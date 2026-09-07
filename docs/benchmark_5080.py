@@ -1,9 +1,8 @@
-#!/usr/bin/env python3
 """Measure RTX 5080 GEMM throughput and memory bandwidth with PyTorch.
 
 Run from the repository root with:
 
-    .venv/bin/python draft/benchmark_5080.py
+    .venv/bin/python docs/benchmark_5080.py
 
 The script uses CUDA events, so timings are device-side rather than wall-clock
 Python timings.
@@ -35,7 +34,7 @@ def try_print_nvidia_smi() -> None:
 
     print("NVIDIA-SMI")
     print(output.rstrip())
-    print("")
+    print()
 
 
 def bench_stats(fn, *, warmup: int, inner: int, outer: int) -> tuple[float, float]:
@@ -76,7 +75,7 @@ def gemm_case(
 
     inner = 8 if n >= 12288 else 12
     best_ms, median_ms = bench_stats(
-        lambda: torch.mm(a, b, out=c),
+        lambda a=a, b=b, c=c: torch.mm(a, b, out=c),
         warmup=6,
         inner=inner,
         outer=6,
@@ -120,7 +119,7 @@ def run_gemm_sweep() -> None:
 
 
 def run_bandwidth_sweep() -> None:
-    print("")
+    print()
     print("Bandwidth sweep")
     for gib_per_array in [0.5, 1.0, 2.0]:
         n = int(gib_per_array * (1024**3) / 4)
@@ -136,7 +135,7 @@ def run_bandwidth_sweep() -> None:
 
         inner = 40 if gib_per_array <= 1.0 else 20
         best_ms, median_ms = bench_stats(
-            lambda: torch.add(a, b, alpha=1.2345, out=c),
+            lambda a=a, b=b, c=c: torch.add(a, b, alpha=1.2345, out=c),
             warmup=10,
             inner=inner,
             outer=7,
@@ -157,7 +156,7 @@ def run_bandwidth_sweep() -> None:
         dst = torch.empty_like(a)
         torch.cuda.synchronize()
         best_ms, median_ms = bench_stats(
-            lambda: dst.copy_(a),
+            lambda dst=dst, a=a: dst.copy_(a),
             warmup=10,
             inner=inner,
             outer=7,
@@ -189,7 +188,7 @@ def main() -> None:
     print(f"total memory: {gib(total)}")
     print(f"free memory before bench: {gib(free)}")
     print(f"torch: {torch.__version__}, torch cuda: {torch.version.cuda}")
-    print("")
+    print()
 
     run_gemm_sweep()
     run_bandwidth_sweep()

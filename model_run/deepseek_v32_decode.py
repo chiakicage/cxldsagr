@@ -26,18 +26,16 @@ import json
 import math
 import os
 import time
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable, Iterable
 
 ROOT = Path(__file__).resolve().parents[1]
 os.environ.setdefault("DG_JIT_CACHE_DIR", str(ROOT / ".deep_gemm_cache"))
 
-import torch
-
 import deep_gemm
+import torch
 from deep_gemm.utils import per_block_cast_to_fp8, per_token_cast_to_fp4, per_token_cast_to_fp8
-
 
 CONFIG_PATH = ROOT / "docs" / "config.json"
 BLOCK_SIZE = 64
@@ -184,7 +182,9 @@ def rms_norm(x: torch.Tensor, eps: float = 1e-6) -> torch.Tensor:
     return y.to(x.dtype)
 
 
-def bench_cuda(fn: Callable[[], object], warmups: int, iters: int, nvtx_label: str | None = None) -> float:
+def bench_cuda(
+    fn: Callable[[], object], warmups: int, iters: int, nvtx_label: str | None = None
+) -> float:
     fn()
     torch.cuda.synchronize()
     for warmup_idx in range(warmups):
@@ -241,18 +241,31 @@ def quantize_kv_v32(kv_bf16: torch.Tensor) -> torch.Tensor:
         result[..., start:end] = fp8.view(torch.uint8)
         scale_bytes = scale.to(torch.float32).contiguous().view(torch.uint8).reshape(nb, bs, 4)
         result[..., d_nope + tile_idx * 4 : d_nope + (tile_idx + 1) * 4] = scale_bytes
-    rope = kv[..., d_nope:].to(torch.bfloat16).contiguous().view(torch.uint8).reshape(nb, bs, d_rope * 2)
+    rope = (
+        kv[..., d_nope:]
+        .to(torch.bfloat16)
+        .contiguous()
+        .view(torch.uint8)
+        .reshape(nb, bs, d_rope * 2)
+    )
     result[..., d_nope + num_tiles * 4 :] = rope
     return result.view(nb, bs, 1, bytes_per_token)
 
 
 def make_kv_cache_v32(num_blocks: int, qk_head_dim: int, device: str) -> torch.Tensor:
     bytes_per_token = 512 + 4 * 4 + 64 * 2
-    fused = torch.empty((num_blocks, BLOCK_SIZE, 1, bytes_per_token), device=device, dtype=torch.uint8)
+    fused = torch.empty(
+        (num_blocks, BLOCK_SIZE, 1, bytes_per_token), device=device, dtype=torch.uint8
+    )
     chunk_blocks = 2048
     for start in range(0, num_blocks, chunk_blocks):
         end = min(start + chunk_blocks, num_blocks)
-        raw = (torch.randn((end - start, BLOCK_SIZE, 1, qk_head_dim), device=device, dtype=torch.bfloat16) / 10).clamp(-1, 1)
+        raw = (
+            torch.randn(
+                (end - start, BLOCK_SIZE, 1, qk_head_dim), device=device, dtype=torch.bfloat16
+            )
+            / 10
+        ).clamp(-1, 1)
         fused[start:end] = quantize_kv_v32(raw)
         del raw
     return fused
@@ -287,7 +300,9 @@ class QuantizedLinear:
         self.out_features = out_features
         self.in_features = in_features
         self.mode = mode
-        raw = torch.randn((out_features, in_features), device="cuda", dtype=torch.bfloat16) / math.sqrt(in_features)
+        raw = torch.randn(
+            (out_features, in_features), device="cuda", dtype=torch.bfloat16
+        ) / math.sqrt(in_features)
         self.weight, self.recipe_b = self._quantize_weight(raw)
         del raw
 
@@ -327,7 +342,9 @@ class GroupedLinear:
         self.out_features = out_features
         self.in_features = in_features
         self.mode = mode
-        raw = torch.randn((groups, out_features, in_features), device="cuda", dtype=torch.bfloat16) / math.sqrt(in_features)
+        raw = torch.randn(
+            (groups, out_features, in_features), device="cuda", dtype=torch.bfloat16
+        ) / math.sqrt(in_features)
         self.weight, self.recipe_b = self._quantize_weight(raw)
         del raw
 
@@ -352,14 +369,18 @@ class GroupedLinear:
         assert groups == self.groups and k == self.in_features
         expected_stride = (m * k, k, 1)
         if x_by_group.stride() != expected_stride:
-            canonical = torch.empty((groups, m, k), device=x_by_group.device, dtype=x_by_group.dtype)
+            canonical = torch.empty(
+                (groups, m, k), device=x_by_group.device, dtype=x_by_group.dtype
+            )
             canonical.copy_(x_by_group)
             x_by_group = canonical
         x2d = x_by_group.view(groups * m, k)
         data2d, sf2d = per_token_cast_to_fp8(x2d, use_ue8m0=True, gran_k=128)
         data = data2d.view(groups, m, k)
         sf = sf2d.view(groups, m, ceil_div(k, 128))
-        out = torch.empty((groups, m, self.out_features), device=x_by_group.device, dtype=torch.bfloat16)
+        out = torch.empty(
+            (groups, m, self.out_features), device=x_by_group.device, dtype=torch.bfloat16
+        )
         masked_m = torch.full((groups,), m, device=x_by_group.device, dtype=torch.int32)
         if self.mode == "fp8":
             deep_gemm.m_grouped_fp8_gemm_nt_masked((data, sf), self.weight, out, masked_m, m)
@@ -386,14 +407,20 @@ class V32DecodeRunner:
         self.wq_a = QuantizedLinear(cfg.q_lora_rank, cfg.dim, mode)
         self.wq_b = QuantizedLinear(cfg.n_heads * cfg.q_proj_head_dim, cfg.q_lora_rank, mode)
         self.wkv_a = QuantizedLinear(cfg.kv_lora_rank + cfg.qk_rope_head_dim, cfg.dim, mode)
-        self.index_wqi = QuantizedLinear(cfg.index_n_heads * cfg.index_head_dim, cfg.q_lora_rank, mode)
+        self.index_wqi = QuantizedLinear(
+            cfg.index_n_heads * cfg.index_head_dim, cfg.q_lora_rank, mode
+        )
         self.index_wki = QuantizedLinear(cfg.index_head_dim, cfg.dim, mode)
         self.index_weights = QuantizedLinear(cfg.index_n_heads, cfg.dim, mode)
         self.wk_b = GroupedLinear(cfg.n_heads, cfg.kv_lora_rank, cfg.qk_nope_head_dim, mode)
         self.wv_b = GroupedLinear(cfg.n_heads, cfg.v_head_dim, cfg.kv_lora_rank, mode)
         self.wo = QuantizedLinear(cfg.dim, cfg.n_heads * cfg.v_head_dim, mode)
-        self.wv_b_torch = torch.randn((cfg.n_heads, cfg.kv_lora_rank, cfg.v_head_dim), device="cuda", dtype=torch.bfloat16) / math.sqrt(cfg.kv_lora_rank)
-        self.wo_torch = torch.randn((cfg.dim, cfg.n_heads * cfg.v_head_dim), device="cuda", dtype=torch.bfloat16) / math.sqrt(cfg.n_heads * cfg.v_head_dim)
+        self.wv_b_torch = torch.randn(
+            (cfg.n_heads, cfg.kv_lora_rank, cfg.v_head_dim), device="cuda", dtype=torch.bfloat16
+        ) / math.sqrt(cfg.kv_lora_rank)
+        self.wo_torch = torch.randn(
+            (cfg.dim, cfg.n_heads * cfg.v_head_dim), device="cuda", dtype=torch.bfloat16
+        ) / math.sqrt(cfg.n_heads * cfg.v_head_dim)
 
     @staticmethod
     def _load_sparse_decode():
@@ -403,15 +430,18 @@ class V32DecodeRunner:
             fn = getattr(sparse_mla_sm120, "sparse_mla_decode_fwd", None)
             if fn is not None:
                 return fn
-        except Exception:
-            pass
+        except ModuleNotFoundError as exc:
+            if exc.name != "sparse_mla_sm120":
+                raise
         import flash_mla_sm120
 
         return flash_mla_sm120.sparse_mla_decode_fwd
 
     def make_case(self, batch: int, history_len: int) -> CaseTensors:
         if batch > DECODE_TOKEN_LIMIT:
-            raise ValueError(f"sparse MLA decode path supports at most {DECODE_TOKEN_LIMIT} tokens; got batch={batch}")
+            raise ValueError(
+                f"sparse MLA decode path supports at most {DECODE_TOKEN_LIMIT} tokens; got batch={batch}"
+            )
         total_len = history_len + 1
         blocks_per_seq = ceil_div(total_len, BLOCK_SIZE)
         capacity = blocks_per_seq * BLOCK_SIZE
@@ -419,22 +449,37 @@ class V32DecodeRunner:
         x = torch.randn((batch, self.cfg.dim), device="cuda", dtype=torch.bfloat16)
 
         kv_cache = make_kv_cache_v32(total_blocks, self.cfg.qk_head_dim, "cuda")
-        current_raw = (torch.randn((batch, 1, 1, self.cfg.qk_head_dim), device="cuda", dtype=torch.bfloat16) / 10).clamp(-1, 1)
+        current_raw = (
+            torch.randn((batch, 1, 1, self.cfg.qk_head_dim), device="cuda", dtype=torch.bfloat16)
+            / 10
+        ).clamp(-1, 1)
         kv_current_packed = quantize_kv_v32(current_raw)[:, 0, :, :].contiguous()
         del current_raw
         seq_ids_long = torch.arange(batch, device="cuda", dtype=torch.long)
         decode_block_ids = seq_ids_long * blocks_per_seq + (history_len // BLOCK_SIZE)
-        decode_token_ids = torch.full((batch,), history_len % BLOCK_SIZE, device="cuda", dtype=torch.long)
-        index_kv_cache = make_index_kv_cache(total_blocks * BLOCK_SIZE, self.cfg.index_head_dim, "cuda")
-        index_current_raw = torch.randn((batch, self.cfg.index_head_dim), device="cuda", dtype=torch.bfloat16) / 10
+        decode_token_ids = torch.full(
+            (batch,), history_len % BLOCK_SIZE, device="cuda", dtype=torch.long
+        )
+        index_kv_cache = make_index_kv_cache(
+            total_blocks * BLOCK_SIZE, self.cfg.index_head_dim, "cuda"
+        )
+        index_current_raw = (
+            torch.randn((batch, self.cfg.index_head_dim), device="cuda", dtype=torch.bfloat16) / 10
+        )
         index_packed, index_scales = pack_index_tokens(index_current_raw)
-        index_current_record = torch.empty((batch, self.cfg.index_head_dim + 4), device="cuda", dtype=torch.uint8)
+        index_current_record = torch.empty(
+            (batch, self.cfg.index_head_dim + 4), device="cuda", dtype=torch.uint8
+        )
         index_current_record[:, : self.cfg.index_head_dim] = index_packed
         index_current_record[:, self.cfg.index_head_dim :] = index_scales
         del index_current_raw, index_packed, index_scales
         context_lens = torch.full((batch, 1), total_len, device="cuda", dtype=torch.int32)
-        block_table = torch.arange(total_blocks, device="cuda", dtype=torch.int32).view(batch, blocks_per_seq)
-        sequence_offsets = (torch.arange(batch, device="cuda", dtype=torch.int32) * capacity).view(batch, 1)
+        block_table = torch.arange(total_blocks, device="cuda", dtype=torch.int32).view(
+            batch, blocks_per_seq
+        )
+        sequence_offsets = (torch.arange(batch, device="cuda", dtype=torch.int32) * capacity).view(
+            batch, 1
+        )
         return CaseTensors(
             batch=batch,
             history_len=history_len,
@@ -469,9 +514,16 @@ class V32DecodeRunner:
         q_latent = q_latent_by_head.transpose(0, 1).contiguous()
         q_attn = (torch.cat([q_latent, q_pe], dim=-1) * 0.1).contiguous()
 
-        idx_q = self.index_wqi(qr).view(case.batch, 1, cfg.index_n_heads, cfg.index_head_dim).contiguous()
+        idx_q = (
+            self.index_wqi(qr)
+            .view(case.batch, 1, cfg.index_n_heads, cfg.index_head_dim)
+            .contiguous()
+        )
         idx_k = rms_norm(self.index_wki(case.x)).contiguous()
-        idx_weights = (self.index_weights(case.x).view(case.batch, cfg.index_n_heads).float() * (cfg.index_n_heads ** -0.5)).contiguous()
+        idx_weights = (
+            self.index_weights(case.x).view(case.batch, cfg.index_n_heads).float()
+            * (cfg.index_n_heads**-0.5)
+        ).contiguous()
         return Projected(qr, q_nope, q_pe, q_attn, kv_current, idx_q, idx_k, idx_weights)
 
     def update_attention_cache(self, case: CaseTensors, projected: Projected) -> None:
@@ -480,12 +532,16 @@ class V32DecodeRunner:
 
     def update_index_cache(self, case: CaseTensors, projected: Projected) -> None:
         del projected
-        case.index_kv_cache[case.decode_block_ids, case.decode_token_ids, 0, :] = case.index_current_record
+        case.index_kv_cache[case.decode_block_ids, case.decode_token_ids, 0, :] = (
+            case.index_current_record
+        )
 
     def compute_index_logits(self, case: CaseTensors, projected: Projected) -> torch.Tensor:
         q_fp8 = projected.idx_q.to(torch.float8_e4m3fn)
         num_clusters = deep_gemm.get_num_sms()
-        schedule_meta = deep_gemm.get_paged_mqa_logits_metadata(case.context_lens, BLOCK_SIZE, num_clusters)
+        schedule_meta = deep_gemm.get_paged_mqa_logits_metadata(
+            case.context_lens, BLOCK_SIZE, num_clusters
+        )
         return deep_gemm.fp8_fp4_paged_mqa_logits(
             (q_fp8, None),
             case.index_kv_cache,
@@ -502,7 +558,9 @@ class V32DecodeRunner:
         k = min(self.cfg.index_topk, case.total_len)
         local = torch.topk(logits, k=k, dim=-1).indices.to(torch.int32)
         if k < self.cfg.index_topk:
-            pad = torch.full((case.batch, self.cfg.index_topk - k), -1, device="cuda", dtype=torch.int32)
+            pad = torch.full(
+                (case.batch, self.cfg.index_topk - k), -1, device="cuda", dtype=torch.int32
+            )
             local = torch.cat([local, pad], dim=-1)
         valid = local >= 0
         global_indices = torch.where(valid, local + case.sequence_offsets, local)
@@ -513,9 +571,13 @@ class V32DecodeRunner:
         logits = self.compute_index_logits(case, projected)
         return self.select_topk(case, logits)
 
-    def sparse_attention(self, case: CaseTensors, projected: Projected, indices: torch.Tensor) -> torch.Tensor:
-        sm_scale = self.cfg.qk_head_dim ** -0.5
-        out = self.sparse_decode(projected.q_attn, case.kv_cache, indices, sm_scale, self.cfg.kv_lora_rank)
+    def sparse_attention(
+        self, case: CaseTensors, projected: Projected, indices: torch.Tensor
+    ) -> torch.Tensor:
+        sm_scale = self.cfg.qk_head_dim**-0.5
+        out = self.sparse_decode(
+            projected.q_attn, case.kv_cache, indices, sm_scale, self.cfg.kv_lora_rank
+        )
         if isinstance(out, tuple):
             out = out[0]
         return out
@@ -529,9 +591,14 @@ class V32DecodeRunner:
     def post_wo(self, head_out: torch.Tensor) -> torch.Tensor:
         if self.post_proj == "deepgemm":
             return self.wo(head_out.view(head_out.shape[0], self.cfg.n_heads * self.cfg.v_head_dim))
-        return torch.matmul(head_out.view(head_out.shape[0], self.cfg.n_heads * self.cfg.v_head_dim), self.wo_torch.t())
+        return torch.matmul(
+            head_out.view(head_out.shape[0], self.cfg.n_heads * self.cfg.v_head_dim),
+            self.wo_torch.t(),
+        )
 
-    def run_attention(self, case: CaseTensors, projected: Projected, indices: torch.Tensor) -> torch.Tensor:
+    def run_attention(
+        self, case: CaseTensors, projected: Projected, indices: torch.Tensor
+    ) -> torch.Tensor:
         self.update_attention_cache(case, projected)
         attn_out = self.sparse_attention(case, projected, indices)
         head_out = self.post_wv_b(attn_out)
@@ -574,12 +641,34 @@ def run_benchmark(args: argparse.Namespace) -> list[BenchResult]:
         del out
 
         case_label = f"b{batch}_h{history_len}"
-        projection_ms = bench_cuda(lambda: runner.project(case), args.warmups, args.iters, f"benchmark/{case_label}/projection_all")
+        projection_ms = bench_cuda(
+            lambda case=case: runner.project(case),
+            args.warmups,
+            args.iters,
+            f"benchmark/{case_label}/projection_all",
+        )
         projected = runner.project(case)
-        indexer_ms = bench_cuda(lambda: runner.run_indexer(case, projected), args.warmups, args.iters, f"benchmark/{case_label}/indexer")
+        indexer_ms = bench_cuda(
+            lambda case=case, projected=projected: runner.run_indexer(case, projected),
+            args.warmups,
+            args.iters,
+            f"benchmark/{case_label}/indexer",
+        )
         indices = runner.run_indexer(case, projected)
-        attention_ms = bench_cuda(lambda: runner.run_attention(case, projected, indices), args.warmups, args.iters, f"benchmark/{case_label}/attention")
-        e2e_ms = bench_cuda(lambda: runner.run_once(case), args.warmups, args.iters, f"benchmark/{case_label}/e2e")
+        attention_ms = bench_cuda(
+            lambda case=case, projected=projected, indices=indices: runner.run_attention(
+                case, projected, indices
+            ),
+            args.warmups,
+            args.iters,
+            f"benchmark/{case_label}/attention",
+        )
+        e2e_ms = bench_cuda(
+            lambda case=case: runner.run_once(case),
+            args.warmups,
+            args.iters,
+            f"benchmark/{case_label}/e2e",
+        )
 
         results.append(
             BenchResult(
@@ -639,7 +728,9 @@ def _attn_update_bytes(case: CaseTensors, cfg: V32Config) -> int:
     return case.batch * (packed + packed + 2 * 8)
 
 
-def _index_logits_bytes(case: CaseTensors, cfg: V32Config, logits: torch.Tensor | None = None) -> int:
+def _index_logits_bytes(
+    case: CaseTensors, cfg: V32Config, logits: torch.Tensor | None = None
+) -> int:
     tokens = case.batch * case.total_len
     bytes_ = case.batch * cfg.index_n_heads * cfg.index_head_dim
     bytes_ += tokens * (cfg.index_head_dim + 4)
@@ -682,25 +773,35 @@ def _decode_iter_flops(case: CaseTensors, cfg: V32Config) -> int:
     )
     indexer_flops = 2 * b * case.total_len * cfg.index_n_heads * cfg.index_head_dim
     attention_flops = _sparse_mla_flops(case, cfg)
-    post_flops = (
-        2 * cfg.n_heads * b * cfg.v_head_dim * cfg.kv_lora_rank
-        + _linear_flops(b, cfg.dim, cfg.n_heads * cfg.v_head_dim)
+    post_flops = 2 * cfg.n_heads * b * cfg.v_head_dim * cfg.kv_lora_rank + _linear_flops(
+        b, cfg.dim, cfg.n_heads * cfg.v_head_dim
     )
     return projection_flops + indexer_flops + attention_flops + post_flops
 
 
-def _decode_iter_bytes(case: CaseTensors, cfg: V32Config, runner: V32DecodeRunner, projected: Projected, logits: torch.Tensor, head_flat: torch.Tensor) -> int:
+def _decode_iter_bytes(
+    case: CaseTensors,
+    cfg: V32Config,
+    runner: V32DecodeRunner,
+    projected: Projected,
+    logits: torch.Tensor,
+    head_flat: torch.Tensor,
+) -> int:
     b = case.batch
     q_proj = runner.wq_b(projected.qr).view(b, cfg.n_heads, cfg.q_proj_head_dim)
     q_nope, _ = torch.split(q_proj, [cfg.qk_nope_head_dim, cfg.qk_rope_head_dim], dim=-1)
     q_nope_by_head = q_nope.transpose(0, 1).contiguous()
-    attn_value_by_head = torch.empty((cfg.n_heads, b, cfg.kv_lora_rank), device=case.x.device, dtype=torch.bfloat16)
+    attn_value_by_head = torch.empty(
+        (cfg.n_heads, b, cfg.kv_lora_rank), device=case.x.device, dtype=torch.bfloat16
+    )
     bytes_ = (
         _linear_effective_bytes(case.x, runner.wq_a, cfg.q_lora_rank)
         + _linear_effective_bytes(projected.qr, runner.wq_b, cfg.n_heads * cfg.q_proj_head_dim)
         + _grouped_linear_effective_bytes(q_nope_by_head, runner.wk_b)
         + _linear_effective_bytes(case.x, runner.wkv_a, cfg.qk_head_dim)
-        + _linear_effective_bytes(projected.qr, runner.index_wqi, cfg.index_n_heads * cfg.index_head_dim)
+        + _linear_effective_bytes(
+            projected.qr, runner.index_wqi, cfg.index_n_heads * cfg.index_head_dim
+        )
         + _linear_effective_bytes(case.x, runner.index_wki, cfg.index_head_dim)
         + _linear_effective_bytes(case.x, runner.index_weights, cfg.index_n_heads)
         + _index_update_bytes(case, cfg)
@@ -779,58 +880,240 @@ def run_detail_benchmark(args: argparse.Namespace) -> list[DetailCase]:
                 "iter",
                 "decode_iter",
                 f"batch={b}, history={history_len}, full project+indexer+attention",
-                lambda: runner.run_once(case),
+                lambda case=case: runner.run_once(case),
                 _decode_iter_flops(case, cfg),
                 _decode_iter_bytes(case, cfg, runner, projected, logits, head_flat),
                 args.warmups,
                 args.iters,
             )
-            cases.append(DetailCase(batch=batch, history_len=history_len, output_shape=output_shape, rows=rows))
-            del case, projected, indices, logits, attn_out, value_by_head, head_by_group, head_out, head_flat
+            cases.append(
+                DetailCase(
+                    batch=batch, history_len=history_len, output_shape=output_shape, rows=rows
+                )
+            )
+            del (
+                case,
+                projected,
+                indices,
+                logits,
+                attn_out,
+                value_by_head,
+                head_by_group,
+                head_out,
+                head_flat,
+            )
             cleanup()
             continue
 
-        _add_detail_row(rows, case, "projection", "wq_a", f"m={b}, n={cfg.q_lora_rank}, k={cfg.dim}", lambda: runner.wq_a(case.x), _linear_flops(b, cfg.q_lora_rank, cfg.dim), _linear_effective_bytes(case.x, runner.wq_a, cfg.q_lora_rank), args.warmups, args.iters)
+        _add_detail_row(
+            rows,
+            case,
+            "projection",
+            "wq_a",
+            f"m={b}, n={cfg.q_lora_rank}, k={cfg.dim}",
+            lambda case=case: runner.wq_a(case.x),
+            _linear_flops(b, cfg.q_lora_rank, cfg.dim),
+            _linear_effective_bytes(case.x, runner.wq_a, cfg.q_lora_rank),
+            args.warmups,
+            args.iters,
+        )
         qr = rms_norm(runner.wq_a(case.x))
-        _add_detail_row(rows, case, "projection", "wq_b", f"m={b}, n={cfg.n_heads * cfg.q_proj_head_dim}, k={cfg.q_lora_rank}", lambda: runner.wq_b(qr), _linear_flops(b, cfg.n_heads * cfg.q_proj_head_dim, cfg.q_lora_rank), _linear_effective_bytes(qr, runner.wq_b, cfg.n_heads * cfg.q_proj_head_dim), args.warmups, args.iters)
+        _add_detail_row(
+            rows,
+            case,
+            "projection",
+            "wq_b",
+            f"m={b}, n={cfg.n_heads * cfg.q_proj_head_dim}, k={cfg.q_lora_rank}",
+            lambda qr=qr: runner.wq_b(qr),
+            _linear_flops(b, cfg.n_heads * cfg.q_proj_head_dim, cfg.q_lora_rank),
+            _linear_effective_bytes(qr, runner.wq_b, cfg.n_heads * cfg.q_proj_head_dim),
+            args.warmups,
+            args.iters,
+        )
         q_proj = runner.wq_b(qr).view(b, cfg.n_heads, cfg.q_proj_head_dim)
         q_nope, _ = torch.split(q_proj, [cfg.qk_nope_head_dim, cfg.qk_rope_head_dim], dim=-1)
         q_nope_by_head = q_nope.transpose(0, 1).contiguous()
-        _add_detail_row(rows, case, "projection", "wk_b_grouped", f"groups={cfg.n_heads}, m/group={b}, n={cfg.kv_lora_rank}, k={cfg.qk_nope_head_dim}", lambda: runner.wk_b(q_nope_by_head), 2 * cfg.n_heads * b * cfg.kv_lora_rank * cfg.qk_nope_head_dim, _grouped_linear_effective_bytes(q_nope_by_head, runner.wk_b), args.warmups, args.iters)
-        _add_detail_row(rows, case, "projection", "wkv_a", f"m={b}, n={cfg.qk_head_dim}, k={cfg.dim}", lambda: runner.wkv_a(case.x), _linear_flops(b, cfg.qk_head_dim, cfg.dim), _linear_effective_bytes(case.x, runner.wkv_a, cfg.qk_head_dim), args.warmups, args.iters)
-        _add_detail_row(rows, case, "projection", "index_wqi", f"m={b}, n={cfg.index_n_heads * cfg.index_head_dim}, k={cfg.q_lora_rank}", lambda: runner.index_wqi(qr), _linear_flops(b, cfg.index_n_heads * cfg.index_head_dim, cfg.q_lora_rank), _linear_effective_bytes(qr, runner.index_wqi, cfg.index_n_heads * cfg.index_head_dim), args.warmups, args.iters)
-        _add_detail_row(rows, case, "projection", "index_wki", f"m={b}, n={cfg.index_head_dim}, k={cfg.dim}", lambda: runner.index_wki(case.x), _linear_flops(b, cfg.index_head_dim, cfg.dim), _linear_effective_bytes(case.x, runner.index_wki, cfg.index_head_dim), args.warmups, args.iters)
-        _add_detail_row(rows, case, "projection", "index_weights", f"m={b}, n={cfg.index_n_heads}, k={cfg.dim}", lambda: runner.index_weights(case.x), _linear_flops(b, cfg.index_n_heads, cfg.dim), _linear_effective_bytes(case.x, runner.index_weights, cfg.index_n_heads), args.warmups, args.iters)
+        _add_detail_row(
+            rows,
+            case,
+            "projection",
+            "wk_b_grouped",
+            f"groups={cfg.n_heads}, m/group={b}, n={cfg.kv_lora_rank}, k={cfg.qk_nope_head_dim}",
+            lambda q_nope_by_head=q_nope_by_head: runner.wk_b(q_nope_by_head),
+            2 * cfg.n_heads * b * cfg.kv_lora_rank * cfg.qk_nope_head_dim,
+            _grouped_linear_effective_bytes(q_nope_by_head, runner.wk_b),
+            args.warmups,
+            args.iters,
+        )
+        _add_detail_row(
+            rows,
+            case,
+            "projection",
+            "wkv_a",
+            f"m={b}, n={cfg.qk_head_dim}, k={cfg.dim}",
+            lambda case=case: runner.wkv_a(case.x),
+            _linear_flops(b, cfg.qk_head_dim, cfg.dim),
+            _linear_effective_bytes(case.x, runner.wkv_a, cfg.qk_head_dim),
+            args.warmups,
+            args.iters,
+        )
+        _add_detail_row(
+            rows,
+            case,
+            "projection",
+            "index_wqi",
+            f"m={b}, n={cfg.index_n_heads * cfg.index_head_dim}, k={cfg.q_lora_rank}",
+            lambda qr=qr: runner.index_wqi(qr),
+            _linear_flops(b, cfg.index_n_heads * cfg.index_head_dim, cfg.q_lora_rank),
+            _linear_effective_bytes(qr, runner.index_wqi, cfg.index_n_heads * cfg.index_head_dim),
+            args.warmups,
+            args.iters,
+        )
+        _add_detail_row(
+            rows,
+            case,
+            "projection",
+            "index_wki",
+            f"m={b}, n={cfg.index_head_dim}, k={cfg.dim}",
+            lambda case=case: runner.index_wki(case.x),
+            _linear_flops(b, cfg.index_head_dim, cfg.dim),
+            _linear_effective_bytes(case.x, runner.index_wki, cfg.index_head_dim),
+            args.warmups,
+            args.iters,
+        )
+        _add_detail_row(
+            rows,
+            case,
+            "projection",
+            "index_weights",
+            f"m={b}, n={cfg.index_n_heads}, k={cfg.dim}",
+            lambda case=case: runner.index_weights(case.x),
+            _linear_flops(b, cfg.index_n_heads, cfg.dim),
+            _linear_effective_bytes(case.x, runner.index_weights, cfg.index_n_heads),
+            args.warmups,
+            args.iters,
+        )
 
         projected = runner.project(case)
         index_update_bytes = _index_update_bytes(case, cfg)
         index_logits_flops = 2 * b * case.total_len * cfg.index_n_heads * cfg.index_head_dim
-        _add_detail_row(rows, case, "indexer", "index_cache_update", f"batch={b}, record={cfg.index_head_dim + 4}B", lambda: runner.update_index_cache(case, projected), 0, index_update_bytes, args.warmups, args.iters)
-        _add_detail_row(rows, case, "indexer", "index_logits_deepgemm", f"batch={b}, tokens={case.total_len}, heads={cfg.index_n_heads}, dim={cfg.index_head_dim}", lambda: runner.compute_index_logits(case, projected), index_logits_flops, _index_logits_bytes(case, cfg), args.warmups, args.iters)
+        _add_detail_row(
+            rows,
+            case,
+            "indexer",
+            "index_cache_update",
+            f"batch={b}, record={cfg.index_head_dim + 4}B",
+            lambda case=case, projected=projected: runner.update_index_cache(case, projected),
+            0,
+            index_update_bytes,
+            args.warmups,
+            args.iters,
+        )
+        _add_detail_row(
+            rows,
+            case,
+            "indexer",
+            "index_logits_deepgemm",
+            f"batch={b}, tokens={case.total_len}, heads={cfg.index_n_heads}, dim={cfg.index_head_dim}",
+            lambda case=case, projected=projected: runner.compute_index_logits(case, projected),
+            index_logits_flops,
+            _index_logits_bytes(case, cfg),
+            args.warmups,
+            args.iters,
+        )
         logits = runner.compute_index_logits(case, projected)
         topk_bytes = _index_topk_bytes(case, cfg, logits)
-        _add_detail_row(rows, case, "indexer", "index_topk", f"batch={b}, logits={tuple(logits.shape)}, topk={min(cfg.index_topk, case.total_len)}", lambda: runner.select_topk(case, logits), 0, topk_bytes, args.warmups, args.iters)
+        _add_detail_row(
+            rows,
+            case,
+            "indexer",
+            "index_topk",
+            f"batch={b}, logits={tuple(logits.shape)}, topk={min(cfg.index_topk, case.total_len)}",
+            lambda case=case, logits=logits: runner.select_topk(case, logits),
+            0,
+            topk_bytes,
+            args.warmups,
+            args.iters,
+        )
         indices = runner.run_indexer(case, projected)
 
         attn_update_bytes = _attn_update_bytes(case, cfg)
         sparse_flops = _sparse_mla_flops(case, cfg)
         sparse_bytes = _sparse_mla_bytes(case, cfg)
-        _add_detail_row(rows, case, "attention", "attn_cache_update", f"batch={b}, record=656B", lambda: runner.update_attention_cache(case, projected), 0, attn_update_bytes, args.warmups, args.iters)
-        _add_detail_row(rows, case, "attention", "sparse_mla_decode", f"batch={b}, heads={cfg.n_heads}, topk={min(cfg.index_topk, case.total_len)}, qk={cfg.qk_head_dim}, v={cfg.kv_lora_rank}", lambda: runner.sparse_attention(case, projected, indices), sparse_flops, sparse_bytes, args.warmups, args.iters)
+        _add_detail_row(
+            rows,
+            case,
+            "attention",
+            "attn_cache_update",
+            f"batch={b}, record=656B",
+            lambda case=case, projected=projected: runner.update_attention_cache(case, projected),
+            0,
+            attn_update_bytes,
+            args.warmups,
+            args.iters,
+        )
+        _add_detail_row(
+            rows,
+            case,
+            "attention",
+            "sparse_mla_decode",
+            f"batch={b}, heads={cfg.n_heads}, topk={min(cfg.index_topk, case.total_len)}, qk={cfg.qk_head_dim}, v={cfg.kv_lora_rank}",
+            lambda case=case, projected=projected, indices=indices: runner.sparse_attention(
+                case, projected, indices
+            ),
+            sparse_flops,
+            sparse_bytes,
+            args.warmups,
+            args.iters,
+        )
         attn_out = runner.sparse_attention(case, projected, indices)
         value_by_head = attn_out.transpose(0, 1).contiguous()
         wv_flops = 2 * cfg.n_heads * b * cfg.v_head_dim * cfg.kv_lora_rank
         wv_bytes = _grouped_linear_effective_bytes(value_by_head, runner.wv_b)
-        _add_detail_row(rows, case, "projection", "post_wv_b_grouped", f"groups={cfg.n_heads}, m/group={b}, n={cfg.v_head_dim}, k={cfg.kv_lora_rank}", lambda: runner.wv_b(value_by_head), wv_flops, wv_bytes, args.warmups, args.iters)
+        _add_detail_row(
+            rows,
+            case,
+            "projection",
+            "post_wv_b_grouped",
+            f"groups={cfg.n_heads}, m/group={b}, n={cfg.v_head_dim}, k={cfg.kv_lora_rank}",
+            lambda value_by_head=value_by_head: runner.wv_b(value_by_head),
+            wv_flops,
+            wv_bytes,
+            args.warmups,
+            args.iters,
+        )
         head_by_group = runner.wv_b(value_by_head)
         head_out = head_by_group.transpose(0, 1).contiguous()
         head_flat = head_out.view(b, cfg.n_heads * cfg.v_head_dim)
         wo_flops = _linear_flops(b, cfg.dim, cfg.n_heads * cfg.v_head_dim)
         wo_bytes = _linear_effective_bytes(head_flat, runner.wo, cfg.dim)
-        _add_detail_row(rows, case, "projection", "post_wo", f"m={b}, n={cfg.dim}, k={cfg.n_heads * cfg.v_head_dim}", lambda: runner.wo(head_flat), wo_flops, wo_bytes, args.warmups, args.iters)
+        _add_detail_row(
+            rows,
+            case,
+            "projection",
+            "post_wo",
+            f"m={b}, n={cfg.dim}, k={cfg.n_heads * cfg.v_head_dim}",
+            lambda head_flat=head_flat: runner.wo(head_flat),
+            wo_flops,
+            wo_bytes,
+            args.warmups,
+            args.iters,
+        )
 
-        cases.append(DetailCase(batch=batch, history_len=history_len, output_shape=output_shape, rows=rows))
-        del case, projected, indices, logits, attn_out, value_by_head, head_by_group, head_out, head_flat
+        cases.append(
+            DetailCase(batch=batch, history_len=history_len, output_shape=output_shape, rows=rows)
+        )
+        del (
+            case,
+            projected,
+            indices,
+            logits,
+            attn_out,
+            value_by_head,
+            head_by_group,
+            head_out,
+            head_flat,
+        )
         cleanup()
     return cases
 
@@ -896,9 +1179,13 @@ def format_detail_markdown(cases: list[DetailCase], args: argparse.Namespace) ->
     return "\n".join(lines) + "\n"
 
 
-
 def _event_device_us(event) -> float:
-    for attr in ("self_device_time_total", "device_time_total", "self_cuda_time_total", "cuda_time_total"):
+    for attr in (
+        "self_device_time_total",
+        "device_time_total",
+        "self_cuda_time_total",
+        "cuda_time_total",
+    ):
         value = getattr(event, attr, None)
         if value is not None:
             return float(value)
@@ -958,20 +1245,84 @@ def run_profile(args: argparse.Namespace) -> list[CaseProfile]:
         torch.cuda.synchronize()
 
         segments: list[SegmentProfile] = []
-        segments.append(profile_step("projection_all", lambda: runner.project(case), args.warmups, args.iters))
+        segments.append(
+            profile_step(
+                "projection_all", lambda case=case: runner.project(case), args.warmups, args.iters
+            )
+        )
         projected = runner.project(case)
-        segments.append(profile_step("index_cache_update", lambda: runner.update_index_cache(case, projected), args.warmups, args.iters))
-        segments.append(profile_step("index_logits_deepgemm", lambda: runner.compute_index_logits(case, projected), args.warmups, args.iters))
+        segments.append(
+            profile_step(
+                "index_cache_update",
+                lambda case=case, projected=projected: runner.update_index_cache(case, projected),
+                args.warmups,
+                args.iters,
+            )
+        )
+        segments.append(
+            profile_step(
+                "index_logits_deepgemm",
+                lambda case=case, projected=projected: runner.compute_index_logits(case, projected),
+                args.warmups,
+                args.iters,
+            )
+        )
         logits = runner.compute_index_logits(case, projected)
-        segments.append(profile_step("index_topk", lambda: runner.select_topk(case, logits), args.warmups, args.iters))
+        segments.append(
+            profile_step(
+                "index_topk",
+                lambda case=case, logits=logits: runner.select_topk(case, logits),
+                args.warmups,
+                args.iters,
+            )
+        )
         indices = runner.select_topk(case, logits)
-        segments.append(profile_step("attn_cache_update", lambda: runner.update_attention_cache(case, projected), args.warmups, args.iters))
-        segments.append(profile_step("sparse_mla_decode", lambda: runner.sparse_attention(case, projected, indices), args.warmups, args.iters))
+        segments.append(
+            profile_step(
+                "attn_cache_update",
+                lambda case=case, projected=projected: runner.update_attention_cache(
+                    case, projected
+                ),
+                args.warmups,
+                args.iters,
+            )
+        )
+        segments.append(
+            profile_step(
+                "sparse_mla_decode",
+                lambda case=case, projected=projected, indices=indices: runner.sparse_attention(
+                    case, projected, indices
+                ),
+                args.warmups,
+                args.iters,
+            )
+        )
         attn_out = runner.sparse_attention(case, projected, indices)
-        segments.append(profile_step("post_wv_b", lambda: runner.post_wv_b(attn_out), args.warmups, args.iters))
+        segments.append(
+            profile_step(
+                "post_wv_b",
+                lambda attn_out=attn_out: runner.post_wv_b(attn_out),
+                args.warmups,
+                args.iters,
+            )
+        )
         head_out = runner.post_wv_b(attn_out)
-        segments.append(profile_step("post_wo", lambda: runner.post_wo(head_out), args.warmups, args.iters))
-        segments.append(profile_step("e2e_decode_layer", lambda: runner.run_once(case), args.warmups, args.iters))
+        segments.append(
+            profile_step(
+                "post_wo",
+                lambda head_out=head_out: runner.post_wo(head_out),
+                args.warmups,
+                args.iters,
+            )
+        )
+        segments.append(
+            profile_step(
+                "e2e_decode_layer",
+                lambda case=case: runner.run_once(case),
+                args.warmups,
+                args.iters,
+            )
+        )
 
         profiles.append(CaseProfile(batch=batch, history_len=history_len, segments=segments))
         del case, projected, logits, indices, attn_out, head_out
@@ -1020,7 +1371,10 @@ def format_profile_markdown(profiles: list[CaseProfile], args: argparse.Namespac
     gap_dominates = 0
     for case in profiles:
         e2e = next((seg for seg in case.segments if seg.name == "e2e_decode_layer"), None)
-        top_gap = max((seg for seg in case.segments if seg.name != "e2e_decode_layer"), key=lambda seg: seg.launch_gap_ms)
+        top_gap = max(
+            (seg for seg in case.segments if seg.name != "e2e_decode_layer"),
+            key=lambda seg: seg.launch_gap_ms,
+        )
         if e2e is not None:
             gap_pct = 100.0 * e2e.launch_gap_ms / max(e2e.event_ms, 1e-9)
             kernel_pct = 100.0 * e2e.kernel_ms / max(e2e.event_ms, 1e-9)
@@ -1123,9 +1477,22 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--iters", type=int, default=10)
     parser.add_argument("--mode", choices=["fp8", "fp8_fp4w"], default="fp8")
     parser.add_argument("--post-proj", choices=["torch", "deepgemm"], default="deepgemm")
-    parser.add_argument("--profile", action="store_true", help="write a segmented launch-vs-kernel profile instead of the sweep table")
-    parser.add_argument("--detail", action="store_true", help="write per-projection/indexer/attention timing, TFlop/s, and bandwidth tables")
-    parser.add_argument("--detail-scope", choices=["modules", "iter"], default="modules", help="with --detail, benchmark isolated modules or the full decode iteration")
+    parser.add_argument(
+        "--profile",
+        action="store_true",
+        help="write a segmented launch-vs-kernel profile instead of the sweep table",
+    )
+    parser.add_argument(
+        "--detail",
+        action="store_true",
+        help="write per-projection/indexer/attention timing, TFlop/s, and bandwidth tables",
+    )
+    parser.add_argument(
+        "--detail-scope",
+        choices=["modules", "iter"],
+        default="modules",
+        help="with --detail, benchmark isolated modules or the full decode iteration",
+    )
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--output", type=Path)
     return parser.parse_args()

@@ -44,7 +44,9 @@ compile_commands.json
 *.log
 
 # Local editor settings and credentials
-.vscode/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
 .idea/
 .DS_Store
 *.swp
@@ -54,7 +56,11 @@ compile_commands.json
 !.env.example
 !.env.sample
 
-# Benchmark executables without file extensions
-/gpu-benches/gpu-metrics/rocm_metrics/test_rocm_metrics
-/gpu-benches/gpu-pcie-host/cpu-mem-bw
-/gpu-benches/gpu-pcie-host/cpu-mem-stream
+# Local model weights and tokenizer assets
+/models/
+
+# Local datasets and generated serving traces (keep GR/analysis reports)
+/data/
+/GR/data/
+/GR/generated/
+*.partial

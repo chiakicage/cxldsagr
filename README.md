@@ -16,7 +16,6 @@
 ├── DeepGEMM/              # DeepSeek-AI DeepGEMM，本地用于 projection / GEMM / MQA logits 实验
 ├── sparse_mla_sm120/      # SM120 sparse MLA CUDA extension
 ├── docs/                  # 实验笔记、benchmark 结果、模型 shape 和 offload 分析
-├── .deep_gemm_cache/      # DeepGEMM JIT kernel cache
 └── .venv/                 # 当前实验环境
 ```
 
@@ -120,9 +119,7 @@ q = torch.randn(batch, heads, 576, device="cuda", dtype=torch.bfloat16).contiguo
 kv_cache = torch.empty(num_blocks, block_size, 1, 656, device="cuda", dtype=torch.uint8)
 indices = torch.randint(0, num_blocks * block_size, (batch, topk), device="cuda", dtype=torch.int32)
 
-out, lse = flash_mla_sm120.sparse_mla_decode_fwd(
-    q, kv_cache, indices, sm_scale=576 ** -0.5, d_v=512
-)
+out, lse = flash_mla_sm120.sparse_mla_decode_fwd(q, kv_cache, indices, sm_scale=576**-0.5, d_v=512)
 ```
 
 Benchmark：
@@ -158,3 +155,18 @@ cudaHostGetDevicePointer(&dptr, hptr, 0);
 已有 RTX 5080 测量显示，656B record 的 mapped pinned memory 读取大约是 10-13 GB/s，远低于 HBM，但比“完全随机 4B load”的心智模型更接近可用的 sparse record streaming。更详细的分析见 `docs/kv_cache_offload.md`。
 
 一个重要实现问题是 decode kernel 目前按 head group 处理，每组 16 个 heads。128 heads 时，同一批 selected KV records 可能被 8 个 head groups 重复 gather。若 KV 在 host memory，这个重复读取会成为 offload 路径的主导成本。
+
+## 生成式推荐实验输入与权重
+
+`GR/` 独立配置数据集用户热度、可读文本和请求到达时间，默认生成精确长度的固定历史与变化候选；文本可采用数据集商品标题或纯规则素材。运行方式及输出格式见 [GR/README.md](GR/README.md)。Embedding 与前两层 dense 层的本地权重选择见 [实验权重说明](model_run/deepseek_v32_two_dense.md)。
+
+## Python 格式化
+
+使用 Ruff，配置在 `pyproject.toml`：Python 3.12、100 字符行宽、双引号、空格缩进、LF 换行。`DeepGEMM/`、`sparse_mla_sm120/` 子项目与生成数据、模型文件排除在外。
+
+```bash
+uv run --no-sync ruff format .
+uv run --no-sync ruff format --check .
+```
+
+Ruff 已加入 `dev` 依赖组；新环境先安装开发依赖。本地 VS Code 工作区已配置 Python 保存时格式化，需启用 `charliermarsh.ruff` 扩展。
