@@ -1,0 +1,60 @@
+# Python environments and caches
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+.eggs/
+
+# Native compilation and packaging
+build/
+dist/
+cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+compile_commands.json
+*.o
+*.obj
+*.so
+*.so.*
+*.a
+*.dylib
+*.dll
+*.exe
+*.cubin
+*.fatbin
+
+# Local kernel caches
+.deep_gemm_cache/
+.cache/
+.triton/
+
+# Raw profiler output (keep scripts and result summaries)
+*.ncu-rep
+*.nsys-rep
+*.qdrep
+*.qdstrm
+*.sqlite
+*.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm
+*.log
+
+# Local editor settings and credentials
+.vscode/
+.idea/
+.DS_Store
+*.swp
+*.swo
+.env
+.env.*
+!.env.example
+!.env.sample
+
+# Benchmark executables without file extensions
+/gpu-benches/gpu-metrics/rocm_metrics/test_rocm_metrics
+/gpu-benches/gpu-pcie-host/cpu-mem-bw
+/gpu-benches/gpu-pcie-host/cpu-mem-stream

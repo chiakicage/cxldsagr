@@ -1,0 +1,6 @@
+CPU memory benchmark: buffer=1 GiB, threads=1, reps=5, sink=45035995938160640
+path            best ms     med ms    best GB/s     med GB/s
+------------------------------------------------------------
+read             32.057     32.531        33.49        33.01
+write            55.626     56.422        19.30        19.03
+copy             46.499     47.046        23.09        22.82

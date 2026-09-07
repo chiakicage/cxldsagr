@@ -1,0 +1,12 @@
+clock: 180 180 180 180 180 180 180 180 180 180 180 180 180 180 1792 
+Device: NVIDIA GeForce RTX 5080, SM 120, SMs=84, clock=1792 MHz
+Mapped pinned host memory read from GPU; device memory is a control
+stream-buffer=256MB mapped-latency-buffer=0MB device-l2-latency-buffer=16MB device-latency-buffer=256MB reps=1
+
+  location     pattern          ms        GB/s    lat cycles
+------------------------------------------------------------
+    mapped    seq-read      13.465       19.94             -
+    device    seq-read       0.856      313.58             -
+    mapped      pchase           -           -         340.0
+ device-l2      pchase           -           -         347.6
+device-gbl      pchase           -           -         690.0

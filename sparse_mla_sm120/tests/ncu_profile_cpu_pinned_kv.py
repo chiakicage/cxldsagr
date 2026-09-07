@@ -1,0 +1,79 @@
+"""NCU profiling script for V32 decode with CPU pinned KV cache."""
+import argparse
+import sys
+
+import torch
+
+sys.path.insert(0, ".")
+
+
+def quantize_kv_v32(kv_bf16):
+    d_nope, d_rope, tile_size, num_tiles = 512, 64, 128, 4
+    nb, bs, hk, d = kv_bf16.shape
+    kv = kv_bf16.squeeze(2)
+    bpt = d_nope + num_tiles * 4 + d_rope * 2  # 656
+    result = torch.zeros(nb, bs, bpt, dtype=torch.uint8, device=kv.device)
+    for ti in range(num_tiles):
+        tile = kv[..., ti * tile_size : (ti + 1) * tile_size].float()
+        amax = tile.abs().amax(dim=-1).clamp(min=1e-4)
+        scale = torch.pow(2, torch.clamp_min(amax / 448.0, 1e-4).log2().ceil())
+        fp8 = (tile / scale.unsqueeze(-1)).clamp(-448, 448).to(torch.float8_e4m3fn)
+        result[..., ti * tile_size : (ti + 1) * tile_size] = fp8.view(torch.uint8)
+        sb = scale.to(torch.float32).contiguous().view(torch.uint8).reshape(nb, bs, 4)
+        result[..., d_nope + ti * 4 : d_nope + (ti + 1) * 4] = sb
+    rope = kv[..., d_nope:].to(torch.bfloat16).contiguous().view(torch.uint8).reshape(nb, bs, d_rope * 2)
+    result[..., d_nope + num_tiles * 4 :] = rope
+    return result.view(nb, bs, 1, bpt).contiguous()
+
+
+def make_cpu_pinned_copy(tensor: torch.Tensor) -> torch.Tensor:
+    cpu_tensor = torch.empty(tensor.shape, dtype=tensor.dtype, device="cpu", pin_memory=True)
+    cpu_tensor.copy_(tensor, non_blocking=False)
+    return cpu_tensor
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--batch-size", type=int, default=1, choices=(1, 4, 8, 16))
+    args = parser.parse_args()
+
+    d_qk, d_v, topk = 576, 512, 2048
+    num_blocks, block_size = 64, 64
+    num_heads, batch_size = 128, args.batch_size
+    sm_scale = d_qk ** -0.5
+
+    torch.manual_seed(42)
+    kv_bf16 = (
+        torch.randn(num_blocks, block_size, 1, d_qk, device="cuda", dtype=torch.bfloat16) / 10
+    ).clamp(-1, 1)
+    kv_packed_gpu = quantize_kv_v32(kv_bf16)
+    kv_packed = make_cpu_pinned_copy(kv_packed_gpu)
+    del kv_packed_gpu, kv_bf16
+    torch.cuda.synchronize()
+
+    q = torch.randn(batch_size, num_heads, d_qk, device="cuda", dtype=torch.bfloat16) / 10
+    indices = torch.randint(0, num_blocks * block_size, (batch_size, topk), device="cuda", dtype=torch.int32)
+    indices[:, -10:] = -1
+
+    import flash_mla_sm120
+
+    # Warmup
+    for _ in range(3):
+        flash_mla_sm120.sparse_mla_decode_fwd(q, kv_packed, indices, sm_scale, d_v)
+    torch.cuda.synchronize()
+
+    # Profiled iteration
+    torch.cuda.nvtx.range_push("sparse_mla_decode_cpu_pinned_kv_profile")
+    try:
+        flash_mla_sm120.sparse_mla_decode_fwd(q, kv_packed, indices, sm_scale, d_v)
+    finally:
+        torch.cuda.nvtx.range_pop()
+    torch.cuda.synchronize()
+    print(
+        f"Done (cpu pinned KV, batch_size={batch_size}, heads={num_heads}, topk={topk}, "
+        f"kv_is_pinned={kv_packed.is_pinned()}, kv_device={kv_packed.device})"
+    )
+
+
+if __name__ == "__main__":
+    main()

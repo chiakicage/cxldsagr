@@ -1,0 +1,23 @@
+Device: NVIDIA GeForce RTX 5080, SM 120, SMs=84
+PCI bus id: 0:1:0
+PCIe link: current Gen5 x16, max Gen5 x16
+buffer=512 MiB, reps=10, grid=8192, block=256
+
+
+[default pinned mapped]
+path                      best ms     med ms    best GB/s     med GB/s
+----------------------------------------------------------------------
+mapped read                24.854     24.951        21.60        21.52
+mapped write               33.800     34.198        15.88        15.70
+cudaMemcpy H2D             23.964     25.564        22.40        21.00
+cudaMemcpy D2H             26.127     26.266        20.55        20.44
+cudaMemcpy H2D+D2H         47.368     47.530        22.67        22.59
+
+[write-combined pinned mapped]
+path                      best ms     med ms    best GB/s     med GB/s
+----------------------------------------------------------------------
+mapped read                25.214     25.458        21.29        21.09
+mapped write               33.120     34.267        16.21        15.67
+cudaMemcpy H2D             24.362     25.652        22.04        20.93
+cudaMemcpy D2H             25.413     26.140        21.13        20.54
+cudaMemcpy H2D+D2H         47.243     47.484        22.73        22.61
