@@ -1,13 +1,21 @@
+import io
 import json
 import tempfile
 import unittest
+from contextlib import redirect_stdout
 from dataclasses import replace
 from pathlib import Path
 
 from tokenizers import Tokenizer
 
 from GR.heat import HeatPopulation
-from GR.input_generator import DEFAULT_TOKENIZER, InputGenerator, TextConfig
+from GR.input_generator import (
+    DEFAULT_TOKENIZER,
+    InputGenerator,
+    TextConfig,
+    create_input_generator,
+    main,
+)
 from GR.scheduling import ScheduleConfig
 
 
@@ -54,6 +62,60 @@ class RuleTextTests(unittest.TestCase):
             titles=titles,
             schedule_config=ScheduleConfig(sampling="sequential"),
         )
+
+    def test_api_and_file_output_match(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            heat = root / "users.csv"
+            heat.write_text("user_id,pv_share\n42,0.2\n99,0.8\n")
+            gen = create_input_generator(
+                heat_source="industrial",
+                heat_path=str(heat),
+                num_users=0,
+                text_material="synthetic",
+                tokenizer=self.tokenizer,
+                text_config=TextConfig(
+                    user_lengths=(4096,),
+                    user_probabilities=(1,),
+                    item_lengths=(1024,),
+                    item_probabilities=(1,),
+                ),
+                schedule_config=ScheduleConfig(sampling="sequential"),
+            )
+            rows = list(gen.iter_generate(4))
+            self.assertEqual(set(root.iterdir()), {heat})
+            self.assertEqual(rows[2]["visit_index"], 1)
+            self.assertEqual(gen.for_user(42)["input_ids"], rows[0]["input_ids"])
+            output = root / "requests.jsonl"
+            with redirect_stdout(io.StringIO()):
+                main(
+                    [
+                        "--heat-source",
+                        "industrial",
+                        "--heat-path",
+                        str(heat),
+                        "--num-users",
+                        "0",
+                        "--text-material",
+                        "synthetic",
+                        "--tokenizer",
+                        str(DEFAULT_TOKENIZER.parent),
+                        "--user-lengths",
+                        "4096",
+                        "--item-lengths",
+                        "1024",
+                        "--sampling",
+                        "sequential",
+                        "--count",
+                        "4",
+                        "--output",
+                        str(output),
+                    ]
+                )
+            self.assertEqual([json.loads(line) for line in output.read_text().splitlines()], rows)
+            meta = json.loads(output.with_suffix(".jsonl.meta.json").read_text())
+            self.assertEqual(meta["stats"]["repeat_requests"], 2)
+            self.assertTrue(output.with_suffix(".jsonl.users.jsonl").is_file())
 
     def test_all_length_buckets_are_exact_and_readable(self):
         # One user per fixed bucket makes coverage independent of random draws.

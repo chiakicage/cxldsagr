@@ -1,6 +1,47 @@
 # GR serving 请求生成器
 
-生成用于 KV cache 实验的可读请求：**用户历史固定、候选每次更新、token 长度精确控制**。用户热度、文本素材、到达时间分别配置。完整文本经本地 DeepSeek V3.2 tokenizer 编码，输出 JSONL，不加载模型或运行 serving。
+生成用于 KV cache 实验的可读请求：**用户历史固定、候选每次更新、token 长度精确控制**。用户热度、文本素材、到达时间分别配置。完整文本经本地 DeepSeek V3.2 tokenizer 编码，可直接通过 Python 接口获取，也可用命令行输出 JSONL，不加载模型或运行 serving。
+
+## Python 接口
+
+```python
+from GR.input_generator import create_input_generator, TextConfig
+from GR.scheduling import ScheduleConfig
+
+generator = create_input_generator(
+    heat_source="industrial",
+    industrial_heat_field="pv_share",
+    num_users=1000,
+    text_material="catalog",
+    text_dataset="beauty",
+    text_config=TextConfig(
+        user_lengths=(4096, 16384, 65536),
+        user_probabilities=(0.3, 0.4, 0.3),
+        item_lengths=(1024, 4096),
+        item_probabilities=(0.5, 0.5),
+    ),
+    schedule_config=ScheduleConfig(seed=42, qps=100, arrival="poisson"),
+)
+
+# 按需逐条生成；request 是包含文本、token IDs 和调度信息的 dict。
+requests = generator.iter_generate(1000)
+request = next(requests)
+input_ids = request["input_ids"]
+prompt = request["prompt"]
+timestamp = request["timestamp"]
+# 继续消费同一个 requests 迭代器，保留这条流的访问计数和模拟时间。
+for request in requests:
+    pass  # 在这里交给你的 serving / KV cache 实验代码
+
+# 也可以自行指定已有用户和访问序号；此接口不包含调度字段。
+uid = generator.users[0]
+first = generator.for_user(uid, visit_index=0)
+revisit = generator.for_user(uid, visit_index=1)
+```
+
+初始化函数读取热度、标题和 tokenizer，返回可复用的 `InputGenerator`，不写文件。路径参数 `data_root`、`heat_path`、`text_catalog_path`、`tokenizer` 接受字符串或 `Path`；`tokenizer` 也接受已加载的 `tokenizers.Tokenizer` 对象（会关闭其 padding 和 truncation）。纯规则商品名使用 `text_material="synthetic"`。
+
+`iter_generate(count)` 返回惰性迭代器，不会一次保存全部请求。每次调用都会重新开始一条可复现的流；需要连续消费时保留同一个迭代器。`for_user` 的 `visit_index` 由调用方维护，同一用户和访问序号会得到相同内容。已有内存热度和标题时，可直接构造 `InputGenerator(population, tokenizer, titles=..., text_config=..., schedule_config=...)`，其中 `population` 为 `HeatPopulation`。
 
 ## 直接运行
 

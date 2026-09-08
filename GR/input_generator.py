@@ -292,6 +292,80 @@ class InputGenerator:
             yield row
 
 
+def create_input_generator(
+    *,
+    heat_source: str = "beauty",
+    heat_path: str | Path | None = None,
+    industrial_heat_field: str = "pv_share",
+    num_users: int = 1000,
+    text_material: str = "catalog",
+    text_dataset: str = "beauty",
+    text_catalog_path: str | Path | None = None,
+    data_root: str | Path = DEFAULT_DATA_ROOT,
+    tokenizer: Tokenizer | str | Path = DEFAULT_TOKENIZER,
+    text_config: TextConfig | None = None,
+    schedule_config: ScheduleConfig | None = None,
+) -> InputGenerator:
+    """Load resources once and return a reusable, in-memory request generator.
+
+    Use ``iter_generate(count)`` for a scheduled stream or ``for_user(uid,
+    visit_index=...)`` for an explicit visit. Neither method writes files or
+    sends requests. Each new stream restarts its schedule and visit counters.
+    Paths accept strings or Path objects; tokenizer may also be preloaded.
+    """
+    datasets = ("beauty", "games", "books", "clothing")
+    if heat_source not in (*datasets, "industrial"):
+        raise ValueError(f"unsupported heat_source: {heat_source}")
+    if text_material not in ("catalog", "synthetic"):
+        raise ValueError(f"unsupported text_material: {text_material}")
+    if text_dataset not in datasets:
+        raise ValueError(f"unsupported text_dataset: {text_dataset}")
+    _integer("num_users", num_users)
+    schedule = schedule_config or ScheduleConfig(sampling="weighted")
+    root = Path(data_root)
+    industrial = heat_source == "industrial"
+    source = (
+        Path(heat_path)
+        if heat_path is not None
+        else (
+            root / "industrial/users_100k.csv"
+            if industrial
+            else root / heat_source / "timestep_map.json"
+        )
+    )
+    population = HeatPopulation.load(
+        source,
+        industrial_field=industrial_heat_field if industrial else None,
+        num_users=num_users,
+        seed=schedule.seed,
+    )
+    titles = None
+    if text_material == "catalog":
+        catalog = (
+            Path(text_catalog_path)
+            if text_catalog_path is not None
+            else (
+                root
+                / "preprocessed"
+                / f"{text_dataset}_min_rating0-min_uc5-min_sc5"
+                / "dataset.pkl"
+            )
+        )
+        titles = load_titles(catalog)
+    if not isinstance(tokenizer, Tokenizer):
+        token_path = Path(tokenizer)
+        if token_path.is_dir():
+            token_path /= "tokenizer.json"
+        tokenizer = Tokenizer.from_file(str(token_path))
+    return InputGenerator(
+        population,
+        tokenizer,
+        text_config=text_config,
+        schedule_config=schedule,
+        titles=titles,
+    )
+
+
 def main(argv: list[str] | None = None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -354,19 +428,20 @@ def main(argv: list[str] | None = None):
         schedule = ScheduleConfig(
             seed=args.seed, qps=args.qps, arrival=args.arrival, sampling=args.sampling
         )
-        industrial = args.heat_source == "industrial"
-        heat_path = args.heat_path or (
-            args.data_root / "industrial/users_100k.csv"
-            if industrial
-            else args.data_root / args.heat_source / "timestep_map.json"
-        )
-        heat = HeatPopulation.load(
-            heat_path,
-            industrial_field=args.industrial_heat_field if industrial else None,
+        gen = create_input_generator(
+            heat_source=args.heat_source,
+            heat_path=args.heat_path,
+            industrial_heat_field=args.industrial_heat_field,
             num_users=args.num_users,
-            seed=args.seed,
+            text_material=args.text_material,
+            text_dataset=args.text_dataset,
+            text_catalog_path=args.text_catalog_path,
+            data_root=args.data_root,
+            tokenizer=args.tokenizer,
+            text_config=cfg,
+            schedule_config=schedule,
         )
-        titles = None
+        heat = gen.population
         catalog_path = None
         if args.text_material == "catalog":
             catalog_path = args.text_catalog_path or (
@@ -375,16 +450,8 @@ def main(argv: list[str] | None = None):
                 / f"{args.text_dataset}_min_rating0-min_uc5-min_sc5"
                 / "dataset.pkl"
             )
-            titles = load_titles(catalog_path)
         token_path = (
             args.tokenizer / "tokenizer.json" if args.tokenizer.is_dir() else args.tokenizer
-        )
-        gen = InputGenerator(
-            heat,
-            Tokenizer.from_file(str(token_path)),
-            text_config=cfg,
-            schedule_config=schedule,
-            titles=titles,
         )
         args.output.parent.mkdir(parents=True, exist_ok=True)
         # Write to a temporary sibling so a budget failure cannot publish a partial trace.
