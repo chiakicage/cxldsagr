@@ -12,11 +12,12 @@ dependencies = [
     "triton==3.7.1",
     "numpy==2.5.0",
     "cuda-bindings==13.0.3",
-    "cuda-pathfinder==1.2.2",
+    "cuda-pathfinder==1.8.1",
     "cuda-toolkit==13.0.2",
     # 本地 CUDA 扩展；DeepGEMM 版本后缀由源码提交状态生成
     "deep-gemm",  # 版本由下方本地源码决定
     "flash-mla-sm120==0.1.0",
+    "flashinfer-python[cu13]==0.6.18",
     # 构建与测试工具
     "ninja==1.13.0",
     "packaging==26.2",

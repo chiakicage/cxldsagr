@@ -33,6 +33,10 @@ compile_commands.json
 .triton/
 
 # Raw profiler output (keep scripts and result summaries)
+*.trace.json
+/docs/extend_step_profile/*
+!/docs/extend_step_profile/*.md
+/docs/model_extend_v32_*.json
 *.ncu-rep
 *.nsys-rep
 *.qdrep

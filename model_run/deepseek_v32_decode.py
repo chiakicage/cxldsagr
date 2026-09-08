@@ -9,7 +9,7 @@ measured separately:
 
 The tensors are randomly initialized and stay on GPU. No KV offload path is
 used. Timing excludes random initialization and pre-quantization of persistent
-weights/caches, but includes per-token activation quantization, cache update,
+weights/caches, but includes FlashInfer norm/RoPE, per-token activation quantization, cache update,
 indexer top-k, sparse attention, and output projection in the end-to-end path.
 
 Example:
@@ -37,6 +37,21 @@ import deep_gemm
 import torch
 from deep_gemm.utils import per_block_cast_to_fp8, per_token_cast_to_fp4, per_token_cast_to_fp8
 
+if __package__:
+    from .deepseek_v32_ops import (
+        FlashInferV32Ops,
+        attention_scale,
+        quantize_index,
+        rotate_activation,
+    )
+else:
+    from deepseek_v32_ops import (
+        FlashInferV32Ops,
+        attention_scale,
+        quantize_index,
+        rotate_activation,
+    )
+
 CONFIG_PATH = ROOT / "docs" / "config.json"
 BLOCK_SIZE = 64
 DECODE_TOKEN_LIMIT = 64
@@ -54,6 +69,14 @@ class V32Config:
     index_n_heads: int
     index_head_dim: int
     index_topk: int
+    norm_eps: float = 1e-6
+    rope_theta: float = 10000.0
+    rope_factor: float = 40.0
+    original_seq_len: int = 4096
+    max_seq_len: int = 163840
+    beta_fast: float = 32.0
+    beta_slow: float = 1.0
+    mscale: float = 1.0
 
     @property
     def qk_head_dim(self) -> int:
@@ -122,6 +145,7 @@ class CaseTensors:
     total_len: int
     blocks_per_seq: int
     x: torch.Tensor
+    position_ids: torch.Tensor
     kv_cache: torch.Tensor
     kv_current_packed: torch.Tensor
     decode_block_ids: torch.Tensor
@@ -159,6 +183,20 @@ def load_config(path: Path) -> V32Config:
         index_n_heads=raw["index_n_heads"],
         index_head_dim=raw["index_head_dim"],
         index_topk=raw["index_topk"],
+        **{
+            name: raw[name]
+            for name in (
+                "norm_eps",
+                "rope_theta",
+                "rope_factor",
+                "original_seq_len",
+                "max_seq_len",
+                "beta_fast",
+                "beta_slow",
+                "mscale",
+            )
+            if name in raw
+        },
     )
 
 
@@ -174,12 +212,6 @@ def tensor_nbytes(x) -> int:
     if isinstance(x, (tuple, list)):
         return sum(tensor_nbytes(v) for v in x)
     return 0
-
-
-def rms_norm(x: torch.Tensor, eps: float = 1e-6) -> torch.Tensor:
-    y = x.float()
-    y = y * torch.rsqrt(y.pow(2).mean(dim=-1, keepdim=True) + eps)
-    return y.to(x.dtype)
 
 
 def bench_cuda(
@@ -216,7 +248,7 @@ def cleanup() -> None:
 
 
 def _cast_scale_inv_to_ue8m0(scales_inv: torch.Tensor) -> torch.Tensor:
-    return torch.pow(2, torch.clamp_min(scales_inv, 1e-4).log2().ceil())
+    return torch.pow(2, scales_inv.clamp_min(torch.finfo(torch.float32).tiny).log2().ceil())
 
 
 def quantize_kv_v32(kv_bf16: torch.Tensor) -> torch.Tensor:
@@ -275,24 +307,33 @@ def make_index_kv_cache(tokens: int, head_dim: int, device: str) -> torch.Tensor
     blocks = ceil_div(tokens, BLOCK_SIZE)
     padded_tokens = blocks * BLOCK_SIZE
     fused = torch.empty((blocks, BLOCK_SIZE, 1, head_dim + 4), device=device, dtype=torch.uint8)
-    flat = fused.view(padded_tokens, 1, head_dim + 4)
+    data_view, scale_view = index_cache_views(fused)
     chunk_tokens = 262144
     for start in range(0, padded_tokens, chunk_tokens):
         end = min(start + chunk_tokens, padded_tokens)
         raw = torch.randn((end - start, head_dim), device=device, dtype=torch.bfloat16) / 10
         packed, scales = pack_index_tokens(raw)
-        flat[start:end, 0, :head_dim] = packed
-        flat[start:end, 0, head_dim:] = scales
+        data_view[start // BLOCK_SIZE : end // BLOCK_SIZE] = packed.view(-1, BLOCK_SIZE, head_dim)
+        scale_view[start // BLOCK_SIZE : end // BLOCK_SIZE] = scales.view(-1, BLOCK_SIZE, 4)
         del raw, packed, scales
     return fused
 
 
+def index_cache_views(cache: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
+    """DeepGEMM stores all keys THEN all scales within each page, not per token."""
+    blocks, page_size, _, record_bytes = cache.shape
+    head_dim = record_bytes - 4
+    raw = cache.view(blocks, -1)
+    return (
+        raw[:, : page_size * head_dim].view(blocks, page_size, head_dim),
+        raw[:, page_size * head_dim :].view(blocks, page_size, 4),
+    )
+
+
 def pack_index_tokens(tokens: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
-    amax = tokens.abs().float().amax(dim=-1, keepdim=True).clamp_min(1e-4)
-    scale = amax / 448.0
-    fp8 = (tokens * (1.0 / scale)).to(torch.float8_e4m3fn).view(torch.uint8)
-    scale_bytes = scale.to(torch.float32).contiguous().view(torch.uint8).reshape(tokens.shape[0], 4)
-    return fp8, scale_bytes
+    fp8, scale = quantize_index(tokens)
+    scale_bytes = scale.contiguous().view(torch.uint8).reshape(tokens.shape[0], 4)
+    return fp8.view(torch.uint8), scale_bytes
 
 
 class QuantizedLinear:
@@ -300,6 +341,7 @@ class QuantizedLinear:
         self.out_features = out_features
         self.in_features = in_features
         self.mode = mode
+        self.activation_quantizer = per_token_cast_to_fp8
         raw = torch.randn(
             (out_features, in_features), device="cuda", dtype=torch.bfloat16
         ) / math.sqrt(in_features)
@@ -317,10 +359,10 @@ class QuantizedLinear:
     def __call__(self, x: torch.Tensor) -> torch.Tensor:
         x2d = x.view(-1, self.in_features).contiguous()
         if self.mode == "fp8_fp4w":
-            a = per_token_cast_to_fp8(x2d, use_ue8m0=True, gran_k=128)
+            a = self.activation_quantizer(x2d, use_ue8m0=True, gran_k=128)
             recipe_a = (1, 128)
         else:
-            a = per_token_cast_to_fp8(x2d, use_ue8m0=True, gran_k=128)
+            a = self.activation_quantizer(x2d, use_ue8m0=True, gran_k=128)
             recipe_a = None
         out = torch.empty((x2d.shape[0], self.out_features), device=x.device, dtype=torch.bfloat16)
         if self.mode == "fp8":
@@ -336,12 +378,27 @@ class QuantizedLinear:
         return out.view(*x.shape[:-1], self.out_features)
 
 
+class BF16Linear:
+    """Indexer head-weight projection stays BF16, including in FP8 GEMM mode."""
+
+    def __init__(self, out_features: int, in_features: int):
+        self.out_features = out_features
+        self.in_features = in_features
+        self.weight = torch.randn(
+            out_features, in_features, device="cuda", dtype=torch.bfloat16
+        ) / math.sqrt(in_features)
+
+    def __call__(self, x):
+        return torch.nn.functional.linear(x, self.weight)
+
+
 class GroupedLinear:
     def __init__(self, groups: int, out_features: int, in_features: int, mode: str = "fp8_fp4w"):
         self.groups = groups
         self.out_features = out_features
         self.in_features = in_features
         self.mode = mode
+        self.activation_quantizer = per_token_cast_to_fp8
         raw = torch.randn(
             (groups, out_features, in_features), device="cuda", dtype=torch.bfloat16
         ) / math.sqrt(in_features)
@@ -375,7 +432,7 @@ class GroupedLinear:
             canonical.copy_(x_by_group)
             x_by_group = canonical
         x2d = x_by_group.view(groups * m, k)
-        data2d, sf2d = per_token_cast_to_fp8(x2d, use_ue8m0=True, gran_k=128)
+        data2d, sf2d = self.activation_quantizer(x2d, use_ue8m0=True, gran_k=128)
         data = data2d.view(groups, m, k)
         sf = sf2d.view(groups, m, ceil_div(k, 128))
         out = torch.empty(
@@ -402,6 +459,7 @@ class V32DecodeRunner:
         self.cfg = cfg
         self.mode = mode
         self.post_proj = post_proj
+        self.ops = FlashInferV32Ops(cfg)
         self.sparse_decode = self._load_sparse_decode()
 
         self.wq_a = QuantizedLinear(cfg.q_lora_rank, cfg.dim, mode)
@@ -411,7 +469,7 @@ class V32DecodeRunner:
             cfg.index_n_heads * cfg.index_head_dim, cfg.q_lora_rank, mode
         )
         self.index_wki = QuantizedLinear(cfg.index_head_dim, cfg.dim, mode)
-        self.index_weights = QuantizedLinear(cfg.index_n_heads, cfg.dim, mode)
+        self.index_weights = BF16Linear(cfg.index_n_heads, cfg.dim)
         self.wk_b = GroupedLinear(cfg.n_heads, cfg.kv_lora_rank, cfg.qk_nope_head_dim, mode)
         self.wv_b = GroupedLinear(cfg.n_heads, cfg.v_head_dim, cfg.kv_lora_rank, mode)
         self.wo = QuantizedLinear(cfg.dim, cfg.n_heads * cfg.v_head_dim, mode)
@@ -438,6 +496,8 @@ class V32DecodeRunner:
         return flash_mla_sm120.sparse_mla_decode_fwd
 
     def make_case(self, batch: int, history_len: int) -> CaseTensors:
+        if not 0 <= history_len < self.cfg.max_seq_len:
+            raise ValueError("history_len must be within the configured RoPE context")
         if batch > DECODE_TOKEN_LIMIT:
             raise ValueError(
                 f"sparse MLA decode path supports at most {DECODE_TOKEN_LIMIT} tokens; got batch={batch}"
@@ -449,12 +509,7 @@ class V32DecodeRunner:
         x = torch.randn((batch, self.cfg.dim), device="cuda", dtype=torch.bfloat16)
 
         kv_cache = make_kv_cache_v32(total_blocks, self.cfg.qk_head_dim, "cuda")
-        current_raw = (
-            torch.randn((batch, 1, 1, self.cfg.qk_head_dim), device="cuda", dtype=torch.bfloat16)
-            / 10
-        ).clamp(-1, 1)
-        kv_current_packed = quantize_kv_v32(current_raw)[:, 0, :, :].contiguous()
-        del current_raw
+        kv_current_packed = torch.empty((batch, 1, 656), device="cuda", dtype=torch.uint8)
         seq_ids_long = torch.arange(batch, device="cuda", dtype=torch.long)
         decode_block_ids = seq_ids_long * blocks_per_seq + (history_len // BLOCK_SIZE)
         decode_token_ids = torch.full(
@@ -463,16 +518,9 @@ class V32DecodeRunner:
         index_kv_cache = make_index_kv_cache(
             total_blocks * BLOCK_SIZE, self.cfg.index_head_dim, "cuda"
         )
-        index_current_raw = (
-            torch.randn((batch, self.cfg.index_head_dim), device="cuda", dtype=torch.bfloat16) / 10
-        )
-        index_packed, index_scales = pack_index_tokens(index_current_raw)
         index_current_record = torch.empty(
             (batch, self.cfg.index_head_dim + 4), device="cuda", dtype=torch.uint8
         )
-        index_current_record[:, : self.cfg.index_head_dim] = index_packed
-        index_current_record[:, self.cfg.index_head_dim :] = index_scales
-        del index_current_raw, index_packed, index_scales
         context_lens = torch.full((batch, 1), total_len, device="cuda", dtype=torch.int32)
         block_table = torch.arange(total_blocks, device="cuda", dtype=torch.int32).view(
             batch, blocks_per_seq
@@ -486,6 +534,7 @@ class V32DecodeRunner:
             total_len=total_len,
             blocks_per_seq=blocks_per_seq,
             x=x,
+            position_ids=torch.full((batch,), history_len, device=x.device, dtype=torch.int64),
             kv_cache=kv_cache,
             kv_current_packed=kv_current_packed,
             decode_block_ids=decode_block_ids,
@@ -500,26 +549,34 @@ class V32DecodeRunner:
 
     def project(self, case: CaseTensors) -> Projected:
         cfg = self.cfg
-        qr = rms_norm(self.wq_a(case.x))
+        qr = self.ops.q_norm(self.wq_a(case.x))
         q_proj = self.wq_b(qr).view(case.batch, cfg.n_heads, cfg.q_proj_head_dim)
         q_nope, q_pe = torch.split(q_proj, [cfg.qk_nope_head_dim, cfg.qk_rope_head_dim], dim=-1)
 
         kv_proj = self.wkv_a(case.x)
         kv_latent, k_pe = torch.split(kv_proj, [cfg.kv_lora_rank, cfg.qk_rope_head_dim], dim=-1)
-        kv_latent = rms_norm(kv_latent)
+        kv_latent = self.ops.kv_norm(kv_latent)
+        q_pe, k_pe = self.ops.apply_rope(q_pe, k_pe, case.position_ids, is_neox=False)
         kv_current = torch.cat([kv_latent, k_pe], dim=-1).contiguous()
 
         q_nope_by_head = q_nope.transpose(0, 1).contiguous()
         q_latent_by_head = self.wk_b(q_nope_by_head)
         q_latent = q_latent_by_head.transpose(0, 1).contiguous()
-        q_attn = (torch.cat([q_latent, q_pe], dim=-1) * 0.1).contiguous()
+        q_attn = torch.cat([q_latent, q_pe], dim=-1).contiguous()
 
         idx_q = (
             self.index_wqi(qr)
             .view(case.batch, 1, cfg.index_n_heads, cfg.index_head_dim)
             .contiguous()
         )
-        idx_k = rms_norm(self.index_wki(case.x)).contiguous()
+        idx_k = self.ops.index_norm(self.index_wki(case.x))
+        # Indexer rotates the FIRST 64 dims, using split-half (NeoX) pairing.
+        rd = cfg.qk_rope_head_dim
+        iq_pe, ik_pe = self.ops.apply_rope(
+            idx_q[:, 0, :, :rd], idx_k[:, :rd], case.position_ids, is_neox=True
+        )
+        idx_q = rotate_activation(torch.cat((iq_pe, idx_q[:, 0, :, rd:]), -1)).unsqueeze(1)
+        idx_k = rotate_activation(torch.cat((ik_pe, idx_k[:, rd:]), -1))
         idx_weights = (
             self.index_weights(case.x).view(case.batch, cfg.index_n_heads).float()
             * (cfg.index_n_heads**-0.5)
@@ -527,17 +584,23 @@ class V32DecodeRunner:
         return Projected(qr, q_nope, q_pe, q_attn, kv_current, idx_q, idx_k, idx_weights)
 
     def update_attention_cache(self, case: CaseTensors, projected: Projected) -> None:
-        del projected
+        packed = quantize_kv_v32(projected.kv_current[:, None, None, :])[:, 0]
+        case.kv_current_packed.copy_(packed)
         case.kv_cache[case.decode_block_ids, case.decode_token_ids, :, :] = case.kv_current_packed
 
     def update_index_cache(self, case: CaseTensors, projected: Projected) -> None:
-        del projected
-        case.index_kv_cache[case.decode_block_ids, case.decode_token_ids, 0, :] = (
-            case.index_current_record
-        )
+        data, scales = pack_index_tokens(projected.idx_k)
+        case.index_current_record[:, : self.cfg.index_head_dim] = data
+        case.index_current_record[:, self.cfg.index_head_dim :] = scales
+        keys, sf = index_cache_views(case.index_kv_cache)
+        keys[case.decode_block_ids, case.decode_token_ids] = data
+        sf[case.decode_block_ids, case.decode_token_ids] = scales
 
     def compute_index_logits(self, case: CaseTensors, projected: Projected) -> torch.Tensor:
-        q_fp8 = projected.idx_q.to(torch.float8_e4m3fn)
+        q_fp8, q_scale = quantize_index(projected.idx_q)
+        weights = (
+            projected.idx_weights * q_scale[:, 0, :, 0] * self.cfg.index_head_dim**-0.5
+        ).contiguous()
         num_clusters = deep_gemm.get_num_sms()
         schedule_meta = deep_gemm.get_paged_mqa_logits_metadata(
             case.context_lens, BLOCK_SIZE, num_clusters
@@ -545,13 +608,13 @@ class V32DecodeRunner:
         return deep_gemm.fp8_fp4_paged_mqa_logits(
             (q_fp8, None),
             case.index_kv_cache,
-            projected.idx_weights,
+            weights,
             case.context_lens,
             case.block_table,
             schedule_meta,
             case.max_context_len,
             False,
-            torch.bfloat16,
+            torch.float32,
         )
 
     def select_topk(self, case: CaseTensors, logits: torch.Tensor) -> torch.Tensor:
@@ -574,7 +637,7 @@ class V32DecodeRunner:
     def sparse_attention(
         self, case: CaseTensors, projected: Projected, indices: torch.Tensor
     ) -> torch.Tensor:
-        sm_scale = self.cfg.qk_head_dim**-0.5
+        sm_scale = attention_scale(self.cfg)
         out = self.sparse_decode(
             projected.q_attn, case.kv_cache, indices, sm_scale, self.cfg.kv_lora_rank
         )
@@ -707,6 +770,8 @@ def _bf16_nbytes(numel: int) -> int:
 def _linear_effective_bytes(x: torch.Tensor, layer: QuantizedLinear, out_features: int) -> int:
     m = x.numel() // layer.in_features
     act_quant = m * layer.in_features + m * ceil_div(layer.in_features, 128) * 4
+    if isinstance(layer, BF16Linear):
+        act_quant = 0
     out = _bf16_nbytes(m * out_features)
     return tensor_nbytes(x) + act_quant + tensor_nbytes(layer.weight) + out
 
@@ -917,7 +982,7 @@ def run_detail_benchmark(args: argparse.Namespace) -> list[DetailCase]:
             args.warmups,
             args.iters,
         )
-        qr = rms_norm(runner.wq_a(case.x))
+        qr = runner.ops.q_norm(runner.wq_a(case.x))
         _add_detail_row(
             rows,
             case,
@@ -1459,7 +1524,8 @@ def format_markdown(results: list[BenchResult], args: argparse.Namespace) -> str
         "",
         "Notes:",
         "",
-        "- E2E includes activation quantization, current-token KV/index cache update, DeepGEMM paged-index logits, `torch.topk`, sparse MLA decode, per-head `W_VB`, and final `W_O`.",
+        "- E2E includes FlashInfer RMSNorm/LayerNorm and MLA/indexer YaRN RoPE, indexer Hadamard rotation, activation quantization, projected-token KV/index cache writes, paged-index logits, top-k, sparse MLA, W_VB and W_O. RoPE table construction is excluded.",
+        "- Weights and historical cache remain synthetic. This is an attention sublayer benchmark, without embedding, residual addition, MLP or LM head. Norm affine parameters are unit/zero. Byte/FLOP estimates cover the major GEMMs and cache operations, not every auxiliary operation.",
         "- The previous sparse-then-DeepGEMM illegal-address was caused by non-canonical strides on size-1 grouped-GEMM dimensions after transpose/contiguous; GroupedLinear now canonicalizes strides before launching DeepGEMM.",
         "- Projection/indexer/attention columns are measured as isolated sections and therefore are not expected to add up exactly to E2E.",
         "- The sparse MLA decode wrapper is used for batch sizes up to 64 decode tokens, matching the current decode kernel limit.",
