@@ -41,7 +41,7 @@ revisit = generator.for_user(uid, visit_index=1)
 
 初始化函数读取热度、标题和 tokenizer，返回可复用的 `InputGenerator`，不写文件。路径参数 `data_root`、`heat_path`、`text_catalog_path`、`tokenizer` 接受字符串或 `Path`；`tokenizer` 也接受已加载的 `tokenizers.Tokenizer` 对象（会关闭其 padding 和 truncation）。纯规则商品名使用 `text_material="synthetic"`。
 
-`iter_generate(count)` 返回惰性迭代器，不会一次保存全部请求。每次调用都会重新开始一条可复现的流；需要连续消费时保留同一个迭代器。`for_user` 的 `visit_index` 由调用方维护，同一用户和访问序号会得到相同内容。已有内存热度和标题时，可直接构造 `InputGenerator(population, tokenizer, titles=..., text_config=..., schedule_config=...)`，其中 `population` 为 `HeatPopulation`。
+`iter_generate(count)` 返回惰性迭代器，不会一次保存全部请求。每次调用都会重新开始一条可复现的流；需要连续消费时保留同一个迭代器。`for_user(uid, item_variant=i)` 可指定独立于 user 的候选内容流；同一 seed、item 长度、visit 与 `item_variant` 下，不同 user 得到相同候选区块。省略时保留原来的 per-user 候选流。`for_user` 的 `visit_index` 由调用方维护，同一用户和访问序号会得到相同内容。已有内存热度和标题时，可直接构造 `InputGenerator(population, tokenizer, titles=..., text_config=..., schedule_config=...)`，其中 `population` 为 `HeatPopulation`。
 
 ## 直接运行
 
@@ -50,8 +50,8 @@ revisit = generator.for_user(uid, visit_index=1)
   --heat-source industrial --industrial-heat-field pv_share \
   --num-users 1000 \
   --text-material catalog --text-dataset beauty \
-  --user-lengths 4096 8192 16384 32768 65536 \
-  --item-lengths 1024 2048 4096 \
+  --user-lengths 4096 16384 65536 262144 1048576 \
+  --item-lengths 64 128 256 512 1024 2048 4096 \
   --count 1000 --qps 100 --arrival poisson \
   --output GR/generated/serving_requests.jsonl
 ```
@@ -77,15 +77,15 @@ Details for (A): designed for travel.
 <Assistant></think>
 ```
 
-- `user-lengths`：历史区块长度，包含 `User profile` 和所有历史记录；默认 4K/8K/16K/32K/64K，1K = 1024 tokens。
-- `item-lengths`：**整个请求除历史区块之外的总预算**，包括固定指令、历史标题、候选、分隔符和 chat 特殊 token；默认 1K/2K/4K。
+- `user-lengths`：历史区块长度，包含 `User profile` 和所有历史记录；默认 4K/16K/64K/256K/1024K（默认等概率），1K = 1024 tokens。
+- `item-lengths`：**整个请求除历史区块之外的总预算**，包括固定指令、历史标题、候选、分隔符和 chat 特殊 token；默认 64/128/256/512/1K/2K/4K（等概率）。
 - 因此 `total_input_tokens = user_tokens + item_tokens`，没有漏算模板开销。
-- 不指定概率时，各长度档位等概率。可指定 `--user-probabilities 0.1 0.2 0.3 0.3 0.1`、`--item-probabilities 0.2 0.5 0.3`；数量须匹配，概率之和须为 1。
+- 不指定概率时，各长度档位等概率。可指定 `--user-probabilities 0.1 0.2 0.3 0.2 0.2`、`--item-probabilities 0.1 0.1 0.1 0.1 0.2 0.2 0.2`；数量须匹配，概率之和须为 1。
 - 两个长度均在用户初始化时抽取一次，独立于热度；复访只更新候选内容，保持长度不变。同一个 seed 和用户 ID 可以重新生成同一份历史。
-- `--candidate-count` 默认 20，决定候选商品数量。长预算由更多完整描述句填充，不靠增加候选数凑长度。
+- `--candidate-count` 默认 20，是候选商品数量上限；64/128 等短预算下自动减少完整候选条目，为收尾保留至少 2 token，最少保留 1 个。若单个 catalog 标题仍超预算，按完整单词缩短，必要时使用简短商品标签。长预算由更多完整描述句填充，不靠增加候选数凑长度。
 - 历史用不同编号和商品的完整记录填充；最后的小额 token 余量用简短完整句子补齐。不会用随机 token ID 或截断半个 Unicode 字符填充预算。
 - 每条完整文本都重新编码，并检查完整编码等于指令、历史、候选各块编码的拼接。若 tokenizer 在区块边界发生合并则报错，不宣称虚假的精确长度或稳定前缀。已针对本地 DeepSeek tokenizer 验证全部默认档位。
-- `--max-input-tokens` 默认 131072。所有配置档位组合必须在预算内；mandatory 候选文本过长时也明确报错。不会根据候选长度临时裁剪用户历史。
+- `--max-input-tokens` 默认 1052672（1024K history + 4K item）。所有配置档位组合必须在预算内；mandatory 候选文本过长时也明确报错。不会根据候选长度临时裁剪用户历史。
 
 为便于观察跨用户复用，历史开头带稳定用户编号；不同用户仍可能共享指令及一小段模板前缀，不能把 `user_id` 当成 KV 命中的充分条件。
 
@@ -126,7 +126,7 @@ Details for (A): designed for travel.
 | `candidate_item_ids` | 本次候选；catalog 模式来自素材库，synthetic 模式为合成编号 |
 | `content_is_synthetic`, `target_item_id` | true、null：合成请求，无真实目标标签 |
 
-`.users.jsonl` 保存每个用户的热度、归一化概率及固定长度；`.meta.json` 保存热度来源、文本来源、tokenizer、长度概率和时间配置。使用同一源文件、tokenizer、参数和随机种子可复现。默认只缓存最近 8 个用户的历史文本，用 `--history-cache-users` 调整，避免为所有用户常驻 64K 文本；淘汰后可确定性重建。
+`.users.jsonl` 保存每个用户的热度、归一化概率及固定长度；`.meta.json` 保存热度来源、文本来源、tokenizer、长度概率和时间配置。使用同一源文件、tokenizer、参数和随机种子可复现。默认只缓存最近 8 个用户的历史文本，用 `--history-cache-users` 调整，避免为所有用户常驻最长 1024K 文本；淘汰后可确定性重建。
 
 默认资源：
 
@@ -142,3 +142,16 @@ Tokenizer：/mnt/nfs/share/models/DeepSeek-V3.2/tokenizer.json
 ```
 
 测试包含全套 15 种默认长度组合、精确编码、复访稳定前缀和候选变化、共同前缀计算、热度载入。本地 DeepSeek tokenizer 不存在时跳过真实 tokenizer 测试。
+
+## 三层内容交叉实验
+
+`model_run.sweep_gr_content_matrix` 使用 5 个 history 长度 × 7 个 new 长度 × 3 份 history × 3 份 item，共 315 份输入，各测第 0/1/2 层，共 945 组层级结果。每个 history 长度下的三份内容固定；同一 item 长度的三份候选内容在不同 history 间复用，通过 SHA-256 校验独立组合。
+
+测量边界沿用 KV 实验口径：history 包含 23-token 固定指令，new 是完整候选后缀。因此测量配置将 generator 的 user 预算设为 `history - instruction_tokens`，item 预算设为 `new + instruction_tokens`，总 token 数和实际 KV 边界精确匹配。
+
+```bash
+env PATH="$PWD/.venv/bin:$PATH" .venv/bin/python -m model_run.sweep_gr_content_matrix
+.venv/bin/python -m model_run.report_gr_content_matrix
+```
+
+结果和回放索引在 `GR/generated/content_matrix/`，报告见 [三层 KV 命中](../docs/extend_step_profile/gr_multilayer_kv_hits.md)。

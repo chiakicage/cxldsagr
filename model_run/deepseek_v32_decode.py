@@ -42,14 +42,12 @@ if __package__:
         FlashInferV32Ops,
         attention_scale,
         quantize_index,
-        rotate_activation,
     )
 else:
     from deepseek_v32_ops import (
         FlashInferV32Ops,
         attention_scale,
         quantize_index,
-        rotate_activation,
     )
 
 CONFIG_PATH = ROOT / "docs" / "config.json"
@@ -575,8 +573,8 @@ class V32DecodeRunner:
         iq_pe, ik_pe = self.ops.apply_rope(
             idx_q[:, 0, :, :rd], idx_k[:, :rd], case.position_ids, is_neox=True
         )
-        idx_q = rotate_activation(torch.cat((iq_pe, idx_q[:, 0, :, rd:]), -1)).unsqueeze(1)
-        idx_k = rotate_activation(torch.cat((ik_pe, idx_k[:, rd:]), -1))
+        idx_q = torch.cat((iq_pe, idx_q[:, 0, :, rd:]), -1).unsqueeze(1)
+        idx_k = torch.cat((ik_pe, idx_k[:, rd:]), -1)
         idx_weights = (
             self.index_weights(case.x).view(case.batch, cfg.index_n_heads).float()
             * (cfg.index_n_heads**-0.5)

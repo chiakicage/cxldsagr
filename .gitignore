@@ -36,6 +36,11 @@ compile_commands.json
 *.trace.json
 /docs/extend_step_profile/*
 !/docs/extend_step_profile/*.md
+!/docs/extend_step_profile/*.png
+!/docs/extend_step_profile/*.svg
+!/docs/extend_step_profile/gr_content_matrix.csv
+!/docs/extend_step_profile/gr_content_matrix.html
+!/docs/extend_step_profile/gemm_precision.json
 /docs/model_extend_v32_*.json
 *.ncu-rep
 *.nsys-rep

@@ -163,12 +163,12 @@ class V32ExtendRunner(V32DecodeRunner):
         output = torch.empty_like(case.x)
         events = []
 
-        def stage(name, fn, *args):
+        def stage(name, fn, *args, **kwargs):
             if not profile:
-                return fn(*args)
+                return fn(*args, **kwargs)
             begin, end = torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True)
             begin.record()
-            result = fn(*args)
+            result = fn(*args, **kwargs)
             end.record()
             events.append((name, begin, end))
             return result
@@ -188,6 +188,7 @@ class V32ExtendRunner(V32DecodeRunner):
                 indices,
                 attention_scale(self.cfg),
                 self.cfg.kv_lora_rank,
+                bf16_qk=False,
             )
 
             if isinstance(attn, tuple):

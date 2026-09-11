@@ -10,7 +10,9 @@ from tokenizers import Tokenizer
 
 from GR.heat import HeatPopulation
 from GR.input_generator import (
+    DEFAULT_ITEM_LENGTHS,
     DEFAULT_TOKENIZER,
+    DEFAULT_USER_LENGTHS,
     InputGenerator,
     TextConfig,
     create_input_generator,
@@ -39,8 +41,8 @@ class HeatTests(unittest.TestCase):
     def test_config_validation(self):
         for kwargs in (
             {"user_lengths": (0,)},
-            {"user_probabilities": (float("nan"),) * 5},
-            {"user_probabilities": (0.1,) * 5},
+            {"user_probabilities": (float("nan"),) * len(DEFAULT_USER_LENGTHS)},
+            {"user_probabilities": (0.1,) * len(DEFAULT_USER_LENGTHS)},
             {"history_cache_users": -1},
             {"max_input_tokens": 100},
         ):
@@ -119,8 +121,8 @@ class RuleTextTests(unittest.TestCase):
 
     def test_all_length_buckets_are_exact_and_readable(self):
         # One user per fixed bucket makes coverage independent of random draws.
-        for history in (4096, 8192, 16384, 32768, 65536):
-            for other in (1024, 2048, 4096):
+        for history in DEFAULT_USER_LENGTHS:
+            for other in DEFAULT_ITEM_LENGTHS:
                 with self.subTest(user=history, item=other):
                     cfg = TextConfig(
                         user_lengths=(history,),
@@ -167,6 +169,43 @@ class RuleTextTests(unittest.TestCase):
             self.assertIn("Real product title", new["prompt"])
         other = self.generator(replace(cfg, history_cache_users=8))
         self.assertEqual(gen.lengths_for_user(42), other.lengths_for_user(42))
+
+    def test_item_variants_are_independent_of_history(self):
+        cfg = TextConfig(
+            user_lengths=(4096,),
+            user_probabilities=(1,),
+            item_lengths=(64,),
+            item_probabilities=(1,),
+        )
+        gen = self.generator(cfg)
+        histories, items = {}, {}
+        for uid in (42, 99):
+            for variant in range(3):
+                row = gen.for_user(uid, item_variant=variant)
+                boundary = row["stable_prefix_tokens"]
+                history = row["input_ids"][:boundary]
+                item = row["input_ids"][boundary:]
+                self.assertEqual(histories.setdefault(uid, history), history)
+                self.assertEqual(items.setdefault(variant, item), item)
+                self.assertEqual(len(row["input_ids"]), 4096 + 64)
+                self.assertGreaterEqual(len(row["candidate_item_ids"]), 1)
+        self.assertNotEqual(histories[42], histories[99])
+        self.assertEqual(len({tuple(item) for item in items.values()}), 3)
+        with self.assertRaises(ValueError):
+            gen.for_user(42, item_variant=-1)
+
+    def test_short_item_budget_with_long_catalog_titles(self):
+        cfg = TextConfig(
+            user_lengths=(4096,),
+            user_probabilities=(1,),
+            item_lengths=(64,),
+            item_probabilities=(1,),
+        )
+        gen = self.generator(cfg, {i: "durable " * 24 for i in range(30)})
+        row = gen.for_user(42)
+        self.assertEqual(len(row["input_ids"]), 4160)
+        self.assertEqual(len(row["candidate_item_ids"]), 1)
+        self.assertIn("durable", row["prompt"][row["prompt"].index("Candidate pool") :])
 
     def test_too_small_budget_fails_explicitly(self):
         cfg = TextConfig(

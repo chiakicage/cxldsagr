@@ -95,16 +95,6 @@ def instrument(runner, scopes, patches):
     )
     patches.enter_context(
         patch.object(
-            decode,
-            "rotate_activation",
-            scopes.wrap(
-                lambda x: "index/q_hadamard" if x.ndim == 3 else "index/k_hadamard",
-                decode.rotate_activation,
-            ),
-        )
-    )
-    patches.enter_context(
-        patch.object(
             extend, "quantize_index", scopes.wrap("index/q_quantize", extend.quantize_index)
         )
     )
@@ -209,6 +199,7 @@ def profile_case(runner, case, repeats, trace):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--config", type=Path, default=decode.CONFIG_PATH)
     parser.add_argument("--history-lens", default="4096,65536")
     parser.add_argument("--new-tokens", type=int, default=4096)
     parser.add_argument("--chunk-size", type=int, default=512)
@@ -219,7 +210,7 @@ def main():
         parser.error("iters must be positive")
     torch.manual_seed(0)
     runner = extend.V32ExtendRunner(
-        decode.load_config(decode.CONFIG_PATH), chunk_size=args.chunk_size
+        decode.load_config(args.config), chunk_size=args.chunk_size
     )
     reports = []
     for history in decode.parse_ints(args.history_lens):
@@ -238,6 +229,7 @@ def main():
                 "torch": torch.__version__,
                 "repeats": args.iters,
                 "mode": "fp8",
+                "bf16_qk": False,
                 "synthetic": True,
                 "reports": reports,
             },

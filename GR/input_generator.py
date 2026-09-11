@@ -18,6 +18,10 @@ from .dataset import DEFAULT_DATA_ROOT, load_titles
 from .heat import HeatPopulation
 from .scheduling import ScheduleConfig, _integer, _schedule, index_letter
 
+DEFAULT_USER_LENGTHS = (4096, 16384, 65536, 262144, 1048576)
+DEFAULT_ITEM_LENGTHS = (64, 128, 256, 512, 1024, 2048, 4096)
+DEFAULT_MAX_INPUT_TOKENS = max(DEFAULT_USER_LENGTHS) + max(DEFAULT_ITEM_LENGTHS)
+
 DEFAULT_TOKENIZER = Path("/mnt/nfs/share/models/DeepSeek-V3.2/tokenizer.json")
 
 INSTRUCTION = (
@@ -59,12 +63,16 @@ TAILS = (
 
 @dataclass(frozen=True)
 class TextConfig:
-    user_lengths: tuple[int, ...] = (4096, 8192, 16384, 32768, 65536)
-    user_probabilities: tuple[float, ...] = (0.2, 0.2, 0.2, 0.2, 0.2)
-    item_lengths: tuple[int, ...] = (1024, 2048, 4096)
-    item_probabilities: tuple[float, ...] = (1 / 3, 1 / 3, 1 / 3)
+    user_lengths: tuple[int, ...] = DEFAULT_USER_LENGTHS
+    user_probabilities: tuple[float, ...] = (1 / len(DEFAULT_USER_LENGTHS),) * len(
+        DEFAULT_USER_LENGTHS
+    )
+    item_lengths: tuple[int, ...] = DEFAULT_ITEM_LENGTHS
+    item_probabilities: tuple[float, ...] = (1 / len(DEFAULT_ITEM_LENGTHS),) * len(
+        DEFAULT_ITEM_LENGTHS
+    )
     candidate_count: int = 20
-    max_input_tokens: int = 131072
+    max_input_tokens: int = DEFAULT_MAX_INPUT_TOKENS
     history_cache_users: int = 8
 
     def __post_init__(self):
@@ -205,14 +213,37 @@ class InputGenerator:
         text = self._fit(f"User profile U{uid}.\n", records(), history_length)
         return text, tuple(self.encode(text))
 
-    def _candidates(self, uid: int, visit: int) -> tuple[str, list[int]]:
+    def _candidates(
+        self, uid: int, visit: int, item_variant: int | None = None
+    ) -> tuple[str, list[int]]:
         _, item_length = self.lengths_for_user(uid)
         budget = item_length - len(self.prefix_ids)
-        rng = random.Random(f"{self.seed}:candidates:{uid}:{visit}")
+        stream = (
+            f"{self.seed}:candidates:{uid}:{visit}"
+            if item_variant is None
+            else f"{self.seed}:candidates:shared:{item_variant}:{visit}"
+        )
+        rng = random.Random(stream)
         items = rng.sample(self.catalog, self.text_config.candidate_count)
-        heading = f"Candidate pool for visit {visit}:\n"
-        for i, item in enumerate(items):
-            heading += f"({index_letter(i)}) P{item}: {self._title(item)}.\n"
+        title = f"Candidate pool for visit {visit}:\n"
+        lines = [
+            f"({index_letter(i)}) P{item}: {self._title(item)}.\n" for i, item in enumerate(items)
+        ]
+        # candidate_count is an upper bound: keep complete candidates when the
+        # 64/128-token item budget cannot hold the full default pool.
+        while len(items) > 1 and len(self.encode(title + "".join(lines) + ENDING)) > budget - 2:
+            items.pop()
+            lines.pop()
+        if len(items) == 1 and len(self.encode(title + lines[0] + ENDING)) > budget - 2:
+            words = self._title(items[0]).split()
+            while len(words) > 1:
+                words.pop()
+                lines[0] = f"(A) P{items[0]}: {' '.join(words)}.\n"
+                if len(self.encode(title + lines[0] + ENDING)) <= budget - 2:
+                    break
+            if len(self.encode(title + lines[0] + ENDING)) > budget - 2:
+                lines[0] = f"(A) P{items[0]}: Catalog product.\n"
+        heading = title + "".join(lines)
 
         def records():
             while True:
@@ -221,12 +252,14 @@ class InputGenerator:
 
         return self._fit(heading, records(), budget, ENDING), items
 
-    def for_user(self, uid: int, *, visit_index: int = 0) -> dict:
+    def for_user(self, uid: int, *, visit_index: int = 0, item_variant: int | None = None) -> dict:
         if uid not in self.population.weights:
             raise KeyError(uid)
         _integer("visit_index", visit_index)
+        if item_variant is not None:
+            _integer("item_variant", item_variant)
         history, history_ids = self._history(uid)
-        suffix, items = self._candidates(uid, visit_index)
+        suffix, items = self._candidates(uid, visit_index, item_variant)
         suffix_ids = self.encode(suffix)
         prompt = PREFIX + history + suffix
         ids = self.encode(prompt)
@@ -256,6 +289,7 @@ class InputGenerator:
             "history_token_span": [start, start + h],
             "candidate_token_span": [start + h, len(ids)],
             "candidate_item_ids": items,
+            "item_content_variant": item_variant,
             "content_is_synthetic": True,
             "target_item_id": None,
         }
@@ -396,15 +430,13 @@ def main(argv: list[str] | None = None):
     )
     parser.add_argument("--data-root", type=Path, default=DEFAULT_DATA_ROOT)
     parser.add_argument("--tokenizer", type=Path, default=DEFAULT_TOKENIZER)
-    parser.add_argument(
-        "--user-lengths", type=int, nargs="+", default=[4096, 8192, 16384, 32768, 65536]
-    )
+    parser.add_argument("--user-lengths", type=int, nargs="+", default=list(DEFAULT_USER_LENGTHS))
     parser.add_argument("--user-probabilities", type=float, nargs="+")
-    parser.add_argument("--item-lengths", type=int, nargs="+", default=[1024, 2048, 4096])
+    parser.add_argument("--item-lengths", type=int, nargs="+", default=list(DEFAULT_ITEM_LENGTHS))
     parser.add_argument("--item-probabilities", type=float, nargs="+")
     parser.add_argument("--candidate-count", type=int, default=20)
     parser.add_argument("--history-cache-users", type=int, default=8)
-    parser.add_argument("--max-input-tokens", type=int, default=131072)
+    parser.add_argument("--max-input-tokens", type=int, default=DEFAULT_MAX_INPUT_TOKENS)
     parser.add_argument("--count", type=int, default=1000)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--qps", type=int, default=100)

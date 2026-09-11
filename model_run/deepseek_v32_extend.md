@@ -131,7 +131,7 @@ Kernel 级 profile 测得设备事件总计 76.06 ms，其中 MLA 与 DeepGEMM �
 - [分块与 graph 对比](../docs/model_extend_v32_optimized.json)（process peak 显存为进程累计峰值）
 - [GPU kernel 耗时](../docs/model_extend_v32_kernel_profile.json)
 
-逐步骤 profile（量化、各投影 GEMM、Norm、RoPE、Hadamard、cache、indexer、top-k、MLA）：
+逐步骤 profile（量化、各投影 GEMM、Norm、RoPE、cache、indexer、top-k、MLA）：
 
 ```bash
 PATH="$PWD/.venv/bin:$PATH" .venv/bin/python model_run/profile_deepseek_v32_extend.py \
@@ -147,3 +147,9 @@ E2E 为预热后无插桩的 5 次均值；GPU 表为单次预热后 CUPTI 采�
 
 逐步计算、张量形状、量化格式、MMA 累加精度与 cache 布局见
 [《DeepSeek V3.2 extend：计算步骤、形状与精度》](../docs/extend_step_profile/extend_compute_zh.md)。
+
+当前 extend 显式使用 `bf16_qk=False`：latent QK 为 MXFP8 MMA，RoPE QK 保留 BF16，PV 为普通 FP8。新旧 trace 核查表明 V3.2 原本就固定走 FP8 QK，Python 开关只影响 MODEL1；前面对 BF16 QK 的标注有误。64K+4K 重测端到端 76.85 ms，详见计算说明中的更新表格。
+
+64K history + 4K new 整批重测（`--chunk-size 4096`，FP8 QK）端到端 77.80 ms；逐操作形状及更新后的耗时见计算说明中的 profile 表。
+
+Indexer Q/K 的 Hadamard 已从共享投影代码中移除，extend/decode 均直接量化 RoPE 后的向量。移除后已整批重测：64K history + 4K new 端到端 69.56 ms，GPU 活动 69.08 ms，独立非 GEMM 算子 13.06 ms（18.90%），有效矩阵吞吐 122.47 TFLOPS，峰值折算利用率 42.54%。更新后的表格及时间轴见计算说明；前面的分块实验和 77.80 ms 为历史结果。

@@ -38,25 +38,6 @@ def attention_scale(cfg) -> float:
     return scale
 
 
-def rotate_activation(x: torch.Tensor) -> torch.Tensor:
-    """Normalized Walsh-Hadamard transform before indexer FP8 quantization.
-
-    PyTorch butterfly implementation; norm and RoPE themselves use FlashInfer.
-    Accumulate in FP32 and round only the final result to BF16.
-    """
-    dim = x.shape[-1]
-    if dim < 1 or dim & (dim - 1):
-        raise ValueError("Indexer head dimension must be a power of two")
-    y = x.float()
-    width = 1
-    while width < dim:
-        pairs = y.reshape(*x.shape[:-1], -1, 2, width)
-        a, b = pairs.unbind(-2)
-        y = torch.stack((a + b, a - b), dim=-2).reshape(x.shape)
-        width *= 2
-    return (y * dim**-0.5).to(x.dtype)
-
-
 def quantize_index(x: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
     """One power-of-two dequantization scale per 128-element indexer head."""
     amax = x.float().abs().amax(-1, keepdim=True).clamp_min(1e-4)

@@ -15,15 +15,8 @@ from model_run.deepseek_v32_ops import (
     FlashInferV32Ops,
     attention_scale,
     quantize_index,
-    rotate_activation,
     yarn_cos_sin_cache,
 )
-
-
-def test_hadamard_preserves_dot_products():
-    torch.manual_seed(0)
-    q, k = torch.randn(2, 8, 128)
-    torch.testing.assert_close(rotate_activation(q) @ rotate_activation(k).T, q @ k.T)
 
 
 def test_index_quantization():
