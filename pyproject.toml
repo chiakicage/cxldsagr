@@ -93,7 +93,7 @@ explicit = true
 target-version = "py312"
 line-length = 100
 # 子项目单独维护格式；显式传入文件时也遵守排除规则。
-extend-exclude = ["operators/sm120/sparse_mla_sm120", "3rdparty", "models", "GR/generated"]
+extend-exclude = ["operators/sm120/sparse_mla_sm120", "3rdparty", "weights", "GR/generated"]
 force-exclude = true
 
 [tool.ruff.lint.per-file-ignores]

@@ -2,7 +2,7 @@
 
 import torch
 
-from model_run.deepseek_v32.deepseek_v32_decode import attention_scale
+from models.deepseek_v32.deepseek_v32_decode import attention_scale
 
 
 def error(actual, expected):

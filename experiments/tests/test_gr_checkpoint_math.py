@@ -8,11 +8,11 @@ import pytest
 import torch
 from safetensors import safe_open
 
-from model_run.deepseek_v32.measure_gr_mla_cache_union import config_from_checkpoint
-from model_run.deepseek_v32.measure_gr_multilayer_hits import load_layer
-from model_run.deepseek_v32.validate_gr_numerics import error, ref_linear
+from experiments.measure_gr_mla_cache_union import config_from_checkpoint
+from experiments.measure_gr_multilayer_hits import load_layer
+from experiments.validate_gr_numerics import error, ref_linear
 
-MODEL = Path("models/DeepSeek-V3.2")
+MODEL = Path("weights/DeepSeek-V3.2")
 pytestmark = pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA required")
 
 
@@ -106,7 +106,7 @@ def test_checkpoint_math(layer):
 def test_long_history_rope(neox):
     from dataclasses import replace
 
-    from model_run.deepseek_v32.deepseek_v32_ops import FlashInferV32Ops
+    from models.deepseek_v32.deepseek_v32_ops import FlashInferV32Ops
 
     torch.manual_seed(42)
     cfg = config_from_checkpoint(json.loads((MODEL / "config.json").read_text()))

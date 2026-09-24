@@ -14,7 +14,7 @@ indexer top-k, sparse attention, and output projection in the end-to-end path.
 
 Example:
     DG_JIT_CACHE_DIR=/home/cage/dsa/.deep_gemm_cache \\
-      .venv/bin/python model_run/deepseek_v32/deepseek_v32_decode.py --quick \\
+      .venv/bin/python models/deepseek_v32/deepseek_v32_decode.py --quick \\
       --output docs/model_decode_v32_results.md
 """
 

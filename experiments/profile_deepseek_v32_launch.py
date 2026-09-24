@@ -1,14 +1,12 @@
 import json
 import statistics
-import sys
 import time
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-
 import torch
-from deepseek_v32_decode import CONFIG_PATH, load_config
-from deepseek_v32_extend import V32ExtendRunner
+
+from models.deepseek_v32.deepseek_v32_decode import CONFIG_PATH, load_config
+from models.deepseek_v32.deepseek_v32_extend import V32ExtendRunner
 
 p = Path("docs/extend_step_profile")
 results = []

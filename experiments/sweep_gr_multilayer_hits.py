@@ -5,7 +5,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from model_run.deepseek_v32.sweep_gr_mla_cache import HISTORIES, NEW_TOKENS
+from experiments.sweep_gr_mla_cache import HISTORIES, NEW_TOKENS
 
 
 def main():
@@ -35,7 +35,7 @@ def main():
                     [
                         sys.executable,
                         "-m",
-                        "model_run.deepseek_v32.measure_gr_multilayer_hits",
+                        "experiments.measure_gr_multilayer_hits",
                         "--validate",
                         "--history",
                         str(h),

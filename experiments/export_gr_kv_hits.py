@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torch
 
-from model_run.deepseek_v32.sweep_gr_mla_cache import HISTORIES, NEW_TOKENS
+from experiments.sweep_gr_mla_cache import HISTORIES, NEW_TOKENS
 
 
 def export_case(source, target, history, new):
@@ -250,7 +250,7 @@ remap = np.load(p / "compact_indices.npy", mmap_mode="r")
 复现（只用 CPU）：
 
 ```bash
-.venv/bin/python -m model_run.deepseek_v32.export_gr_kv_hits
+.venv/bin/python -m experiments.export_gr_kv_hits
 ```
 
 导出时检查全部 21 组的索引 dtype/形状、因果边界、逐 query 无重复、命中并集与原实验一致、引用总数守恒、重映射可逆，以及连续段能精确重建并集。原始实验与导出 NPY 留在被 Git 忽略的 `GR/generated/`；脚本、报告及分布图随仓库保存。

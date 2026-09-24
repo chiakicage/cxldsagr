@@ -10,8 +10,8 @@ from unittest.mock import patch
 import torch
 import torch.nn.functional as F
 
-from model_run.deepseek_v32.deepseek_v32_decode import QuantizedLinear, bench_cuda, deep_gemm
-from model_run.deepseek_v32.deepseek_v32_extend_kernels import quantize_activation
+from models.deepseek_v32.deepseek_v32_decode import QuantizedLinear, bench_cuda, deep_gemm
+from models.deepseek_v32.deepseek_v32_extend_kernels import quantize_activation
 
 
 def profile(layers, tokens, repeats, output_dir):

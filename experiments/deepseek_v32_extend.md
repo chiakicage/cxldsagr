@@ -5,7 +5,7 @@
 
 ```bash
 source .venv/bin/activate
-python model_run/deepseek_v32/deepseek_v32_extend.py
+python models/deepseek_v32/deepseek_v32_extend.py
 ```
 
 默认 sweep：history = 4096/8192/16384/32768/65536；new tokens = 1024/2048/4096。
@@ -14,7 +14,7 @@ python model_run/deepseek_v32/deepseek_v32_extend.py
 cache 生成、权重量化、RoPE 表构建不计时，新 token 的全部计算及 cache 写入计时。
 
 ```bash
-python model_run/deepseek_v32/deepseek_v32_extend.py \
+python models/deepseek_v32/deepseek_v32_extend.py \
   --history-lens 65536 --new-tokens 4096 --chunk-size 256 \
   --warmups 1 --iters 3 --output /tmp/extend_64k_4k.json
 ```
@@ -50,7 +50,7 @@ fp8_fp4w。未包含 MLP、残差连接、多请求调度和真实历史 prefill
 测试：
 
 ```bash
-python -m pytest model_run/deepseek_v32/tests/test_deepseek_v32_extend.py -q
+python -m pytest models/deepseek_v32/tests/test_deepseek_v32_extend.py -q
 ```
 
 覆盖显式未来 token 屏蔽、DeepGEMM logits 与 PyTorch 参考比较、分块边界、
@@ -88,7 +88,7 @@ extend 仅保留融合路径；PyTorch 参考计算仅用于测试。
   另一次 eager profile，不能当作 graph 的分段计时。
 
 ```bash
-python model_run/deepseek_v32/deepseek_v32_extend.py --history-lens 4096,65536 \
+python models/deepseek_v32/deepseek_v32_extend.py --history-lens 4096,65536 \
   --new-tokens 4096 --cuda-graph --output /tmp/extend_graph.json
 ```
 
@@ -136,11 +136,11 @@ Kernel 级 profile 测得设备事件总计 76.06 ms，其中 MLA 与 DeepGEMM �
 逐步骤 profile（量化、各投影 GEMM、Norm、RoPE、cache、indexer、top-k、MLA）：
 
 ```bash
-PATH="$PWD/.venv/bin:$PATH" .venv/bin/python model_run/deepseek_v32/profile_deepseek_v32_extend.py \
+PATH="$PWD/.venv/bin:$PATH" .venv/bin/python experiments/profile_deepseek_v32_extend.py \
   --history-lens 4096,65536 --new-tokens 4096 --chunk-size 512 --iters 5
 ```
 
-结果见 [逐步骤耗时](../../docs/extend_step_profile/summary.md)；同目录运行时还会写出
+结果见 [逐步骤耗时](../docs/extend_step_profile/summary.md)；同目录运行时还会写出
 `summary.json` 与 `*.trace.json`（后者可用 Perfetto 打开），均为本地产物，不入库。
 E2E 为预热后无插桩的 5 次均值；GPU 表为单次预热后 CUPTI 采样，按 launch correlation
 归因到最内层步骤，覆盖直接 CUDA driver 启动的内核。表中时间累加了全部 chunk，
@@ -148,7 +148,7 @@ E2E 为预热后无插桩的 5 次均值；GPU 表为单次预热后 CUPTI 采�
 # 中文计算说明
 
 逐步计算、张量形状、量化格式、MMA 累加精度与 cache 布局见
-[《DeepSeek V3.2 extend：计算步骤、形状与精度》](../../docs/extend_step_profile/extend_compute_zh.md)。
+[《DeepSeek V3.2 extend：计算步骤、形状与精度》](../docs/extend_step_profile/extend_compute_zh.md)。
 
 当前 extend 显式使用 `bf16_qk=False`：latent QK 为 MXFP8 MMA，RoPE QK 保留 BF16，PV 为普通 FP8。新旧 trace 核查表明 V3.2 原本就固定走 FP8 QK，Python 开关只影响 MODEL1；前面对 BF16 QK 的标注有误。64K+4K 重测端到端 76.85 ms，详见计算说明中的更新表格。
 

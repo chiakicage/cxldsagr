@@ -1,6 +1,6 @@
 # DeepSeek V3.2 extend：计算步骤、形状与精度
 
-本文描述当前 `model_run/deepseek_v32/deepseek_v32_extend.py` 的默认 `mode="fp8"` 路径，按源码核对于 2026 年 9 月 8 日。文中的 FP8/MXFP8 沿用本项目约定：E4M3 数据配任意 FP32 scale 称为 FP8；E4M3 数据配 UE8M0 可表达的 scale 称为 MXFP8。代码参数 `fp8` 是已有接口名称，其投影实际使用 MXFP8 量化和 MMA。
+本文描述当前 `models/deepseek_v32/deepseek_v32_extend.py` 的默认 `mode="fp8"` 路径，按源码核对于 2026 年 9 月 8 日。文中的 FP8/MXFP8 沿用本项目约定：E4M3 数据配任意 FP32 scale 称为 FP8；E4M3 数据配 UE8M0 可表达的 scale 称为 MXFP8。代码参数 `fp8` 是已有接口名称，其投影实际使用 MXFP8 量化和 MMA。
 
 当前 runner 处理单条序列的一个 attention 子层。输入、权重和历史 cache 都是随机构造的，Norm 使用单位权重，LayerNorm 偏置为零。它没有执行 embedding、attention 前的整层 RMSNorm、残差相加、MLP/MoE、跨层计算或 LM head。因此，本文的输出是 attention 输出投影，不能直接理解为完整 Transformer 层输出。
 
@@ -476,7 +476,7 @@ FFN 只处理新增 token，不读取历史 KV。因此下面的 1K、4K 整批�
 
 算子 GPU 时间取一次预热后的 CUPTI profile，按最内层 scope 互斥归因；GEMM 行包含 API 内 scale 打包和归约。无插桩端到端另测 5 次均值，不与 GPU exclusive 行相加。两组输出的形状与有限值检查均通过；未新增数值误差对比。这里测的是 dense FFN，不能代表后续 MoE 层的耗时。
 
-复现脚本为 [profile_deepseek_v32_ffn.py](../../model_run/deepseek_v32/profile_deepseek_v32_ffn.py)：
+复现脚本为 [profile_deepseek_v32_ffn.py](../../experiments/profile_deepseek_v32_ffn.py)：
 
 ```bash
 PATH="$PWD/.venv/bin:$PATH" .venv/bin/python -m model_run.deepseek_v32.profile_deepseek_v32_ffn \
@@ -496,10 +496,10 @@ PATH="$PWD/.venv/bin:$PATH" .venv/bin/python -m model_run.deepseek_v32.profile_d
 
 ## 源码与核查记录
 
-- [extend 主循环、cache 追加、logits 与 top-k](../../model_run/deepseek_v32/deepseek_v32_extend.py)
-- [投影、GroupedLinear 和输出投影](../../model_run/deepseek_v32/deepseek_v32_decode.py)
-- [Norm、RoPE 和 indexer 量化](../../model_run/deepseek_v32/deepseek_v32_ops.py)
-- [融合 activation 量化和 cache 写入](../../model_run/deepseek_v32/deepseek_v32_extend_kernels.py)
+- [extend 主循环、cache 追加、logits 与 top-k](../../models/deepseek_v32/deepseek_v32_extend.py)
+- [投影、GroupedLinear 和输出投影](../../models/deepseek_v32/deepseek_v32_decode.py)
+- [Norm、RoPE 和 indexer 量化](../../models/deepseek_v32/deepseek_v32_ops.py)
+- [融合 activation 量化和 cache 写入](../../models/deepseek_v32/deepseek_v32_extend_kernels.py)
 - [DeepGEMM scale 布局转换](../../3rdparty/DeepGEMM/csrc/apis/layout.hpp)
 - [SM120 MMA 指令封装](../../3rdparty/DeepGEMM/deep_gemm/include/deep_gemm/mma/sm120.cuh)
 - [MQA logits 内核](../../3rdparty/DeepGEMM/deep_gemm/include/deep_gemm/impls/sm120_fp8_mqa_logits.cuh)

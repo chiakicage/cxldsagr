@@ -4,14 +4,14 @@ from types import SimpleNamespace
 import pytest
 import torch
 
-from model_run.deepseek_v32.deepseek_v32_decode import (
+from models.deepseek_v32.deepseek_v32_decode import (
     CONFIG_PATH,
     V32DecodeRunner,
     index_cache_views,
     load_config,
     quantize_kv_v32,
 )
-from model_run.deepseek_v32.deepseek_v32_ops import (
+from models.deepseek_v32.deepseek_v32_ops import (
     FlashInferV32Ops,
     attention_scale,
     quantize_index,

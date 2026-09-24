@@ -10,12 +10,8 @@ from unittest.mock import patch
 
 import torch
 
-if __package__:
-    from . import deepseek_v32_decode as decode
-    from . import deepseek_v32_extend as extend
-else:
-    import deepseek_v32_decode as decode
-    import deepseek_v32_extend as extend
+from models.deepseek_v32 import deepseek_v32_decode as decode
+from models.deepseek_v32 import deepseek_v32_extend as extend
 
 
 class Scopes:

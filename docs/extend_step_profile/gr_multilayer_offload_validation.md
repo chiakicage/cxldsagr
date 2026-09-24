@@ -28,7 +28,7 @@ NRMSE 定义为 `||actual-reference||₂ / ||reference||₂`，表中取所有�
 
 Top-k 的最大相对目标值差为 1.81e-07。**全部 45 组完整 new 批次**另外执行实际 packed KV → CPU → CPU 按 token gather → GPU staging → 索引重映射 → 同一 MLA kernel，结果与原 GPU cache 的 MLA 输出逐位一致，最大绝对误差为 0。这部分覆盖所有 new query 和全部 heads，并非只检查抽样行。显存峰值（含验证）为 11.993 GiB。
 
-Checkpoint 的 K/V 拆分、O 非二次幂 scale、三层五种 FP8 投影、Norm、RoPE 另由 `model_run/deepseek_v32/tests/test_gr_checkpoint_math.py` 独立测试（3 层参数化测试全部通过）；RoPE 参考使用 float64 频率和复数旋转，覆盖到位置 69631。
+Checkpoint 的 K/V 拆分、O 非二次幂 scale、三层五种 FP8 投影、Norm、RoPE 另由 `experiments/tests/test_gr_checkpoint_math.py` 独立测试（3 层参数化测试全部通过）；RoPE 参考使用 float64 频率和复数旋转，覆盖到位置 69631。
 
 ## 预算公式
 

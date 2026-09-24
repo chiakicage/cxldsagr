@@ -5,8 +5,8 @@ from pathlib import Path
 
 import numpy as np
 
-from model_run.deepseek_v32.export_gr_kv_hits import plt
-from model_run.deepseek_v32.sweep_gr_mla_cache import HISTORIES, NEW_TOKENS
+from experiments.export_gr_kv_hits import plt
+from experiments.sweep_gr_mla_cache import HISTORIES, NEW_TOKENS
 
 
 def main():
@@ -96,7 +96,7 @@ p 使用 0–1 比例。这是同一批数据上的描述性拟合，没有独�
 每个形状只有一份 seed=42 的 GR 合成商品文本，使用真实 checkpoint 第 0 层 indexer、无 Hadamard。不同形状不保证是同一文本的截断，history 长度与文本内容的影响尚未分离。这里不能给出总体置信区间，也不能把拟合当作多层或真实业务的通用规律；验证需要多文本、多 seed，并用同一长前缀的不同截断控制内容差异。
 
 ```bash
-.venv/bin/python -m model_run.deepseek_v32.analyze_gr_kv_coverage
+.venv/bin/python -m experiments.analyze_gr_kv_coverage
 ```
 
 输入为 `GR/generated/kv_hit_replay/summary.json`，只重新统计和绘图，不运行模型。

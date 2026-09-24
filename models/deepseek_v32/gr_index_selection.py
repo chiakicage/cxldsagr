@@ -2,8 +2,8 @@
 
 import torch
 
-from model_run.deepseek_v32.deepseek_v32_decode import deep_gemm
-from model_run.deepseek_v32.deepseek_v32_extend import V32ExtendRunner
+from models.deepseek_v32.deepseek_v32_decode import deep_gemm
+from models.deepseek_v32.deepseek_v32_extend import V32ExtendRunner
 
 
 def select_batched(q, keys, scales, weights, ends, topk=2048, batch=128):

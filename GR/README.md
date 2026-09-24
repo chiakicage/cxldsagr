@@ -135,7 +135,7 @@ Details for (A): designed for travel.
 Tokenizer：/mnt/nfs/share/models/DeepSeek-V3.2/tokenizer.json
 ```
 
-可用 `--data-root`、`--tokenizer`、`--text-catalog-path` 覆盖。本地 tokenizer 副本也可用 `--tokenizer models/DeepSeek-V3.2`。Python API 为 `GR.input_generator.InputGenerator`、`TextConfig`、`GR.scheduling.ScheduleConfig` 和 `GR.heat.HeatPopulation`。
+可用 `--data-root`、`--tokenizer`、`--text-catalog-path` 覆盖。本地 tokenizer 副本也可用 `--tokenizer weights/DeepSeek-V3.2`。Python API 为 `GR.input_generator.InputGenerator`、`TextConfig`、`GR.scheduling.ScheduleConfig` 和 `GR.heat.HeatPopulation`。
 
 ```bash
 .venv/bin/python -m unittest discover -s GR/tests -v
@@ -145,13 +145,13 @@ Tokenizer：/mnt/nfs/share/models/DeepSeek-V3.2/tokenizer.json
 
 ## 三层内容交叉实验
 
-`model_run.deepseek_v32.sweep_gr_content_matrix` 使用 5 个 history 长度 × 7 个 new 长度 × 3 份 history × 3 份 item，共 315 份输入，各测第 0/1/2 层，共 945 组层级结果。每个 history 长度下的三份内容固定；同一 item 长度的三份候选内容在不同 history 间复用，通过 SHA-256 校验独立组合。
+`experiments.sweep_gr_content_matrix` 使用 5 个 history 长度 × 7 个 new 长度 × 3 份 history × 3 份 item，共 315 份输入，各测第 0/1/2 层，共 945 组层级结果。每个 history 长度下的三份内容固定；同一 item 长度的三份候选内容在不同 history 间复用，通过 SHA-256 校验独立组合。
 
 测量边界沿用 KV 实验口径：history 包含 23-token 固定指令，new 是完整候选后缀。因此测量配置将 generator 的 user 预算设为 `history - instruction_tokens`，item 预算设为 `new + instruction_tokens`，总 token 数和实际 KV 边界精确匹配。
 
 ```bash
-env PATH="$PWD/.venv/bin:$PATH" .venv/bin/python -m model_run.deepseek_v32.sweep_gr_content_matrix
-.venv/bin/python -m model_run.deepseek_v32.report_gr_content_matrix
+env PATH="$PWD/.venv/bin:$PATH" .venv/bin/python -m experiments.sweep_gr_content_matrix
+.venv/bin/python -m experiments.report_gr_content_matrix
 ```
 
 结果和回放索引在 `GR/generated/content_matrix/`，报告见 [三层 KV 命中](../docs/extend_step_profile/gr_multilayer_kv_hits.md)。

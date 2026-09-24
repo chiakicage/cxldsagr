@@ -6,22 +6,27 @@
 ## 目录与职责
 
 - 自有硬件算子放在 `operators/sm90/`、`operators/sm120/`；共享第三方库放在 `3rdparty/`。
-- 模型结构、稀疏选择语义、KV 表示和运行适配放在 `model_run/deepseek_v32/`、
-  `model_run/nosa/`。接入另一架构时复用对应模型目录，不按架构复制模型树。
-- `GR/` 保存共享请求内容、用户热度和调度工具。DeepSeek 专用的 GR checkpoint /
-  indexer 实验保留在 DeepSeek 模型目录。
+- 模型结构、稀疏选择语义、KV 表示和运行适配放在 `models/deepseek_v32/`、
+  `models/nosa/`。`models/` 只保留模型推理相关代码及其测试；接入另一架构时复用对应
+  模型目录，不按架构复制模型树。
+- `experiments/` 保存实验脚本（measure / sweep / report / analyze / export / profile /
+  render / validate）、实验运行记录与实验文档。DeepSeek 专用的 GR checkpoint / indexer
+  实验放在 `experiments/`，不混入 `models/`。
+- `GR/` 保存共享请求内容、用户热度和调度工具。
+- 本地权重与 tokenizer 放在 `weights/`（已被 `.gitignore` 排除），例如
+  `weights/DeepSeek-V3.2/`；与代码目录 `models/` 分离。
 - 不将 DeepSeek V3.2 的 656 B packed MLA record、indexer 或 tokenizer 作为通用
   offloading / NOSA 的固定假设；新增模型时显式适配其稀疏访问语义和 KV 布局。
 - 修改目录时同步更新 Python 导入、`-m` 子进程入口、构建路径、配置和文档链接。
-  保留 `models/`、`GR/generated/`、`docs/` 的现有数据和报告路径；不删除历史实验文档。
+  保留 `weights/`、`GR/generated/`、`docs/` 的现有数据和报告路径；不删除历史实验文档。
 
 ## 脚本与环境
 
 - 暂时不把 cxldsagr 做成 Python 包：保留 `[tool.uv] package = false`，不新增根包、
-  安装入口或打包配置。`model_run/` 与 `operators/` 保持源码目录，不为目录整理添加
-  `__init__.py`；算子子项目保留自己的扩展包及导入名称。
+  安装入口或打包配置。`models/`、`experiments/` 与 `operators/` 保持源码目录，不为
+  目录整理添加 `__init__.py`；算子子项目保留自己的扩展包及导入名称。
 - 实验命令默认从仓库根目录运行。保留已支持的直接脚本入口；跨目录脚本使用
-  `python -m model_run.<模型>.<脚本>`，无需安装仓库。
+  `python -m models.<模型>.<脚本>` 或 `python -m experiments.<脚本>`，无需安装仓库。
 - 用 `pyproject.toml` 和 `uv.lock` 管理环境，依赖改动同步维护两者。当前 SM120 扩展
   放入显式 `sm120` 依赖组，基础环境不默认安装；未接入后端前不虚设 SM90 安装组。
 

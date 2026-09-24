@@ -1,13 +1,13 @@
 import pytest
 import torch
 
-from model_run.deepseek_v32.deepseek_v32_decode import (
+from models.deepseek_v32.deepseek_v32_decode import (
     CONFIG_PATH,
     load_config,
     quantize_index,
     quantize_kv_v32,
 )
-from model_run.deepseek_v32.deepseek_v32_extend import V32ExtendRunner
+from models.deepseek_v32.deepseek_v32_extend import V32ExtendRunner
 
 
 @pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA required")
@@ -74,7 +74,7 @@ def test_extend_index_logits_and_chunk_causality(history):
 def test_fused_activation_quantization(width):
     from deep_gemm.utils import per_token_cast_to_fp8
 
-    from model_run.deepseek_v32.deepseek_v32_extend_kernels import quantize_activation
+    from models.deepseek_v32.deepseek_v32_extend_kernels import quantize_activation
 
     x = torch.randn(34, width, device="cuda", dtype=torch.bfloat16)[::2]
     x[0] = 0

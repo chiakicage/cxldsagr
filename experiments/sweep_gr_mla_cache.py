@@ -30,7 +30,7 @@ def main():
                         [
                             sys.executable,
                             "-m",
-                            "model_run.deepseek_v32.measure_gr_mla_cache_union",
+                            "experiments.measure_gr_mla_cache_union",
                             "--history",
                             str(h),
                             "--new",
@@ -255,15 +255,15 @@ t_page = B_page / (50 × 10⁹)
 
 ## 复现
 
-在仓库根目录运行，模型默认位于 `models/DeepSeek-V3.2`：
+在仓库根目录运行，模型默认位于 `weights/DeepSeek-V3.2`：
 
 ```bash
-env PATH="$PWD/.venv/bin:$PATH" .venv/bin/python -m model_run.deepseek_v32.sweep_gr_mla_cache --measure
+env PATH="$PWD/.venv/bin:$PATH" .venv/bin/python -m experiments.sweep_gr_mla_cache --measure
 # 已有 21 组结果时，只重新汇总：
-.venv/bin/python -m model_run.deepseek_v32.sweep_gr_mla_cache
+.venv/bin/python -m experiments.sweep_gr_mla_cache
 ```
 
-[测量脚本](../../model_run/deepseek_v32/measure_gr_mla_cache_union.py)负责生成输入和执行真实 indexer；[汇总脚本](../../model_run/deepseek_v32/sweep_gr_mla_cache.py)计算字节量、FLOPs 和传输预算。输入、top-k 索引、日志与结果 JSON 保存在 `GR/generated/cache_union_sweep/`，由 Git 忽略；仓库只保留脚本和此 Markdown 汇总。此前的 [64K + 4K 单组报告](gr_cache_union_64k_4k.md)可用于交叉核对。
+[测量脚本](../../experiments/measure_gr_mla_cache_union.py)负责生成输入和执行真实 indexer；[汇总脚本](../../experiments/sweep_gr_mla_cache.py)计算字节量、FLOPs 和传输预算。输入、top-k 索引、日志与结果 JSON 保存在 `GR/generated/cache_union_sweep/`，由 Git 忽略；仓库只保留脚本和此 Markdown 汇总。此前的 [64K + 4K 单组报告](gr_cache_union_64k_4k.md)可用于交叉核对。
 """
     report = report.replace("21 组", f"{len(rows)} 组")
     args.report.write_text(report)

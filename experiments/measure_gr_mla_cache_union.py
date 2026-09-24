@@ -9,14 +9,14 @@ import torch
 from safetensors import safe_open
 from tokenizers import Tokenizer
 
+from experiments.sweep_gr_mla_cache import HISTORIES
 from GR.heat import HeatPopulation
 from GR.input_generator import PREFIX, InputGenerator, TextConfig
 from GR.scheduling import ScheduleConfig
-from model_run.deepseek_v32.deepseek_v32_decode import QuantizedLinear, V32Config
-from model_run.deepseek_v32.deepseek_v32_extend import V32ExtendRunner
-from model_run.deepseek_v32.deepseek_v32_extend_kernels import quantize_activation
-from model_run.deepseek_v32.deepseek_v32_ops import FlashInferV32Ops, quantize_index
-from model_run.deepseek_v32.sweep_gr_mla_cache import HISTORIES
+from models.deepseek_v32.deepseek_v32_decode import QuantizedLinear, V32Config
+from models.deepseek_v32.deepseek_v32_extend import V32ExtendRunner
+from models.deepseek_v32.deepseek_v32_extend_kernels import quantize_activation
+from models.deepseek_v32.deepseek_v32_ops import FlashInferV32Ops, quantize_index
 
 
 def config_from_checkpoint(raw):
@@ -63,7 +63,7 @@ def rmsnorm(x, weight, eps):
 @torch.inference_mode()
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--model", type=Path, default=Path("models/DeepSeek-V3.2"))
+    parser.add_argument("--model", type=Path, default=Path("weights/DeepSeek-V3.2"))
     parser.add_argument("--output", type=Path, default=Path("GR/generated/cache_union_64k_4k"))
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--history", type=int, choices=HISTORIES, default=65536)
@@ -141,11 +141,11 @@ def main():
         k8, ks = quantize_index(key)
         keys[start:stop].copy_(k8)
         scales[start:stop].copy_(ks[:, 0])
-    from model_run.deepseek_v32.deepseek_v32_decode import deep_gemm
+    from models.deepseek_v32.deepseek_v32_decode import deep_gemm
 
     ends = torch.arange(history + 1, history + new + 1, device="cuda", dtype=torch.int32)
     if history > 65536:
-        from model_run.deepseek_v32.gr_index_selection import select_batched
+        from models.deepseek_v32.gr_index_selection import select_batched
 
         indices, sampled_logits = select_batched(q8, keys, scales, weights, ends, cfg.index_topk)
         del sampled_logits

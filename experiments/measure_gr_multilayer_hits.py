@@ -12,19 +12,19 @@ from types import SimpleNamespace
 import torch
 from safetensors import safe_open
 
-from model_run.deepseek_v32.deepseek_v32_decode import attention_scale
-from model_run.deepseek_v32.deepseek_v32_extend import V32ExtendRunner
-from model_run.deepseek_v32.deepseek_v32_ops import FlashInferV32Ops, quantize_index
-from model_run.deepseek_v32.measure_gr_mla_cache_union import (
+from experiments.measure_gr_mla_cache_union import (
     checkpoint_linear,
     config_from_checkpoint,
     rmsnorm,
 )
-from model_run.deepseek_v32.validate_gr_numerics import (
+from experiments.validate_gr_numerics import (
     validate_attention,
     validate_ffn,
     validate_index,
 )
+from models.deepseek_v32.deepseek_v32_decode import attention_scale
+from models.deepseek_v32.deepseek_v32_extend import V32ExtendRunner
+from models.deepseek_v32.deepseek_v32_ops import FlashInferV32Ops, quantize_index
 
 
 class CheckpointOps(FlashInferV32Ops):
@@ -153,7 +153,7 @@ def main():
     parser.add_argument("--history", type=int, default=4096)
     parser.add_argument("--new", type=int, default=1024)
     parser.add_argument("--chunk", type=int, default=512)
-    parser.add_argument("--model", type=Path, default=Path("models/DeepSeek-V3.2"))
+    parser.add_argument("--model", type=Path, default=Path("weights/DeepSeek-V3.2"))
     parser.add_argument(
         "--output", type=Path, default=Path("GR/generated/multilayer_hits_validated")
     )
@@ -210,7 +210,7 @@ def main():
                         print(f"Layer {layer}: {stop}/{h + n} tokens (KV prepared)", flush=True)
                     continue
                 if h > 65536:
-                    from model_run.deepseek_v32.gr_index_selection import select_batched
+                    from models.deepseek_v32.gr_index_selection import select_batched
 
                     q8, qs = quantize_index(proj.idx_q[:, 0])
                     weights = (

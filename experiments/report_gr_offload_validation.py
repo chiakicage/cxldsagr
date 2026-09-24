@@ -3,7 +3,7 @@
 import json
 from pathlib import Path
 
-from model_run.deepseek_v32.sweep_gr_mla_cache import HISTORIES, NEW_TOKENS
+from experiments.sweep_gr_mla_cache import HISTORIES, NEW_TOKENS
 
 
 def main():
@@ -97,7 +97,7 @@ NRMSE 定义为 `||actual-reference||₂ / ||reference||₂`，表中取所有�
         report += f"| {label} | {s['samples']} | {s['max_nrmse']:.6%} | {s['min_cosine']:.8f} | {s['max_abs']:.6g} |\n"
     report += f"\nTop-k 的最大相对目标值差为 {summary['max_topk_objective_gap']:.3g}。**全部 {summary['offload_bitwise_cases']} 组完整 new 批次**另外执行实际 packed KV → CPU → CPU 按 token gather → GPU staging → 索引重映射 → 同一 MLA kernel，结果与原 GPU cache 的 MLA 输出逐位一致，最大绝对误差为 0。这部分覆盖所有 new query 和全部 heads，并非只检查抽样行。显存峰值（含验证）为 {max(peaks) / 1024:.3f} GiB。\n"
     report += """
-Checkpoint 的 K/V 拆分、O 非二次幂 scale、三层五种 FP8 投影、Norm、RoPE 另由 `model_run/deepseek_v32/tests/test_gr_checkpoint_math.py` 独立测试（3 层参数化测试全部通过）；RoPE 参考使用 float64 频率和复数旋转，覆盖到位置 69631。另增两个长位置 RoPE 测试，覆盖 512K/1024K history 与 4K new 的末端，仍采用独立 float64 参考；现有 FP32 相位构造在长位置误差更大，因此明确要求 NRMSE < 1%、cosine > 0.9999，不沿用短位置的 0.4% 误差界。
+Checkpoint 的 K/V 拆分、O 非二次幂 scale、三层五种 FP8 投影、Norm、RoPE 另由 `experiments/tests/test_gr_checkpoint_math.py` 独立测试（3 层参数化测试全部通过）；RoPE 参考使用 float64 频率和复数旋转，覆盖到位置 69631。另增两个长位置 RoPE 测试，覆盖 512K/1024K history 与 4K new 的末端，仍采用独立 float64 参考；现有 FP32 相位构造在长位置误差更大，因此明确要求 NRMSE < 1%、cosine > 0.9999，不沿用短位置的 0.4% 误差界。
 
 ## 预算公式
 
@@ -139,10 +139,10 @@ AI 单位 FLOP/B，MiB=2²⁰ B。“预算占比”是 50 GB/s 理想搬运时�
 ## 复现
 
 ```bash
-env PATH="$PWD/.venv/bin:$PATH" .venv/bin/python -m model_run.deepseek_v32.sweep_gr_multilayer_hits
-env PATH="$PWD/.venv/bin:$PATH" .venv/bin/python -m pytest model_run/deepseek_v32/tests/test_gr_checkpoint_math.py -q
-.venv/bin/python -m model_run.deepseek_v32.report_gr_offload_validation
-.venv/bin/python -m model_run.deepseek_v32.report_gr_multilayer_hits
+env PATH="$PWD/.venv/bin:$PATH" .venv/bin/python -m experiments.sweep_gr_multilayer_hits
+env PATH="$PWD/.venv/bin:$PATH" .venv/bin/python -m pytest experiments/tests/test_gr_checkpoint_math.py -q
+.venv/bin/python -m experiments.report_gr_offload_validation
+.venv/bin/python -m experiments.report_gr_multilayer_hits
 ```
 
 原始结果、每处数值误差、搬运回放检查和完整预算 JSON 位于 `GR/generated/multilayer_hits_validated/`。具体命中位置、热力图和 NPY 回放格式见 [三层位置报告](gr_multilayer_kv_hits.md)。

@@ -1,6 +1,6 @@
 # DeepSeek V3.2 embedding + 两层 dense 实验权重
 
-本地分片位于 `models/DeepSeek-V3.2/model-00001-of-000163.safetensors`，从 `/mnt/nfs/share/models/DeepSeek-V3.2/` 复制，源文件流与本地文件进行了 SHA-256 比对。该目录已加入 `.gitignore`。
+本地分片位于 `weights/DeepSeek-V3.2/model-00001-of-000163.safetensors`，从 `/mnt/nfs/share/models/DeepSeek-V3.2/` 复制，源文件流与本地文件进行了 SHA-256 比对。该目录已加入 `.gitignore`。
 
 本次选择：
 
@@ -20,7 +20,7 @@
 
 ```bash
 .venv/bin/python -m GR.input_generator \
-  --tokenizer models/DeepSeek-V3.2 \
+  --tokenizer weights/DeepSeek-V3.2 \
   --heat-source beauty --text-dataset beauty --count 1000 \
   --output GR/generated/beauty.jsonl
 ```

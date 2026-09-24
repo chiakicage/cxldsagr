@@ -5,8 +5,8 @@ import shutil
 import tempfile
 from pathlib import Path
 
-from model_run.deepseek_v32.export_gr_kv_hits import export_case, plot_cases
-from model_run.deepseek_v32.sweep_gr_mla_cache import HISTORIES, NEW_TOKENS
+from experiments.export_gr_kv_hits import export_case, plot_cases
+from experiments.sweep_gr_mla_cache import HISTORIES, NEW_TOKENS
 
 
 def main():
@@ -93,15 +93,15 @@ Q/K 投影、indexer 投影、dense FFN 使用 checkpoint FP8 权重和 MXFP8 ac
 - 汇总：`GR/generated/multilayer_hits_validated/summary.json`。KV 内容及中间 hidden states 不落盘；这些是地址搬运实验输入。
 
 ```bash
-env PATH="$PWD/.venv/bin:$PATH" .venv/bin/python -m model_run.deepseek_v32.sweep_gr_mla_cache --measure --histories 524288 1048576
-env PATH="$PWD/.venv/bin:$PATH" .venv/bin/python -m model_run.deepseek_v32.sweep_gr_multilayer_hits --histories 524288 1048576 --skip-completed
-.venv/bin/python -m model_run.deepseek_v32.sweep_gr_mla_cache
-.venv/bin/python -m model_run.deepseek_v32.export_gr_kv_hits
-.venv/bin/python -m model_run.deepseek_v32.report_gr_offload_validation
-.venv/bin/python -m model_run.deepseek_v32.report_gr_multilayer_hits
+env PATH="$PWD/.venv/bin:$PATH" .venv/bin/python -m experiments.sweep_gr_mla_cache --measure --histories 524288 1048576
+env PATH="$PWD/.venv/bin:$PATH" .venv/bin/python -m experiments.sweep_gr_multilayer_hits --histories 524288 1048576 --skip-completed
+.venv/bin/python -m experiments.sweep_gr_mla_cache
+.venv/bin/python -m experiments.export_gr_kv_hits
+.venv/bin/python -m experiments.report_gr_offload_validation
+.venv/bin/python -m experiments.report_gr_multilayer_hits
 ```
 
-只跑一个形状：`.venv/bin/python -m model_run.deepseek_v32.measure_gr_multilayer_hits --history 65536 --new 4096 --validate`。显存测量包含实际层间 forward，生成图表和回放 NPY 仅需 CPU。原始产物由 Git 忽略，脚本、报告与图片保留。
+只跑一个形状：`.venv/bin/python -m experiments.measure_gr_multilayer_hits --history 65536 --new 4096 --validate`。显存测量包含实际层间 forward，生成图表和回放 NPY 仅需 CPU。原始产物由 Git 忽略，脚本、报告与图片保留。
 """
     (report_dir / "gr_multilayer_kv_hits.md").write_text(report)
     print(

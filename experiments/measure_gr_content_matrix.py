@@ -12,6 +12,13 @@ import torch
 from safetensors import safe_open
 from tokenizers import Tokenizer
 
+from experiments.measure_gr_mla_cache_union import config_from_checkpoint, rmsnorm
+from experiments.measure_gr_multilayer_hits import load_layer, save_hits
+from experiments.validate_gr_numerics import (
+    validate_attention,
+    validate_ffn,
+    validate_index,
+)
 from GR.heat import HeatPopulation
 from GR.input_generator import (
     DEFAULT_ITEM_LENGTHS,
@@ -21,16 +28,9 @@ from GR.input_generator import (
     TextConfig,
 )
 from GR.scheduling import ScheduleConfig
-from model_run.deepseek_v32.deepseek_v32_decode import attention_scale
-from model_run.deepseek_v32.deepseek_v32_ops import quantize_index
-from model_run.deepseek_v32.gr_index_selection import select_batched
-from model_run.deepseek_v32.measure_gr_mla_cache_union import config_from_checkpoint, rmsnorm
-from model_run.deepseek_v32.measure_gr_multilayer_hits import load_layer, save_hits
-from model_run.deepseek_v32.validate_gr_numerics import (
-    validate_attention,
-    validate_ffn,
-    validate_index,
-)
+from models.deepseek_v32.deepseek_v32_decode import attention_scale
+from models.deepseek_v32.deepseek_v32_ops import quantize_index
+from models.deepseek_v32.gr_index_selection import select_batched
 
 ROOT = Path("GR/generated/content_matrix")
 
@@ -277,7 +277,7 @@ def main():
         choices=DEFAULT_ITEM_LENGTHS,
         default=DEFAULT_ITEM_LENGTHS,
     )
-    parser.add_argument("--model", type=Path, default=Path("models/DeepSeek-V3.2"))
+    parser.add_argument("--model", type=Path, default=Path("weights/DeepSeek-V3.2"))
     parser.add_argument("--root", type=Path, default=ROOT)
     args = parser.parse_args()
     measure_group(args.root, args.model, args.history, args.history_variant, args.new_lengths)

@@ -42,8 +42,8 @@ head_dim 的缩放合入 FP32 head weights，logits 输出为 FP32。
 ```bash
 uv sync --frozen
 source .venv/bin/activate
-python -m pytest model_run/deepseek_v32/tests/test_deepseek_v32_ops.py -q
-python model_run/deepseek_v32/deepseek_v32_decode.py --batch-sizes 1 --history-lens 4096 --warmups 1 --iters 2
+python -m pytest models/deepseek_v32/tests/test_deepseek_v32_ops.py -q
+python models/deepseek_v32/deepseek_v32_decode.py --batch-sizes 1 --history-lens 4096 --warmups 1 --iters 2
 ```
 
 测试覆盖 YaRN 频率、Hadamard 点积保持、FP8 scale、真实 cache 更新，以及 GPU 上的

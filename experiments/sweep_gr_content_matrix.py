@@ -6,8 +6,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+from experiments.measure_gr_content_matrix import ROOT, case_name
 from GR.input_generator import DEFAULT_ITEM_LENGTHS, DEFAULT_USER_LENGTHS
-from model_run.deepseek_v32.measure_gr_content_matrix import ROOT, case_name
 
 
 def complete(root, h, u):
@@ -61,7 +61,7 @@ def main():
                     [
                         sys.executable,
                         "-m",
-                        "model_run.deepseek_v32.measure_gr_content_matrix",
+                        "experiments.measure_gr_content_matrix",
                         "--history",
                         str(h),
                         "--history-variant",

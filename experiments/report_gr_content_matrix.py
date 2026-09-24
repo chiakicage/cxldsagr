@@ -8,11 +8,11 @@ from pathlib import Path
 
 import numpy as np
 
+from experiments.export_gr_kv_hits import export_case, plt
+from experiments.measure_gr_content_matrix import ROOT, case_name
+from experiments.sweep_gr_content_matrix import complete
 from GR.input_generator import DEFAULT_ITEM_LENGTHS as NEWS
 from GR.input_generator import DEFAULT_USER_LENGTHS as HISTORIES
-from model_run.deepseek_v32.export_gr_kv_hits import export_case, plt
-from model_run.deepseek_v32.measure_gr_content_matrix import ROOT, case_name
-from model_run.deepseek_v32.sweep_gr_content_matrix import complete
 
 
 def label(n):
@@ -336,10 +336,10 @@ Top-k=2048，不做 Hadamard。Indexer 每 128 个 query 分批，但每个 quer
 - 每条压缩 MLA KV 为 656 B；CSV 的 `history_mib` 只计历史，`all_mib` 包含历史和 new，均按本批 query 去重。
 
 ```bash
-env PATH="$PWD/.venv/bin:$PATH" .venv/bin/python -m model_run.deepseek_v32.sweep_gr_content_matrix
-.venv/bin/python -m model_run.deepseek_v32.report_gr_content_matrix
+env PATH="$PWD/.venv/bin:$PATH" .venv/bin/python -m experiments.sweep_gr_content_matrix
+.venv/bin/python -m experiments.report_gr_content_matrix
 # 可选：导出全部精确 NPY 搬运回放数组
-.venv/bin/python -m model_run.deepseek_v32.report_gr_content_matrix --export-replay
+.venv/bin/python -m experiments.report_gr_content_matrix --export-replay
 ```
 
 调度按 15 个 history 内容组保存完成标记，重跑会跳过完整组。旧版单内容实验使用 `GR/generated/cache_union_sweep/`、`GR/generated/multilayer_hits_validated/`，不混入本次内容矩阵。

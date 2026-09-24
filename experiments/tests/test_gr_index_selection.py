@@ -4,9 +4,9 @@ import unittest
 
 import torch
 
-from model_run.deepseek_v32.deepseek_v32_decode import deep_gemm
-from model_run.deepseek_v32.deepseek_v32_extend import V32ExtendRunner
-from model_run.deepseek_v32.gr_index_selection import select_batched
+from models.deepseek_v32.deepseek_v32_decode import deep_gemm
+from models.deepseek_v32.deepseek_v32_extend import V32ExtendRunner
+from models.deepseek_v32.gr_index_selection import select_batched
 
 
 @unittest.skipUnless(torch.cuda.is_available(), "CUDA required")
