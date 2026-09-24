@@ -6,7 +6,7 @@
 
 | 模型 | 当前内容 |
 | --- | --- |
-| [NOSA](nosa/README.md) | SM90 / Hopper 入口，尚无可运行实现 |
+| [NOSA](nosa/README.md) | FlashInfer Full Attention 单 GPU 推理、分块 prefill、KV cache 与文本生成 |
 | [DeepSeek V3.2](deepseek_v32/README.md) | SM120 synthetic decode/extend、packed MLA cache、indexer 稀疏索引选择 |
 
 共享请求生成工具见 [`GR/`](../GR/README.md)，算子与构建说明见 [`operators/`](../operators/README.md)。

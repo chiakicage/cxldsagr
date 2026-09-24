@@ -6,13 +6,14 @@ memory 等显存之外的位置，GPU 根据稀疏访问需求读取或搬入所
 
 当前选择 DeepSeek V3.2 和 NOSA，重点是 **NOSA + SM90 / Hopper**。
 已有 DeepSeek V3.2 / SM120 的 attention decode、extend 和部分 checkpoint 层实验；
-NOSA、Hopper 模型运行和通用端到端 offloading 尚未实现。DeepGEMM 使用上游 `nv_dev`
+NOSA 已提供基于 FlashInfer Full Attention 的单 GPU 模型推理，支持分块 prefill 和缓存 decode；
+NOSA sparse attention 与通用端到端 offloading 尚未实现。DeepGEMM 使用上游 `nv_dev`
 子模块，其依赖更新尚未经过 GPU 构建和模型验证。
 
 ```text
 operators/sm90/                  Hopper 算子入口
 operators/sm120/                 sparse MLA 扩展与现有算子基准
-models/nosa/                     NOSA 入口
+models/nosa/                     NOSA Full Attention 模型推理
 models/deepseek_v32/             DeepSeek V3.2 decode/extend 与稀疏索引
 experiments/                     实验脚本、运行记录与实验文档
 3rdparty/DeepGEMM/               DeepGEMM nv_dev 子模块
@@ -34,6 +35,10 @@ python3 scripts/prepare_3rdparty.py --init
 # 基础环境
 uv sync
 
+# NOSA Full Attention（激活环境以便 FlashInfer 找到 ninja）
+source .venv/bin/activate
+python -m models.nosa.infer --prompt "请解释 KV cache 的作用。" --disable-thinking
+
 # DeepSeek V3.2 / SM120 实验及报告依赖
 uv sync --group sm120 --group analysis
 
@@ -43,7 +48,8 @@ uv sync --group sm120 --group analysis
 .venv/bin/python operators/sm120/benchmarks/deepgemm_v32_benchmark.py --quick
 ```
 
-模型实验需要对应配置、权重或 tokenizer，见 [DeepSeek V3.2](models/deepseek_v32/README.md)。
+模型实验需要对应配置、权重或 tokenizer，见 [NOSA](models/nosa/README.md) 和
+[DeepSeek V3.2](models/deepseek_v32/README.md)。
 构建与测试命令见 [SM120 算子](operators/sm120/README.md)。
 
 ## 提交检查
