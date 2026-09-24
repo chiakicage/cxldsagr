@@ -1,0 +1,79 @@
+x: [s, 7168]
+
+wq_a: [7168, 1536]
+qr: [s, 1536] = wq_a(x)
+wq_b: [1536, 128 * (128 + 64)]
+q: [s, 128 * (128 + 64)] = wq_b(qr)
+# split q into q_nope and q_pe
+q_nope: [s, 128, 128]
+q_pe: [s, 128, 64]
+
+wkv_a: [7168, 512 + 64]
+kvr: [s, 512 + 64] = wkv_a(x)
+# split kvr into kvr_nope and kvr_pe
+kvr_nope: [s, 512] # cache
+kvr_pe: [s, 64] # cache
+
+# Prefill
+wkv_b: [512, 128 * (128 + 128)]
+kv: [s, 128 * (128 + 128)] = wkv_b(kvr_nope)
+# split kv into k_nope and v
+k_nope: [s, 128, 128]
+v: [s, 128, 128]
+
+q: [s, 128, 128 + 64] = cat([q_nope, q_pe], dim=-1)
+k: [s, 128, 128 + 64] = cat([k_nope, kvr_pe.expand(-1, 128, -1)], dim=-1)
+
+s = MHA(q, k, v)
+
+# Decode 
+wkv_b: [128, 128 + 128, 512]
+#split wkv_b into wk_b and wv_b
+wk_b: [128, 128, 512]
+wv_b: [128, 512, 128]
+q: [s, 128, 512] = wk_b(q_nope)
+score: [128, s, s] = q @ kvr_nope + q_pe @ kvr_pe # mask and softmax
+sr: [128, s, 512] = score @ kvr_nope
+s: [s, 128, 128] = wv_b(sr)
+
+wo: [128, 128, 7168]
+o: [s, 7168] = wo(s)
+
+
+
+# Decode
+x: [s, 7168]
+
+wq_a: [7168, 1536]
+qr: [s, 1536] = wq_a(x)
+wq_b: [1536, 128 * (128 + 64)]
+q: [s, 128 * (128 + 64)] = wq_b(qr)
+# split q into q_nope and q_pe
+q_nope: [s, 128, 128]
+q_pe: [s, 128, 64]
+wk_b: [128, 128, 512]
+q: [s, 128, 512] = wk_b(q_nope)
+
+
+wkv_a: [7168, 512 + 64]
+kvr: [s, 512 + 64] = wkv_a(x)
+# split kvr into kvr_nope and kvr_pe
+kvr_nope: [s, 512] # cache
+kvr_pe: [s, 64] # cache
+
+
+
+score: [s, 128, s] = q @ kvr_nope + q_pe @ kvr_pe # mask and softmax
+sr: [s, 128, 512] = score @ kvr_nope
+
+wv_b: [128, 512, 128]
+s: [s, 128, 128] = wv_b(sr)
+
+wo: [128, 128, 7168]
+o: [s, 7168] = wo(s)
+
+wqi: [1536, 64 * 128]
+qi: [s, 64, 128] = wqi_b(qr)
+wki: [7168, 128]
+ki: [s, 128] = wki(x)
+

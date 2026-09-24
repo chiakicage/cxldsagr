@@ -1,0 +1,75 @@
+# Python environments and caches
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+.eggs/
+
+# Native compilation and packaging
+build/
+dist/
+cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+compile_commands.json
+*.o
+*.obj
+*.so
+*.so.*
+*.a
+*.dylib
+*.dll
+*.exe
+*.cubin
+*.fatbin
+
+# Local kernel caches
+.deep_gemm_cache/
+.cache/
+.triton/
+
+# Raw profiler output (keep scripts and result summaries)
+*.trace.json
+/docs/extend_step_profile/*
+!/docs/extend_step_profile/*.md
+!/docs/extend_step_profile/*.png
+!/docs/extend_step_profile/*.svg
+!/docs/extend_step_profile/gr_content_matrix.csv
+!/docs/extend_step_profile/gr_content_matrix.html
+!/docs/extend_step_profile/gemm_precision.json
+/docs/model_extend_v32_*.json
+*.ncu-rep
+*.nsys-rep
+*.qdrep
+*.qdstrm
+*.sqlite
+*.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm
+*.log
+
+# Local editor settings and credentials
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+.DS_Store
+*.swp
+*.swo
+.env
+.env.*
+!.env.example
+!.env.sample
+
+# Local model weights and tokenizer assets
+/models/
+
+# Local datasets and generated serving traces (keep GR/analysis reports)
+/data/
+/GR/data/
+/GR/generated/
+*.partial

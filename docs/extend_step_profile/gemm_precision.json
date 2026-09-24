@@ -1,0 +1,65 @@
+[
+  {
+    "template": "0u, 128u, 512u, 128u, 128u, 128u, 128u, 128u, 128u, 128u, 128u, 128u, 2u, 128u, 256u, 84u, (deep_gemm::GemmType)2, false, cutlass::bfloat16_t, deep_gemm::epilogue::transform::EpilogueIdentity, false, false, false, true, false, 128u, 1u",
+    "source": ".deep_gemm_cache/cache/kernel.sm120_m_grouped_fp8_fp4_gemm_masked_1d1d.873135bb8e927fa0a43b223ce77df425/kernel.cu",
+    "mma_instructions": [
+      "QMMA.SF.16832.F32.E4M3.E4M3.E8"
+    ]
+  },
+  {
+    "template": "0u, 128u, 7168u, 128u, 128u, 1u, 128u, 64u, 128u, 128u, 128u, 128u, 3u, 128u, 256u, 84u, (deep_gemm::GemmType)0, false, cutlass::bfloat16_t, deep_gemm::epilogue::transform::EpilogueIdentity, false, false, false, true, false, 128u, 7u",
+    "source": ".deep_gemm_cache/cache/kernel.sm120_fp8_fp4_gemm_1d1d.094f83b64c20146c051f5b2e5c65bb19/kernel.cu",
+    "mma_instructions": [
+      "QMMA.SF.16832.F32.E4M3.E4M3.E8"
+    ]
+  },
+  {
+    "template": "0u, 1536u, 7168u, 128u, 128u, 1u, 128u, 128u, 128u, 128u, 128u, 128u, 2u, 128u, 256u, 84u, (deep_gemm::GemmType)0, false, cutlass::bfloat16_t, deep_gemm::epilogue::transform::EpilogueIdentity, false, false, false, true, false, 128u, 1u",
+    "source": ".deep_gemm_cache/cache/kernel.sm120_fp8_fp4_gemm_1d1d.3a2122d2c52adec3ba52049b50a0eba1/kernel.cu",
+    "mma_instructions": [
+      "QMMA.SF.16832.F32.E4M3.E4M3.E8"
+    ]
+  },
+  {
+    "template": "0u, 24576u, 1536u, 128u, 128u, 1u, 128u, 128u, 128u, 128u, 128u, 128u, 2u, 128u, 256u, 84u, (deep_gemm::GemmType)0, false, cutlass::bfloat16_t, deep_gemm::epilogue::transform::EpilogueIdentity, false, false, false, true, false, 128u, 1u",
+    "source": ".deep_gemm_cache/cache/kernel.sm120_fp8_fp4_gemm_1d1d.690d4d75de11026ebdb2eb6a55c1d90d/kernel.cu",
+    "mma_instructions": [
+      "QMMA.SF.16832.F32.E4M3.E4M3.E8"
+    ]
+  },
+  {
+    "template": "0u, 512u, 128u, 128u, 128u, 128u, 128u, 128u, 128u, 128u, 128u, 128u, 2u, 128u, 256u, 84u, (deep_gemm::GemmType)2, false, cutlass::bfloat16_t, deep_gemm::epilogue::transform::EpilogueIdentity, false, false, false, true, false, 128u, 1u",
+    "source": ".deep_gemm_cache/cache/kernel.sm120_m_grouped_fp8_fp4_gemm_masked_1d1d.d3510a462a371b5df6188711c488ccf1/kernel.cu",
+    "mma_instructions": [
+      "QMMA.SF.16832.F32.E4M3.E4M3.E8"
+    ]
+  },
+  {
+    "template": "0u, 576u, 7168u, 128u, 128u, 1u, 128u, 64u, 128u, 128u, 128u, 128u, 3u, 128u, 256u, 84u, (deep_gemm::GemmType)0, false, cutlass::bfloat16_t, deep_gemm::epilogue::transform::EpilogueIdentity, false, false, false, true, false, 128u, 2u",
+    "source": ".deep_gemm_cache/cache/kernel.sm120_fp8_fp4_gemm_1d1d.41b8a44b18793be403336500a1d56954/kernel.cu",
+    "mma_instructions": [
+      "QMMA.SF.16832.F32.E4M3.E4M3.E8"
+    ]
+  },
+  {
+    "template": "0u, 7168u, 16384u, 128u, 128u, 1u, 128u, 128u, 128u, 128u, 128u, 128u, 2u, 128u, 256u, 84u, (deep_gemm::GemmType)0, false, cutlass::bfloat16_t, deep_gemm::epilogue::transform::EpilogueIdentity, false, false, false, true, false, 128u, 1u",
+    "source": ".deep_gemm_cache/cache/kernel.sm120_fp8_fp4_gemm_1d1d.058940b3a3558a98d99443569d3330f3/kernel.cu",
+    "mma_instructions": [
+      "QMMA.SF.16832.F32.E4M3.E4M3.E8"
+    ]
+  },
+  {
+    "template": "0u, 8192u, 1536u, 128u, 128u, 1u, 128u, 128u, 128u, 128u, 128u, 128u, 2u, 128u, 256u, 84u, (deep_gemm::GemmType)0, false, cutlass::bfloat16_t, deep_gemm::epilogue::transform::EpilogueIdentity, false, false, false, true, false, 128u, 1u",
+    "source": ".deep_gemm_cache/cache/kernel.sm120_fp8_fp4_gemm_1d1d.e4f72b1ecde8ae9239ef3683e28b3ac7/kernel.cu",
+    "mma_instructions": [
+      "QMMA.SF.16832.F32.E4M3.E4M3.E8"
+    ]
+  },
+  {
+    "template": "void deep_gemm::sm120_fp8_mqa_logits<64u, 128u, false, 2u, 128u, 2u, 3u, 84u, 128u, 256u, float>(unsigned int, unsigned int, unsigned int, unsigned int, unsigned int*, unsigned int*, float*, CUtensorMap_st, CUtensorMap_st, CUtensorMap_st, CUtensorMap_st)",
+    "source": ".deep_gemm_cache/cache/kernel.sm120_fp8_mqa_logits.b3bf6cb227c2bfa459277ed63d2bac62/kernel.cu",
+    "mma_instructions": [
+      "QMMA.16832.F32.E4M3.E4M3"
+    ]
+  }
+]
