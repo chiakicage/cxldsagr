@@ -11,7 +11,8 @@ from tokenizers import Tokenizer
 
 from experiments.sweep_gr_mla_cache import HISTORIES
 from GR.heat import HeatPopulation
-from GR.input_generator import PREFIX, InputGenerator, TextConfig
+from GR.input_generator import DEEPSEEK_PREFIX as PREFIX
+from GR.input_generator import InputGenerator, TextConfig
 from GR.scheduling import ScheduleConfig
 from models.deepseek_v32.deepseek_v32_decode import QuantizedLinear, V32Config
 from models.deepseek_v32.deepseek_v32_extend import V32ExtendRunner
@@ -78,7 +79,9 @@ def main():
     generator = InputGenerator(
         HeatPopulation({0: 1.0}, {"source": "single-user measurement"}),
         tokenizer,
+        model="deepseek_v32",
         text_config=TextConfig(
+            max_input_tokens=1048576 + 4096,
             user_lengths=(history - instruction_tokens,),
             user_probabilities=(1.0,),
             item_lengths=(new + instruction_tokens,),

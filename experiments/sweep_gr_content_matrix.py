@@ -7,7 +7,8 @@ import sys
 from pathlib import Path
 
 from experiments.measure_gr_content_matrix import ROOT, case_name
-from GR.input_generator import DEFAULT_ITEM_LENGTHS, DEFAULT_USER_LENGTHS
+from GR.input_generator import DEEPSEEK_ITEM_LENGTHS as DEFAULT_ITEM_LENGTHS
+from GR.input_generator import DEEPSEEK_USER_LENGTHS as DEFAULT_USER_LENGTHS
 
 
 def complete(root, h, u):

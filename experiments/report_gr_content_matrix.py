@@ -11,8 +11,8 @@ import numpy as np
 from experiments.export_gr_kv_hits import export_case, plt
 from experiments.measure_gr_content_matrix import ROOT, case_name
 from experiments.sweep_gr_content_matrix import complete
-from GR.input_generator import DEFAULT_ITEM_LENGTHS as NEWS
-from GR.input_generator import DEFAULT_USER_LENGTHS as HISTORIES
+from GR.input_generator import DEEPSEEK_ITEM_LENGTHS as NEWS
+from GR.input_generator import DEEPSEEK_USER_LENGTHS as HISTORIES
 
 
 def label(n):

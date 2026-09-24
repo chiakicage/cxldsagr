@@ -10,6 +10,10 @@ from tokenizers import Tokenizer
 
 from GR.heat import HeatPopulation
 from GR.input_generator import (
+    DEEPSEEK_ITEM_LENGTHS,
+    DEEPSEEK_PREFIX,
+    DEEPSEEK_TOKENIZER,
+    DEEPSEEK_USER_LENGTHS,
     DEFAULT_ITEM_LENGTHS,
     DEFAULT_TOKENIZER,
     DEFAULT_USER_LENGTHS,
@@ -19,6 +23,7 @@ from GR.input_generator import (
     main,
 )
 from GR.scheduling import ScheduleConfig
+from models.nosa.infer import DEFAULT_MODEL_PATH, encode_prompt, load_tokenizer
 
 
 class HeatTests(unittest.TestCase):
@@ -50,7 +55,7 @@ class HeatTests(unittest.TestCase):
                 TextConfig(**kwargs)
 
 
-@unittest.skipUnless(DEFAULT_TOKENIZER.is_file(), "local DeepSeek tokenizer unavailable")
+@unittest.skipUnless(DEFAULT_TOKENIZER.is_file(), "local NOSA tokenizer unavailable")
 class RuleTextTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -64,6 +69,24 @@ class RuleTextTests(unittest.TestCase):
             titles=titles,
             schedule_config=ScheduleConfig(sampling="sequential"),
         )
+
+    def test_nosa_prompt_matches_checkpoint_template_and_context_limit(self):
+        tokenizer, config = load_tokenizer(DEFAULT_MODEL_PATH)
+        gen = create_input_generator(tokenizer=tokenizer, num_users=2)
+        row = gen.for_user(0)
+        content = row["prompt"].removeprefix("<|im_start|>user\n").removesuffix(gen.ending)
+        self.assertEqual(
+            row["input_ids"], encode_prompt(tokenizer, config, content, disable_thinking=True)
+        )
+        self.assertEqual(row["model"], "nosa")
+        self.assertLessEqual(row["total_input_tokens"], 32768)
+        with self.assertRaisesRegex(ValueError, "32768-token context"):
+            create_input_generator(
+                tokenizer=tokenizer,
+                text_config=TextConfig(
+                    user_lengths=(32768,), user_probabilities=(1,), max_input_tokens=65536
+                ),
+            )
 
     def test_api_and_file_output_match(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -119,6 +142,26 @@ class RuleTextTests(unittest.TestCase):
             self.assertEqual(meta["stats"]["repeat_requests"], 2)
             self.assertTrue(output.with_suffix(".jsonl.users.jsonl").is_file())
 
+    def test_curve_defaults_generate_requests_without_raw_data(self):
+        with tempfile.TemporaryDirectory() as directory:
+            gen = create_input_generator(
+                tokenizer=self.tokenizer,
+                data_root=Path(directory) / "absent",
+                num_users=2,
+                text_config=TextConfig(
+                    user_lengths=(4096,),
+                    user_probabilities=(1,),
+                    item_lengths=(1024,),
+                    item_probabilities=(1,),
+                ),
+                schedule_config=ScheduleConfig(sampling="sequential"),
+            )
+            rows = list(gen.iter_generate(4))
+            self.assertEqual(rows, list(gen.iter_generate(4)))
+            self.assertEqual([row["user_id"] for row in rows], [0, 1, 0, 1])
+            self.assertEqual(rows[0]["history_sha256"], rows[2]["history_sha256"])
+            self.assertTrue(all(len(row["input_ids"]) == 5120 for row in rows))
+
     def test_all_length_buckets_are_exact_and_readable(self):
         # One user per fixed bucket makes coverage independent of random draws.
         for history in DEFAULT_USER_LENGTHS:
@@ -136,9 +179,7 @@ class RuleTextTests(unittest.TestCase):
                     self.assertEqual(len(ids), history + other)
                     self.assertEqual(row["user_tokens"], history)
                     self.assertEqual(row["item_tokens"], other)
-                    self.assertEqual(
-                        gen.tokenizer.decode(ids, skip_special_tokens=False), row["prompt"]
-                    )
+                    self.assertEqual(gen.encode(row["prompt"]), ids)
                     self.assertIn("User profile U42.", row["prompt"])
                     self.assertIn("Record 1:", row["prompt"])
                     self.assertIn("Candidate pool for visit 0:", row["prompt"])
@@ -174,7 +215,7 @@ class RuleTextTests(unittest.TestCase):
         cfg = TextConfig(
             user_lengths=(4096,),
             user_probabilities=(1,),
-            item_lengths=(64,),
+            item_lengths=(80,),
             item_probabilities=(1,),
         )
         gen = self.generator(cfg)
@@ -187,7 +228,7 @@ class RuleTextTests(unittest.TestCase):
                 item = row["input_ids"][boundary:]
                 self.assertEqual(histories.setdefault(uid, history), history)
                 self.assertEqual(items.setdefault(variant, item), item)
-                self.assertEqual(len(row["input_ids"]), 4096 + 64)
+                self.assertEqual(len(row["input_ids"]), 4096 + 80)
                 self.assertGreaterEqual(len(row["candidate_item_ids"]), 1)
         self.assertNotEqual(histories[42], histories[99])
         self.assertEqual(len({tuple(item) for item in items.values()}), 3)
@@ -198,12 +239,12 @@ class RuleTextTests(unittest.TestCase):
         cfg = TextConfig(
             user_lengths=(4096,),
             user_probabilities=(1,),
-            item_lengths=(64,),
+            item_lengths=(80,),
             item_probabilities=(1,),
         )
         gen = self.generator(cfg, {i: "durable " * 24 for i in range(30)})
         row = gen.for_user(42)
-        self.assertEqual(len(row["input_ids"]), 4160)
+        self.assertEqual(len(row["input_ids"]), 4176)
         self.assertEqual(len(row["candidate_item_ids"]), 1)
         self.assertIn("durable", row["prompt"][row["prompt"].index("Candidate pool") :])
 
@@ -216,6 +257,36 @@ class RuleTextTests(unittest.TestCase):
         )
         with self.assertRaisesRegex(ValueError, "mandatory text"):
             self.generator(cfg).for_user(42)
+
+
+@unittest.skipUnless(DEEPSEEK_TOKENIZER.is_file(), "local DeepSeek tokenizer unavailable")
+class DeepSeekCompatibilityTests(unittest.TestCase):
+    def test_historical_layout_and_all_length_buckets(self):
+        tokenizer = Tokenizer.from_file(str(DEEPSEEK_TOKENIZER))
+        default = InputGenerator(HeatPopulation({42: 1}, {}), tokenizer, model="deepseek_v32")
+        self.assertEqual(default.prefix, DEEPSEEK_PREFIX)
+        self.assertEqual(default.text_config.user_lengths, DEEPSEEK_USER_LENGTHS)
+        self.assertEqual(default.text_config.item_lengths, DEEPSEEK_ITEM_LENGTHS)
+        for history in DEEPSEEK_USER_LENGTHS:
+            for item in DEEPSEEK_ITEM_LENGTHS:
+                with self.subTest(history=history, item=item):
+                    gen = InputGenerator(
+                        HeatPopulation({42: 1}, {}),
+                        tokenizer,
+                        model="deepseek_v32",
+                        text_config=TextConfig(
+                            user_lengths=(history,),
+                            user_probabilities=(1,),
+                            item_lengths=(item,),
+                            item_probabilities=(1,),
+                            max_input_tokens=1048576 + 4096,
+                        ),
+                    )
+                    row = gen.for_user(42)
+                    self.assertEqual(len(row["input_ids"]), history + item)
+                    self.assertEqual(
+                        tokenizer.decode(row["input_ids"], skip_special_tokens=False), row["prompt"]
+                    )
 
 
 if __name__ == "__main__":

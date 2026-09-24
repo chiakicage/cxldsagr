@@ -14,21 +14,28 @@ from pathlib import Path
 
 from tokenizers import Tokenizer
 
+from models.deepseek_v32 import request_format as deepseek_format
+from models.nosa import request_format as nosa_format
+
 from .dataset import DEFAULT_DATA_ROOT, load_titles
-from .heat import HeatPopulation
+from .heat import DEFAULT_HEAT_CURVES, HeatPopulation
 from .scheduling import ScheduleConfig, _integer, _schedule, index_letter
 
-DEFAULT_USER_LENGTHS = (4096, 16384, 65536, 262144, 1048576)
-DEFAULT_ITEM_LENGTHS = (64, 128, 256, 512, 1024, 2048, 4096)
-DEFAULT_MAX_INPUT_TOKENS = max(DEFAULT_USER_LENGTHS) + max(DEFAULT_ITEM_LENGTHS)
+MODEL_FORMATS = {"nosa": nosa_format, "deepseek_v32": deepseek_format}
+DEFAULT_USER_LENGTHS = nosa_format.USER_LENGTHS
+DEEPSEEK_USER_LENGTHS = deepseek_format.USER_LENGTHS
+DEFAULT_ITEM_LENGTHS = nosa_format.ITEM_LENGTHS
+DEEPSEEK_ITEM_LENGTHS = deepseek_format.ITEM_LENGTHS
+DEFAULT_MAX_INPUT_TOKENS = nosa_format.MAX_INPUT_TOKENS
 
-DEFAULT_TOKENIZER = Path("/mnt/nfs/share/models/DeepSeek-V3.2/tokenizer.json")
+DEFAULT_TOKENIZER = nosa_format.TOKENIZER_PATH
+DEEPSEEK_TOKENIZER = deepseek_format.TOKENIZER_PATH
 
 INSTRUCTION = (
     "Recommend one item from the candidate pool based on the user history. Output its index letter."
 )
-PREFIX = f"<｜begin▁of▁sentence｜>{INSTRUCTION}<｜User｜>User history:\n"
-ENDING = "<｜Assistant｜></think>"
+PREFIX = nosa_format.prefix(INSTRUCTION)
+DEEPSEEK_PREFIX = deepseek_format.prefix(INSTRUCTION)
 ATTRIBUTES = (
     "easy to clean",
     "comfortable to use",
@@ -102,15 +109,35 @@ class InputGenerator:
         population: HeatPopulation,
         tokenizer: Tokenizer,
         *,
+        model: str = "nosa",
         text_config: TextConfig | None = None,
         schedule_config: ScheduleConfig | None = None,
         titles: dict[int, str] | None = None,
     ):
+        if model not in MODEL_FORMATS:
+            raise ValueError(f"unsupported model: {model}")
+        self.model = model
+        self.request_format = MODEL_FORMATS[model]
+        self.prefix = self.request_format.prefix(INSTRUCTION)
+        self.ending = self.request_format.ENDING
         self.population = population
         self.tokenizer = tokenizer
         tokenizer.no_padding()
         tokenizer.no_truncation()
-        self.text_config = text_config or TextConfig()
+        self.text_config = text_config or TextConfig(
+            user_lengths=self.request_format.USER_LENGTHS,
+            user_probabilities=(1 / len(self.request_format.USER_LENGTHS),)
+            * len(self.request_format.USER_LENGTHS),
+            item_lengths=self.request_format.ITEM_LENGTHS,
+            item_probabilities=(1 / len(self.request_format.ITEM_LENGTHS),)
+            * len(self.request_format.ITEM_LENGTHS),
+            max_input_tokens=self.request_format.MAX_INPUT_TOKENS,
+        )
+        if model == "nosa" and (
+            max(self.text_config.user_lengths) + max(self.text_config.item_lengths)
+            > self.request_format.MAX_INPUT_TOKENS
+        ):
+            raise ValueError("NOSA request exceeds the supported 32768-token context")
         self.schedule_config = schedule_config or ScheduleConfig(sampling="weighted")
         self.seed = self.schedule_config.seed
         self.users = sorted(population.weights)
@@ -122,15 +149,25 @@ class InputGenerator:
         self.catalog = sorted(titles) if titles is not None else range(1_000_000)
         if len(self.catalog) < self.text_config.candidate_count:
             raise ValueError("candidate_count exceeds catalog size")
-        for special in ("<｜begin▁of▁sentence｜>", "<｜User｜>", "<｜Assistant｜>", "</think>"):
+        for special in self.request_format.SPECIAL_TOKENS:
             if tokenizer.token_to_id(special) is None:
-                raise ValueError(f"tokenizer lacks DeepSeek token {special}")
-        self.prefix_ids = self.encode(PREFIX)
+                raise ValueError(f"tokenizer lacks {model} token {special}")
+        self.prefix_ids = self.encode(self.prefix)
+        self.block_context_ids = self.encode(self.request_format.BLOCK_CONTEXT)
         self._title = lru_cache(maxsize=16384)(self._make_title)
         self._history = lru_cache(maxsize=self.text_config.history_cache_users)(self._make_history)
 
     def encode(self, text: str) -> list[int]:
         return self.tokenizer.encode(text, add_special_tokens=False).ids
+
+    def _encode_block(self, text: str) -> list[int]:
+        if not self.request_format.BLOCK_CONTEXT:
+            return self.encode(text)
+        ids = self.encode(self.request_format.BLOCK_CONTEXT + text)
+        n = len(self.block_context_ids)
+        if ids[:n] != self.block_context_ids:
+            raise ValueError("tokenizer merges across the continuation context boundary")
+        return ids[n:]
 
     def _make_title(self, item: int) -> str:
         if self.titles is not None:
@@ -159,7 +196,7 @@ class InputGenerator:
         Full-block tokenization verifies the budget. No arbitrary ID padding or
         partially decoded token prefix is used to fill the token budget.
         """
-        base = len(self.encode(heading + ending))
+        base = len(self._encode_block(heading + ending))
         if base > target:
             raise ValueError(f"mandatory text uses {base} tokens, budget is {target}")
         lines = []
@@ -167,21 +204,22 @@ class InputGenerator:
         while estimate < target + 64:
             line = next(records)
             lines.append(line)
-            estimate += max(1, len(self.encode(line)))
+            estimate += max(1, len(self._encode_block(line)))
         # Find the longest record prefix fitting the block budget.
         low, high = 0, len(lines)
         while low < high:
             mid = (low + high + 1) // 2
-            if len(self.encode(heading + "".join(lines[:mid]) + ending)) <= target:
+            if len(self._encode_block(heading + "".join(lines[:mid]) + ending)) <= target:
                 low = mid
             else:
                 high = mid - 1
         for keep in range(low, max(-1, low - 4), -1):
             body = heading + "".join(lines[:keep])
-            remainder = target - len(self.encode(body + ending))
+            remainder = target - len(self._encode_block(body + ending))
             # Measure contextual increments rather than assume tokenizer additivity.
             increments = [
-                len(self.encode(body + tail + ending)) - (target - remainder) for tail in TAILS
+                len(self._encode_block(body + tail + ending)) - (target - remainder)
+                for tail in TAILS
             ]
             solutions: dict[int, list[str]] = {0: []}
             for total in range(1, remainder + 1):
@@ -191,7 +229,7 @@ class InputGenerator:
                         break
             if remainder in solutions:
                 result = body + "".join(solutions[remainder]) + ending
-                if len(self.encode(result)) == target:
+                if len(self._encode_block(result)) == target:
                     return result
         raise ValueError(f"cannot fit a readable block to {target} tokens with this tokenizer")
 
@@ -211,13 +249,14 @@ class InputGenerator:
                 )
 
         text = self._fit(f"User profile U{uid}.\n", records(), history_length)
-        return text, tuple(self.encode(text))
+        return text, tuple(self._encode_block(text))
 
     def _candidates(
         self, uid: int, visit: int, item_variant: int | None = None
     ) -> tuple[str, list[int]]:
         _, item_length = self.lengths_for_user(uid)
         budget = item_length - len(self.prefix_ids)
+        reserve = self.request_format.TAIL_RESERVE_TOKENS
         stream = (
             f"{self.seed}:candidates:{uid}:{visit}"
             if item_variant is None
@@ -230,18 +269,24 @@ class InputGenerator:
             f"({index_letter(i)}) P{item}: {self._title(item)}.\n" for i, item in enumerate(items)
         ]
         # candidate_count is an upper bound: keep complete candidates when the
-        # 64/128-token item budget cannot hold the full default pool.
-        while len(items) > 1 and len(self.encode(title + "".join(lines) + ENDING)) > budget - 2:
+        # short item budget cannot hold the full default pool.
+        while (
+            len(items) > 1
+            and len(self._encode_block(title + "".join(lines) + self.ending)) > budget - reserve
+        ):
             items.pop()
             lines.pop()
-        if len(items) == 1 and len(self.encode(title + lines[0] + ENDING)) > budget - 2:
+        if (
+            len(items) == 1
+            and len(self._encode_block(title + lines[0] + self.ending)) > budget - reserve
+        ):
             words = self._title(items[0]).split()
             while len(words) > 1:
                 words.pop()
                 lines[0] = f"(A) P{items[0]}: {' '.join(words)}.\n"
-                if len(self.encode(title + lines[0] + ENDING)) <= budget - 2:
+                if len(self._encode_block(title + lines[0] + self.ending)) <= budget - reserve:
                     break
-            if len(self.encode(title + lines[0] + ENDING)) > budget - 2:
+            if len(self._encode_block(title + lines[0] + self.ending)) > budget - reserve:
                 lines[0] = f"(A) P{items[0]}: Catalog product.\n"
         heading = title + "".join(lines)
 
@@ -250,7 +295,7 @@ class InputGenerator:
                 i = rng.randrange(len(items))
                 yield f"Details for ({index_letter(i)}): {rng.choice(ATTRIBUTES)}.\n"
 
-        return self._fit(heading, records(), budget, ENDING), items
+        return self._fit(heading, records(), budget, self.ending), items
 
     def for_user(self, uid: int, *, visit_index: int = 0, item_variant: int | None = None) -> dict:
         if uid not in self.population.weights:
@@ -260,8 +305,8 @@ class InputGenerator:
             _integer("item_variant", item_variant)
         history, history_ids = self._history(uid)
         suffix, items = self._candidates(uid, visit_index, item_variant)
-        suffix_ids = self.encode(suffix)
-        prompt = PREFIX + history + suffix
+        suffix_ids = self._encode_block(suffix)
+        prompt = self.prefix + history + suffix
         ids = self.encode(prompt)
         expected = self.prefix_ids + list(history_ids) + suffix_ids
         if ids != expected:
@@ -273,6 +318,7 @@ class InputGenerator:
             raise ValueError("full prompt length does not match configured budgets")
         start = len(self.prefix_ids)
         return {
+            "model": self.model,
             "user_id": uid,
             "visit_index": visit_index,
             "prompt": prompt,
@@ -313,7 +359,7 @@ class InputGenerator:
             )
             if last:
                 old_suffix, _ = self._candidates(uid, visit - 1)
-                old_ids = self.encode(old_suffix)
+                old_ids = self._encode_block(old_suffix)
                 new_ids = row["input_ids"][row["stable_prefix_tokens"] :]
                 shared = 0
                 for a, b in zip(old_ids, new_ids):
@@ -328,15 +374,18 @@ class InputGenerator:
 
 def create_input_generator(
     *,
-    heat_source: str = "beauty",
+    model: str = "nosa",
+    heat_source: str = "curve",
     heat_path: str | Path | None = None,
+    curve_dataset: str = "beauty",
+    curve_field: str | None = None,
     industrial_heat_field: str = "pv_share",
     num_users: int = 1000,
-    text_material: str = "catalog",
+    text_material: str = "synthetic",
     text_dataset: str = "beauty",
     text_catalog_path: str | Path | None = None,
     data_root: str | Path = DEFAULT_DATA_ROOT,
-    tokenizer: Tokenizer | str | Path = DEFAULT_TOKENIZER,
+    tokenizer: Tokenizer | str | Path | None = None,
     text_config: TextConfig | None = None,
     schedule_config: ScheduleConfig | None = None,
 ) -> InputGenerator:
@@ -346,9 +395,14 @@ def create_input_generator(
     visit_index=...)`` for an explicit visit. Neither method writes files or
     sends requests. Each new stream restarts its schedule and visit counters.
     Paths accept strings or Path objects; tokenizer may also be preloaded.
+    By default, synthesize heat from the bundled Beauty curve and use rule-based
+    product names. Curve mode requires num_users > 0; curve_field defaults to
+    interaction_count (Amazon) or pv_share (industrial).
     """
+    if model not in MODEL_FORMATS:
+        raise ValueError(f"unsupported model: {model}")
     datasets = ("beauty", "games", "books", "clothing")
-    if heat_source not in (*datasets, "industrial"):
+    if heat_source not in (*datasets, "industrial", "curve"):
         raise ValueError(f"unsupported heat_source: {heat_source}")
     if text_material not in ("catalog", "synthetic"):
         raise ValueError(f"unsupported text_material: {text_material}")
@@ -357,22 +411,32 @@ def create_input_generator(
     _integer("num_users", num_users)
     schedule = schedule_config or ScheduleConfig(sampling="weighted")
     root = Path(data_root)
-    industrial = heat_source == "industrial"
-    source = (
-        Path(heat_path)
-        if heat_path is not None
-        else (
-            root / "industrial/users_100k.csv"
-            if industrial
-            else root / heat_source / "timestep_map.json"
+    if heat_source == "curve":
+        population = HeatPopulation.from_curve(
+            heat_path if heat_path is not None else DEFAULT_HEAT_CURVES,
+            dataset=curve_dataset,
+            field=curve_field
+            or ("pv_share" if curve_dataset.startswith("industrial_") else "interaction_count"),
+            num_users=num_users,
+            seed=schedule.seed,
         )
-    )
-    population = HeatPopulation.load(
-        source,
-        industrial_field=industrial_heat_field if industrial else None,
-        num_users=num_users,
-        seed=schedule.seed,
-    )
+    else:
+        industrial = heat_source == "industrial"
+        source = (
+            Path(heat_path)
+            if heat_path is not None
+            else (
+                root / "industrial/users_100k.csv"
+                if industrial
+                else root / heat_source / "timestep_map.json"
+            )
+        )
+        population = HeatPopulation.load(
+            source,
+            industrial_field=industrial_heat_field if industrial else None,
+            num_users=num_users,
+            seed=schedule.seed,
+        )
     titles = None
     if text_material == "catalog":
         catalog = (
@@ -386,6 +450,8 @@ def create_input_generator(
             )
         )
         titles = load_titles(catalog)
+    if tokenizer is None:
+        tokenizer = MODEL_FORMATS[model].TOKENIZER_PATH
     if not isinstance(tokenizer, Tokenizer):
         token_path = Path(tokenizer)
         if token_path.is_dir():
@@ -394,6 +460,7 @@ def create_input_generator(
     return InputGenerator(
         population,
         tokenizer,
+        model=model,
         text_config=text_config,
         schedule_config=schedule,
         titles=titles,
@@ -402,13 +469,20 @@ def create_input_generator(
 
 def main(argv: list[str] | None = None):
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--model", choices=tuple(MODEL_FORMATS), default="nosa")
     parser.add_argument(
         "--heat-source",
-        choices=("beauty", "games", "books", "clothing", "industrial"),
-        default="beauty",
+        choices=("curve", "beauty", "games", "books", "clothing", "industrial"),
+        default="curve",
     )
     parser.add_argument(
-        "--heat-path", type=Path, help="Override timestep_map.json / industrial CSV"
+        "--heat-path",
+        type=Path,
+        help="Override heat_curves.csv / timestep_map.json / industrial CSV",
+    )
+    parser.add_argument("--curve-dataset", default="beauty", help="Dataset name in heat_curves.csv")
+    parser.add_argument(
+        "--curve-field", help="Curve field (default: interaction_count, or pv_share for industrial)"
     )
     parser.add_argument(
         "--industrial-heat-field",
@@ -419,9 +493,9 @@ def main(argv: list[str] | None = None):
         "--num-users",
         type=int,
         default=1000,
-        help="Uniform user subset; 0 selects all source users",
+        help="Synthetic population size (>0); for raw sources, subset size (0 selects all)",
     )
-    parser.add_argument("--text-material", choices=("catalog", "synthetic"), default="catalog")
+    parser.add_argument("--text-material", choices=("catalog", "synthetic"), default="synthetic")
     parser.add_argument(
         "--text-dataset", choices=("beauty", "games", "books", "clothing"), default="beauty"
     )
@@ -429,14 +503,14 @@ def main(argv: list[str] | None = None):
         "--text-catalog-path", type=Path, help="Override dataset.pkl containing meta titles"
     )
     parser.add_argument("--data-root", type=Path, default=DEFAULT_DATA_ROOT)
-    parser.add_argument("--tokenizer", type=Path, default=DEFAULT_TOKENIZER)
-    parser.add_argument("--user-lengths", type=int, nargs="+", default=list(DEFAULT_USER_LENGTHS))
+    parser.add_argument("--tokenizer", type=Path, help="Override the selected model's tokenizer")
+    parser.add_argument("--user-lengths", type=int, nargs="+", help="Defaults depend on --model")
     parser.add_argument("--user-probabilities", type=float, nargs="+")
-    parser.add_argument("--item-lengths", type=int, nargs="+", default=list(DEFAULT_ITEM_LENGTHS))
+    parser.add_argument("--item-lengths", type=int, nargs="+", help="Defaults depend on --model")
     parser.add_argument("--item-probabilities", type=float, nargs="+")
     parser.add_argument("--candidate-count", type=int, default=20)
     parser.add_argument("--history-cache-users", type=int, default=8)
-    parser.add_argument("--max-input-tokens", type=int, default=DEFAULT_MAX_INPUT_TOKENS)
+    parser.add_argument("--max-input-tokens", type=int, help="Defaults depend on --model")
     parser.add_argument("--count", type=int, default=1000)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--qps", type=int, default=100)
@@ -446,6 +520,15 @@ def main(argv: list[str] | None = None):
     )
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args(argv)
+    model_format = MODEL_FORMATS[args.model]
+    if args.tokenizer is None:
+        args.tokenizer = model_format.TOKENIZER_PATH
+    if args.user_lengths is None:
+        args.user_lengths = list(model_format.USER_LENGTHS)
+    if args.item_lengths is None:
+        args.item_lengths = list(model_format.ITEM_LENGTHS)
+    if args.max_input_tokens is None:
+        args.max_input_tokens = model_format.MAX_INPUT_TOKENS
     try:
         _integer("count", args.count)
         cfg = TextConfig(
@@ -461,8 +544,11 @@ def main(argv: list[str] | None = None):
             seed=args.seed, qps=args.qps, arrival=args.arrival, sampling=args.sampling
         )
         gen = create_input_generator(
+            model=args.model,
             heat_source=args.heat_source,
             heat_path=args.heat_path,
+            curve_dataset=args.curve_dataset,
+            curve_field=args.curve_field,
             industrial_heat_field=args.industrial_heat_field,
             num_users=args.num_users,
             text_material=args.text_material,
@@ -520,7 +606,8 @@ def main(argv: list[str] | None = None):
             "mean_input_tokens": total / args.count if args.count else 0,
         }
         meta = {
-            "schema_version": 4,
+            "schema_version": 5,
+            "model": args.model,
             "text_source": "rules",
             "text_material": args.text_material,
             "text_catalog_path": str(catalog_path.resolve()) if catalog_path else None,

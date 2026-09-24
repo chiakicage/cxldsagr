@@ -1,8 +1,10 @@
-"""Load user identities and heat independently of request text."""
+"""Load or synthesize user heat independently of request text."""
 
 from __future__ import annotations
 
 import csv
+import hashlib
+import io
 import math
 import random
 from collections import Counter
@@ -11,11 +13,104 @@ from pathlib import Path
 
 import ijson
 
+from .scheduling import _integer
+
+DEFAULT_HEAT_CURVES = Path(__file__).resolve().parent / "analysis" / "heat_curves.csv"
+
 
 @dataclass
 class HeatPopulation:
     weights: dict[int, float]
     metadata: dict
+
+    @classmethod
+    def from_curve(
+        cls,
+        path: str | Path = DEFAULT_HEAT_CURVES,
+        *,
+        dataset: str = "beauty",
+        field: str = "interaction_count",
+        num_users: int = 1000,
+        seed: int = 42,
+    ) -> HeatPopulation:
+        """Approximate ranked heat using cumulative-traffic curve increments.
+
+        Each synthetic user receives C(i/N) - C((i-1)/N), where C is the
+        piecewise-linear curve with origin (0, 0). The seed shuffles these
+        weights across synthetic IDs; it does not change the distribution.
+        """
+        _integer("num_users", num_users, 1)
+        _integer("seed", seed)
+        path = Path(path)
+        raw = path.read_bytes()
+        reader = csv.DictReader(io.StringIO(raw.decode("utf-8")))
+        required = {"dataset", "field", "user_fraction", "traffic_fraction"}
+        if not required.issubset(reader.fieldnames or []):
+            raise ValueError(f"{path}: missing curve columns {sorted(required)}")
+        points = [(0.0, 0.0)]
+        matched = 0
+        previous_slope = math.inf
+        for line, row in enumerate(reader, 2):
+            if row["dataset"] != dataset or row["field"] != field:
+                continue
+            try:
+                x, y = float(row["user_fraction"]), float(row["traffic_fraction"])
+                if not math.isfinite(x) or not math.isfinite(y):
+                    raise ValueError("curve fractions must be finite")
+                matched += 1
+                if matched == 1 and (x, y) == (0.0, 0.0):
+                    continue
+                px, py = points[-1]
+                if not (px < x <= 1 and py < y <= 1):
+                    raise ValueError("curve fractions must increase strictly within [0, 1]")
+                slope = (y - py) / (x - px)
+                if slope > previous_slope and not math.isclose(
+                    slope, previous_slope, rel_tol=1e-8, abs_tol=1e-10
+                ):
+                    raise ValueError("ranked traffic curve must be concave")
+                points.append((x, y))
+                previous_slope = slope
+            except (ValueError, TypeError) as exc:
+                raise ValueError(f"{path}:{line}: {exc}") from exc
+        if len(points) == 1:
+            raise ValueError(f"{path}: no curve for {dataset}/{field}")
+        if points[-1] != (1.0, 1.0):
+            raise ValueError(f"{path}: curve must end at (1, 1)")
+
+        ranked = []
+        segment = 1
+        previous = 0.0
+        for rank in range(1, num_users + 1):
+            fraction = rank / num_users
+            while points[segment][0] < fraction:
+                segment += 1
+            left_x, left_y = points[segment - 1]
+            right_x, right_y = points[segment]
+            cumulative = left_y + (right_y - left_y) * ((fraction - left_x) / (right_x - left_x))
+            weight = cumulative - previous
+            if not math.isfinite(weight) or weight <= 0:
+                raise ValueError("curve interpolation produced a nonpositive user weight")
+            ranked.append(weight)
+            previous = cumulative
+        random.Random(f"{seed}:curve-population").shuffle(ranked)
+        weights = dict(enumerate(ranked))
+        return cls(
+            weights,
+            {
+                "path": str(path.resolve()),
+                "sha256": hashlib.sha256(raw).hexdigest(),
+                "dataset": dataset,
+                "field": field,
+                "synthetic": True,
+                "method": "piecewise_linear_cumulative_increments",
+                "curve_points": len(points) - 1,
+                "selected_users": num_users,
+                "seed": seed,
+                "selection": "synthetic_population",
+                "selected_weight_sum": math.fsum(weights.values()),
+                "user_identity": "synthetic IDs 0..N-1; seeded shuffle of ranked weights",
+            },
+        )
 
     @classmethod
     def load(

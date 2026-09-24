@@ -104,3 +104,6 @@ python -m models.nosa.infer \
   --prompt "请用一句话解释 KV cache 的作用。" \
   --disable-thinking --max-new-tokens 64 --prefill-chunk-size 8
 ```
+
+共享 GR 请求生成使用 [request_format.py](request_format.py)：NOSA 聊天模板、tokenizer 与请求预算适配。
+用法见 [GR 生成器](../../GR/README.md)。

@@ -20,10 +20,10 @@ from experiments.validate_gr_numerics import (
     validate_index,
 )
 from GR.heat import HeatPopulation
+from GR.input_generator import DEEPSEEK_ITEM_LENGTHS as DEFAULT_ITEM_LENGTHS
+from GR.input_generator import DEEPSEEK_PREFIX as PREFIX
+from GR.input_generator import DEEPSEEK_USER_LENGTHS as DEFAULT_USER_LENGTHS
 from GR.input_generator import (
-    DEFAULT_ITEM_LENGTHS,
-    DEFAULT_USER_LENGTHS,
-    PREFIX,
     InputGenerator,
     TextConfig,
 )
@@ -49,7 +49,9 @@ def generate_group(root, model, h, u, new_lengths):
         generator = InputGenerator(
             HeatPopulation({u: 1.0}, {"source": "independent-content matrix"}),
             tokenizer,
+            model="deepseek_v32",
             text_config=TextConfig(
+                max_input_tokens=1048576 + 4096,
                 user_lengths=(h - instruction,),
                 user_probabilities=(1.0,),
                 item_lengths=(n + instruction,),

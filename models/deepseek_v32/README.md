@@ -42,3 +42,6 @@ uv sync --group sm120
 benchmark、profile 与 GR checkpoint 层实验见 [`experiments/`](../../experiments/README.md)：
 [decode 实验](../../experiments/deepseek_v32_decode.md)、
 [extend 实验](../../experiments/deepseek_v32_extend.md)。
+
+共享 GR 请求生成使用 [request_format.py](request_format.py)：DeepSeek 历史请求模板与长上下文预算适配。
+用法见 [GR 生成器](../../GR/README.md)。
