@@ -227,7 +227,7 @@ touch_all_pages(ptr, bytes);
 cudaHostRegister(ptr, bytes, cudaHostRegisterMapped);
 ```
 
-详细数据见 `docs/gpu_cpu_pcie_bandwidth_root_cause.md`。
+详细数据见 `experiments/legacy/deepseek_v32/docs/gpu_cpu_pcie_bandwidth_root_cause.md`。
 
 ### GPU Direct `ld.global` Host Memory
 
@@ -251,4 +251,4 @@ C++ 普通 `uint4` load 和显式 PTX `ld.global.v4.u32` 基本一致，所以�
 
 所以 direct GPU read 的当前最佳是 `~39.4 GB/s`，仍低于 copy engine 的 `cudaMemcpy` H2D `~44-46 GB/s` 和 D2H `~53 GB/s`。因此 dense bulk transfer 还是应优先 staging/copy；direct mapped load 更适合 sparse/on-demand 访问。
 
-详细结果见 `docs/gpu_host_direct_ld_results.md`（原 `gpu-benches/gpu-host-direct-ld/` 源码已移出仓库）。
+详细结果见 `experiments/legacy/deepseek_v32/docs/gpu_host_direct_ld_results.md`（原 `gpu-benches/gpu-host-direct-ld/` 源码已移出仓库）。

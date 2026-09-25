@@ -50,7 +50,7 @@ else:
         quantize_index,
     )
 
-CONFIG_PATH = ROOT / "docs" / "config.json"
+CONFIG_PATH = ROOT / "experiments" / "legacy" / "deepseek_v32" / "docs" / "config.json"
 BLOCK_SIZE = 64
 DECODE_TOKEN_LIMIT = 64
 

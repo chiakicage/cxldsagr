@@ -122,6 +122,8 @@ def generate(
     """Run one request, with chunked prefill and one-token cached decoding."""
     import torch
 
+    from executor.model_executor import ModelExecutor
+
     _validate_generation_options(max_new_tokens, prefill_chunk_size, temperature, top_p)
     if input_ids.ndim != 1 or input_ids.numel() == 0 or input_ids.dtype != torch.long:
         raise ValueError("input_ids must be a nonempty 1-D torch.long tensor")
@@ -146,32 +148,37 @@ def generate(
             torch.cuda.synchronize(device)
 
     model.eval()
-    cache = model.new_cache(max_seq_len)
+    executor = ModelExecutor(model, chunk_size=prefill_chunk_size)
+    cache = executor.allocate(max_seq_len)
     generated_ids = []
     decode_steps = 0
     stopped_on_eos = False
-    with torch.inference_mode():
-        synchronize()
-        prefill_start = time.perf_counter()
-        for start in range(0, prompt_tokens, prefill_chunk_size):
-            logits = model(input_ids[start : start + prefill_chunk_size], cache, logits_to_keep=1)[
-                -1
-            ]
-        synchronize()
-        prefill_seconds = time.perf_counter() - prefill_start
-        decode_start = time.perf_counter()
-        for step in range(max_new_tokens):
-            token = _sample_token(logits, temperature=temperature, top_p=top_p, generator=generator)
-            generated_ids.append(token)
-            if token in eos_ids:
-                stopped_on_eos = True
-                break
-            if step + 1 < max_new_tokens:
-                token_ids = torch.tensor([token], device=device, dtype=torch.long)
-                logits = model(token_ids, cache, logits_to_keep=1)[-1]
-                decode_steps += 1
-        synchronize()
-        decode_seconds = time.perf_counter() - decode_start
+    try:
+        with torch.inference_mode():
+            synchronize()
+            prefill_start = time.perf_counter()
+            logits = executor.prefill(input_ids, cache, output="logits", logits_to_keep=1)[-1]
+            synchronize()
+            prefill_seconds = time.perf_counter() - prefill_start
+            decode_start = time.perf_counter()
+            for step in range(max_new_tokens):
+                token = _sample_token(
+                    logits, temperature=temperature, top_p=top_p, generator=generator
+                )
+                generated_ids.append(token)
+                if token in eos_ids:
+                    stopped_on_eos = True
+                    break
+                if step + 1 < max_new_tokens:
+                    token_ids = torch.tensor([token], device=device, dtype=torch.long)
+                    logits = executor.extend(token_ids, cache, output="logits", logits_to_keep=1)[
+                        -1
+                    ]
+                    decode_steps += 1
+            synchronize()
+            decode_seconds = time.perf_counter() - decode_start
+    finally:
+        executor.release(cache)
     return generated_ids, {
         "prompt_tokens": prompt_tokens,
         "generated_tokens": len(generated_ids),
@@ -206,6 +213,16 @@ def _build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> None:
     parser = _build_parser()
     args = parser.parse_args(argv)
+    if not __package__:
+        script_dir = Path(__file__).resolve().parent
+        repo_root = script_dir.parents[1]
+        # A local cache.py/layers.py beats a namespace directory even when the
+        # root appears first. Remove the script directory before runtime imports.
+        sys.path[:] = [str(repo_root)] + [
+            entry
+            for entry in sys.path
+            if Path(entry or ".").resolve() not in (repo_root, script_dir)
+        ]
     try:
         _validate_generation_options(
             args.max_new_tokens, args.prefill_chunk_size, args.temperature, args.top_p
@@ -236,10 +253,7 @@ def main(argv: list[str] | None = None) -> None:
         import flashinfer  # noqa: F401
         import safetensors  # noqa: F401
 
-        if __package__:
-            from .model import NosaConfig, NosaForCausalLM
-        else:
-            from model import NosaConfig, NosaForCausalLM
+        from models.nosa.model import NosaConfig, NosaForCausalLM
 
         config = NosaConfig.from_pretrained(args.model_path)
         tokenizer, tokenizer_config = load_tokenizer(args.model_path)

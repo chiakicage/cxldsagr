@@ -1,5 +1,9 @@
 # GR serving 请求生成器
 
+生成的请求可直接交给 [本地 serving runner](../serving/README.md)：
+`python -m serving.run_gr --count 1`。该框架串行执行 NOSA prefix/extend，生成器本身
+继续只负责输入，不加载模型或持有 KV cache。
+
 生成用于 KV cache 实验的可读请求：**用户历史固定、候选每次更新、token 长度精确控制**。用户热度、文本素材、到达时间分别配置。默认从仓库内的 Beauty 热度曲线生成合成用户，商品名也由规则生成，无需原始数据集。默认使用本地 NOSA-8B tokenizer 和关闭 thinking 的聊天模板，保留显式 DeepSeek V3.2 适配。完整文本编码后，可直接通过 Python 接口获取，也可用命令行输出 JSONL，不加载模型或运行 serving。
 
 ## Python 接口
@@ -176,13 +180,13 @@ DeepSeek tokenizer：/mnt/nfs/share/models/DeepSeek-V3.2/tokenizer.json
 
 ## 三层内容交叉实验
 
-这些历史实验显式选择 `deepseek_v32`，保留原有模板与长度档位。`experiments.sweep_gr_content_matrix` 使用 5 个 history 长度 × 7 个 new 长度 × 3 份 history × 3 份 item，共 315 份输入，各测第 0/1/2 层，共 945 组层级结果。每个 history 长度下的三份内容固定；同一 item 长度的三份候选内容在不同 history 间复用，通过 SHA-256 校验独立组合。
+这些历史实验显式选择 `deepseek_v32`，保留原有模板与长度档位。`experiments.legacy.deepseek_v32.sweep_gr_content_matrix` 使用 5 个 history 长度 × 7 个 new 长度 × 3 份 history × 3 份 item，共 315 份输入，各测第 0/1/2 层，共 945 组层级结果。每个 history 长度下的三份内容固定；同一 item 长度的三份候选内容在不同 history 间复用，通过 SHA-256 校验独立组合。
 
 测量边界沿用 KV 实验口径：history 包含 23-token 固定指令，new 是完整候选后缀。因此测量配置将 generator 的 user 预算设为 `history - instruction_tokens`，item 预算设为 `new + instruction_tokens`，总 token 数和实际 KV 边界精确匹配。
 
 ```bash
-env PATH="$PWD/.venv/bin:$PATH" .venv/bin/python -m experiments.sweep_gr_content_matrix
-.venv/bin/python -m experiments.report_gr_content_matrix
+env PATH="$PWD/.venv/bin:$PATH" .venv/bin/python -m experiments.legacy.deepseek_v32.sweep_gr_content_matrix
+.venv/bin/python -m experiments.legacy.deepseek_v32.report_gr_content_matrix
 ```
 
-结果和回放索引在 `GR/generated/content_matrix/`，报告见 [三层 KV 命中](../docs/extend_step_profile/gr_multilayer_kv_hits.md)。
+结果和回放索引在 `GR/generated/content_matrix/`，报告见 [三层 KV 命中](../experiments/legacy/deepseek_v32/docs/extend_step_profile/gr_multilayer_kv_hits.md)。

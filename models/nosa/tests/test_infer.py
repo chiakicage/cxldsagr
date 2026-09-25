@@ -1,6 +1,11 @@
 """Generation boundaries and local tokenizer behavior without model downloads."""
 
 import json
+import os
+import subprocess
+import sys
+import textwrap
+from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
@@ -125,3 +130,49 @@ def test_chat_template_special_tokens_and_options(tokenizer_files):
     ) == [1, 7, 5, 8, 3, 5, 6, 4, 5, 9]
     with pytest.raises(ValueError, match="require chat mode"):
         encode_prompt(tokenizer, config, "hello", raw_prompt=True, disable_thinking=True)
+
+
+def test_direct_script_imports_canonical_runtime_with_root_already_on_pythonpath(tmp_path):
+    root = Path(__file__).resolve().parents[3]
+    missing_model = tmp_path / "missing-checkpoint"
+    code = textwrap.dedent(
+        """
+        import runpy
+        import sys
+        import types
+        from pathlib import Path
+
+        import torch
+
+        root, missing_model = map(Path, sys.argv[1:])
+        script = root / "models/nosa/infer.py"
+        assert str(root) in sys.path
+        sys.path.insert(0, str(script.parent))
+        torch.cuda.is_available = lambda: True
+        torch.cuda.current_device = lambda: 0
+        torch.cuda.set_device = lambda device: None
+        torch.cuda.is_bf16_supported = lambda: True
+        sys.modules["flashinfer"] = types.ModuleType("flashinfer")
+        sys.argv = [str(script), "--model-path", str(missing_model), "--prompt", "test"]
+        try:
+            runpy.run_path(str(script), run_name="__main__")
+        except SystemExit as exc:
+            assert exc.code == 1
+        else:
+            raise AssertionError("The missing checkpoint should fail after runtime import")
+        assert sys.path[0] == str(root)
+        assert "models.nosa.model" in sys.modules
+        assert "model" not in sys.modules
+        assert Path(sys.modules["cache.manager"].__file__).resolve() == root / "cache/manager.py"
+        """
+    )
+    result = subprocess.run(
+        [sys.executable, "-c", code, str(root), str(missing_model)],
+        cwd=tmp_path,
+        env={**os.environ, "PYTHONPATH": str(root), "PYTHONDONTWRITEBYTECODE": "1"},
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    assert str(missing_model / "config.json") in result.stderr
+    assert "missing or incompatible dependency" not in result.stderr

@@ -2,11 +2,22 @@
 
 此目录提供 NOSA checkpoint 的单 GPU 文本推理，目标平台为 SM90 / Hopper。
 当前 attention 使用 FlashInfer **Full Attention**，支持分块 prefill、KV cache 和逐 token decode；
-尚未实现 sparse block selection、KV offloading 或批量调度。
+支持 [GR 本地串行执行](../../serving/README.md)，尚未实现 sparse block selection、
+KV offloading 或批量调度。
 
-- [model.py](model.py)：模型配置、权重加载、LongRoPE、模型前向与 KV cache。
+- [model.py](model.py)：模型参数树、权重加载与前向；保留原有导入接口。
+- [config.py](config.py)、[rotary.py](rotary.py)：NOSA 配置与 LongRoPE。
+- [layers.py](layers.py)：NOSA projection、attention 与 decoder 组合。
+- [cache.py](cache.py)：NOSA KV 布局及 resident session 适配。
+- [indexer.py](indexer.py)：64-token block、1 sink + 16 local + 47 top-k 策略与未实现入口。
 - [infer.py](infer.py)：本地 tokenizer、chat template、采样与命令行入口。
 - 现有 DeepSeek 实验见 [DeepSeek V3.2](../deepseek_v32/README.md)。
+
+普通 RMSNorm / SwiGLU 与 attention 契约见 [共享层](../../layers/README.md)，FlashInfer
+调用见 [算子](../../operators/README.md)。[执行器](../../executor/README.md) 统一分块前向，
+[缓存管理器](../../cache/README.md) 管理逐层写入、有效长度提交及请求释放。
+main attention 接收逻辑块选择与 cache access，为后续 SM90 算子内部 fetch/compute overlap
+保留边界；当前 dense 路径不执行 indexer，也没有异步搬运或 DRAM backing。
 
 ## 模型与 attention 语义
 
@@ -107,3 +118,19 @@ python -m models.nosa.infer \
 
 共享 GR 请求生成使用 [request_format.py](request_format.py)：NOSA 聊天模板、tokenizer 与请求预算适配。
 用法见 [GR 生成器](../../GR/README.md)。
+预热后的单请求性能测量见 [GR 性能报告](../../experiments/nosa_gr_65536_1024/README.md)，
+可通过 `bash experiments/nosa_gr_65536_1024/scripts/run.sh <run_id>` 复现测量和模块 MFU。
+
+GR 前向使用 `model(input_ids, cache, return_hidden=True)` 返回本次调用所有输入 token 的最终
+normalized hidden states，跳过 LM head；不与 `logits_to_keep` 同时使用。
+生成 CLI 仍默认返回 logits。GR 性能按完整 prefill、固定前缀 prefill、候选 extend 测量，
+不执行自回归生成，也不使用 Decode tok/s、TTFT 或 TPOT。
+
+分块执行 `executor.model_executor.run_chunks` 返回最后一个 chunk 的输出；serving 从中
+取末 token hidden，不累积整条请求的全部 hidden。每请求独立创建和释放 cache；同一请求
+的 candidate extend 使用其已完成的 stable prefix，当前没有跨请求的用户前缀缓存。
+
+2026-09-25 在 framework worktree 完成的历史验证见 [框架验证记录](../../experiments/nosa_framework_refactor/README.md)：
+当时 108 项 CPU 回归通过，SM90 小模型数值/profile、真实 NOSA-8B GR 前向和直接脚本生成通过。
+该记录与上方 2026-09-24 的初版推理验证分别保留；合并未重跑 GPU 验证，
+这些结果也不表示 sparse/offloading 已实现。

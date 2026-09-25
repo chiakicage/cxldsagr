@@ -11,7 +11,7 @@ KV offload 路径。DeepGEMM 切换 `nv_dev` 后尚未重新验证模型运行�
 | [deepseek_v32_extend_kernels.py](deepseek_v32_extend_kernels.py) | 融合 FP8 量化与 cache 追加的 Triton kernel |
 | [deepseek_v32_ops.py](deepseek_v32_ops.py) | FlashInfer Norm / RoPE 与 indexer 量化适配 |
 | [gr_index_selection.py](gr_index_selection.py) | 限制 logits 显存的分批因果 top-k 选择 |
-| [tests/](tests/) | ops 与 extend 的数学、cache / indexer 验证 |
+| [tests/](tests) | ops 与 extend 的数学、cache / indexer 验证 |
 
 ## 运行
 
@@ -26,7 +26,7 @@ uv sync --group sm120
 ```
 
 `deepseek_v32_decode.py` 与 `deepseek_v32_extend.py` 同时支持 `-m` 入口和直接脚本入口。
-两者默认读取 `docs/config.json` 的 attention / indexer 配置。
+两者默认读取 `experiments/legacy/deepseek_v32/docs/config.json` 的 attention / indexer 配置。
 
 ## KV 与 RoPE 语义
 
@@ -40,8 +40,8 @@ uv sync --group sm120
 ## 相关实验
 
 benchmark、profile 与 GR checkpoint 层实验见 [`experiments/`](../../experiments/README.md)：
-[decode 实验](../../experiments/deepseek_v32_decode.md)、
-[extend 实验](../../experiments/deepseek_v32_extend.md)。
+[decode 实验](../../experiments/legacy/deepseek_v32/deepseek_v32_decode.md)、
+[extend 实验](../../experiments/legacy/deepseek_v32/deepseek_v32_extend.md)。
 
 共享 GR 请求生成使用 [request_format.py](request_format.py)：DeepSeek 历史请求模板与长上下文预算适配。
 用法见 [GR 生成器](../../GR/README.md)。

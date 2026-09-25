@@ -6,27 +6,76 @@
 ## 目录与职责
 
 - 自有硬件算子放在 `operators/sm90/`、`operators/sm120/`；共享第三方库放在 `3rdparty/`。
-- 模型结构、稀疏选择语义、KV 表示和运行适配放在 `models/deepseek_v32/`、
-  `models/nosa/`。`models/` 只保留模型推理相关代码及其测试；接入另一架构时复用对应
-  模型目录，不按架构复制模型树。
-- `experiments/` 保存实验脚本（measure / sweep / report / analyze / export / profile /
-  render / validate）、实验运行记录与实验文档。DeepSeek 专用的 GR checkpoint / indexer
-  实验放在 `experiments/`，不混入 `models/`。
+- `operators/` 的共享适配只封装现有后端调用；`layers/` 保存共享普通层及 indexer /
+  main attention 契约。共享层接收显式维度和参数，不反向导入模型配置。
+- 模型结构、权重加载、位置编码、稀疏选择语义、KV 布局适配放在
+  `models/deepseek_v32/`、`models/nosa/`。`models/` 只保留模型推理相关代码及其测试；
+  接入另一架构时复用对应模型目录，不按架构复制模型树。此次分层仅接入 NOSA，
+  DeepSeek V3.2 / SM120 保留既有组织。
+- `executor/` 负责通用模型分块执行和输出选择，不读取 GR 请求；`serving/` 负责 GR
+  请求适配及串行请求生命周期，不包含网络服务或 CXL/RDMA 依赖。
+- `cache/` 管理请求级缓存分配、逐层写入、提交、重置和释放。模型提供 KV 布局和
+  兼容信息；所有模型层成功执行后统一推进有效长度。当前后端仅为模型设备上的
+  resident cache，CPU 用于参考测试；local DRAM backing 与 HBM caching 尚未实现。
+- main attention 接收逻辑块选择、cache access 与执行上下文，不能把「全部 KV
+  已完成搬入 HBM」作为通用前置条件。未来 fetch/compute overlap 由 SM90 算子实现；
+  本轮 sparse/indexer/offload 入口只预留接口，调用未实现路径须明确失败。
+- NOSA 的预留策略为 64-token block、最多 64 块：1 sink + 16 causal local + 47 top-k。
+  原始 indexer 的评分、辅助状态和 sparse 数值路径后续接入，不借接口重构改变 dense 基线。
+- `experiments/` 按实验独立目录维护，具体布局见下节。DeepSeek 专用 GR checkpoint /
+  indexer 等旧实验整体归档在 `experiments/legacy/deepseek_v32/`，不混入 `models/`。
 - `GR/` 保存共享请求内容、用户热度和调度工具。
 - 本地权重与 tokenizer 放在 `weights/`（已被 `.gitignore` 排除），例如
   `weights/DeepSeek-V3.2/`；与代码目录 `models/` 分离。
 - 不将 DeepSeek V3.2 的 656 B packed MLA record、indexer 或 tokenizer 作为通用
   offloading / NOSA 的固定假设；新增模型时显式适配其稀疏访问语义和 KV 布局。
 - 修改目录时同步更新 Python 导入、`-m` 子进程入口、构建路径、配置和文档链接。
-  保留 `weights/`、`GR/generated/`、`docs/` 的现有数据和报告路径；不删除历史实验文档。
+  保留 `weights/` 和 GR 共享资源；实验专用产物迁入对应实验的 `output/`，迁移时不丢弃
+  历史报告和数据。`docs/` 保留跨实验设计文档，旧 DeepSeek / SM120 报告随 legacy 归档。
+
+## 实验目录与产物
+
+- 每个实验使用一个有明确目的的目录 `experiments/<experiment>/`，禁止继续在
+  `experiments/` 根目录堆放测量脚本、报告或 JSON/CSV。根 `README.md` 只维护实验入口索引。
+- 每个实验必须有 `README.md`，说明实验目的、实验内容与测量边界、运行方式及调用模块、
+  实验结果和结论；未运行的实验明确写未运行，不把路径迁移或静态检查当成新的测量结果。
+  记录硬件、依赖、输入形状、精度、预热/重复次数、指标定义和已有数据的 run ID。
+- 使用以下统一结构，不为目录整理新增 `__init__.py` 或根包：
+
+  ```text
+  experiments/<experiment>/
+    README.md
+    src/                 实验的 measure / profile / analyze / report 等 Python 代码
+    scripts/             可复现的运行脚本，负责参数组合、环境和日志重定向
+    tests/               本实验的单元测试
+    output/              默认全部不进 Git，由运行脚本自动创建
+      log/<run_id>/      stdout 日志；stderr 使用独立文件记录
+      data/<run_id>/     JSON/JSONL/CSV/NPY、整理后的表格、分析结果、导出的 SQLite 等
+      profile/<run_id>/  nsys/nsys-rep、ncu、Chrome trace 等原始 profiler 产物
+  ```
+
+- 整理好的数据也放 `output/data/`，不能因为是汇总 CSV/JSON 就放回源码目录或默认提交。
+  README 保存必要的结果表和结论；忽略的产物使用普通代码路径，不创建仓库文档链接。
+  源码快照、运行参数和迁移索引属于复现数据，放 `output/data/`。
+- `src/` 不实现 shell 调度；`scripts/` 只编排 `python -m ...` / nsys 等入口，不复制模型
+  计算逻辑。模型推理代码及其测试仍归 `models/`，共享 GR 生成器及热度曲线仍归 `GR/`。
+  复用其他实验的工具时使用显式导入，并在 README 的调用模块中写明依赖。
+- 默认从仓库根目录执行，Python 实验入口为
+  `python -m experiments.<experiment>.src.<module>`；运行脚本应能定位仓库根目录，
+  支持 `--help`，创建分类输出目录并保留子进程失败状态。不同运行用不同 run ID，不覆盖旧结果。
+- 旧 DeepSeek 及配套 SM120 实验集中保存在 `experiments/legacy/deepseek_v32/`，
+  作为整体归档，不强行套用新目录层级或拆分历史数据；仅修复导入、入口和导航链接。
+  历史报告中的原命令与原测量含义保留，当前运行方式写在归档 README。
+  其他已撤回实验在 `legacy/` 单独归档，明确撤回原因，不混入有效结果。
 
 ## 脚本与环境
 
 - 暂时不把 cxldsagr 做成 Python 包：保留 `[tool.uv] package = false`，不新增根包、
-  安装入口或打包配置。`models/`、`experiments/` 与 `operators/` 保持源码目录，不为
-  目录整理添加 `__init__.py`；算子子项目保留自己的扩展包及导入名称。
-- 实验命令默认从仓库根目录运行。保留已支持的直接脚本入口；跨目录脚本使用
-  `python -m models.<模型>.<脚本>` 或 `python -m experiments.<脚本>`，无需安装仓库。
+  安装入口或打包配置。模型、实验、算子及 `layers/`、`executor/`、`cache/`、
+  `serving/` 保持源码目录，不为目录整理添加 `__init__.py`；算子子项目保留自己的
+  扩展包及导入名称。
+- 实验命令默认从仓库根目录运行。模型直接脚本入口保持可用；实验整理后统一使用上节的新
+  模块入口，不在旧目录遗留兼容壳文件。旧命令只在历史运行记录中保留，无需安装仓库。
 - 用 `pyproject.toml` 和 `uv.lock` 管理环境，依赖改动同步维护两者。当前 SM120 扩展
   放入显式 `sm120` 依赖组，基础环境不默认安装；未接入后端前不虚设 SM90 安装组。
 
@@ -55,8 +104,8 @@
   已完成 GPU 验证。明确区分已运行的验证、静态检查和未验证路径。
 - 历史测量报告里的命令行和依赖路径（例如已移出仓库的 `gpu-benches/`）保留原样，
   它们记录当时的运行方式；只修正导航性链接和「当前文件在哪」的指向。
-  被 `.gitignore` 排除的运行产物（如 `docs/model_extend_v32_*.json`、
-  `docs/extend_step_profile/summary.json`）在文档里写成普通代码路径，不做链接。
+  被 `.gitignore` 排除的运行产物（如实验 `output/data/`、`output/profile/` 下的文件）
+  在文档里写成普通代码路径，不做链接。
 - 按改动选择验证：路径迁移检查导入、子进程入口和文档链接，并运行可用的 CLI /
   现有测试；算子或数值改动运行相应硬件和正确性测试。缺少依赖或 GPU 时如实记录。
 - Python 格式遵循根 `pyproject.toml` 的 Ruff 配置；第三方和独立算子子项目遵循

@@ -1,39 +1,26 @@
-# 实验
+# 实验索引
 
-实验脚本、运行记录与实验文档。模型推理代码见 [`models/`](../models/README.md)，
-历史测量报告与性能记录仍在 [`docs/`](../docs/)。
+每个实验的目的、内容、调用模块、运行方式、结果和结论均在其 README 中。
+源码在 `src/`，运行脚本在 `scripts/`，单元测试在 `tests/`；运行产物统一归 `output/`，默认不进 Git。
 
-| 入口 | 用途 |
-| --- | --- |
-| [deepseek_v32_decode.md](deepseek_v32_decode.md)、[deepseek_v32_extend.md](deepseek_v32_extend.md) | synthetic attention benchmark、执行流程与测量结果 |
-| `profile_deepseek_v32_*.py`、`render_extend_timeline.py` | profile 与时间线渲染 |
-| `measure_gr_*.py`、`sweep_gr_*.py` | checkpoint 层与稀疏索引实验 |
-| `report_gr_*.py`、`export_gr_kv_hits.py`、`analyze_gr_kv_coverage.py` | 实验汇总、KV 命中分布与回放输入导出 |
-| `validate_gr_numerics.py`、[tests/](tests/) | GR 数值参考与 checkpoint 数学验证 |
-| [deepseek_v32_two_dense.md](deepseek_v32_two_dense.md) | embedding + 两层 dense 实验权重说明 |
-
-## 运行
-
-从仓库根目录执行。跨目录脚本使用 `-m experiments.<脚本>`，无需安装仓库：
+| 实验 | 内容与状态 | 仓库根目录运行入口 |
+| --- | --- | --- |
+| [NOSA GR 65536 + 1024](nosa_gr_65536_1024/README.md) | instruction + 历史 65536、候选 1024；nsys / 模块 MFU | `bash experiments/nosa_gr_65536_1024/scripts/run.sh <run_id>` |
+| [NOSA framework 重构验证](nosa_framework_refactor/README.md) | serving / executor / cache 分层与 profiler 接线；保留原 worktree 验证记录 | `bash experiments/nosa_framework_refactor/scripts/run.sh <run_id> cpu` |
+| [旧 DeepSeek / SM120](legacy/deepseek_v32/README.md) | 旧脚本、测试和历史报告整体归档 | 见归档 README |
+| [已撤回的 NOSA 多长度前向试测](legacy/nosa_gr_forward/README.md) | 保留 framework worktree 历史源码/报告，不恢复为当前有效结果 | 见归档 README |
+| [已撤回的 NOSA 生成试测](legacy/nosa_generation/README.md) | 固定 64-token 生成不适用 GR，仅供追溯 | 见归档 README |
 
 ```bash
-python3 scripts/prepare_3rdparty.py --init
-uv sync --group sm120 --group analysis
-
-.venv/bin/python -m experiments.sweep_gr_content_matrix
-.venv/bin/python -m experiments.report_gr_content_matrix
-.venv/bin/python -m experiments.measure_gr_mla_cache_union
-.venv/bin/python -m pytest experiments/tests -q
+bash experiments/nosa_gr_65536_1024/scripts/run.sh --help
+.venv/bin/python -m pytest experiments/nosa_gr_65536_1024/tests -q
+bash experiments/nosa_framework_refactor/scripts/run.sh --help
 ```
 
-逐步骤 profile 与时间线：
+新运行的 stdout/stderr 在 `output/log/<run_id>/`，原始与整理后的数据在
+`output/data/<run_id>/`，nsys / Chrome trace 在 `output/profile/<run_id>/`。
+旧运行使用 `20260925` 标识，修正语义的 64K+1K 运行使用 `semantic_65536_1024_20260925`；历史文件原内容未改写，旧路径到新路径的对应关系在各实验的
+`output/data/migration.json`。未保存过的历史 stdout 不补造。
 
-```bash
-PATH="$PWD/.venv/bin:$PATH" .venv/bin/python -m experiments.profile_deepseek_v32_extend \
-  --history-lens 4096,65536 --new-tokens 4096 --chunk-size 512 --iters 5
-.venv/bin/python -m experiments.render_extend_timeline
-```
-
-GR 实验默认从 `weights/DeepSeek-V3.2/` 读取权重与 tokenizer，见
-[权重说明](deepseek_v32_two_dense.md)。实验数据输出到 `GR/generated/`（Git 忽略），
-汇总报告输出到 `docs/`。
+环境准备见 [项目 README](../README.md)。模型推理见 [models](../models/README.md)，
+共享请求和热度资源见 [GR](../GR/README.md)，目录维护规则见 [AGENTS.md](../AGENTS.md)。

@@ -33,6 +33,7 @@ compile_commands.json
 .triton/
 
 # Raw profiler output (keep scripts and result summaries)
+/experiments/**/output/
 *.trace.json
 /docs/extend_step_profile/*
 !/docs/extend_step_profile/*.md
