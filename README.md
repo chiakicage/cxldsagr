@@ -8,7 +8,8 @@ memory 等显存之外的位置，GPU 根据稀疏访问需求读取或搬入所
 已有 DeepSeek V3.2 / SM120 的 attention decode、extend 和部分 checkpoint 层实验；
 NOSA 已提供基于 FlashInfer Full Attention 的单 GPU 模型推理，以及直接消费 GR 输入的
 本地串行执行框架。模型层、执行器与缓存管理已分离，当前 KV 全部驻留 HBM；
-NOSA indexer、sparse attention 和 local DRAM offloading 仅预留接口。DeepGEMM 使用上游 `nv_dev`
+NOSA 已提供 query-aware indexer 参考实现与 GR 选块容量实验；sparse attention 和
+local DRAM offloading 仅预留接口。DeepGEMM 使用上游 `nv_dev`
 子模块，其依赖更新尚未经过 GPU 构建和模型验证。
 
 ```text

@@ -2,14 +2,15 @@
 
 此目录提供 NOSA checkpoint 的单 GPU 文本推理，目标平台为 SM90 / Hopper。
 当前 attention 使用 FlashInfer **Full Attention**，支持分块 prefill、KV cache 和逐 token decode；
-支持 [GR 本地串行执行](../../serving/README.md)，尚未实现 sparse block selection、
-KV offloading 或批量调度。
+支持 [GR 本地串行执行](../../serving/README.md)，默认推理不启用 sparse selection。
+query-aware block indexer 已有独立参考实现，sparse attention、KV offloading 与批量调度尚未实现。
 
 - [model.py](model.py)：模型参数树、权重加载与前向；保留原有导入接口。
 - [config.py](config.py)、[rotary.py](rotary.py)：NOSA 配置与 LongRoPE。
 - [layers.py](layers.py)：NOSA projection、attention 与 decoder 组合。
 - [cache.py](cache.py)：NOSA KV 布局及 resident session 适配。
-- [indexer.py](indexer.py)：64-token block、1 sink + 16 local + 47 top-k 策略与未实现入口。
+- [indexer.py](indexer.py)：64-token block，默认 1 sink + 16 local + 47 query-aware top-k；
+  支持 32-block 预算下的 1 sink + 16 local + 15 query-aware top-k。
 - [infer.py](infer.py)：本地 tokenizer、chat template、采样与命令行入口。
 - 现有 DeepSeek 实验见 [DeepSeek V3.2](../deepseek_v32/README.md)。
 
@@ -47,6 +48,17 @@ NOSA 的 `self_attn.A` 与 `self_attn.delta.weight` 在加载时明确跳过。
 原 sparse 分支中这两个参数既用于块选择，也用于 CIS attention 加权；当前两者均不启用，
 语义对应上游模型的普通 dense `eager` / `flash_attention_2` 分支，而非仅移除 sparse mask。
 因此当前结果是使用 NOSA 权重的 Full Attention 基线，不表示原 NOSA sparse 推理结果。
+
+`NosaIndexer()` 接受现有 `q/cache_access/context` 契约，在 resident K 上用 FP32
+计算 query-aware 评分，返回 `[query, KV head, block_budget]` 的逻辑 block IDs 与 validity mask。
+默认 `block_budget=64`；使用 `NosaIndexer(block_budget=32)` 可改为 32 块。
+Q/K 均为 RoPE 后张量；K mean compression 为窗口 32、stride 16，各 Q head 先独立
+causal softmax，再按 GQA 分组求和、五窗口 max pooling，最后排除 sink/local 后选择
+剩余的 query-aware top-k：64-block 预算选 47 块，32-block 预算选 15 块。
+local 明确包含当前块及之前 15 块，选择与相同分数的排序均确定。此分支不需要 A/delta。
+非 resident access 明确报错，默认 dense adapter 仍拒绝非空 selection。
+[64K+1K pattern 实验](../../experiments/nosa_indexer_pattern_65536_1024/README.md)
+在 dense 激活上旁路记录 indexer，统计每层各 KV head 对 1K queries 的选块并集及 K+V 容量。
 
 ## 运行
 

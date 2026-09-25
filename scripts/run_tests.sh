@@ -22,6 +22,7 @@ if [[ "$mode" == cpu || "$mode" == all ]]; then
   CUDA_VISIBLE_DEVICES='' .venv/bin/python -m pytest \
     models/nosa/tests cache/tests executor/tests serving/tests GR/tests \
     tests/integration experiments/nosa_gr_65536_1024/tests \
+    experiments/nosa_indexer_pattern_65536_1024/tests \
     -q -rs -p no:cacheprovider
 fi
 if [[ "$mode" == gpu || "$mode" == all ]]; then

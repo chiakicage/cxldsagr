@@ -1,6 +1,6 @@
 """NOSA model assembly, inference, and strict checkpoint loading.
 
-The dense backend is runnable; indexer and SM90 offload backends are reserved.
+The dense backend and reference indexer are runnable; SM90 sparse/offload is reserved.
 """
 
 import json

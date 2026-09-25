@@ -19,9 +19,14 @@
   resident cache，CPU 用于参考测试；local DRAM backing 与 HBM caching 尚未实现。
 - main attention 接收逻辑块选择、cache access 与执行上下文，不能把「全部 KV
   已完成搬入 HBM」作为通用前置条件。未来 fetch/compute overlap 由 SM90 算子实现；
-  本轮 sparse/indexer/offload 入口只预留接口，调用未实现路径须明确失败。
-- NOSA 的预留策略为 64-token block、最多 64 块：1 sink + 16 causal local + 47 top-k。
-  原始 indexer 的评分、辅助状态和 sparse 数值路径后续接入，不借接口重构改变 dense 基线。
+  sparse attention / offload 入口仍只预留接口，调用未实现路径须明确失败。
+- NOSA query-aware indexer 已有 resident K 上的 PyTorch FP32 参考实现：64-token block、
+  默认 `block_budget=64`，1 sink + 16 causal local（含当前块）+ 47 query-aware top-k；
+  支持 `block_budget=32`，保持 1 sink + 16 local，query-aware top-k 改为 15。
+  返回逻辑选择形状为 `[query, KV head, block_budget]`，短上下文的不足位置使用 validity mask。
+  采用 RoPE 后 Q/K、32-token / stride-16 mean compression、逐 Q head softmax、GQA
+  求和与五窗口 max pooling；不启用 query-agnostic / CIS。稀疏数值路径和 offload
+  后续接入；pattern 实验只在 dense 激活上旁路选块，不改变 dense 基线。
 - `tests/` 只保存保证代码正确性的跨模块集成测试代码，`scripts/run_tests.sh`
   负责全局回归编排；模块单元测试仍留在对应模块的 `tests/`。测试与论文实验的目的不同，
   smoke、数值正确性和回归检查不能作为 `experiments/` 的实验或结果。

@@ -418,7 +418,7 @@ def test_indexer_and_main_attention_receive_logical_selection_and_request_state(
     torch.testing.assert_close(model(tokens), expected, atol=3e-6, rtol=3e-5)
 
 
-def test_reserved_backends_fail_explicitly_and_cache_step_is_aborted():
+def test_sparse_attention_backends_fail_explicitly_and_cache_step_is_aborted():
     model = initialized_model()
     cache = model.new_cache(4)
     tokens = torch.tensor([1, 3, 5])
@@ -426,7 +426,7 @@ def test_reserved_backends_fail_explicitly_and_cache_step_is_aborted():
     assert (policy.block_size, policy.block_budget) == (64, 64)
     assert (policy.sink_blocks, policy.local_blocks, policy.topk_blocks) == (1, 16, 47)
     model.indexer = NosaIndexer()
-    with pytest.raises(NotImplementedError, match="NOSA block scoring"):
+    with pytest.raises(NotImplementedError, match="block selection"):
         model(tokens, cache)
     assert cache.length == 0
     model.indexer = None
