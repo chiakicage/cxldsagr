@@ -5,7 +5,7 @@ from torch import nn
 from layers.attention import AttentionContext, ResidentLayerView
 from layers.feed_forward import SwiGLU
 from layers.normalization import RMSNorm
-from models.nosa.rotary import apply_rotary
+from models.nosa.rotary import NosaRotaryEmbedding, apply_rotary_qk
 
 # Aliasing keeps both the old import and profiler isinstance checks meaningful.
 NosaRMSNorm = RMSNorm
@@ -16,25 +16,28 @@ class NosaAttention(nn.Module):
         super().__init__()
         self.config = config
         args = {"device": device, "dtype": dtype, "bias": config.attention_bias}
-        self.q_proj = nn.Linear(
-            config.hidden_size, config.num_attention_heads * config.head_dim, **args
-        )
-        self.k_proj = nn.Linear(
-            config.hidden_size, config.num_key_value_heads * config.head_dim, **args
-        )
-        self.v_proj = nn.Linear(
-            config.hidden_size, config.num_key_value_heads * config.head_dim, **args
+        self.qkv_proj = nn.Linear(
+            config.hidden_size,
+            (config.num_attention_heads + 2 * config.num_key_value_heads) * config.head_dim,
+            **args,
         )
         self.o_proj = nn.Linear(
             config.num_attention_heads * config.head_dim, config.hidden_size, **args
         )
 
-    def forward(self, x, cos, sin, main_attention, cache, layer_idx, *, indexer=None):
+    def forward(
+        self, x, positions, cos_sin_cache, main_attention, cache, layer_idx, *, indexer=None
+    ):
         config = self.config
-        q = self.q_proj(x).view(-1, config.num_attention_heads, config.head_dim)
-        k = self.k_proj(x).view(-1, config.num_key_value_heads, config.head_dim)
-        v = self.v_proj(x).view(-1, config.num_key_value_heads, config.head_dim)
-        q, k = apply_rotary(q, cos, sin), apply_rotary(k, cos, sin)
+        q_width = config.num_attention_heads * config.head_dim
+        kv_width = config.num_key_value_heads * config.head_dim
+        # Split only creates views. RoPE and attention consume the row-strided
+        # Q/K/V directly, without packing or materializing contiguous copies.
+        q, k, v = self.qkv_proj(x).split((q_width, kv_width, kv_width), dim=-1)
+        q = q.view(-1, config.num_attention_heads, config.head_dim)
+        k = k.view(-1, config.num_key_value_heads, config.head_dim)
+        v = v.view(-1, config.num_key_value_heads, config.head_dim)
+        q, k = apply_rotary_qk(q, k, positions, cos_sin_cache)
         if cache is None:
             cache_access = ResidentLayerView(layer_idx, keys=k, values=v)
             start = 0
@@ -73,11 +76,30 @@ class NosaDecoderLayer(nn.Module):
         self.input_layernorm = NosaRMSNorm(config.hidden_size, config.rms_norm_eps, **args)
         self.post_attention_layernorm = NosaRMSNorm(config.hidden_size, config.rms_norm_eps, **args)
 
-    def forward(self, x, cos, sin, main_attention, cache, layer_idx, *, indexer=None):
-        x = x + self.self_attn(
-            self.input_layernorm(x), cos, sin, main_attention, cache, layer_idx, indexer=indexer
+    def forward(
+        self,
+        x,
+        positions,
+        cos_sin_cache,
+        main_attention,
+        cache,
+        layer_idx,
+        *,
+        indexer=None,
+        residual=None,
+    ):
+        # Carry the pending MLP output separately across layers so its addition
+        # can share the next RMSNorm kernel. The first layer starts at embedding.
+        if residual is None:
+            residual = x
+            x = self.input_layernorm(x)
+        else:
+            x, residual = self.input_layernorm(x, residual)
+        x = self.self_attn(
+            x, positions, cos_sin_cache, main_attention, cache, layer_idx, indexer=indexer
         )
-        return x + self.mlp(self.post_attention_layernorm(x))
+        x, residual = self.post_attention_layernorm(x, residual)
+        return self.mlp(x), residual
 
 
 class NosaModel(nn.Module):
@@ -89,3 +111,4 @@ class NosaModel(nn.Module):
             NosaDecoderLayer(config, **args) for _ in range(config.num_hidden_layers)
         )
         self.norm = NosaRMSNorm(config.hidden_size, config.rms_norm_eps, **args)
+        self.rotary = NosaRotaryEmbedding()

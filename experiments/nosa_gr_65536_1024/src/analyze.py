@@ -64,8 +64,16 @@ def analyze(path):
         values.sort(key=lambda event: (event["start"], -event["end"]))
         starts[tid] = [event["start"] for event in values]
     activities = []
+    tables = {
+        row[0] for row in connection.execute("SELECT name FROM sqlite_master WHERE type='table'")
+    }
     for category in ("KERNEL", "MEMCPY", "MEMSET"):
-        for row in connection.execute(f"SELECT * FROM CUPTI_ACTIVITY_KIND_{category}"):
+        table = f"CUPTI_ACTIVITY_KIND_{category}"
+        # Nsight omits optional activity tables entirely when their count is
+        # zero. Strided KV writes, for example, appear as copy kernels.
+        if category != "KERNEL" and table not in tables:
+            continue
+        for row in connection.execute(f"SELECT * FROM {table}"):
             event = dict(row)
             event["category"] = category
             event["name"] = strings[event["demangledName"]] if category == "KERNEL" else category

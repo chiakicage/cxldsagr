@@ -1,6 +1,60 @@
-"""Single-request FlashInfer dense attention adapter."""
+"""Thin adapters for FlashInfer inference kernels."""
 
 import torch
+
+
+def can_use_flashinfer(x: torch.Tensor) -> bool:
+    """Ordinary layers keep the eager path for CPU, FP32 and autograd."""
+    return (
+        x.device.type == "cuda"
+        and x.dtype in (torch.bfloat16, torch.float16)
+        and not torch.is_grad_enabled()
+    )
+
+
+def rmsnorm(x: torch.Tensor, weight: torch.Tensor, eps: float) -> torch.Tensor:
+    from flashinfer.norm import rmsnorm as kernel
+
+    with torch.cuda.device(x.device):
+        return kernel(x, weight, eps=eps)
+
+
+def fused_add_rmsnorm(
+    x: torch.Tensor, residual: torch.Tensor, weight: torch.Tensor, eps: float
+) -> tuple[torch.Tensor, torch.Tensor]:
+    """Overwrite x with normalized output and residual with their sum."""
+    from flashinfer.norm import fused_add_rmsnorm as kernel
+
+    with torch.cuda.device(x.device):
+        kernel(x, residual, weight, eps=eps)
+    return x, residual
+
+
+def silu_and_mul(gate_up: torch.Tensor) -> torch.Tensor:
+    """Consume contiguous [..., gate | up] projections without a packing copy."""
+    from flashinfer.activation import silu_and_mul as kernel
+
+    with torch.cuda.device(gate_up.device):
+        return kernel(gate_up)
+
+
+def apply_rope_with_cos_sin_cache(q, k, positions, cos_sin_cache):
+    """Rotate NHD Q/K in place, preserving packed QKV token-row strides."""
+    from flashinfer.rope import apply_rope_with_cos_sin_cache_inplace
+
+    head_size = q.shape[-1]
+    with torch.cuda.device(q.device):
+        # Flatten only adjacent head/feature axes. These views preserve token
+        # strides and storage offsets; FlashInfer forwards both to the kernel.
+        apply_rope_with_cos_sin_cache_inplace(
+            positions,
+            q.view(q.shape[0], -1),
+            k.view(k.shape[0], -1),
+            head_size,
+            cos_sin_cache,
+            is_neox=True,
+        )
+    return q, k
 
 
 class FlashInferFullAttention:

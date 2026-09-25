@@ -52,18 +52,82 @@ def initialized_model(config=None, *, device="cpu", dtype=torch.float32, attenti
         config or tiny_config(), device=device, dtype=dtype, attention=attention
     )
     generator = torch.Generator(device=device).manual_seed(1234)
+    config = model.config
+    projection_widths = {
+        "qkv_proj": (
+            config.num_attention_heads * config.head_dim,
+            config.num_key_value_heads * config.head_dim,
+            config.num_key_value_heads * config.head_dim,
+        ),
+        "gate_up_proj": (config.intermediate_size, config.intermediate_size),
+    }
+
+    def initialize(parameter, name):
+        values = torch.randn(parameter.shape, generator=generator, device=device) * 0.12
+        if "norm.weight" in name:
+            values += 1
+        parameter.copy_(values)
+
     with torch.no_grad():
         for name, parameter in model.named_parameters():
-            values = torch.randn(parameter.shape, generator=generator, device=device) * 0.12
-            if "norm.weight" in name:
-                values += 1
-            parameter.copy_(values)
+            module_name, field = name.rsplit(".", 1)
+            projection = module_name.rsplit(".", 1)[-1]
+            if projection in projection_widths:
+                if field == "bias":
+                    continue
+                module = model.get_submodule(module_name)
+                offset = 0
+                # Preserve the original logical projection sizes and RNG order:
+                # q.weight, q.bias, k.weight, k.bias, v.weight, v.bias, etc.
+                # CUDA randn consumes Philox state according to each call shape.
+                for width in projection_widths[projection]:
+                    initialize(module.weight.narrow(0, offset, width), name)
+                    if module.bias is not None:
+                        initialize(module.bias.narrow(0, offset, width), module_name + ".bias")
+                    offset += width
+            else:
+                initialize(parameter, name)
     return model.eval()
+
+
+def split_projection_state(config, state):
+    """Recover checkpoint Q/K/V and gate/up tensors independently of the loader."""
+    result = dict(state)
+    q_width = config.num_attention_heads * config.head_dim
+    kv_width = config.num_key_value_heads * config.head_dim
+    for index in range(config.num_hidden_layers):
+        layer = f"model.layers.{index}"
+        for block, packed, names, widths in (
+            (
+                "self_attn",
+                "qkv_proj",
+                ("q_proj", "k_proj", "v_proj"),
+                (q_width, kv_width, kv_width),
+            ),
+            (
+                "mlp",
+                "gate_up_proj",
+                ("gate_proj", "up_proj"),
+                (config.intermediate_size, config.intermediate_size),
+            ),
+        ):
+            for parameter in ("weight", "bias"):
+                key = f"{layer}.{block}.{packed}.{parameter}"
+                if key not in result:
+                    continue
+                parts = result.pop(key).split(widths, dim=0)
+                for name, value in zip(names, parts, strict=True):
+                    split_key = f"{layer}.{block}.{name}.{parameter}"
+                    assert split_key not in result
+                    result[split_key] = value.clone()
+    return result
 
 
 def reference_logits(config, weights, input_ids):
     """Independent FP64 Llama equations; RoPE uses complex multiplication."""
-    weights = {name: tensor.double() for name, tensor in weights.items()}
+    weights = {
+        name: tensor.double() for name, tensor in split_projection_state(config, weights).items()
+    }
 
     def linear(x, name):
         result = x @ weights[name + ".weight"].T
@@ -212,7 +276,17 @@ def write_checkpoint(path, config, state, *, sharded=False):
         save_file(state, path / "model.safetensors")
         return
     names = sorted(state)
-    shards = (names[::2], names[1::2])
+    # Keep each split projection's weight and bias together, while putting
+    # q/k/v and gate/up into different shards to exercise incremental loading.
+    shards = ([], [])
+    for index, name in enumerate(names):
+        if ".k_proj." in name or ".up_proj." in name:
+            shard = 1
+        elif any(f".{projection}." in name for projection in ("q_proj", "v_proj", "gate_proj")):
+            shard = 0
+        else:
+            shard = index % 2
+        shards[shard].append(name)
     mapping = {}
     for index, shard in enumerate(shards, start=1):
         filename = f"model-{index:05d}-of-00002.safetensors"
@@ -244,11 +318,15 @@ def test_backbone_features_skip_lm_head_and_support_candidate_extend():
 
 
 @pytest.mark.parametrize("sharded", [False, True])
+@pytest.mark.parametrize("layout", ["split", "packed"])
+@pytest.mark.parametrize("bias", [False, True])
 @torch.inference_mode()
-def test_checkpoint_loading_ignores_only_cis_weights(tmp_path, sharded):
-    config = tiny_config()
+def test_checkpoint_loading_ignores_only_cis_weights(tmp_path, sharded, layout, bias):
+    config = tiny_config(attention_bias=bias, mlp_bias=bias)
     model = initialized_model(config)
     state = dict(model.state_dict())
+    if layout == "split":
+        state = split_projection_state(config, state)
     for index in range(config.num_hidden_layers):
         state[f"model.layers.{index}.self_attn.A"] = torch.ones(config.num_key_value_heads)
         state[f"model.layers.{index}.self_attn.delta.weight"] = torch.zeros(
@@ -260,6 +338,7 @@ def test_checkpoint_loading_ignores_only_cis_weights(tmp_path, sharded):
         tmp_path, device="cpu", dtype=torch.float32, attention=dense_attention
     )
     assert set(loaded.state_dict()) == set(model.state_dict())
+    torch.testing.assert_close(loaded.state_dict(), model.state_dict(), rtol=0, atol=0)
     torch.testing.assert_close(loaded(tokens), model(tokens), rtol=0, atol=0)
     loaded_cache = loaded.new_cache(len(tokens))
     assert loaded_cache.device == torch.device("cpu")
@@ -394,7 +473,7 @@ def test_legacy_cache_cursor_override_is_validated_before_forward():
 def test_checkpoint_loading_rejects_mismatches(tmp_path, problem):
     config = tiny_config()
     state = dict(initialized_model(config).state_dict())
-    key = "model.layers.0.self_attn.q_proj.weight"
+    key = "model.layers.0.self_attn.qkv_proj.weight"
     if problem == "missing":
         del state[key]
     elif problem == "extra":
@@ -444,7 +523,7 @@ def test_unsupported_rope_frequency_switch_is_rejected():
 
 @pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA required for FlashInfer")
 @torch.inference_mode()
-def test_flashinfer_prefill_and_decode_match_dense_attention():
+def test_flashinfer_prefill_and_decode_match_dense_attention(monkeypatch):
     pytest.importorskip("flashinfer")
     config = tiny_config(hidden_size=256, head_dim=64, intermediate_size=384)
     model = initialized_model(config, device="cuda", dtype=torch.bfloat16, attention=None)
@@ -452,6 +531,36 @@ def test_flashinfer_prefill_and_decode_match_dense_attention():
         config, device="cuda", dtype=torch.bfloat16, attention=dense_attention
     ).eval()
     reference.load_state_dict(model.state_dict())
+
+    def separate_matmuls(projection, widths):
+        def forward(x):
+            weights = projection.weight.split(widths, dim=0)
+            biases = (
+                [None] * len(widths)
+                if projection.bias is None
+                else projection.bias.split(widths, dim=0)
+            )
+            return torch.cat(
+                [
+                    torch.nn.functional.linear(x, weight, bias)
+                    for weight, bias in zip(weights, biases, strict=True)
+                ],
+                dim=-1,
+            )
+
+        return forward
+
+    q_width = config.num_attention_heads * config.head_dim
+    kv_width = config.num_key_value_heads * config.head_dim
+    for layer in reference.model.layers:
+        qkv = layer.self_attn.qkv_proj
+        gate_up = layer.mlp.gate_up_proj
+        monkeypatch.setattr(qkv, "forward", separate_matmuls(qkv, (q_width, kv_width, kv_width)))
+        monkeypatch.setattr(
+            gate_up,
+            "forward",
+            separate_matmuls(gate_up, (config.intermediate_size, config.intermediate_size)),
+        )
     tokens = torch.tensor([1, 7, 6, 3, 2, 8, 9, 11, 12], device="cuda")
     expected = reference(tokens)
     torch.testing.assert_close(model(tokens), expected, atol=0.06, rtol=0.03)

@@ -1,4 +1,4 @@
-"""Module scopes for the NOSA nsys experiment and archived profiler checks."""
+"""Module scopes for the NOSA nsys experiment."""
 
 from collections import Counter
 from unittest.mock import patch
@@ -7,6 +7,7 @@ import torch
 
 from models.nosa import layers as nosa_layers
 from models.nosa import model as nosa
+from models.nosa.rotary import NosaRotaryEmbedding
 
 
 class ModuleScopes:
@@ -20,11 +21,12 @@ class ModuleScopes:
 
     def wrap(self, fn, category, layer="shared", flop_fn=None):
         def call(*args, **kwargs):
-            key = f"{self.phase}/{category}/{layer}"
+            current_category = category(*args, **kwargs) if callable(category) else category
+            key = f"{self.phase}/{current_category}/{layer}"
             self.calls[key] += 1
             if flop_fn is not None:
                 self.flops[key] += flop_fn(*args, **kwargs)
-            with self.scope(category, layer):
+            with self.scope(current_category, layer):
                 return fn(*args, **kwargs)
 
         return call
@@ -36,21 +38,35 @@ class ModuleScopes:
             category = parts[-1]
             flop_fn = None
             if isinstance(module, torch.nn.Linear):
+                # Keep combined QKV and gate/up GEMMs as one real module each.
+                # Their full output width already includes every projection;
+                # neither time nor FLOPs are attributed to synthetic submodules.
                 in_features, out_features = module.in_features, module.out_features
 
-                def flop_fn(x, in_features=in_features, out_features=out_features):
+                def flop_fn(x, *, in_features=in_features, out_features=out_features):
                     return 2 * (x.numel() // in_features) * in_features * out_features
 
             elif isinstance(module, torch.nn.Embedding):
                 category = "embedding"
             elif isinstance(module, nosa.NosaRMSNorm):
                 category = "final_norm" if name == "model.norm" else category
+
+                def category(x, residual=None, *, base_category=category):
+                    # This marks the combined residual/norm execution boundary
+                    # on both CUDA and the CPU reference. kernel_names tells
+                    # whether that boundary actually used a fused GPU kernel.
+                    return (
+                        f"{base_category}_add_residual" if residual is not None else base_category
+                    )
+
             elif isinstance(module, nosa.NosaAttention):
                 category = "kv_cache_and_layout"
             elif isinstance(module, nosa.NosaMLP):
                 category = "swiglu_elementwise"
             elif isinstance(module, nosa.NosaDecoderLayer):
-                category = "residual"
+                category = "decoder"
+            elif isinstance(module, NosaRotaryEmbedding):
+                category = "rope_prepare"
             else:
                 continue
             stack.enter_context(
@@ -58,11 +74,8 @@ class ModuleScopes:
             )
         stack.enter_context(
             patch.object(
-                nosa_layers, "apply_rotary", self.wrap(nosa_layers.apply_rotary, "rope_apply")
+                nosa_layers, "apply_rotary_qk", self.wrap(nosa_layers.apply_rotary_qk, "rope_apply")
             )
-        )
-        stack.enter_context(
-            patch.object(nosa, "rotary_cos_sin", self.wrap(nosa.rotary_cos_sin, "rope_prepare"))
         )
 
         def attention_flops(q, k, v):

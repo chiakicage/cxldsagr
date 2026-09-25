@@ -17,12 +17,9 @@ def matrix_flops(config, prefix, query):
     kv_width = config["num_key_value_heads"] * dim
     projection = 2 * query * layers * hidden
     return {
-        "q_proj": projection * q_width,
+        "qkv_proj": projection * (q_width + 2 * kv_width),
         "o_proj": projection * q_width,
-        "k_proj": projection * kv_width,
-        "v_proj": projection * kv_width,
-        "gate_proj": projection * intermediate,
-        "up_proj": projection * intermediate,
+        "gate_up_proj": projection * (2 * intermediate),
         "down_proj": projection * intermediate,
         "attention_core": 4 * layers * q_width * (query * prefix + query * (query + 1) // 2),
     }
@@ -35,7 +32,7 @@ def main():
     args = parser.parse_args()
     metadata = json.loads((args.data_dir / "metadata.json").read_text())
     analysis = json.loads((args.data_dir / "analysis.json").read_text())
-    config = json.loads((Path(metadata["args"]["model_path"]) / "config.json").read_text())
+    config = metadata["model_config"]
     execution = metadata["execution"]
     shapes = metadata["attention_shapes"]
     assert len(shapes) == config["num_hidden_layers"]

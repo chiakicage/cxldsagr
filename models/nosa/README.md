@@ -23,8 +23,24 @@ main attention 接收逻辑块选择与 cache access，为后续 SM90 算子内�
 
 默认 checkpoint 为 `/mnt/ssd-wlcb/chenkaiqi/NOSA-8B`。该配置包含 32 层、4096 hidden size、
 16384 FFN intermediate size、32 个 query heads、2 个 KV heads、128 head dimension，
-使用独立的 Q/K/V 投影、SwiGLU、RMSNorm 和 LongRoPE。KV cache 保存 RoPE 后的 K 与原始 V，
+使用 Q/K/V 投影、SwiGLU、RMSNorm 和 LongRoPE。Q/K/V 合并为一次 `qkv_proj` GEMM，
+gate/up 合并为一次 `gate_up_proj` GEMM。KV cache 保存 RoPE 后的 K 与原始 V，
 采用此模型的 GQA 布局。BF16 权重约 16.37 GB，还需要 KV cache、激活和 kernel workspace 显存。
+
+CUDA BF16/FP16 推理的 RMSNorm、residual-add + RMSNorm、SwiGLU 激活已接入 FlashInfer。
+Decoder 返回待相加的 MLP 输出和 residual，下一层 input norm 合并相加；最后一次相加
+由 final norm 完成。输出选择会同步截取这两个分量。
+融合的数值舍入与逐算子路径不同，正确性通过模型单元测试与跨模块回归检查。
+
+`from_pretrained` 接受原 NOSA checkpoint 的独立 Q/K/V、gate/up 权重与 bias，
+在加载时直接复制进合并参数的对应切片，支持跨 safetensors 分片；前向没有权重拼接或副本缓存。
+运行时 `state_dict` 使用 `self_attn.qkv_proj` 和 `mlp.gate_up_proj` 参数名，加载器也支持这种格式。
+重复混入同一投影的独立与合并权重、缺失参数或 shape 不符均报错。
+
+LongRoPE 使用模型持有的 FP32 cos/sin cache，复用静态频率及位置对应的旋转值。
+CUDA 推理通过 FlashInfer `apply_rope_with_cos_sin_cache_inplace` 一次融合 Q/K 旋转，
+直接使用合并 GEMM 输出的行跨距视图，保留 V 并避免 Q/K 复制。
+保留 NOSA 的 split-half 布局和 LongRoPE scaling。融合后的性能测量见 [64K+1K 实验](../../experiments/nosa_gr_65536_1024/README.md)。
 
 当前实现计算普通 causal GQA attention，保留 checkpoint 的 LongRoPE 缩放向量。
 NOSA 的 `self_attn.A` 与 `self_attn.delta.weight` 在加载时明确跳过。
@@ -85,22 +101,10 @@ stdout 仅输出生成文本，stderr 输出 JSON 统计，可分别重定向。
 `prefill_seconds` 与 `decode_seconds` 包含首次 kernel 编译、采样和 Python 调度开销，
 仅用于本次请求的耗时观察，不作为经过预热的吞吐基准。
 
-## 验证状态
+## 正确性检查
 
-2026-09-24 已在本机 NVIDIA M403（SM90）上完成 BF16 验证，使用现有环境的
-PyTorch `2.10.0+cu132`、FlashInfer `0.6.18`、safetensors `0.8.0`、tokenizers `0.23.2`。
-该 PyTorch 版本与仓库锁定的 `2.12.1+cu130` 不同；本次没有重建完整锁定环境，也没有验证
-FP16、32768-token 上限、sparse attention、offloading 或 DeepGEMM。
-
-- CPU 独立 FP64 数学参考验证 GQA、RMSNorm、SwiGLU、LongRoPE 和模型 logits；
-  同时检查分块 cache、重置、溢出、单文件/分片权重、模板、EOS 和生成长度。
-- GPU FlashInfer prefill、追加 prefill、decode 与独立 dense attention 参考对照通过。
-- 本地 NOSA-8B 全部 dense 权重加载与文本生成通过：27-token chat prompt，
-  `--prefill-chunk-size 8`，生成 59 tokens（含 EOS），执行 58 次缓存 decode 并正常停止。
-- Ruff、模块入口与直接脚本 `--help` 检查通过。
-
-本次完整测试集 **24 项通过**。运行方式如下（没有 CUDA 时 GPU 项跳过；未设置模型路径时
-本地 metadata 项跳过）：
+模型单元测试覆盖独立数学参考、分块 cache、权重加载、模板与生成停止条件。
+没有 CUDA 时 GPU 项跳过；未设置模型路径时本地 metadata 项跳过。
 
 ```bash
 source .venv/bin/activate
@@ -108,13 +112,10 @@ NOSA_MODEL_PATH=/mnt/ssd-wlcb/chenkaiqi/NOSA-8B \
   python -m pytest models/nosa/tests -q
 ```
 
-复现本次真实权重生成检查：
+跨模块回归使用 `bash scripts/run_tests.sh [cpu|gpu|all]`，默认 CPU；GPU 模式要求
+CUDA 与 FlashInfer 可用。测试命令和环境准备见[项目 README](../../README.md)。
 
-```bash
-python -m models.nosa.infer \
-  --prompt "请用一句话解释 KV cache 的作用。" \
-  --disable-thinking --max-new-tokens 64 --prefill-chunk-size 8
-```
+## GR 前向与性能测量
 
 共享 GR 请求生成使用 [request_format.py](request_format.py)：NOSA 聊天模板、tokenizer 与请求预算适配。
 用法见 [GR 生成器](../../GR/README.md)。
@@ -123,14 +124,9 @@ python -m models.nosa.infer \
 
 GR 前向使用 `model(input_ids, cache, return_hidden=True)` 返回本次调用所有输入 token 的最终
 normalized hidden states，跳过 LM head；不与 `logits_to_keep` 同时使用。
-生成 CLI 仍默认返回 logits。GR 性能按完整 prefill、固定前缀 prefill、候选 extend 测量，
-不执行自回归生成，也不使用 Decode tok/s、TTFT 或 TPOT。
+生成 CLI 仍默认返回 logits。64K+1K 实验测量完整 prefill 与 prefix 已就绪后的候选 extend，
+不执行自回归生成。
 
 分块执行 `executor.model_executor.run_chunks` 返回最后一个 chunk 的输出；serving 从中
 取末 token hidden，不累积整条请求的全部 hidden。每请求独立创建和释放 cache；同一请求
 的 candidate extend 使用其已完成的 stable prefix，当前没有跨请求的用户前缀缓存。
-
-2026-09-25 在 framework worktree 完成的历史验证见 [框架验证记录](../../experiments/nosa_framework_refactor/README.md)：
-当时 108 项 CPU 回归通过，SM90 小模型数值/profile、真实 NOSA-8B GR 前向和直接脚本生成通过。
-该记录与上方 2026-09-24 的初版推理验证分别保留；合并未重跑 GPU 验证，
-这些结果也不表示 sparse/offloading 已实现。

@@ -127,17 +127,29 @@ class NosaForCausalLM(nn.Module):
         if cache is not None:
             cache.begin_step(input_ids.numel())
         try:
-            positions = torch.arange(start, end, device=input_ids.device)
-            cos, sin = rotary_cos_sin(self.config, positions, weight.dtype)
+            positions, cos_sin_cache = self.model.rotary(
+                self.config, start, end, device=weight.device
+            )
             x = self.model.embed_tokens(input_ids)
             # Preserve replacements of the legacy attention callable by tests or
             # profilers without allocating another adapter for every forward.
             self._dense_main_attention.attention = self.attention
+            residual = None
             for idx, layer in enumerate(self.model.layers):
-                x = layer(x, cos, sin, self.main_attention, cache, idx, indexer=self.indexer)
+                x, residual = layer(
+                    x,
+                    positions,
+                    cos_sin_cache,
+                    self.main_attention,
+                    cache,
+                    idx,
+                    indexer=self.indexer,
+                    residual=residual,
+                )
             if logits_to_keep:
                 x = x[-logits_to_keep:]
-            hidden = self.model.norm(x)
+                residual = residual[-logits_to_keep:]
+            hidden, _ = self.model.norm(x, residual)
             output = hidden if return_hidden else self.lm_head(hidden).float()
             if cache is not None:
                 cache.commit_step()
@@ -161,7 +173,10 @@ class NosaForCausalLM(nn.Module):
         """Strictly load single-file or indexed safetensors, one tensor at a time.
 
         Only the known NOSA A/delta tensors may be omitted from this dense model.
-        Shapes and all core keys are checked before allocating model weights.
+        Original Q/K/V and gate/up tensors are copied into merged parameter
+        slices at load time. Runtime packed checkpoints are also accepted.
+        Shapes and all core keys are checked before allocating model weights;
+        no separate projection weights or packing cache remain after loading.
         """
         from safetensors import safe_open
 
@@ -218,27 +233,68 @@ class NosaForCausalLM(nn.Module):
                     actual[name] = filename
             if weight_map is not None and actual != weight_map:
                 raise ValueError("Safetensors index does not match the tensors in its shards")
-            missing = expected.keys() - actual.keys()
-            unexpected = actual.keys() - expected.keys() - allowed_extra.keys()
+            # Select either one packed tensor or all original component tensors
+            # for each parameter. A mixture with duplicate components is rejected
+            # by the same strict unexpected-key check as any other extra tensor.
+            sources = {}
+            source_shapes = {}
+            for name, parameter in expected.items():
+                module_name, kind = name.rsplit(".", 1)
+                parent, _, projection = module_name.rpartition(".")
+                if name not in actual and projection in ("qkv_proj", "gate_up_proj"):
+                    if projection == "qkv_proj":
+                        components = (
+                            ("q_proj", config.num_attention_heads * config.head_dim),
+                            ("k_proj", config.num_key_value_heads * config.head_dim),
+                            ("v_proj", config.num_key_value_heads * config.head_dim),
+                        )
+                    else:
+                        components = (
+                            ("gate_proj", config.intermediate_size),
+                            ("up_proj", config.intermediate_size),
+                        )
+                    parts = {
+                        f"{parent}.{component}.{kind}": (width, *parameter.shape[1:])
+                        for component, width in components
+                    }
+                else:
+                    parts = {name: tuple(parameter.shape)}
+                sources[name] = parts
+                source_shapes.update(parts)
+            missing = source_shapes.keys() - actual.keys()
+            unexpected = actual.keys() - source_shapes.keys() - allowed_extra.keys()
             if missing or unexpected:
                 raise ValueError(
                     f"Checkpoint key mismatch: missing={sorted(missing)}, unexpected={sorted(unexpected)}"
                 )
             for name, filename in actual.items():
                 shape = tuple(handles[filename].get_slice(name).get_shape())
-                wanted = tuple(expected[name].shape) if name in expected else allowed_extra[name]
+                wanted = source_shapes[name] if name in source_shapes else allowed_extra[name]
                 if shape != wanted:
                     raise ValueError(
                         f"Checkpoint shape mismatch for {name}: {shape}, expected {wanted}"
                     )
-            for name in expected:
+
+            def read_tensor(name):
                 tensor = handles[actual[name]].get_tensor(name)
                 if not tensor.is_floating_point():
                     raise ValueError(f"Expected floating point checkpoint tensor: {name}")
-                tensor = tensor.to(device=device, dtype=dtype)
+                return tensor
+
+            for name, parts in sources.items():
+                if len(parts) == 1:
+                    tensor = read_tensor(name).to(device=device, dtype=dtype)
+                else:
+                    tensor = torch.empty(expected[name].shape, device=device, dtype=dtype)
+                    start = 0
+                    for source, shape in parts.items():
+                        # Copy directly from the checkpoint into its final
+                        # storage, including dtype conversion and device transfer.
+                        tensor.narrow(0, start, shape[0]).copy_(read_tensor(source))
+                        start += shape[0]
                 parent_name, parameter_name = name.rsplit(".", 1)
                 model.get_submodule(parent_name).register_parameter(
                     parameter_name, nn.Parameter(tensor, requires_grad=False)
                 )
-            model.ignored_checkpoint_keys = tuple(sorted(actual.keys() - expected.keys()))
+            model.ignored_checkpoint_keys = tuple(sorted(actual.keys() - source_shapes.keys()))
         return model

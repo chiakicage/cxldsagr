@@ -7,11 +7,14 @@ Use nsys --capture-range=cudaProfilerApi --capture-range-end=stop.
 from __future__ import annotations
 
 import argparse
+import importlib.metadata
 import json
 import statistics
+import subprocess
 import time
 from contextlib import ExitStack
-from dataclasses import replace
+from dataclasses import asdict, replace
+from datetime import UTC, datetime
 from pathlib import Path
 from unittest.mock import patch
 
@@ -199,9 +202,12 @@ def main():
             ),
         }
         assert validation["finite"]
+        assert validation["last_hidden_max_abs"] == 0, "Full and split execution disagree"
         # Source is kept alongside the requested report for reproducibility.
         meta = {
+            "recorded_at_utc": datetime.now(UTC).isoformat(),
             "args": {k: str(v) if isinstance(v, Path) else v for k, v in vars(args).items()},
+            "model_config": asdict(model.config),
             "original_context": original_context,
             "experiment_context": model.config.max_position_embeddings,
             "instruction_tokens": instruction_tokens,
@@ -210,6 +216,16 @@ def main():
             "gpu": str(torch.cuda.get_device_properties(device)),
             "torch": torch.__version__,
             "cuda": torch.version.cuda,
+            "flashinfer": importlib.metadata.version("flashinfer-python"),
+            "nsys": subprocess.check_output(["nsys", "--version"], text=True).strip(),
+            "nvidia_smi": subprocess.check_output(
+                [
+                    "nvidia-smi",
+                    "--query-gpu=name,uuid,driver_version,memory.total,power.limit",
+                    "--format=csv",
+                ],
+                text=True,
+            ).strip(),
             "timings": timings,
             "validation": validation,
             "medians": {

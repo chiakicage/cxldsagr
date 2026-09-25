@@ -20,7 +20,8 @@ models/deepseek_v32/             DeepSeek V3.2 decode/extend 与稀疏索引
 executor/                       通用 prefill / extend 分块执行
 cache/                          请求级 KV cache 管理，当前仅 resident 后端
 serving/                        GR 输入驱动的本地串行执行
-experiments/                     每个实验独立目录，含 src/scripts/tests/output
+tests/                          跨模块正确性测试
+experiments/                     每个实验独立目录，含 src、scripts、tests 和 output
 experiments/legacy/              旧 DeepSeek / SM120 等历史归档
 3rdparty/DeepGEMM/               DeepGEMM nv_dev 子模块
 3rdparty/cutlass/                共享 CUTLASS 子模块
@@ -48,6 +49,9 @@ python -m models.nosa.infer --prompt "请解释 KV cache 的作用。" --disable
 # 本地 GR 请求：prefix prefill + candidate extend，输出完成摘要
 python -m serving.run_gr --count 1
 
+# 全局 CPU 回归（省略模式时也默认 cpu）
+bash scripts/run_tests.sh cpu
+
 # DeepSeek V3.2 / SM120 实验及报告依赖
 uv sync --group sm120 --group analysis
 
@@ -60,6 +64,8 @@ uv sync --group sm120 --group analysis
 模型实验需要对应配置、权重或 tokenizer，见 [NOSA](models/nosa/README.md) 和
 [DeepSeek V3.2](models/deepseek_v32/README.md)。
 构建与测试命令见 [SM120 算子](operators/sm120/README.md)。
+全局回归使用 `bash scripts/run_tests.sh [cpu|gpu|all]`，结果直接输出终端。
+`gpu` / `all` 需要可用 CUDA 与 FlashInfer，CLI 集成测试使用临时小模型权重。
 
 ## 提交检查
 

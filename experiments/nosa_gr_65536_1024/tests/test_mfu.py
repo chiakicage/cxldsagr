@@ -15,5 +15,11 @@ def test_full_equals_prefix_plus_extend_flops():
     prefix = matrix_flops(config, 0, 65536)
     extend = matrix_flops(config, 65536, 1024)
     assert all(full[name] == prefix[name] + extend[name] for name in full)
-    assert extend["q_proj"] == 1099511627776
+    assert set(extend) == {"qkv_proj", "o_proj", "gate_up_proj", "down_proj", "attention_core"}
+    # Sum the effective work of the constituent projections, without inventing
+    # individual timing denominators for the combined GEMMs.
+    assert extend["qkv_proj"] == 1099511627776 + 2 * 68719476736
+    assert extend["gate_up_proj"] == 2 * 4398046511104
     assert full["attention_core"] == 1161376605143040
+    assert sum(extend.values()) == 50990120173568
+    assert sum(full.values()) == 2170865718394880

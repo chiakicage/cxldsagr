@@ -1,5 +1,7 @@
 """NOSA's post-RoPE K / unmodified V layout on the shared resident backend."""
 
+from copy import deepcopy
+
 from cache.manager import CacheSpec, ResidentCache
 from models.nosa.config import NosaConfig
 
@@ -13,13 +15,16 @@ class NosaKVCache(ResidentCache):
     """
 
     def __init__(self, config: NosaConfig, max_seq_len: int, *, device, dtype):
-        self.config = config
+        # LongRoPE factors live in a nested mutable dict even though NosaConfig
+        # is frozen. A snapshot makes the model reject changed rotation settings
+        # instead of appending differently rotated keys to an existing cache.
+        self.config = deepcopy(config)
         shape = (config.num_key_value_heads, config.head_dim)
         spec = CacheSpec(
             num_layers=config.num_hidden_layers,
             max_position_embeddings=config.max_position_embeddings,
             record_shapes={"keys": shape, "values": shape},
-            compatibility_key=config,
+            compatibility_key=self.config,
         )
         super().__init__(spec, max_seq_len, device=device, dtype=dtype)
 
