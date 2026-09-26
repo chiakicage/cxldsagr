@@ -56,12 +56,13 @@ def estimate_overlap(
         union, full = head["sparse_union_bytes"], head["full_kv_bytes"]
         if type(union) is not int or type(full) is not int or not 0 <= union <= full or full <= 0:
             raise ValueError("KV byte counts must be integers with 0 <= union <= full and full > 0")
-        sparse = union / full < threshold_pct / 100
+        coverage_pct = 100 * union / full
+        sparse = coverage_pct < threshold_pct
         heads.append(
             {
                 "layer": head["layer"],
                 "kv_head": head["kv_head"],
-                "coverage_pct": union / full * 100,
+                "coverage_pct": coverage_pct,
                 "head_class": "sparse" if sparse else "dense",
                 "selected_union_bytes": union,
                 "full_kv_bytes": full,
@@ -159,6 +160,7 @@ def estimate_overlap(
             **params,
             "threshold_pct": threshold_pct,
             "bandwidth_gbps": bandwidth_gbps,
+            "bytes_per_second": bandwidth_gbps * 1e9,
             "attention_mfu_scale": attention_mfu_scale,
         },
         "heads": heads,
