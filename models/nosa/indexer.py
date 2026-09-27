@@ -1,4 +1,4 @@
-"""FP32 reference for NOSA's query-aware block selection on resident K.
+"""NOSA block selection on resident K, with an unchanged QA-only default.
 
 The scoring follows ``CompressK`` / ``compressed_attention`` and the stage-one
 oracle in thunlp/NOSA at commit 1cbee77d607f9051b206a09c862bea28becb9e67:
@@ -10,7 +10,11 @@ default 64-block budget, or 15 with a 32-block budget. It uses exactly 16 local
 blocks, including the query's block, as specified in NOSA's
 paper (https://arxiv.org/html/2510.13602v2#A2.SS2.SSS2). The upstream pooling
 kernels' inclusive local boundary instead reserves 17 when configured with 16.
-No query-agnostic scores, attention bias, sparse attention, or offload are run.
+``mode="nosa"`` reproduces cxl-recsys's complete two-stage selection: its
+inclusive local boundary reserves 17 blocks (current + 16 predecessors),
+query-aware selection retains 33 blocks including sink/local, then learned
+query-agnostic CIS fills a 64-block budget. Model-dtype compression and score
+rounding match that implementation. All modes return logical block IDs.
 """
 
 from dataclasses import dataclass
@@ -19,6 +23,7 @@ import torch
 
 from cache.contracts import CacheAccess
 from layers.attention import AttentionContext, BlockSelection
+from models.nosa.scoring import NosaAttentionState, compress_sequence
 
 
 @dataclass(frozen=True)
@@ -48,23 +53,44 @@ class NosaIndexer:
     heads shares one KV head. Results have shape ``[query, kv_head, block_budget]``, with
     ascending valid IDs, ``-1`` padding, and an explicit validity mask.
 
-    Arithmetic is FP32, including compression and softmax. Query chunking
-    bounds temporary score storage without changing causal positions. CUDA
-    matmul precision is temporarily set to IEEE FP32 and restored afterward;
-    this reference is intended for the project's serial execution path.
+    The default query-aware-only path uses FP32 compression and softmax.
+    Full ``mode="nosa"`` retains checkpoint-dtype compression/score rounding,
+    consumes resident CIS scores, and supports the Hopper Triton backend.
+    Query chunking bounds temporary score storage. CUDA reference matmul
+    precision is temporarily set to IEEE FP32 and restored afterward; this
+    indexer is intended for the project's serial execution path.
     """
 
-    def __init__(self, query_chunk_size: int = 64, *, block_budget: int = 64):
+    def __init__(
+        self,
+        query_chunk_size: int = 64,
+        *,
+        block_budget: int = 64,
+        mode: str = "query_aware",
+        backend: str = "reference",
+    ):
         if type(query_chunk_size) is not int or query_chunk_size <= 0:
             raise ValueError("query_chunk_size must be a positive integer")
         if type(block_budget) is not int or block_budget not in (32, 64):
             raise ValueError("block_budget must be the integer 32 or 64")
+        if mode not in ("query_aware", "nosa"):
+            raise ValueError("NOSA indexer mode must be query_aware or nosa")
+        if backend not in ("reference", "auto", "triton"):
+            raise ValueError("NOSA indexer backend must be reference, auto or triton")
+        if mode == "query_aware" and backend != "reference":
+            raise ValueError("Query-aware-only analysis requires the reference backend")
+        if mode == "nosa" and block_budget != 64:
+            raise ValueError("Full NOSA selection requires block_budget=64")
         defaults = NosaSelectionPolicy()
         self.policy = NosaSelectionPolicy(
             block_budget=block_budget,
             topk_blocks=block_budget - defaults.sink_blocks - defaults.local_blocks,
         )
         self.query_chunk_size = query_chunk_size
+        self.mode = mode
+        self.backend = backend
+        if mode == "nosa":
+            self.policy = NosaSelectionPolicy(local_blocks=17, topk_blocks=15)
 
     @torch.no_grad()
     def __call__(self, q, cache_access: CacheAccess, context: AttentionContext) -> BlockSelection:
@@ -81,6 +107,30 @@ class NosaIndexer:
         keys = keys[: context.query_start + context.query_length]
         if not torch.isfinite(q).all() or not torch.isfinite(keys).all():
             raise ValueError("NOSA indexer requires finite Q and K")
+        cis = None
+        if self.mode == "nosa":
+            state = context.auxiliary_state
+            cis = (
+                state.cis_scores
+                if isinstance(state, NosaAttentionState)
+                else records.get("cis_scores")
+            )
+            if not isinstance(cis, torch.Tensor):
+                raise ValueError("Full NOSA selection requires resident cis_scores")
+            if (
+                cis.ndim != 2
+                or cis.shape[0] < len(keys)
+                or cis.shape[1] != keys.shape[1]
+                or cis.device != keys.device
+                or cis.dtype != keys.dtype
+                or q.dtype != keys.dtype
+            ):
+                raise ValueError(
+                    "CIS must cover resident K with [token, KV head] shape and Q/K dtype/device"
+                )
+            cis = cis[: len(keys)]
+            if not torch.isfinite(cis).all():
+                raise ValueError("NOSA indexer requires finite CIS scores")
 
         old_precision = None
         if q.device.type == "cuda":
@@ -88,6 +138,8 @@ class NosaIndexer:
             torch.backends.cuda.matmul.fp32_precision = "ieee"
         try:
             with torch.autocast(device_type=q.device.type, enabled=False):
+                if self.mode == "nosa":
+                    return self._select_nosa(q, keys, cis, context.query_start)
                 return self._select(q, keys, context.query_start)
         finally:
             if old_precision is not None:
@@ -199,3 +251,100 @@ class NosaIndexer:
             )
 
         return BlockSelection(block_ids, policy.block_size, valid_mask=block_ids >= 0)
+
+    def _select_nosa(self, q, keys, cis, query_start):
+        backend = self.backend
+        if backend == "auto":
+            backend = "triton" if q.is_cuda else "reference"
+        positions = torch.arange(query_start, query_start + len(q), device=q.device)
+        kv_heads = keys.shape[1]
+        query = q.reshape(len(q), kv_heads, q.shape[1] // kv_heads, q.shape[-1])
+        compressed_k, compressed_cis = compress_sequence(keys), compress_sequence(cis)
+        result = torch.full((len(q), kv_heads, 64), -1, device=q.device, dtype=torch.long)
+        if backend == "triton":
+            from operators.sm90.nosa_indexer import select_blocks
+        else:
+            select_blocks = select_nosa_blocks_reference
+            # Prepare the shared layout once; each query head still retains
+            # its own FP32 softmax normalizer.
+            compressed_k = prepare_indexer_keys(compressed_k)
+        for start in range(0, len(q), self.query_chunk_size):
+            end = min(start + self.query_chunk_size, len(q))
+            selected = select_blocks(
+                query[start:end], compressed_k, compressed_cis, positions[start:end], len(keys)
+            )
+            result[start:end, :, : selected.shape[-1]] = selected
+        return BlockSelection(result, 64, valid_mask=result >= 0)
+
+
+def prepare_indexer_keys(keys):
+    """Preserve cxl-recsys's per-query GEMM operand layout and FP32 rounding."""
+    if keys.shape[1] == 1:
+        return keys.float().contiguous()
+    return keys.float().permute(1, 2, 0).contiguous().permute(2, 0, 1)
+
+
+def compressed_scores_reference(query, compressed_keys, positions):
+    """Grouped Q ``[Q,Hkv,G,D]`` to compressed scores ``[Q,Hkv,C]``.
+
+    Compute per-Q-head FP32 softmax before summing GQA heads; match the
+    source's model-dtype score rounding before max pooling and top-k.
+    """
+    count = len(compressed_keys)
+    if not count:
+        return torch.empty((*query.shape[:2], 0), dtype=query.dtype, device=query.device)
+    if len(query) == 1:
+        logits = torch.einsum(
+            "qhgd,qchd->qhgc", query.float(), compressed_keys.float().contiguous()[None]
+        )
+    else:
+        keys = prepare_indexer_keys(compressed_keys)
+        queries = query.float()
+        logits = torch.stack(
+            [
+                torch.bmm(queries[:, head], keys[:, head].T.expand(len(query), -1, -1))
+                for head in range(query.shape[1])
+            ],
+            dim=1,
+        )
+    logits *= query.shape[-1] ** -0.5
+    ends = torch.arange(count, device=query.device) * 16 + 31
+    causal = ends[None, :] <= positions[:, None]
+    logits.masked_fill_(~causal[:, None, None, :], -torch.inf)
+    logits.masked_fill_(~causal.any(-1)[:, None, None, None], 0)
+    probability = logits.softmax(-1).masked_fill(~causal[:, None, None, :], 0)
+    return probability.sum(2).to(query.dtype)
+
+
+def select_nosa_blocks_reference(query, compressed_keys, compressed_cis, positions, total_length):
+    """cxl-recsys two-stage 33/64 selection, with stable ascending-ID ties.
+
+    The query-aware stage includes sink and exactly 17 inclusive local blocks;
+    CIS fills the remaining slots after those first 33 blocks are protected.
+    For short contexts every visible block is selected. IDs are sorted and
+    future blocks become -1; the caller pads the final width to 64.
+    """
+    block_count = (total_length + 63) // 64
+    block_ids = torch.arange(block_count, device=query.device)
+    q_block = positions // 64
+    if block_count <= 64:
+        blocks = block_ids.expand(len(query), query.shape[1], -1)
+        return blocks.masked_fill(blocks > q_block[:, None, None], -1)
+    scores = compressed_scores_reference(query, compressed_keys, positions)
+    windows = block_ids[:, None] * 4 - 1 + torch.arange(5, device=query.device)
+    valid = (windows >= 0) & (windows < len(compressed_keys))
+    safe = windows.clamp(0, len(compressed_keys) - 1)
+    block_scores = scores[:, :, safe].masked_fill(~valid, -torch.inf).amax(-1)
+    cis = compressed_cis.T[:, safe].masked_fill(~valid, -torch.inf).amax(-1)
+    cis = cis[None].expand(len(query), -1, -1).clone()
+    causal = block_ids[None, :] <= q_block[:, None]
+    mandatory = (block_ids[None, :] == 0) | (causal & (q_block[:, None] <= block_ids[None, :] + 16))
+    block_scores.masked_fill_(mandatory[:, None, :], torch.inf)
+    block_scores.masked_fill_(~causal[:, None, :], -torch.inf)
+    cis.masked_fill_(mandatory[:, None, :], torch.inf)
+    cis.masked_fill_(~causal[:, None, :], -torch.inf)
+    selected_q = block_scores.argsort(dim=-1, descending=True, stable=True)[..., :33]
+    cis.scatter_(-1, selected_q, torch.inf)
+    cis.masked_fill_(~causal[:, None, :], -torch.inf)
+    selected = cis.argsort(dim=-1, descending=True, stable=True)[..., :64].sort(-1).values
+    return selected.masked_fill(selected > q_block[:, None, None], -1)

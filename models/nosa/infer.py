@@ -1,4 +1,4 @@
-"""Generate text with NOSA weights and FlashInfer full causal attention."""
+"""Generate text with NOSA weights and dense or block sparse causal attention."""
 
 from __future__ import annotations
 
@@ -204,6 +204,8 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--prefill-chunk-size", type=int, default=1024)
     parser.add_argument("--device", default="cuda:0")
     parser.add_argument("--dtype", choices=("bfloat16", "float16"), default="bfloat16")
+    parser.add_argument("--attention-mode", choices=("dense", "sparse"), default="dense")
+    parser.add_argument("--sparse-backend", choices=("auto", "reference", "triton"), default="auto")
     parser.add_argument("--temperature", type=float, default=0.0, help="0: greedy; >0: sampling")
     parser.add_argument("--top-p", type=float, default=1.0)
     parser.add_argument("--seed", type=int, default=0)
@@ -237,7 +239,7 @@ def main(argv: list[str] | None = None) -> None:
         device = torch.device(args.device)
         if device.type != "cuda":
             raise ValueError(
-                "FlashInfer inference requires a CUDA device (for example --device cuda:0)"
+                "NOSA CLI inference requires a CUDA device (for example --device cuda:0)"
             )
         if not torch.cuda.is_available():
             raise RuntimeError(
@@ -274,7 +276,13 @@ def main(argv: list[str] | None = None) -> None:
             )
         dtype = getattr(torch, args.dtype)
         load_start = time.perf_counter()
-        model = NosaForCausalLM.from_pretrained(args.model_path, device=device, dtype=dtype)
+        model = NosaForCausalLM.from_pretrained(
+            args.model_path,
+            device=device,
+            dtype=dtype,
+            attention_mode=args.attention_mode,
+            sparse_backend=args.sparse_backend,
+        )
         torch.cuda.synchronize(device)
         load_seconds = time.perf_counter() - load_start
         generated_ids, stats = generate(
@@ -288,6 +296,11 @@ def main(argv: list[str] | None = None) -> None:
         )
         print(tokenizer.decode(generated_ids, skip_special_tokens=True))
         stats["load_seconds"] = load_seconds
+        stats["attention_mode"] = args.attention_mode
+        if args.attention_mode == "sparse":
+            stats["sparse_backend"] = (
+                "triton" if args.sparse_backend == "auto" else args.sparse_backend
+            )
         print(json.dumps(stats, ensure_ascii=False), file=sys.stderr)
     except ImportError as exc:
         parser.exit(1, f"error: missing or incompatible dependency: {exc}. Run uv sync.\n")

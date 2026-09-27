@@ -14,17 +14,21 @@ class NosaKVCache(ResidentCache):
     than managing the physical buffers themselves.
     """
 
-    def __init__(self, config: NosaConfig, max_seq_len: int, *, device, dtype):
+    def __init__(self, config: NosaConfig, max_seq_len: int, *, device, dtype, with_cis=False):
         # LongRoPE factors live in a nested mutable dict even though NosaConfig
         # is frozen. A snapshot makes the model reject changed rotation settings
         # instead of appending differently rotated keys to an existing cache.
         self.config = deepcopy(config)
+        self.with_cis = with_cis
         shape = (config.num_key_value_heads, config.head_dim)
+        records = {"keys": shape, "values": shape}
+        if with_cis:
+            records["cis_scores"] = (config.num_key_value_heads,)
         spec = CacheSpec(
             num_layers=config.num_hidden_layers,
             max_position_embeddings=config.max_position_embeddings,
-            record_shapes={"keys": shape, "values": shape},
-            compatibility_key=self.config,
+            record_shapes=records,
+            compatibility_key=(self.config, with_cis),
         )
         super().__init__(spec, max_seq_len, device=device, dtype=dtype)
 
@@ -35,6 +39,10 @@ class NosaKVCache(ResidentCache):
     @property
     def values(self):
         return self.buffers["values"]
+
+    @property
+    def cis_scores(self):
+        return self.buffers["cis_scores"]
 
     @property
     def length(self):

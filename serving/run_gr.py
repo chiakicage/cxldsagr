@@ -14,6 +14,8 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--model-path", type=Path, default=DEFAULT_MODEL_PATH)
     parser.add_argument("--device", default="cuda:0")
     parser.add_argument("--dtype", choices=("bfloat16", "float16"), default="bfloat16")
+    parser.add_argument("--attention-mode", choices=("dense", "sparse"), default="dense")
+    parser.add_argument("--sparse-backend", choices=("auto", "reference", "triton"), default="auto")
     parser.add_argument("--count", type=int, default=1)
     parser.add_argument("--num-users", type=int, default=1000)
     parser.add_argument("--seed", type=int, default=42)
@@ -59,14 +61,18 @@ def main(argv: list[str] | None = None) -> None:
         )
         device = torch.device(args.device)
         if device.type != "cuda" or not torch.cuda.is_available():
-            raise ValueError("NOSA FlashInfer inference requires an available CUDA device")
+            raise ValueError("NOSA CLI inference requires an available CUDA device")
         if device.index is None:
             device = torch.device("cuda", torch.cuda.current_device())
         torch.cuda.set_device(device)
         if args.dtype == "bfloat16" and not torch.cuda.is_bf16_supported():
             raise ValueError("this CUDA device does not support bfloat16; use --dtype float16")
         model = NosaForCausalLM.from_pretrained(
-            args.model_path, device=device, dtype=getattr(torch, args.dtype)
+            args.model_path,
+            device=device,
+            dtype=getattr(torch, args.dtype),
+            attention_mode=args.attention_mode,
+            sparse_backend=args.sparse_backend,
         )
         runner = GRRunner(ModelExecutor(model, chunk_size=args.prefill_chunk_size), device=device)
         for result in runner.run(generator.iter_generate(args.count)):
@@ -75,6 +81,7 @@ def main(argv: list[str] | None = None) -> None:
                 json.dumps(
                     {
                         "status": "completed",
+                        "attention_mode": args.attention_mode,
                         "metadata": result.metadata,
                         "feature_shape": list(result.last_hidden.shape),
                         "feature_dtype": str(result.last_hidden.dtype),

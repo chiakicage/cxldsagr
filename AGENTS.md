@@ -19,14 +19,20 @@
   resident cache，CPU 用于参考测试；local DRAM backing 与 HBM caching 尚未实现。
 - main attention 接收逻辑块选择、cache access 与执行上下文，不能把「全部 KV
   已完成搬入 HBM」作为通用前置条件。未来 fetch/compute overlap 由 SM90 算子实现；
-  sparse attention / offload 入口仍只预留接口，调用未实现路径须明确失败。
+  resident NOSA block sparse attention 已接入 SM90 Triton；offload 入口仍只预留接口，
+  调用未实现路径须明确失败，不将 resident 验证表述为 offload 验证。
 - NOSA query-aware indexer 已有 resident K 上的 PyTorch FP32 参考实现：64-token block、
   默认 `block_budget=64`，1 sink + 16 causal local（含当前块）+ 47 query-aware top-k；
   支持 `block_budget=32`，保持 1 sink + 16 local，query-aware top-k 改为 15。
   返回逻辑选择形状为 `[query, KV head, block_budget]`，短上下文的不足位置使用 validity mask。
   采用 RoPE 后 Q/K、32-token / stride-16 mean compression、逐 Q head softmax、GQA
-  求和与五窗口 max pooling；不启用 query-agnostic / CIS。稀疏数值路径和 offload
-  后续接入；pattern 实验只在 dense 激活上旁路选块，不改变 dense 基线。
+  求和与五窗口 max pooling；此默认分析模式不启用 query-agnostic / CIS。
+  显式 `attention_mode="sparse"` 复刻 cxl-recsys 的完整 NOSA：64-token / 64-block，
+  inclusive local 为当前块加前 16 块，query-aware 阶段含 sink/local 共保留 33 块，
+  再按 query-agnostic CIS 补满 64 块。A/delta 从 checkpoint 严格加载；
+  `softplus(delta(V)) * A` 同时用于压缩后选块及 attention 加性 bias。
+  K/V/CIS 作为同一 resident cache step 提交，CPU reference 与 SM90 Triton 均可运行。
+  两种 policy 不混用；pattern 实验仍只在 dense 激活上旁路选块，不改变 dense 基线。
 - `tests/` 只保存保证代码正确性的跨模块集成测试代码，`scripts/run_tests.sh`
   负责全局回归编排；模块单元测试仍留在对应模块的 `tests/`。测试与论文实验的目的不同，
   smoke、数值正确性和回归检查不能作为 `experiments/` 的实验或结果。
@@ -38,7 +44,8 @@
 - 不将 DeepSeek V3.2 的 656 B packed MLA record、indexer 或 tokenizer 作为通用
   offloading / NOSA 的固定假设；新增模型时显式适配其稀疏访问语义和 KV 布局。
 - 修改目录时同步更新 Python 导入、`-m` 子进程入口、构建路径、配置和文档链接。
-  保留 `weights/` 和 GR 共享资源；符合实验目的的有效产物迁入对应实验的 `output/`。
+  保留 `weights/` 和 GR 共享资源；符合实验目的的有效运行产物迁入对应实验的 `output/`，
+  报告需要呈现的图表和数据保存在该实验的 `report/`。
   `docs/` 保留跨实验设计文档，有效的旧 DeepSeek / SM120 报告随 legacy 归档。
 
 ## 实验目录与产物
@@ -61,15 +68,21 @@
     src/                 实验的 measure / profile / analyze / report 等 Python 代码
     scripts/             可复现的运行脚本，负责参数组合、环境和日志重定向
     tests/               本实验的单元测试
+    report/              报告需要呈现的图片、表格及数据，随 Git 保存
     output/              默认全部不进 Git，由运行脚本自动创建
       log/<run_id>/      stdout 日志；stderr 使用独立文件记录
       data/<run_id>/     JSON/JSONL/CSV/NPY、整理后的表格、分析结果、导出的 SQLite 等
       profile/<run_id>/  nsys/nsys-rep、ncu、Chrome trace 等原始 profiler 产物
   ```
 
-- 整理好的数据也放 `output/data/`，不能因为是汇总 CSV/JSON 就放回源码目录或默认提交。
-  README 保存必要的结果表和结论；忽略的产物使用普通代码路径，不创建仓库文档链接。
-  源码快照、运行参数和迁移索引属于复现数据，放 `output/data/`。
+- 运行生成的完整数据和分析结果放 `output/data/`，包括汇总 CSV/JSON；不放回源码目录。
+  源码快照、运行参数和迁移索引等复现数据也放 `output/data/`，原始日志和 profiler
+  产物分别放 `output/log/`、`output/profile/`，默认不提交。
+- `report/` 保留从有效实验结果中选出的、需要在报告里呈现的图片、表格和数据
+  （例如 PNG/SVG、CSV/JSON），随 Git 保存。README 保留结果说明和结论，通过相对路径
+  嵌入或链接 `report/` 文件；报告所需的图像应放 `report/`，不为它们放开 `output/` 的忽略规则。
+  在 README 中注明这些素材的来源 run ID 和生成方式；可从对应 `output/` 复制选定素材，
+  保留原运行产物以便复现。仍被忽略的产物使用普通代码路径，不创建仓库文档链接。
 - `src/` 不实现 shell 调度；`scripts/` 只编排 `python -m ...` / nsys 等入口，不复制模型
   计算逻辑。模型推理代码及其测试仍归 `models/`，共享 GR 生成器及热度曲线仍归 `GR/`。
   复用其他实验的工具时使用显式导入，并在 README 的调用模块中写明依赖。
@@ -129,7 +142,7 @@
 - 保留的有效测量报告里的命令行和依赖路径（例如已移出仓库的 `gpu-benches/`）保留原样，
   它们记录当时的运行方式；只修正导航性链接和「当前文件在哪」的指向。
   被 `.gitignore` 排除的运行产物（如实验 `output/data/`、`output/profile/` 下的文件）
-  在文档里写成普通代码路径，不做链接。
+  在文档里写成普通代码路径，不做链接；随 Git 保存的 `report/` 图表和数据使用相对链接或图片嵌入。
 - 按改动选择验证：路径迁移检查导入、子进程入口和文档链接，并运行可用的 CLI /
   现有测试；算子或数值改动运行相应硬件和正确性测试。缺少依赖或 GPU 时如实记录。
 - Python 格式遵循根 `pyproject.toml` 的 Ruff 配置；第三方和独立算子子项目遵循

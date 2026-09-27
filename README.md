@@ -8,12 +8,13 @@ memory 等显存之外的位置，GPU 根据稀疏访问需求读取或搬入所
 已有 DeepSeek V3.2 / SM120 的 attention decode、extend 和部分 checkpoint 层实验；
 NOSA 已提供基于 FlashInfer Full Attention 的单 GPU 模型推理，以及直接消费 GR 输入的
 本地串行执行框架。模型层、执行器与缓存管理已分离，当前 KV 全部驻留 HBM；
-NOSA 已提供 query-aware indexer 参考实现与 GR 选块容量实验；sparse attention 和
-local DRAM offloading 仅预留接口。DeepGEMM 使用上游 `nv_dev`
+NOSA 已提供 query-aware indexer 参考实现与 GR 选块容量实验，以及包含 query-agnostic
+CIS 打分的 resident block sparse 推理（CPU reference / SM90 Triton）。local DRAM
+offloading 仅预留接口。DeepGEMM 使用上游 `nv_dev`
 子模块，其依赖更新尚未经过 GPU 构建和模型验证。
 
 ```text
-operators/sm90/                  Hopper sparse attention + fetch 接口（未实现）
+operators/sm90/                  Hopper NOSA block sparse / indexer；fetch 接口待实现
 operators/sm120/                 sparse MLA 扩展与现有算子基准
 layers/                         普通层与 indexer / main attention 契约
 models/nosa/                     NOSA 模型结构、权重、位置编码与 KV 布局适配
@@ -47,6 +48,9 @@ uv sync
 source .venv/bin/activate
 python -m models.nosa.infer --prompt "请解释 KV cache 的作用。" --disable-thinking
 
+# NOSA block sparse（Hopper，加载 A/delta，启用 query-aware + query-agnostic 选块）
+python -m models.nosa.infer --attention-mode sparse --prompt "请解释 KV cache 的作用。" --disable-thinking
+
 # 本地 GR 请求：prefix prefill + candidate extend，输出完成摘要
 python -m serving.run_gr --count 1
 
@@ -66,7 +70,7 @@ uv sync --group sm120 --group analysis
 [DeepSeek V3.2](models/deepseek_v32/README.md)。
 构建与测试命令见 [SM120 算子](operators/sm120/README.md)。
 全局回归使用 `bash scripts/run_tests.sh [cpu|gpu|all]`，结果直接输出终端。
-`gpu` / `all` 需要可用 CUDA 与 FlashInfer，CLI 集成测试使用临时小模型权重。
+`gpu` / `all` 需要 Hopper CUDA、Triton 与 FlashInfer，CLI 集成测试使用临时小模型权重。
 
 ## 提交检查
 

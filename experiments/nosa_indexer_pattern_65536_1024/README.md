@@ -86,7 +86,8 @@ block ID 升序；不承诺与上游低精度 kernel 在临界 top-k 上逐位�
   精确请求、运行边界、实际形状、硬件与依赖、权重/输入/源码哈希及源码快照。
 
 stdout/stderr 分别存 `output/log/<run_id>/`；未运行 profiler，`output/profile/<run_id>/` 为空。
-产物默认不进入 Git；README 保留必要结果，完整数组和图使用上述普通路径。
+`output/` 产物默认不进入 Git；README 保留必要结果，报告引用的图片和数据放在 `report/`，
+随 Git 维护。完整运行产物使用上述普通路径。
 
 ## 运行方式与调用模块
 
@@ -664,9 +665,11 @@ coverage[layer, head] = |union over 1024 queries| / 1040
   区间左闭右开，最后一个区间包含100%；每种配置的所有分箱合计64个heads。
 - 右：经验累计分布，纵轴表示并集占比不超过横轴值的heads比例；使用原始64个样本阶梯图。
 
-完整图位于
-`output/data/head_coverage_distribution_32_64_20260926_01/head_coverage_distribution.png`，
-同目录保存SVG。以下分位数使用NumPy的 `method="linear"`，数值均为并集占比：
+![32-block与64-block配置下全部KV heads的并集占比直方图和累计分布](report/head_coverage_distribution.png)
+
+上图为本节run生成的PNG副本，保存在 `report/` 并随 Git 维护；
+原始PNG、SVG和统计数据保留在 `output/data/head_coverage_distribution_32_64_20260926_01/`。
+以下分位数使用NumPy的 `method="linear"`，数值均为并集占比：
 
 | 预算 | 均值 | P25 | 中位数 | P75 | P90 | P95 | 最小 | 最大 |
 | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |

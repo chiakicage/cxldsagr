@@ -301,6 +301,7 @@ def test_cli_streams_summary_without_feature_vectors(monkeypatch, capsys):
     row = json.loads(capsys.readouterr().out)
     assert row == {
         "status": "completed",
+        "attention_mode": "dense",
         "metadata": {"task_id": 0},
         "feature_shape": [3],
         "feature_dtype": "torch.float32",

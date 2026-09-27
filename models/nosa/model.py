@@ -1,6 +1,6 @@
 """NOSA model assembly, inference, and strict checkpoint loading.
 
-The dense backend and reference indexer are runnable; SM90 sparse/offload is reserved.
+Dense and resident NOSA block sparse inference share the same model and cache lifecycle.
 """
 
 import json
@@ -46,6 +46,8 @@ class NosaForCausalLM(nn.Module):
     The legacy ``attention(q, k, v)`` callable remains a dense numerical test
     seam. ``indexer`` and ``main_attention`` expose the separate sparse-layer
     boundaries; the default path uses no indexer and FlashInfer full attention.
+    ``attention_mode="sparse"`` loads CIS parameters and selects the complete
+    NOSA policy, with ``sparse_backend`` choosing reference or Triton arithmetic.
     """
 
     def __init__(
@@ -57,16 +59,36 @@ class NosaForCausalLM(nn.Module):
         attention=None,
         main_attention=None,
         indexer=None,
+        attention_mode="dense",
+        sparse_backend="auto",
     ):
         super().__init__()
         self.config = config
+        if attention_mode not in ("dense", "sparse"):
+            raise ValueError("attention_mode must be dense or sparse")
+        if sparse_backend not in ("auto", "reference", "triton"):
+            raise ValueError("sparse_backend must be auto, reference or triton")
+        if attention_mode == "sparse" and any(
+            value is not None for value in (attention, main_attention, indexer)
+        ):
+            raise ValueError("sparse mode owns attention and indexer; do not override them")
+        self.attention_mode = attention_mode
+        self.sparse_backend = sparse_backend
         self.attention = FlashInferFullAttention() if attention is None else attention
         self._dense_main_attention = DenseMainAttention(self.attention)
         self.main_attention = (
             self._dense_main_attention if main_attention is None else main_attention
         )
         self.indexer = indexer
-        self.model = NosaModel(config, device=device, dtype=dtype)
+        if attention_mode == "sparse":
+            from models.nosa.attention import NosaSparseAttention
+            from models.nosa.indexer import NosaIndexer
+
+            self.main_attention = NosaSparseAttention(backend=sparse_backend)
+            self.indexer = NosaIndexer(mode="nosa", backend=sparse_backend)
+        self.model = NosaModel(
+            config, device=device, dtype=dtype, with_cis=attention_mode == "sparse"
+        )
         self.lm_head = nn.Linear(
             config.hidden_size, config.vocab_size, bias=False, device=device, dtype=dtype
         )
@@ -78,7 +100,13 @@ class NosaForCausalLM(nn.Module):
     def _allocate_cache(self, max_seq_len: int) -> NosaKVCache:
         # Read placement now: from_pretrained constructs on meta before loading.
         weight = self.model.embed_tokens.weight
-        return NosaKVCache(self.config, max_seq_len, device=weight.device, dtype=weight.dtype)
+        return NosaKVCache(
+            self.config,
+            max_seq_len,
+            device=weight.device,
+            dtype=weight.dtype,
+            with_cis=self.attention_mode == "sparse",
+        )
 
     def new_cache(self, max_seq_len: int) -> NosaKVCache:
         return self.cache_manager.allocate(max_seq_len)
@@ -114,8 +142,11 @@ class NosaForCausalLM(nn.Module):
                 cache.config != self.config
                 or cache.device != weight.device
                 or cache.dtype != weight.dtype
+                or cache.with_cis != (self.attention_mode == "sparse")
             ):
-                raise ValueError("KV cache must match the model config, device and dtype")
+                raise ValueError(
+                    "KV cache must match the model config, device, dtype and CIS layout"
+                )
             if not 0 <= cache.length <= cache.max_seq_len:
                 raise ValueError("Invalid KV cache length")
             start = cache.length
@@ -169,10 +200,12 @@ class NosaForCausalLM(nn.Module):
         attention=None,
         main_attention=None,
         indexer=None,
+        attention_mode="dense",
+        sparse_backend="auto",
     ):
         """Strictly load single-file or indexed safetensors, one tensor at a time.
 
-        Only the known NOSA A/delta tensors may be omitted from this dense model.
+        The dense model ignores NOSA A/delta; sparse mode requires and loads them.
         Original Q/K/V and gate/up tensors are copied into merged parameter
         slices at load time. Runtime packed checkpoints are also accepted.
         Shapes and all core keys are checked before allocating model weights;
@@ -183,7 +216,7 @@ class NosaForCausalLM(nn.Module):
         model_path = Path(model_path)
         config = NosaConfig.from_pretrained(model_path)
         device = torch.device(device)
-        if attention is None and main_attention is None:
+        if attention_mode == "dense" and attention is None and main_attention is None:
             if device.type != "cuda" or not torch.cuda.is_available():
                 raise ValueError("NOSA FlashInfer inference requires an available CUDA device")
             if dtype not in (torch.bfloat16, torch.float16):
@@ -196,6 +229,8 @@ class NosaForCausalLM(nn.Module):
             attention=attention,
             main_attention=main_attention,
             indexer=indexer,
+            attention_mode=attention_mode,
+            sparse_backend=sparse_backend,
         )
         expected = dict(model.named_parameters())
         allowed_extra = {}

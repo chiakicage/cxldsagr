@@ -1,5 +1,6 @@
 """NOSA decoder composition, projections, and model-specific attention wiring."""
 
+import torch
 from torch import nn
 
 from layers.attention import AttentionContext, ResidentLayerView
@@ -12,9 +13,10 @@ NosaRMSNorm = RMSNorm
 
 
 class NosaAttention(nn.Module):
-    def __init__(self, config, *, device, dtype):
+    def __init__(self, config, *, device, dtype, with_cis=False):
         super().__init__()
         self.config = config
+        self.with_cis = with_cis
         args = {"device": device, "dtype": dtype, "bias": config.attention_bias}
         self.qkv_proj = nn.Linear(
             config.hidden_size,
@@ -24,6 +26,13 @@ class NosaAttention(nn.Module):
         self.o_proj = nn.Linear(
             config.num_attention_heads * config.head_dim, config.hidden_size, **args
         )
+        if with_cis:
+            self.A = nn.Parameter(
+                torch.ones(config.num_key_value_heads, device=device, dtype=dtype)
+            )
+            self.delta = nn.Linear(
+                config.num_key_value_heads * config.head_dim, config.num_key_value_heads, **args
+            )
 
     def forward(
         self, x, positions, cos_sin_cache, main_attention, cache, layer_idx, *, indexer=None
@@ -38,11 +47,16 @@ class NosaAttention(nn.Module):
         k = k.view(-1, config.num_key_value_heads, config.head_dim)
         v = v.view(-1, config.num_key_value_heads, config.head_dim)
         q, k = apply_rotary_qk(q, k, positions, cos_sin_cache)
+        records = {"keys": k, "values": v}
+        if self.with_cis:
+            from models.nosa.scoring import cis_scores
+
+            records["cis_scores"] = cis_scores(v, self.delta.weight, self.A, self.delta.bias)
         if cache is None:
-            cache_access = ResidentLayerView(layer_idx, keys=k, values=v)
+            cache_access = ResidentLayerView(layer_idx, **records)
             start = 0
         else:
-            cache.write_layer(layer_idx, keys=k, values=v)
+            cache.write_layer(layer_idx, **records)
             cache_access = cache
             start = cache.length
         context = AttentionContext(
@@ -68,10 +82,10 @@ class NosaMLP(SwiGLU):
 
 
 class NosaDecoderLayer(nn.Module):
-    def __init__(self, config, *, device, dtype):
+    def __init__(self, config, *, device, dtype, with_cis=False):
         super().__init__()
         args = {"device": device, "dtype": dtype}
-        self.self_attn = NosaAttention(config, **args)
+        self.self_attn = NosaAttention(config, with_cis=with_cis, **args)
         self.mlp = NosaMLP(config, **args)
         self.input_layernorm = NosaRMSNorm(config.hidden_size, config.rms_norm_eps, **args)
         self.post_attention_layernorm = NosaRMSNorm(config.hidden_size, config.rms_norm_eps, **args)
@@ -103,12 +117,13 @@ class NosaDecoderLayer(nn.Module):
 
 
 class NosaModel(nn.Module):
-    def __init__(self, config, *, device, dtype):
+    def __init__(self, config, *, device, dtype, with_cis=False):
         super().__init__()
         args = {"device": device, "dtype": dtype}
         self.embed_tokens = nn.Embedding(config.vocab_size, config.hidden_size, **args)
         self.layers = nn.ModuleList(
-            NosaDecoderLayer(config, **args) for _ in range(config.num_hidden_layers)
+            NosaDecoderLayer(config, with_cis=with_cis, **args)
+            for _ in range(config.num_hidden_layers)
         )
         self.norm = NosaRMSNorm(config.hidden_size, config.rms_norm_eps, **args)
         self.rotary = NosaRotaryEmbedding()

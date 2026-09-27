@@ -5,6 +5,8 @@
 共享管理器不假设 NOSA GQA 或 DeepSeek packed MLA 布局。
 [NOSA 适配](../models/nosa/cache.py) 保留独立 K/V，形状仍为
 `[layer, capacity, kv_head, head_dim]`，K 为 post-RoPE，V 保留原值。
+NOSA sparse 模式额外声明 `[layer, capacity, kv_head]` 的 `cis_scores`，与 K/V
+使用同一层写入、提交、重置和释放边界。dense 与 sparse cache 布局不能混用。
 
 manager 通过 `allocate` / `release` 管理请求 session。一次模型 forward 内执行
 `begin_step` → 各层 `write_layer` → `commit_step`；resident `layer_view` 提供包含本次写入的
@@ -12,7 +14,7 @@ manager 通过 `allocate` / `release` 管理请求 session。一次模型 forwar
 `reset` 重用分配好的存储，`release` 使 session 失效并放弃其 buffer 所有权。
 `stats` 返回容量、resident/host 字节数和有效长度。
 
-辅助状态归请求 session 按 layer 保存；本轮仅提供状态对象的访问和提交边界，不维护 CIS。
+辅助状态归请求 session 按 layer 保存；CIS 的模型语义由 NOSA 声明，管理器仅管理命名 record。
 manager 通过弱引用记录 session，兼容既有 `model.new_cache()` 使用方式。
 
 当前只有模型设备上的 resident 后端：生产推理使用 HBM，CPU 用于独立数学测试。

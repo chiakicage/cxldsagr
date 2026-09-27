@@ -27,4 +27,6 @@ selection、cache access 和 layer/query 位置上下文。实际 dense adapter 
 [SM90 入口](../operators/sm90/README.md) 将负责 attention 与 fetch 的重叠执行。
 NOSA indexer 已实现 resident K 上的 query-aware 参考选块，见
 [pattern 实验](../experiments/nosa_indexer_pattern_65536_1024/README.md)。实验只旁路记录选择，
-dense adapter 仍拒绝非空 selection；SM90 sparse attention 与 offload 路径明确报未实现。
+dense adapter 仍拒绝非空 selection。完整 NOSA 由模型的
+[sparse adapter](../models/nosa/attention.py) 读取 resident K/V/CIS，调用 SM90 Triton
+block sparse 算子；query-agnostic 分数和选块策略仍归模型。offload 路径明确报未实现。

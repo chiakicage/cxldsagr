@@ -1,16 +1,20 @@
 # NOSA
 
 此目录提供 NOSA checkpoint 的单 GPU 文本推理，目标平台为 SM90 / Hopper。
-当前 attention 使用 FlashInfer **Full Attention**，支持分块 prefill、KV cache 和逐 token decode；
+默认 attention 使用 FlashInfer **Full Attention**，支持分块 prefill、KV cache 和逐 token decode；
 支持 [GR 本地串行执行](../../serving/README.md)，默认推理不启用 sparse selection。
-query-aware block indexer 已有独立参考实现，sparse attention、KV offloading 与批量调度尚未实现。
+显式 sparse 模式提供 query-aware / query-agnostic 选块及 resident block sparse attention。
+KV offloading 与批量调度尚未实现。
 
 - [model.py](model.py)：模型参数树、权重加载与前向；保留原有导入接口。
 - [config.py](config.py)、[rotary.py](rotary.py)：NOSA 配置与 LongRoPE。
 - [layers.py](layers.py)：NOSA projection、attention 与 decoder 组合。
 - [cache.py](cache.py)：NOSA KV 布局及 resident session 适配。
 - [indexer.py](indexer.py)：64-token block，默认 1 sink + 16 local + 47 query-aware top-k；
-  支持 32-block 预算下的 1 sink + 16 local + 15 query-aware top-k。
+  支持 32-block 分析预算，以及显式完整 NOSA 两阶段选块。
+- [scoring.py](scoring.py)：query-agnostic CIS 打分与 32-token / stride-16 压缩。
+- [attention.py](attention.py)：resident sparse adapter，调用
+  [SM90 算子](../../operators/sm90/README.md) 或 CPU 数学参考。
 - [infer.py](infer.py)：本地 tokenizer、chat template、采样与命令行入口。
 - 现有 DeepSeek 实验见 [DeepSeek V3.2](../deepseek_v32/README.md)。
 
@@ -43,11 +47,11 @@ CUDA 推理通过 FlashInfer `apply_rope_with_cos_sin_cache_inplace` 一次融�
 直接使用合并 GEMM 输出的行跨距视图，保留 V 并避免 Q/K 复制。
 保留 NOSA 的 split-half 布局和 LongRoPE scaling。融合后的性能测量见 [64K+1K 实验](../../experiments/nosa_gr_65536_1024/README.md)。
 
-当前实现计算普通 causal GQA attention，保留 checkpoint 的 LongRoPE 缩放向量。
-NOSA 的 `self_attn.A` 与 `self_attn.delta.weight` 在加载时明确跳过。
-原 sparse 分支中这两个参数既用于块选择，也用于 CIS attention 加权；当前两者均不启用，
+默认 dense 模式计算普通 causal GQA attention，保留 checkpoint 的 LongRoPE 缩放向量。
+此模式将 NOSA 的 `self_attn.A` 与 `self_attn.delta.weight` 在加载时明确跳过。
+原 sparse 分支中这两个参数既用于块选择，也用于 CIS attention 加权；dense 两者均不启用，
 语义对应上游模型的普通 dense `eager` / `flash_attention_2` 分支，而非仅移除 sparse mask。
-因此当前结果是使用 NOSA 权重的 Full Attention 基线，不表示原 NOSA sparse 推理结果。
+既有 dense 性能实验仍表示使用 NOSA 权重的 Full Attention 基线。
 
 `NosaIndexer()` 接受现有 `q/cache_access/context` 契约，在 resident K 上用 FP32
 计算 query-aware 评分，返回 `[query, KV head, block_budget]` 的逻辑 block IDs 与 validity mask。
@@ -59,6 +63,54 @@ local 明确包含当前块及之前 15 块，选择与相同分数的排序均�
 非 resident access 明确报错，默认 dense adapter 仍拒绝非空 selection。
 [64K+1K pattern 实验](../../experiments/nosa_indexer_pattern_65536_1024/README.md)
 在 dense 激活上旁路记录 indexer，统计每层各 KV head 对 1K queries 的选块并集及 K+V 容量。
+
+## 完整 NOSA block sparse
+
+`NosaForCausalLM(..., attention_mode="sparse", sparse_backend="auto")` 以及同参数的
+`from_pretrained` 启用完整路径；默认值仍为 `attention_mode="dense"`。
+实现参考 cxl-recsys commit `6e20e7df07518be4a0669dd94bdbb304e619fe31` 中
+`cxl_recsys/models/nosa_ops.py`、`nosa_indexer.py`、`nosa_attention.py`，使用本项目的
+模型、LongRoPE 和 resident cache 接口，无需导入 cxl-recsys 或 HiSparse。
+
+每层加载 `A=[KV heads]` 与 `delta.weight=[KV heads, KV heads * head_dim]`；
+配置启用 attention bias 时也加载 `delta.bias`。缺失、shape 错误和非浮点权重均报错。
+对原始 V 计算 `CIS = softplus(delta(V.flatten(1)).float()) * A.float()`，再转回模型 dtype。
+attention 使用 `softmax(QK / sqrt(D) + CIS) V`，CIS 直接作为加性偏置。
+即使短上下文所有块均选中，输出也可能与无 CIS 的 dense 基线不同。
+
+`NosaIndexer(mode="nosa", backend="reference" | "triton" | "auto")` 返回
+`[query, KV head, 64]`，有效 ID 升序排列，缺位为 `-1` 并附 validity mask：
+
+| 模式 | local（含当前块） | query-aware | query-agnostic |
+| --- | --- | --- | --- |
+| 默认分析 `query_aware` | 16 | sink/local 外选 47（32预算选15） | 不启用 |
+| 完整 `nosa` | 17 | 含 sink/local 共保留 33 | 排除已选块后补满 64 |
+
+完整模式复刻 cxl-recsys 的 inclusive local 边界（当前块和前 16 块），仅支持 64-block
+预算。K 与 CIS 均按 32-token、stride-16 对完整窗口取 mean，再对每个 64-token block
+重叠的五窗口取 max。query-aware 分数先逐 Q head causal softmax，再按 GQA 求和；
+query-agnostic 使用压缩后的 CIS。相同分数优先较小 block ID。完整模式保留模型 dtype
+的压缩/分数舍入；原 query-aware-only FP32 分析保持原语义。
+
+`auto` 在 CPU 使用 reference、CUDA 使用 Triton，CUDA 不支持的设备或 shape 明确失败。
+Triton 支持 SM90、FP16/BF16、head_dim 64/128、GQA group 1–32，使用 FP32 在线 softmax
+累积，AV 概率转回输入 dtype；数值不保证与 FP32 reference 逐位相等，indexer 的舍入
+也可能改变近似并列分数的排名。算子按逻辑块直接读取 resident NHD K/V，逐 token
+应用 causal mask，不生成 `[queries, selected_tokens, K/V]` 展开缓冲区。
+
+sparse cache 将 CIS 作为 `[layer, capacity, KV head]` 的命名 record，按新增 token
+计算一次，与 K/V 共同提交。当前 indexer 每次从 resident 前缀重算压缩，不提供增量压缩
+缓存；offload fetch、overlap 和性能调优不在此路径内。原 dense pattern 实验不启用此模式。
+完整 sparse 路径的全模型 prefill/extend 测量见
+[64K+1K 端到端 profile](../../experiments/indexer_block_sparse_profile/README.md)。
+
+```bash
+source .venv/bin/activate
+python -m models.nosa.infer --attention-mode sparse --sparse-backend triton \
+  --prompt "请用简洁的中文解释 KV cache。" --disable-thinking --max-new-tokens 32
+python -m serving.run_gr --attention-mode sparse --count 1 \
+  --user-lengths 4096 --item-lengths 128 --prefill-chunk-size 1024
+```
 
 ## 运行
 
@@ -117,6 +169,18 @@ stdout 仅输出生成文本，stderr 输出 JSON 统计，可分别重定向。
 
 模型单元测试覆盖独立数学参考、分块 cache、权重加载、模板与生成停止条件。
 没有 CUDA 时 GPU 项跳过；未设置模型路径时本地 metadata 项跳过。
+
+2026-09-26 在 NVIDIA H200（SM90）上验证了 sparse 路径：CIS/两阶段选择的独立参考、
+BF16/FP16 Triton attention 与 indexer、严格 A/delta 加载、缓存回滚、生成/GR CLI，
+以及 4097-token 场景的 65→64 块裁剪。另以本地 NOSA-8B 完成一次
+`--user-lengths 4096 --item-lengths 128` 的 sparse GR 前向，总长 4224，
+stable prefix 4124、candidate suffix 100。此检查不构成吞吐测量或模型质量评估。
+当时环境为 PyTorch `2.10.0+cu132`、Triton `3.6.0`、FlashInfer `0.6.18`；
+与当前 `pyproject.toml` / `uv.lock` 中的 torch/triton 版本不同，锁定版本组合尚未在本次验证。
+
+直接加载 cxl-recsys 的 `nosa_ops.py` 作只读对照，CPU/CUDA × FP32/BF16、6147 tokens、
+4 Q heads / 2 KV heads / D64 下，CIS 与 reference 完整选块 ID 均精确一致。
+Triton scoring 使用 Tensor Core 舍入，不能将 reference 对齐表述为所有后端逐位一致。
 
 ```bash
 source .venv/bin/activate

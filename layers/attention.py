@@ -3,7 +3,7 @@
 An indexer returns logical block IDs, not gathered KV tensors. Main attention
 receives the selection and cache access together so a future hardware backend
 can overlap attention computation with fetching offloaded records internally.
-Only the resident dense adapter is implemented today.
+The shared dense adapter and model-owned resident sparse adapters use this boundary.
 """
 
 from collections.abc import Callable

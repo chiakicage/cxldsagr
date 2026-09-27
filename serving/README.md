@@ -11,6 +11,7 @@
 
 ```bash
 python -m serving.run_gr --count 1
+python -m serving.run_gr --attention-mode sparse --count 1
 python -m serving.run_gr \
   --model-path /mnt/ssd-wlcb/chenkaiqi/NOSA-8B \
   --device cuda:0 --dtype bfloat16 --count 2 \
@@ -48,5 +49,6 @@ for result in runner.run(generator.iter_generate(2)):
 框架流程为 GR → serving → [executor](../executor/README.md) →
 [NOSA layers](../models/nosa/README.md) → [operators](../operators/README.md)，
 由 [cache manager](../cache/README.md) 统一管理 KV。
-当前仅 Full Attention + 全 HBM；NOSA indexer、main sparse attention 和 local DRAM
-offloading 都是未实现接口，后续首先面向 SM90。
+默认使用 Full Attention；`--attention-mode sparse` 启用 NOSA 完整选块与 CIS attention，
+`--sparse-backend auto` 在 CUDA 上使用 SM90 Triton。两者均为全 HBM resident cache；
+local DRAM offloading 尚未实现。

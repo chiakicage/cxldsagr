@@ -8,7 +8,7 @@ NOSA 复用 [共享层](../layers/README.md)、[执行器](../executor/README.md
 
 | 模型 | 当前内容 |
 | --- | --- |
-| [NOSA](nosa/README.md) | FlashInfer Full Attention、独立执行器与 resident cache、GR 串行前向及文本生成 |
+| [NOSA](nosa/README.md) | FlashInfer Full Attention / SM90 block sparse、CIS 与 indexer、resident cache、GR 前向及文本生成 |
 | [DeepSeek V3.2](deepseek_v32/README.md) | SM120 synthetic decode/extend、packed MLA cache、indexer 稀疏索引选择 |
 
 共享请求生成工具见 [`GR/`](../GR/README.md)，算子与构建说明见 [`operators/`](../operators/README.md)。
