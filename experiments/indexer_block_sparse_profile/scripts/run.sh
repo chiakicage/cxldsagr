@@ -3,7 +3,7 @@ set -euo pipefail
 usage() {
   echo "Usage: bash experiments/indexer_block_sparse_profile/scripts/run.sh [RUN_ID] [OPTIONS]"
   echo "End-to-end NOSA sparse: prefix=65536, candidate=1024, chunk=1024, BF16, all 32 layers."
-  echo "Options: --model-path PATH --request-file PATH --device DEVICE"
+  echo "Options: --model-path PATH --request-file PATH --device DEVICE --kernel-backend native|triton"
   echo "         --warmup N --repeats N --profile-repeats N --without-nsys --peak-tflops N --timeline-only"
   echo "Defaults: warmup=2, repeats=5, profile-repeats=1; separate benchmark and nsys processes."
   echo "Offline MFU uses H200 dense BF16 peak 989 TFLOPS; other hardware requires --peak-tflops."
@@ -35,7 +35,7 @@ while [[ $# -gt 0 ]]; do
       fi
       mfu_arguments+=("$1" "$2")
       shift 2 ;;
-    --model-path|--request-file|--device|--warmup|--repeats|--profile-repeats)
+    --model-path|--request-file|--device|--kernel-backend|--warmup|--repeats|--profile-repeats)
       if [[ $# -lt 2 || "$2" == --* ]]; then
         echo "Missing value for $1" >&2
         exit 2

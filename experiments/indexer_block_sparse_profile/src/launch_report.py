@@ -15,6 +15,7 @@ from experiments.indexer_block_sparse_profile.src.analyze import (
     _stats,
 )
 from experiments.indexer_block_sparse_profile.src.launch_analysis import analyze
+from experiments.indexer_block_sparse_profile.src.mfu import validate_kernel_backend
 from experiments.indexer_block_sparse_profile.src.module_mfu import ROOT_RANGE
 
 IDENTITY_FIELDS = (
@@ -28,6 +29,8 @@ IDENTITY_FIELDS = (
     "cuda",
     "triton",
     "flashinfer",
+    "tvm_ffi",
+    "native_build",
     "gpu",
 )
 WORKLOAD_ARGS = (
@@ -82,6 +85,8 @@ def validate_inputs(measurements, metadata, profile_metadata):
     if not isinstance(metadata["source_sha256"], dict) or not metadata["source_sha256"]:
         raise ValueError("Nonempty source_sha256 provenance is required")
     workload = measurements.get("workload", {})
+    validate_kernel_backend(workload, metadata)
+    validate_kernel_backend(workload, profile_metadata)
     for key in WORKLOAD_ARGS:
         expected = _integer(workload.get(key), f"workload.{key}", minimum=1)
         if any(meta["args"].get(key) != expected for meta in (metadata, profile_metadata)):
@@ -198,7 +203,11 @@ def summarize(measurements, metadata, profile_metadata, launch):
             "limits": launch["definitions"]["limits"]
             + "; no module attribution, HBM-bandwidth diagnosis or pure launch-latency isolation",
         },
-        "provenance": {"source_sha256": metadata["source_sha256"]},
+        "provenance": {
+            "source_sha256": metadata["source_sha256"],
+            "native_build": metadata["native_build"],
+            "tvm_ffi": metadata["tvm_ffi"],
+        },
     }
 
 

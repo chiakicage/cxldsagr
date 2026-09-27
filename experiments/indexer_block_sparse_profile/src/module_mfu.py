@@ -23,7 +23,11 @@ from experiments.indexer_block_sparse_profile.src.analyze import (
     STAGES,
     _integer,
 )
-from experiments.indexer_block_sparse_profile.src.mfu import build_report, matrix_flops
+from experiments.indexer_block_sparse_profile.src.mfu import (
+    build_report,
+    matrix_flops,
+    validate_kernel_backend,
+)
 
 ROOT_RANGE = re.compile(r"NOSA/profile/(full_prefill|extend)/(\d+)\Z")
 STAGE_RANGE = re.compile(r"NOSA/(full_prefill|extend)/layer_(\d+)/([a-z_]+)/q(\d+)\+(\d+)\Z")
@@ -67,6 +71,21 @@ SUPPORTED_GRAPHS = (
         "operators/sm90/nosa_validation.py": "aded63a061790919d0596c18f4129d4c77782b53c4e762ae87f7bd3aa2bb9700",
     },
 )
+# The migrated native kernels and the remeasured Triton control share this
+# dispatcher/source tree. Native score scopes contain normalizer + score
+# launches; attention scopes contain one native WGMMA/TMA launch.
+SUPPORTED_GRAPHS += (
+    SUPPORTED_GRAPHS[-1]
+    | {
+        "operators/sm90/nosa_indexer.py": "5319079fcd2810d3e8d0437b15d32c3b4fee9c020436b5aaf6f7178baf3ceedd",
+        "operators/sm90/nosa_attention.py": "69c587aa7e15afe3dc4d813bab1a6b01785b5c3db9d6dca5bfa7e68159d5563d",
+        "operators/sm90/_native.py": "1a852683700af461fc2de5b12295678da86026b92b031b3b609aad6fa5af1ff3",
+        "operators/sm90/_nosa_scores_cuda.py": "70a5cc50c3916675d7a23b9dca49e531a7bed9026e0f5f0bc254bd0a24bd170c",
+        "operators/sm90/_nosa_attention_cuda.py": "52371a3e7441070f9dd124fca4b7664fc282a8022292fc36357e5ca11f63a9d3",
+        "operators/sm90/csrc/nosa_scores.cu": "319c6a58c45e6e77fcf3b23d8d6e104f89c99d569e6d171f02412bc846b87830",
+        "operators/sm90/csrc/nosa_attention.cu": "c669d9a3f1fa9be72cd2578e6bfeb797b765798e8498a1df154c932b120e514e",
+    },
+)
 
 
 def _validate_source_graph(hashes):
@@ -90,6 +109,47 @@ def _cached_indexer(workload):
 def _matrix_kernel(kernel):
     name = kernel["name"].lower()
     return name.startswith("nvjet_") or "gemm" in name
+
+
+def _validate_operator_kernels(stage, selected, backend, *, query_length, total_length):
+    """Require the reviewed operator inside its Python/NVTX boundary.
+
+    A CUDA symbol may include namespaces, templates and a return type. Match
+    the operator family instead of assuming Triton's exact bare symbol name.
+    The reviewed native dispatcher keeps short compressed-key sequences on
+    Triton. Derive that branch from the captured query geometry; kernel names
+    must then match the exact branch, including both native launches in order.
+    """
+    score_backend = None
+    if stage == "block_sparse_attention":
+        expected = (
+            "nosa_attention::attention_kernel"
+            if backend == "cuda_tvm_ffi"
+            else "_nosa_block_attention",
+        )
+    elif stage in ("compressed_scores", "pooled_scores"):
+        compressed_count = max(0, (total_length - 32) // 16 + 1)
+        native_min_count = 2047 if query_length >= 1024 else 511
+        score_backend = (
+            "cuda_tvm_ffi"
+            if backend == "cuda_tvm_ffi" and compressed_count >= native_min_count
+            else "triton"
+        )
+        expected = (
+            ("nosa_scores::normalizer_kernel", "nosa_scores::scores_kernel")
+            if score_backend == "cuda_tvm_ffi"
+            else ("_scores",)
+        )
+    else:
+        return
+    # Demangled names can begin with a return type and append template args,
+    # but a longer identifier (e.g. scores_kernel_helper) is another kernel.
+    if len(selected) != len(expected) or any(
+        re.search(rf"(?<![\w:]){re.escape(family)}(?=[<(\s]|$)", kernel["name"]) is None
+        for family, kernel in zip(expected, selected, strict=True)
+    ):
+        raise ValueError(f"Scope {stage} must contain exactly the kernel sequence {expected}")
+    return score_backend
 
 
 def _interval(record, label, *, start="start"):
@@ -159,13 +219,30 @@ def _attribute_run(root, scopes, kernels, num_layers, workload):
     if any(left["end"] > right["start"] for left, right in pairwise(primary)):
         raise ValueError("Primary layer scopes must not overlap")
     primary_starts = [scope["start"] for scope in primary]
-    matrices = [kernel for kernel in kernels if _matrix_kernel(kernel)]
+
+    def primary_owner(kernel):
+        position = bisect_right(primary_starts, kernel["launch_start"]) - 1
+        if position >= 0 and kernel["launch_start"] < primary[position]["end"]:
+            return primary[position]
+        return None
+
+    # QK/PV kernels may have "gemm" in a demangled template name. Their
+    # enclosing scope owns that work; only CIS and unscoped model GEMMs enter
+    # the reviewed five-projection sequence.
+    matrices = [
+        kernel
+        for kernel in kernels
+        if _matrix_kernel(kernel)
+        and ((owner := primary_owner(kernel)) is None or owner["stage"] == "cis_projection")
+    ]
     if len(matrices) != 5 * len(calls):
         raise ValueError("Expected five GEMM kernels per layer/query call, four outside CIS")
     modules = {name: _empty_module(name) for name in MODULES}
     covered = set()
     layer_calls = []
+    score_dispatch = Counter()
     cached = _cached_indexer(workload)
+    backend = validate_kernel_backend(workload)
     query_tile = (
         None
         if cached
@@ -203,33 +280,31 @@ def _attribute_run(root, scopes, kernels, num_layers, workload):
             )
         per_call = {name: _empty_module(name) for name in MODULES if name != "other_non_matrix"}
         for stage in STAGES:
-            for scope in group[stage]:
+            for scope_index, scope in enumerate(group[stage]):
                 selected = _scope_kernels(scope, kernels, launches)
                 if not selected and not (cached and stage == "indexer_cache_update"):
                     raise ValueError(f"Scope {stage} contains no correlated CUDA kernels")
-                if stage == "block_sparse_attention" and (
-                    len(selected) != 1 or "_nosa_block_attention" not in selected[0]["name"]
-                ):
-                    raise ValueError(
-                        "Block attention scope must contain one _nosa_block_attention kernel"
-                    )
-                if (
-                    stage in ("compressed_scores", "pooled_scores")
-                    and sum(k["name"] == "_scores" for k in selected) != 1
-                ):
-                    raise ValueError("Each score scope must contain exactly one _scores kernel")
+                score_rows = (
+                    min(query_tile, length - scope_index * query_tile)
+                    if stage == "compressed_scores"
+                    else length
+                )
+                score_backend = _validate_operator_kernels(
+                    stage,
+                    selected,
+                    backend,
+                    query_length=score_rows,
+                    total_length=start + length,
+                )
+                if score_backend is not None:
+                    score_dispatch[score_backend] += 1
                 _add_kernels(modules[stage], selected)
                 _add_kernels(per_call[stage], selected)
                 if stage in PRIMARY_STAGES:
                     covered.update(k["correlationId"] for k in selected)
         gemms = dict(zip(LINEARS, matrices[5 * call_index : 5 * (call_index + 1)], strict=True))
         for name, kernel in gemms.items():
-            position = bisect_right(primary_starts, kernel["launch_start"]) - 1
-            owner = (
-                primary[position]
-                if position >= 0 and kernel["launch_start"] < primary[position]["end"]
-                else None
-            )
+            owner = primary_owner(kernel)
             if name == "cis_projection":
                 if owner is not cis:
                     raise ValueError(
@@ -297,6 +372,7 @@ def _attribute_run(root, scopes, kernels, num_layers, workload):
         "iteration": root["iteration"],
         "kernel_ms": total_ns / 1e6,
         "kernel_count": len(kernels),
+        "score_dispatch_scope_counts": dict(sorted(score_dispatch.items())),
         "modules": modules,
         "layer_calls": layer_calls,
         "root_scope": {name: root[name] for name in ("start", "end", "text", "globalTid")},
@@ -506,9 +582,13 @@ def _validate_inputs(data_dir, metadata, summary, profile_metadata):
         "cuda",
         "triton",
         "flashinfer",
+        "tvm_ffi",
+        "native_build",
     ):
         if profile_metadata.get(key) != metadata.get(key):
             raise ValueError(f"Profile and benchmark metadata disagree on {key}")
+    validate_kernel_backend(summary["workload"], metadata)
+    validate_kernel_backend(summary["workload"], profile_metadata)
     for key in ("prefix_tokens", "new_tokens", "chunk_size", "profile_repeats", "device"):
         if profile_metadata["args"][key] != metadata["args"][key]:
             raise ValueError(f"Profile and benchmark arguments disagree on {key}")
@@ -678,6 +758,7 @@ def build_module_report(metadata, summary, profile_metadata, attribution, *, pea
         "peak_source": baseline["peak_source"],
         "peak_kind": baseline["peak_kind"],
         "workload": workload,
+        "implementation": baseline["implementation"],
         "dimensions": baseline["dimensions"],
         "runs": runs,
         "phases": phases,
@@ -686,6 +767,7 @@ def build_module_report(metadata, summary, profile_metadata, attribution, *, pea
         | {
             "mfu_pct": "100 * useful matrix FLOPs / (sum of attributed GPU kernel durations in seconds * peak FLOP/s)",
             "kernel_attribution": "Host CUDA launch correlation within NVTX; GPU timestamps supply durations only",
+            "native_score_dispatch": "Native QK requires >=2047 compressed keys for >=1024 query rows, otherwise >=511 keys; shorter scored chunks use exactly one Triton _scores kernel; eligible chunks use normalizer_kernel then scores_kernel",
             "unscoped_gemms": "Reviewed runtime source order [QKV,CIS,O,gate_up,down] plus CIS/attention/RoPE/norm/activation anchors",
             "kernel_shape_proof": "Captured config and source graph, audited resident Q/K/V shapes and complete layer/chunk counts; kernel names/grids are not shape evidence",
             "no_matrix_modules": "Compression, selection and other non-matrix modules have MFU null, not zero",

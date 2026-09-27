@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "run_id": "nosa_cached_indexer_20260928_01",
+  "run_id": "nosa_triton_control_20260928_01",
   "gpu": {
     "name": "NVIDIA H200",
     "capability": [
@@ -21,6 +21,8 @@
     "chunk_size": 1024,
     "attention_mode": "sparse",
     "backend": "triton",
+    "kernel_backend": "triton",
+    "selection_backend": "flashinfer",
     "dtype": "bfloat16",
     "block_size": 64,
     "block_budget": 64,
@@ -31,6 +33,37 @@
     "profile_repeats": 1,
     "indexer_query_chunk_size": null,
     "indexer_execution": "cached_flashinfer_v1"
+  },
+  "implementation": {
+    "sparse_backend_api": "triton",
+    "kernel_backend": "triton",
+    "selection_backend": "flashinfer",
+    "tvm_ffi": "0.1.14.post0",
+    "native_build": {
+      "tvm_ffi": "0.1.14.post0",
+      "compiler": {
+        "path": "/usr/local/cuda-13.2/bin/nvcc",
+        "version": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2026 NVIDIA Corporation\nBuilt on Thu_Mar_19_11:12:51_PM_PDT_2026\nCuda compilation tools, release 13.2, V13.2.78\nBuild cuda_13.2.r13.2/compiler.37668154_0"
+      },
+      "cutlass": {
+        "commit": "f3fde58372d33e9a5650ba7b80fc48b3b49d40c8",
+        "version_header_sha256": "471048c340f3a7d8b2bc1618919fd4368c05f357755e2445c34fda652182783d"
+      },
+      "cuda_flags": [
+        "-O3",
+        "-std=c++20",
+        "--expt-relaxed-constexpr",
+        "--expt-extended-lambda",
+        "-gencode=arch=compute_90a,code=sm_90a",
+        "-lineinfo"
+      ],
+      "selected_backend": "triton",
+      "source_sha256": {
+        "operators/sm90/_native.py": "1a852683700af461fc2de5b12295678da86026b92b031b3b609aad6fa5af1ff3",
+        "operators/sm90/csrc/nosa_attention.cu": "c669d9a3f1fa9be72cd2578e6bfeb797b765798e8498a1df154c932b120e514e",
+        "operators/sm90/csrc/nosa_scores.cu": "319c6a58c45e6e77fcf3b23d8d6e104f89c99d569e6d171f02412bc846b87830"
+      }
+    }
   },
   "dimensions": {
     "num_hidden_layers": 32,
@@ -45,7 +78,7 @@
     "matmul": "2 FLOPs per multiply-add; forward only, no LM head",
     "sparse_attention": "QK + AV over selected causal tokens; current block is mandatory",
     "indexer_qk": "One logical QK per complete causal compressed key; short chunks bypass QK",
-    "excluded_flops": "Two-pass QK recomputation, masked future work, tile padding, compression, softmax/softplus, pooling/top-k, GQA score reduction, CIS bias, norms, RoPE, activations and memory operations; their time stays in the denominator",
+    "excluded_flops": "Two-pass QK recomputation, pooling-halo overlap, masked future work, tile padding, compression, softmax/softplus, pooling/top-k, GQA score reduction, CIS bias, norms, RoPE, activations and memory operations; their time stays in the denominator",
     "interpretation": "Useful matrix MFU, not hardware instruction utilization or SM occupancy"
   },
   "phases": {
@@ -69,9 +102,9 @@
       },
       "total_matrix_flops": 1183130731937792,
       "sample_count": 5,
-      "wall_ms": 3698.3914896845818,
-      "effective_tflops": 319.9041354160956,
-      "mfu_pct": 32.346221983427256
+      "wall_ms": 3726.671786978841,
+      "effective_tflops": 317.4765043897088,
+      "mfu_pct": 32.10075878561262
     },
     "extend": {
       "prefix_tokens": 65536,
@@ -93,18 +126,18 @@
       },
       "total_matrix_flops": 18820462804992,
       "sample_count": 5,
-      "wall_ms": 62.03421391546726,
-      "effective_tflops": 303.3884306269803,
-      "mfu_pct": 30.676282166529862
+      "wall_ms": 63.28347325325012,
+      "effective_tflops": 297.3993340990559,
+      "mfu_pct": 30.0707112334738
     }
   },
-  "derived_at_utc": "2026-09-27T17:43:24.419387+00:00",
+  "derived_at_utc": "2026-09-27T18:42:31.224420+00:00",
   "input_sha256": {
-    "metadata.json": "f79363cd2b985f26ee846a25a74791bc8d896c8f422f775a4209e608a52f2f38",
-    "summary.json": "c532ec9691cd409b80c8f864209115c623b59ced4dd7c1e056fd18bf43bba78b"
+    "metadata.json": "221fca211d1b4fd0ab9d75b8f27feedef9963783ce995f8e8014e4d7b7cf87a3",
+    "summary.json": "e005ace2574aa7d02b9053cf5760a410c1cf93c1d30d1e66b932b7acf1c7d32b"
   },
   "analysis_source_sha256": {
-    "experiments/indexer_block_sparse_profile/src/mfu.py": "db2e7babf0052ac87858459e50ea2dbdb1a0d3b6a12de8f3038cb387940b675e",
+    "experiments/indexer_block_sparse_profile/src/mfu.py": "022f35b6935087a8f702a3458f9de54c102bd53fec4537340eb2646b464ba2ac",
     "experiments/indexer_block_sparse_profile/src/analyze.py": "0abfbe66485466126de39cbba9921e3f563fe63cefc242e471a3fafdf13225fc",
     "experiments/nosa_gr_65536_1024/src/mfu.py": "e30ee5ad7ca52e1de1f6f5f03f2b7b776f8ae707a0ae7468adfb00de2755ec98"
   }

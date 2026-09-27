@@ -93,15 +93,20 @@ attention 使用 `softmax(QK / sqrt(D) + CIS) V`，CIS 直接作为加性偏置�
 query-agnostic 使用压缩后的 CIS。相同分数优先较小 block ID。完整模式保留模型 dtype
 的压缩/分数舍入；原 query-aware-only FP32 分析保持原语义。
 
-`auto` 在 CPU 使用 reference、CUDA 使用 Triton，CUDA 不支持的设备或 shape 明确失败。
+`auto` 在 CPU 使用 reference、CUDA 使用 SM90 dispatcher；历史接口名 `triton` 保留。
+NOSA-8B 的 D128/GQA=16 默认启用迁移后的 CUDA/CuTe QK score 和 block sparse attention；
+QK 在短上下文按[算子阈值](../../operators/sm90/README.md)使用单 kernel Triton。
+其余已支持形状走 Triton。`CXLDSAGR_SM90_BACKEND=triton` 强制对照后端。
+原生构建要求 nvcc、TVM FFI 与共享 CUTLASS，见[算子说明](../../operators/sm90/README.md)。
+CUDA 不支持的设备或 shape 明确失败。
 Triton 支持 SM90、FP16/BF16、head_dim 64/128、GQA group 1–32，使用 FP32 在线 softmax
 累积，AV 概率转回输入 dtype；数值不保证与 FP32 reference 逐位相等，indexer 的舍入
 也可能改变近似并列分数的排名。算子按逻辑块直接读取 resident NHD K/V，逐 token
 应用 causal mask，不生成 `[queries, selected_tokens, K/V]` 展开缓冲区。
 
-完整 NOSA 的 Triton indexer 一次处理完整 query batch，reference 默认 64；
+完整 NOSA 的 CUDA indexer 一次处理完整 query batch，reference 默认 64；
 `NosaIndexer(query_chunk_size=...)` 仅控制 reference。`effective_query_chunk_size(device)`
-对 Triton 返回 `None` 表示不分块，传入 query_length 可查询本次实际大小。Triton 使用连续整数 query
+对 CUDA 返回 `None` 表示不分块，传入 query_length 可查询本次实际大小。CUDA 使用连续整数 query
 区间，省去位置张量的同步检查；Q/K/CIS 有限性检查仍保留，合并为一次 GPU 状态读取。
 
 sparse cache 将 CIS 作为 `[layer, capacity, KV head]` 的命名 record，按新增 token

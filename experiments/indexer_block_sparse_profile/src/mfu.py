@@ -32,6 +32,75 @@ DIMENSIONS = (
     "num_attention_heads",
     "num_key_value_heads",
 )
+NATIVE_SOURCES = {
+    "operators/sm90/_native.py",
+    "operators/sm90/csrc/nosa_attention.cu",
+    "operators/sm90/csrc/nosa_scores.cu",
+}
+
+
+def validate_kernel_backend(workload, metadata=None):
+    """Validate actual dispatch separately from the historical sparse API name.
+
+    Older captures did not declare kernel_backend and used Triton throughout.
+    New captures identify both implementations and the native build inputs,
+    including the Triton control measured from the same final source tree.
+    This check reads captured JSON only; offline analysis never loads CUDA.
+    """
+    backend = workload.get("kernel_backend", "triton")
+    if backend not in ("triton", "cuda_tvm_ffi"):
+        raise ValueError(f"Unsupported kernel_backend: {backend}")
+    if "kernel_backend" not in workload:
+        if "selection_backend" in workload or (
+            metadata is not None
+            and ("native_build" in metadata or "kernel_backend" in metadata.get("args", {}))
+        ):
+            raise ValueError("Native-era capture metadata requires an explicit kernel_backend")
+        return backend
+    if workload.get("selection_backend") != "flashinfer":
+        raise ValueError("Declared kernel_backend requires selection_backend='flashinfer'")
+    if metadata is None:
+        return backend
+    selected = "native" if backend == "cuda_tvm_ffi" else "triton"
+    if metadata.get("args", {}).get("kernel_backend") != selected:
+        raise ValueError("Capture arguments disagree with kernel_backend")
+    build = metadata.get("native_build")
+    if not isinstance(build, dict) or build.get("selected_backend") != selected:
+        raise ValueError("native_build selected_backend disagrees with kernel_backend")
+    if not metadata.get("tvm_ffi") or build.get("tvm_ffi") != metadata["tvm_ffi"]:
+        raise ValueError("native_build tvm_ffi version disagrees with runtime metadata")
+    compiler = build.get("compiler", {})
+    if not isinstance(compiler, dict) or any(
+        not isinstance(compiler.get(key), str) or not compiler[key] for key in ("path", "version")
+    ):
+        raise ValueError("native_build requires compiler path and version")
+    flags = build.get("cuda_flags")
+    if not isinstance(flags, list) or not flags or any(not isinstance(flag, str) for flag in flags):
+        raise ValueError("native_build requires CUDA compiler flags")
+    cutlass = build.get("cutlass", {})
+    if not isinstance(cutlass, dict) or any(
+        not isinstance(cutlass.get(key), str) or not cutlass[key]
+        for key in ("commit", "version_header_sha256")
+    ):
+        raise ValueError("native_build requires shared CUTLASS commit and header fingerprint")
+    hashes = build.get("source_sha256")
+    captured = metadata.get("source_sha256", {})
+    if not isinstance(hashes, dict) or not NATIVE_SOURCES.issubset(hashes):
+        raise ValueError("native_build requires complete native source fingerprints")
+    if not isinstance(captured, dict) or any(not isinstance(name, str) for name in captured):
+        raise ValueError("Captured source fingerprints must map source paths to hashes")
+    compiled_sources = {name for name in captured if name.startswith("operators/sm90/csrc/")}
+    if not compiled_sources.issubset(hashes):
+        raise ValueError("Captured native sources are missing from native_build")
+    if any(
+        not isinstance(digest, str)
+        or len(digest) != 64
+        or any(character not in "0123456789abcdef" for character in digest)
+        or captured.get(name) != digest
+        for name, digest in hashes.items()
+    ):
+        raise ValueError("native_build source fingerprints disagree with captured sources")
+    return backend
 
 
 def work_counts(prefix, query, chunk_size):
@@ -41,7 +110,8 @@ def work_counts(prefix, query, chunk_size):
     unique historical blocks, so token counts do not depend on the ranked IDs.
     Indexer QK is bypassed when the entire model chunk fits within 64 blocks.
     Count each complete causal 32-token, stride-16 compressed key once; the
-    two-pass kernel's recomputation, future masks and tile padding are excluded.
+    two-pass recomputation, pooling-halo overlap, future masks and tile padding
+    are excluded.
     """
     _integer(prefix, "prefix")
     _integer(query, "query", minimum=1)
@@ -96,6 +166,7 @@ def build_report(metadata, summary, *, peak_tflops=None):
     if summary.get("schema_version") != 1:
         raise ValueError("Expected summary schema_version=1")
     workload = summary["workload"]
+    kernel_backend = validate_kernel_backend(workload, metadata)
     for name, expected in {**WORKLOAD, **POLICY}.items():
         if workload.get(name) != expected:
             raise ValueError(f"MFU counting requires {name}={expected!r}")
@@ -156,6 +227,13 @@ def build_report(metadata, summary, *, peak_tflops=None):
         "peak_source": peak_source,
         "peak_kind": "BF16 dense Tensor Core peak, not 2:4 structured sparsity peak",
         "workload": workload,
+        "implementation": {
+            "sparse_backend_api": workload["backend"],
+            "kernel_backend": kernel_backend,
+            "selection_backend": workload.get("selection_backend"),
+            "tvm_ffi": metadata.get("tvm_ffi"),
+            "native_build": metadata.get("native_build"),
+        },
         "dimensions": {
             **{name: config[name] for name in DIMENSIONS},
             "head_dim": config.get(
@@ -168,7 +246,7 @@ def build_report(metadata, summary, *, peak_tflops=None):
             "sparse_attention": "QK + AV over selected causal tokens; current block is mandatory",
             "indexer_qk": "One logical QK per complete causal compressed key; short chunks bypass QK",
             "excluded_flops": (
-                "Two-pass QK recomputation, masked future work, tile padding, compression, "
+                "Two-pass QK recomputation, pooling-halo overlap, masked future work, tile padding, compression, "
                 "softmax/softplus, pooling/top-k, GQA score reduction, CIS bias, norms, RoPE, "
                 "activations and memory operations; their time stays in the denominator"
             ),

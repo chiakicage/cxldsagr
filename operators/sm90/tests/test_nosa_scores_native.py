@@ -1,0 +1,106 @@
+"""Native QK normalization, pooled rounding, and stream correctness."""
+
+import pytest
+import torch
+
+from models.nosa.indexer import compressed_scores_reference
+
+requires_cuda = pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA unavailable")
+
+
+@requires_cuda
+@pytest.mark.parametrize("dtype", [torch.bfloat16, torch.float16])
+@pytest.mark.parametrize("count", [1, 127, 128, 129, 256, 257, 4159])
+@torch.inference_mode()
+def test_cuda_native_scores_strides_causality_and_pooled_rounding(dtype, count):
+    from operators.sm90._nosa_scores_cuda import scores_out
+    from operators.sm90.nosa_indexer import _pool_qa
+
+    generator = torch.Generator(device="cuda").manual_seed(357)
+    # Model QKV views and cache records need not have contiguous outer strides.
+    query = torch.randn(6, 4608, device="cuda", dtype=dtype, generator=generator)
+    query = query[1:, :4096].view(5, 2, 16, 128)
+    keys = torch.randn(count + 1, 2, 144, device="cuda", dtype=dtype, generator=generator)
+    keys = keys[1:, ..., :128]
+    length = (count + 1) * 16
+    positions = torch.tensor([0, 31, length - 1, 1023, 63], device="cuda")
+    scores = torch.full((5, 2, count), float("nan"), device="cuda", dtype=dtype)
+    scores_out(query, keys, positions, scores, 0, 0, pool_output=False)
+    expected = compressed_scores_reference(query, keys, positions)
+    torch.testing.assert_close(scores.float(), expected.float(), rtol=0.012, atol=0.001)
+    assert scores[0].count_nonzero() == 0
+
+    blocks = (length + 63) // 64
+    pooled = torch.full((5, 2, blocks), float("nan"), device="cuda", dtype=torch.float32)
+    expected_pool = torch.empty_like(pooled)
+    scores_out(query, keys, positions, pooled, 0, blocks, pool_output=True)
+    # Independent existing pooling implementation consumes the materialized,
+    # model-dtype scores. Equality proves rounding happens before max pooling.
+    _pool_qa[(10, (blocks + 127) // 128)](
+        scores, positions, expected_pool, count, 2, blocks, 0, False, 128
+    )
+    torch.testing.assert_close(pooled, expected_pool, rtol=0, atol=0)
+
+    # The actual select_blocks/select_contiguous_blocks pipeline uses a flat
+    # row/head dimension for FlashInfer top-k; both layouts share the ABI.
+    flat_pool = torch.full((10, blocks), float("nan"), device="cuda", dtype=torch.float32)
+    scores_out(query, keys, positions, flat_pool, 0, blocks, pool_output=True)
+    torch.testing.assert_close(flat_pool.view_as(pooled), pooled, rtol=0, atol=0)
+
+
+@requires_cuda
+@pytest.mark.parametrize("dtype", [torch.bfloat16, torch.float16])
+@torch.inference_mode()
+def test_cuda_native_scores_strided_groups_single_split_and_uniform_logits(dtype):
+    from operators.sm90._nosa_scores_cuda import scores_out
+
+    query = torch.randn(130, 2, 32, 128, device="cuda", dtype=dtype)[1:, :, ::2]
+    query[::2].zero_()
+    keys = torch.randn(290, 2, 128, device="cuda", dtype=dtype)[1:]
+    # 129 queries use one normalizer split; early rows have no eligible key.
+    positions = torch.arange(129, device="cuda", dtype=torch.int32) * 35
+    output = torch.empty(129, 2, 289, device="cuda", dtype=dtype)
+    scores_out(query, keys, positions, output, 0, 0, pool_output=False)
+    expected = compressed_scores_reference(query, keys, positions)
+    torch.testing.assert_close(output.float(), expected.float(), rtol=0.012, atol=0.001)
+
+
+@requires_cuda
+@torch.inference_mode()
+def test_cuda_native_scores_broadcast_strides_use_triton(monkeypatch):
+    from operators.sm90._nosa_scores_cuda import supports
+    from operators.sm90.nosa_indexer import compressed_scores
+
+    monkeypatch.setenv("CXLDSAGR_SM90_BACKEND", "native")
+    query = torch.randn(1, 2, 1, 128, device="cuda", dtype=torch.bfloat16).expand(3, 2, 16, 128)
+    keys = torch.randn(17, 1, 128, device="cuda", dtype=torch.bfloat16).expand(17, 2, 128)
+    positions = torch.tensor([31, 150, 287], device="cuda")
+    output = torch.empty(3, 2, 17, device="cuda", dtype=query.dtype)
+    assert not supports(query, keys, output)
+    actual = compressed_scores(query, keys, positions)
+    expected = compressed_scores_reference(query, keys, positions)
+    torch.testing.assert_close(actual.float(), expected.float(), rtol=0.012, atol=0.001)
+
+
+@requires_cuda
+@torch.inference_mode()
+def test_cuda_native_scores_contiguous_range_on_nondefault_stream_and_graph():
+    from operators.sm90._nosa_scores_cuda import scores_out
+
+    query = torch.randn(7, 2, 16, 128, device="cuda", dtype=torch.bfloat16)
+    keys = torch.randn(289, 2, 128, device="cuda", dtype=torch.bfloat16)
+    positions = torch.arange(4000, 4007, device="cuda", dtype=torch.int32)
+    expected = torch.empty(7, 2, 289, device="cuda", dtype=query.dtype)
+    actual = torch.empty_like(expected)
+    scores_out(query, keys, positions, expected, 0, 0, pool_output=False)
+    stream = torch.cuda.Stream()
+    stream.wait_stream(torch.cuda.current_stream())
+    with torch.cuda.stream(stream):
+        scores_out(query, keys, None, actual, 4000, 0, pool_output=False)
+        graph = torch.cuda.CUDAGraph()
+        with torch.cuda.graph(graph, stream=stream):
+            scores_out(query, keys, None, actual, 4000, 0, pool_output=False)
+        actual.fill_(float("nan"))
+        graph.replay()
+    torch.cuda.current_stream().wait_stream(stream)
+    torch.testing.assert_close(actual, expected, rtol=0, atol=0)

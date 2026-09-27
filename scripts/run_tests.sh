@@ -2,7 +2,8 @@
 set -euo pipefail
 if [[ "${1:-}" == "--help" ]]; then
   echo "Usage: bash scripts/run_tests.sh [cpu|gpu|all]"
-  echo "Default: cpu. gpu/all require Hopper CUDA, Triton and FlashInfer; CLI checks use tiny weights."
+  echo "Default: cpu. gpu/all require Hopper CUDA, nvcc, shared CUTLASS, TVM FFI, Triton and FlashInfer."
+  echo "CLI checks use tiny weights."
   exit 0
 fi
 if [[ $# -gt 1 ]]; then
@@ -27,7 +28,7 @@ if [[ "$mode" == cpu || "$mode" == all ]]; then
     -q -rs -p no:cacheprovider
 fi
 if [[ "$mode" == gpu || "$mode" == all ]]; then
-  .venv/bin/python -c 'import torch; import flashinfer; import triton; torch.cuda.init()'
+  .venv/bin/python -c 'import torch; import flashinfer; import triton; import tvm_ffi; torch.cuda.init(); from operators.sm90._native import build_info; build_info()'
   .venv/bin/python -m pytest models/nosa/tests operators/sm90/tests tests/integration \
     -k 'cuda or flashinfer' -q -rs -p no:cacheprovider
 fi

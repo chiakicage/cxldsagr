@@ -1,5 +1,7 @@
 """Synthetic asynchronous launches exercise module attribution, without a GPU."""
 
+import hashlib
+import json
 import sqlite3
 from copy import deepcopy
 
@@ -11,6 +13,8 @@ from experiments.indexer_block_sparse_profile.src.module_mfu import (
     PARENTS,
     SUPPORTED_GRAPHS,
     _flops_by_module,
+    _validate_inputs,
+    _validate_operator_kernels,
     _validate_source_graph,
     attribute_kernels,
     build_module_report,
@@ -47,6 +51,7 @@ def trace(
     *,
     cached=False,
     empty_cache_update=False,
+    native=False,
 ):
     total = prefix + query_length
     workload = {
@@ -59,6 +64,8 @@ def trace(
         workload.update(indexer_execution="cached_flashinfer_v1", indexer_query_chunk_size=None)
     elif indexer_query_chunk_size is not None:
         workload["indexer_query_chunk_size"] = indexer_query_chunk_size
+    if native:
+        workload.update(kernel_backend="cuda_tvm_ffi", selection_backend="flashinfer")
     scopes, kernels = [], []
     tid = (1 << 24) + 3
 
@@ -117,6 +124,9 @@ def trace(
             stage("indexer_total", 200, 400)
             scored = (position + query_length + 63) // 64 > 64
             if cached:
+                native_score = native and position + query_length >= (
+                    32768 if query_length >= 1024 else 8192
+                )
                 stage("indexer_validate", 220, 240)
                 kernel("_finite_partials", base + 225, duration=2)
                 kernel("_finite_reduce", base + 232, duration=2)
@@ -126,13 +136,25 @@ def trace(
                     kernel("_pool_cis_prefix", base + 260, duration=4)
                 if scored:
                     for name, kernel_name, start in (
-                        ("pooled_scores", "_scores", 280),
+                        (
+                            "pooled_scores",
+                            "void nosa_scores::scores_kernel<cutlass::gemm::Shape<16>>()"
+                            if native_score
+                            else "_scores",
+                            280,
+                        ),
                         ("topk_qa", "flashinfer_topk", 302),
                         ("prepare_cis", "_prepare_cis", 324),
                         ("topk_cis", "flashinfer_topk", 346),
                         ("finish_selection", "_finish_selection", 368),
                     ):
                         stage(name, start, start + 20)
+                        if native_score and name == "pooled_scores":
+                            kernel(
+                                "void nosa_scores::normalizer_kernel<cutlass::bfloat16_t>()",
+                                base + start + 3,
+                                duration=1,
+                            )
                         kernel(kernel_name, base + start + 5, duration=5)
                 else:
                     kernel("_select_all_blocks", base + 280, duration=5)
@@ -148,13 +170,35 @@ def trace(
                     tiles = (query_length + query_tile - 1) // query_tile
                     width = 60 / tiles
                     for tile in range(tiles):
+                        rows = min(query_tile, query_length - tile * query_tile)
+                        native_score = native and position + query_length >= (
+                            32768 if rows >= 1024 else 8192
+                        )
                         start = 325 + tile * width
                         stage("compressed_scores", start, start + width / 3)
-                        kernel("_scores", base + start + width / 6, duration=width / 6)
+                        if native_score:
+                            kernel(
+                                "void nosa_scores::normalizer_kernel<cutlass::bfloat16_t>()",
+                                base + start + width / 12,
+                                duration=width / 20,
+                            )
+                        kernel(
+                            "void nosa_scores::scores_kernel<cutlass::gemm::Shape<16>>()"
+                            if native_score
+                            else "_scores",
+                            base + start + width / 6,
+                            duration=width / 6,
+                        )
                         stage("select_from_scores", start + width / 3, start + width)
                         kernel("_select", base + start + width / 2, duration=width / 6)
             stage("block_sparse_attention", 410, 480)
-            kernel("_nosa_block_attention", base + 430, duration=40)
+            kernel(
+                "void nosa_attention::attention_kernel<cutlass::gemm::Shape<16>>()"
+                if native
+                else "_nosa_block_attention",
+                base + 430,
+                duration=40,
+            )
             kernel("nvjet_sm90_tst_256x128_64x4_1x2_h_bz_coopA_TNT", base + 500)
             kernel("fused_add_rmsnorm", base + 520)
             kernel("nvjet_sm90_tst_256x128_64x4_1x2_h_bz_coopA_TNT", base + 540, grid=(2, 66, 1))
@@ -196,6 +240,107 @@ def test_input_order_does_not_affect_launch_order_attribution():
     expected = attribute_kernels(scopes, kernels, 1, workload)
     actual = attribute_kernels(scopes[::-1], kernels[::-1], 1, workload)
     assert actual == expected
+
+
+def test_native_operator_gemms_are_owned_by_scopes_not_model_projections():
+    scopes, kernels, workload = trace(prefix=31744, query_length=1024, cached=True, native=True)
+    result = attribute_kernels(scopes, kernels, 1, workload)
+    for run in result["runs"]:
+        calls = 32 if run["phase"] == "full_prefill" else 1
+        modules = run["modules"]
+        assert modules["pooled_scores"]["kernel_count"] == (29 if calls == 32 else 2)
+        assert run["score_dispatch_scope_counts"] == (
+            {"triton": 27, "cuda_tvm_ffi": 1} if calls == 32 else {"cuda_tvm_ffi": 1}
+        )
+        assert modules["block_sparse_attention"]["kernel_count"] == calls
+        assert modules["qkv_proj"]["kernel_count"] == calls
+        assert modules["cis_projection_gemm"]["kernel_count"] == calls
+        assert (
+            sum(row["kernel_count"] for name, row in modules.items() if name not in PARENTS)
+            == run["kernel_count"]
+        )
+
+
+@pytest.mark.parametrize("stage", ["pooled_scores", "block_sparse_attention"])
+@pytest.mark.parametrize(
+    "problem", ["missing_kernel", "missing_scope", "fallback", "extra_kernel", "wrong_family"]
+)
+def test_native_operator_attribution_rejects_missing_or_unreviewed_work(stage, problem):
+    scopes, kernels, workload = trace(prefix=31744, query_length=1024, cached=True, native=True)
+    family = "nosa_scores::" if stage == "pooled_scores" else "nosa_attention::"
+    selected = [kernel for kernel in kernels if family in kernel["name"]]
+    if problem == "missing_kernel":
+        kernels = [kernel for kernel in kernels if family not in kernel["name"]]
+    elif problem == "missing_scope":
+        scopes = [scope for scope in scopes if f"/{stage}/" not in scope["text"]]
+    elif problem == "fallback":
+        for kernel in selected:
+            kernel["name"] = "_scores" if stage == "pooled_scores" else "_nosa_block_attention"
+    elif problem == "wrong_family":
+        for kernel in selected:
+            kernel["name"] = kernel["name"].replace("kernel<", "kernel_helper<")
+    else:
+        extra = deepcopy(selected[0])
+        extra.update(name="unreviewed_helper", correlationId=100_000)
+        kernels.append(extra)
+    with pytest.raises(ValueError):
+        attribute_kernels(scopes, kernels, 1, workload)
+
+
+def test_native_scores_require_normalizer_before_score_output():
+    scopes, kernels, workload = trace(prefix=31744, query_length=1024, cached=True, native=True)
+    for kernel in kernels:
+        kernel["name"] = (
+            kernel["name"]
+            .replace("normalizer_kernel", "TEMP_KERNEL")
+            .replace("scores_kernel", "normalizer_kernel")
+            .replace("TEMP_KERNEL", "scores_kernel")
+        )
+    with pytest.raises(ValueError, match="kernel sequence"):
+        attribute_kernels(scopes, kernels, 1, workload)
+
+
+@pytest.mark.parametrize("stage", ["pooled_scores", "compressed_scores"])
+@pytest.mark.parametrize(
+    ("rows", "total", "expected_backend"),
+    [
+        (1024, 32767, "triton"),
+        (1024, 32768, "cuda_tvm_ffi"),
+        (1023, 8191, "triton"),
+        (1023, 8192, "cuda_tvm_ffi"),
+        (64, 8191, "triton"),
+        (64, 8192, "cuda_tvm_ffi"),
+    ],
+)
+def test_native_score_dispatch_requires_exact_kernel_branch_at_key_thresholds(
+    stage, rows, total, expected_backend
+):
+    branches = {
+        "triton": [{"name": "_scores"}],
+        "cuda_tvm_ffi": [
+            {"name": "void nosa_scores::normalizer_kernel<cutlass::bfloat16_t, Map>()"},
+            {"name": "void nosa_scores::scores_kernel<cutlass::bfloat16_t, Map>()"},
+        ],
+    }
+    assert (
+        _validate_operator_kernels(
+            stage,
+            branches[expected_backend],
+            "cuda_tvm_ffi",
+            query_length=rows,
+            total_length=total,
+        )
+        == expected_backend
+    )
+    opposite = "triton" if expected_backend == "cuda_tvm_ffi" else "cuda_tvm_ffi"
+    with pytest.raises(ValueError, match="kernel sequence"):
+        _validate_operator_kernels(
+            stage,
+            branches[opposite],
+            "cuda_tvm_ffi",
+            query_length=rows,
+            total_length=total,
+        )
 
 
 def test_compressed_scoring_bypass_and_parent_child_accounting():
@@ -311,9 +456,66 @@ def test_cached_graph_requires_new_derived_cache_dependencies(source):
         _validate_source_graph(hashes)
 
 
+@pytest.mark.parametrize("problem", [None, "native_build", "header"])
+def test_module_input_validation_checks_native_build_and_snapshot_contents(
+    tmp_path, monkeypatch, problem
+):
+    from experiments.indexer_block_sparse_profile.src import module_mfu
+    from experiments.indexer_block_sparse_profile.tests.test_sparse_profile_mfu import native_inputs
+
+    metadata, summary = native_inputs()
+    metadata["args"].update(profile_repeats=1, device="cuda:0")
+    hashes = {}
+    for name in metadata["source_sha256"]:
+        path = tmp_path / "sources" / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(f"source snapshot for {name}\n")
+        hashes[name] = hashlib.sha256(path.read_bytes()).hexdigest()
+    metadata["source_sha256"] = dict(hashes)
+    metadata["native_build"]["source_sha256"] = dict(hashes)
+    # The fixture graph is fully hashed too; this avoids blessing an evolving
+    # production native graph before its final implementation is reviewed.
+    monkeypatch.setattr(module_mfu, "SUPPORTED_GRAPHS", (hashes,))
+    profile = deepcopy(metadata)
+    profile["args"]["mode"] = "profile"
+    profile["validation"] = {"finite": True}
+    audit = [
+        {
+            "stage": "block_sparse_attention",
+            "layer_idx": layer,
+            "status": "ok",
+            "phase": "extend",
+            "query_start": 65536,
+            "query_length": 1024,
+            "details": {
+                "q_shape": [1024, 32, 128],
+                "k_shape": [66560, 2, 128],
+                "v_shape": [66560, 2, 128],
+                "selection_shape": [1024, 2, 64],
+                "block_size": 64,
+                "block_budget": 64,
+                "valid_blocks_min": 64,
+                "valid_blocks_max": 64,
+            },
+        }
+        for layer in range(32)
+    ]
+    (tmp_path / "attention_audit.json").write_text(json.dumps(audit))
+    if problem == "native_build":
+        profile["native_build"]["compiler"]["version"] = "different compiler"
+    elif problem == "header":
+        (tmp_path / "sources/operators/sm90/csrc/detail/pipeline.cuh").write_text("changed\n")
+    if problem is None:
+        assert _validate_inputs(tmp_path, metadata, summary, profile) == hashes
+    else:
+        with pytest.raises(ValueError, match="native_build|snapshot hash"):
+            _validate_inputs(tmp_path, metadata, summary, profile)
+
+
 @pytest.mark.parametrize("cached", [False, True])
-def test_module_report_assigns_qk_once_and_accepts_absent_other_generation_stages(cached):
-    scopes, kernels, workload = trace(prefix=65536, query_length=1024, cached=cached)
+@pytest.mark.parametrize("native", [False, True])
+def test_module_report_assigns_qk_once_and_accepts_absent_other_generation_stages(cached, native):
+    scopes, kernels, workload = trace(prefix=65536, query_length=1024, cached=cached, native=native)
     workload.update(POLICY, repeats=1, profile_repeats=1)
     config = {
         "num_hidden_layers": 1,
@@ -330,6 +532,15 @@ def test_module_report_assigns_qk_once_and_accepts_absent_other_generation_stage
         "args": workload | {"mode": "benchmark"},
         "measurement_boundary": {"output": "normalized hidden states; no LM head"},
     }
+    if native:
+        from experiments.indexer_block_sparse_profile.tests.test_sparse_profile_mfu import (
+            native_inputs,
+        )
+
+        native_metadata, _ = native_inputs()
+        for key in ("source_sha256", "tvm_ffi", "native_build"):
+            metadata[key] = native_metadata[key]
+        metadata["args"]["kernel_backend"] = "native"
     summary = {
         "schema_version": 1,
         "run_id": "synthetic",
@@ -361,6 +572,8 @@ def test_module_report_assigns_qk_once_and_accepts_absent_other_generation_stage
         attribution,
         peak_tflops=1.0,
     )
+    assert report["implementation"]["kernel_backend"] == ("cuda_tvm_ffi" if native else "triton")
+    assert report["implementation"]["native_build"] == metadata.get("native_build")
     active, absent = (
         ("pooled_scores", "compressed_scores") if cached else ("compressed_scores", "pooled_scores")
     )

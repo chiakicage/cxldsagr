@@ -14,7 +14,7 @@ K+V 块容量及其占完整 KV cache 的比例。
 输入为 synthetic GR 内容，user 623、visit 0、seed 42；instruction 28 + history 65508
 组成 65536-token prefix，candidate suffix 为 1024 tokens，总计 66560。
 默认请求读取
-`experiments/indexer_block_sparse_profile/output/data/nosa_cached_indexer_20260928_01/request.json`。
+`experiments/indexer_block_sparse_profile/output/data/nosa_native_wgmma_20260928_02/request.json`。
 这是独立保存的请求输入，不从其他实验的性能数字推导本实验结果。
 
 本实验统计每个选中块仅计一次的 **unique K+V payload**，不测延迟、吞吐、带宽或总线流量。

@@ -28,7 +28,7 @@ from models.nosa.infer import DEFAULT_MODEL_PATH
 from models.nosa.model import NosaForCausalLM
 
 ROOT = Path(__file__).resolve().parents[3]
-SOURCE_RUN = "nosa_cached_indexer_20260928_01"
+SOURCE_RUN = "nosa_native_wgmma_20260928_02"
 DEFAULT_REQUEST = (
     ROOT / "experiments/indexer_block_sparse_profile/output/data" / SOURCE_RUN / "request.json"
 )

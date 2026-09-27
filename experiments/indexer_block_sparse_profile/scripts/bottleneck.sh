@@ -3,13 +3,13 @@ set -euo pipefail
 usage() {
   echo "Usage: bash experiments/indexer_block_sparse_profile/scripts/bottleneck.sh RUN_ID [SOURCE_RUN_ID]"
   echo "Measure CIS eager/graph and Nsight Compute counters; verify its source against a model run."
-  echo "Default source: nosa_cached_indexer_20260928_01. Uses CUDA_VISIBLE_DEVICES, cuda:0."
+  echo "Default source: nosa_native_wgmma_20260928_02. Uses CUDA_VISIBLE_DEVICES, cuda:0."
   echo "Requires project .venv and ncu. Successful results publish to output/{data,log,profile}/RUN_ID."
 }
 if [[ "${1:-}" == --help ]]; then usage; exit 0; fi
 if [[ $# -lt 1 || $# -gt 2 ]]; then usage >&2; exit 2; fi
 run_id="$1"
-source_run="${2:-nosa_cached_indexer_20260928_01}"
+source_run="${2:-nosa_native_wgmma_20260928_02}"
 for id in "$run_id" "$source_run"; do
   if [[ ! "$id" =~ ^[A-Za-z0-9_-]+$ ]]; then echo "Invalid run ID" >&2; exit 2; fi
 done

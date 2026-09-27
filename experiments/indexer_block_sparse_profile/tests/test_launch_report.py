@@ -14,9 +14,11 @@ from experiments.indexer_block_sparse_profile.src.launch_report import (
     validate_inputs,
     write_report,
 )
+from experiments.indexer_block_sparse_profile.tests.test_sparse_profile_mfu import native_inputs
 
 
 def inputs():
+    native_metadata, native_summary = native_inputs()
     workload = {
         "prefix_tokens": 65536,
         "new_tokens": 1024,
@@ -25,21 +27,28 @@ def inputs():
         "warmup": 2,
         "repeats": 2,
         "profile_repeats": 2,
+        "kernel_backend": native_summary["workload"]["kernel_backend"],
+        "selection_backend": "flashinfer",
     }
     gpu = {"uuid": "GPU-fixture", "sm_count": 132, "capability": [9, 0]}
     metadata = {
         "run_id": "fixture",
-        "args": {"run_id": "fixture", "mode": "benchmark", **workload},
+        "args": {"run_id": "fixture", "mode": "benchmark", **workload, "kernel_backend": "native"},
         "model_config": {"num_hidden_layers": 32},
         "checkpoint_path": "/weights/nosa",
         "checkpoint_files": {"model.safetensors": {"size": 1, "mtime_ns": 1}},
         "checkpoint_config_sha256": "config",
         "request_sha256": "request",
-        "source_sha256": {"models/nosa/model.py": "source"},
+        "source_sha256": {
+            **native_metadata["source_sha256"],
+            "models/nosa/model.py": "source",
+        },
         "torch": "torch-version",
         "cuda": "cuda-version",
         "triton": "triton-version",
         "flashinfer": "flashinfer-version",
+        "tvm_ffi": native_metadata["tvm_ffi"],
+        "native_build": native_metadata["native_build"],
         "gpu": gpu,
     }
 
@@ -134,6 +143,9 @@ def data_dir(tmp_path):
 
 def test_end_to_end_root_only_report_preserves_process_boundaries(data_dir):
     report = write_report(data_dir)
+    _, metadata, _ = inputs()
+    assert report["provenance"]["native_build"] == metadata["native_build"]
+    assert report["provenance"]["tvm_ffi"] == metadata["tvm_ffi"]
     for phase in PHASES:
         assert report["benchmark"][phase]["wall_ms"] == {
             "count": 2,
@@ -167,6 +179,8 @@ def test_end_to_end_root_only_report_preserves_process_boundaries(data_dir):
     "problem",
     [
         "source",
+        "native_build",
+        "tvm_ffi",
         "checkpoint",
         "workload",
         "run_id",
@@ -182,6 +196,10 @@ def test_mismatched_and_incomplete_runs_are_rejected(problem):
     measurements, metadata, profile = inputs()
     if problem == "source":
         profile["source_sha256"]["models/nosa/model.py"] = "different"
+    elif problem == "native_build":
+        profile["native_build"]["compiler"]["version"] = "different"
+    elif problem == "tvm_ffi":
+        profile["tvm_ffi"] = "different"
     elif problem == "checkpoint":
         profile["checkpoint_files"]["model.safetensors"]["size"] = 2
     elif problem == "workload":

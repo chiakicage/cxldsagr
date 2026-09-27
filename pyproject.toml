@@ -15,6 +15,7 @@ dependencies = [
     "cuda-pathfinder==1.8.1",
     "cuda-toolkit==13.0.2",
     "flashinfer-python[cu13]==0.6.18",
+    "apache-tvm-ffi>=0.1.13.post3,<0.2",
     # 构建与测试工具
     "ninja==1.13.0",
     "packaging==26.2",

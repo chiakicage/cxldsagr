@@ -11,6 +11,7 @@ import argparse
 import hashlib
 import importlib.metadata
 import json
+import os
 import subprocess
 import time
 from contextlib import ExitStack, nullcontext
@@ -22,6 +23,7 @@ from unittest.mock import patch
 import torch
 
 from executor.model_executor import run_chunks
+from experiments.indexer_block_sparse_profile.src.mfu import validate_kernel_backend
 from experiments.nosa_gr_65536_1024.src.capture import execution_split
 from experiments.nosa_gr_65536_1024.src.sources import source_hashes
 from GR.input_generator import INSTRUCTION, TextConfig, create_input_generator
@@ -74,8 +76,11 @@ def validate_profile_metadata(current, benchmark):
         "request_sha256",
         "source_sha256",
         "torch",
+        "cuda",
         "triton",
         "flashinfer",
+        "tvm_ffi",
+        "native_build",
         "gpu",
     ):
         # Frozen config tuples (e.g. EOS IDs) become arrays in metadata.json.
@@ -164,6 +169,8 @@ def timed_forward(model, ids, cache, prefix_length, chunk_size):
 
 
 def runtime_metadata(args, model, original_context):
+    from operators.sm90._native import build_info
+
     props = torch.cuda.get_device_properties(model.model.embed_tokens.weight.device)
     checkpoint = args.model_path.resolve()
     return {
@@ -194,6 +201,8 @@ def runtime_metadata(args, model, original_context):
         "cuda": torch.version.cuda,
         "triton": importlib.metadata.version("triton"),
         "flashinfer": importlib.metadata.version("flashinfer-python"),
+        "tvm_ffi": importlib.metadata.version("apache-tvm-ffi"),
+        "native_build": build_info(),
         "nvidia_smi": subprocess.check_output(
             [
                 "nvidia-smi",
@@ -263,6 +272,12 @@ def _build_parser():
     parser.add_argument("--model-path", type=Path, default=DEFAULT_MODEL_PATH)
     parser.add_argument("--request-file", type=Path)
     parser.add_argument("--device", default="cuda:0")
+    parser.add_argument(
+        "--kernel-backend",
+        choices=("native", "triton"),
+        default="native",
+        help="Native tvm-ffi Hopper kernels, or the retained Triton measurement control",
+    )
     parser.add_argument("--prefix-tokens", type=int, default=65536)
     parser.add_argument("--new-tokens", type=int, default=1024)
     parser.add_argument("--chunk-size", type=int, default=1024)
@@ -276,6 +291,9 @@ def _build_parser():
 
 @torch.inference_mode()
 def run(args):
+    # Set the dispatcher before any model call in this process. The historical
+    # sparse_backend='triton' API now names the shared SM90 dispatcher.
+    os.environ["CXLDSAGR_SM90_BACKEND"] = args.kernel_backend
     validate_workload(
         args.prefix_tokens,
         args.new_tokens,
@@ -298,6 +316,8 @@ def run(args):
         "chunk_size": args.chunk_size,
         "attention_mode": "sparse",
         "backend": "triton",
+        "kernel_backend": "cuda_tvm_ffi" if args.kernel_backend == "native" else "triton",
+        "selection_backend": "flashinfer",
         "dtype": "bfloat16",
         "block_size": 64,
         "block_budget": 64,
@@ -355,6 +375,7 @@ def run(args):
         config, max_position_embeddings=max(total, config.max_position_embeddings)
     )
     meta = runtime_metadata(args, model, config.max_position_embeddings)
+    validate_kernel_backend(workload, meta)
     meta["request_sha256"] = hashlib.sha256(
         (args.output_dir / "request.json").read_bytes()
     ).hexdigest()

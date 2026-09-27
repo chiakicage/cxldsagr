@@ -23,3 +23,6 @@ DeepGEMM 2.8.0 改用 DeepJIT 和 C++20，不再依赖 fmt。SM120 构建需要�
 重新比较数值时需要考虑该变化。
 
 `EzKernelKit/` 是由 Git 忽略的本地参考 checkout，不是子模块或自动构建依赖。
+
+SM90 的本地 NOSA CUDA 内核复用顶层 `cutlass/include`，通过项目环境中的 TVM FFI
+按需编译；只运行该后端时使用 `uv sync`，不要求安装 `sm120` 组或 EzKernelKit。

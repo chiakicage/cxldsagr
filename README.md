@@ -9,7 +9,7 @@ memory 等显存之外的位置，GPU 根据稀疏访问需求读取或搬入所
 NOSA 已提供基于 FlashInfer Full Attention 的单 GPU 模型推理，以及直接消费 GR 输入的
 本地串行执行框架。模型层、执行器与缓存管理已分离，当前 KV 全部驻留 HBM；
 NOSA 已提供 query-aware indexer 参考实现与 GR 选块容量实验，以及包含 query-agnostic
-CIS 打分的 resident block sparse 推理（CPU reference / SM90 Triton）。local DRAM
+CIS 打分的 resident block sparse 推理（CPU reference / SM90 CUDA、Triton）。local DRAM
 offloading 仅预留接口。DeepGEMM 使用上游 `nv_dev`
 子模块，其依赖更新尚未经过 GPU 构建和模型验证。
 
@@ -70,7 +70,7 @@ uv sync --group sm120 --group analysis
 [DeepSeek V3.2](models/deepseek_v32/README.md)。
 构建与测试命令见 [SM120 算子](operators/sm120/README.md)。
 全局回归使用 `bash scripts/run_tests.sh [cpu|gpu|all]`，结果直接输出终端。
-`gpu` / `all` 需要 Hopper CUDA、Triton 与 FlashInfer，CLI 集成测试使用临时小模型权重。
+`gpu` / `all` 需要 Hopper CUDA、nvcc、共享 CUTLASS、TVM FFI、Triton 与 FlashInfer，CLI 集成测试使用临时小模型权重。
 
 ## 提交检查
 

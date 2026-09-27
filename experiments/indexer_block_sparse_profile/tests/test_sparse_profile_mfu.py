@@ -5,11 +5,13 @@ import json
 import pytest
 
 from experiments.indexer_block_sparse_profile.src.mfu import (
+    NATIVE_SOURCES,
     POLICY,
     WORKLOAD,
     analyze,
     build_report,
     matrix_flops,
+    validate_kernel_backend,
     work_counts,
 )
 
@@ -105,6 +107,113 @@ def inputs():
         },
     }
     return metadata, summary
+
+
+def native_inputs(*, backend="native"):
+    metadata, summary = inputs()
+    summary["workload"].update(
+        kernel_backend="cuda_tvm_ffi" if backend == "native" else "triton",
+        selection_backend="flashinfer",
+    )
+    metadata["args"]["kernel_backend"] = backend
+    hashes = {name: "a" * 64 for name in NATIVE_SOURCES}
+    hashes["operators/sm90/csrc/detail/pipeline.cuh"] = "b" * 64
+    metadata.update(
+        source_sha256=dict(hashes),
+        tvm_ffi="fixture-ffi-version",
+        native_build={
+            "selected_backend": backend,
+            "tvm_ffi": "fixture-ffi-version",
+            "compiler": {"path": "/cuda/bin/nvcc", "version": "fixture-nvcc-version"},
+            "cuda_flags": ["-O3", "-gencode=arch=compute_90a,code=sm_90a"],
+            "cutlass": {"commit": "c" * 40, "version_header_sha256": "d" * 64},
+            "source_sha256": hashes,
+        },
+    )
+    return metadata, summary
+
+
+@pytest.mark.parametrize("backend", ["native", "triton"])
+def test_native_and_remeasured_triton_control_preserve_math_and_build_identity(backend):
+    metadata, summary = native_inputs(backend=backend)
+    report = build_report(metadata, summary)
+    legacy = build_report(*inputs())
+    assert report["phases"] == legacy["phases"]
+    assert report["implementation"]["kernel_backend"] == summary["workload"]["kernel_backend"]
+    assert report["implementation"]["native_build"] == metadata["native_build"]
+
+
+@pytest.mark.parametrize(
+    "problem",
+    [
+        "kernel_backend",
+        "missing_kernel_backend",
+        "selection_backend",
+        "args",
+        "missing_build",
+        "selected_backend",
+        "ffi_version",
+        "compiler",
+        "flags",
+        "cutlass",
+        "missing_source",
+        "header_mismatch",
+        "uncaptured_header",
+        "invalid_digest",
+        "invalid_source_map",
+    ],
+)
+def test_native_backend_metadata_requires_complete_matching_build_inputs(problem):
+    metadata, summary = native_inputs()
+    workload = summary["workload"]
+    build = metadata["native_build"]
+    if problem == "kernel_backend":
+        workload["kernel_backend"] = "unknown"
+    elif problem == "missing_kernel_backend":
+        del workload["kernel_backend"]
+    elif problem == "selection_backend":
+        workload["selection_backend"] = "unknown"
+    elif problem == "args":
+        metadata["args"]["kernel_backend"] = "triton"
+    elif problem == "missing_build":
+        del metadata["native_build"]
+    elif problem == "selected_backend":
+        build["selected_backend"] = "triton"
+    elif problem == "ffi_version":
+        build["tvm_ffi"] = "different"
+    elif problem == "compiler":
+        del build["compiler"]["version"]
+    elif problem == "flags":
+        build["cuda_flags"] = []
+    elif problem == "cutlass":
+        del build["cutlass"]["commit"]
+    elif problem == "missing_source":
+        del build["source_sha256"]["operators/sm90/csrc/nosa_scores.cu"]
+    elif problem == "header_mismatch":
+        metadata["source_sha256"]["operators/sm90/csrc/detail/pipeline.cuh"] = "c" * 64
+    elif problem == "uncaptured_header":
+        metadata["source_sha256"]["operators/sm90/csrc/missing.cuh"] = "d" * 64
+    elif problem == "invalid_source_map":
+        metadata["source_sha256"] = []
+    else:
+        name = "operators/sm90/csrc/detail/pipeline.cuh"
+        metadata["source_sha256"][name] = build["source_sha256"][name] = "invalid"
+    with pytest.raises(ValueError):
+        validate_kernel_backend(workload, metadata)
+
+
+@pytest.mark.parametrize("marker", ["selection_backend", "native_build", "args"])
+def test_modern_capture_cannot_omit_dispatch_identity(marker):
+    metadata, summary = inputs()
+    workload = summary["workload"]
+    if marker == "selection_backend":
+        workload[marker] = "flashinfer"
+    elif marker == "native_build":
+        metadata[marker] = {}
+    else:
+        metadata["args"]["kernel_backend"] = "native"
+    with pytest.raises(ValueError, match="explicit kernel_backend"):
+        validate_kernel_backend(workload, metadata)
 
 
 def test_report_uses_wall_medians_and_dense_bf16_peak():

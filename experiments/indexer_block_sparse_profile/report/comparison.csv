@@ -1,0 +1,9 @@
+phase,metric,timing_boundary,native_ms,triton_ms,speedup_triton_over_native,native_run_id,triton_run_id
+full_prefill,end_to_end,unprofiled wall time,3429.5164681971073,3726.671786978841,1.0866464183908549,nosa_native_wgmma_20260928_02,nosa_triton_control_20260928_01
+full_prefill,pooled_scores,nsys correlated kernel duration sum,285.270451,292.92689,1.0268392291355828,nosa_native_wgmma_20260928_02,nosa_triton_control_20260928_01
+full_prefill,block_sparse_attention,nsys correlated kernel duration sum,874.408863,1193.840392,1.3653114035281686,nosa_native_wgmma_20260928_02,nosa_triton_control_20260928_01
+full_prefill,indexer_total,nsys correlated kernel duration sum,667.225245,677.387554,1.0152307021896332,nosa_native_wgmma_20260928_02,nosa_triton_control_20260928_01
+extend,end_to_end,unprofiled wall time,58.13363566994667,63.28347325325012,1.0885861949619258,nosa_native_wgmma_20260928_02,nosa_triton_control_20260928_01
+extend,pooled_scores,nsys correlated kernel duration sum,8.290464,8.815114,1.0632835508362377,nosa_native_wgmma_20260928_02,nosa_triton_control_20260928_01
+extend,block_sparse_attention,nsys correlated kernel duration sum,13.931456,18.450134,1.3243507354866568,nosa_native_wgmma_20260928_02,nosa_triton_control_20260928_01
+extend,indexer_total,nsys correlated kernel duration sum,14.749536,15.364716,1.041708430692328,nosa_native_wgmma_20260928_02,nosa_triton_control_20260928_01

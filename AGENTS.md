@@ -21,7 +21,7 @@
   语义由模型声明。派生缓存随 KV 统一提交、回滚和截短，不占用通用 opaque layer state。
 - main attention 接收逻辑块选择、cache access 与执行上下文，不能把「全部 KV
   已完成搬入 HBM」作为通用前置条件。未来 fetch/compute overlap 由 SM90 算子实现；
-  resident NOSA block sparse attention 已接入 SM90 Triton；offload 入口仍只预留接口，
+  resident NOSA block sparse attention 已接入 SM90 CUDA/CuTe 与 Triton；offload 入口仍只预留接口，
   调用未实现路径须明确失败，不将 resident 验证表述为 offload 验证。
 - NOSA query-aware indexer 已有 resident K 上的 PyTorch FP32 参考实现：64-token block、
   默认 `block_budget=64`，1 sink + 16 causal local（含当前块）+ 47 query-aware top-k；
@@ -33,7 +33,7 @@
   inclusive local 为当前块加前 16 块，query-aware 阶段含 sink/local 共保留 33 块，
   再按 query-agnostic CIS 补满 64 块。A/delta 从 checkpoint 严格加载；
   `softplus(delta(V)) * A` 同时用于压缩后选块及 attention 加性 bias。
-  K/V/CIS 作为同一 resident cache step 提交，CPU reference 与 SM90 Triton 均可运行。
+  K/V/CIS 作为同一 resident cache step 提交，CPU reference 与 SM90 CUDA/Triton 均可运行。
   两种 policy 不混用；原 query-aware pattern 实验在 dense 激活上旁路选块，不改变 dense 基线。
   完整 NOSA pattern 对照分别采集同一 dense 激活上的 QA-only/full NOSA 选择，以及真实
   sparse 传播中 attention 实际消费的选择；dense/sparse prefix 从独立空 cache 构建。

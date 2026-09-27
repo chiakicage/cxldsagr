@@ -3,9 +3,12 @@
 import hashlib
 from pathlib import Path
 
+ROOT = Path(__file__).resolve().parents[3]
+NATIVE_SOURCE_SUFFIXES = {".cu", ".cuh", ".c", ".cpp", ".h", ".hpp"}
+
 
 def source_hashes(*extra_sources):
-    root = Path(__file__).resolve().parents[3]
+    root = ROOT
     paths = {root / "GR/analysis/heat_curves.csv"}
     for directory in (
         "models/nosa",
@@ -19,6 +22,11 @@ def source_hashes(*extra_sources):
         "experiments/nosa_gr_65536_1024/src",
     ):
         paths.update((root / directory).glob("*.py"))
+    paths.update(
+        path
+        for path in (root / "operators/sm90/csrc").rglob("*")
+        if path.is_file() and path.suffix in NATIVE_SOURCE_SUFFIXES
+    )
     paths.update(Path(path).resolve() for path in extra_sources)
     return {
         str(path.relative_to(root)): hashlib.sha256(path.read_bytes()).hexdigest()

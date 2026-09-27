@@ -267,6 +267,15 @@ def _launch_scores(query, keys, positions, output, query_start, blocks, *, pool_
     rows, heads, groups, dim = query.shape
     if not rows or not len(keys):
         return
+    from operators.sm90._native import native_enabled
+    from operators.sm90._nosa_scores_cuda import scores_out, supports
+
+    # The two-kernel native schedule amortizes its extra launch on long keys;
+    # short prefill chunks retain the single-kernel Triton schedule.
+    native_min_count = 2047 if rows >= 1024 else 511
+    if native_enabled() and len(keys) >= native_min_count and supports(query, keys, output):
+        scores_out(query, keys, positions, output, query_start, blocks, pool_output=pool_output)
+        return
     query_block = 4 if groups == 16 else 1
     if groups == 16 and dim == 128 and rows >= 1024:
         query_block = 8
