@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 usage() {
-  echo "Usage: bash experiments/nosa_indexer_pattern_65536_1024/scripts/estimate.sh [RUN_ID] [--dense-data-dir PATH] [--pattern-data-dir PATH] [--bandwidth-gbps NUMBER]"
+  echo "Usage: bash experiments/nosa_indexer_pattern_65536_1024/scripts/estimate.sh [RUN_ID] --dense-data-dir PATH [--pattern-data-dir PATH] [--bandwidth-gbps NUMBER]"
   echo "Calculate per-layer sparse GPU work at unchanged MFU and KV fetch at 50 decimal GB/s by default."
-  echo "Reads existing results only; requires NumPy and Matplotlib, no GPU execution."
+  echo "Requires an explicit valid dense timing run; reads results only, with NumPy and Matplotlib and no GPU execution."
 }
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 cd -- "$script_dir/../../.."

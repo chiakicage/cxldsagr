@@ -16,6 +16,7 @@ from itertools import pairwise
 from pathlib import Path
 
 from experiments.indexer_block_sparse_profile.src.analyze import (
+    FUSED_STAGES,
     NESTED_STAGES,
     PHASES,
     PRIMARY_STAGES,
@@ -36,9 +37,9 @@ MODULES = (
 PARENTS = {stage: "indexer_total" for stage in NESTED_STAGES} | {
     "cis_projection_gemm": "cis_projection"
 }
-# This inference graph was reviewed against the captured source snapshot.
-# A different graph requires review before relying on its unscoped GEMM order.
-SUPPORTED_GRAPH = {
+# These inference graphs share the reviewed unscoped GEMM order. Keep complete
+# versions so an old captured snapshot remains analyzable after optimization.
+_LEGACY_GRAPH = {
     "models/nosa/model.py": "5acbd9c5349f75b5b02366849ef7cd76d6f5b0676126bc789b8384939dfc51a5",
     "models/nosa/layers.py": "cf54c7c1e96483175da788491450bd264fae322a6c1452f830b5ce721f308b43",
     "models/nosa/scoring.py": "c4c7e75a15a5ffb95e935b02ec482586a288c64ad079a175b293db6baa3f92d8",
@@ -48,6 +49,42 @@ SUPPORTED_GRAPH = {
     "operators/sm90/nosa_indexer.py": "640cff9441efe24e579b64d7f91eb6684075f35ae32243f0c46a988b5b7453b5",
     "operators/sm90/_nosa_attention_triton.py": "c9b2060928cff8cbf594a876061546521064da78f52b3297922bcc5dd0f96985",
 }
+SUPPORTED_GRAPHS = (
+    _LEGACY_GRAPH,
+    _LEGACY_GRAPH
+    | {
+        "models/nosa/indexer.py": "cbaa654ddcd5db2de65f2894361bd277bec95911c60adf344099f0268dc8bba7",
+        "operators/sm90/nosa_indexer.py": "bc402c60d3283d8651c562f41689f3e70842ce226b2e244c5db83437aa43fd4b",
+    },
+    _LEGACY_GRAPH
+    | {
+        "cache/manager.py": "3f8a3129900f8e5e1af6005fcc187f5d430c5ce5156ca80c169384694dd39f91",
+        "cache/indexer_cache.py": "da80484c5d2ad016b3119f80576e72d2956f8d9d1a5cc2804a0e6d668b80b2eb",
+        "models/nosa/cache.py": "aa8e5f9a71a4c715e22567e9dcaa0d88d795c9a76a127431e7eb2045658d2f1d",
+        "models/nosa/indexer.py": "e5f636a626ca2319698fb28ce49c9637088bc3af4b98ba197feafbd72f165633",
+        "operators/sm90/nosa_indexer.py": "980c667fc87d7d62b8165cf10b0385cfbefd8b81419f2b1f81f660014b6e78eb",
+        "operators/sm90/nosa_compression.py": "9655a9b4caeea836c846eef654f781318fc930e5ee95192fbeb6ee64dc8201f3",
+        "operators/sm90/nosa_validation.py": "aded63a061790919d0596c18f4129d4c77782b53c4e762ae87f7bd3aa2bb9700",
+    },
+)
+
+
+def _validate_source_graph(hashes):
+    if not any(
+        all(hashes.get(name) == expected for name, expected in graph.items())
+        for graph in SUPPORTED_GRAPHS
+    ):
+        raise ValueError("Unreviewed inference graph for unscoped GEMM attribution")
+
+
+def _cached_indexer(workload):
+    execution = workload.get("indexer_execution")
+    if execution not in (None, "cached_flashinfer_v1"):
+        raise ValueError(f"Unsupported indexer_execution: {execution}")
+    cached = execution == "cached_flashinfer_v1"
+    if cached and workload.get("indexer_query_chunk_size") is not None:
+        raise ValueError("cached_flashinfer_v1 requires whole-batch query dispatch")
+    return cached
 
 
 def _matrix_kernel(kernel):
@@ -128,16 +165,18 @@ def _attribute_run(root, scopes, kernels, num_layers, workload):
     modules = {name: _empty_module(name) for name in MODULES}
     covered = set()
     layer_calls = []
-    query_tile = _integer(
-        workload.get("indexer_query_chunk_size", 64), "indexer_query_chunk_size", minimum=1
+    cached = _cached_indexer(workload)
+    query_tile = (
+        None
+        if cached
+        else _integer(
+            workload.get("indexer_query_chunk_size", 64), "indexer_query_chunk_size", minimum=1
+        )
     )
     for call_index, key in enumerate(calls):
         group = grouped[key]
-        if any(
-            len(group[stage]) != 1
-            for stage in (*PRIMARY_STAGES, "compression_k", "compression_cis")
-        ):
-            raise ValueError("Each layer call needs exactly one primary and two compression scopes")
+        if any(len(group[stage]) != 1 for stage in PRIMARY_STAGES):
+            raise ValueError("Each layer call needs exactly one scope for each primary stage")
         cis, indexer, attention = [group[name][0] for name in PRIMARY_STAGES]
         if not (cis["end"] <= indexer["start"] and indexer["end"] <= attention["start"]):
             raise ValueError("Expected CIS -> indexer -> block attention scope order")
@@ -151,10 +190,13 @@ def _attribute_run(root, scopes, kernels, num_layers, workload):
             raise ValueError("Indexer child scopes must not overlap")
         layer, start, length = key
         scored = (start + length + 63) // 64 > 64
-        tiles = (length + query_tile - 1) // query_tile if scored else 0
-        expected = ["compression_k", "compression_cis"] + [
-            stage for _ in range(tiles) for stage in ("compressed_scores", "select_from_scores")
-        ]
+        if cached:
+            expected = list(FUSED_STAGES if scored else FUSED_STAGES[:2])
+        else:
+            tiles = (length + query_tile - 1) // query_tile if scored else 0
+            expected = ["compression_k", "compression_cis"] + [
+                stage for _ in range(tiles) for stage in ("compressed_scores", "select_from_scores")
+            ]
         if [scope["stage"] for scope in nested] != expected:
             raise ValueError(
                 "Indexer child count/order disagrees with query tiling or short-context bypass"
@@ -163,7 +205,7 @@ def _attribute_run(root, scopes, kernels, num_layers, workload):
         for stage in STAGES:
             for scope in group[stage]:
                 selected = _scope_kernels(scope, kernels, launches)
-                if not selected:
+                if not selected and not (cached and stage == "indexer_cache_update"):
                     raise ValueError(f"Scope {stage} contains no correlated CUDA kernels")
                 if stage == "block_sparse_attention" and (
                     len(selected) != 1 or "_nosa_block_attention" not in selected[0]["name"]
@@ -172,12 +214,10 @@ def _attribute_run(root, scopes, kernels, num_layers, workload):
                         "Block attention scope must contain one _nosa_block_attention kernel"
                     )
                 if (
-                    stage == "compressed_scores"
+                    stage in ("compressed_scores", "pooled_scores")
                     and sum(k["name"] == "_scores" for k in selected) != 1
                 ):
-                    raise ValueError(
-                        "Compressed score scope must contain exactly one _scores kernel"
-                    )
+                    raise ValueError("Each score scope must contain exactly one _scores kernel")
                 _add_kernels(modules[stage], selected)
                 _add_kernels(per_call[stage], selected)
                 if stage in PRIMARY_STAGES:
@@ -475,9 +515,7 @@ def _validate_inputs(data_dir, metadata, summary, profile_metadata):
     if profile_metadata.get("validation", {}).get("finite") is not True:
         raise ValueError("The captured profile must have passed its finite-output check")
     hashes = metadata["source_sha256"]
-    for name, expected in SUPPORTED_GRAPH.items():
-        if hashes.get(name) != expected:
-            raise ValueError(f"Unreviewed inference graph for unscoped GEMM attribution: {name}")
+    _validate_source_graph(hashes)
     verified = {}
     for name, expected in hashes.items():
         path = (data_dir / "sources" / name).resolve()
@@ -525,12 +563,13 @@ def _validate_inputs(data_dir, metadata, summary, profile_metadata):
     return verified
 
 
-def _flops_by_module(config, prefix, query, chunk_size):
+def _flops_by_module(config, prefix, query, chunk_size, *, cached=False):
     flops = matrix_flops(config, prefix, query, chunk_size)
     return {
         **{name: flops.get(name, 0) for name in MODULES},
         "indexer_total": flops["indexer_qk"],
-        "compressed_scores": flops["indexer_qk"],
+        "compressed_scores": 0 if cached else flops["indexer_qk"],
+        "pooled_scores": flops["indexer_qk"] if cached else 0,
         "cis_projection_gemm": flops["cis_projection"],
     }
 
@@ -551,6 +590,7 @@ def build_module_report(metadata, summary, profile_metadata, attribution, *, pea
     baseline = build_report(metadata, summary, peak_tflops=peak_tflops)
     peak = baseline["peak_tflops"]
     config, workload = metadata["model_config"], summary["workload"]
+    cached = _cached_indexer(workload)
     runs = attribution["runs"]
     repeats = _integer(workload["profile_repeats"], "profile_repeats", minimum=1)
     for phase in PHASES:
@@ -567,13 +607,17 @@ def build_module_report(metadata, summary, profile_metadata, attribution, *, pea
             if phase == "full_prefill"
             else (workload["prefix_tokens"], workload["new_tokens"])
         )
-        flops = _flops_by_module(config, prefix, query, workload["chunk_size"])
+        flops = _flops_by_module(config, prefix, query, workload["chunk_size"], cached=cached)
         for name, module in run["modules"].items():
             _add_mfu(module, flops[name], peak)
         for call in run["layer_calls"]:
             one_layer = config | {"num_hidden_layers": 1}
             call_flops = _flops_by_module(
-                one_layer, call["query_start"], call["query_length"], workload["chunk_size"]
+                one_layer,
+                call["query_start"],
+                call["query_length"],
+                workload["chunk_size"],
+                cached=cached,
             )
             for name, module in call["modules"].items():
                 _add_mfu(module, call_flops[name], peak)
@@ -615,7 +659,7 @@ def build_module_report(metadata, summary, profile_metadata, attribution, *, pea
                 if values[0]["mfu_pct"] is not None
                 else None,
             }
-            if name in STAGES:
+            if name in summary["profiles"][phase]["stage_totals"]:
                 interval = summary["profiles"][phase]["stage_totals"][name]["cuda_elapsed_ms"][
                     "median"
                 ]

@@ -6,9 +6,9 @@
 | 实验 | 内容与状态 | 仓库根目录运行入口 |
 | --- | --- | --- |
 | [CPU DRAM 带宽](cpu_dram_bandwidth/README.md) | 双路 Xeon 8558P / DDR5-4400；理论 563.2 GB/s，当前容器 IMC 顺序读约 428 GB/s、应用约 435 GB/s，含 NUMA 与线程扫描 | `bash experiments/cpu_dram_bandwidth/scripts/run.sh <run_id> --imc` |
-| [NOSA indexer + block sparse profile](indexer_block_sparse_profile/README.md) | 完整 NOSA sparse 的 64K+1K 端到端：H200 BF16 full-prefill 10.580 s、prefix-ready extend 194.837 ms；含 CIS/indexer/attention 分解与 nsys | `bash experiments/indexer_block_sparse_profile/scripts/run.sh <run_id>` |
-| [NOSA GR 65536 + 1024](nosa_gr_65536_1024/README.md) | instruction + 历史 65536、候选 1024；QKV/gate-up GEMM 合并与 FlashInfer 融合，已完成 GPU 时间、模块 MFU 与 launch 开销测量 | `bash experiments/nosa_gr_65536_1024/scripts/run.sh <run_id>` |
-| [NOSA query-aware pattern 65536 + 1024](nosa_indexer_pattern_65536_1024/README.md) | dense 激活上比较 64/32 blocks（1 sink + 16 local + 47/15 query-aware）；并集占完整 KV 的 37.90%/25.32%，含逐层/head 结果、全部head占比分布图、固定 MFU、50 GB/s fetch、sink/local 与 QA 分项及30%分类overlap估算 | `bash experiments/nosa_indexer_pattern_65536_1024/scripts/run.sh <run_id> --block-budget 32`（默认64）；离线计算用同目录 `scripts/estimate.sh` / `scripts/decompose.sh` |
+| [NOSA indexer + block sparse profile](indexer_block_sparse_profile/README.md) | 增量压缩缓存 + FlashInfer Top-K；H200 BF16 64K+1K 无插桩 full-prefill 3.698 s、extend 62.034 ms，含模块 kernel MFU | `bash experiments/indexer_block_sparse_profile/scripts/run.sh <run_id>` |
+| [NOSA GR 65536 + 1024](nosa_gr_65536_1024/README.md) | dense 单请求前向与模块 MFU；共享 cache 改动后未运行 | `bash experiments/nosa_gr_65536_1024/scripts/run.sh <run_id>` |
+| [NOSA indexer pattern 65536 + 1024](nosa_indexer_pattern_65536_1024/README.md) | 完整 NOSA 三组对照改动后未运行；保留独立 QA-only FP32 选块原始数据 | `bash experiments/nosa_indexer_pattern_65536_1024/scripts/sparse_compare.sh <run_id>` |
 | [旧 DeepSeek / SM120](legacy/deepseek_v32/README.md) | 旧脚本、测试和历史报告整体归档 | 见归档 README |
 
 ```bash

@@ -57,9 +57,9 @@ nsys capture → SQLite export → analyze → MFU，保存各步骤 stdout/stde
 
 ## 测量方法
 
-平台：NVIDIA M403（CUDA 名称 H200，132 SM、SM90），GPU 0；PyTorch 2.10.0+cu132 / CUDA 13.2，
-FlashInfer 0.6.18，驱动 570.124.06，Nsight Systems 2025.6.3。
-每阶段预热 2 次、基准计时 5 次取中位数。加载、GR 生成、prefix 构建、形状审计和基准计时
+目标平台为 NVIDIA Hopper / H200（SM90），使用仓库环境中的 PyTorch、CUDA、FlashInfer
+与 Nsight Systems。重跑时由 metadata 记录实际 GPU、驱动和依赖版本。
+默认每阶段预热 2 次、基准计时 5 次取中位数。加载、GR 生成、prefix 构建、形状审计和基准计时
 在捕获区间外；nsys 进程仍已启动，因此“采集关闭”不表示完全没有 profiler 注入影响。
 关闭 CPU IP sampling/context-switch tracing，不同时启用 PyTorch profiler。
 
@@ -93,100 +93,10 @@ CUDA BF16 推理使用 FlashInfer 普通层和 RoPE kernel：
   逐频率 factors 和 attention_factor，旋转后才写回 BF16。
 - 位置缓存不进入 checkpoint；首次构建发生在预热前，稳态 chunk 不重建常量或位置。
 
-## 当前 GPU 结果（2026-09-25）
+## 结果与当前状态
 
-Run ID：`flashinfer_merged_gemm_65536_1024_20260925_02`。完成 32 层 GPU 前向、Nsight Systems 捕获、SQLite 导出与 MFU 分析。
+**改动后未运行。** `NosaKVCache` 的共享生命周期随 indexer 优化调整，dense forward 的
+cache 调用路径也发生变化。本实验受影响的结果、性能结论与对应运行产物已清理；当前没有
+可报告的 dense 前向耗时、MFU 或 launch 分析结果，需按上述命令重新测量。
 
-```bash
-CUDA_VISIBLE_DEVICES=0 bash experiments/nosa_gr_65536_1024/scripts/run.sh flashinfer_merged_gemm_65536_1024_20260925_02
-```
-
-本次使用上节硬件、依赖、BF16 和精确输入，测量期间没有并行 GPU 测试。
-GPU UUID 为 `2522820c-89d9-aa17-f79c-ca8cc767fb77`；metadata 保存实际依赖版本、硬件、
-模型配置、源码指纹和每次计时。32 层实际形状均为 `Q=[1024,32,128]`、
-`K=V=[66560,2,128]`，extend 前后 cache 长度分别为 65536、66560。
-完整前向和 prefix+extend 的末 token hidden 最大绝对差 **0**、余弦相似度 **1.0**，输出均有限。
-
-### 墙钟与整段 MFU
-
-| 阶段 | 墙钟中位数 ms | Host 提交中位数 ms | 整段 MFU |
-| --- | ---: | ---: | ---: |
-| full_prefill | 3498.293 | 3284.493 | 62.75% |
-| extend | 81.271 | 9.442 | 63.44% |
-
-Host 提交时间包含 CUDA API 内部等待，不与 GPU 时间相加。
-
-### 合并投影与实际 kernel
-
-每层有 4 次投影 GEMM：QKV、O、gate/up、down。QKV 输出为 `[1024,4608]`，
-gate/up 输出为 `[1024,32768]`；原 checkpoint 在加载时合并到最终权重存储。
-下表为 detailed extend 的 32 层合计，包含 final norm。
-
-| 操作 | Kernel 数 | GPU ms |
-| --- | ---: | ---: |
-| Q/K/V 合并 GEMM | 32 | 1.812897 |
-| gate/up 合并 GEMM | 32 | 12.323178 |
-| RMSNorm + residual | 65 | 0.492129 |
-| SwiGLU 激活 | 32 | 0.763969 |
-| Q/K RoPE | 32 | 0.240096 |
-| K/V cache 写入 | 64 | 0.170816 |
-| RoPE 准备（缓存复用） | 0 | 0 |
-
-QKV 与 gate/up 各层均只有一个 GEMM kernel，时间和 MFU 按合并模块统计。
-Trace 同时确认 FlashInfer `RMSNormKernel`、`FusedAddRMSNormKernel`、
-`activation::act_and_mul_kernel<…silu>` 与 `BatchQKApplyRotaryPosIdsCosSinCacheHeadParallelismKernel`。
-
-Q/K/V 是合并输出的行跨距视图，RoPE 直接在 Q/K 原位置旋转，V 保持不变。
-K/V 各自从这些视图写入连续的 resident cache，因此每层有两个 `direct_copy_kernel_cuda`，
-合计 64 个；它们属于必要的 cache 写入。没有独立的权重拼接、Q/K contiguous 或 activation
-拼接 kernel。gate/up GEMM 另有 32 次 MEMSET，时间包含在其模块 GPU 时间中。
-本次捕获没有 MEMCPY 活动；分析器支持 Nsight 省略零活动类型的表。
-
-预生成的 RoPE cache 为 `[66560,128]` FP32，约 32.5 MiB，另有约 0.51 MiB 的 int64 positions。
-稳态 `rope_prepare` 没有 GPU kernel、H2D 拷贝或同步；采集区间没有 `cudaStreamSynchronize`。
-各段计时首尾的两次显式 `cudaDeviceSynchronize` 用于界定测量边界。
-
-### GPU 活动与 CPU launch
-
-| 低标注区间 | Kernel 数 | GPU span ms | GPU active ms | Gap ms | Active 占比 | Launch-to-kernel 中位数 ms |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| full_prefill/0 | 23010 | 3487.119 | 3455.286 | 31.833 | 99.09% | 141.403 |
-| extend/0 | 354 | 80.678 | 79.961 | 0.717 | 99.11% | 34.553 |
-| extend/1 | 354 | 80.521 | 79.826 | 0.695 | 99.14% | 34.451 |
-| extend/2 | 354 | 80.271 | 79.588 | 0.683 | 99.15% | 34.398 |
-
-三次 extend 的 GPU gap 为 0.68–0.72 ms，其中下一次 CUDA API 尚未进入的部分为
-0.18–0.20 ms；launch-to-kernel 中位数约 34.4–34.6 ms，说明 CPU 已提前提交工作。
-本场景整体仍以 GPU 计算为主，不能把全部 GPU gap 归因于 CPU launch。
-
-### 各模块时间与 MFU
-
-GPU 时间来自详细采集的模块归因。非矩阵模块 MFU 不适用。
-
-| 模块 | Extend kernel 数 | Extend GPU ms | Extend MFU | Full MFU |
-| --- | ---: | ---: | ---: | ---: |
-| rope_prepare | 0 | 0.000 | 不适用 | 不适用 |
-| embedding | 1 | 0.005 | 不适用 | 不适用 |
-| input_layernorm | 1 | 0.005 | 不适用 | 不适用 |
-| input_layernorm_add_residual | 31 | 0.232 | 不适用 | 不适用 |
-| qkv_proj | 32 | 1.813 | 68.99% | 67.29% |
-| rope_apply | 32 | 0.240 | 不适用 | 不适用 |
-| attention_core | 32 | 57.048 | 62.85% | 61.03% |
-| o_proj | 32 | 1.652 | 67.31% | 65.41% |
-| post_attention_layernorm_add_residual | 32 | 0.247 | 不适用 | 不适用 |
-| gate_up_proj | 32 | 12.323 | 72.17% | 70.56% |
-| swiglu_elementwise | 32 | 0.764 | 不适用 | 不适用 |
-| down_proj | 32 | 6.043 | 73.59% | 71.84% |
-| final_norm_add_residual | 1 | 0.007 | 不适用 | 不适用 |
-| kv_cache_and_layout | 64 | 0.171 | 不适用 | 不适用 |
-
-attention core 为 extend 的主要 GPU 开销：**57.048 ms**，
-约占模块 GPU 时间合计的 **70.8%**。
-当前基线使用合并 QKV/gate-up GEMM、FlashInfer 普通层与 Q/K RoPE；有效矩阵工作量为
-full prefill **2,170,865,718,394,880 FLOPs**、extend **50,990,120,173,568 FLOPs**
-（投影与 attention 合计）。合并减少投影调用次数，端到端性能仍主要由 attention 与矩阵计算决定。
-本次没有测量 CUDA Graph、sparse attention 或 offloading。
-
-原始 trace 为 `output/profile/flashinfer_merged_gemm_65536_1024_20260925_02/nosa_gr_65536_1024.nsys-rep`；
-请求、逐层形状、源码快照、完整计时、SQLite、模块分析和 MFU 在
-`output/data/flashinfer_merged_gemm_65536_1024_20260925_02/`，对应 stdout/stderr 在 `output/log/flashinfer_merged_gemm_65536_1024_20260925_02/`。
+本实验每次通过 GR 生成完整请求并保存到新 run 的 `request.json`，不依赖已删除的运行目录。

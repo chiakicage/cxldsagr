@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 usage() {
-  echo "Usage: bash experiments/nosa_indexer_pattern_65536_1024/scripts/threshold_sweep.sh [RUN_ID] [--estimate-data-dir PATH] [--baseline-threshold-pct NUMBER] [--bandwidth-gbps NUMBER] [--attention-mfu-scale NUMBER]"
+  echo "Usage: bash experiments/nosa_indexer_pattern_65536_1024/scripts/threshold_sweep.sh [RUN_ID] --estimate-data-dir PATH [--baseline-threshold-pct NUMBER] [--bandwidth-gbps NUMBER] [--attention-mfu-scale NUMBER]"
   echo "Scan every sparse/dense classification threshold; minimize unhidden fetch and maximize hidden/fetch."
-  echo "Reads 32/64-block estimates; defaults to baseline 30%, bandwidth 50 GB/s and attention MFU scale 0.5. No GPU execution."
+  echo "Requires an explicit valid estimate run; defaults to baseline 30%, bandwidth 50 GB/s and attention MFU scale 0.5. No GPU execution."
 }
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 cd -- "$script_dir/../../.."

@@ -3,7 +3,7 @@ set -euo pipefail
 usage() {
   echo "Usage: bash experiments/nosa_indexer_pattern_65536_1024/scripts/distribution.sh [RUN_ID] [--pattern-data-dir PATH] (repeat --pattern-data-dir to compare)"
   echo "Plot combined KV union coverage across all layer/KV heads: histogram and empirical CDF."
-  echo "Reads existing arrays only; defaults to comparing the 32-block and 64-block pattern runs. No GPU execution."
+  echo "Reads existing arrays only; defaults to the 64-block baseline. No GPU execution."
 }
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 cd -- "$script_dir/../../.."

@@ -3,7 +3,7 @@ set -euo pipefail
 usage() {
   echo "Usage: bash experiments/nosa_indexer_pattern_65536_1024/scripts/decompose.sh [RUN_ID] [--pattern-data-dir PATH] [--bandwidth-gbps NUMBER]"
   echo "Split sink/local and query-aware unions, report overlap and additional fetch at 50 GB/s by default."
-  echo "Reads existing arrays only; defaults to the 32-block pattern run. No GPU execution."
+  echo "Reads existing arrays only; defaults to the 64-block baseline. No GPU execution."
 }
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 cd -- "$script_dir/../../.."

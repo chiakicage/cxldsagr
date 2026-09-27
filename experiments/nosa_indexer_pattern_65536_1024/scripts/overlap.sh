@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 usage() {
-  echo "Usage: bash experiments/nosa_indexer_pattern_65536_1024/scripts/overlap.sh [RUN_ID] [--estimate-data-dir PATH] [--threshold-pct NUMBER] [--bandwidth-gbps NUMBER] [--attention-mfu-scale NUMBER]"
+  echo "Usage: bash experiments/nosa_indexer_pattern_65536_1024/scripts/overlap.sh [RUN_ID] --estimate-data-dir PATH [--threshold-pct NUMBER] [--bandwidth-gbps NUMBER] [--attention-mfu-scale NUMBER]"
   echo "Estimate fetch overlap: sparse union during attention, dense full KV prefetched during preceding non-attention work."
-  echo "Reads 32/64-block time estimates; defaults to threshold 30%, bandwidth 50 GB/s, MFU scale 1. Use MFU scale 0.5 to double attention time. No GPU execution."
+  echo "Requires an explicit valid estimate run; defaults to threshold 30%, bandwidth 50 GB/s and MFU scale 1. Use MFU scale 0.5 to double attention time. No GPU execution."
 }
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 cd -- "$script_dir/../../.."

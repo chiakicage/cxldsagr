@@ -20,7 +20,7 @@ from experiments.nosa_indexer_pattern_65536_1024.src.selection_parts import deco
 ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_PATTERN = (
     ROOT
-    / "experiments/nosa_indexer_pattern_65536_1024/output/data/query_aware32_fp32_65536_1024_20260926_01"
+    / "experiments/nosa_indexer_pattern_65536_1024/output/data/query_aware_fp32_65536_1024_20260925_01"
 )
 LABELS = {
     "sink": "Sink",
@@ -132,7 +132,12 @@ def _hash(path):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--pattern-data-dir", type=Path, default=DEFAULT_PATTERN)
+    parser.add_argument(
+        "--pattern-data-dir",
+        type=Path,
+        default=DEFAULT_PATTERN,
+        help="Pattern capture directory; defaults to the 64-block baseline",
+    )
     parser.add_argument("--bandwidth-gbps", type=float, default=50.0, help="Decimal GB/s")
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--run-id", required=True)

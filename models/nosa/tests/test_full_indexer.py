@@ -172,3 +172,62 @@ def test_explicit_triton_indexer_rejects_cpu_even_for_short_context():
             0,
             backend="triton",
         )
+
+
+@pytest.mark.parametrize(
+    ("device", "backend"),
+    [
+        ("cpu", "reference"),
+        pytest.param(
+            "cuda",
+            "triton",
+            marks=pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA unavailable"),
+        ),
+    ],
+)
+@pytest.mark.parametrize("name", ["Q", "K", "CIS"])
+@pytest.mark.parametrize("value", [torch.nan, torch.inf, -torch.inf])
+def test_full_nosa_nonfinite_inputs_are_rejected(device, backend, name, value):
+    # The short-context fast path must still reject nonfinite inputs even
+    # though every visible block will be selected without computing scores.
+    q = torch.zeros((2, 32, 128), device=device, dtype=torch.bfloat16)
+    keys = torch.zeros((33, 2, 128), device=device, dtype=q.dtype)
+    cis = torch.zeros((33, 2), device=device, dtype=q.dtype)
+    inputs = {"Q": q, "K": keys, "CIS": cis}
+    inputs[name].reshape(-1)[-1] = value
+    with pytest.raises(ValueError, match="finite"):
+        select(q, keys, cis, 31, chunk=None, backend=backend)
+
+
+@pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA unavailable")
+@pytest.mark.parametrize(
+    ("length", "start", "rows", "strided"),
+    [(66560, 65536, 1024, True), (66559, 65536, 1023, False), (63, 0, 63, True)],
+)
+@torch.inference_mode()
+def test_cuda_default_nosa_chunks_preserve_64_query_block_selections(length, start, rows, strided):
+    generator = torch.Generator(device="cuda").manual_seed(857)
+    q = torch.randn(
+        (rows, 40 if strided else 32, 128),
+        generator=generator,
+        device="cuda",
+        dtype=torch.bfloat16,
+    )[:, :32]
+    keys = torch.randn(
+        (length, 4 if strided else 2, 128),
+        generator=generator,
+        device="cuda",
+        dtype=q.dtype,
+    )
+    if strided:
+        keys = keys[:, ::2]
+    cis = -torch.rand((length, 2), generator=generator, device="cuda", dtype=q.dtype)
+    expected = select(q, keys, cis, start, chunk=64, backend="triton")
+    for backend in ("auto", "triton"):
+        actual = select(q, keys, cis, start, chunk=None, backend=backend)
+        torch.testing.assert_close(actual.block_ids, expected.block_ids, rtol=0, atol=0)
+        torch.testing.assert_close(actual.valid_mask, expected.valid_mask, rtol=0, atol=0)
+        assert actual.block_ids.shape == (rows, 2, 64)
+    if length < 64:
+        assert expected.valid_mask.sum() == rows * 2
+        assert (expected.block_ids[..., 0] == 0).all()

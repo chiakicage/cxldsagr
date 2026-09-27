@@ -28,8 +28,10 @@ from models.nosa.infer import DEFAULT_MODEL_PATH
 from models.nosa.model import NosaForCausalLM
 
 ROOT = Path(__file__).resolve().parents[3]
-SOURCE_RUN = "flashinfer_merged_gemm_65536_1024_20260925_02"
-DEFAULT_REQUEST = ROOT / "experiments/nosa_gr_65536_1024/output/data" / SOURCE_RUN / "request.json"
+SOURCE_RUN = "nosa_cached_indexer_20260928_01"
+DEFAULT_REQUEST = (
+    ROOT / "experiments/indexer_block_sparse_profile/output/data" / SOURCE_RUN / "request.json"
+)
 UPSTREAM_COMMIT = "1cbee77d607f9051b206a09c862bea28becb9e67"
 
 
@@ -54,7 +56,11 @@ class CaptureAttention:
         self.prefix_tokens = prefix_tokens
         self.query_length = query_length
         self.block_budget = block_budget
-        self.indexer = NosaIndexer(block_budget=block_budget) if indexer is None else indexer
+        self.indexer = (
+            NosaIndexer(block_budget=block_budget, query_chunk_size=64)
+            if indexer is None
+            else indexer
+        )
         self.verbose = verbose
         self.block_ids = []
         self.valid_masks = []

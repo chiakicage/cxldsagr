@@ -17,7 +17,6 @@ from pathlib import Path
 
 from experiments.nosa_indexer_pattern_65536_1024.src.analyze import _write_csv
 from experiments.nosa_indexer_pattern_65536_1024.src.overlap import (
-    DEFAULT_ESTIMATES,
     ROOT,
     _hash,
     estimate_overlap,
@@ -232,14 +231,20 @@ def plot_sweep(output_dir, reports):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--estimate-data-dir", type=Path, action="append")
+    parser.add_argument(
+        "--estimate-data-dir",
+        type=Path,
+        action="append",
+        required=True,
+        help="Current valid estimate run; repeat to compare explicit inputs",
+    )
     parser.add_argument("--baseline-threshold-pct", type=float, default=30.0)
     parser.add_argument("--bandwidth-gbps", type=float, default=50.0)
     parser.add_argument("--attention-mfu-scale", type=float, default=0.5)
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--run-id", required=True)
     args = parser.parse_args()
-    inputs = [path / "estimates.json" for path in (args.estimate_data_dir or DEFAULT_ESTIMATES)]
+    inputs = [path / "estimates.json" for path in args.estimate_data_dir]
     reports = []
     for path in inputs:
         source = json.loads(path.read_text())

@@ -21,10 +21,6 @@ from experiments.nosa_gr_65536_1024.src.mfu import matrix_flops
 from experiments.nosa_indexer_pattern_65536_1024.src.analyze import summarize
 
 ROOT = Path(__file__).resolve().parents[3]
-DEFAULT_DENSE = (
-    ROOT
-    / "experiments/nosa_gr_65536_1024/output/data/flashinfer_merged_gemm_65536_1024_20260925_02"
-)
 DEFAULT_PATTERN = (
     ROOT
     / "experiments/nosa_indexer_pattern_65536_1024/output/data/query_aware_fp32_65536_1024_20260925_01"
@@ -283,7 +279,9 @@ def main():
     from experiments.nosa_indexer_pattern_65536_1024.src.dense_timing import load_dense_layer_timing
 
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--dense-data-dir", type=Path, default=DEFAULT_DENSE)
+    parser.add_argument(
+        "--dense-data-dir", type=Path, required=True, help="Current valid dense timing run"
+    )
     parser.add_argument("--pattern-data-dir", type=Path, default=DEFAULT_PATTERN)
     parser.add_argument("--bandwidth-gbps", type=float, default=50.0, help="Decimal GB/s")
     parser.add_argument("--output-dir", type=Path, required=True)

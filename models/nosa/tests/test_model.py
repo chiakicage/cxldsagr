@@ -456,9 +456,9 @@ def test_legacy_cache_cursor_override_is_validated_before_forward():
     expected = model(tokens, cache)
     cache.length = 2
     torch.testing.assert_close(model(tokens[2:], cache), expected[2:], atol=3e-6, rtol=3e-5)
-    cache.length = -1
     with pytest.raises(ValueError, match="cache length"):
-        model(tokens, cache)
+        cache.length = -1
+    assert cache.length == len(tokens)
     cache.reset()
     cache.begin_step(1)
     with pytest.raises(RuntimeError, match="pending"):

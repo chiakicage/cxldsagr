@@ -46,7 +46,7 @@ class NosaSelectionPolicy:
 
 
 class NosaIndexer:
-    """Analyze post-RoPE Q/K without modifying the model or its cache state.
+    """Select post-RoPE Q/K, reusing owned full-NOSA compression when available.
 
     Q has shape ``[query, query_head, head_dim]`` and the resident ``keys`` view
     has shape ``[token, kv_head, head_dim]``. Each contiguous group of query
@@ -56,20 +56,24 @@ class NosaIndexer:
     The default query-aware-only path uses FP32 compression and softmax.
     Full ``mode="nosa"`` retains checkpoint-dtype compression/score rounding,
     consumes resident CIS scores, and supports the Hopper Triton backend.
-    Query chunking bounds temporary score storage. CUDA reference matmul
+    Reference query chunking bounds temporary score storage. Triton processes
+    the complete query batch and writes final IDs/masks without host chunking.
+    CUDA reference matmul
     precision is temporarily set to IEEE FP32 and restored afterward; this
     indexer is intended for the project's serial execution path.
     """
 
     def __init__(
         self,
-        query_chunk_size: int = 64,
+        query_chunk_size: int | None = None,
         *,
         block_budget: int = 64,
         mode: str = "query_aware",
         backend: str = "reference",
     ):
-        if type(query_chunk_size) is not int or query_chunk_size <= 0:
+        if query_chunk_size is not None and (
+            type(query_chunk_size) is not int or query_chunk_size <= 0
+        ):
             raise ValueError("query_chunk_size must be a positive integer")
         if type(block_budget) is not int or block_budget not in (32, 64):
             raise ValueError("block_budget must be the integer 32 or 64")
@@ -92,6 +96,19 @@ class NosaIndexer:
         if mode == "nosa":
             self.policy = NosaSelectionPolicy(local_blocks=17, topk_blocks=15)
 
+    def effective_query_chunk_size(self, device, query_length=None) -> int | None:
+        """Reference chunk limit, or the complete Triton query batch.
+
+        ``query_chunk_size`` controls reference temporary storage only. For
+        Triton, ``None`` without a query length denotes an unchunked batch.
+        """
+        triton_backend = self.backend == "triton" or (
+            self.backend == "auto" and torch.device(device).type == "cuda"
+        )
+        if self.mode == "nosa" and triton_backend:
+            return query_length
+        return self.query_chunk_size if self.query_chunk_size is not None else 64
+
     @torch.no_grad()
     def __call__(self, q, cache_access: CacheAccess, context: AttentionContext) -> BlockSelection:
         layer_view = getattr(cache_access, "layer_view", None)
@@ -105,9 +122,8 @@ class NosaIndexer:
         # An offline view may also contain later queries. Trim it to this call's
         # last query; earlier queries still need the per-compressed-window mask.
         keys = keys[: context.query_start + context.query_length]
-        if not torch.isfinite(q).all() or not torch.isfinite(keys).all():
-            raise ValueError("NOSA indexer requires finite Q and K")
         cis = None
+        indexer_cache = None
         if self.mode == "nosa":
             state = context.auxiliary_state
             cis = (
@@ -129,17 +145,52 @@ class NosaIndexer:
                     "CIS must cover resident K with [token, KV head] shape and Q/K dtype/device"
                 )
             cis = cis[: len(keys)]
-            if not torch.isfinite(cis).all():
-                raise ValueError("NOSA indexer requires finite CIS scores")
+            if len(keys) > 262144:
+                raise ValueError("Full NOSA supports at most 262144 tokens")
+            if q.is_cuda and self.backend in ("auto", "triton"):
+                from models.nosa.cache import NosaKVCache
+
+                # Only the owning request can vouch for an immutable validated
+                # prefix. External CIS overrides and borrowed offline views use
+                # independent compression and full finite-input checks.
+                if isinstance(cache_access, NosaKVCache) and not isinstance(
+                    state, NosaAttentionState
+                ):
+                    indexer_cache = cache_access.indexer_cache
+
+        # Retain strict rejection of nonfinite inputs without materializing
+        # elementwise masks across the entire resident prefix on Hopper.
+        if self.mode == "nosa" and q.is_cuda and self.backend in ("auto", "triton"):
+            from operators.sm90.nosa_validation import all_finite
+
+            validated = (
+                indexer_cache.layer_state(context.layer_idx).validated_tokens
+                if indexer_cache is not None
+                else 0
+            )
+            finite = all_finite(q, keys[validated:], cis[validated:])
+        else:
+            finite = torch.isfinite(q).all() & torch.isfinite(keys).all()
+            if cis is not None:
+                finite = finite & torch.isfinite(cis).all()
+        if not finite:
+            raise ValueError("NOSA indexer requires finite Q, K and CIS scores")
 
         old_precision = None
-        if q.device.type == "cuda":
+        if q.device.type == "cuda" and (self.mode != "nosa" or self.backend == "reference"):
             old_precision = torch.backends.cuda.matmul.fp32_precision
             torch.backends.cuda.matmul.fp32_precision = "ieee"
         try:
             with torch.autocast(device_type=q.device.type, enabled=False):
                 if self.mode == "nosa":
-                    return self._select_nosa(q, keys, cis, context.query_start)
+                    return self._select_nosa(
+                        q,
+                        keys,
+                        cis,
+                        context.query_start,
+                        indexer_cache=indexer_cache,
+                        layer_idx=context.layer_idx,
+                    )
                 return self._select(q, keys, context.query_start)
         finally:
             if old_precision is not None:
@@ -196,8 +247,9 @@ class NosaIndexer:
         else:
             compressed_k = None
 
-        for start in range(0, query_count, self.query_chunk_size):
-            stop = min(start + self.query_chunk_size, query_count)
+        chunk_size = self.effective_query_chunk_size(q.device)
+        for start in range(0, query_count, chunk_size):
+            stop = min(start + chunk_size, query_count)
             positions = torch.arange(query_start + start, query_start + stop, device=q.device)
             query_blocks = positions // policy.block_size
             visible_blocks = blocks[None, :] <= query_blocks[:, None]
@@ -252,29 +304,89 @@ class NosaIndexer:
 
         return BlockSelection(block_ids, policy.block_size, valid_mask=block_ids >= 0)
 
-    def _select_nosa(self, q, keys, cis, query_start):
+    def _select_nosa(self, q, keys, cis, query_start, *, indexer_cache=None, layer_idx=0):
         backend = self.backend
         if backend == "auto":
             backend = "triton" if q.is_cuda else "reference"
-        positions = torch.arange(query_start, query_start + len(q), device=q.device)
         kv_heads = keys.shape[1]
         query = q.reshape(len(q), kv_heads, q.shape[1] // kv_heads, q.shape[-1])
-        compressed_k, compressed_cis = compress_sequence(keys), compress_sequence(cis)
-        result = torch.full((len(q), kv_heads, 64), -1, device=q.device, dtype=torch.long)
         if backend == "triton":
-            from operators.sm90.nosa_indexer import select_blocks
-        else:
-            select_blocks = select_nosa_blocks_reference
-            # Prepare the shared layout once; each query head still retains
-            # its own FP32 softmax normalizer.
-            compressed_k = prepare_indexer_keys(compressed_k)
-        for start in range(0, len(q), self.query_chunk_size):
-            end = min(start + self.query_chunk_size, len(q))
-            selected = select_blocks(
+            from operators.sm90.nosa_indexer import select_contiguous_blocks
+
+            compressed_k, compressed_cis, pooled_cis, workspace = prepare_indexer_inputs(
+                keys, cis, len(q), indexer_cache=indexer_cache, layer_idx=layer_idx
+            )
+            ids, valid = select_contiguous_blocks(
+                query,
+                compressed_k,
+                compressed_cis,
+                query_start,
+                len(keys),
+                return_valid_mask=True,
+                pooled_cis=pooled_cis,
+                workspace=workspace,
+            )
+            return BlockSelection(ids, 64, valid_mask=valid)
+
+        compressed_k, compressed_cis = compress_sequence(keys), compress_sequence(cis)
+        positions = torch.arange(query_start, query_start + len(q), device=q.device)
+        # The reference still bounds its per-Q-head logits allocation.
+        compressed_k = prepare_indexer_keys(compressed_k)
+        result = torch.full((len(q), kv_heads, 64), -1, device=q.device, dtype=torch.long)
+        chunk_size = self.effective_query_chunk_size(q.device)
+        for start in range(0, len(q), chunk_size):
+            end = min(start + chunk_size, len(q))
+            selected = select_nosa_blocks_reference(
                 query[start:end], compressed_k, compressed_cis, positions[start:end], len(keys)
             )
             result[start:end, :, : selected.shape[-1]] = selected
         return BlockSelection(result, 64, valid_mask=result >= 0)
+
+
+def prepare_indexer_inputs(keys, cis, query_count, *, indexer_cache=None, layer_idx=0):
+    """Materialize the visible full-NOSA compression, publishing only metadata.
+
+    The request owns all persistent buffers and transaction state. This adapter
+    supplies NOSA's C/S bounds and numerical update; shorter offline reads slice
+    an already materialized prefix and recompute their own unstable CIS tail.
+    """
+    from operators.sm90.nosa_compression import update_compressed_cache
+
+    length, heads, dim = keys.shape
+    count, stable = max(0, length // 16 - 1), max(0, (length - 16) // 64)
+    lengths = {"compressed_keys": count, "compressed_cis": count, "pooled_cis": stable}
+    if indexer_cache is None:
+        buffers = {
+            "compressed_keys": torch.empty(
+                (count, heads, dim), device=keys.device, dtype=keys.dtype
+            ),
+            "compressed_cis": torch.empty((count, heads), device=keys.device, dtype=keys.dtype),
+            "pooled_cis": torch.empty((stable, heads), device=keys.device, dtype=keys.dtype),
+        }
+        update_compressed_cache(keys, cis, **buffers, compressed_start=0, pooled_start=0)
+        workspace = None
+    else:
+        reservation = indexer_cache.reserve_layer(layer_idx, length, lengths)
+        try:
+            update_compressed_cache(
+                keys,
+                cis,
+                **reservation.buffers,
+                compressed_start=min(reservation.previous.lengths["compressed_keys"], count),
+                pooled_start=min(reservation.previous.lengths["pooled_cis"], stable),
+            )
+            indexer_cache.finish_layer(layer_idx)
+        except BaseException:
+            indexer_cache.abort_layer(layer_idx)
+            raise
+        buffers = reservation.views
+        blocks = (length + 63) // 64
+        workspace = (
+            indexer_cache.workspace(query_count * heads * blocks, keys.dtype)
+            if blocks > 64
+            else None
+        )
+    return buffers["compressed_keys"], buffers["compressed_cis"], buffers["pooled_cis"], workspace
 
 
 def prepare_indexer_keys(keys):

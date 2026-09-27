@@ -13,7 +13,7 @@ import importlib.metadata
 import json
 import subprocess
 import time
-from contextlib import ExitStack
+from contextlib import ExitStack, nullcontext
 from dataclasses import asdict, replace
 from datetime import UTC, datetime
 from pathlib import Path
@@ -126,12 +126,7 @@ def validate_request(request, prefix_tokens, new_tokens):
 
 
 def rewind_cache(cache, prefix_length):
-    """Reuse an immutable resident prefix; reject future opaque indexer state.
-
-    Current NOSA stores K/V/CIS as per-token records and does not maintain an
-    incremental compressed state. Cursor rewind is therefore confined to this
-    repeated-request experiment; it never mutates the committed prefix bytes.
-    """
+    """Rewind raw and derived records to the same immutable request prefix."""
     if prefix_length == 0:
         cache.reset()
         return
@@ -139,7 +134,7 @@ def rewind_cache(cache, prefix_length):
         raise ValueError("The requested stable prefix has not been built")
     if any(cache.get_layer_state(i) is not None for i in range(cache.config.num_hidden_layers)):
         raise ValueError("Replaying extend cannot rewind opaque layer state")
-    cache.length = prefix_length
+    cache.truncate(prefix_length)
 
 
 @torch.inference_mode()
@@ -259,7 +254,12 @@ def audit_extend(model, ids, cache, prefix_tokens):
 
 def _build_parser():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--mode", choices=("benchmark", "profile"), default="benchmark")
+    parser.add_argument(
+        "--mode",
+        choices=("benchmark", "profile", "timeline"),
+        default="benchmark",
+        help="timeline records root ranges only, without module wrappers or module CUDA events",
+    )
     parser.add_argument("--model-path", type=Path, default=DEFAULT_MODEL_PATH)
     parser.add_argument("--request-file", type=Path)
     parser.add_argument("--device", default="cuda:0")
@@ -320,7 +320,7 @@ def run(args):
         }
     else:
         measurements = json.loads((args.output_dir / "measurements.json").read_text())
-        if measurements["run_id"] != args.run_id or measurements["workload"] != workload:
+        if measurements["run_id"] != args.run_id:
             raise ValueError("Profile must use the benchmark run ID and workload")
         if measurements["profiles"]:
             raise ValueError("Profile results already exist")
@@ -337,6 +337,10 @@ def run(args):
         attention_mode="sparse",
         sparse_backend="triton",
     )
+    workload["indexer_query_chunk_size"] = model.indexer.effective_query_chunk_size(device)
+    workload["indexer_execution"] = "cached_flashinfer_v1"
+    if args.mode != "benchmark" and measurements["workload"] != workload:
+        raise ValueError("Profile must use the benchmark run ID and workload")
     config = model.config
     if (
         config.num_hidden_layers,
@@ -354,7 +358,7 @@ def run(args):
     meta["request_sha256"] = hashlib.sha256(
         (args.output_dir / "request.json").read_bytes()
     ).hexdigest()
-    if args.mode == "profile":
+    if args.mode != "benchmark":
         benchmark_meta = json.loads((args.output_dir / "metadata.json").read_text())
         validate_profile_metadata(meta, benchmark_meta)
     ids = torch.tensor(request["input_ids"], device=device, dtype=torch.long)
@@ -399,33 +403,44 @@ def run(args):
             )
         meta["validation"] = validation
         meta["cache_capacity_bytes_per_session"] = full_cache.stats()["capacity_bytes"]
-        if args.mode == "profile":
-            from experiments.indexer_block_sparse_profile.src.instrumentation import SparseScopes
-
+        if args.mode != "benchmark":
+            if args.mode == "profile":
+                from experiments.indexer_block_sparse_profile.src.instrumentation import (
+                    SparseScopes,
+                )
+            meta["module_scopes_enabled"] = args.mode == "profile"
             meta["instrumented_timings"] = {}
             torch.cuda.synchronize(device)
             torch.cuda.cudart().cudaProfilerStart()
             try:
                 for phase, tokens, cache, prefix in work:
-                    measurements["profiles"][phase] = []
+                    if args.mode == "profile":
+                        measurements["profiles"][phase] = []
                     meta["instrumented_timings"][phase] = []
                     for iteration in range(args.profile_repeats):
                         with torch.cuda.nvtx.range(f"NOSA/profile/{phase}/{iteration}"):
-                            with SparseScopes(model, phase=phase, timing=True) as scopes:
+                            scope_context = (
+                                SparseScopes(model, phase=phase, timing=True)
+                                if args.mode == "profile"
+                                else nullcontext()
+                            )
+                            with scope_context as scopes:
                                 hidden, timing = timed_forward(
                                     model, tokens, cache, prefix, args.chunk_size
                                 )
-                            records = scopes.collect()
+                            records = scopes.collect() if scopes is not None else []
                         if not torch.isfinite(hidden).all().item():
                             raise ValueError("Profile produced nonfinite hidden output")
                         if not torch.equal(hidden.float(), outputs[phase]):
                             raise ValueError(
                                 "Profiling changed the model's candidate hidden states"
                             )
-                        measurements["profiles"][phase].append(records)
+                        if args.mode == "profile":
+                            measurements["profiles"][phase].append(records)
                         meta["instrumented_timings"][phase].append(timing)
                         print(
-                            f"Profiled {phase}/{iteration}: {len(records)} module intervals",
+                            f"{args.mode} {phase}/{iteration}: {timing['wall_ms']:.3f} ms, "
+                            f"{len(records)} module intervals",
                             flush=True,
                         )
             finally:
@@ -443,6 +458,8 @@ def run(args):
                 "gr_item_budget_including_instruction": request["item_tokens"],
             }
             write_json(args.output_dir / "execution.json", execution)
+            if fingerprint_sources() != meta["source_sha256"]:
+                raise ValueError("Runtime sources changed during benchmark capture")
             for name in meta["source_sha256"]:
                 destination = args.output_dir / "sources" / name
                 destination.parent.mkdir(parents=True, exist_ok=True)

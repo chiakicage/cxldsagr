@@ -19,11 +19,6 @@ from pathlib import Path
 from experiments.nosa_indexer_pattern_65536_1024.src.analyze import _write_csv
 
 ROOT = Path(__file__).resolve().parents[3]
-DATA = ROOT / "experiments/nosa_indexer_pattern_65536_1024/output/data"
-DEFAULT_ESTIMATES = (
-    DATA / "estimate32_mfu_pcie50_20260926_01",
-    DATA / "estimate_mfu_pcie50_20260925_01",
-)
 
 
 def _ratio(hidden, fetch):
@@ -222,7 +217,8 @@ def main():
         "--estimate-data-dir",
         type=Path,
         action="append",
-        help="Repeat to compare; defaults to both 32/64-block estimates",
+        required=True,
+        help="Current valid estimate run; repeat to compare explicit inputs",
     )
     parser.add_argument("--threshold-pct", type=float, default=30.0)
     parser.add_argument("--bandwidth-gbps", type=float, default=50.0)
@@ -235,7 +231,7 @@ def main():
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--run-id", required=True)
     args = parser.parse_args()
-    inputs = [path / "estimates.json" for path in (args.estimate_data_dir or DEFAULT_ESTIMATES)]
+    inputs = [path / "estimates.json" for path in args.estimate_data_dir]
     reports = []
     for path in inputs:
         source = json.loads(path.read_text())

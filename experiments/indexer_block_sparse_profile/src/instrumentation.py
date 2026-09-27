@@ -238,6 +238,7 @@ class SparseScopes:
         import models.nosa.indexer as indexer_module
         import models.nosa.scoring as scoring_module
         import operators.sm90.nosa_indexer as operator_module
+        import operators.sm90.nosa_validation as validation_module
 
         original_indexer = self.model.indexer
         original_attention = self.model.main_attention
@@ -271,8 +272,12 @@ class SparseScopes:
         self._patch(self.model, "main_attention", _WrappedCallable(original_attention, attention))
         self._wrap_function(scoring_module, "cis_scores", "cis_projection")
         self._wrap_function(indexer_module, "compress_sequence", "compression")
+        self._wrap_function(indexer_module, "prepare_indexer_inputs", "indexer_cache_update")
+        self._wrap_function(validation_module, "all_finite", "indexer_validate")
         self._wrap_function(operator_module, "compressed_scores", "compressed_scores")
-        self._wrap_function(operator_module, "select_from_scores", "select_from_scores")
+        self._wrap_function(operator_module, "_select_validated_scores", "select_from_scores")
+        for stage in ("pooled_scores", "topk_qa", "prepare_cis", "topk_cis", "finish_selection"):
+            self._wrap_function(operator_module, stage, stage)
         for layer_idx, layer in enumerate(self.model.model.layers):
             before = layer.self_attn.register_forward_pre_hook(
                 self._attention_enter(layer_idx), with_kwargs=True

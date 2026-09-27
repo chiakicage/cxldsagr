@@ -17,6 +17,13 @@ manager 通过 `allocate` / `release` 管理请求 session。一次模型 forwar
 辅助状态归请求 session 按 layer 保存；CIS 的模型语义由 NOSA 声明，管理器仅管理命名 record。
 manager 通过弱引用记录 session，兼容既有 `model.new_cache()` 使用方式。
 
+[indexer_cache.py](indexer_cache.py) 提供 `IndexerCache`：接受显式 record spec，惰性分配
+逐层派生数据，并保存 committed/pending 有效长度和请求共享 workspace。它不导入模型
+配置或计算压缩语义。NOSA sparse cache 持有该模块，SM90 indexer 首次访问时补齐前缀，
+后续只追加完整压缩窗口和稳定 pooled CIS；未使用 indexer 的层仍可提交原始 KV。
+派生数据与 KV 一起 commit/abort，计入 session 内存统计。`NosaKVCache.truncate(length)`
+同步回退所有有效长度；旧 `length=` 只允许合法倒退，存在 opaque state 的非零倒退会拒绝。
+
 当前只有模型设备上的 resident 后端：生产推理使用 HBM，CPU 用于独立数学测试。
 未来完整 KV 可保存在 local DRAM，HBM 缓存当前访问块；本轮不分配 DRAM backing，
 不实现复制、淘汰、预取或跨请求前缀保留。`layer_view` 的连续张量保证仅属于 resident

@@ -128,17 +128,17 @@ def test_operator_children_are_nested_in_the_matching_indexer_call(monkeypatch):
     def fake_selection(scores, cis, positions, total_length):
         return torch.zeros((*scores.shape[:2], 1), dtype=torch.long)
 
-    def select(q, keys, cis, query_start):
+    def select(q, keys, cis, query_start, **kwargs):
         grouped = q.reshape(len(q), keys.shape[1], -1, q.shape[-1])
         compressed_k = indexer_module.compress_sequence(keys)
         compressed_cis = indexer_module.compress_sequence(cis)
         positions = torch.arange(query_start, query_start + len(q))
         scores = operator_module.compressed_scores(grouped, compressed_k, positions)
-        ids = operator_module.select_from_scores(scores, compressed_cis, positions, len(keys))
+        ids = operator_module._select_validated_scores(scores, compressed_cis, positions, len(keys))
         return BlockSelection(ids, 64)
 
     monkeypatch.setattr(operator_module, "compressed_scores", fake_scores)
-    monkeypatch.setattr(operator_module, "select_from_scores", fake_selection)
+    monkeypatch.setattr(operator_module, "_select_validated_scores", fake_selection)
     monkeypatch.setattr(model.indexer, "_select_nosa", select)
     with SparseScopes(model, clock=FakeClock()) as scopes:
         model(torch.tensor([1, 2]), return_hidden=True)
@@ -154,7 +154,44 @@ def test_operator_children_are_nested_in_the_matching_indexer_call(monkeypatch):
         assert child["query_length"] == parent["query_length"] == 2
         assert 0 < child["cuda_elapsed_ms"] < parent["cuda_elapsed_ms"]
     assert operator_module.compressed_scores is fake_scores
-    assert operator_module.select_from_scores is fake_selection
+    assert operator_module._select_validated_scores is fake_selection
+
+
+def test_fused_pipeline_scopes_are_siblings_and_restore_launch_helpers(monkeypatch):
+    import models.nosa.indexer as indexer_module
+    import operators.sm90.nosa_indexer as operator_module
+    import operators.sm90.nosa_validation as validation_module
+
+    model = tiny_sparse_model()
+    helpers = (
+        (validation_module, "all_finite", "indexer_validate"),
+        (indexer_module, "prepare_indexer_inputs", "indexer_cache_update"),
+        *[
+            (operator_module, name, name)
+            for name in ("pooled_scores", "topk_qa", "prepare_cis", "topk_cis", "finish_selection")
+        ],
+    )
+    sentinel = object()
+
+    def launch(*args):
+        return sentinel
+
+    for module, name, _ in helpers:
+        monkeypatch.setattr(module, name, launch)
+
+    def select(q, keys, cis, query_start, **kwargs):
+        for module, name, _ in helpers:
+            assert getattr(module, name)(q) is sentinel
+        return BlockSelection(torch.zeros((len(q), keys.shape[1], 1), dtype=torch.long), 64)
+
+    monkeypatch.setattr(model.indexer, "_select_nosa", select)
+    with SparseScopes(model, clock=FakeClock()) as scopes:
+        model(torch.tensor([1, 2]), return_hidden=True)
+    records = scopes.collect()
+    for parent in (record for record in records if record["stage"] == "indexer_total"):
+        children = [record for record in records if record["parent_scope_id"] == parent["scope_id"]]
+        assert [record["stage"] for record in children] == [stage for _, _, stage in helpers]
+    assert all(getattr(module, name) is launch for module, name, _ in helpers)
 
 
 def test_exception_restores_modules_hooks_and_nvtx_and_keeps_layer_attribution(monkeypatch):

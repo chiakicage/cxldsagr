@@ -29,7 +29,10 @@ checkpoint 加载、tokenizer/GR 生成、输入 H2D、缓存分配/reset 以及
 均在计时外；这属于单请求模型前向延迟，不是网络服务延迟。
 
 完整 K/V/CIS 驻留 HBM，无 DRAM backing、offload fetch、缓存淘汰或 fetch/compute overlap。
-indexer 仍按当前实现重新压缩 resident 前缀并执行输入检查，这些开销纳入主计时。
+当前 indexer 通过 IndexerCache 复用压缩前缀，只计算新增 K/CIS 窗口和稳定 pool；
+检查当前 Q 及尚未校验的 K/CIS 后缀。这些开销纳入主计时。Triton 一次处理完整 query batch，
+workload 的 `indexer_query_chunk_size=null` 表示不分块，
+`indexer_execution=cached_flashinfer_v1` 标识增量缓存与 FlashInfer 两阶段选择。
 仅在实验进程把上下文上限扩大为 66560，保留 checkpoint 的 LongRoPE factors；不改磁盘
 配置，不对超出原 32768 上下文后的模型质量作结论。
 
@@ -50,7 +53,7 @@ JIT 编译、CUDA 模块加载及 allocator 初始化不计入正式采集。
 
 ```bash
 bash experiments/indexer_block_sparse_profile/scripts/run.sh sparse_e2e_same_request \
-  --request-file experiments/nosa_gr_65536_1024/output/data/flashinfer_merged_gemm_65536_1024_20260925_02/request.json \
+  --request-file experiments/indexer_block_sparse_profile/output/data/nosa_cached_indexer_20260928_01/request.json \
   --device cuda:0 --warmup 2 --repeats 5 --profile-repeats 1
 ```
 
@@ -60,6 +63,12 @@ PyTorch、Triton、FlashInfer、safetensors、tokenizer 与 Nsight Systems，沿
 `--without-nsys` 保留独立端到端计时及 CUDA event 模块分解，省略原始 nsys / SQLite。
 分模块 kernel MFU 依赖 SQLite，`--without-nsys` 时仅生成端到端 MFU。
 
+检查整体提交瓶颈时使用 `--timeline-only`：仍先运行独立、无 profiler 的 benchmark，
+第二进程只记录每次完整 forward 的根 NVTX 与 CUDA 活动，不安装 `SparseScopes`、
+逐层 hook 或模块 CUDA events；只保留整段计时的起止 events。该模式生成
+`launch_analysis.json`、`launch_summary.json/csv/md`，不生成模块分解或 MFU。
+它需要 nsys，不能与 `--without-nsys` 同用；可用 `--profile-repeats 3` 重复时间线采集。
+
 Python 入口：
 
 ```bash
@@ -67,6 +76,7 @@ Python 入口：
 .venv/bin/python -m experiments.indexer_block_sparse_profile.src.analyze --help
 .venv/bin/python -m experiments.indexer_block_sparse_profile.src.mfu --help
 .venv/bin/python -m experiments.indexer_block_sparse_profile.src.module_mfu --help
+.venv/bin/python -m experiments.indexer_block_sparse_profile.src.launch_report --help
 ```
 
 脚本依次执行独立 benchmark → nsys profile → SQLite export → analyze → 离线 MFU。所有步骤在系统
@@ -83,8 +93,10 @@ Python 入口：
 - 模块 `cuda_elapsed_ms`：单独 profile 下的 inclusive CUDA event 区间，可能含 launch gaps
   和 instrumentation 开销；先汇总一次运行内全部层/chunks，再对 profile repeats 取中位数。
   `cis_projection`、`indexer_total`、`block_sparse_attention` 为独立顶层区间。
-  `compression_k`、`compression_cis`、`compressed_scores`、`select_from_scores` 是
-  indexer 的嵌套子项，不能再次加到 indexer 总时间上，也不从主 wall 中减出“其他模块”。
+  当前 indexer 子项为 `indexer_validate`、`indexer_cache_update`、`pooled_scores`、
+  `topk_qa`、`prepare_cis`、`topk_cis`、`finish_selection`。
+  子项不能再次加到 indexer 总时间上，也不从主 wall
+  中减出“其他模块”。没有新完整窗口时，cache update 可以不发起 kernel。
 - `mfu_pct`：有效矩阵 FLOPs /（未插桩墙钟中位数 × GPU 峰值 FLOP/s）× 100。
   默认采用 H200 SXM 标称 BF16 dense Tensor Core 峰值 **989 TFLOPS**，不是 2:4 稀疏峰值，
   也不是实测可持续峰值；其他 GPU/SKU 可用 `--peak-tflops` 显式指定。
@@ -111,7 +123,7 @@ metadata 记录实际硬件/UUID、依赖版本、输入与精度、原始/实�
 CUDA/NVTX/OS runtime；模块 NVTX 标签为 `NOSA/<phase>/layer_<id>/<stage>/q<start>+<length>`。
 
 调用模块：`src/capture.py` 复用共享 GR、`executor.model_executor.run_chunks`、
-`models.nosa.model`、旧 dense 实验的
+`models.nosa.model`、dense 实验的
 `experiments.nosa_gr_65536_1024.src.capture.execution_split` 和 `src.sources.source_hashes`；
 `src/instrumentation.py` 临时包装已有 scoring/indexer/attention，退出时恢复；
 `src/analyze.py` 校验完整阶段、层与 chunk 覆盖并聚合测量。实验 CPU 单元测试纳入
@@ -123,46 +135,112 @@ CUDA/NVTX/OS runtime；模块 NVTX 标签为 `NOSA/<phase>/layer_<id>/<stage>/q<
 
 ## 结果与结论
 
-已于 2026-09-26 完成测量，run ID：`nosa_sparse_e2e_65536_1024_20260926_03`。
-硬件为 NVIDIA H200 / SM90（nvidia-smi 名称 M403，132 SM，GPU 0），UUID
-`2522820c-89d9-aa17-f79c-ca8cc767fb77`；驱动 570.124.06，PyTorch `2.10.0+cu132`、
-CUDA 13.2、Triton `3.6.0`、FlashInfer `0.6.18`、Nsight Systems `2025.6.3`。
-实际 torch/triton 版本与仓库锁定版本不同，不能据此声称锁定版本组合已完成本实验。
-测量期间没有并行 GPU 测试。
+### 当前实现：增量压缩缓存与 FlashInfer Top-K（2026-09-28）
+
+run ID：`nosa_cached_indexer_20260928_01`。模型 indexer / SM90 indexer 的源码 SHA256
+分别以 `e5f636a626ca` / `980c667fc87d` 开头，完整指纹和源码快照保存在该 run 中。
+Triton 一次处理完整 query batch；QK、GQA 归约、舍入和五窗口 pooling 融合，
+两阶段 Top-33 / Top-64 调用 FlashInfer。`IndexerCache` 保存压缩 K/CIS 和稳定 pool，
+extend 只更新新增窗口，scratch 跨阶段、层复用。
+
+硬件为 H200、SM90、132 SM，GPU UUID `2522820c-89d9-aa17-f79c-ca8cc767fb77`。
+环境为 PyTorch `2.10.0+cu132`、CUDA 13.2、Triton `3.6.0`、FlashInfer `0.6.18`、
+Nsight Systems `2025.6.3`。使用 NOSA-8B BF16、32 layers、32 Q heads / 2 KV heads / D128，
+P=65536、Q=1024，模型 chunk=1024，64-block sparse 策略。
+
+无 profiler 的独立 benchmark 每阶段预热 2 次、测量 5 次；模块 profile 在另一进程
+同样预热 2 次，每阶段采集 1 次。两进程的源码、checkpoint、请求、设备与参数经
+metadata 校验一致。完整前向与 prefix-ready extend 的 candidate hidden 全部有限，
+最大绝对差为 **0**；插桩前后输出也精确一致。GPU 测量串行执行。
+
+| 阶段 | 无 profiler wall ms，中位数 [min,max] | 端到端 MFU | 模块插桩进程 wall ms |
+| --- | ---: | ---: | ---: |
+| full_prefill | **3698.391 [3692.369,3708.610]** | **32.35%** | 4354.819 |
+| extend | **62.034 [61.978,62.172]** | **30.68%** | 70.196 |
+
+端到端 MFU 分母使用未插桩 wall 与 H200 BF16 dense 989 TFLOPS。
+主计时对应吞吐为 full-prefill **17997 tokens/s**、extend **16507 tokens/s**。
+插桩进程仅用于归因，不能作为主延迟，也不用于替换端到端 MFU 分母。
+当前请求每个 cache session 的容量统计为 **2,262,624,000 bytes**，包含 K/V/CIS、
+派生压缩缓存和 indexer scratch，不包含模型权重、其他激活和库 workspace。
+
+### 模块 kernel 耗时与 MFU
+
+下表从当前模块 trace 的 SQLite 关联 CUDA launch 与 kernel，按阶段汇总全部层/chunks。
+分母是对应 kernel duration 之和，排除 host 空档、API、memcpy 和 memset。
+模块 MFU 与端到端 MFU 使用不同分母；它们均不表示 SM occupancy。
+
+| 模块 | full kernel ms | full MFU | extend kernel ms | extend MFU |
+| --- | ---: | ---: | ---: | ---: |
+| QKV projection | 104.356 | 77.90% | 1.602 | 78.09% |
+| O projection | 91.187 | 79.25% | 1.404 | 79.20% |
+| FFN gate + up | 716.786 | 80.65% | 11.019 | 80.71% |
+| FFN down | 345.975 | 83.55% | 5.313 | 83.70% |
+| Query-agnostic CIS | 25.871 | 0.00852% | 0.396 | 0.00856% |
+| **Indexer total** | **677.822** | **5.39%** | **15.367** | **7.29%** |
+| Block sparse attention | 1195.239 | 11.63% | 18.416 | 11.98% |
+
+Indexer 内部如下；这些子项已包含在 total 中，不能再次相加到顶层。
+
+| Indexer 子项 | full kernel ms | extend kernel ms | full / extend kernel 数 |
+| --- | ---: | ---: | ---: |
+| 有限值检查 `indexer_validate` | 10.474 | 0.162 | 4160 / 64 |
+| 增量压缩与稳定 pool `indexer_cache_update` | 12.955 | 0.200 | 2080 / 32 |
+| QK、softmax、GQA 与 pooling `pooled_scores` | **293.354** | **8.819** | 1952 / 32 |
+| FlashInfer Top-33 `topk_qa` | 152.645 | 2.493 | 3904 / 64 |
+| 构造 CIS 候选分数 `prepare_cis` | 19.520 | 0.563 | 1952 / 32 |
+| FlashInfer Top-64 `topk_cis` | 181.473 | 3.013 | 3904 / 64 |
+| ID 排序与 validity 写出 `finish_selection` | 7.130 | 0.117 | 1952 / 32 |
+
+Indexer total 的 kernel 数为 **20032 / 320**。full 的前四个短上下文 chunk 直接输出
+全部因果块；其输出 kernel 计入 total，不归入上表的长上下文 `finish_selection`。
+当前 trace 中每次 FlashInfer Top-K 调用对应两个 kernel。
+
+extend 的 QK/pooling 占 indexer kernel 时间约 **57.39%**，两次 Top-K 合计约 **35.83%**；
+有限值检查与增量缓存更新合计约 **2.35%**。当前主要开销在打分和选块。
+`pooled_scores` 的有效矩阵 MFU 为 full **12.45%**、extend **12.70%**：只给逻辑 QK
+计一次有效 FLOPs，而两遍 QK、softmax、归约与 pooling 的全部时间均计入分母。
+两次 Top-K 不计矩阵 FLOPs，因此 indexer total 的 MFU 更低。
+
+模块 CUDA event 区间仍含 host 提交空档和插桩开销。例如 extend 的 cache update
+区间为 **4.550 ms**，实际 kernel 合计仅 **0.200 ms**；indexer total 的 event 区间为
+**27.368 ms**，kernel 合计为 **15.367 ms**。这些 inclusive 区间不能与子项重复相加，
+也不能用来直接分解独立 benchmark 的 62.034 ms。
+
+### 复现与报告材料
+
+从仓库根目录用新 run ID 重跑同一请求：
 
 ```bash
 CUDA_VISIBLE_DEVICES=0 bash experiments/indexer_block_sparse_profile/scripts/run.sh \
-  nosa_sparse_e2e_65536_1024_20260926_03 \
-  --request-file experiments/nosa_gr_65536_1024/output/data/flashinfer_merged_gemm_65536_1024_20260925_02/request.json
+  nosa_cached_indexer_rerun \
+  --request-file experiments/indexer_block_sparse_profile/output/data/nosa_cached_indexer_20260928_01/request.json \
+  --warmup 2 --repeats 5 --profile-repeats 1
 ```
 
-使用上述默认 BF16、64K+1K、1024 chunk、2 warmup / 5 repeats / 1 profile repeat。
-request 内容与所引用 dense 实验完全一致；完整前向与 prefix-ready extend 的全部
-`[1024,4096]` candidate hidden 均有限，最大绝对差为 **0**，插桩后输出同样一致。
+本次原始启动参数保存在 `metadata.json`；新 run 自身保存完整 `request.json`，
+上述复现命令使用该副本。完整数据、源码快照、SQLite 位于
+`output/data/nosa_cached_indexer_20260928_01/`，日志及 `.nsys-rep` 位于同 run ID 的
+`output/log/`、`output/profile/`。
 
-### 独立端到端计时
+报告材料由 `src.analyze`、`src.mfu`、`src.module_mfu` 从该 run 生成后直接复制：
 
-| 阶段 | 墙钟中位数 ms | min–max ms | Host 提交中位数 ms | CUDA span 中位数 ms | tokens/s |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| full_prefill，66560 tokens | **10580.463** | 10571.731–10814.865 | 10579.554 | 10580.437 | 6290.84 |
-| prefix-ready extend，1024 tokens | **194.837** | 194.584–194.928 | 193.916 | 194.821 | 5255.68 |
+| 报告材料 | 该 run 内的来源 |
+| --- | --- |
+| [端到端 MFU 与计数](report/cached_indexer_mfu.json) | `mfu.json` |
+| [模块 kernel MFU](report/cached_indexer_module_mfu.csv) | `module_mfu.csv` |
+| [端到端计时](report/cached_indexer_timings.csv) | `timings.csv` |
+| [模块 event 区间](report/cached_indexer_stages.csv) | `stages.csv` |
 
-这是完整 sparse 模型前向的稳态延迟，包含 indexer 和 CIS；不是只测 attention kernel。
-不包含 KV 分配、GR/tokenizer、prefix 构建（extend）或 LM head。Host 提交几乎覆盖整段
-墙钟，但其中含 indexer 内部 CUDA 同步等待，不能据此将整段归因为 CPU 计算。
+轻量整体时间线（`--timeline-only`）和 CIS 独立微测量（`scripts/bottleneck.sh`）
+**改动后未运行**；当前报告不对 GPU active/idle 比例或 CIS eager/graph 加速比作结论。
+这两条采集入口仍可使用新 run ID 执行。
 
-### 端到端 MFU
+### 有效矩阵 FLOPs 计数
 
-2026-09-27 根据上述同一 run 的配置、源码快照及无 profiler 墙钟中位数离线推导，
-没有新增 GPU 测量。分子包含 QKV/O、gate/up/down、CIS 投影、选中块的 QK/AV，
-以及 indexer 对有效压缩 K 的一次逻辑 QK；每次乘加计 2 FLOPs，不包含 LM head。
 
-| 阶段 | 有效矩阵 FLOPs（10¹²） | 墙钟中位数 ms | 有效 TFLOPS | 端到端 MFU |
-| --- | ---: | ---: | ---: | ---: |
-| full_prefill，66560 tokens | 1183.130732 | 10580.463 | 111.82 | **11.31%** |
-| prefix-ready extend，1024 tokens | 18.820463 | 194.837 | 96.60 | **9.77%** |
-
-具体计数口径：
+分子包含 QKV/O、gate/up/down、CIS 投影、选中块的 QK/AV，以及 indexer 对有效压缩
+K 的一次逻辑 QK；每次乘加计 2 FLOPs，不包含 LM head。
 
 - 对零起始 query 位置 `p`，当前块必选，其他选中块均为完整历史块，因此每个 Q head
   可见的 KV token 数精确为 `64 * min(p // 64, 63) + p % 64 + 1`，与具体 top-k ID 无关。
@@ -178,103 +256,3 @@ request 内容与所引用 dense 实验完全一致；完整前向与 prefix-rea
 - 两遍 indexer QK 的重算、未来位置遮罩和 tile padding 不属于有效模型 FLOPs，
   不进入分子；这与 dense 实验按有效因果矩阵工作量计数的约定一致。
   此处 MFU 不表示实际执行指令利用率或 SM occupancy，也不使用插桩模块区间计算主 MFU。
-
-复算命令（默认峰值 989 TFLOPS）：
-
-```bash
-.venv/bin/python -m experiments.indexer_block_sparse_profile.src.mfu \
-  experiments/indexer_block_sparse_profile/output/data/nosa_sparse_e2e_65536_1024_20260926_03
-```
-
-`output/data/nosa_sparse_e2e_65536_1024_20260926_03/mfu.json` 保留逐项 FLOPs、有效 pair
-数量、分母、峰值假设、输入及分析代码 SHA256。原始计时、metadata 和当时的源码快照保持不变。
-
-### 分模块 MFU：实际 kernel 耗时口径
-
-同一 run 的 Nsight Systems trace 于 2026-09-27 离线分析，无新增 GPU 测量。
-下表分母为模块内 **GPU kernel duration 之和**，分子沿用上节有效矩阵 FLOPs，
-峰值仍为 H200 BF16 dense **989 TFLOPS**。每个阶段只有一次 profile，跨全部层/chunks
-求和；保留 scope 内非矩阵 kernel 的耗时，排除 CPU 提交空档、CUDA API、memcpy/memset
-活动和 event instrumentation 的等待。此口径与端到端墙钟 MFU、下节 CUDA event 区间不同。
-
-| 模块 | full kernel ms | full MFU | extend kernel ms | extend MFU |
-| --- | ---: | ---: | ---: | ---: |
-| QKV projection | 103.914 | **78.23%** | 1.594 | **78.46%** |
-| O projection | 90.728 | **79.65%** | 1.395 | **79.71%** |
-| FFN gate + up | 716.177 | **80.72%** | 11.014 | **80.75%** |
-| FFN down | 343.922 | **84.05%** | 5.288 | **84.09%** |
-| Query-agnostic CIS，含 softplus 等 | 25.357 | **0.00870%** | 0.388 | **0.00873%** |
-| Indexer total，含全部子项及校验 | 2946.886 | **1.24%** | 86.910 | **1.29%** |
-| Indexer compressed QK scores（子项） | 1977.463 | **1.85%** | 59.791 | **1.87%** |
-| Block sparse attention | 1196.500 | **11.62%** | 18.490 | **11.93%** |
-
-indexer total 与 compressed QK 行使用相同的有效 QK FLOPs，但前者分母还包括压缩、
-选块及校验 kernel；两者是父子关系，不能相加。压缩和选块的矩阵 MFU 为 N/A：
-
-| Indexer 非矩阵子项 | full kernel ms | extend kernel ms | 矩阵 MFU |
-| --- | ---: | ---: | --- |
-| K compression | 23.285 | 0.592 | N/A |
-| CIS compression | 8.664 | 0.146 | N/A |
-| Block selection | 565.477 | 19.908 | N/A |
-
-四个 indexer 子项的核时之和不覆盖其全部校验、分配和拷贝 kernel。
-norm、RoPE、SwiGLU 的逐元素激活同样不定义本次矩阵 MFU。CIS 的 delta 输出只有
-2 个 KV-head 分数，矩阵为 `[1024,256] × [256,2]`，分子很小；该行还包含 softplus
-等 kernel，不能和大型 projection GEMM 的利用率直接类比。
-
-归因方法及检查：
-
-- 使用 kernel 的 CUDA correlation ID 找到 host launch，再按同一 host thread 的
-  NVTX 包含关系归入模块；不使用 GPU 执行时间是否落在 host NVTX 区间内作为依据。
-- CIS、indexer 及其子项、block attention 有直接 NVTX 标签。四个普通投影没有单独标签，
-  根据该 run 保存的模型源码顺序重建：QKV → RoPE → CIS → indexer → attention →
-  O → norm → gate/up → SiLU → down。检查每层每 chunk 的五个 GEMM（含 CIS）、
-  CIS/attention NVTX 锚点及 RoPE/norm/SiLU kernel 锚点；O 和 down 即使 kernel 同名也不混用。
-  全部 2080 次 full 层调用及 32 次 extend 层调用通过检查，无未归属的 projection GEMM。
-  离线分析校验保存的源码 SHA256；推理图变更后须重新核对顺序归因，或增加显式模块标签。
-- trace 为单进程、单设备、单 stream；SQLite 的 GPU UUID、SM90 和 132 SM 与 metadata 一致。
-  核时取 duration sum；Nsight 时间戳的最大边界重叠为 928 ns，因此此值不称为区间并集
-  active time。它仍受 profiler 的运行环境影响，
-  不替代无 profiler 的端到端测量，也不表示硬件指令利用率或 SM occupancy。
-
-普通投影 GEMM 的 MFU 约 78%–84%，indexer 的有效矩阵 MFU 明显更低。
-结合下节包含提交空档的模块区间，后续应优先优化 indexer 的计算、选块及提交/同步开销。
-
-复算并生成逐项 JSON/CSV/Markdown：
-
-```bash
-.venv/bin/python -m experiments.indexer_block_sparse_profile.src.module_mfu \
-  experiments/indexer_block_sparse_profile/output/data/nosa_sparse_e2e_65536_1024_20260926_03
-```
-
-产物为同一运行数据目录内的 `module_mfu.json`、`module_mfu.csv` 和 `module_mfu.md`。
-
-### 单独插桩运行的模块区间
-
-插桩运行的整段墙钟为 full-prefill **16053.869 ms**、extend **268.304 ms**。
-下表是该运行内跨全部层/chunks 的 inclusive CUDA event 区间合计；采集开销明显，
-不能将表中模块时间当作上表无 profiler 墙钟的直接分解，也不能称为纯 kernel active 时间。
-
-| 阶段 | full_prefill ms | extend ms | 归属 |
-| --- | ---: | ---: | --- |
-| CIS projection | 46.434 | 1.009 | 顶层 |
-| indexer total | **13079.259** | **220.438** | 顶层 |
-| block sparse attention | 1437.931 | 22.134 | 顶层 |
-| K compression | 89.564 | 1.462 | indexer 子项 |
-| CIS compression | 68.041 | 1.027 | indexer 子项 |
-| compressed query-aware scores | 3988.300 | 87.412 | indexer 子项 |
-| block selection | 3268.818 | 50.507 | indexer 子项 |
-
-full-prefill 的三个顶层模块各调用 2080 次（65 chunks × 32 layers），extend 各 32 次。
-extend 的 query chunk size 为现有 indexer 默认 64，因此压缩打分与选块各调用
-512 次（16 query chunks × 32 layers）；相关调用和逐层结果已写入 CSV。
-
-当前插桩结果中 indexer 区间明显大于 block sparse attention，后续性能工作应优先检查
-indexer 的打分、选块及调用/同步开销。压缩与选块仍消费全 HBM resident 前缀；这些数字
-不代表 offloading 收益，也不评价 sparse 模型质量。此实验没有重新测量 dense 对照，
-不据此给出同条件 dense/sparse 加速比。
-
-主结果、原始样本、逐层分解、源码及 SQLite 位于
-`output/data/nosa_sparse_e2e_65536_1024_20260926_03/`，原始 trace 为
-`output/profile/nosa_sparse_e2e_65536_1024_20260926_03/indexer_block_sparse_profile.nsys-rep`，
-stdout/stderr 位于 `output/log/nosa_sparse_e2e_65536_1024_20260926_03/`。

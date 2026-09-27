@@ -4,9 +4,10 @@ usage() {
   echo "Usage: bash experiments/indexer_block_sparse_profile/scripts/run.sh [RUN_ID] [OPTIONS]"
   echo "End-to-end NOSA sparse: prefix=65536, candidate=1024, chunk=1024, BF16, all 32 layers."
   echo "Options: --model-path PATH --request-file PATH --device DEVICE"
-  echo "         --warmup N --repeats N --profile-repeats N --without-nsys --peak-tflops N"
+  echo "         --warmup N --repeats N --profile-repeats N --without-nsys --peak-tflops N --timeline-only"
   echo "Defaults: warmup=2, repeats=5, profile-repeats=1; separate benchmark and nsys processes."
   echo "Offline MFU uses H200 dense BF16 peak 989 TFLOPS; other hardware requires --peak-tflops."
+  echo "--timeline-only: independent benchmark + nsys root ranges only; no module wrappers/events or module MFU."
   echo "Successful results publish to output/{data,log,profile}/RUN_ID; failed runs stay in /tmp."
 }
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
@@ -21,10 +22,12 @@ fi
 arguments=()
 mfu_arguments=()
 use_nsys=true
+profile_mode=profile
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --help) usage; exit 0 ;;
     --without-nsys) use_nsys=false; shift ;;
+    --timeline-only) profile_mode=timeline; shift ;;
     --peak-tflops)
       if [[ $# -lt 2 || "$2" == --* ]]; then
         echo "Missing value for $1" >&2
@@ -42,6 +45,10 @@ while [[ $# -gt 0 ]]; do
     *) echo "Unknown argument: $1; use --help" >&2; exit 2 ;;
   esac
 done
+if [[ "$profile_mode" == timeline && "$use_nsys" != true ]]; then
+  echo "--timeline-only requires nsys; it cannot be combined with --without-nsys" >&2
+  exit 2
+fi
 if [[ ! "$run_id" =~ ^[A-Za-z0-9_-]+$ ]]; then
   echo "RUN_ID must contain only letters, digits, underscores or hyphens" >&2
   exit 2
@@ -84,19 +91,25 @@ run_logged benchmark .venv/bin/python -m experiments.indexer_block_sparse_profil
 if [[ "$use_nsys" == true ]]; then
   run_logged nsys_version nsys --version
   report="$staging/profile/indexer_block_sparse_profile"
-  run_logged profile nsys profile --trace=cuda,nvtx,osrt --sample=none --cpuctxsw=none \
+  trace=cuda,nvtx,osrt
+  if [[ "$profile_mode" == timeline ]]; then trace=cuda,nvtx; fi
+  run_logged profile nsys profile --trace="$trace" --sample=none --cpuctxsw=none \
     --capture-range=cudaProfilerApi --capture-range-end=stop --output="$report" \
     .venv/bin/python -m experiments.indexer_block_sparse_profile.src.capture \
-    --mode profile "${common[@]}" "${arguments[@]}"
+    --mode "$profile_mode" "${common[@]}" "${arguments[@]}"
   run_logged export nsys export --type=sqlite --output="$staging/data/nsys.sqlite" "$report.nsys-rep"
 else
   run_logged profile .venv/bin/python -m experiments.indexer_block_sparse_profile.src.capture \
     --mode profile "${common[@]}" "${arguments[@]}"
 fi
-run_logged analyze .venv/bin/python -m experiments.indexer_block_sparse_profile.src.analyze "$staging/data"
-run_logged mfu .venv/bin/python -m experiments.indexer_block_sparse_profile.src.mfu "$staging/data" "${mfu_arguments[@]}"
-if [[ "$use_nsys" == true ]]; then
-  run_logged module_mfu .venv/bin/python -m experiments.indexer_block_sparse_profile.src.module_mfu "$staging/data" "${mfu_arguments[@]}"
+if [[ "$profile_mode" == timeline ]]; then
+  run_logged launch_report .venv/bin/python -m experiments.indexer_block_sparse_profile.src.launch_report "$staging/data"
+else
+  run_logged analyze .venv/bin/python -m experiments.indexer_block_sparse_profile.src.analyze "$staging/data"
+  run_logged mfu .venv/bin/python -m experiments.indexer_block_sparse_profile.src.mfu "$staging/data" "${mfu_arguments[@]}"
+  if [[ "$use_nsys" == true ]]; then
+    run_logged module_mfu .venv/bin/python -m experiments.indexer_block_sparse_profile.src.module_mfu "$staging/data" "${mfu_arguments[@]}"
+  fi
 fi
 mkdir -p "$output/data" "$output/log" "$output/profile"
 for category in data log profile; do

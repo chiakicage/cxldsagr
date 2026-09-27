@@ -15,7 +15,22 @@ from pathlib import Path
 PHASES = ("full_prefill", "extend")
 TIMING_METRICS = ("wall_ms", "host_submit_ms", "cuda_span_ms")
 PRIMARY_STAGES = ("cis_projection", "indexer_total", "block_sparse_attention")
-NESTED_STAGES = ("compression_k", "compression_cis", "compressed_scores", "select_from_scores")
+FUSED_STAGES = (
+    "indexer_validate",
+    "indexer_cache_update",
+    "pooled_scores",
+    "topk_qa",
+    "prepare_cis",
+    "topk_cis",
+    "finish_selection",
+)
+NESTED_STAGES = (
+    "compression_k",
+    "compression_cis",
+    "compressed_scores",
+    "select_from_scores",
+    *FUSED_STAGES,
+)
 STAGES = (*PRIMARY_STAGES, *NESTED_STAGES)
 WORKLOAD = {
     "prefix_tokens": 65536,

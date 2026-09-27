@@ -170,6 +170,30 @@ def test_chunk_size_must_be_a_positive_integer(chunk_size):
         NosaIndexer(chunk_size)
 
 
+@pytest.mark.parametrize(
+    ("mode", "backend", "device", "expected"),
+    [
+        ("query_aware", "reference", "cpu", 64),
+        ("query_aware", "reference", "cuda", 64),
+        ("nosa", "reference", "cpu", 64),
+        ("nosa", "reference", "cuda", 64),
+        ("nosa", "auto", "cpu", 64),
+        ("nosa", "auto", "cuda", None),
+        ("nosa", "triton", "cuda", None),
+    ],
+)
+def test_default_query_chunk_size_follows_execution_backend(mode, backend, device, expected):
+    indexer = NosaIndexer(mode=mode, backend=backend)
+    assert indexer.effective_query_chunk_size(torch.device(device)) == expected
+    for size in (1, 64, 1536):
+        explicit = NosaIndexer(size, mode=mode, backend=backend)
+        assert explicit.effective_query_chunk_size(torch.device(device)) == (
+            None if expected is None else size
+        )
+        if expected is None:
+            assert explicit.effective_query_chunk_size(torch.device(device), 8193) == 8193
+
+
 def test_budget_derives_dynamic_topk_and_preserves_default_policy_fields():
     assert asdict(NosaIndexer().policy) == asdict(NosaSelectionPolicy())
     smaller = asdict(NosaIndexer(block_budget=32).policy)

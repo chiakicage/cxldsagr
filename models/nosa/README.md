@@ -45,13 +45,14 @@ Decoder 返回待相加的 MLP 输出和 residual，下一层 input norm 合并�
 LongRoPE 使用模型持有的 FP32 cos/sin cache，复用静态频率及位置对应的旋转值。
 CUDA 推理通过 FlashInfer `apply_rope_with_cos_sin_cache_inplace` 一次融合 Q/K 旋转，
 直接使用合并 GEMM 输出的行跨距视图，保留 V 并避免 Q/K 复制。
-保留 NOSA 的 split-half 布局和 LongRoPE scaling。融合后的性能测量见 [64K+1K 实验](../../experiments/nosa_gr_65536_1024/README.md)。
+保留 NOSA 的 split-half 布局和 LongRoPE scaling。dense 性能测量入口见
+[64K+1K 实验](../../experiments/nosa_gr_65536_1024/README.md)，共享 cache 改动后未运行。
 
 默认 dense 模式计算普通 causal GQA attention，保留 checkpoint 的 LongRoPE 缩放向量。
 此模式将 NOSA 的 `self_attn.A` 与 `self_attn.delta.weight` 在加载时明确跳过。
 原 sparse 分支中这两个参数既用于块选择，也用于 CIS attention 加权；dense 两者均不启用，
 语义对应上游模型的普通 dense `eager` / `flash_attention_2` 分支，而非仅移除 sparse mask。
-既有 dense 性能实验仍表示使用 NOSA 权重的 Full Attention 基线。
+dense 性能实验测量使用 NOSA 权重的 Full Attention。
 
 `NosaIndexer()` 接受现有 `q/cache_access/context` 契约，在 resident K 上用 FP32
 计算 query-aware 评分，返回 `[query, KV head, block_budget]` 的逻辑 block IDs 与 validity mask。
@@ -62,7 +63,7 @@ causal softmax，再按 GQA 分组求和、五窗口 max pooling，最后排除 
 local 明确包含当前块及之前 15 块，选择与相同分数的排序均确定。此分支不需要 A/delta。
 非 resident access 明确报错，默认 dense adapter 仍拒绝非空 selection。
 [64K+1K pattern 实验](../../experiments/nosa_indexer_pattern_65536_1024/README.md)
-在 dense 激活上旁路记录 indexer，统计每层各 KV head 对 1K queries 的选块并集及 K+V 容量。
+对比同一 dense 激活上的 QA-only / 完整 NOSA 与实际 sparse 传播，统计每层各 KV head 对 1K queries 的选块并集、K+V 容量及覆盖率。
 
 ## 完整 NOSA block sparse
 
@@ -98,9 +99,20 @@ Triton 支持 SM90、FP16/BF16、head_dim 64/128、GQA group 1–32，使用 FP3
 也可能改变近似并列分数的排名。算子按逻辑块直接读取 resident NHD K/V，逐 token
 应用 causal mask，不生成 `[queries, selected_tokens, K/V]` 展开缓冲区。
 
+完整 NOSA 的 Triton indexer 一次处理完整 query batch，reference 默认 64；
+`NosaIndexer(query_chunk_size=...)` 仅控制 reference。`effective_query_chunk_size(device)`
+对 Triton 返回 `None` 表示不分块，传入 query_length 可查询本次实际大小。Triton 使用连续整数 query
+区间，省去位置张量的同步检查；Q/K/CIS 有限性检查仍保留，合并为一次 GPU 状态读取。
+
 sparse cache 将 CIS 作为 `[layer, capacity, KV head]` 的命名 record，按新增 token
-计算一次，与 K/V 共同提交。当前 indexer 每次从 resident 前缀重算压缩，不提供增量压缩
-缓存；offload fetch、overlap 和性能调优不在此路径内。原 dense pattern 实验不启用此模式。
+计算一次，与 K/V 共同提交。完整 NOSA 的 SM90 路径使用请求持有的
+[IndexerCache](../../cache/indexer_cache.py)：按层惰性缓存压缩 K/CIS 和稳定 CIS pool，
+prefill 完成后仅追加新窗口。五窗口 pool 在块结束后再到来 16 tokens 才稳定，末尾最多
+两个块现场计算。有限值检查复用已校验前缀；外部 CIS 覆盖和 reference 仍独立检查与计算。
+Top-33 / Top-64 使用 FlashInfer；query scratch 跨阶段和层复用。上下文上限为 256K tokens。
+`cache.truncate(length)` 同步回退原始和派生记录，失败 append 随模型事务一起回滚。
+offload fetch 与 overlap 尚未实现。原 QA-only pattern 不启用此模式；
+新增完整 NOSA pattern 对照从独立空 cache 构建 sparse prefix，记录 attention 实际消费的选块。
 完整 sparse 路径的全模型 prefill/extend 测量见
 [64K+1K 端到端 profile](../../experiments/indexer_block_sparse_profile/README.md)。
 
@@ -195,8 +207,9 @@ CUDA 与 FlashInfer 可用。测试命令和环境准备见[项目 README](../..
 
 共享 GR 请求生成使用 [request_format.py](request_format.py)：NOSA 聊天模板、tokenizer 与请求预算适配。
 用法见 [GR 生成器](../../GR/README.md)。
-预热后的单请求性能测量见 [GR 性能报告](../../experiments/nosa_gr_65536_1024/README.md)，
-可通过 `bash experiments/nosa_gr_65536_1024/scripts/run.sh <run_id>` 复现测量和模块 MFU。
+dense 单请求性能测量入口见 [GR 实验](../../experiments/nosa_gr_65536_1024/README.md)，
+共享 cache 改动后未运行。通过 `bash experiments/nosa_gr_65536_1024/scripts/run.sh <run_id>`
+可重新测量延迟和模块 MFU。
 
 GR 前向使用 `model(input_ids, cache, return_hidden=True)` 返回本次调用所有输入 token 的最终
 normalized hidden states，跳过 LM head；不与 `logits_to_keep` 同时使用。

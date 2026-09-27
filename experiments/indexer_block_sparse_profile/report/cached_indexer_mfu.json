@@ -1,0 +1,111 @@
+{
+  "schema_version": 1,
+  "run_id": "nosa_cached_indexer_20260928_01",
+  "gpu": {
+    "name": "NVIDIA H200",
+    "capability": [
+      9,
+      0
+    ],
+    "uuid": "2522820c-89d9-aa17-f79c-ca8cc767fb77",
+    "total_memory": 150121545728,
+    "sm_count": 132
+  },
+  "peak_tflops": 989.0,
+  "peak_source": "Nominal H200 SXM dense BF16 peak; assumed, not measured sustainable throughput",
+  "peak_kind": "BF16 dense Tensor Core peak, not 2:4 structured sparsity peak",
+  "workload": {
+    "prefix_tokens": 65536,
+    "new_tokens": 1024,
+    "total_tokens": 66560,
+    "chunk_size": 1024,
+    "attention_mode": "sparse",
+    "backend": "triton",
+    "dtype": "bfloat16",
+    "block_size": 64,
+    "block_budget": 64,
+    "local_blocks": 17,
+    "query_stage_blocks": 33,
+    "warmup": 2,
+    "repeats": 5,
+    "profile_repeats": 1,
+    "indexer_query_chunk_size": null,
+    "indexer_execution": "cached_flashinfer_v1"
+  },
+  "dimensions": {
+    "num_hidden_layers": 32,
+    "hidden_size": 4096,
+    "intermediate_size": 16384,
+    "num_attention_heads": 32,
+    "num_key_value_heads": 2,
+    "head_dim": 128
+  },
+  "definitions": {
+    "mfu_pct": "100 * useful matrix FLOPs / (median unprofiled wall seconds * peak FLOP/s)",
+    "matmul": "2 FLOPs per multiply-add; forward only, no LM head",
+    "sparse_attention": "QK + AV over selected causal tokens; current block is mandatory",
+    "indexer_qk": "One logical QK per complete causal compressed key; short chunks bypass QK",
+    "excluded_flops": "Two-pass QK recomputation, masked future work, tile padding, compression, softmax/softplus, pooling/top-k, GQA score reduction, CIS bias, norms, RoPE, activations and memory operations; their time stays in the denominator",
+    "interpretation": "Useful matrix MFU, not hardware instruction utilization or SM occupancy"
+  },
+  "phases": {
+    "full_prefill": {
+      "prefix_tokens": 0,
+      "query_tokens": 66560,
+      "work_counts": {
+        "sparse_token_pairs_per_q_head_layer": 262275584,
+        "compressed_key_pairs_per_q_head_layer": 137830720,
+        "indexer_scored_queries": 62464,
+        "indexer_bypassed_queries": 4096
+      },
+      "matrix_flops": {
+        "qkv_proj": 80401787781120,
+        "o_proj": 71468255805440,
+        "gate_up_proj": 571746046443520,
+        "down_proj": 285873023221760,
+        "block_sparse_attention": 137507941384192,
+        "cis_projection": 2181038080,
+        "indexer_qk": 36131496263680
+      },
+      "total_matrix_flops": 1183130731937792,
+      "sample_count": 5,
+      "wall_ms": 3698.3914896845818,
+      "effective_tflops": 319.9041354160956,
+      "mfu_pct": 32.346221983427256
+    },
+    "extend": {
+      "prefix_tokens": 65536,
+      "query_tokens": 1024,
+      "work_counts": {
+        "sparse_token_pairs_per_q_head_layer": 4162048,
+        "compressed_key_pairs_per_q_head_layer": 4225600,
+        "indexer_scored_queries": 1024,
+        "indexer_bypassed_queries": 0
+      },
+      "matrix_flops": {
+        "qkv_proj": 1236950581248,
+        "o_proj": 1099511627776,
+        "gate_up_proj": 8796093022208,
+        "down_proj": 4398046511104,
+        "block_sparse_attention": 2182111821824,
+        "cis_projection": 33554432,
+        "indexer_qk": 1107715686400
+      },
+      "total_matrix_flops": 18820462804992,
+      "sample_count": 5,
+      "wall_ms": 62.03421391546726,
+      "effective_tflops": 303.3884306269803,
+      "mfu_pct": 30.676282166529862
+    }
+  },
+  "derived_at_utc": "2026-09-27T17:43:24.419387+00:00",
+  "input_sha256": {
+    "metadata.json": "f79363cd2b985f26ee846a25a74791bc8d896c8f422f775a4209e608a52f2f38",
+    "summary.json": "c532ec9691cd409b80c8f864209115c623b59ced4dd7c1e056fd18bf43bba78b"
+  },
+  "analysis_source_sha256": {
+    "experiments/indexer_block_sparse_profile/src/mfu.py": "db2e7babf0052ac87858459e50ea2dbdb1a0d3b6a12de8f3038cb387940b675e",
+    "experiments/indexer_block_sparse_profile/src/analyze.py": "0abfbe66485466126de39cbba9921e3f563fe63cefc242e471a3fafdf13225fc",
+    "experiments/nosa_gr_65536_1024/src/mfu.py": "e30ee5ad7ca52e1de1f6f5f03f2b7b776f8ae707a0ae7468adfb00de2755ec98"
+  }
+}

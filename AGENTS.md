@@ -17,6 +17,8 @@
 - `cache/` 管理请求级缓存分配、逐层写入、提交、重置和释放。模型提供 KV 布局和
   兼容信息；所有模型层成功执行后统一推进有效长度。当前后端仅为模型设备上的
   resident cache，CPU 用于参考测试；local DRAM backing 与 HBM caching 尚未实现。
+  `cache/indexer_cache.py` 管理请求级派生 record 与共享 scratch；压缩和稳定 pool 的
+  语义由模型声明。派生缓存随 KV 统一提交、回滚和截短，不占用通用 opaque layer state。
 - main attention 接收逻辑块选择、cache access 与执行上下文，不能把「全部 KV
   已完成搬入 HBM」作为通用前置条件。未来 fetch/compute overlap 由 SM90 算子实现；
   resident NOSA block sparse attention 已接入 SM90 Triton；offload 入口仍只预留接口，
@@ -32,7 +34,9 @@
   再按 query-agnostic CIS 补满 64 块。A/delta 从 checkpoint 严格加载；
   `softplus(delta(V)) * A` 同时用于压缩后选块及 attention 加性 bias。
   K/V/CIS 作为同一 resident cache step 提交，CPU reference 与 SM90 Triton 均可运行。
-  两种 policy 不混用；pattern 实验仍只在 dense 激活上旁路选块，不改变 dense 基线。
+  两种 policy 不混用；原 query-aware pattern 实验在 dense 激活上旁路选块，不改变 dense 基线。
+  完整 NOSA pattern 对照分别采集同一 dense 激活上的 QA-only/full NOSA 选择，以及真实
+  sparse 传播中 attention 实际消费的选择；dense/sparse prefix 从独立空 cache 构建。
 - `tests/` 只保存保证代码正确性的跨模块集成测试代码，`scripts/run_tests.sh`
   负责全局回归编排；模块单元测试仍留在对应模块的 `tests/`。测试与论文实验的目的不同，
   smoke、数值正确性和回归检查不能作为 `experiments/` 的实验或结果。
@@ -55,6 +59,13 @@
   失败运行和已撤回的结果必须删除，不能以历史记录或 `legacy/` 归档为由保留在实验目录。
   不能仅因性能较差而删除合理的对照组；有效比较必须由实验目的明确支持。
   正确性检查只负责验证代码，不因使用 GPU、计时或 profiler 就成为论文实验。
+- 凡涉及性能优化或正确性修正的改动，必须在同一改动中清理 `experiments/` 内受影响的
+  旧报告内容，包括 README 中的结果、结论和性能数字、`report/` 图表与数据，以及
+  `output/` 中对应的旧运行产物；不得以历史记录、优化前对照、标注过期或 `legacy/`
+  归档为由保留。需要对照的实现应按当前正确性与测量要求重新运行，生成新的有效结果。
+  新报告必须基于改动后的实现重新测量生成，注明新的 run ID；尚未重跑时明确写
+  “改动后未运行”，删除旧结果及其引用，不沿用旧数字或仅修改文字包装为新结果。
+  清理范围按改动影响确定，共享模块变更须检查所有依赖实验；未受影响的有效实验可保留。
 - 每个实验使用一个有明确目的的目录 `experiments/<experiment>/`，禁止继续在
   `experiments/` 根目录堆放测量脚本、报告或 JSON/CSV。根 `README.md` 只维护实验入口索引。
 - 每个实验必须有 `README.md`，说明实验目的、实验内容与测量边界、运行方式及调用模块、
@@ -82,13 +93,15 @@
   （例如 PNG/SVG、CSV/JSON），随 Git 保存。README 保留结果说明和结论，通过相对路径
   嵌入或链接 `report/` 文件；报告所需的图像应放 `report/`，不为它们放开 `output/` 的忽略规则。
   在 README 中注明这些素材的来源 run ID 和生成方式；可从对应 `output/` 复制选定素材，
-  保留原运行产物以便复现。仍被忽略的产物使用普通代码路径，不创建仓库文档链接。
+  保留仍然有效的原运行产物以便复现；性能优化或正确性修正后按上述规则清理受影响的旧产物。
+  仍被忽略的产物使用普通代码路径，不创建仓库文档链接。
 - `src/` 不实现 shell 调度；`scripts/` 只编排 `python -m ...` / nsys 等入口，不复制模型
   计算逻辑。模型推理代码及其测试仍归 `models/`，共享 GR 生成器及热度曲线仍归 `GR/`。
   复用其他实验的工具时使用显式导入，并在 README 的调用模块中写明依赖。
 - 默认从仓库根目录执行，Python 实验入口为
   `python -m experiments.<experiment>.src.<module>`；运行脚本应能定位仓库根目录，
-  支持 `--help`，创建分类输出目录并保留子进程失败状态。不同运行用不同 run ID，不覆盖旧结果。
+  支持 `--help`，创建分类输出目录并保留子进程失败状态。不同运行用不同 run ID，
+  不覆盖仍然有效的旧结果；受性能优化或正确性修正影响的旧结果按上述规则删除。
 - 旧 DeepSeek 及配套 SM120 实验集中保存在 `experiments/legacy/deepseek_v32/`，
   作为整体归档，不强行套用新目录层级或拆分历史数据；仅修复导入、入口和导航链接。
   仅保留符合其目的的有效实验；这不豁免上述结果有效性要求。保留报告中的原命令与

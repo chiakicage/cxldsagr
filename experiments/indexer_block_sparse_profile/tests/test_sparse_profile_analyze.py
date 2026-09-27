@@ -136,7 +136,10 @@ def test_stage_totals_sum_within_run_before_taking_medians_and_keep_nesting():
         assert indexer["calls_per_run"]["median"] == 2 * call_count
         assert indexer["parent_stage"] is None
         for stage in NESTED_STAGES:
-            assert profile["stage_totals"][stage]["parent_stage"] == "indexer_total"
+            if stage in profile["stage_totals"]:
+                assert profile["stage_totals"][stage]["parent_stage"] == "indexer_total"
+            else:
+                assert stage in profile["unrecorded_stages"]
         score = profile["stage_totals"]["compressed_scores"]
         score_calls = 244 if phase == "full_prefill" else 4
         assert score["calls_per_run"]["median"] == score_calls

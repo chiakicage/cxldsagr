@@ -18,10 +18,7 @@ from experiments.nosa_indexer_pattern_65536_1024.src.analyze import _write_csv, 
 
 ROOT = Path(__file__).resolve().parents[3]
 DATA = ROOT / "experiments/nosa_indexer_pattern_65536_1024/output/data"
-DEFAULT_PATTERNS = (
-    DATA / "query_aware32_fp32_65536_1024_20260926_01",
-    DATA / "query_aware_fp32_65536_1024_20260925_01",
-)
+DEFAULT_PATTERNS = (DATA / "query_aware_fp32_65536_1024_20260925_01",)
 
 
 def load_distribution(pattern):
@@ -201,7 +198,7 @@ def main():
         "--pattern-data-dir",
         type=Path,
         action="append",
-        help="Repeat to compare runs; defaults to both 32/64-block runs",
+        help="Repeat to compare explicit inputs; defaults to the 64-block baseline",
     )
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--run-id", required=True)
