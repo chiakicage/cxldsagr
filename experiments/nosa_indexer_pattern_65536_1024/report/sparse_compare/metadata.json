@@ -1,0 +1,1839 @@
+{
+  "schema_version": 1,
+  "run_id": "nosa_sparse_pattern_h200_gpu1_20260928_01",
+  "recorded_at_utc": "2026-09-28T07:48:38.258527+00:00",
+  "args": {
+    "model_path": "/mnt/ssd-wlcb/chenkaiqi/NOSA-8B",
+    "request_file": "experiments/nosa_gr_65536_1024/output/data/dense_h200_gpu1_20260928_01/request.json",
+    "device": "cuda:0",
+    "output_dir": "/tmp/nosa-sparse-pattern-nosa_sparse_pattern_h200_gpu1_20260928_01.tVrnMn/data",
+    "run_id": "nosa_sparse_pattern_h200_gpu1_20260928_01"
+  },
+  "source_run_id": "dense_h200_gpu1_20260928_01",
+  "request_sha256": "0bbabf07bc72f9804dbc2e9644cf708e21eafe237631f4a56c64b20f9cda7f2f",
+  "input_ids_sha256": "8135e79dfb79fe97a70e6bbe00aff7b19ddf2aeb95caa3fdfaf3a196c5c8839b",
+  "model_config": {
+    "hidden_size": 4096,
+    "intermediate_size": 16384,
+    "num_hidden_layers": 32,
+    "num_attention_heads": 32,
+    "num_key_value_heads": 2,
+    "head_dim": 128,
+    "vocab_size": 73448,
+    "max_position_embeddings": 66560,
+    "rms_norm_eps": 1e-06,
+    "rope_theta": 10000.0,
+    "rope_scaling": {
+      "rope_type": "longrope",
+      "attention_factor": 1.0,
+      "long_factor": [
+        0.9977997200264581,
+        1.014658295992452,
+        1.0349680404997148,
+        1.059429246056193,
+        1.0888815016813513,
+        1.1243301355211495,
+        1.166977103606075,
+        1.2182568066927284,
+        1.2798772354275727,
+        1.3538666751582975,
+        1.4426259039919596,
+        1.5489853358570191,
+        1.6762658237220625,
+        1.8283407612492941,
+        2.0096956085876183,
+        2.225478927469756,
+        2.481536379650452,
+        2.784415934557119,
+        3.1413289096347365,
+        3.560047844772632,
+        4.048719380066383,
+        4.615569542115128,
+        5.2684819496549835,
+        6.014438591970396,
+        6.858830049237097,
+        7.804668263503327,
+        8.851768731513417,
+        9.99600492938444,
+        11.228766118181639,
+        12.536757560834843,
+        13.902257701387796,
+        15.303885189125953,
+        16.717837610115794,
+        18.119465097853947,
+        19.484965238406907,
+        20.792956681060105,
+        22.02571786985731,
+        23.16995406772833,
+        24.217054535738416,
+        25.16289275000465,
+        26.007284207271347,
+        26.753240849586767,
+        27.40615325712662,
+        27.973003419175363,
+        28.461674954469114,
+        28.880393889607006,
+        29.237306864684626,
+        29.540186419591297,
+        29.79624387177199,
+        30.01202719065413,
+        30.193382037992453,
+        30.34545697551969,
+        30.47273746338473,
+        30.579096895249787,
+        30.66785612408345,
+        30.741845563814174,
+        30.80346599254902,
+        30.85474569563567,
+        30.897392663720595,
+        30.932841297560394,
+        30.962293553185553,
+        30.986754758742034,
+        31.007064503249293,
+        31.02392307921529
+      ],
+      "short_factor": [
+        0.9977997200264581,
+        1.014658295992452,
+        1.0349680404997148,
+        1.059429246056193,
+        1.0888815016813513,
+        1.1243301355211495,
+        1.166977103606075,
+        1.2182568066927284,
+        1.2798772354275727,
+        1.3538666751582975,
+        1.4426259039919596,
+        1.5489853358570191,
+        1.6762658237220625,
+        1.8283407612492941,
+        2.0096956085876183,
+        2.225478927469756,
+        2.481536379650452,
+        2.784415934557119,
+        3.1413289096347365,
+        3.560047844772632,
+        4.048719380066383,
+        4.615569542115128,
+        5.2684819496549835,
+        6.014438591970396,
+        6.858830049237097,
+        7.804668263503327,
+        8.851768731513417,
+        9.99600492938444,
+        11.228766118181639,
+        12.536757560834843,
+        13.902257701387796,
+        15.303885189125953,
+        16.717837610115794,
+        18.119465097853947,
+        19.484965238406907,
+        20.792956681060105,
+        22.02571786985731,
+        23.16995406772833,
+        24.217054535738416,
+        25.16289275000465,
+        26.007284207271347,
+        26.753240849586767,
+        27.40615325712662,
+        27.973003419175363,
+        28.461674954469114,
+        28.880393889607006,
+        29.237306864684626,
+        29.540186419591297,
+        29.79624387177199,
+        30.01202719065413,
+        30.193382037992453,
+        30.34545697551969,
+        30.47273746338473,
+        30.579096895249787,
+        30.66785612408345,
+        30.741845563814174,
+        30.80346599254902,
+        30.85474569563567,
+        30.897392663720595,
+        30.932841297560394,
+        30.962293553185553,
+        30.986754758742034,
+        31.007064503249293,
+        31.02392307921529
+      ],
+      "original_max_position_embeddings": 32768
+    },
+    "bos_token_id": 1,
+    "eos_token_id": [
+      2,
+      73440
+    ],
+    "attention_bias": false,
+    "mlp_bias": false,
+    "tie_word_embeddings": false
+  },
+  "original_context": 32768,
+  "execution": {
+    "prefix_tokens": 65536,
+    "new_tokens": 1024,
+    "total_tokens": 66560,
+    "prefix_chunk_size": 1024,
+    "candidate_forward_calls": 1,
+    "instruction_tokens": 28,
+    "history_tokens": 65508,
+    "prefix_span": [
+      0,
+      65536
+    ],
+    "extend_span": [
+      65536,
+      66560
+    ]
+  },
+  "dtype": "bfloat16",
+  "element_size": 2,
+  "block_size": 64,
+  "weight_loading_mode": "sparse_with_strict_cis_weights",
+  "arms": {
+    "dense_qa64": {
+      "label": "Dense + QA-only64",
+      "activation_source": "dense_full_attention_post_rope",
+      "prefix_propagation": "dense",
+      "candidate_propagation": "dense",
+      "indexer_mode": "query_aware",
+      "indexer_backend": "reference",
+      "indexer_policy": {
+        "block_size": 64,
+        "block_budget": 64,
+        "sink_blocks": 1,
+        "local_blocks": 16,
+        "topk_blocks": 47,
+        "compression_kernel_size": 32,
+        "compression_stride": 16
+      },
+      "query_stage_blocks": null,
+      "selection_source": "sidecar_same_dense_activations"
+    },
+    "dense_nosa64": {
+      "label": "Dense + full NOSA64",
+      "activation_source": "dense_full_attention_post_rope",
+      "prefix_propagation": "dense",
+      "candidate_propagation": "dense",
+      "indexer_mode": "nosa",
+      "indexer_backend": "triton",
+      "indexer_policy": {
+        "block_size": 64,
+        "block_budget": 64,
+        "sink_blocks": 1,
+        "local_blocks": 17,
+        "topk_blocks": 15,
+        "compression_kernel_size": 32,
+        "compression_stride": 16
+      },
+      "query_stage_blocks": 33,
+      "selection_source": "sidecar_same_dense_activations"
+    },
+    "sparse_nosa64": {
+      "label": "Sparse + full NOSA64",
+      "activation_source": "resident_block_sparse_attention_with_cis_post_rope",
+      "prefix_propagation": "sparse",
+      "candidate_propagation": "sparse",
+      "indexer_mode": "nosa",
+      "indexer_backend": "triton",
+      "indexer_policy": {
+        "block_size": 64,
+        "block_budget": 64,
+        "sink_blocks": 1,
+        "local_blocks": 17,
+        "topk_blocks": 15,
+        "compression_kernel_size": 32,
+        "compression_stride": 16
+      },
+      "query_stage_blocks": 33,
+      "selection_source": "actual_attention_input_without_reselection"
+    }
+  },
+  "attention_shapes": {
+    "dense": [
+      {
+        "layer": 0,
+        "query_start": 65536,
+        "q": [
+          1024,
+          32,
+          128
+        ],
+        "k": [
+          66560,
+          2,
+          128
+        ],
+        "v": [
+          66560,
+          2,
+          128
+        ],
+        "cis": [
+          66560,
+          2
+        ]
+      },
+      {
+        "layer": 1,
+        "query_start": 65536,
+        "q": [
+          1024,
+          32,
+          128
+        ],
+        "k": [
+          66560,
+          2,
+          128
+        ],
+        "v": [
+          66560,
+          2,
+          128
+        ],
+        "cis": [
+          66560,
+          2
+        ]
+      },
+      {
+        "layer": 2,
+        "query_start": 65536,
+        "q": [
+          1024,
+          32,
+          128
+        ],
+        "k": [
+          66560,
+          2,
+          128
+        ],
+        "v": [
+          66560,
+          2,
+          128
+        ],
+        "cis": [
+          66560,
+          2
+        ]
+      },
+      {
+        "layer": 3,
+        "query_start": 65536,
+        "q": [
+          1024,
+          32,
+          128
+        ],
+        "k": [
+          66560,
+          2,
+          128
+        ],
+        "v": [
+          66560,
+          2,
+          128
+        ],
+        "cis": [
+          66560,
+          2
+        ]
+      },
+      {
+        "layer": 4,
+        "query_start": 65536,
+        "q": [
+          1024,
+          32,
+          128
+        ],
+        "k": [
+          66560,
+          2,
+          128
+        ],
+        "v": [
+          66560,
+          2,
+          128
+        ],
+        "cis": [
+          66560,
+          2
+        ]
+      },
+      {
+        "layer": 5,
+        "query_start": 65536,
+        "q": [
+          1024,
+          32,
+          128
+        ],
+        "k": [
+          66560,
+          2,
+          128
+        ],
+        "v": [
+          66560,
+          2,
+          128
+        ],
+        "cis": [
+          66560,
+          2
+        ]
+      },
+      {
+        "layer": 6,
+        "query_start": 65536,
+        "q": [
+          1024,
+          32,
+          128
+        ],
+        "k": [
+          66560,
+          2,
+          128
+        ],
+        "v": [
+          66560,
+          2,
+          128
+        ],
+        "cis": [
+          66560,
+          2
+        ]
+      },
+      {
+        "layer": 7,
+        "query_start": 65536,
+        "q": [
+          1024,
+          32,
+          128
+        ],
+        "k": [
+          66560,
+          2,
+          128
+        ],
+        "v": [
+          66560,
+          2,
+          128
+        ],
+        "cis": [
+          66560,
+          2
+        ]
+      },
+      {
+        "layer": 8,
+        "query_start": 65536,
+        "q": [
+          1024,
+          32,
+          128
+        ],
+        "k": [
+          66560,
+          2,
+          128
+        ],
+        "v": [
+          66560,
+          2,
+          128
+        ],
+        "cis": [
+          66560,
+          2
+        ]
+      },
+      {
+        "layer": 9,
+        "query_start": 65536,
+        "q": [
+          1024,
+          32,
+          128
+        ],
+        "k": [
+          66560,
+          2,
+          128
+        ],
+        "v": [
+          66560,
+          2,
+          128
+        ],
+        "cis": [
+          66560,
+          2
+        ]
+      },
+      {
+        "layer": 10,
+        "query_start": 65536,
+        "q": [
+          1024,
+          32,
+          128
+        ],
+        "k": [
+          66560,
+          2,
+          128
+        ],
+        "v": [
+          66560,
+          2,
+          128
+        ],
+        "cis": [
+          66560,
+          2
+        ]
+      },
+      {
+        "layer": 11,
+        "query_start": 65536,
+        "q": [
+          1024,
+          32,
+          128
+        ],
+        "k": [
+          66560,
+          2,
+          128
+        ],
+        "v": [
+          66560,
+          2,
+          128
+        ],
+        "cis": [
+          66560,
+          2
+        ]
+      },
+      {
+        "layer": 12,
+        "query_start": 65536,
+        "q": [
+          1024,
+          32,
+          128
+        ],
+        "k": [
+          66560,
+          2,
+          128
+        ],
+        "v": [
+          66560,
+          2,
+          128
+        ],
+        "cis": [
+          66560,
+          2
+        ]
+      },
+      {
+        "layer": 13,
+        "query_start": 65536,
+        "q": [
+          1024,
+          32,
+          128
+        ],
+        "k": [
+          66560,
+          2,
+          128
+        ],
+        "v": [
+          66560,
+          2,
+          128
+        ],
+        "cis": [
+          66560,
+          2
+        ]
+      },
+      {
+        "layer": 14,
+        "query_start": 65536,
+        "q": [
+          1024,
+          32,
+          128
+        ],
+        "k": [
+          66560,
+          2,
+          128
+        ],
+        "v": [
+          66560,
+          2,
+          128
+        ],
+        "cis": [
+          66560,
+          2
+        ]
+      },
+      {
+        "layer": 15,
+        "query_start": 65536,
+        "q": [
+          1024,
+          32,
+          128
+        ],
+        "k": [
+          66560,
+          2,
+          128
+        ],
+        "v": [
+          66560,
+          2,
+          128
+        ],
+        "cis": [
+          66560,
+          2
+        ]
+      },
+      {
+        "layer": 16,
+        "query_start": 65536,
+        "q": [
+          1024,
+          32,
+          128
+        ],
+        "k": [
+          66560,
+          2,
+          128
+        ],
+        "v": [
+          66560,
+          2,
+          128
+        ],
+        "cis": [
+          66560,
+          2
+        ]
+      },
+      {
+        "layer": 17,
+        "query_start": 65536,
+        "q": [
+          1024,
+          32,
+          128
+        ],
+        "k": [
+          66560,
+          2,
+          128
+        ],
+        "v": [
+          66560,
+          2,
+          128
+        ],
+        "cis": [
+          66560,
+          2
+        ]
+      },
+      {
+        "layer": 18,
+        "query_start": 65536,
+        "q": [
+          1024,
+          32,
+          128
+        ],
+        "k": [
+          66560,
+          2,
+          128
+        ],
+        "v": [
+          66560,
+          2,
+          128
+        ],
+        "cis": [
+          66560,
+          2
+        ]
+      },
+      {
+        "layer": 19,
+        "query_start": 65536,
+        "q": [
+          1024,
+          32,
+          128
+        ],
+        "k": [
+          66560,
+          2,
+          128
+        ],
+        "v": [
+          66560,
+          2,
+          128
+        ],
+        "cis": [
+          66560,
+          2
+        ]
+      },
+      {
+        "layer": 20,
+        "query_start": 65536,
+        "q": [
+          1024,
+          32,
+          128
+        ],
+        "k": [
+          66560,
+          2,
+          128
+        ],
+        "v": [
+          66560,
+          2,
+          128
+        ],
+        "cis": [
+          66560,
+          2
+        ]
+      },
+      {
+        "layer": 21,
+        "query_start": 65536,
+        "q": [
+          1024,
+          32,
+          128
+        ],
+        "k": [
+          66560,
+          2,
+          128
+        ],
+        "v": [
+          66560,
+          2,
+          128
+        ],
+        "cis": [
+          66560,
+          2
+        ]
+      },
+      {
+        "layer": 22,
+        "query_start": 65536,
+        "q": [
+          1024,
+          32,
+          128
+        ],
+        "k": [
+          66560,
+          2,
+          128
+        ],
+        "v": [
+          66560,
+          2,
+          128
+        ],
+        "cis": [
+          66560,
+          2
+        ]
+      },
+      {
+        "layer": 23,
+        "query_start": 65536,
+        "q": [
+          1024,
+          32,
+          128
+        ],
+        "k": [
+          66560,
+          2,
+          128
+        ],
+        "v": [
+          66560,
+          2,
+          128
+        ],
+        "cis": [
+          66560,
+          2
+        ]
+      },
+      {
+        "layer": 24,
+        "query_start": 65536,
+        "q": [
+          1024,
+          32,
+          128
+        ],
+        "k": [
+          66560,
+          2,
+          128
+        ],
+        "v": [
+          66560,
+          2,
+          128
+        ],
+        "cis": [
+          66560,
+          2
+        ]
+      },
+      {
+        "layer": 25,
+        "query_start": 65536,
+        "q": [
+          1024,
+          32,
+          128
+        ],
+        "k": [
+          66560,
+          2,
+          128
+        ],
+        "v": [
+          66560,
+          2,
+          128
+        ],
+        "cis": [
+          66560,
+          2
+        ]
+      },
+      {
+        "layer": 26,
+        "query_start": 65536,
+        "q": [
+          1024,
+          32,
+          128
+        ],
+        "k": [
+          66560,
+          2,
+          128
+        ],
+        "v": [
+          66560,
+          2,
+          128
+        ],
+        "cis": [
+          66560,
+          2
+        ]
+      },
+      {
+        "layer": 27,
+        "query_start": 65536,
+        "q": [
+          1024,
+          32,
+          128
+        ],
+        "k": [
+          66560,
+          2,
+          128
+        ],
+        "v": [
+          66560,
+          2,
+          128
+        ],
+        "cis": [
+          66560,
+          2
+        ]
+      },
+      {
+        "layer": 28,
+        "query_start": 65536,
+        "q": [
+          1024,
+          32,
+          128
+        ],
+        "k": [
+          66560,
+          2,
+          128
+        ],
+        "v": [
+          66560,
+          2,
+          128
+        ],
+        "cis": [
+          66560,
+          2
+        ]
+      },
+      {
+        "layer": 29,
+        "query_start": 65536,
+        "q": [
+          1024,
+          32,
+          128
+        ],
+        "k": [
+          66560,
+          2,
+          128
+        ],
+        "v": [
+          66560,
+          2,
+          128
+        ],
+        "cis": [
+          66560,
+          2
+        ]
+      },
+      {
+        "layer": 30,
+        "query_start": 65536,
+        "q": [
+          1024,
+          32,
+          128
+        ],
+        "k": [
+          66560,
+          2,
+          128
+        ],
+        "v": [
+          66560,
+          2,
+          128
+        ],
+        "cis": [
+          66560,
+          2
+        ]
+      },
+      {
+        "layer": 31,
+        "query_start": 65536,
+        "q": [
+          1024,
+          32,
+          128
+        ],
+        "k": [
+          66560,
+          2,
+          128
+        ],
+        "v": [
+          66560,
+          2,
+          128
+        ],
+        "cis": [
+          66560,
+          2
+        ]
+      }
+    ],
+    "sparse": [
+      {
+        "layer": 0,
+        "query_start": 65536,
+        "q": [
+          1024,
+          32,
+          128
+        ],
+        "k": [
+          66560,
+          2,
+          128
+        ],
+        "v": [
+          66560,
+          2,
+          128
+        ],
+        "cis": [
+          66560,
+          2
+        ]
+      },
+      {
+        "layer": 1,
+        "query_start": 65536,
+        "q": [
+          1024,
+          32,
+          128
+        ],
+        "k": [
+          66560,
+          2,
+          128
+        ],
+        "v": [
+          66560,
+          2,
+          128
+        ],
+        "cis": [
+          66560,
+          2
+        ]
+      },
+      {
+        "layer": 2,
+        "query_start": 65536,
+        "q": [
+          1024,
+          32,
+          128
+        ],
+        "k": [
+          66560,
+          2,
+          128
+        ],
+        "v": [
+          66560,
+          2,
+          128
+        ],
+        "cis": [
+          66560,
+          2
+        ]
+      },
+      {
+        "layer": 3,
+        "query_start": 65536,
+        "q": [
+          1024,
+          32,
+          128
+        ],
+        "k": [
+          66560,
+          2,
+          128
+        ],
+        "v": [
+          66560,
+          2,
+          128
+        ],
+        "cis": [
+          66560,
+          2
+        ]
+      },
+      {
+        "layer": 4,
+        "query_start": 65536,
+        "q": [
+          1024,
+          32,
+          128
+        ],
+        "k": [
+          66560,
+          2,
+          128
+        ],
+        "v": [
+          66560,
+          2,
+          128
+        ],
+        "cis": [
+          66560,
+          2
+        ]
+      },
+      {
+        "layer": 5,
+        "query_start": 65536,
+        "q": [
+          1024,
+          32,
+          128
+        ],
+        "k": [
+          66560,
+          2,
+          128
+        ],
+        "v": [
+          66560,
+          2,
+          128
+        ],
+        "cis": [
+          66560,
+          2
+        ]
+      },
+      {
+        "layer": 6,
+        "query_start": 65536,
+        "q": [
+          1024,
+          32,
+          128
+        ],
+        "k": [
+          66560,
+          2,
+          128
+        ],
+        "v": [
+          66560,
+          2,
+          128
+        ],
+        "cis": [
+          66560,
+          2
+        ]
+      },
+      {
+        "layer": 7,
+        "query_start": 65536,
+        "q": [
+          1024,
+          32,
+          128
+        ],
+        "k": [
+          66560,
+          2,
+          128
+        ],
+        "v": [
+          66560,
+          2,
+          128
+        ],
+        "cis": [
+          66560,
+          2
+        ]
+      },
+      {
+        "layer": 8,
+        "query_start": 65536,
+        "q": [
+          1024,
+          32,
+          128
+        ],
+        "k": [
+          66560,
+          2,
+          128
+        ],
+        "v": [
+          66560,
+          2,
+          128
+        ],
+        "cis": [
+          66560,
+          2
+        ]
+      },
+      {
+        "layer": 9,
+        "query_start": 65536,
+        "q": [
+          1024,
+          32,
+          128
+        ],
+        "k": [
+          66560,
+          2,
+          128
+        ],
+        "v": [
+          66560,
+          2,
+          128
+        ],
+        "cis": [
+          66560,
+          2
+        ]
+      },
+      {
+        "layer": 10,
+        "query_start": 65536,
+        "q": [
+          1024,
+          32,
+          128
+        ],
+        "k": [
+          66560,
+          2,
+          128
+        ],
+        "v": [
+          66560,
+          2,
+          128
+        ],
+        "cis": [
+          66560,
+          2
+        ]
+      },
+      {
+        "layer": 11,
+        "query_start": 65536,
+        "q": [
+          1024,
+          32,
+          128
+        ],
+        "k": [
+          66560,
+          2,
+          128
+        ],
+        "v": [
+          66560,
+          2,
+          128
+        ],
+        "cis": [
+          66560,
+          2
+        ]
+      },
+      {
+        "layer": 12,
+        "query_start": 65536,
+        "q": [
+          1024,
+          32,
+          128
+        ],
+        "k": [
+          66560,
+          2,
+          128
+        ],
+        "v": [
+          66560,
+          2,
+          128
+        ],
+        "cis": [
+          66560,
+          2
+        ]
+      },
+      {
+        "layer": 13,
+        "query_start": 65536,
+        "q": [
+          1024,
+          32,
+          128
+        ],
+        "k": [
+          66560,
+          2,
+          128
+        ],
+        "v": [
+          66560,
+          2,
+          128
+        ],
+        "cis": [
+          66560,
+          2
+        ]
+      },
+      {
+        "layer": 14,
+        "query_start": 65536,
+        "q": [
+          1024,
+          32,
+          128
+        ],
+        "k": [
+          66560,
+          2,
+          128
+        ],
+        "v": [
+          66560,
+          2,
+          128
+        ],
+        "cis": [
+          66560,
+          2
+        ]
+      },
+      {
+        "layer": 15,
+        "query_start": 65536,
+        "q": [
+          1024,
+          32,
+          128
+        ],
+        "k": [
+          66560,
+          2,
+          128
+        ],
+        "v": [
+          66560,
+          2,
+          128
+        ],
+        "cis": [
+          66560,
+          2
+        ]
+      },
+      {
+        "layer": 16,
+        "query_start": 65536,
+        "q": [
+          1024,
+          32,
+          128
+        ],
+        "k": [
+          66560,
+          2,
+          128
+        ],
+        "v": [
+          66560,
+          2,
+          128
+        ],
+        "cis": [
+          66560,
+          2
+        ]
+      },
+      {
+        "layer": 17,
+        "query_start": 65536,
+        "q": [
+          1024,
+          32,
+          128
+        ],
+        "k": [
+          66560,
+          2,
+          128
+        ],
+        "v": [
+          66560,
+          2,
+          128
+        ],
+        "cis": [
+          66560,
+          2
+        ]
+      },
+      {
+        "layer": 18,
+        "query_start": 65536,
+        "q": [
+          1024,
+          32,
+          128
+        ],
+        "k": [
+          66560,
+          2,
+          128
+        ],
+        "v": [
+          66560,
+          2,
+          128
+        ],
+        "cis": [
+          66560,
+          2
+        ]
+      },
+      {
+        "layer": 19,
+        "query_start": 65536,
+        "q": [
+          1024,
+          32,
+          128
+        ],
+        "k": [
+          66560,
+          2,
+          128
+        ],
+        "v": [
+          66560,
+          2,
+          128
+        ],
+        "cis": [
+          66560,
+          2
+        ]
+      },
+      {
+        "layer": 20,
+        "query_start": 65536,
+        "q": [
+          1024,
+          32,
+          128
+        ],
+        "k": [
+          66560,
+          2,
+          128
+        ],
+        "v": [
+          66560,
+          2,
+          128
+        ],
+        "cis": [
+          66560,
+          2
+        ]
+      },
+      {
+        "layer": 21,
+        "query_start": 65536,
+        "q": [
+          1024,
+          32,
+          128
+        ],
+        "k": [
+          66560,
+          2,
+          128
+        ],
+        "v": [
+          66560,
+          2,
+          128
+        ],
+        "cis": [
+          66560,
+          2
+        ]
+      },
+      {
+        "layer": 22,
+        "query_start": 65536,
+        "q": [
+          1024,
+          32,
+          128
+        ],
+        "k": [
+          66560,
+          2,
+          128
+        ],
+        "v": [
+          66560,
+          2,
+          128
+        ],
+        "cis": [
+          66560,
+          2
+        ]
+      },
+      {
+        "layer": 23,
+        "query_start": 65536,
+        "q": [
+          1024,
+          32,
+          128
+        ],
+        "k": [
+          66560,
+          2,
+          128
+        ],
+        "v": [
+          66560,
+          2,
+          128
+        ],
+        "cis": [
+          66560,
+          2
+        ]
+      },
+      {
+        "layer": 24,
+        "query_start": 65536,
+        "q": [
+          1024,
+          32,
+          128
+        ],
+        "k": [
+          66560,
+          2,
+          128
+        ],
+        "v": [
+          66560,
+          2,
+          128
+        ],
+        "cis": [
+          66560,
+          2
+        ]
+      },
+      {
+        "layer": 25,
+        "query_start": 65536,
+        "q": [
+          1024,
+          32,
+          128
+        ],
+        "k": [
+          66560,
+          2,
+          128
+        ],
+        "v": [
+          66560,
+          2,
+          128
+        ],
+        "cis": [
+          66560,
+          2
+        ]
+      },
+      {
+        "layer": 26,
+        "query_start": 65536,
+        "q": [
+          1024,
+          32,
+          128
+        ],
+        "k": [
+          66560,
+          2,
+          128
+        ],
+        "v": [
+          66560,
+          2,
+          128
+        ],
+        "cis": [
+          66560,
+          2
+        ]
+      },
+      {
+        "layer": 27,
+        "query_start": 65536,
+        "q": [
+          1024,
+          32,
+          128
+        ],
+        "k": [
+          66560,
+          2,
+          128
+        ],
+        "v": [
+          66560,
+          2,
+          128
+        ],
+        "cis": [
+          66560,
+          2
+        ]
+      },
+      {
+        "layer": 28,
+        "query_start": 65536,
+        "q": [
+          1024,
+          32,
+          128
+        ],
+        "k": [
+          66560,
+          2,
+          128
+        ],
+        "v": [
+          66560,
+          2,
+          128
+        ],
+        "cis": [
+          66560,
+          2
+        ]
+      },
+      {
+        "layer": 29,
+        "query_start": 65536,
+        "q": [
+          1024,
+          32,
+          128
+        ],
+        "k": [
+          66560,
+          2,
+          128
+        ],
+        "v": [
+          66560,
+          2,
+          128
+        ],
+        "cis": [
+          66560,
+          2
+        ]
+      },
+      {
+        "layer": 30,
+        "query_start": 65536,
+        "q": [
+          1024,
+          32,
+          128
+        ],
+        "k": [
+          66560,
+          2,
+          128
+        ],
+        "v": [
+          66560,
+          2,
+          128
+        ],
+        "cis": [
+          66560,
+          2
+        ]
+      },
+      {
+        "layer": 31,
+        "query_start": 65536,
+        "q": [
+          1024,
+          32,
+          128
+        ],
+        "k": [
+          66560,
+          2,
+          128
+        ],
+        "v": [
+          66560,
+          2,
+          128
+        ],
+        "cis": [
+          66560,
+          2
+        ]
+      }
+    ]
+  },
+  "indexer_query_chunk_sizes": {
+    "dense_qa64": 64,
+    "dense_nosa64": null,
+    "sparse_nosa64": null
+  },
+  "metric": "unique_selected_full_block_kv_payload_excluding_cis",
+  "warmup": 0,
+  "captures_per_trajectory": 1,
+  "validation_replays_per_trajectory": 1,
+  "performance_measured": false,
+  "validation": {
+    "hidden_finite": true,
+    "dense_observer_hidden_max_abs": 0.0,
+    "sparse_observer_hidden_max_abs": 0.0,
+    "full_nosa_layer0_selection_equal": true
+  },
+  "gpu": {
+    "name": "NVIDIA H20Z",
+    "uuid": "a2e4882b-3248-6018-14ab-90e45b5a5b04",
+    "sm_count": 132,
+    "capability": [
+      9,
+      0
+    ]
+  },
+  "torch": "2.12.1+cu130",
+  "cuda": "13.0",
+  "dependencies": {
+    "flashinfer-python": "0.6.18",
+    "triton": "3.7.1",
+    "numpy": "2.5.0",
+    "matplotlib": "3.11.1",
+    "safetensors": "0.8.0",
+    "tokenizers": "0.23.2"
+  },
+  "nvidia_smi": "name, uuid, driver_version, memory.total [MiB]\nNVIDIA H20Z, GPU-86d7bbfd-342a-d3ee-178a-2928c0132eec, 570.124.06, 143771 MiB\nNVIDIA H20Z, GPU-6f4b62c7-b7c7-6f21-cb63-03280645c400, 570.124.06, 143771 MiB\nNVIDIA H20Z, GPU-87c92411-f84a-5e4e-3181-f430e63faafe, 570.124.06, 143771 MiB\nNVIDIA H20Z, GPU-70eaf74c-5d92-8cd3-3307-023c66694ed3, 570.124.06, 143771 MiB\nNVIDIA H20Z, GPU-9c391197-77a2-2d84-952f-d70f505495a1, 570.124.06, 143771 MiB\nNVIDIA H20Z, GPU-33f281c9-f9c1-3350-16c8-9ece0e9da8dd, 570.124.06, 143771 MiB\nNVIDIA H20Z, GPU-738830be-2787-983a-dd4a-54d5c7a0531a, 570.124.06, 143771 MiB\nNVIDIA H20Z, GPU-618f287e-098d-c62f-bd4a-a6d3da3df44b, 570.124.06, 143771 MiB",
+  "checkpoint_sha256": {
+    "model.safetensors": "5219c9ec34c4a19650e98b079ccf4911ffb3457e8f67690ca9037c09e89fd477",
+    "config.json": "1dcc43c82877f1f0dfce453f49d6cdab8e538f437279c5a83000102b671bcb17",
+    "tokenizer.json": "adf7208af154a5ca065d2eda4e5419e02aac58c2c00627874748b75ec6769094"
+  },
+  "source_sha256": {
+    "GR/__init__.py": "26c88a81740555c7801e3d3e82b4e08599da112b7e134290e0fc23070f416eff",
+    "GR/analysis/heat_curves.csv": "7f94568e6136f894d27085827760b0dad71301b4f8f94f0b02d1b58018e1186f",
+    "GR/analyze_heat.py": "4dbed207151eda02a4fae1d475f4b88e5ae7dd06df8a7f6f48d07021d2636bc7",
+    "GR/dataset.py": "0ec95750722fefe387c0c62a2064e101622d060ac69d4c933044b1a950c24ce4",
+    "GR/heat.py": "c6ebe2ebc73db10c4f2706701d3e7a1c7aee2dc40162e00f6b5ce4550a587f4f",
+    "GR/input_generator.py": "1e6024a227a53c6152caaa6988be256d37077d75c0cae0eeee460d18575fa309",
+    "GR/scheduling.py": "e7e24cc2fcaf90796494e0c139d8c1e300a5e4ea42e294d6293939746f1bb8c6",
+    "cache/contracts.py": "58575f1c9aee3f2843b7f2bce07f1589ea8cb9a712b050991199a95639f97f73",
+    "cache/indexer_cache.py": "da80484c5d2ad016b3119f80576e72d2956f8d9d1a5cc2804a0e6d668b80b2eb",
+    "cache/manager.py": "3f8a3129900f8e5e1af6005fcc187f5d430c5ce5156ca80c169384694dd39f91",
+    "executor/model_executor.py": "f585f9940d5fb506e7f8aaeafe8602f9877ac773f2183603744f2b3a2a48c919",
+    "experiments/indexer_block_sparse_profile/src/capture.py": "6cc6632ca6e4ea744362535e86ffb062b7e989f1574ab4fe53da4d1e9fa4cc69",
+    "experiments/nosa_gr_65536_1024/src/analyze.py": "0126cc5c4ed401a77c87b5bba57ce3b759d92c1715dc60018611b09ae1f5aa09",
+    "experiments/nosa_gr_65536_1024/src/capture.py": "ba9e591cae497bfd516d04ed8c789c674e7ccfe92be6ec20b8ece0bfbd6fac1b",
+    "experiments/nosa_gr_65536_1024/src/instrumentation.py": "fdcc857f5d3128d0ab36c57ee99f34f3e844259ad5fe88318315258465598853",
+    "experiments/nosa_gr_65536_1024/src/mfu.py": "e30ee5ad7ca52e1de1f6f5f03f2b7b776f8ae707a0ae7468adfb00de2755ec98",
+    "experiments/nosa_gr_65536_1024/src/sources.py": "b33e15ef4c1ae86349e703f394348efd36246acf6bbeaaeee9969cdbdf7c8b57",
+    "experiments/nosa_indexer_pattern_65536_1024/scripts/decompose.sh": "6d3fcbbe9b92dd7047bec109007453aebf2c614e62aae0f81b070dc690a97c19",
+    "experiments/nosa_indexer_pattern_65536_1024/scripts/distribution.sh": "d751fdc74638efa2656d4b65430517652b9aec5664c62f4b607e8a1e9503a323",
+    "experiments/nosa_indexer_pattern_65536_1024/scripts/estimate.sh": "8e84bdfbf65f173b7629d173ead2ebafd8ada70c38813131509ef729f4367812",
+    "experiments/nosa_indexer_pattern_65536_1024/scripts/overlap.sh": "ad9172d37f78fb1d49fdb0c03320bc766243d646d08ff06611243a45e319a8b1",
+    "experiments/nosa_indexer_pattern_65536_1024/scripts/run.sh": "8324dfcdc655f8c9c113b4f011501da91cf983f08ce327f9978ad9da98274cdb",
+    "experiments/nosa_indexer_pattern_65536_1024/scripts/sparse_compare.sh": "070eb48445c243bf087c2a944fb2b210967feb7dbf371e7fe4246ae8c8dfa847",
+    "experiments/nosa_indexer_pattern_65536_1024/scripts/threshold_sweep.sh": "0f3c60c63ea969f7225144f2db03196f536c333580616e8dea968d8ddb77a5dd",
+    "experiments/nosa_indexer_pattern_65536_1024/src/analyze.py": "f9c8fd15ad747ad6136126da606e42bb18a7d6701e552d19986987961412893f",
+    "experiments/nosa_indexer_pattern_65536_1024/src/capture.py": "624f98af87cc1d78e3d341dd7c065ce4b9ea6a5a03e01e556ef623b6f1dc0cd2",
+    "experiments/nosa_indexer_pattern_65536_1024/src/decompose.py": "f113e5a41090dfa465c9877f0473f792865129f01966394bb9eca1b803b3a2a7",
+    "experiments/nosa_indexer_pattern_65536_1024/src/dense_timing.py": "b4c7c9a2cb40ef08f563161684d582f9815e5537ddd805d5f4f72ce31a9c563c",
+    "experiments/nosa_indexer_pattern_65536_1024/src/distribution.py": "5e6988402d5bf3e9982be60601e9a7cd72eb669da6315eea5f73158a20e5c426",
+    "experiments/nosa_indexer_pattern_65536_1024/src/estimate.py": "27fa738beae455f1d7d65a047f57d3f47b9eb0c7254e76635c82d3965638b02b",
+    "experiments/nosa_indexer_pattern_65536_1024/src/overlap.py": "9c8b2e81d856fa455bddbc7ba2f532ef9c9ab22b6a0ccb6d64fb2cdc489f321f",
+    "experiments/nosa_indexer_pattern_65536_1024/src/selection_parts.py": "ba787c411cbbcc4564e23a2429a569b57d72febd47302ea66d95d07fc92b1d3c",
+    "experiments/nosa_indexer_pattern_65536_1024/src/sparse_capture.py": "39fef52775b936e30afb6437d9bb4f16ae3d4bbfedfa14f5b004a55d65ad7b4d",
+    "experiments/nosa_indexer_pattern_65536_1024/src/sparse_compare.py": "7662a8a303a3678881fad835bd9eca8ac00ee8c1d669682ce0b90f1d78528047",
+    "experiments/nosa_indexer_pattern_65536_1024/src/threshold_sweep.py": "2188563dff8a13585e45eca54789a4a603bd4f47d7125793bd25ca67f7f61c5d",
+    "layers/attention.py": "91eccef789f099017c229b99d1d0ccc9d66ce980ab6dbc772a25fe031f6f34d3",
+    "layers/feed_forward.py": "95dcebaa67b4f2069f580ac0831ef8335fc15b022e802708e24f58c02408de4a",
+    "layers/normalization.py": "426b2cd0e1da6c944ff661a93d55eee2b064585d5c5f6c6e6a0b80ca3bc98af0",
+    "models/nosa/attention.py": "1592ff0607cda99b94e75fa62ca4a64f4ec086be4e7aa4cd8714f610c6f07d84",
+    "models/nosa/cache.py": "aa8e5f9a71a4c715e22567e9dcaa0d88d795c9a76a127431e7eb2045658d2f1d",
+    "models/nosa/config.py": "eaa168a439fada20f13b6d0a44c801de30e3b1c04d3e5ac43d4273a3454db165",
+    "models/nosa/indexer.py": "e5f636a626ca2319698fb28ce49c9637088bc3af4b98ba197feafbd72f165633",
+    "models/nosa/infer.py": "909541308008b155071db3af00927f4861b201ae7fc8e7c0bd9291ee1b19c672",
+    "models/nosa/layers.py": "cf54c7c1e96483175da788491450bd264fae322a6c1452f830b5ce721f308b43",
+    "models/nosa/model.py": "5acbd9c5349f75b5b02366849ef7cd76d6f5b0676126bc789b8384939dfc51a5",
+    "models/nosa/request_format.py": "25c775ba0b76cab91663b827fc8b38fc20511895a5e6eff3054273cbfe418825",
+    "models/nosa/rotary.py": "f14c898cd77a72bd4e6908ef59b0b5fe5d42b2ebadb34aa5db092577d154dbde",
+    "models/nosa/scoring.py": "c4c7e75a15a5ffb95e935b02ec482586a288c64ad079a175b293db6baa3f92d8",
+    "operators/flashinfer.py": "0573d16ce4dd3e13b3792c6b1a4b8c9bab1477ee0f7bfce2abfad87c4c305fd9",
+    "operators/sm90/_native.py": "1a852683700af461fc2de5b12295678da86026b92b031b3b609aad6fa5af1ff3",
+    "operators/sm90/_nosa_attention_cuda.py": "66f737253c18dacf91eb066c2b07041864b91e7e7fa5f6e674943c424aca038e",
+    "operators/sm90/_nosa_attention_triton.py": "c9b2060928cff8cbf594a876061546521064da78f52b3297922bcc5dd0f96985",
+    "operators/sm90/_nosa_scores_cuda.py": "70a5cc50c3916675d7a23b9dca49e531a7bed9026e0f5f0bc254bd0a24bd170c",
+    "operators/sm90/csrc/nosa_attention.cu": "158aad48fc48b0319bea8de939483580f40115d069813958537b956d97a8fefa",
+    "operators/sm90/csrc/nosa_attention_grouped.cuh": "21826cbc696c86de2d7fa5b8df185713e37827a8b80c909ad38bfd275383d8b9",
+    "operators/sm90/csrc/nosa_scores.cu": "0897a00d6d38dccf88566771f063b71e8de16f9458d1f4f6e3bcc71ff91e84d2",
+    "operators/sm90/nosa_attention.py": "0c1b422a5fe5c485927f017f4c2578271eaf6258d01cc3c1aa6d33d488d1d6f9",
+    "operators/sm90/nosa_compression.py": "9655a9b4caeea836c846eef654f781318fc930e5ee95192fbeb6ee64dc8201f3",
+    "operators/sm90/nosa_indexer.py": "1c34d2ebddba31cd2d06d1468c36535a9ab835ee28e134a6a8b4bf1e32df028a",
+    "operators/sm90/nosa_validation.py": "aded63a061790919d0596c18f4129d4c77782b53c4e762ae87f7bd3aa2bb9700",
+    "operators/sm90/sparse_attention.py": "5cad42677974731057cbed607d138cf8cf296dc2094c44a09b68a61f0c43a786",
+    "pyproject.toml": "5c0c8ec55158fadefd8da5b5a1e7288d9cca5cf04db42998ee5d4e85aa93b428",
+    "serving/run_gr.py": "fe94fcd9011c75adbc4530759e4a8dd92d4f1a9a5f64b20b0732a5bc776a5695",
+    "serving/runner.py": "bd36c4b8725bbe99f934a1ebee604a7e7b471c6c06859b3d0a1bc91c7686a421",
+    "uv.lock": "94ff0ab9a8e01a924575c9e2a8381fba8d4249eeb33a60eca3b35246e150bd8e"
+  }
+}

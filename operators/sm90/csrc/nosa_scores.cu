@@ -23,6 +23,13 @@ namespace nosa_scores {
 using namespace cute;
 using tvm::ffi::TensorView;
 constexpr int kColumns = 128;
+// Keep maxima and denominators in base two, as in high-performance attention
+// softmax schedules; each score requires one approximate exponent instruction.
+__device__ __forceinline__ float exp2_approx(float x) {
+  float result;
+  asm("ex2.approx.ftz.f32 %0, %1;" : "=f"(result) : "f"(x));
+  return result;
+}
 using Barrier = cutlass::arch::ClusterTransactionBarrier;
 template <class S, class TMA, class QS, class QTMA> struct TensorMaps {
   S shape;
@@ -82,7 +89,7 @@ __device__ __forceinline__ void issue(Shared& smem, int buffer, Acc& acc) {
 template <bool Masked, typename Acc>
 __device__ __forceinline__ void normalize_tile(Acc& score, int tile, int count,
     int64_t position, float (&maximum)[2], float (&denominator)[2]) {
-  constexpr float scale = 0.08838834764831844f;
+  constexpr float scale = 0.12751743082459868f;  // log2(e) / sqrt(128)
   int lane = threadIdx.x % 32;
   CUTE_UNROLL
   for (int row = 0; row < 2; ++row) {
@@ -106,11 +113,11 @@ __device__ __forceinline__ void normalize_tile(Acc& score, int tile, int count,
     float local_sum = 0.0f;
     CUTE_UNROLL
     for (int i = row * 2; i < size(score); i += 4) {
-      local_sum += __expf(score(i) - safe) + __expf(score(i + 1) - safe);
+      local_sum += exp2_approx(score(i) - safe) + exp2_approx(score(i + 1) - safe);
     }
     // Each of the four lanes keeps its partial denominator until the first
     // pass finishes; only maxima need a cross-lane reduction every tile.
-    denominator[row] = denominator[row] * __expf(maximum[row] - safe) + local_sum;
+    denominator[row] = denominator[row] * exp2_approx(maximum[row] - safe) + local_sum;
     maximum[row] = next_max;
   }
 }
@@ -221,17 +228,21 @@ __device__ __forceinline__ void write_result(const Params& p, Shared& smem, Acc&
   int tid = threadIdx.x, lane = tid % 32, warp = tid / 32;
   int row = blockIdx.x * 4 + warp, head = blockIdx.y;
   constexpr int BlocksPerTile = (kColumns - 1) / 4;
-  constexpr float scale = 0.08838834764831844f;
+  constexpr float scale = 0.12751743082459868f;  // log2(e) / sqrt(128)
+  // The normalizer stores the rounded FP32 scaled logit. Reproduce that
+  // rounding before subtraction; an FFMA here keeps extra low bits and can
+  // bias even a uniform softmax when logits are large. Likewise, retain max
+  // and inverse separately: folding log(sum) into a large max loses precision.
   CUTE_UNROLL
   for (int i = 0; i < size(acc); i += 4) {
     int local = 8 * (i / 4) + (lane % 4) * 2, col = start + local;
     float a = 0.0f, b = 0.0f;
     if (!Masked || (col >= 0 && col < p.count && col * 16 + 31 <= position))
-      a = __expf(acc(i) * scale - maximum[0]) * inv[0]
-        + __expf(acc(i + 2) * scale - maximum[1]) * inv[1];
+      a = exp2_approx(__fmul_rn(acc(i), scale) - maximum[0]) * inv[0]
+        + exp2_approx(__fmul_rn(acc(i + 2), scale) - maximum[1]) * inv[1];
     if (!Masked || (col + 1 >= 0 && col + 1 < p.count && (col + 1) * 16 + 31 <= position))
-      b = __expf(acc(i + 1) * scale - maximum[0]) * inv[0]
-        + __expf(acc(i + 3) * scale - maximum[1]) * inv[1];
+      b = exp2_approx(__fmul_rn(acc(i + 1), scale) - maximum[0]) * inv[0]
+        + exp2_approx(__fmul_rn(acc(i + 3), scale) - maximum[1]) * inv[1];
     CUTE_UNROLL
     for (int offset = 4; offset <= 16; offset *= 2) {
       a += __shfl_xor_sync(0xffffffff, a, offset);
@@ -281,11 +292,7 @@ __global__ __launch_bounds__(128) void scores_kernel(__grid_constant__ const Par
   __syncthreads();
   load_query<T>(p, smem, map);
   load_k<T>(smem, 0, start, map);
-  smem.q_ready.wait(0);
-  smem.ready[0].wait(0);
-  __syncthreads();
-  auto acc = partition_fragment_C(typename Tr::MMA{}, Shape<_64, Int<kColumns>>{});
-  issue<T>(smem, 0, acc);
+  // Overlap normalizer loads with the Q/K TMA transfers.
   float maximum[2] = {-INFINITY, -INFINITY}, inv[2];
   CUTE_UNROLL
   for (int r = 0; r < 2; ++r) {
@@ -300,13 +307,18 @@ __global__ __launch_bounds__(128) void scores_kernel(__grid_constant__ const Par
         int64_t index = ((int64_t(split) * p.rows + row) * p.heads + head) * 16 + group;
         float other = p.normalizers[index * 2], s = p.normalizers[index * 2 + 1];
         float next = fmaxf(m, other), safe = next == -INFINITY ? 0.0f : next;
-        sum = sum * __expf(m - safe) + s * __expf(other - safe);
+        sum = sum * exp2_approx(m - safe) + s * exp2_approx(other - safe);
         m = next;
       }
     }
     maximum[r] = m == -INFINITY ? 0.0f : m;
     inv[r] = 1.0f / (sum > 0.0f ? sum : 1.0f);
   }
+  smem.q_ready.wait(0);
+  smem.ready[0].wait(0);
+  __syncthreads();
+  auto acc = partition_fragment_C(typename Tr::MMA{}, Shape<_64, Int<kColumns>>{});
+  issue<T>(smem, 0, acc);
   warpgroup_wait<0>();
   int64_t position = smem.positions[warp];
   bool full = start >= 0 && start + kColumns <= p.count && (start + kColumns - 1) * 16 + 31 <= position;
@@ -343,7 +355,7 @@ void launch(const Params& p, cudaStream_t stream) {
   configure(normalizer, normalizer_shared);
   configure(kernel, score_shared);
   normalizer<<<dim3((p.rows + 3) / 4, p.heads, p.splits), 128, normalizer_shared, stream>>>(p, map);
-  int tiles = Pool ? (p.blocks + 30) / 31 : (p.count + 127) / 128;
+  int tiles = Pool ? (p.blocks + (kColumns - 1) / 4 - 1) / ((kColumns - 1) / 4) : (p.count + kColumns - 1) / kColumns;
   kernel<<<dim3((p.rows + 3) / 4, p.heads, tiles), 128, score_shared, stream>>>(p, map);
   auto error = cudaGetLastError();
   TVM_FFI_ICHECK(error == cudaSuccess) << cudaGetErrorString(error);

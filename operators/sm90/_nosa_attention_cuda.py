@@ -25,6 +25,9 @@ def launch_nosa_block_attention(q, keys, values, selection, query_start, cis_bia
         return output
     module = load_module("nosa_attention")
     empty = torch.empty(0, dtype=torch.bool, device=q.device)
+    group_fallback = torch.empty(
+        ((len(q) + 3) // 4, keys.shape[1]), dtype=torch.int32, device=q.device
+    )
     with torch.cuda.device(q.device), tvm_ffi.use_torch_stream():
         module.forward(
             q,
@@ -34,6 +37,7 @@ def launch_nosa_block_attention(q, keys, values, selection, query_start, cis_bia
             selection.valid_mask if selection.valid_mask is not None else empty,
             cis_bias if cis_bias is not None else empty,
             output,
+            group_fallback,
             query_start,
         )
     return output

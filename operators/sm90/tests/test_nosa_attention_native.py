@@ -153,3 +153,135 @@ def test_cuda_native_unsupported_tma_alignment_uses_triton():
     expected = reference_nosa_block_sparse_attention(q, keys, values, selection, 68)
     actual = nosa_block_sparse_attention(q, keys, values, selection, 68)
     torch.testing.assert_close(actual, expected, atol=0.008, rtol=0.016)
+
+
+@pytest.mark.parametrize("dtype", [torch.bfloat16, torch.float16])
+@pytest.mark.parametrize("queries", [4, 5])
+@pytest.mark.parametrize("block_budget", [32, 64])
+def test_cuda_native_grouped_independent_unsorted_masks_and_causal_blocks(
+    dtype, queries, block_budget
+):
+    require_sm90()
+    torch.manual_seed(8031)
+    query_start = 79 * 64 + 62
+    tokens = 80 * 64 + 23
+    q = torch.randn(queries, 4608, device="cuda", dtype=dtype)[:, :4096]
+    q = q.view(queries, 32, 128)
+    keys = torch.randn(tokens + 1, 2, 144, device="cuda", dtype=dtype)[1:, :, :128]
+    values = torch.randn_like(keys)
+    bias = torch.randn(tokens, 2, device="cuda")
+    bias[:64] = -float("inf")
+    # Query rows 0/1 end in block 79, rows 2+ in block 80. Every query/head
+    # chooses its own history; block 3 is excluded and may contain poison.
+    generator = torch.Generator().manual_seed(934)
+    history = torch.tensor([2, *range(4, 79)])
+    ids = torch.full((queries, 2, block_budget * 2), -1, dtype=torch.int64)[..., ::2]
+    mask = torch.zeros(queries, 2, block_budget * 2, dtype=torch.bool)[..., ::2]
+    for row in range(queries):
+        for head in range(2):
+            selected = torch.cat(
+                (
+                    torch.tensor([79, 80, 81, -1, 2**62, 3, 0, 1]),
+                    history[torch.randperm(len(history), generator=generator)[: block_budget - 8]],
+                )
+            )
+            valid = (torch.arange(block_budget) + row + head) % 5 != 0
+            valid[:3] = True
+            valid[5] = False
+            valid[6] = True
+            order = torch.randperm(block_budget, generator=generator)
+            ids[row, head] = selected[order]
+            mask[row, head] = valid[order]
+    mask[1, 1] = False
+    # Preserve strided selection and mask views on CUDA as well.
+    ids_storage = torch.empty(queries, 2, block_budget * 2, device="cuda", dtype=ids.dtype)
+    mask_storage = torch.empty_like(ids_storage, dtype=torch.bool)
+    ids_storage[..., ::2] = ids
+    mask_storage[..., ::2] = mask
+    selection = BlockSelection(ids_storage[..., ::2], 64, mask_storage[..., ::2])
+    keys[192:256] = float("nan")
+    values[192:256] = float("nan")
+    bias[192:256] = float("nan")
+    assert supports_native_attention(q, keys, values)
+    expected = reference_nosa_block_sparse_attention(q, keys, values, selection, query_start, bias)
+    actual = nosa_block_sparse_attention(q, keys, values, selection, query_start, bias)
+    assert torch.isfinite(expected).all()
+    tolerance = 0.001 if dtype == torch.bfloat16 else 0.0002
+    torch.testing.assert_close(actual, expected, atol=tolerance, rtol=0.016)
+    assert torch.equal(actual[1, 16:], torch.zeros_like(actual[1, 16:]))
+
+
+@pytest.mark.parametrize("queries", [4, 5])
+@pytest.mark.parametrize("block_budget", [32, 64])
+def test_cuda_native_grouped_disjoint_selection_exercises_entire_union(queries, block_budget):
+    require_sm90()
+    query_start = queries * block_budget * 64
+    tokens = query_start + 64
+    q = torch.zeros(queries, 16, 128, device="cuda", dtype=torch.bfloat16)
+    keys = torch.zeros(tokens, 1, 128, device="cuda", dtype=q.dtype)
+    block_values = (torch.arange(tokens // 64, device="cuda") % 17 - 8).to(q.dtype) / 8
+    values = block_values.repeat_interleave(64)[:, None, None].expand(-1, 1, 128).contiguous()
+    ids = torch.arange(queries * block_budget, device="cuda").view(queries, 1, block_budget)
+    selection = BlockSelection(ids.flip(-1), 64)
+    # Four disjoint 64-block selections make the largest 256-block union.
+    # The fifth query exercises the final partially filled query package.
+    expected = reference_nosa_block_sparse_attention(q, keys, values, selection, query_start)
+    actual = nosa_block_sparse_attention(q, keys, values, selection, query_start)
+    # Uniform probabilities and power-of-two values are exactly representable;
+    # dropping/duplicating a union block cannot hide inside a loose tolerance.
+    torch.testing.assert_close(actual, expected, atol=0, rtol=0)
+
+
+@pytest.mark.parametrize("queries", [4, 5])
+@pytest.mark.parametrize("block_budget", [32, 64])
+def test_cuda_native_grouped_all_masked_rows_return_zero(queries, block_budget):
+    require_sm90()
+    q = torch.ones(queries, 32, 128, device="cuda", dtype=torch.bfloat16)
+    keys = torch.full((192, 2, 128), float("nan"), device="cuda", dtype=q.dtype)
+    values = torch.full_like(keys, float("nan"))
+    bias = torch.full((192, 2), float("nan"), device="cuda")
+    ids = torch.arange(block_budget, device="cuda").expand(queries, 2, -1).clone()
+    selection = BlockSelection(ids, 64, torch.zeros_like(ids, dtype=torch.bool))
+    actual = nosa_block_sparse_attention(q, keys, values, selection, 126, bias)
+    assert torch.equal(actual, torch.zeros_like(actual))
+
+
+@pytest.mark.parametrize("queries", [4, 5])
+@pytest.mark.parametrize("poison", ["future_for_early_queries", "unselected_history", "past_group"])
+def test_cuda_native_grouped_nan_values_do_not_leak_between_queries(queries, poison):
+    require_sm90()
+    torch.manual_seed(6081)
+    query_start = 126
+    q = torch.randn(queries, 32, 128, device="cuda", dtype=torch.bfloat16)
+    keys = torch.randn(192, 2, 128, device="cuda", dtype=q.dtype)
+    values = torch.randn_like(keys)
+    bias = torch.randn(192, 2, device="cuda")
+    ids = torch.tensor([2, 0, 1, -1], device="cuda").expand(queries, 2, -1).clone()
+    mask = torch.ones_like(ids, dtype=torch.bool)
+    if poison == "future_for_early_queries":
+        # Token 128 is future for queries 126/127 and legitimately visible to
+        # the other rows. Only those later rows may propagate its NaN in dim 17.
+        values[128, :, 17] = float("nan")
+    elif poison == "unselected_history":
+        # The union includes block 0, but query 0 did not select it. Zero P
+        # alone must not let 0*NaN in a shared PV tile poison that query.
+        mask[0, :, 1] = False
+        values[0, :, 17] = float("nan")
+    else:
+        first_future = query_start + queries
+        keys[first_future:] = float("nan")
+        values[first_future:] = float("nan")
+        bias[first_future:] = float("nan")
+    selection = BlockSelection(ids, 64, mask)
+    expected = reference_nosa_block_sparse_attention(q, keys, values, selection, query_start, bias)
+    actual = nosa_block_sparse_attention(q, keys, values, selection, query_start, bias)
+    assert torch.equal(torch.isnan(actual), torch.isnan(expected))
+    torch.testing.assert_close(actual, expected, atol=0.004, rtol=0.016, equal_nan=True)
+    if poison == "future_for_early_queries":
+        assert torch.isfinite(expected[:2]).all()
+        assert torch.isnan(expected[2:, :, 17]).all()
+    elif poison == "unselected_history":
+        assert torch.isfinite(expected[0]).all()
+        assert torch.isnan(expected[1:, :, 17]).all()
+    else:
+        assert torch.isfinite(expected).all()

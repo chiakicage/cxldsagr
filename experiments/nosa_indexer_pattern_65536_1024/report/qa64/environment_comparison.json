@@ -1,0 +1,102 @@
+{
+  "analysis_run_id": "qa64_environment_compare_20260928_01",
+  "analyzed_at_utc": "2026-09-28T07:53:28.219381+00:00",
+  "old_capture_run_id": "query_aware_fp32_65536_1024_20260925_01",
+  "new_capture_run_id": "nosa_sparse_pattern_h200_gpu1_20260928_01",
+  "new_capture_arm": "dense_qa64",
+  "request_bytes_equal": true,
+  "checkpoint_sha256_equal": true,
+  "model_config_equal": true,
+  "arrays": {
+    "block_ids.npy": {
+      "shape": [
+        32,
+        1024,
+        2,
+        64
+      ],
+      "old_dtype": "int32",
+      "new_dtype": "int32",
+      "same_shape": true,
+      "same_dtype": true,
+      "array_equal": true,
+      "unequal_elements": 0,
+      "old_file_sha256": "d87e29307f226aedb35e7f25c2b8a92b9fd987a0cb0d6ebc0cdbfb6ee1ca04f0",
+      "new_file_sha256": "d87e29307f226aedb35e7f25c2b8a92b9fd987a0cb0d6ebc0cdbfb6ee1ca04f0"
+    },
+    "valid_mask.npy": {
+      "shape": [
+        32,
+        1024,
+        2,
+        64
+      ],
+      "old_dtype": "bool",
+      "new_dtype": "bool",
+      "same_shape": true,
+      "same_dtype": true,
+      "array_equal": true,
+      "unequal_elements": 0,
+      "old_file_sha256": "9108a011bc3196cc1bfe4b760b22f871ede2dacc4c24d9a2b81c5a17c73e6fe7",
+      "new_file_sha256": "9108a011bc3196cc1bfe4b760b22f871ede2dacc4c24d9a2b81c5a17c73e6fe7"
+    },
+    "union_mask.npy": {
+      "shape": [
+        32,
+        2,
+        1040
+      ],
+      "old_dtype": "bool",
+      "new_dtype": "bool",
+      "same_shape": true,
+      "same_dtype": true,
+      "array_equal": true,
+      "unequal_elements": 0,
+      "old_file_sha256": "6a7dc6adee5f4cc34d01473c20c2d96f8f7cfc560de19d78c6fd9f10378c37ea",
+      "new_file_sha256": "6a7dc6adee5f4cc34d01473c20c2d96f8f7cfc560de19d78c6fd9f10378c37ea"
+    }
+  },
+  "old_environment": {
+    "torch": "2.10.0+cu132",
+    "cuda": "13.2",
+    "dependencies": {
+      "flashinfer-python": "0.6.18",
+      "numpy": "2.5.0",
+      "matplotlib": "3.11.1",
+      "safetensors": "0.8.0",
+      "tokenizers": "0.23.2"
+    },
+    "gpu": "_CudaDeviceProperties(name='NVIDIA H200', major=9, minor=0, total_memory=143167MB, multi_processor_count=132, uuid=2522820c-89d9-aa17-f79c-ca8cc767fb77, pci_bus_id=42, pci_device_id=0, pci_domain_id=0, L2_cache_size=60MB)"
+  },
+  "new_environment": {
+    "torch": "2.12.1+cu130",
+    "cuda": "13.0",
+    "dependencies": {
+      "flashinfer-python": "0.6.18",
+      "triton": "3.7.1",
+      "numpy": "2.5.0",
+      "matplotlib": "3.11.1",
+      "safetensors": "0.8.0",
+      "tokenizers": "0.23.2"
+    },
+    "gpu": {
+      "name": "NVIDIA H20Z",
+      "uuid": "a2e4882b-3248-6018-14ab-90e45b5a5b04",
+      "sm_count": 132,
+      "capability": [
+        9,
+        0
+      ]
+    }
+  },
+  "source_metadata_sha256": {
+    "old": "05c244ed62897a4f2d3e03642b79f053af3f74a3fa5e33380fcb124e78f17dc8",
+    "new": "a6bafd3d4c17f7328aa07fcefe434845f3896a15b8ffd48146f46b70ec1e89e4"
+  },
+  "analysis_source_sha256": "8a85b3a39b871f3c4c4fe8c62b50480ec9149fc5135ca46aab3f80f29768a118",
+  "python": "3.12.13",
+  "numpy": "2.5.0",
+  "model_executed": false,
+  "performance_measured": false,
+  "interpretation": "The current-environment dense QA64 arm reproduces all selection arrays from the retained prior QA64 capture exactly for this request and checkpoint; this CPU comparison did not execute a model."
+}

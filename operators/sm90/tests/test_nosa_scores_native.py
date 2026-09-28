@@ -104,3 +104,62 @@ def test_cuda_native_scores_contiguous_range_on_nondefault_stream_and_graph():
         graph.replay()
     torch.cuda.current_stream().wait_stream(stream)
     torch.testing.assert_close(actual, expected, rtol=0, atol=0)
+
+
+@requires_cuda
+@pytest.mark.parametrize("dtype", [torch.bfloat16, torch.float16])
+@pytest.mark.parametrize("backend", ["native", "triton"])
+@torch.inference_mode()
+def test_cuda_native_scores_large_uniform_logits_preserve_normalization(
+    dtype, backend, monkeypatch
+):
+    from operators.sm90.nosa_indexer import _launch_scores as scores_out
+
+    monkeypatch.setenv("CXLDSAGR_SM90_BACKEND", backend)
+
+    count = 4159
+    # Large but finite logits expose lost precision from folding log(sum) into
+    # max, or fusing scale/subtract when the normalizer rounded scale first.
+    magnitude = torch.tensor([64256.0, 65504.0], device="cuda", dtype=dtype)
+    query = magnitude[:, None, None, None].expand(-1, 2, 16, 128).contiguous()
+    keys = torch.ones(count, 2, 128, device="cuda", dtype=dtype)
+    positions = torch.full((2,), (count + 1) * 16 - 1, device="cuda", dtype=torch.int64)
+    actual = torch.empty(2, 2, count, device="cuda", dtype=dtype)
+    scores_out(query, keys, positions, actual, 0, 0, pool_output=False)
+    # Every Q head has exactly uniform softmax over all compressed windows.
+    expected = torch.full_like(actual, 16.0 / count)
+    torch.testing.assert_close(actual, expected, rtol=0, atol=0)
+
+    blocks = ((count + 1) * 16 + 63) // 64
+    pooled = torch.empty(2, 2, blocks, device="cuda", dtype=torch.float32)
+    scores_out(query, keys, positions, pooled, 0, blocks, pool_output=True)
+    torch.testing.assert_close(
+        pooled[..., 1 : blocks - 17],
+        expected[..., :1].float().expand_as(pooled[..., 1 : blocks - 17]),
+        rtol=0,
+        atol=0,
+    )
+
+
+@requires_cuda
+@pytest.mark.parametrize("dtype", [torch.bfloat16, torch.float16])
+@pytest.mark.parametrize("backend", ["native", "triton"])
+@torch.inference_mode()
+def test_cuda_native_scores_full_prefill_match_fp32_reference(dtype, backend, monkeypatch):
+    from operators.sm90.nosa_indexer import _launch_scores as scores_out
+
+    monkeypatch.setenv("CXLDSAGR_SM90_BACKEND", backend)
+
+    generator = torch.Generator(device="cuda").manual_seed(913)
+    query = torch.randn(1024, 4608, device="cuda", dtype=dtype, generator=generator)
+    query = query[:, :4096].view(1024, 2, 16, 128)
+    keys = torch.randn(4159, 2, 144, device="cuda", dtype=dtype, generator=generator)
+    keys = keys[..., :128]
+    positions = torch.arange(65536, 66560, device="cuda")
+    actual = torch.empty(1024, 2, 4159, device="cuda", dtype=dtype)
+    scores_out(query, keys, None, actual, 65536, 0, pool_output=False)
+    expected = compressed_scores_reference(query, keys, positions)
+    # An absolute 1e-3 tolerance would hide large relative errors at this
+    # context length. Allow one dtype rounding step with a small zero floor.
+    rtol = 0.008 if dtype == torch.bfloat16 else 0.0011
+    torch.testing.assert_close(actual.float(), expected.float(), rtol=rtol, atol=1e-7)

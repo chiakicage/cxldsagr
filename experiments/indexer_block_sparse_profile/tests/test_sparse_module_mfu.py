@@ -10,6 +10,7 @@ import pytest
 from experiments.indexer_block_sparse_profile.src.mfu import POLICY
 from experiments.indexer_block_sparse_profile.src.module_mfu import (
     FUSED_STAGES,
+    GROUPED_ATTENTION_SOURCE,
     PARENTS,
     SUPPORTED_GRAPHS,
     _flops_by_module,
@@ -26,7 +27,30 @@ TIME_SCALE = 100
 
 @pytest.mark.parametrize("graph", SUPPORTED_GRAPHS)
 def test_reviewed_graph_versions_accept_extra_captured_sources(graph):
-    _validate_source_graph(graph | {"capture.py": "additional_source_snapshot"})
+    assert _validate_source_graph(graph | {"capture.py": "additional_source_snapshot"}) == (
+        4 if GROUPED_ATTENTION_SOURCE in graph else 1
+    )
+
+
+def test_unreferenced_grouped_header_does_not_change_legacy_graph_dispatch():
+    graph = SUPPORTED_GRAPHS[-2] | {
+        GROUPED_ATTENTION_SOURCE: SUPPORTED_GRAPHS[-1][GROUPED_ATTENTION_SOURCE]
+    }
+    assert _validate_source_graph(graph) == 1
+
+
+@pytest.mark.parametrize("problem", ["missing", "changed", "mixed_dispatcher"])
+def test_grouped_graph_requires_matching_cuda_dispatcher_and_header(problem):
+    hashes = dict(SUPPORTED_GRAPHS[-1])
+    if problem == "missing":
+        hashes.pop(GROUPED_ATTENTION_SOURCE)
+    elif problem == "changed":
+        hashes[GROUPED_ATTENTION_SOURCE] = "unreviewed_grouped_implementation"
+    else:
+        name = "operators/sm90/_nosa_attention_cuda.py"
+        hashes[name] = SUPPORTED_GRAPHS[-2][name]
+    with pytest.raises(ValueError, match="Unreviewed inference graph"):
+        _validate_source_graph(hashes)
 
 
 @pytest.mark.parametrize("problem", ["missing", "unreviewed", "mixed_versions"])
@@ -52,6 +76,7 @@ def trace(
     cached=False,
     empty_cache_update=False,
     native=False,
+    native_attention_group_size=4,
 ):
     total = prefix + query_length
     workload = {
@@ -192,12 +217,19 @@ def trace(
                         stage("select_from_scores", start + width / 3, start + width)
                         kernel("_select", base + start + width / 2, duration=width / 6)
             stage("block_sparse_attention", 410, 480)
+            grouped = native and native_attention_group_size == 4 and query_length >= 4
+            if grouped:
+                kernel(
+                    "void nosa_attention::grouped_attention_kernel<cutlass::gemm::Shape<64>>()",
+                    base + 420,
+                    duration=37,
+                )
             kernel(
                 "void nosa_attention::attention_kernel<cutlass::gemm::Shape<16>>()"
                 if native
                 else "_nosa_block_attention",
-                base + 430,
-                duration=40,
+                base + (460 if grouped else 430),
+                duration=8 if grouped else 40,
             )
             kernel("nvjet_sm90_tst_256x128_64x4_1x2_h_bz_coopA_TNT", base + 500)
             kernel("fused_add_rmsnorm", base + 520)
@@ -252,13 +284,75 @@ def test_native_operator_gemms_are_owned_by_scopes_not_model_projections():
         assert run["score_dispatch_scope_counts"] == (
             {"triton": 27, "cuda_tvm_ffi": 1} if calls == 32 else {"cuda_tvm_ffi": 1}
         )
-        assert modules["block_sparse_attention"]["kernel_count"] == calls
+        assert len(run["layer_calls"]) == calls
+        assert modules["block_sparse_attention"]["kernel_count"] == 2 * calls
+        assert modules["block_sparse_attention"]["kernel_ns"] == calls * (37 + 8) * TIME_SCALE
         assert modules["qkv_proj"]["kernel_count"] == calls
         assert modules["cis_projection_gemm"]["kernel_count"] == calls
         assert (
             sum(row["kernel_count"] for name, row in modules.items() if name not in PARENTS)
             == run["kernel_count"]
         )
+
+
+@pytest.mark.parametrize("problem", ["missing_grouped", "missing_fallback", "reversed"])
+def test_grouped_attention_requires_both_launches_in_order(problem):
+    scopes, kernels, workload = trace(cached=True, native=True)
+    if problem == "missing_grouped":
+        kernels = [
+            kernel for kernel in kernels if "::grouped_attention_kernel" not in kernel["name"]
+        ]
+    elif problem == "missing_fallback":
+        kernels = [kernel for kernel in kernels if "::attention_kernel" not in kernel["name"]]
+    else:
+        for kernel in kernels:
+            kernel["name"] = (
+                kernel["name"]
+                .replace("::grouped_attention_kernel", "::TEMP_KERNEL")
+                .replace("::attention_kernel", "::grouped_attention_kernel")
+                .replace("::TEMP_KERNEL", "::attention_kernel")
+            )
+    with pytest.raises(ValueError, match="kernel sequence"):
+        attribute_kernels(scopes, kernels, 1, workload)
+
+
+@pytest.mark.parametrize("rows", [1, 3, 4, 1024])
+@pytest.mark.parametrize("group_size", [1, 4])
+def test_native_attention_launch_sequence_uses_reviewed_revision_and_query_length(rows, group_size):
+    fallback = {"name": "void nosa_attention::attention_kernel<cutlass::bfloat16_t, Map>()"}
+    grouped = {"name": "void nosa_attention::grouped_attention_kernel<cutlass::bfloat16_t, Map>()"}
+    selected = [grouped, fallback] if group_size == 4 and rows >= 4 else [fallback]
+    assert (
+        _validate_operator_kernels(
+            "block_sparse_attention",
+            selected,
+            "cuda_tvm_ffi",
+            query_length=rows,
+            total_length=65536 + rows,
+            native_attention_group_size=group_size,
+        )
+        is None
+    )
+    opposite = [fallback] if len(selected) == 2 else [grouped, fallback]
+    with pytest.raises(ValueError, match="kernel sequence"):
+        _validate_operator_kernels(
+            "block_sparse_attention",
+            opposite,
+            "cuda_tvm_ffi",
+            query_length=rows,
+            total_length=65536 + rows,
+            native_attention_group_size=group_size,
+        )
+
+
+def test_legacy_native_attention_attribution_retains_one_launch_per_layer_call():
+    scopes, kernels, workload = trace(cached=True, native=True, native_attention_group_size=1)
+    result = attribute_kernels(scopes, kernels, 1, workload, native_attention_group_size=1)
+    assert result["validation"]["native_attention_group_size"] == 1
+    for run in result["runs"]:
+        attention = run["modules"]["block_sparse_attention"]
+        assert attention["kernel_count"] == len(run["layer_calls"])
+        assert attention["kernel_ns"] == len(run["layer_calls"]) * 40 * TIME_SCALE
 
 
 @pytest.mark.parametrize("stage", ["pooled_scores", "block_sparse_attention"])
@@ -514,7 +608,7 @@ def test_module_input_validation_checks_native_build_and_snapshot_contents(
 
 @pytest.mark.parametrize("cached", [False, True])
 @pytest.mark.parametrize("native", [False, True])
-def test_module_report_assigns_qk_once_and_accepts_absent_other_generation_stages(cached, native):
+def test_module_report_counts_useful_matrix_work_once_and_accepts_absent_stages(cached, native):
     scopes, kernels, workload = trace(prefix=65536, query_length=1024, cached=cached, native=native)
     workload.update(POLICY, repeats=1, profile_repeats=1)
     config = {
@@ -590,7 +684,17 @@ def test_module_report_assigns_qk_once_and_accepts_absent_other_generation_stage
         prefix, query = (0, 66560) if phase == "full_prefill" else (65536, 1024)
         expected = _flops_by_module(config, prefix, query, 1024, cached=cached)
         run = next(run for run in report["runs"] if run["phase"] == phase)
-        for name in (active, absent, "indexer_total"):
+        attention = modules["block_sparse_attention"]
+        calls = 65 if phase == "full_prefill" else 1
+        assert len(run["layer_calls"]) == calls
+        assert attention["kernel_count_per_run"] == [calls * (2 if native else 1)]
+        kernel_ms = calls * (45 if native else 40) * TIME_SCALE / 1e6
+        assert attention["kernel_ms_median"] == pytest.approx(kernel_ms)
+        assert attention["matrix_flops_per_run"] == expected["block_sparse_attention"]
+        assert attention["mfu_pct_median"] == pytest.approx(
+            expected["block_sparse_attention"] / kernel_ms / 1e9 * 100
+        )
+        for name in (active, absent, "indexer_total", "block_sparse_attention"):
             assert (
                 sum(call["modules"][name]["matrix_flops"] for call in run["layer_calls"])
                 == (expected[name])
@@ -661,3 +765,101 @@ def test_sqlite_gpu_identity_matches_kernel_device_and_metadata(tmp_path, mismat
             validate_trace_gpu(path, device, gpu)
     else:
         assert validate_trace_gpu(path, device, gpu)["id"] == 0
+
+
+@pytest.mark.parametrize(
+    "problem",
+    [
+        None,
+        "missing_mapping",
+        "wrong_process",
+        "duplicate_mapping",
+        "missing_process",
+        "duplicate_process",
+        "missing_process_table",
+        "missing_global_pid",
+        "unknown_physical_gpu",
+        "wrong_physical_gpu",
+        "wrong_mapping_uuid",
+        "wrong_mapping_sm_count",
+        "wrong_memory",
+        "duplicate_physical_gpu",
+    ],
+)
+def test_sqlite_process_local_cuda_ordinal_maps_to_the_verified_physical_gpu(tmp_path, problem):
+    path = tmp_path / "trace.sqlite"
+    global_pid = 47 << 24
+    gpu = {
+        "uuid": "GPU-B",
+        "sm_count": 132,
+        "capability": [9, 0],
+        "total_memory": 150121545728,
+    }
+    with sqlite3.connect(path) as connection:
+        connection.executescript(
+            """
+            CREATE TABLE TARGET_INFO_GPU (
+                id INTEGER, uuid TEXT, name TEXT, smCount INTEGER, computeMajor INTEGER,
+                computeMinor INTEGER, totalMemory INTEGER, busLocation TEXT
+            );
+            INSERT INTO TARGET_INFO_GPU VALUES
+                (0,'gpu-a','same model',132,9,0,150121545728,'0000:63:00.0'),
+                (1,'gpu-b','same model',132,9,0,150121545728,'0000:67:00.0');
+            CREATE TABLE PROCESSES (globalPid INTEGER, pid INTEGER);
+            CREATE TABLE TARGET_INFO_CUDA_DEVICE (
+                gpuId INTEGER, cudaId INTEGER, pid INTEGER, uuid TEXT, numMultiprocessors INTEGER
+            );
+            INSERT INTO TARGET_INFO_CUDA_DEVICE VALUES
+                (1,0,47,NULL,132), (0,0,48,'GPU-A',132);
+            """
+        )
+        connection.executemany(
+            "INSERT INTO PROCESSES VALUES (?,?)", [(global_pid, 47), (48 << 24, 48)]
+        )
+        if problem == "missing_mapping":
+            connection.execute("DELETE FROM TARGET_INFO_CUDA_DEVICE WHERE pid=47")
+        elif problem == "wrong_process":
+            global_pid = 48 << 24
+        elif problem == "duplicate_mapping":
+            connection.execute("INSERT INTO TARGET_INFO_CUDA_DEVICE VALUES (1,0,47,NULL,132)")
+        elif problem == "missing_process":
+            connection.execute("DELETE FROM PROCESSES WHERE pid=47")
+        elif problem == "duplicate_process":
+            connection.execute("INSERT INTO PROCESSES VALUES (?,47)", (global_pid,))
+        elif problem == "missing_process_table":
+            connection.execute("DROP TABLE PROCESSES")
+        elif problem == "missing_global_pid":
+            global_pid = None
+        elif problem in ("unknown_physical_gpu", "wrong_physical_gpu"):
+            physical = 9 if problem == "unknown_physical_gpu" else 0
+            connection.execute(
+                "UPDATE TARGET_INFO_CUDA_DEVICE SET gpuId=? WHERE pid=47", (physical,)
+            )
+        elif problem == "wrong_mapping_uuid":
+            connection.execute("UPDATE TARGET_INFO_CUDA_DEVICE SET uuid='GPU-A' WHERE pid=47")
+        elif problem == "wrong_mapping_sm_count":
+            connection.execute(
+                "UPDATE TARGET_INFO_CUDA_DEVICE SET numMultiprocessors=100 WHERE pid=47"
+            )
+        elif problem == "wrong_memory":
+            gpu["total_memory"] = 1
+        elif problem == "duplicate_physical_gpu":
+            connection.execute(
+                "INSERT INTO TARGET_INFO_GPU SELECT * FROM TARGET_INFO_GPU WHERE id=1"
+            )
+    if problem:
+        with pytest.raises(ValueError):
+            validate_trace_gpu(path, 0, gpu, global_pid=global_pid)
+    else:
+        device = validate_trace_gpu(path, 0, gpu, global_pid=global_pid)
+        assert device["id"] == 1
+        assert device["kernel_device_id"] == 0
+        assert device["busLocation"] == "0000:67:00.0"
+        assert device["cuda_device_mapping"] == {
+            "gpuId": 1,
+            "cudaId": 0,
+            "pid": 47,
+            "uuid": None,
+            "numMultiprocessors": 132,
+            "globalPid": global_pid,
+        }

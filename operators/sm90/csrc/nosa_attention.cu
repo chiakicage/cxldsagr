@@ -1,8 +1,9 @@
 // Resident NOSA attention, implemented locally using CUTLASS/CuTe primitives.
 // Scheduling reference: EzKernelKit 995d5a47fc35cef2c3d536133c8c87e8a6e46acd,
 // csrc/sparse_attn/sm90/fwd.cu. No EzKernelKit headers/runtime.
-// K Q^T and V^T P^T use the 16 GQA heads as the WGMMA N dimension. A
-// dedicated producer loads K/V with TMA while a consumer pipelines PV/QK.
+// The per-query path uses 16 GQA heads as the WGMMA N dimension.
+// Longer batches share selected K/V across four independent queries; see
+// nosa_attention_grouped.cuh. Both paths pipeline TMA with WGMMA.
 #include <cuda.h>
 #include <cuda_runtime.h>
 #include <cute/tensor.hpp>
@@ -13,6 +14,7 @@
 #include <tvm/ffi/container/tensor.h>
 #include <tvm/ffi/extra/c_env_api.h>
 #include <tvm/ffi/function.h>
+#include <climits>
 #include <cmath>
 #include <cstdint>
 
@@ -22,9 +24,11 @@ using Barrier = cutlass::arch::ClusterTransactionBarrier;
 using tvm::ffi::TensorView;
 
 struct Params {
-  void const *ids, *bias;
+  void const *q, *ids, *bias;
+  int64_t qr, qh;
   bool const *valid;
   void *out;
+  int *group_fallback;
   int tokens, queries, heads, kv_heads, count, query_start;
   int bias_type;
   bool ids64;
@@ -131,6 +135,7 @@ struct Maps { QS qs; QT qt; KS ks; KT kt; VS vs; VT vt; };
 template <typename T, class MapsT>
 __global__ __launch_bounds__(256, 4) void attention_kernel(
     __grid_constant__ Params const p, __grid_constant__ MapsT const maps) {
+  if (p.group_fallback && !p.group_fallback[(blockIdx.x / 4) * p.kv_heads + blockIdx.y]) return;
   using Tr = Traits<T>;
   extern __shared__ char storage[];
   auto &s = *reinterpret_cast<typename Tr::Shared *>(storage);
@@ -284,6 +289,8 @@ __global__ __launch_bounds__(256, 4) void attention_kernel(
   }
 }
 
+#include "nosa_attention_grouped.cuh"
+
 template <typename T>
 void launch(Params const &p, TensorView q, TensorView k, TensorView v, cudaStream_t stream) {
   using Tr = Traits<T>;
@@ -297,6 +304,14 @@ void launch(Params const &p, TensorView q, TensorView k, TensorView v, cudaStrea
   auto vt = make_tma_copy(SM90_TMA_LOAD{},
       make_tensor(make_gmem_ptr(static_cast<T const *>(v.data_ptr())), make_layout(vs, make_stride(v.stride(0), _1{}, v.stride(1)))), typename Tr::KVLayout{});
   Maps<decltype(qs), decltype(qt), decltype(ks), decltype(kt), decltype(vs), decltype(vt)> maps{qs, qt, ks, kt, vs, vt};
+  if (p.queries >= 4) {
+    auto kernel = grouped_attention_kernel<T, decltype(maps)>;
+    cudaError_t error = cudaFuncSetAttribute(kernel, cudaFuncAttributeMaxDynamicSharedMemorySize, sizeof(typename GroupedTraits<T>::Shared));
+    TVM_FFI_ICHECK(error == cudaSuccess) << cudaGetErrorString(error);
+    kernel<<<dim3((p.queries + 3) / 4, p.kv_heads), 256, sizeof(typename GroupedTraits<T>::Shared), stream>>>(p, maps);
+    error = cudaGetLastError();
+    TVM_FFI_ICHECK(error == cudaSuccess) << cudaGetErrorString(error);
+  }
   auto kernel = attention_kernel<T, decltype(maps)>;
   cudaError_t error = cudaFuncSetAttribute(kernel, cudaFuncAttributeMaxDynamicSharedMemorySize, sizeof(typename Tr::Shared));
   TVM_FFI_ICHECK(error == cudaSuccess) << cudaGetErrorString(error);
@@ -306,15 +321,17 @@ void launch(Params const &p, TensorView q, TensorView k, TensorView v, cudaStrea
 }
 
 void forward(TensorView q, TensorView k, TensorView v, TensorView ids, TensorView mask,
-             TensorView bias, TensorView out, int64_t query_start) {
+             TensorView bias, TensorView out, TensorView group_fallback, int64_t query_start) {
   TVM_FFI_ICHECK(q.ndim() == 3 && q.size(2) == 128 && q.size(1) == k.size(1) * 16);
   TVM_FFI_ICHECK(q.dtype().bits == 16 && q.device().device_type == kDLCUDA);
   if (!q.size(0)) return;
   Params p{};
+  p.q = q.data_ptr(); p.qr = q.stride(0); p.qh = q.stride(1);
   p.ids = ids.data_ptr(); p.ids64 = ids.dtype().bits == 64;
   p.valid = mask.numel() ? static_cast<bool const *>(mask.data_ptr()) : nullptr;
   p.bias = bias.numel() ? bias.data_ptr() : nullptr;
   p.bias_type = bias.dtype().bits == 32 ? 0 : bias.dtype().code == kDLBfloat ? 1 : 2;
+  p.group_fallback = q.size(0) >= 4 ? static_cast<int *>(group_fallback.data_ptr()) : nullptr;
   p.out = out.data_ptr(); p.tokens = k.size(0); p.queries = q.size(0);
   p.heads = q.size(1); p.kv_heads = k.size(1); p.count = ids.size(2); p.query_start = query_start;
   p.ir = ids.size(0) == 1 ? 0 : ids.stride(0); p.ih = ids.size(1) == 1 ? 0 : ids.stride(1); p.ib = ids.stride(2);

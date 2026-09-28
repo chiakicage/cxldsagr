@@ -28,9 +28,9 @@ from models.nosa.infer import DEFAULT_MODEL_PATH
 from models.nosa.model import NosaForCausalLM
 
 ROOT = Path(__file__).resolve().parents[3]
-SOURCE_RUN = "nosa_native_wgmma_20260928_02"
+SOURCE_RUN = "query_aware_fp32_65536_1024_20260925_01"
 DEFAULT_REQUEST = (
-    ROOT / "experiments/indexer_block_sparse_profile/output/data" / SOURCE_RUN / "request.json"
+    ROOT / "experiments/nosa_indexer_pattern_65536_1024/output/data" / SOURCE_RUN / "request.json"
 )
 UPSTREAM_COMMIT = "1cbee77d607f9051b206a09c862bea28becb9e67"
 

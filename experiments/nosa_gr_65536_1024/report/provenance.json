@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "run_id": "dense_h200_gpu1_20260928_01",
+  "generated_at_utc": "2026-09-28T07:38:51.556184+00:00",
+  "data_directory": "experiments/nosa_gr_65536_1024/output/data/dense_h200_gpu1_20260928_01",
+  "profile_directory": "experiments/nosa_gr_65536_1024/output/profile/dense_h200_gpu1_20260928_01",
+  "input_sha256": {
+    "metadata.json": "27b3fc42342664580c9c1c64aa82c3f4d0abf7898e9bf36e240220c764696993",
+    "analysis.json": "8b385dea254d7d80995e3b035578cfa4d97c9b079c4e88fdbb56b6a54e2e5c8f",
+    "mfu.json": "bd03d277823abc792797c127e8897d257685afd160de6ec4687ba168750fa0c5",
+    "request.json": "0bbabf07bc72f9804dbc2e9644cf708e21eafe237631f4a56c64b20f9cda7f2f",
+    "execution.json": "a0443098944715282fbfa13b2c282dd4298d7b0a0420afc02131aadb687bed5d",
+    "attention_shapes.json": "fa0ab70c8f6073f3309569d57a4c49071c562ebd3a8855d3845d4d1667ffc4e6"
+  },
+  "report_sha256": {
+    "metadata.json": "27b3fc42342664580c9c1c64aa82c3f4d0abf7898e9bf36e240220c764696993",
+    "analysis.json": "8b385dea254d7d80995e3b035578cfa4d97c9b079c4e88fdbb56b6a54e2e5c8f",
+    "mfu.json": "bd03d277823abc792797c127e8897d257685afd160de6ec4687ba168750fa0c5",
+    "timings.csv": "9adadfd137e90f1631e31dee2785338a8b02717e56f61f6b5b522890ddae70d6",
+    "module_mfu.csv": "ed8fe489a0d345f3018fb055a023eed999cafb3fd481c5496e665bd06a915aed",
+    "launch.csv": "0f62c2d779e78560e66fa6a4ad06b97c4d79d5d9977bda757d76c39e84e67f2b"
+  },
+  "derivation": {
+    "metadata.json / analysis.json / mfu.json": "Byte-for-byte copies from the completed run.",
+    "timings.csv": "metadata.timings and metadata.medians, joined to mfu.<phase>.end_to_end.",
+    "module_mfu.csv": "analysis GR/detailed/<phase>/0 modules, joined to mfu.<phase>; non-matrix FLOPs and MFU are empty.",
+    "launch.csv": "Scalar fields from all six analysis NVTX root ranges; launch latency is in microseconds.",
+    "csv_writer": "Python standard library csv.DictWriter; full-precision source values."
+  },
+  "verification": {
+    "source_snapshot_sha256_matches_metadata": 44,
+    "current_source_sha256_matches_metadata": 44,
+    "execution_and_attention_shapes_match_metadata": true,
+    "timing_medians_recomputed": true,
+    "mfu_recomputed": true,
+    "module_kernel_counts_conserve_profile_totals": true,
+    "gpu_active_plus_gap_matches_span": true
+  },
+  "measurement_boundary": "Timing samples were collected with capture disabled inside the nsys process. They are not an independent profiler-free benchmark. Module and launch statistics come from separate captured ranges.",
+  "peak_tflops": 989.0,
+  "peak_basis": "Dense BF16 Tensor Core nominal H200 peak; operator-confirmed H200 configuration reported by the device as NVIDIA H20Z."
+}

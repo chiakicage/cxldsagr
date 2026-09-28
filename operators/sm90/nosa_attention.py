@@ -140,8 +140,12 @@ def nosa_block_sparse_attention(
     identical to the FP32 reference. K/V remain resident and are read in place.
 
     The native CuTe implementation specializes D=128 and GQA=16 with TMA
-    aligned pointers and row/head strides. Other supported shapes/layouts use
-    Triton. CXLDSAGR_SM90_BACKEND=triton selects that implementation explicitly.
+    aligned pointers and row/head strides. Four adjacent queries share the
+    union of their selected blocks while retaining independent causal masks,
+    selection membership and softmax state. Packages with little overlap or
+    nonfinite values requiring separate masking use the per-query kernel.
+    Other supported shapes/layouts use Triton. CXLDSAGR_SM90_BACKEND=triton
+    selects that implementation explicitly.
     """
     _validate_inputs(q, keys, values, selection, query_start, cis_bias)
     if not q.is_cuda or torch.cuda.get_device_capability(q.device) != (9, 0):

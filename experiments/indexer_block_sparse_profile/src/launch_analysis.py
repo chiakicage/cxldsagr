@@ -196,7 +196,12 @@ def analyze(data_dir, output):
     mode = profile_metadata.get("args", {}).get("mode", "profile")
     if mode == "timeline" and len(scopes) != len(roots):
         raise ValueError("Timeline capture must contain root-only NOSA NVTX scopes")
-    validate_trace_gpu(trace, activities[0]["deviceId"], metadata["gpu"])
+    validate_trace_gpu(
+        trace,
+        activities[0]["deviceId"],
+        metadata["gpu"],
+        global_pid=activities[0]["globalPid"],
+    )
     report = {
         "source_run_id": metadata["run_id"],
         "capture_mode": mode,

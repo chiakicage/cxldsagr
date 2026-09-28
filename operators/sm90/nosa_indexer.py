@@ -8,6 +8,7 @@ the model dtype before pooling, preserving the standalone score semantics.
 import torch
 import triton
 import triton.language as tl
+from triton.language.extra.cuda import libdevice
 
 _MAX_SEQUENCE_LENGTH = 262144
 _MAX_COMPRESSED_WINDOWS = _MAX_SEQUENCE_LENGTH // 16 - 1
@@ -74,11 +75,13 @@ def _scores(
     maximum = tl.full((BG,), -float("inf"), tl.float32)
     denominator = tl.zeros((BG,), tl.float32)
     # Softmax is per Q head; reducing logits before normalization changes GQA.
+    # Both passes round the FP32 scale before subtracting the max. Fusing
+    # scale/subtract can bias a uniform softmax when logits are large.
     for start in range(tl.cdiv(count, BN)):
         c = start * BN + n
         valid = (c[None, :] < count) & (c[None, :] * 16 + 31 <= position[:, None])
         k = tl.load(K + c[None, :] * KC + head * KH + d[:, None], c[None, :] < count, other=0)
-        score = tl.dot(q, k) * (DIM**-0.5)
+        score = libdevice.mul_rn(tl.dot(q, k), DIM**-0.5)
         score = tl.where(valid, score, -float("inf"))
         next_max = tl.maximum(maximum, tl.max(score, 1))
         safe = tl.where(next_max == -float("inf"), 0.0, next_max)
@@ -101,7 +104,7 @@ def _scores(
         c = start * BN + n
         valid = (c[None, :] < count) & (c[None, :] * 16 + 31 <= position[:, None])
         k = tl.load(K + c[None, :] * KC + head * KH + d[:, None], c[None, :] < count, other=0)
-        score = tl.dot(q, k) * (DIM**-0.5)
+        score = libdevice.mul_rn(tl.dot(q, k), DIM**-0.5)
         probability = tl.exp(score - safe[:, None]) * inv[:, None]
         probability = tl.where(valid & (group[:, None] < GROUPS), probability, 0.0)
         reduced = tl.sum(tl.reshape(probability, (BQ, PG, BN)), 1)

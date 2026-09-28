@@ -1,0 +1,778 @@
+[
+  {
+    "range": "GR/light/full_prefill/0",
+    "wall_ms": 3475.501826,
+    "gpu_span_ms": 3474.529814,
+    "gpu_busy_ms": 3441.378131,
+    "gpu_gap_ms": 33.151683,
+    "gpu_busy_pct": 99.04586563435372,
+    "max_gap_us": 354.145,
+    "gaps_over_5us": 22,
+    "gap_before_next_cuda_api_ms": 1.591622,
+    "kernel_count": 23010,
+    "kernel_ms": 3440.336714,
+    "streams": [
+      7
+    ],
+    "kernels": {
+      "void flashinfer::PrefillWithKVCacheKernel<flashinfer::CollectiveMainloop<Params::AdditionalParams, flashinfer::AttentionKernelTraits<(bool)1, (int)128, (int)128, (int)128, (int)128, (int)2, cutlass::bfloat16_t, cutlass::bfloat16_t, cutlass::bfloat16_t, int, flashinfer::StandardAttention>, (bool)1>, flashinfer::CollectiveEpilogue<flashinfer::AttentionKernelTraits<(bool)1, (int)128, (int)128, (int)128, (int)128, (int)2, cutlass::bfloat16_t, cutlass::bfloat16_t, cutlass::bfloat16_t, int, flashinfer::StandardAttention>>, flashinfer::AttentionKernelTraits<(bool)1, (int)128, (int)128, (int)128, (int)128, (int)2, cutlass::bfloat16_t, cutlass::bfloat16_t, cutlass::bfloat16_t, int, flashinfer::StandardAttention>, (bool)0, (bool)1, flashinfer::SingleTileScheduler, (bool)0>(T1::Params, T2::Params, T6::Params)": {
+        "count": 2080,
+        "gpu_ms": 1908.431606000001
+      },
+      "nvjet_sm90_tst_256x128_64x4_1x2_h_bz_coopA_TNT": {
+        "count": 6240,
+        "gpu_ms": 1304.6403969999953
+      },
+      "nvjet_sm90_tst_144x128_64x6_1x2_h_bz_TNN": {
+        "count": 2080,
+        "gpu_ms": 118.18138800000007
+      },
+      "void flashinfer::activation::act_and_mul_kernel<__nv_bfloat16, &silu>(T1 *, const T1 *, int)": {
+        "count": 2080,
+        "gpu_ms": 50.03099200000028
+      },
+      "kernel_cutlass_kernel_flashinfernormkernelsfused_add_rmsnormFusedAddRMSNormKernel_object_at__tensorptrbf16gmemalign128oi64409640961_tensorptrbf16gmemalign128oi64409640961_tensorptrbf16gme_0": {
+        "count": 4160,
+        "gpu_ms": 31.841538000000075
+      },
+      "void flashinfer::BatchQKApplyRotaryPosIdsCosSinCacheHeadParallelismKernel<(bool)0, (unsigned int)128, (unsigned int)8, (unsigned int)16, __nv_bfloat16, long>(T5 *, T5 *, T5 *, T5 *, float *, T6 *, unsigned int, unsigned int, unsigned int, unsigned int, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long)": {
+        "count": 2080,
+        "gpu_ms": 15.500124999999978
+      },
+      "void at::native::elementwise_kernel<(int)128, (int)4, void at::native::gpu_kernel_impl_nocast<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase &)::[lambda() (instance 3)]::operator ()() const::[lambda() (instance 12)]::operator ()() const::[lambda(c10::BFloat16) (instance 1)]>(at::TensorIteratorBase &, const T1 &)::[lambda(int) (instance 1)]>(int, T3)": {
+        "count": 4160,
+        "gpu_ms": 11.09949800000001
+      },
+      "kernel_cutlass_kernel_flashinfernormkernelsrmsnormRMSNormKernel_object_at__tensorptrbf16gmemalign128oi64409640961_tensorptrbf16gmemalign16o40961_tensorptrbf16gmemalign128oi64409640961___T_0": {
+        "count": 65,
+        "gpu_ms": 0.3130879999999999
+      },
+      "void at::native::vectorized_gather_kernel<(int)16, long>(char *, char *, T2 *, int, long, long, long, long, bool)": {
+        "count": 65,
+        "gpu_ms": 0.29808200000000007
+      }
+    },
+    "cuda_apis": {
+      "cuLaunchKernelEx": {
+        "count": 8320,
+        "cpu_ms": 1352.7974299999987
+      },
+      "cudaLaunchKernel_v7000": {
+        "count": 8385,
+        "cpu_ms": 575.8527709999986
+      },
+      "cudaMemsetAsync_v3020": {
+        "count": 2080,
+        "cpu_ms": 294.9950660000002
+      },
+      "cudaDeviceSynchronize_v3020": {
+        "count": 2,
+        "cpu_ms": 211.97811299999998
+      },
+      "cudaLaunchKernelExC_v11060": {
+        "count": 6305,
+        "cpu_ms": 149.40213699999947
+      },
+      "cuKernelGetAttribute": {
+        "count": 16640,
+        "cpu_ms": 3.531643000000005
+      },
+      "cudaGetDriverEntryPointByVersion_v12050": {
+        "count": 6240,
+        "cpu_ms": 3.417964999999994
+      },
+      "cuKernelGetName": {
+        "count": 8450,
+        "cpu_ms": 2.6791940000000114
+      },
+      "cuTensorMapEncodeTiled": {
+        "count": 6240,
+        "cpu_ms": 2.509162000000003
+      }
+    },
+    "median_launch_to_kernel_us": 140298.73200000002,
+    "modules": {}
+  },
+  {
+    "range": "GR/light/extend/0",
+    "wall_ms": 79.738429,
+    "gpu_span_ms": 79.102324,
+    "gpu_busy_ms": 77.939278,
+    "gpu_gap_ms": 1.163046,
+    "gpu_busy_pct": 98.52969427295209,
+    "max_gap_us": 193.441,
+    "gaps_over_5us": 6,
+    "gap_before_next_cuda_api_ms": 0.612941,
+    "kernel_count": 354,
+    "kernel_ms": 77.922702,
+    "streams": [
+      7
+    ],
+    "kernels": {
+      "void flashinfer::PrefillWithKVCacheKernel<flashinfer::CollectiveMainloop<Params::AdditionalParams, flashinfer::AttentionKernelTraits<(bool)1, (int)128, (int)128, (int)128, (int)128, (int)2, cutlass::bfloat16_t, cutlass::bfloat16_t, cutlass::bfloat16_t, int, flashinfer::StandardAttention>, (bool)1>, flashinfer::CollectiveEpilogue<flashinfer::AttentionKernelTraits<(bool)1, (int)128, (int)128, (int)128, (int)128, (int)2, cutlass::bfloat16_t, cutlass::bfloat16_t, cutlass::bfloat16_t, int, flashinfer::StandardAttention>>, flashinfer::AttentionKernelTraits<(bool)1, (int)128, (int)128, (int)128, (int)128, (int)2, cutlass::bfloat16_t, cutlass::bfloat16_t, cutlass::bfloat16_t, int, flashinfer::StandardAttention>, (bool)0, (bool)1, flashinfer::SingleTileScheduler, (bool)0>(T1::Params, T2::Params, T6::Params)": {
+        "count": 32,
+        "gpu_ms": 55.112107
+      },
+      "nvjet_sm90_tst_256x128_64x4_1x2_h_bz_coopA_TNT": {
+        "count": 96,
+        "gpu_ms": 19.393942000000006
+      },
+      "nvjet_sm90_tst_144x128_64x6_1x2_h_bz_TNN": {
+        "count": 32,
+        "gpu_ms": 1.7564870000000001
+      },
+      "void flashinfer::activation::act_and_mul_kernel<__nv_bfloat16, &silu>(T1 *, const T1 *, int)": {
+        "count": 32,
+        "gpu_ms": 0.7624340000000001
+      },
+      "kernel_cutlass_kernel_flashinfernormkernelsfused_add_rmsnormFusedAddRMSNormKernel_object_at__tensorptrbf16gmemalign128oi64409640961_tensorptrbf16gmemalign128oi64409640961_tensorptrbf16gme_0": {
+        "count": 64,
+        "gpu_ms": 0.48582700000000006
+      },
+      "void flashinfer::BatchQKApplyRotaryPosIdsCosSinCacheHeadParallelismKernel<(bool)0, (unsigned int)128, (unsigned int)8, (unsigned int)16, __nv_bfloat16, long>(T5 *, T5 *, T5 *, T5 *, float *, T6 *, unsigned int, unsigned int, unsigned int, unsigned int, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long)": {
+        "count": 32,
+        "gpu_ms": 0.23420799999999997
+      },
+      "void at::native::elementwise_kernel<(int)128, (int)4, void at::native::gpu_kernel_impl_nocast<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase &)::[lambda() (instance 3)]::operator ()() const::[lambda() (instance 12)]::operator ()() const::[lambda(c10::BFloat16) (instance 1)]>(at::TensorIteratorBase &, const T1 &)::[lambda(int) (instance 1)]>(int, T3)": {
+        "count": 64,
+        "gpu_ms": 0.16835299999999997
+      },
+      "kernel_cutlass_kernel_flashinfernormkernelsrmsnormRMSNormKernel_object_at__tensorptrbf16gmemalign128oi64409640961_tensorptrbf16gmemalign16o40961_tensorptrbf16gmemalign128oi64409640961___T_0": {
+        "count": 1,
+        "gpu_ms": 0.004864
+      },
+      "void at::native::vectorized_gather_kernel<(int)16, long>(char *, char *, T2 *, int, long, long, long, long, bool)": {
+        "count": 1,
+        "gpu_ms": 0.00448
+      }
+    },
+    "cuda_apis": {
+      "cudaDeviceSynchronize_v3020": {
+        "count": 2,
+        "cpu_ms": 63.196663
+      },
+      "cudaLaunchKernel_v7000": {
+        "count": 129,
+        "cpu_ms": 0.9670850000000003
+      },
+      "cuLaunchKernelEx": {
+        "count": 128,
+        "cpu_ms": 0.8888320000000002
+      },
+      "cudaLaunchKernelExC_v11060": {
+        "count": 97,
+        "cpu_ms": 0.7082850000000002
+      },
+      "cudaMemsetAsync_v3020": {
+        "count": 32,
+        "cpu_ms": 0.199492
+      },
+      "cuKernelGetAttribute": {
+        "count": 256,
+        "cpu_ms": 0.05024499999999999
+      },
+      "cudaGetDriverEntryPointByVersion_v12050": {
+        "count": 96,
+        "cpu_ms": 0.04070100000000002
+      },
+      "cuTensorMapEncodeTiled": {
+        "count": 96,
+        "cpu_ms": 0.03802699999999998
+      },
+      "cuKernelGetName": {
+        "count": 130,
+        "cpu_ms": 0.02665799999999999
+      }
+    },
+    "median_launch_to_kernel_us": 31151.59,
+    "modules": {}
+  },
+  {
+    "range": "GR/light/extend/1",
+    "wall_ms": 81.351989,
+    "gpu_span_ms": 81.038685,
+    "gpu_busy_ms": 80.048251,
+    "gpu_gap_ms": 0.990434,
+    "gpu_busy_pct": 98.77782567671231,
+    "max_gap_us": 143.137,
+    "gaps_over_5us": 6,
+    "gap_before_next_cuda_api_ms": 0.447225,
+    "kernel_count": 354,
+    "kernel_ms": 80.033818,
+    "streams": [
+      7
+    ],
+    "kernels": {
+      "void flashinfer::PrefillWithKVCacheKernel<flashinfer::CollectiveMainloop<Params::AdditionalParams, flashinfer::AttentionKernelTraits<(bool)1, (int)128, (int)128, (int)128, (int)128, (int)2, cutlass::bfloat16_t, cutlass::bfloat16_t, cutlass::bfloat16_t, int, flashinfer::StandardAttention>, (bool)1>, flashinfer::CollectiveEpilogue<flashinfer::AttentionKernelTraits<(bool)1, (int)128, (int)128, (int)128, (int)128, (int)2, cutlass::bfloat16_t, cutlass::bfloat16_t, cutlass::bfloat16_t, int, flashinfer::StandardAttention>>, flashinfer::AttentionKernelTraits<(bool)1, (int)128, (int)128, (int)128, (int)128, (int)2, cutlass::bfloat16_t, cutlass::bfloat16_t, cutlass::bfloat16_t, int, flashinfer::StandardAttention>, (bool)0, (bool)1, flashinfer::SingleTileScheduler, (bool)0>(T1::Params, T2::Params, T6::Params)": {
+        "count": 32,
+        "gpu_ms": 56.676021
+      },
+      "nvjet_sm90_tst_256x128_64x4_1x2_h_bz_coopA_TNT": {
+        "count": 96,
+        "gpu_ms": 19.879513000000003
+      },
+      "nvjet_sm90_tst_144x128_64x6_1x2_h_bz_TNN": {
+        "count": 32,
+        "gpu_ms": 1.8001669999999999
+      },
+      "void flashinfer::activation::act_and_mul_kernel<__nv_bfloat16, &silu>(T1 *, const T1 *, int)": {
+        "count": 32,
+        "gpu_ms": 0.771361
+      },
+      "kernel_cutlass_kernel_flashinfernormkernelsfused_add_rmsnormFusedAddRMSNormKernel_object_at__tensorptrbf16gmemalign128oi64409640961_tensorptrbf16gmemalign128oi64409640961_tensorptrbf16gme_0": {
+        "count": 64,
+        "gpu_ms": 0.488641
+      },
+      "void flashinfer::BatchQKApplyRotaryPosIdsCosSinCacheHeadParallelismKernel<(bool)0, (unsigned int)128, (unsigned int)8, (unsigned int)16, __nv_bfloat16, long>(T5 *, T5 *, T5 *, T5 *, float *, T6 *, unsigned int, unsigned int, unsigned int, unsigned int, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long)": {
+        "count": 32,
+        "gpu_ms": 0.238819
+      },
+      "void at::native::elementwise_kernel<(int)128, (int)4, void at::native::gpu_kernel_impl_nocast<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase &)::[lambda() (instance 3)]::operator ()() const::[lambda() (instance 12)]::operator ()() const::[lambda(c10::BFloat16) (instance 1)]>(at::TensorIteratorBase &, const T1 &)::[lambda(int) (instance 1)]>(int, T3)": {
+        "count": 64,
+        "gpu_ms": 0.1696
+      },
+      "kernel_cutlass_kernel_flashinfernormkernelsrmsnormRMSNormKernel_object_at__tensorptrbf16gmemalign128oi64409640961_tensorptrbf16gmemalign16o40961_tensorptrbf16gmemalign128oi64409640961___T_0": {
+        "count": 1,
+        "gpu_ms": 0.004896
+      },
+      "void at::native::vectorized_gather_kernel<(int)16, long>(char *, char *, T2 *, int, long, long, long, long, bool)": {
+        "count": 1,
+        "gpu_ms": 0.0048
+      }
+    },
+    "cuda_apis": {
+      "cudaDeviceSynchronize_v3020": {
+        "count": 2,
+        "cpu_ms": 65.92627999999999
+      },
+      "cudaLaunchKernel_v7000": {
+        "count": 129,
+        "cpu_ms": 0.9414289999999994
+      },
+      "cuLaunchKernelEx": {
+        "count": 128,
+        "cpu_ms": 0.90639
+      },
+      "cudaLaunchKernelExC_v11060": {
+        "count": 97,
+        "cpu_ms": 0.7146279999999998
+      },
+      "cudaMemsetAsync_v3020": {
+        "count": 32,
+        "cpu_ms": 0.18994699999999998
+      },
+      "cuKernelGetAttribute": {
+        "count": 256,
+        "cpu_ms": 0.051401000000000016
+      },
+      "cudaGetDriverEntryPointByVersion_v12050": {
+        "count": 96,
+        "cpu_ms": 0.04130700000000001
+      },
+      "cuTensorMapEncodeTiled": {
+        "count": 96,
+        "cpu_ms": 0.028563
+      },
+      "cuKernelGetName": {
+        "count": 130,
+        "cpu_ms": 0.02761599999999999
+      }
+    },
+    "median_launch_to_kernel_us": 32939.9155,
+    "modules": {}
+  },
+  {
+    "range": "GR/light/extend/2",
+    "wall_ms": 80.944989,
+    "gpu_span_ms": 80.698907,
+    "gpu_busy_ms": 79.816151,
+    "gpu_gap_ms": 0.882756,
+    "gpu_busy_pct": 98.9061115784381,
+    "max_gap_us": 124.609,
+    "gaps_over_5us": 6,
+    "gap_before_next_cuda_api_ms": 0.341298,
+    "kernel_count": 354,
+    "kernel_ms": 79.798968,
+    "streams": [
+      7
+    ],
+    "kernels": {
+      "void flashinfer::PrefillWithKVCacheKernel<flashinfer::CollectiveMainloop<Params::AdditionalParams, flashinfer::AttentionKernelTraits<(bool)1, (int)128, (int)128, (int)128, (int)128, (int)2, cutlass::bfloat16_t, cutlass::bfloat16_t, cutlass::bfloat16_t, int, flashinfer::StandardAttention>, (bool)1>, flashinfer::CollectiveEpilogue<flashinfer::AttentionKernelTraits<(bool)1, (int)128, (int)128, (int)128, (int)128, (int)2, cutlass::bfloat16_t, cutlass::bfloat16_t, cutlass::bfloat16_t, int, flashinfer::StandardAttention>>, flashinfer::AttentionKernelTraits<(bool)1, (int)128, (int)128, (int)128, (int)128, (int)2, cutlass::bfloat16_t, cutlass::bfloat16_t, cutlass::bfloat16_t, int, flashinfer::StandardAttention>, (bool)0, (bool)1, flashinfer::SingleTileScheduler, (bool)0>(T1::Params, T2::Params, T6::Params)": {
+        "count": 32,
+        "gpu_ms": 56.50910699999999
+      },
+      "nvjet_sm90_tst_256x128_64x4_1x2_h_bz_coopA_TNT": {
+        "count": 96,
+        "gpu_ms": 19.828465999999995
+      },
+      "nvjet_sm90_tst_144x128_64x6_1x2_h_bz_TNN": {
+        "count": 32,
+        "gpu_ms": 1.7961050000000003
+      },
+      "void flashinfer::activation::act_and_mul_kernel<__nv_bfloat16, &silu>(T1 *, const T1 *, int)": {
+        "count": 32,
+        "gpu_ms": 0.762756
+      },
+      "kernel_cutlass_kernel_flashinfernormkernelsfused_add_rmsnormFusedAddRMSNormKernel_object_at__tensorptrbf16gmemalign128oi64409640961_tensorptrbf16gmemalign128oi64409640961_tensorptrbf16gme_0": {
+        "count": 64,
+        "gpu_ms": 0.48682
+      },
+      "void flashinfer::BatchQKApplyRotaryPosIdsCosSinCacheHeadParallelismKernel<(bool)0, (unsigned int)128, (unsigned int)8, (unsigned int)16, __nv_bfloat16, long>(T5 *, T5 *, T5 *, T5 *, float *, T6 *, unsigned int, unsigned int, unsigned int, unsigned int, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long)": {
+        "count": 32,
+        "gpu_ms": 0.23737700000000003
+      },
+      "void at::native::elementwise_kernel<(int)128, (int)4, void at::native::gpu_kernel_impl_nocast<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase &)::[lambda() (instance 3)]::operator ()() const::[lambda() (instance 12)]::operator ()() const::[lambda(c10::BFloat16) (instance 1)]>(at::TensorIteratorBase &, const T1 &)::[lambda(int) (instance 1)]>(int, T3)": {
+        "count": 64,
+        "gpu_ms": 0.168833
+      },
+      "kernel_cutlass_kernel_flashinfernormkernelsrmsnormRMSNormKernel_object_at__tensorptrbf16gmemalign128oi64409640961_tensorptrbf16gmemalign16o40961_tensorptrbf16gmemalign128oi64409640961___T_0": {
+        "count": 1,
+        "gpu_ms": 0.0048
+      },
+      "void at::native::vectorized_gather_kernel<(int)16, long>(char *, char *, T2 *, int, long, long, long, long, bool)": {
+        "count": 1,
+        "gpu_ms": 0.004704
+      }
+    },
+    "cuda_apis": {
+      "cudaDeviceSynchronize_v3020": {
+        "count": 2,
+        "cpu_ms": 65.569483
+      },
+      "cudaLaunchKernel_v7000": {
+        "count": 129,
+        "cpu_ms": 0.955447
+      },
+      "cuLaunchKernelEx": {
+        "count": 128,
+        "cpu_ms": 0.8966540000000003
+      },
+      "cudaLaunchKernelExC_v11060": {
+        "count": 97,
+        "cpu_ms": 0.7388250000000002
+      },
+      "cudaMemsetAsync_v3020": {
+        "count": 32,
+        "cpu_ms": 0.208008
+      },
+      "cudaGetDriverEntryPointByVersion_v12050": {
+        "count": 96,
+        "cpu_ms": 0.05178299999999998
+      },
+      "cuKernelGetAttribute": {
+        "count": 256,
+        "cpu_ms": 0.05039000000000001
+      },
+      "cuTensorMapEncodeTiled": {
+        "count": 96,
+        "cpu_ms": 0.03744999999999998
+      },
+      "cuKernelGetName": {
+        "count": 130,
+        "cpu_ms": 0.03200000000000001
+      }
+    },
+    "median_launch_to_kernel_us": 32313.707000000002,
+    "modules": {}
+  },
+  {
+    "range": "GR/detailed/full_prefill/0",
+    "wall_ms": 3511.309815,
+    "gpu_span_ms": 3510.858068,
+    "gpu_busy_ms": 3479.084766,
+    "gpu_gap_ms": 31.773302,
+    "gpu_busy_pct": 99.09499896080676,
+    "max_gap_us": 162.4,
+    "gaps_over_5us": 16,
+    "gap_before_next_cuda_api_ms": 0.567785,
+    "kernel_count": 23010,
+    "kernel_ms": 3478.055163,
+    "streams": [
+      7
+    ],
+    "kernels": {
+      "void flashinfer::PrefillWithKVCacheKernel<flashinfer::CollectiveMainloop<Params::AdditionalParams, flashinfer::AttentionKernelTraits<(bool)1, (int)128, (int)128, (int)128, (int)128, (int)2, cutlass::bfloat16_t, cutlass::bfloat16_t, cutlass::bfloat16_t, int, flashinfer::StandardAttention>, (bool)1>, flashinfer::CollectiveEpilogue<flashinfer::AttentionKernelTraits<(bool)1, (int)128, (int)128, (int)128, (int)128, (int)2, cutlass::bfloat16_t, cutlass::bfloat16_t, cutlass::bfloat16_t, int, flashinfer::StandardAttention>>, flashinfer::AttentionKernelTraits<(bool)1, (int)128, (int)128, (int)128, (int)128, (int)2, cutlass::bfloat16_t, cutlass::bfloat16_t, cutlass::bfloat16_t, int, flashinfer::StandardAttention>, (bool)0, (bool)1, flashinfer::SingleTileScheduler, (bool)0>(T1::Params, T2::Params, T6::Params)": {
+        "count": 2080,
+        "gpu_ms": 1920.6305640000016
+      },
+      "nvjet_sm90_tst_256x128_64x4_1x2_h_bz_coopA_TNT": {
+        "count": 6240,
+        "gpu_ms": 1327.2794939999956
+      },
+      "nvjet_sm90_tst_144x128_64x6_1x2_h_bz_TNN": {
+        "count": 2080,
+        "gpu_ms": 120.48023800000017
+      },
+      "void flashinfer::activation::act_and_mul_kernel<__nv_bfloat16, &silu>(T1 *, const T1 *, int)": {
+        "count": 2080,
+        "gpu_ms": 50.09176700000022
+      },
+      "kernel_cutlass_kernel_flashinfernormkernelsfused_add_rmsnormFusedAddRMSNormKernel_object_at__tensorptrbf16gmemalign128oi64409640961_tensorptrbf16gmemalign128oi64409640961_tensorptrbf16gme_0": {
+        "count": 4160,
+        "gpu_ms": 31.98482200000012
+      },
+      "void flashinfer::BatchQKApplyRotaryPosIdsCosSinCacheHeadParallelismKernel<(bool)0, (unsigned int)128, (unsigned int)8, (unsigned int)16, __nv_bfloat16, long>(T5 *, T5 *, T5 *, T5 *, float *, T6 *, unsigned int, unsigned int, unsigned int, unsigned int, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long)": {
+        "count": 2080,
+        "gpu_ms": 15.74432399999997
+      },
+      "void at::native::elementwise_kernel<(int)128, (int)4, void at::native::gpu_kernel_impl_nocast<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase &)::[lambda() (instance 3)]::operator ()() const::[lambda() (instance 12)]::operator ()() const::[lambda(c10::BFloat16) (instance 1)]>(at::TensorIteratorBase &, const T1 &)::[lambda(int) (instance 1)]>(int, T3)": {
+        "count": 4160,
+        "gpu_ms": 11.223951999999999
+      },
+      "kernel_cutlass_kernel_flashinfernormkernelsrmsnormRMSNormKernel_object_at__tensorptrbf16gmemalign128oi64409640961_tensorptrbf16gmemalign16o40961_tensorptrbf16gmemalign128oi64409640961___T_0": {
+        "count": 65,
+        "gpu_ms": 0.317474
+      },
+      "void at::native::vectorized_gather_kernel<(int)16, long>(char *, char *, T2 *, int, long, long, long, long, bool)": {
+        "count": 65,
+        "gpu_ms": 0.30252799999999996
+      }
+    },
+    "cuda_apis": {
+      "cuLaunchKernelEx": {
+        "count": 8320,
+        "cpu_ms": 1264.6681759999988
+      },
+      "cudaLaunchKernel_v7000": {
+        "count": 8385,
+        "cpu_ms": 557.0355700000014
+      },
+      "cudaMemsetAsync_v3020": {
+        "count": 2080,
+        "cpu_ms": 241.16680899999974
+      },
+      "cudaDeviceSynchronize_v3020": {
+        "count": 2,
+        "cpu_ms": 218.302076
+      },
+      "cudaLaunchKernelExC_v11060": {
+        "count": 6305,
+        "cpu_ms": 149.62547099999995
+      },
+      "cuKernelGetAttribute": {
+        "count": 16640,
+        "cpu_ms": 3.70320499999997
+      },
+      "cudaGetDriverEntryPointByVersion_v12050": {
+        "count": 6240,
+        "cpu_ms": 3.479009999999993
+      },
+      "cuTensorMapEncodeTiled": {
+        "count": 6240,
+        "cpu_ms": 2.539060000000002
+      },
+      "cuKernelGetName": {
+        "count": 8450,
+        "cpu_ms": 2.2582530000000056
+      }
+    },
+    "median_launch_to_kernel_us": 140515.2085,
+    "modules": {
+      "embedding": {
+        "kernel_count": 65,
+        "activity_count": 65,
+        "gpu_ms": 0.30252799999999996,
+        "kernel_names": {
+          "void at::native::vectorized_gather_kernel<(int)16, long>(char *, char *, T2 *, int, long, long, long, long, bool)": 65
+        }
+      },
+      "input_layernorm": {
+        "kernel_count": 65,
+        "activity_count": 65,
+        "gpu_ms": 0.317474,
+        "kernel_names": {
+          "kernel_cutlass_kernel_flashinfernormkernelsrmsnormRMSNormKernel_object_at__tensorptrbf16gmemalign128oi64409640961_tensorptrbf16gmemalign16o40961_tensorptrbf16gmemalign128oi64409640961___T_0": 65
+        }
+      },
+      "qkv_proj": {
+        "kernel_count": 2080,
+        "activity_count": 2080,
+        "gpu_ms": 120.48023800000017,
+        "kernel_names": {
+          "nvjet_sm90_tst_144x128_64x6_1x2_h_bz_TNN": 2080
+        }
+      },
+      "rope_apply": {
+        "kernel_count": 2080,
+        "activity_count": 2080,
+        "gpu_ms": 15.74432399999997,
+        "kernel_names": {
+          "void flashinfer::BatchQKApplyRotaryPosIdsCosSinCacheHeadParallelismKernel<(bool)0, (unsigned int)128, (unsigned int)8, (unsigned int)16, __nv_bfloat16, long>(T5 *, T5 *, T5 *, T5 *, float *, T6 *, unsigned int, unsigned int, unsigned int, unsigned int, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long)": 2080
+        }
+      },
+      "kv_cache_and_layout": {
+        "kernel_count": 4160,
+        "activity_count": 4160,
+        "gpu_ms": 11.223951999999999,
+        "kernel_names": {
+          "void at::native::elementwise_kernel<(int)128, (int)4, void at::native::gpu_kernel_impl_nocast<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase &)::[lambda() (instance 3)]::operator ()() const::[lambda() (instance 12)]::operator ()() const::[lambda(c10::BFloat16) (instance 1)]>(at::TensorIteratorBase &, const T1 &)::[lambda(int) (instance 1)]>(int, T3)": 4160
+        }
+      },
+      "attention_core": {
+        "kernel_count": 2080,
+        "activity_count": 2080,
+        "gpu_ms": 1920.6305640000016,
+        "kernel_names": {
+          "void flashinfer::PrefillWithKVCacheKernel<flashinfer::CollectiveMainloop<Params::AdditionalParams, flashinfer::AttentionKernelTraits<(bool)1, (int)128, (int)128, (int)128, (int)128, (int)2, cutlass::bfloat16_t, cutlass::bfloat16_t, cutlass::bfloat16_t, int, flashinfer::StandardAttention>, (bool)1>, flashinfer::CollectiveEpilogue<flashinfer::AttentionKernelTraits<(bool)1, (int)128, (int)128, (int)128, (int)128, (int)2, cutlass::bfloat16_t, cutlass::bfloat16_t, cutlass::bfloat16_t, int, flashinfer::StandardAttention>>, flashinfer::AttentionKernelTraits<(bool)1, (int)128, (int)128, (int)128, (int)128, (int)2, cutlass::bfloat16_t, cutlass::bfloat16_t, cutlass::bfloat16_t, int, flashinfer::StandardAttention>, (bool)0, (bool)1, flashinfer::SingleTileScheduler, (bool)0>(T1::Params, T2::Params, T6::Params)": 2080
+        }
+      },
+      "o_proj": {
+        "kernel_count": 2080,
+        "activity_count": 2080,
+        "gpu_ms": 110.46213600000009,
+        "kernel_names": {
+          "nvjet_sm90_tst_256x128_64x4_1x2_h_bz_coopA_TNT": 2080
+        }
+      },
+      "post_attention_layernorm_add_residual": {
+        "kernel_count": 2080,
+        "activity_count": 2080,
+        "gpu_ms": 16.271914000000017,
+        "kernel_names": {
+          "kernel_cutlass_kernel_flashinfernormkernelsfused_add_rmsnormFusedAddRMSNormKernel_object_at__tensorptrbf16gmemalign128oi64409640961_tensorptrbf16gmemalign128oi64409640961_tensorptrbf16gme_0": 2080
+        }
+      },
+      "gate_up_proj": {
+        "kernel_count": 2080,
+        "activity_count": 4160,
+        "gpu_ms": 817.1272919999813,
+        "kernel_names": {
+          "nvjet_sm90_tst_256x128_64x4_1x2_h_bz_coopA_TNT": 2080,
+          "MEMSET": 2080
+        }
+      },
+      "swiglu_elementwise": {
+        "kernel_count": 2080,
+        "activity_count": 2080,
+        "gpu_ms": 50.09176700000022,
+        "kernel_names": {
+          "void flashinfer::activation::act_and_mul_kernel<__nv_bfloat16, &silu>(T1 *, const T1 *, int)": 2080
+        }
+      },
+      "down_proj": {
+        "kernel_count": 2080,
+        "activity_count": 2080,
+        "gpu_ms": 401.78108500000076,
+        "kernel_names": {
+          "nvjet_sm90_tst_256x128_64x4_1x2_h_bz_coopA_TNT": 2080
+        }
+      },
+      "input_layernorm_add_residual": {
+        "kernel_count": 2015,
+        "activity_count": 2015,
+        "gpu_ms": 15.219625999999975,
+        "kernel_names": {
+          "kernel_cutlass_kernel_flashinfernormkernelsfused_add_rmsnormFusedAddRMSNormKernel_object_at__tensorptrbf16gmemalign128oi64409640961_tensorptrbf16gmemalign128oi64409640961_tensorptrbf16gme_0": 2015
+        }
+      },
+      "final_norm_add_residual": {
+        "kernel_count": 65,
+        "activity_count": 65,
+        "gpu_ms": 0.493282,
+        "kernel_names": {
+          "kernel_cutlass_kernel_flashinfernormkernelsfused_add_rmsnormFusedAddRMSNormKernel_object_at__tensorptrbf16gmemalign128oi64409640961_tensorptrbf16gmemalign128oi64409640961_tensorptrbf16gme_0": 65
+        }
+      }
+    }
+  },
+  {
+    "range": "GR/detailed/extend/0",
+    "wall_ms": 82.27181,
+    "gpu_span_ms": 81.896794,
+    "gpu_busy_ms": 80.664596,
+    "gpu_gap_ms": 1.232198,
+    "gpu_busy_pct": 98.49542584047917,
+    "max_gap_us": 240.897,
+    "gaps_over_5us": 6,
+    "gap_before_next_cuda_api_ms": 0.681181,
+    "kernel_count": 354,
+    "kernel_ms": 80.648885,
+    "streams": [
+      7
+    ],
+    "kernels": {
+      "void flashinfer::PrefillWithKVCacheKernel<flashinfer::CollectiveMainloop<Params::AdditionalParams, flashinfer::AttentionKernelTraits<(bool)1, (int)128, (int)128, (int)128, (int)128, (int)2, cutlass::bfloat16_t, cutlass::bfloat16_t, cutlass::bfloat16_t, int, flashinfer::StandardAttention>, (bool)1>, flashinfer::CollectiveEpilogue<flashinfer::AttentionKernelTraits<(bool)1, (int)128, (int)128, (int)128, (int)128, (int)2, cutlass::bfloat16_t, cutlass::bfloat16_t, cutlass::bfloat16_t, int, flashinfer::StandardAttention>>, flashinfer::AttentionKernelTraits<(bool)1, (int)128, (int)128, (int)128, (int)128, (int)2, cutlass::bfloat16_t, cutlass::bfloat16_t, cutlass::bfloat16_t, int, flashinfer::StandardAttention>, (bool)0, (bool)1, flashinfer::SingleTileScheduler, (bool)0>(T1::Params, T2::Params, T6::Params)": {
+        "count": 32,
+        "gpu_ms": 57.10784899999998
+      },
+      "nvjet_sm90_tst_256x128_64x4_1x2_h_bz_coopA_TNT": {
+        "count": 96,
+        "gpu_ms": 20.044636999999998
+      },
+      "nvjet_sm90_tst_144x128_64x6_1x2_h_bz_TNN": {
+        "count": 32,
+        "gpu_ms": 1.8186660000000001
+      },
+      "void flashinfer::activation::act_and_mul_kernel<__nv_bfloat16, &silu>(T1 *, const T1 *, int)": {
+        "count": 32,
+        "gpu_ms": 0.7668510000000001
+      },
+      "kernel_cutlass_kernel_flashinfernormkernelsfused_add_rmsnormFusedAddRMSNormKernel_object_at__tensorptrbf16gmemalign128oi64409640961_tensorptrbf16gmemalign128oi64409640961_tensorptrbf16gme_0": {
+        "count": 64,
+        "gpu_ms": 0.4899210000000001
+      },
+      "void flashinfer::BatchQKApplyRotaryPosIdsCosSinCacheHeadParallelismKernel<(bool)0, (unsigned int)128, (unsigned int)8, (unsigned int)16, __nv_bfloat16, long>(T5 *, T5 *, T5 *, T5 *, float *, T6 *, unsigned int, unsigned int, unsigned int, unsigned int, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long)": {
+        "count": 32,
+        "gpu_ms": 0.24035299999999996
+      },
+      "void at::native::elementwise_kernel<(int)128, (int)4, void at::native::gpu_kernel_impl_nocast<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase &)::[lambda() (instance 3)]::operator ()() const::[lambda() (instance 12)]::operator ()() const::[lambda(c10::BFloat16) (instance 1)]>(at::TensorIteratorBase &, const T1 &)::[lambda(int) (instance 1)]>(int, T3)": {
+        "count": 64,
+        "gpu_ms": 0.17078400000000002
+      },
+      "kernel_cutlass_kernel_flashinfernormkernelsrmsnormRMSNormKernel_object_at__tensorptrbf16gmemalign128oi64409640961_tensorptrbf16gmemalign16o40961_tensorptrbf16gmemalign128oi64409640961___T_0": {
+        "count": 1,
+        "gpu_ms": 0.00496
+      },
+      "void at::native::vectorized_gather_kernel<(int)16, long>(char *, char *, T2 *, int, long, long, long, long, bool)": {
+        "count": 1,
+        "gpu_ms": 0.004864
+      }
+    },
+    "cuda_apis": {
+      "cudaDeviceSynchronize_v3020": {
+        "count": 2,
+        "cpu_ms": 62.004476000000004
+      },
+      "cudaLaunchKernel_v7000": {
+        "count": 129,
+        "cpu_ms": 1.0318230000000002
+      },
+      "cuLaunchKernelEx": {
+        "count": 128,
+        "cpu_ms": 0.9310999999999998
+      },
+      "cudaLaunchKernelExC_v11060": {
+        "count": 97,
+        "cpu_ms": 0.792893
+      },
+      "cudaMemsetAsync_v3020": {
+        "count": 32,
+        "cpu_ms": 0.225383
+      },
+      "cuKernelGetAttribute": {
+        "count": 256,
+        "cpu_ms": 0.08368
+      },
+      "cudaGetDriverEntryPointByVersion_v12050": {
+        "count": 96,
+        "cpu_ms": 0.052454000000000015
+      },
+      "cuTensorMapEncodeTiled": {
+        "count": 96,
+        "cpu_ms": 0.048139999999999995
+      },
+      "cuKernelGetName": {
+        "count": 130,
+        "cpu_ms": 0.047362999999999995
+      }
+    },
+    "median_launch_to_kernel_us": 30651.682,
+    "modules": {
+      "embedding": {
+        "kernel_count": 1,
+        "activity_count": 1,
+        "gpu_ms": 0.004864,
+        "kernel_names": {
+          "void at::native::vectorized_gather_kernel<(int)16, long>(char *, char *, T2 *, int, long, long, long, long, bool)": 1
+        }
+      },
+      "input_layernorm": {
+        "kernel_count": 1,
+        "activity_count": 1,
+        "gpu_ms": 0.00496,
+        "kernel_names": {
+          "kernel_cutlass_kernel_flashinfernormkernelsrmsnormRMSNormKernel_object_at__tensorptrbf16gmemalign128oi64409640961_tensorptrbf16gmemalign16o40961_tensorptrbf16gmemalign128oi64409640961___T_0": 1
+        }
+      },
+      "qkv_proj": {
+        "kernel_count": 32,
+        "activity_count": 32,
+        "gpu_ms": 1.8186660000000001,
+        "kernel_names": {
+          "nvjet_sm90_tst_144x128_64x6_1x2_h_bz_TNN": 32
+        }
+      },
+      "rope_apply": {
+        "kernel_count": 32,
+        "activity_count": 32,
+        "gpu_ms": 0.24035299999999996,
+        "kernel_names": {
+          "void flashinfer::BatchQKApplyRotaryPosIdsCosSinCacheHeadParallelismKernel<(bool)0, (unsigned int)128, (unsigned int)8, (unsigned int)16, __nv_bfloat16, long>(T5 *, T5 *, T5 *, T5 *, float *, T6 *, unsigned int, unsigned int, unsigned int, unsigned int, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long, unsigned long)": 32
+        }
+      },
+      "kv_cache_and_layout": {
+        "kernel_count": 64,
+        "activity_count": 64,
+        "gpu_ms": 0.17078400000000002,
+        "kernel_names": {
+          "void at::native::elementwise_kernel<(int)128, (int)4, void at::native::gpu_kernel_impl_nocast<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase &)::[lambda() (instance 3)]::operator ()() const::[lambda() (instance 12)]::operator ()() const::[lambda(c10::BFloat16) (instance 1)]>(at::TensorIteratorBase &, const T1 &)::[lambda(int) (instance 1)]>(int, T3)": 64
+        }
+      },
+      "attention_core": {
+        "kernel_count": 32,
+        "activity_count": 32,
+        "gpu_ms": 57.10784899999998,
+        "kernel_names": {
+          "void flashinfer::PrefillWithKVCacheKernel<flashinfer::CollectiveMainloop<Params::AdditionalParams, flashinfer::AttentionKernelTraits<(bool)1, (int)128, (int)128, (int)128, (int)128, (int)2, cutlass::bfloat16_t, cutlass::bfloat16_t, cutlass::bfloat16_t, int, flashinfer::StandardAttention>, (bool)1>, flashinfer::CollectiveEpilogue<flashinfer::AttentionKernelTraits<(bool)1, (int)128, (int)128, (int)128, (int)128, (int)2, cutlass::bfloat16_t, cutlass::bfloat16_t, cutlass::bfloat16_t, int, flashinfer::StandardAttention>>, flashinfer::AttentionKernelTraits<(bool)1, (int)128, (int)128, (int)128, (int)128, (int)2, cutlass::bfloat16_t, cutlass::bfloat16_t, cutlass::bfloat16_t, int, flashinfer::StandardAttention>, (bool)0, (bool)1, flashinfer::SingleTileScheduler, (bool)0>(T1::Params, T2::Params, T6::Params)": 32
+        }
+      },
+      "o_proj": {
+        "kernel_count": 32,
+        "activity_count": 32,
+        "gpu_ms": 1.6608719999999997,
+        "kernel_names": {
+          "nvjet_sm90_tst_256x128_64x4_1x2_h_bz_coopA_TNT": 32
+        }
+      },
+      "post_attention_layernorm_add_residual": {
+        "kernel_count": 32,
+        "activity_count": 32,
+        "gpu_ms": 0.24960000000000002,
+        "kernel_names": {
+          "kernel_cutlass_kernel_flashinfernormkernelsfused_add_rmsnormFusedAddRMSNormKernel_object_at__tensorptrbf16gmemalign128oi64409640961_tensorptrbf16gmemalign128oi64409640961_tensorptrbf16gme_0": 32
+        }
+      },
+      "gate_up_proj": {
+        "kernel_count": 32,
+        "activity_count": 64,
+        "gpu_ms": 12.351449,
+        "kernel_names": {
+          "nvjet_sm90_tst_256x128_64x4_1x2_h_bz_coopA_TNT": 32,
+          "MEMSET": 32
+        }
+      },
+      "swiglu_elementwise": {
+        "kernel_count": 32,
+        "activity_count": 32,
+        "gpu_ms": 0.7668510000000001,
+        "kernel_names": {
+          "void flashinfer::activation::act_and_mul_kernel<__nv_bfloat16, &silu>(T1 *, const T1 *, int)": 32
+        }
+      },
+      "down_proj": {
+        "kernel_count": 32,
+        "activity_count": 32,
+        "gpu_ms": 6.064476000000001,
+        "kernel_names": {
+          "nvjet_sm90_tst_256x128_64x4_1x2_h_bz_coopA_TNT": 32
+        }
+      },
+      "input_layernorm_add_residual": {
+        "kernel_count": 31,
+        "activity_count": 31,
+        "gpu_ms": 0.233153,
+        "kernel_names": {
+          "kernel_cutlass_kernel_flashinfernormkernelsfused_add_rmsnormFusedAddRMSNormKernel_object_at__tensorptrbf16gmemalign128oi64409640961_tensorptrbf16gmemalign128oi64409640961_tensorptrbf16gme_0": 31
+        }
+      },
+      "final_norm_add_residual": {
+        "kernel_count": 1,
+        "activity_count": 1,
+        "gpu_ms": 0.007168,
+        "kernel_names": {
+          "kernel_cutlass_kernel_flashinfernormkernelsfused_add_rmsnormFusedAddRMSNormKernel_object_at__tensorptrbf16gmemalign128oi64409640961_tensorptrbf16gmemalign128oi64409640961_tensorptrbf16gme_0": 1
+        }
+      }
+    }
+  }
+]

@@ -1,18 +1,18 @@
 {
   "schema_version": 1,
-  "run_id": "nosa_native_wgmma_20260928_02",
+  "run_id": "sparse_native_h200_gpu1_20260928_02",
   "gpu": {
-    "name": "NVIDIA H200",
+    "name": "NVIDIA H20Z",
     "capability": [
       9,
       0
     ],
-    "uuid": "2522820c-89d9-aa17-f79c-ca8cc767fb77",
+    "uuid": "a2e4882b-3248-6018-14ab-90e45b5a5b04",
     "total_memory": 150121545728,
     "sm_count": 132
   },
   "peak_tflops": 989.0,
-  "peak_source": "Nominal H200 SXM dense BF16 peak; assumed, not measured sustainable throughput",
+  "peak_source": "Explicit --peak-tflops override",
   "peak_kind": "BF16 dense Tensor Core peak, not 2:4 structured sparsity peak",
   "workload": {
     "prefix_tokens": 65536,
@@ -38,12 +38,12 @@
     "sparse_backend_api": "triton",
     "kernel_backend": "cuda_tvm_ffi",
     "selection_backend": "flashinfer",
-    "tvm_ffi": "0.1.14.post0",
+    "tvm_ffi": "0.1.13.post3",
     "native_build": {
-      "tvm_ffi": "0.1.14.post0",
+      "tvm_ffi": "0.1.13.post3",
       "compiler": {
         "path": "/usr/local/cuda-13.2/bin/nvcc",
-        "version": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2026 NVIDIA Corporation\nBuilt on Thu_Mar_19_11:12:51_PM_PDT_2026\nCuda compilation tools, release 13.2, V13.2.78\nBuild cuda_13.2.r13.2/compiler.37668154_0"
+        "version": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2026 NVIDIA Corporation\nBuilt on Fri_May_08_10:53:34_AM_PDT_2026\nCuda compilation tools, release 13.2, V13.2.86\nBuild cuda_13.2.r13.2/compiler.37953736_0"
       },
       "cutlass": {
         "commit": "f3fde58372d33e9a5650ba7b80fc48b3b49d40c8",
@@ -60,8 +60,9 @@
       "selected_backend": "native",
       "source_sha256": {
         "operators/sm90/_native.py": "1a852683700af461fc2de5b12295678da86026b92b031b3b609aad6fa5af1ff3",
-        "operators/sm90/csrc/nosa_attention.cu": "c669d9a3f1fa9be72cd2578e6bfeb797b765798e8498a1df154c932b120e514e",
-        "operators/sm90/csrc/nosa_scores.cu": "319c6a58c45e6e77fcf3b23d8d6e104f89c99d569e6d171f02412bc846b87830"
+        "operators/sm90/csrc/nosa_attention.cu": "158aad48fc48b0319bea8de939483580f40115d069813958537b956d97a8fefa",
+        "operators/sm90/csrc/nosa_attention_grouped.cuh": "21826cbc696c86de2d7fa5b8df185713e37827a8b80c909ad38bfd275383d8b9",
+        "operators/sm90/csrc/nosa_scores.cu": "0897a00d6d38dccf88566771f063b71e8de16f9458d1f4f6e3bcc71ff91e84d2"
       }
     }
   },
@@ -102,9 +103,9 @@
       },
       "total_matrix_flops": 1183130731937792,
       "sample_count": 5,
-      "wall_ms": 3429.5164681971073,
-      "effective_tflops": 344.98470641832563,
-      "mfu_pct": 34.882174562014725
+      "wall_ms": 3304.487319663167,
+      "effective_tflops": 358.0376068921913,
+      "mfu_pct": 36.20198249668264
     },
     "extend": {
       "prefix_tokens": 65536,
@@ -126,15 +127,15 @@
       },
       "total_matrix_flops": 18820462804992,
       "sample_count": 5,
-      "wall_ms": 58.13363566994667,
-      "effective_tflops": 323.7448094911017,
-      "mfu_pct": 32.73456112144608
+      "wall_ms": 54.172055795788765,
+      "effective_tflops": 347.4201325483953,
+      "mfu_pct": 35.12842594018153
     }
   },
-  "derived_at_utc": "2026-09-27T18:38:46.727315+00:00",
+  "derived_at_utc": "2026-09-28T07:52:33.281843+00:00",
   "input_sha256": {
-    "metadata.json": "f3785a20073522c6cb036c6e15619740a5a3312911f98765bacd018b0774be85",
-    "summary.json": "550becc6285408f4de87736805b4907fee52780fdc3baa2bc1399a0d8e5c58fd"
+    "metadata.json": "ff22bf3f21c94db8c577590ee09d912d0f9733f4cde1b5038f027893be860725",
+    "summary.json": "1b5f4cd481d2efbb7da861c675bcc42068d5ca4d61412f396bcaa75f4d0a6391"
   },
   "analysis_source_sha256": {
     "experiments/indexer_block_sparse_profile/src/mfu.py": "022f35b6935087a8f702a3458f9de54c102bd53fec4537340eb2646b464ba2ac",

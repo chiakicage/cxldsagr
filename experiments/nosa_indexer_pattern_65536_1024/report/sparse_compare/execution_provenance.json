@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "run_id": "nosa_sparse_pattern_h200_gpu1_20260928_01",
+  "documented_at_utc": "2026-09-28T07:53:05.926256+00:00",
+  "evidence_kind": "launch command and saved dispatch source; not per-kernel launch observation",
+  "launch_command": "CUDA_VISIBLE_DEVICES=1 PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 bash experiments/nosa_indexer_pattern_65536_1024/scripts/sparse_compare.sh nosa_sparse_pattern_h200_gpu1_20260928_01 --request-file experiments/nosa_gr_65536_1024/output/data/dense_h200_gpu1_20260928_01/request.json",
+  "shell_login": false,
+  "command_environment_overrides": {
+    "CUDA_VISIBLE_DEVICES": "1",
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "PYTHONUNBUFFERED": "1"
+  },
+  "sm90_backend_explicitly_overridden_in_command": false,
+  "inherited_environment_captured": false,
+  "source_default_sm90_backend": "native",
+  "model_interface_backend_label": "triton",
+  "label_interpretation": "The model/indexer label triton enters the SM90 dispatcher; it is not evidence of an exclusively Triton implementation.",
+  "source_dispatch": {
+    "attention": "Use native CuTe when native_enabled() and supports_native_attention(q, keys, values); otherwise Triton.",
+    "scores": "Use native when native_enabled(), supported inputs and compressed count >= 2047 for query rows >= 1024 (>= 511 for smaller batches); otherwise Triton.",
+    "other_indexer_stages": "Compression and selection retain their existing Triton/FlashInfer calls.",
+    "trajectory_settings": "The two full-NOSA arms run in one process with the same backend environment and dispatcher."
+  },
+  "limitations": [
+    "The exact command did not override CXLDSAGR_SM90_BACKEND, and the saved source defaults to native. Inherited environment was not captured in the original run, so the source default is an interpretation of startup configuration rather than an observed per-launch backend.",
+    "No per-kernel launch trace was collected for this pattern experiment.",
+    "Original capture metadata is preserved unchanged; this file adds post-run execution provenance without a new GPU capture."
+  ],
+  "capture_metadata_sha256": "a6bafd3d4c17f7328aa07fcefe434845f3896a15b8ffd48146f46b70ec1e89e4",
+  "saved_source_sha256": {
+    "experiments/nosa_indexer_pattern_65536_1024/scripts/sparse_compare.sh": "070eb48445c243bf087c2a944fb2b210967feb7dbf371e7fe4246ae8c8dfa847",
+    "experiments/nosa_indexer_pattern_65536_1024/src/sparse_capture.py": "39fef52775b936e30afb6437d9bb4f16ae3d4bbfedfa14f5b004a55d65ad7b4d",
+    "operators/sm90/_native.py": "1a852683700af461fc2de5b12295678da86026b92b031b3b609aad6fa5af1ff3",
+    "operators/sm90/nosa_indexer.py": "1c34d2ebddba31cd2d06d1468c36535a9ab835ee28e134a6a8b4bf1e32df028a",
+    "operators/sm90/nosa_attention.py": "0c1b422a5fe5c485927f017f4c2578271eaf6258d01cc3c1aa6d33d488d1d6f9",
+    "operators/sm90/_nosa_scores_cuda.py": "70a5cc50c3916675d7a23b9dca49e531a7bed9026e0f5f0bc254bd0a24bd170c",
+    "operators/sm90/_nosa_attention_cuda.py": "66f737253c18dacf91eb066c2b07041864b91e7e7fa5f6e674943c424aca038e"
+  }
+}

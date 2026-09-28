@@ -46,7 +46,7 @@ LongRoPE 使用模型持有的 FP32 cos/sin cache，复用静态频率及位置�
 CUDA 推理通过 FlashInfer `apply_rope_with_cos_sin_cache_inplace` 一次融合 Q/K 旋转，
 直接使用合并 GEMM 输出的行跨距视图，保留 V 并避免 Q/K 复制。
 保留 NOSA 的 split-half 布局和 LongRoPE scaling。dense 性能测量入口见
-[64K+1K 实验](../../experiments/nosa_gr_65536_1024/README.md)，共享 cache 改动后未运行。
+[64K+1K 实验](../../experiments/nosa_gr_65536_1024/README.md)，已于 2026-09-28 在 H200 上补测。
 
 默认 dense 模式计算普通 causal GQA attention，保留 checkpoint 的 LongRoPE 缩放向量。
 此模式将 NOSA 的 `self_attn.A` 与 `self_attn.delta.weight` 在加载时明确跳过。
@@ -193,7 +193,11 @@ BF16/FP16 Triton attention 与 indexer、严格 A/delta 加载、缓存回滚、
 `--user-lengths 4096 --item-lengths 128` 的 sparse GR 前向，总长 4224，
 stable prefix 4124、candidate suffix 100。此检查不构成吞吐测量或模型质量评估。
 当时环境为 PyTorch `2.10.0+cu132`、Triton `3.6.0`、FlashInfer `0.6.18`；
-与当前 `pyproject.toml` / `uv.lock` 中的 torch/triton 版本不同，锁定版本组合尚未在本次验证。
+与当前 `pyproject.toml` / `uv.lock` 中的 torch/triton 版本不同；上述验证记录对应 2026-09-26 的环境。
+2026-09-28 已使用当前锁定的 PyTorch `2.12.1+cu130` / Triton `3.7.1` 完成
+[dense](../../experiments/nosa_gr_65536_1024/README.md) 与
+[sparse native/Triton](../../experiments/indexer_block_sparse_profile/README.md) 测量及测量内的输出一致性验收，
+具体覆盖范围见各报告。
 
 直接加载 cxl-recsys 的 `nosa_ops.py` 作只读对照，CPU/CUDA × FP32/BF16、6147 tokens、
 4 Q heads / 2 KV heads / D64 下，CIS 与 reference 完整选块 ID 均精确一致。
@@ -213,8 +217,8 @@ CUDA 与 FlashInfer 可用。测试命令和环境准备见[项目 README](../..
 共享 GR 请求生成使用 [request_format.py](request_format.py)：NOSA 聊天模板、tokenizer 与请求预算适配。
 用法见 [GR 生成器](../../GR/README.md)。
 dense 单请求性能测量入口见 [GR 实验](../../experiments/nosa_gr_65536_1024/README.md)，
-共享 cache 改动后未运行。通过 `bash experiments/nosa_gr_65536_1024/scripts/run.sh <run_id>`
-可重新测量延迟和模块 MFU。
+已于 2026-09-28 在 H200 上补测；测量边界与 run ID 见报告。
+通过 `bash experiments/nosa_gr_65536_1024/scripts/run.sh <run_id>` 可重新测量延迟和模块 MFU。
 
 GR 前向使用 `model(input_ids, cache, return_hidden=True)` 返回本次调用所有输入 token 的最终
 normalized hidden states，跳过 LM head；不与 `logits_to_keep` 同时使用。

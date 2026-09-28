@@ -1,0 +1,1338 @@
+{
+  "kind": "estimate_from_existing_measurements",
+  "parameters": {
+    "peak_tflops": 989.0,
+    "bandwidth_gbps": 50.0,
+    "bytes_per_second": 50000000000.0,
+    "num_layers": 32,
+    "num_queries": 1024,
+    "num_kv_heads": 2,
+    "selection_slots": 64,
+    "prefix_tokens": 65536,
+    "candidate_tokens": 1024,
+    "total_tokens": 66560,
+    "head_dim": 128,
+    "element_size": 2,
+    "block_size": 64,
+    "blocks_per_head": 1040,
+    "block_bytes": 32768
+  },
+  "assumptions": {
+    "mfu": "preserve each layer's measured dense attention MFU",
+    "other_modules": "preserve each layer's measured non-attention GPU activity durations",
+    "flops": "causal effective QK + PV; each KV head serves its GQA query heads",
+    "layer_time": "sum of GPU module activity durations, as in the source MFU denominator",
+    "fetch": "full selected K+V blocks including candidate KV, both heads share one bandwidth",
+    "excluded": [
+      "indexer",
+      "host gaps and launch overhead",
+      "fetch startup overhead",
+      "transfer/compute overlap"
+    ]
+  },
+  "layers": [
+    {
+      "layer": 0,
+      "dense_attention_flops": 1108109950976,
+      "sparse_attention_flops": 68190994432,
+      "attention_flops_ratio": 0.061538112144863245,
+      "projection_flops": 485331304448,
+      "dense_attention_mfu_pct": 60.937437891829816,
+      "dense_attention_gpu_ms": 1.838664,
+      "dense_layer_gpu_ms": 2.589931,
+      "other_gpu_ms": 0.7512669999999999,
+      "sparse_attention_gpu_ms": 0.11314791142872284,
+      "sparse_layer_gpu_ms": 0.8644149114287227,
+      "sparse_union_bytes": 11665408,
+      "full_kv_bytes": 68157440,
+      "sparse_fetch_ms": 0.23330816,
+      "full_fetch_ms": 1.3631488,
+      "prefix_sparse_fetch_ms": 0.21233664,
+      "prefix_full_fetch_ms": 1.34217728
+    },
+    {
+      "layer": 1,
+      "dense_attention_flops": 1108109950976,
+      "sparse_attention_flops": 68190994432,
+      "attention_flops_ratio": 0.061538112144863245,
+      "projection_flops": 485331304448,
+      "dense_attention_mfu_pct": 61.699850493155836,
+      "dense_attention_gpu_ms": 1.815944,
+      "dense_layer_gpu_ms": 2.5667,
+      "other_gpu_ms": 0.750756,
+      "sparse_attention_gpu_ms": 0.11174976552079154,
+      "sparse_layer_gpu_ms": 0.8625057655207915,
+      "sparse_union_bytes": 16678912,
+      "full_kv_bytes": 68157440,
+      "sparse_fetch_ms": 0.33357824,
+      "full_fetch_ms": 1.3631488,
+      "prefix_sparse_fetch_ms": 0.31260672,
+      "prefix_full_fetch_ms": 1.34217728
+    },
+    {
+      "layer": 2,
+      "dense_attention_flops": 1108109950976,
+      "sparse_attention_flops": 68190994432,
+      "attention_flops_ratio": 0.061538112144863245,
+      "projection_flops": 485331304448,
+      "dense_attention_mfu_pct": 61.945456794296696,
+      "dense_attention_gpu_ms": 1.808744,
+      "dense_layer_gpu_ms": 2.551052,
+      "other_gpu_ms": 0.742308,
+      "sparse_attention_gpu_ms": 0.11130669111334852,
+      "sparse_layer_gpu_ms": 0.8536146911133485,
+      "sparse_union_bytes": 17530880,
+      "full_kv_bytes": 68157440,
+      "sparse_fetch_ms": 0.3506176,
+      "full_fetch_ms": 1.3631488,
+      "prefix_sparse_fetch_ms": 0.32964608,
+      "prefix_full_fetch_ms": 1.34217728
+    },
+    {
+      "layer": 3,
+      "dense_attention_flops": 1108109950976,
+      "sparse_attention_flops": 68190994432,
+      "attention_flops_ratio": 0.061538112144863245,
+      "projection_flops": 485331304448,
+      "dense_attention_mfu_pct": 62.42807443662046,
+      "dense_attention_gpu_ms": 1.794761,
+      "dense_layer_gpu_ms": 2.533516,
+      "other_gpu_ms": 0.738755,
+      "sparse_attention_gpu_ms": 0.1104462036912269,
+      "sparse_layer_gpu_ms": 0.849201203691227,
+      "sparse_union_bytes": 22904832,
+      "full_kv_bytes": 68157440,
+      "sparse_fetch_ms": 0.45809664,
+      "full_fetch_ms": 1.3631488,
+      "prefix_sparse_fetch_ms": 0.43712512,
+      "prefix_full_fetch_ms": 1.34217728
+    },
+    {
+      "layer": 4,
+      "dense_attention_flops": 1108109950976,
+      "sparse_attention_flops": 68190994432,
+      "attention_flops_ratio": 0.061538112144863245,
+      "projection_flops": 485331304448,
+      "dense_attention_mfu_pct": 62.41583304446203,
+      "dense_attention_gpu_ms": 1.795113,
+      "dense_layer_gpu_ms": 2.534988,
+      "other_gpu_ms": 0.7398749999999998,
+      "sparse_attention_gpu_ms": 0.1104678651067019,
+      "sparse_layer_gpu_ms": 0.8503428651067018,
+      "sparse_union_bytes": 19529728,
+      "full_kv_bytes": 68157440,
+      "sparse_fetch_ms": 0.39059456,
+      "full_fetch_ms": 1.3631488,
+      "prefix_sparse_fetch_ms": 0.36962304,
+      "prefix_full_fetch_ms": 1.34217728
+    },
+    {
+      "layer": 5,
+      "dense_attention_flops": 1108109950976,
+      "sparse_attention_flops": 68190994432,
+      "attention_flops_ratio": 0.061538112144863245,
+      "projection_flops": 485331304448,
+      "dense_attention_mfu_pct": 62.411417584246884,
+      "dense_attention_gpu_ms": 1.79524,
+      "dense_layer_gpu_ms": 2.533643,
+      "other_gpu_ms": 0.7384030000000001,
+      "sparse_attention_gpu_ms": 0.1104756804469443,
+      "sparse_layer_gpu_ms": 0.8488786804469445,
+      "sparse_union_bytes": 16220160,
+      "full_kv_bytes": 68157440,
+      "sparse_fetch_ms": 0.3244032,
+      "full_fetch_ms": 1.3631488,
+      "prefix_sparse_fetch_ms": 0.30343168,
+      "prefix_full_fetch_ms": 1.34217728
+    },
+    {
+      "layer": 6,
+      "dense_attention_flops": 1108109950976,
+      "sparse_attention_flops": 68190994432,
+      "attention_flops_ratio": 0.061538112144863245,
+      "projection_flops": 485331304448,
+      "dense_attention_mfu_pct": 62.42365724432018,
+      "dense_attention_gpu_ms": 1.794888,
+      "dense_layer_gpu_ms": 2.529676,
+      "other_gpu_ms": 0.7347879999999998,
+      "sparse_attention_gpu_ms": 0.1104540190314693,
+      "sparse_layer_gpu_ms": 0.8452420190314691,
+      "sparse_union_bytes": 24903680,
+      "full_kv_bytes": 68157440,
+      "sparse_fetch_ms": 0.4980736,
+      "full_fetch_ms": 1.3631488,
+      "prefix_sparse_fetch_ms": 0.47710208,
+      "prefix_full_fetch_ms": 1.34217728
+    },
+    {
+      "layer": 7,
+      "dense_attention_flops": 1108109950976,
+      "sparse_attention_flops": 68190994432,
+      "attention_flops_ratio": 0.061538112144863245,
+      "projection_flops": 485331304448,
+      "dense_attention_mfu_pct": 62.9171760160373,
+      "dense_attention_gpu_ms": 1.780809,
+      "dense_layer_gpu_ms": 2.5159160000000003,
+      "other_gpu_ms": 0.7351070000000002,
+      "sparse_attention_gpu_ms": 0.10958762395058178,
+      "sparse_layer_gpu_ms": 0.8446946239505819,
+      "sparse_union_bytes": 19169280,
+      "full_kv_bytes": 68157440,
+      "sparse_fetch_ms": 0.3833856,
+      "full_fetch_ms": 1.3631488,
+      "prefix_sparse_fetch_ms": 0.36241408,
+      "prefix_full_fetch_ms": 1.34217728
+    },
+    {
+      "layer": 8,
+      "dense_attention_flops": 1108109950976,
+      "sparse_attention_flops": 68190994432,
+      "attention_flops_ratio": 0.061538112144863245,
+      "projection_flops": 485331304448,
+      "dense_attention_mfu_pct": 62.99645181063832,
+      "dense_attention_gpu_ms": 1.778568,
+      "dense_layer_gpu_ms": 2.511275,
+      "other_gpu_ms": 0.732707,
+      "sparse_attention_gpu_ms": 0.10944971704126513,
+      "sparse_layer_gpu_ms": 0.8421567170412652,
+      "sparse_union_bytes": 17793024,
+      "full_kv_bytes": 68157440,
+      "sparse_fetch_ms": 0.35586048,
+      "full_fetch_ms": 1.3631488,
+      "prefix_sparse_fetch_ms": 0.33488896,
+      "prefix_full_fetch_ms": 1.34217728
+    },
+    {
+      "layer": 9,
+      "dense_attention_flops": 1108109950976,
+      "sparse_attention_flops": 68190994432,
+      "attention_flops_ratio": 0.061538112144863245,
+      "projection_flops": 485331304448,
+      "dense_attention_mfu_pct": 63.07248342959979,
+      "dense_attention_gpu_ms": 1.776424,
+      "dense_layer_gpu_ms": 2.508684,
+      "other_gpu_ms": 0.7322600000000001,
+      "sparse_attention_gpu_ms": 0.10931777932882654,
+      "sparse_layer_gpu_ms": 0.8415777793288267,
+      "sparse_union_bytes": 39256064,
+      "full_kv_bytes": 68157440,
+      "sparse_fetch_ms": 0.78512128,
+      "full_fetch_ms": 1.3631488,
+      "prefix_sparse_fetch_ms": 0.76414976,
+      "prefix_full_fetch_ms": 1.34217728
+    },
+    {
+      "layer": 10,
+      "dense_attention_flops": 1108109950976,
+      "sparse_attention_flops": 68190994432,
+      "attention_flops_ratio": 0.061538112144863245,
+      "projection_flops": 485331304448,
+      "dense_attention_mfu_pct": 63.05086810652553,
+      "dense_attention_gpu_ms": 1.777033,
+      "dense_layer_gpu_ms": 2.510284,
+      "other_gpu_ms": 0.7332509999999999,
+      "sparse_attention_gpu_ms": 0.10935525603912277,
+      "sparse_layer_gpu_ms": 0.8426062560391226,
+      "sparse_union_bytes": 15040512,
+      "full_kv_bytes": 68157440,
+      "sparse_fetch_ms": 0.30081024,
+      "full_fetch_ms": 1.3631488,
+      "prefix_sparse_fetch_ms": 0.27983872,
+      "prefix_full_fetch_ms": 1.34217728
+    },
+    {
+      "layer": 11,
+      "dense_attention_flops": 1108109950976,
+      "sparse_attention_flops": 68190994432,
+      "attention_flops_ratio": 0.061538112144863245,
+      "projection_flops": 485331304448,
+      "dense_attention_mfu_pct": 63.03274253911204,
+      "dense_attention_gpu_ms": 1.777544,
+      "dense_layer_gpu_ms": 2.510411,
+      "other_gpu_ms": 0.7328669999999999,
+      "sparse_attention_gpu_ms": 0.1093867020144288,
+      "sparse_layer_gpu_ms": 0.8422537020144287,
+      "sparse_union_bytes": 21233664,
+      "full_kv_bytes": 68157440,
+      "sparse_fetch_ms": 0.42467328,
+      "full_fetch_ms": 1.3631488,
+      "prefix_sparse_fetch_ms": 0.40370176,
+      "prefix_full_fetch_ms": 1.34217728
+    },
+    {
+      "layer": 12,
+      "dense_attention_flops": 1108109950976,
+      "sparse_attention_flops": 68190994432,
+      "attention_flops_ratio": 0.061538112144863245,
+      "projection_flops": 485331304448,
+      "dense_attention_mfu_pct": 63.08498377540065,
+      "dense_attention_gpu_ms": 1.776072,
+      "dense_layer_gpu_ms": 2.508588,
+      "other_gpu_ms": 0.732516,
+      "sparse_attention_gpu_ms": 0.10929611791335156,
+      "sparse_layer_gpu_ms": 0.8418121179133515,
+      "sparse_union_bytes": 18481152,
+      "full_kv_bytes": 68157440,
+      "sparse_fetch_ms": 0.36962304,
+      "full_fetch_ms": 1.3631488,
+      "prefix_sparse_fetch_ms": 0.34865152,
+      "prefix_full_fetch_ms": 1.34217728
+    },
+    {
+      "layer": 13,
+      "dense_attention_flops": 1108109950976,
+      "sparse_attention_flops": 68190994432,
+      "attention_flops_ratio": 0.061538112144863245,
+      "projection_flops": 485331304448,
+      "dense_attention_mfu_pct": 63.04178628458477,
+      "dense_attention_gpu_ms": 1.777289,
+      "dense_layer_gpu_ms": 2.510348,
+      "other_gpu_ms": 0.7330590000000001,
+      "sparse_attention_gpu_ms": 0.10937100979583185,
+      "sparse_layer_gpu_ms": 0.8424300097958319,
+      "sparse_union_bytes": 29491200,
+      "full_kv_bytes": 68157440,
+      "sparse_fetch_ms": 0.589824,
+      "full_fetch_ms": 1.3631488,
+      "prefix_sparse_fetch_ms": 0.56885248,
+      "prefix_full_fetch_ms": 1.34217728
+    },
+    {
+      "layer": 14,
+      "dense_attention_flops": 1108109950976,
+      "sparse_attention_flops": 68190994432,
+      "attention_flops_ratio": 0.061538112144863245,
+      "projection_flops": 485331304448,
+      "dense_attention_mfu_pct": 63.06566714694868,
+      "dense_attention_gpu_ms": 1.776616,
+      "dense_layer_gpu_ms": 2.508298,
+      "other_gpu_ms": 0.7316819999999999,
+      "sparse_attention_gpu_ms": 0.10932959464635836,
+      "sparse_layer_gpu_ms": 0.8410115946463583,
+      "sparse_union_bytes": 18120704,
+      "full_kv_bytes": 68157440,
+      "sparse_fetch_ms": 0.36241408,
+      "full_fetch_ms": 1.3631488,
+      "prefix_sparse_fetch_ms": 0.34144256,
+      "prefix_full_fetch_ms": 1.34217728
+    },
+    {
+      "layer": 15,
+      "dense_attention_flops": 1108109950976,
+      "sparse_attention_flops": 68190994432,
+      "attention_flops_ratio": 0.061538112144863245,
+      "projection_flops": 485331304448,
+      "dense_attention_mfu_pct": 63.08498377540065,
+      "dense_attention_gpu_ms": 1.776072,
+      "dense_layer_gpu_ms": 2.516748,
+      "other_gpu_ms": 0.7406760000000001,
+      "sparse_attention_gpu_ms": 0.10929611791335156,
+      "sparse_layer_gpu_ms": 0.8499721179133517,
+      "sparse_union_bytes": 16449536,
+      "full_kv_bytes": 68157440,
+      "sparse_fetch_ms": 0.32899072,
+      "full_fetch_ms": 1.3631488,
+      "prefix_sparse_fetch_ms": 0.3080192,
+      "prefix_full_fetch_ms": 1.34217728
+    },
+    {
+      "layer": 16,
+      "dense_attention_flops": 1108109950976,
+      "sparse_attention_flops": 68190994432,
+      "attention_flops_ratio": 0.061538112144863245,
+      "projection_flops": 485331304448,
+      "dense_attention_mfu_pct": 62.699727923817704,
+      "dense_attention_gpu_ms": 1.786985,
+      "dense_layer_gpu_ms": 2.5267,
+      "other_gpu_ms": 0.7397149999999999,
+      "sparse_attention_gpu_ms": 0.10996768333118845,
+      "sparse_layer_gpu_ms": 0.8496826833311883,
+      "sparse_union_bytes": 41549824,
+      "full_kv_bytes": 68157440,
+      "sparse_fetch_ms": 0.83099648,
+      "full_fetch_ms": 1.3631488,
+      "prefix_sparse_fetch_ms": 0.81002496,
+      "prefix_full_fetch_ms": 1.34217728
+    },
+    {
+      "layer": 17,
+      "dense_attention_flops": 1108109950976,
+      "sparse_attention_flops": 68190994432,
+      "attention_flops_ratio": 0.061538112144863245,
+      "projection_flops": 485331304448,
+      "dense_attention_mfu_pct": 62.82914932279823,
+      "dense_attention_gpu_ms": 1.783304,
+      "dense_layer_gpu_ms": 2.517548,
+      "other_gpu_ms": 0.7342440000000001,
+      "sparse_attention_gpu_ms": 0.1097411615403832,
+      "sparse_layer_gpu_ms": 0.8439851615403833,
+      "sparse_union_bytes": 20643840,
+      "full_kv_bytes": 68157440,
+      "sparse_fetch_ms": 0.4128768,
+      "full_fetch_ms": 1.3631488,
+      "prefix_sparse_fetch_ms": 0.39190528,
+      "prefix_full_fetch_ms": 1.34217728
+    },
+    {
+      "layer": 18,
+      "dense_attention_flops": 1108109950976,
+      "sparse_attention_flops": 68190994432,
+      "attention_flops_ratio": 0.061538112144863245,
+      "projection_flops": 485331304448,
+      "dense_attention_mfu_pct": 62.9930516971971,
+      "dense_attention_gpu_ms": 1.778664,
+      "dense_layer_gpu_ms": 2.5136760000000002,
+      "other_gpu_ms": 0.7350120000000002,
+      "sparse_attention_gpu_ms": 0.10945562470003103,
+      "sparse_layer_gpu_ms": 0.8444676247000312,
+      "sparse_union_bytes": 50462720,
+      "full_kv_bytes": 68157440,
+      "sparse_fetch_ms": 1.0092544,
+      "full_fetch_ms": 1.3631488,
+      "prefix_sparse_fetch_ms": 0.98828288,
+      "prefix_full_fetch_ms": 1.34217728
+    },
+    {
+      "layer": 19,
+      "dense_attention_flops": 1108109950976,
+      "sparse_attention_flops": 68190994432,
+      "attention_flops_ratio": 0.061538112144863245,
+      "projection_flops": 485331304448,
+      "dense_attention_mfu_pct": 62.97492395577693,
+      "dense_attention_gpu_ms": 1.779176,
+      "dense_layer_gpu_ms": 2.513452,
+      "other_gpu_ms": 0.7342759999999999,
+      "sparse_attention_gpu_ms": 0.10948713221344922,
+      "sparse_layer_gpu_ms": 0.8437631322134491,
+      "sparse_union_bytes": 25821184,
+      "full_kv_bytes": 68157440,
+      "sparse_fetch_ms": 0.51642368,
+      "full_fetch_ms": 1.3631488,
+      "prefix_sparse_fetch_ms": 0.49545216,
+      "prefix_full_fetch_ms": 1.34217728
+    },
+    {
+      "layer": 20,
+      "dense_attention_flops": 1108109950976,
+      "sparse_attention_flops": 68190994432,
+      "attention_flops_ratio": 0.061538112144863245,
+      "projection_flops": 485331304448,
+      "dense_attention_mfu_pct": 62.91947259344598,
+      "dense_attention_gpu_ms": 1.780744,
+      "dense_layer_gpu_ms": 2.515852,
+      "other_gpu_ms": 0.7351080000000001,
+      "sparse_attention_gpu_ms": 0.10958362397329237,
+      "sparse_layer_gpu_ms": 0.8446916239732924,
+      "sparse_union_bytes": 21004288,
+      "full_kv_bytes": 68157440,
+      "sparse_fetch_ms": 0.42008576,
+      "full_fetch_ms": 1.3631488,
+      "prefix_sparse_fetch_ms": 0.39911424,
+      "prefix_full_fetch_ms": 1.34217728
+    },
+    {
+      "layer": 21,
+      "dense_attention_flops": 1108109950976,
+      "sparse_attention_flops": 68190994432,
+      "attention_flops_ratio": 0.061538112144863245,
+      "projection_flops": 485331304448,
+      "dense_attention_mfu_pct": 62.847193224977104,
+      "dense_attention_gpu_ms": 1.782792,
+      "dense_layer_gpu_ms": 2.5181869999999997,
+      "other_gpu_ms": 0.7353949999999998,
+      "sparse_attention_gpu_ms": 0.10970965402696503,
+      "sparse_layer_gpu_ms": 0.8451046540269649,
+      "sparse_union_bytes": 18612224,
+      "full_kv_bytes": 68157440,
+      "sparse_fetch_ms": 0.37224448,
+      "full_fetch_ms": 1.3631488,
+      "prefix_sparse_fetch_ms": 0.35127296,
+      "prefix_full_fetch_ms": 1.34217728
+    },
+    {
+      "layer": 22,
+      "dense_attention_flops": 1108109950976,
+      "sparse_attention_flops": 68190994432,
+      "attention_flops_ratio": 0.061538112144863245,
+      "projection_flops": 485331304448,
+      "dense_attention_mfu_pct": 63.048632884179234,
+      "dense_attention_gpu_ms": 1.777096,
+      "dense_layer_gpu_ms": 2.512556,
+      "other_gpu_ms": 0.73546,
+      "sparse_attention_gpu_ms": 0.1093591329401879,
+      "sparse_layer_gpu_ms": 0.844819132940188,
+      "sparse_union_bytes": 41549824,
+      "full_kv_bytes": 68157440,
+      "sparse_fetch_ms": 0.83099648,
+      "full_fetch_ms": 1.3631488,
+      "prefix_sparse_fetch_ms": 0.81002496,
+      "prefix_full_fetch_ms": 1.34217728
+    },
+    {
+      "layer": 23,
+      "dense_attention_flops": 1108109950976,
+      "sparse_attention_flops": 68190994432,
+      "attention_flops_ratio": 0.061538112144863245,
+      "projection_flops": 485331304448,
+      "dense_attention_mfu_pct": 62.97262332867969,
+      "dense_attention_gpu_ms": 1.779241,
+      "dense_layer_gpu_ms": 2.513772,
+      "other_gpu_ms": 0.7345309999999998,
+      "sparse_attention_gpu_ms": 0.10949113219073862,
+      "sparse_layer_gpu_ms": 0.8440221321907384,
+      "sparse_union_bytes": 55640064,
+      "full_kv_bytes": 68157440,
+      "sparse_fetch_ms": 1.11280128,
+      "full_fetch_ms": 1.3631488,
+      "prefix_sparse_fetch_ms": 1.09182976,
+      "prefix_full_fetch_ms": 1.34217728
+    },
+    {
+      "layer": 24,
+      "dense_attention_flops": 1108109950976,
+      "sparse_attention_flops": 68190994432,
+      "attention_flops_ratio": 0.061538112144863245,
+      "projection_flops": 485331304448,
+      "dense_attention_mfu_pct": 62.86863382453404,
+      "dense_attention_gpu_ms": 1.782184,
+      "dense_layer_gpu_ms": 2.51841,
+      "other_gpu_ms": 0.7362259999999998,
+      "sparse_attention_gpu_ms": 0.10967223885478096,
+      "sparse_layer_gpu_ms": 0.8458982388547808,
+      "sparse_union_bytes": 30441472,
+      "full_kv_bytes": 68157440,
+      "sparse_fetch_ms": 0.60882944,
+      "full_fetch_ms": 1.3631488,
+      "prefix_sparse_fetch_ms": 0.58785792,
+      "prefix_full_fetch_ms": 1.34217728
+    },
+    {
+      "layer": 25,
+      "dense_attention_flops": 1108109950976,
+      "sparse_attention_flops": 68190994432,
+      "attention_flops_ratio": 0.061538112144863245,
+      "projection_flops": 485331304448,
+      "dense_attention_mfu_pct": 62.95341080936978,
+      "dense_attention_gpu_ms": 1.779784,
+      "dense_layer_gpu_ms": 2.514156,
+      "other_gpu_ms": 0.7343719999999998,
+      "sparse_attention_gpu_ms": 0.10952454738563329,
+      "sparse_layer_gpu_ms": 0.8438965473856331,
+      "sparse_union_bytes": 32014336,
+      "full_kv_bytes": 68157440,
+      "sparse_fetch_ms": 0.64028672,
+      "full_fetch_ms": 1.3631488,
+      "prefix_sparse_fetch_ms": 0.6193152,
+      "prefix_full_fetch_ms": 1.34217728
+    },
+    {
+      "layer": 26,
+      "dense_attention_flops": 1108109950976,
+      "sparse_attention_flops": 68190994432,
+      "attention_flops_ratio": 0.061538112144863245,
+      "projection_flops": 485331304448,
+      "dense_attention_mfu_pct": 62.853927100873044,
+      "dense_attention_gpu_ms": 1.782601,
+      "dense_layer_gpu_ms": 2.5190200000000003,
+      "other_gpu_ms": 0.7364190000000002,
+      "sparse_attention_gpu_ms": 0.10969790024754537,
+      "sparse_layer_gpu_ms": 0.8461169002475455,
+      "sparse_union_bytes": 44924928,
+      "full_kv_bytes": 68157440,
+      "sparse_fetch_ms": 0.89849856,
+      "full_fetch_ms": 1.3631488,
+      "prefix_sparse_fetch_ms": 0.87752704,
+      "prefix_full_fetch_ms": 1.34217728
+    },
+    {
+      "layer": 27,
+      "dense_attention_flops": 1108109950976,
+      "sparse_attention_flops": 68190994432,
+      "attention_flops_ratio": 0.061538112144863245,
+      "projection_flops": 485331304448,
+      "dense_attention_mfu_pct": 62.943225500959166,
+      "dense_attention_gpu_ms": 1.780072,
+      "dense_layer_gpu_ms": 2.516747,
+      "other_gpu_ms": 0.736675,
+      "sparse_attention_gpu_ms": 0.10954227036193101,
+      "sparse_layer_gpu_ms": 0.846217270361931,
+      "sparse_union_bytes": 20316160,
+      "full_kv_bytes": 68157440,
+      "sparse_fetch_ms": 0.4063232,
+      "full_fetch_ms": 1.3631488,
+      "prefix_sparse_fetch_ms": 0.38535168,
+      "prefix_full_fetch_ms": 1.34217728
+    },
+    {
+      "layer": 28,
+      "dense_attention_flops": 1108109950976,
+      "sparse_attention_flops": 68190994432,
+      "attention_flops_ratio": 0.061538112144863245,
+      "projection_flops": 485331304448,
+      "dense_attention_mfu_pct": 62.93756842026398,
+      "dense_attention_gpu_ms": 1.780232,
+      "dense_layer_gpu_ms": 2.515116,
+      "other_gpu_ms": 0.7348839999999999,
+      "sparse_attention_gpu_ms": 0.10955211645987419,
+      "sparse_layer_gpu_ms": 0.844436116459874,
+      "sparse_union_bytes": 24018944,
+      "full_kv_bytes": 68157440,
+      "sparse_fetch_ms": 0.48037888,
+      "full_fetch_ms": 1.3631488,
+      "prefix_sparse_fetch_ms": 0.45940736,
+      "prefix_full_fetch_ms": 1.34217728
+    },
+    {
+      "layer": 29,
+      "dense_attention_flops": 1108109950976,
+      "sparse_attention_flops": 68190994432,
+      "attention_flops_ratio": 0.061538112144863245,
+      "projection_flops": 485331304448,
+      "dense_attention_mfu_pct": 62.97488856024071,
+      "dense_attention_gpu_ms": 1.779177,
+      "dense_layer_gpu_ms": 2.513548,
+      "other_gpu_ms": 0.7343710000000001,
+      "sparse_attention_gpu_ms": 0.10948719375156135,
+      "sparse_layer_gpu_ms": 0.8438581937515615,
+      "sparse_union_bytes": 30670848,
+      "full_kv_bytes": 68157440,
+      "sparse_fetch_ms": 0.61341696,
+      "full_fetch_ms": 1.3631488,
+      "prefix_sparse_fetch_ms": 0.59244544,
+      "prefix_full_fetch_ms": 1.34217728
+    },
+    {
+      "layer": 30,
+      "dense_attention_flops": 1108109950976,
+      "sparse_attention_flops": 68190994432,
+      "attention_flops_ratio": 0.061538112144863245,
+      "projection_flops": 485331304448,
+      "dense_attention_mfu_pct": 63.198850962699716,
+      "dense_attention_gpu_ms": 1.772872,
+      "dense_layer_gpu_ms": 2.504299,
+      "other_gpu_ms": 0.731427,
+      "sparse_attention_gpu_ms": 0.109099195954488,
+      "sparse_layer_gpu_ms": 0.8405261959544881,
+      "sparse_union_bytes": 25067520,
+      "full_kv_bytes": 68157440,
+      "sparse_fetch_ms": 0.5013504,
+      "full_fetch_ms": 1.3631488,
+      "prefix_sparse_fetch_ms": 0.48037888,
+      "prefix_full_fetch_ms": 1.34217728
+    },
+    {
+      "layer": 31,
+      "dense_attention_flops": 1108109950976,
+      "sparse_attention_flops": 68190994432,
+      "attention_flops_ratio": 0.061538112144863245,
+      "projection_flops": 485331304448,
+      "dense_attention_mfu_pct": 63.54754535304171,
+      "dense_attention_gpu_ms": 1.763144,
+      "dense_layer_gpu_ms": 2.4959160000000002,
+      "other_gpu_ms": 0.7327720000000002,
+      "sparse_attention_gpu_ms": 0.10850055319954277,
+      "sparse_layer_gpu_ms": 0.841272553199543,
+      "sparse_union_bytes": 19431424,
+      "full_kv_bytes": 68157440,
+      "sparse_fetch_ms": 0.38862848,
+      "full_fetch_ms": 1.3631488,
+      "prefix_sparse_fetch_ms": 0.36765696,
+      "prefix_full_fetch_ms": 1.34217728
+    }
+  ],
+  "heads": [
+    {
+      "layer": 0,
+      "kv_head": 0,
+      "sparse_union_bytes": 6848512,
+      "full_kv_bytes": 34078720,
+      "sparse_fetch_ms": 0.13697024,
+      "full_fetch_ms": 0.6815744
+    },
+    {
+      "layer": 0,
+      "kv_head": 1,
+      "sparse_union_bytes": 4816896,
+      "full_kv_bytes": 34078720,
+      "sparse_fetch_ms": 0.09633792,
+      "full_fetch_ms": 0.6815744
+    },
+    {
+      "layer": 1,
+      "kv_head": 0,
+      "sparse_union_bytes": 7634944,
+      "full_kv_bytes": 34078720,
+      "sparse_fetch_ms": 0.15269888,
+      "full_fetch_ms": 0.6815744
+    },
+    {
+      "layer": 1,
+      "kv_head": 1,
+      "sparse_union_bytes": 9043968,
+      "full_kv_bytes": 34078720,
+      "sparse_fetch_ms": 0.18087936,
+      "full_fetch_ms": 0.6815744
+    },
+    {
+      "layer": 2,
+      "kv_head": 0,
+      "sparse_union_bytes": 10289152,
+      "full_kv_bytes": 34078720,
+      "sparse_fetch_ms": 0.20578304,
+      "full_fetch_ms": 0.6815744
+    },
+    {
+      "layer": 2,
+      "kv_head": 1,
+      "sparse_union_bytes": 7241728,
+      "full_kv_bytes": 34078720,
+      "sparse_fetch_ms": 0.14483456,
+      "full_fetch_ms": 0.6815744
+    },
+    {
+      "layer": 3,
+      "kv_head": 0,
+      "sparse_union_bytes": 13008896,
+      "full_kv_bytes": 34078720,
+      "sparse_fetch_ms": 0.26017792,
+      "full_fetch_ms": 0.6815744
+    },
+    {
+      "layer": 3,
+      "kv_head": 1,
+      "sparse_union_bytes": 9895936,
+      "full_kv_bytes": 34078720,
+      "sparse_fetch_ms": 0.19791872,
+      "full_fetch_ms": 0.6815744
+    },
+    {
+      "layer": 4,
+      "kv_head": 0,
+      "sparse_union_bytes": 10715136,
+      "full_kv_bytes": 34078720,
+      "sparse_fetch_ms": 0.21430272,
+      "full_fetch_ms": 0.6815744
+    },
+    {
+      "layer": 4,
+      "kv_head": 1,
+      "sparse_union_bytes": 8814592,
+      "full_kv_bytes": 34078720,
+      "sparse_fetch_ms": 0.17629184,
+      "full_fetch_ms": 0.6815744
+    },
+    {
+      "layer": 5,
+      "kv_head": 0,
+      "sparse_union_bytes": 9043968,
+      "full_kv_bytes": 34078720,
+      "sparse_fetch_ms": 0.18087936,
+      "full_fetch_ms": 0.6815744
+    },
+    {
+      "layer": 5,
+      "kv_head": 1,
+      "sparse_union_bytes": 7176192,
+      "full_kv_bytes": 34078720,
+      "sparse_fetch_ms": 0.14352384,
+      "full_fetch_ms": 0.6815744
+    },
+    {
+      "layer": 6,
+      "kv_head": 0,
+      "sparse_union_bytes": 9142272,
+      "full_kv_bytes": 34078720,
+      "sparse_fetch_ms": 0.18284544,
+      "full_fetch_ms": 0.6815744
+    },
+    {
+      "layer": 6,
+      "kv_head": 1,
+      "sparse_union_bytes": 15761408,
+      "full_kv_bytes": 34078720,
+      "sparse_fetch_ms": 0.31522816,
+      "full_fetch_ms": 0.6815744
+    },
+    {
+      "layer": 7,
+      "kv_head": 0,
+      "sparse_union_bytes": 10092544,
+      "full_kv_bytes": 34078720,
+      "sparse_fetch_ms": 0.20185088,
+      "full_fetch_ms": 0.6815744
+    },
+    {
+      "layer": 7,
+      "kv_head": 1,
+      "sparse_union_bytes": 9076736,
+      "full_kv_bytes": 34078720,
+      "sparse_fetch_ms": 0.18153472,
+      "full_fetch_ms": 0.6815744
+    },
+    {
+      "layer": 8,
+      "kv_head": 0,
+      "sparse_union_bytes": 9306112,
+      "full_kv_bytes": 34078720,
+      "sparse_fetch_ms": 0.18612224,
+      "full_fetch_ms": 0.6815744
+    },
+    {
+      "layer": 8,
+      "kv_head": 1,
+      "sparse_union_bytes": 8486912,
+      "full_kv_bytes": 34078720,
+      "sparse_fetch_ms": 0.16973824,
+      "full_fetch_ms": 0.6815744
+    },
+    {
+      "layer": 9,
+      "kv_head": 0,
+      "sparse_union_bytes": 28016640,
+      "full_kv_bytes": 34078720,
+      "sparse_fetch_ms": 0.5603328,
+      "full_fetch_ms": 0.6815744
+    },
+    {
+      "layer": 9,
+      "kv_head": 1,
+      "sparse_union_bytes": 11239424,
+      "full_kv_bytes": 34078720,
+      "sparse_fetch_ms": 0.22478848,
+      "full_fetch_ms": 0.6815744
+    },
+    {
+      "layer": 10,
+      "kv_head": 0,
+      "sparse_union_bytes": 5177344,
+      "full_kv_bytes": 34078720,
+      "sparse_fetch_ms": 0.10354688,
+      "full_fetch_ms": 0.6815744
+    },
+    {
+      "layer": 10,
+      "kv_head": 1,
+      "sparse_union_bytes": 9863168,
+      "full_kv_bytes": 34078720,
+      "sparse_fetch_ms": 0.19726336,
+      "full_fetch_ms": 0.6815744
+    },
+    {
+      "layer": 11,
+      "kv_head": 0,
+      "sparse_union_bytes": 14385152,
+      "full_kv_bytes": 34078720,
+      "sparse_fetch_ms": 0.28770304,
+      "full_fetch_ms": 0.6815744
+    },
+    {
+      "layer": 11,
+      "kv_head": 1,
+      "sparse_union_bytes": 6848512,
+      "full_kv_bytes": 34078720,
+      "sparse_fetch_ms": 0.13697024,
+      "full_fetch_ms": 0.6815744
+    },
+    {
+      "layer": 12,
+      "kv_head": 0,
+      "sparse_union_bytes": 8355840,
+      "full_kv_bytes": 34078720,
+      "sparse_fetch_ms": 0.1671168,
+      "full_fetch_ms": 0.6815744
+    },
+    {
+      "layer": 12,
+      "kv_head": 1,
+      "sparse_union_bytes": 10125312,
+      "full_kv_bytes": 34078720,
+      "sparse_fetch_ms": 0.20250624,
+      "full_fetch_ms": 0.6815744
+    },
+    {
+      "layer": 13,
+      "kv_head": 0,
+      "sparse_union_bytes": 18743296,
+      "full_kv_bytes": 34078720,
+      "sparse_fetch_ms": 0.37486592,
+      "full_fetch_ms": 0.6815744
+    },
+    {
+      "layer": 13,
+      "kv_head": 1,
+      "sparse_union_bytes": 10747904,
+      "full_kv_bytes": 34078720,
+      "sparse_fetch_ms": 0.21495808,
+      "full_fetch_ms": 0.6815744
+    },
+    {
+      "layer": 14,
+      "kv_head": 0,
+      "sparse_union_bytes": 9469952,
+      "full_kv_bytes": 34078720,
+      "sparse_fetch_ms": 0.18939904,
+      "full_fetch_ms": 0.6815744
+    },
+    {
+      "layer": 14,
+      "kv_head": 1,
+      "sparse_union_bytes": 8650752,
+      "full_kv_bytes": 34078720,
+      "sparse_fetch_ms": 0.17301504,
+      "full_fetch_ms": 0.6815744
+    },
+    {
+      "layer": 15,
+      "kv_head": 0,
+      "sparse_union_bytes": 10944512,
+      "full_kv_bytes": 34078720,
+      "sparse_fetch_ms": 0.21889024,
+      "full_fetch_ms": 0.6815744
+    },
+    {
+      "layer": 15,
+      "kv_head": 1,
+      "sparse_union_bytes": 5505024,
+      "full_kv_bytes": 34078720,
+      "sparse_fetch_ms": 0.11010048,
+      "full_fetch_ms": 0.6815744
+    },
+    {
+      "layer": 16,
+      "kv_head": 0,
+      "sparse_union_bytes": 32079872,
+      "full_kv_bytes": 34078720,
+      "sparse_fetch_ms": 0.64159744,
+      "full_fetch_ms": 0.6815744
+    },
+    {
+      "layer": 16,
+      "kv_head": 1,
+      "sparse_union_bytes": 9469952,
+      "full_kv_bytes": 34078720,
+      "sparse_fetch_ms": 0.18939904,
+      "full_fetch_ms": 0.6815744
+    },
+    {
+      "layer": 17,
+      "kv_head": 0,
+      "sparse_union_bytes": 11206656,
+      "full_kv_bytes": 34078720,
+      "sparse_fetch_ms": 0.22413312,
+      "full_fetch_ms": 0.6815744
+    },
+    {
+      "layer": 17,
+      "kv_head": 1,
+      "sparse_union_bytes": 9437184,
+      "full_kv_bytes": 34078720,
+      "sparse_fetch_ms": 0.18874368,
+      "full_fetch_ms": 0.6815744
+    },
+    {
+      "layer": 18,
+      "kv_head": 0,
+      "sparse_union_bytes": 22544384,
+      "full_kv_bytes": 34078720,
+      "sparse_fetch_ms": 0.45088768,
+      "full_fetch_ms": 0.6815744
+    },
+    {
+      "layer": 18,
+      "kv_head": 1,
+      "sparse_union_bytes": 27918336,
+      "full_kv_bytes": 34078720,
+      "sparse_fetch_ms": 0.55836672,
+      "full_fetch_ms": 0.6815744
+    },
+    {
+      "layer": 19,
+      "kv_head": 0,
+      "sparse_union_bytes": 16941056,
+      "full_kv_bytes": 34078720,
+      "sparse_fetch_ms": 0.33882112,
+      "full_fetch_ms": 0.6815744
+    },
+    {
+      "layer": 19,
+      "kv_head": 1,
+      "sparse_union_bytes": 8880128,
+      "full_kv_bytes": 34078720,
+      "sparse_fetch_ms": 0.17760256,
+      "full_fetch_ms": 0.6815744
+    },
+    {
+      "layer": 20,
+      "kv_head": 0,
+      "sparse_union_bytes": 9863168,
+      "full_kv_bytes": 34078720,
+      "sparse_fetch_ms": 0.19726336,
+      "full_fetch_ms": 0.6815744
+    },
+    {
+      "layer": 20,
+      "kv_head": 1,
+      "sparse_union_bytes": 11141120,
+      "full_kv_bytes": 34078720,
+      "sparse_fetch_ms": 0.2228224,
+      "full_fetch_ms": 0.6815744
+    },
+    {
+      "layer": 21,
+      "kv_head": 0,
+      "sparse_union_bytes": 8912896,
+      "full_kv_bytes": 34078720,
+      "sparse_fetch_ms": 0.17825792,
+      "full_fetch_ms": 0.6815744
+    },
+    {
+      "layer": 21,
+      "kv_head": 1,
+      "sparse_union_bytes": 9699328,
+      "full_kv_bytes": 34078720,
+      "sparse_fetch_ms": 0.19398656,
+      "full_fetch_ms": 0.6815744
+    },
+    {
+      "layer": 22,
+      "kv_head": 0,
+      "sparse_union_bytes": 32047104,
+      "full_kv_bytes": 34078720,
+      "sparse_fetch_ms": 0.64094208,
+      "full_fetch_ms": 0.6815744
+    },
+    {
+      "layer": 22,
+      "kv_head": 1,
+      "sparse_union_bytes": 9502720,
+      "full_kv_bytes": 34078720,
+      "sparse_fetch_ms": 0.1900544,
+      "full_fetch_ms": 0.6815744
+    },
+    {
+      "layer": 23,
+      "kv_head": 0,
+      "sparse_union_bytes": 31195136,
+      "full_kv_bytes": 34078720,
+      "sparse_fetch_ms": 0.62390272,
+      "full_fetch_ms": 0.6815744
+    },
+    {
+      "layer": 23,
+      "kv_head": 1,
+      "sparse_union_bytes": 24444928,
+      "full_kv_bytes": 34078720,
+      "sparse_fetch_ms": 0.48889856,
+      "full_fetch_ms": 0.6815744
+    },
+    {
+      "layer": 24,
+      "kv_head": 0,
+      "sparse_union_bytes": 9961472,
+      "full_kv_bytes": 34078720,
+      "sparse_fetch_ms": 0.19922944,
+      "full_fetch_ms": 0.6815744
+    },
+    {
+      "layer": 24,
+      "kv_head": 1,
+      "sparse_union_bytes": 20480000,
+      "full_kv_bytes": 34078720,
+      "sparse_fetch_ms": 0.4096,
+      "full_fetch_ms": 0.6815744
+    },
+    {
+      "layer": 25,
+      "kv_head": 0,
+      "sparse_union_bytes": 20021248,
+      "full_kv_bytes": 34078720,
+      "sparse_fetch_ms": 0.40042496,
+      "full_fetch_ms": 0.6815744
+    },
+    {
+      "layer": 25,
+      "kv_head": 1,
+      "sparse_union_bytes": 11993088,
+      "full_kv_bytes": 34078720,
+      "sparse_fetch_ms": 0.23986176,
+      "full_fetch_ms": 0.6815744
+    },
+    {
+      "layer": 26,
+      "kv_head": 0,
+      "sparse_union_bytes": 23461888,
+      "full_kv_bytes": 34078720,
+      "sparse_fetch_ms": 0.46923776,
+      "full_fetch_ms": 0.6815744
+    },
+    {
+      "layer": 26,
+      "kv_head": 1,
+      "sparse_union_bytes": 21463040,
+      "full_kv_bytes": 34078720,
+      "sparse_fetch_ms": 0.4292608,
+      "full_fetch_ms": 0.6815744
+    },
+    {
+      "layer": 27,
+      "kv_head": 0,
+      "sparse_union_bytes": 9994240,
+      "full_kv_bytes": 34078720,
+      "sparse_fetch_ms": 0.1998848,
+      "full_fetch_ms": 0.6815744
+    },
+    {
+      "layer": 27,
+      "kv_head": 1,
+      "sparse_union_bytes": 10321920,
+      "full_kv_bytes": 34078720,
+      "sparse_fetch_ms": 0.2064384,
+      "full_fetch_ms": 0.6815744
+    },
+    {
+      "layer": 28,
+      "kv_head": 0,
+      "sparse_union_bytes": 8716288,
+      "full_kv_bytes": 34078720,
+      "sparse_fetch_ms": 0.17432576,
+      "full_fetch_ms": 0.6815744
+    },
+    {
+      "layer": 28,
+      "kv_head": 1,
+      "sparse_union_bytes": 15302656,
+      "full_kv_bytes": 34078720,
+      "sparse_fetch_ms": 0.30605312,
+      "full_fetch_ms": 0.6815744
+    },
+    {
+      "layer": 29,
+      "kv_head": 0,
+      "sparse_union_bytes": 7438336,
+      "full_kv_bytes": 34078720,
+      "sparse_fetch_ms": 0.14876672,
+      "full_fetch_ms": 0.6815744
+    },
+    {
+      "layer": 29,
+      "kv_head": 1,
+      "sparse_union_bytes": 23232512,
+      "full_kv_bytes": 34078720,
+      "sparse_fetch_ms": 0.46465024,
+      "full_fetch_ms": 0.6815744
+    },
+    {
+      "layer": 30,
+      "kv_head": 0,
+      "sparse_union_bytes": 14581760,
+      "full_kv_bytes": 34078720,
+      "sparse_fetch_ms": 0.2916352,
+      "full_fetch_ms": 0.6815744
+    },
+    {
+      "layer": 30,
+      "kv_head": 1,
+      "sparse_union_bytes": 10485760,
+      "full_kv_bytes": 34078720,
+      "sparse_fetch_ms": 0.2097152,
+      "full_fetch_ms": 0.6815744
+    },
+    {
+      "layer": 31,
+      "kv_head": 0,
+      "sparse_union_bytes": 8945664,
+      "full_kv_bytes": 34078720,
+      "sparse_fetch_ms": 0.17891328,
+      "full_fetch_ms": 0.6815744
+    },
+    {
+      "layer": 31,
+      "kv_head": 1,
+      "sparse_union_bytes": 10485760,
+      "full_kv_bytes": 34078720,
+      "sparse_fetch_ms": 0.2097152,
+      "full_fetch_ms": 0.6815744
+    }
+  ],
+  "totals": {
+    "dense_attention_flops": 35459518431232,
+    "sparse_attention_flops": 2182111821824,
+    "projection_flops": 15530601742336,
+    "dense_attention_gpu_ms": 57.107849,
+    "dense_layer_gpu_ms": 80.669013,
+    "other_gpu_ms": 23.561163999999998,
+    "sparse_attention_gpu_ms": 3.5143092161139164,
+    "sparse_layer_gpu_ms": 27.075473216113917,
+    "sparse_union_bytes": 826638336,
+    "full_kv_bytes": 2181038080,
+    "sparse_fetch_ms": 16.53276672,
+    "full_fetch_ms": 43.6207616,
+    "prefix_sparse_fetch_ms": 15.86167808,
+    "prefix_full_fetch_ms": 42.94967296,
+    "shared_gpu_ms": 0.012032000000000001,
+    "sparse_model_gpu_ms_including_shared": 27.087505216113918,
+    "mean_sparse_attention_gpu_ms": 0.10982216300355989,
+    "mean_sparse_layer_gpu_ms": 0.8461085380035599,
+    "attention_flops_ratio": 0.061538112144863245,
+    "dense_attention_mfu_pct": 62.78280846694451,
+    "sparse_effective_matrix_flops": 17712713564160
+  },
+  "dense_shared_modules": {
+    "embedding": 0.004864,
+    "final_norm_add_residual": 0.007168
+  },
+  "sparse_query_key_pairs_per_kv_head": [
+    [
+      4162048,
+      4162048
+    ],
+    [
+      4162048,
+      4162048
+    ],
+    [
+      4162048,
+      4162048
+    ],
+    [
+      4162048,
+      4162048
+    ],
+    [
+      4162048,
+      4162048
+    ],
+    [
+      4162048,
+      4162048
+    ],
+    [
+      4162048,
+      4162048
+    ],
+    [
+      4162048,
+      4162048
+    ],
+    [
+      4162048,
+      4162048
+    ],
+    [
+      4162048,
+      4162048
+    ],
+    [
+      4162048,
+      4162048
+    ],
+    [
+      4162048,
+      4162048
+    ],
+    [
+      4162048,
+      4162048
+    ],
+    [
+      4162048,
+      4162048
+    ],
+    [
+      4162048,
+      4162048
+    ],
+    [
+      4162048,
+      4162048
+    ],
+    [
+      4162048,
+      4162048
+    ],
+    [
+      4162048,
+      4162048
+    ],
+    [
+      4162048,
+      4162048
+    ],
+    [
+      4162048,
+      4162048
+    ],
+    [
+      4162048,
+      4162048
+    ],
+    [
+      4162048,
+      4162048
+    ],
+    [
+      4162048,
+      4162048
+    ],
+    [
+      4162048,
+      4162048
+    ],
+    [
+      4162048,
+      4162048
+    ],
+    [
+      4162048,
+      4162048
+    ],
+    [
+      4162048,
+      4162048
+    ],
+    [
+      4162048,
+      4162048
+    ],
+    [
+      4162048,
+      4162048
+    ],
+    [
+      4162048,
+      4162048
+    ],
+    [
+      4162048,
+      4162048
+    ],
+    [
+      4162048,
+      4162048
+    ]
+  ],
+  "provenance": {
+    "run_id": "estimate64_h200_pcie50_20260928_01",
+    "computed_at_utc": "2026-09-28T07:35:14.277779+00:00",
+    "dense_run_id": "dense_h200_gpu1_20260928_01",
+    "pattern_run_id": "query_aware_fp32_65536_1024_20260925_01",
+    "input_sha256": {
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_gr_65536_1024/output/data/dense_h200_gpu1_20260928_01/request.json": "0bbabf07bc72f9804dbc2e9644cf708e21eafe237631f4a56c64b20f9cda7f2f",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_gr_65536_1024/output/data/dense_h200_gpu1_20260928_01/metadata.json": "27b3fc42342664580c9c1c64aa82c3f4d0abf7898e9bf36e240220c764696993",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_gr_65536_1024/output/data/dense_h200_gpu1_20260928_01/analysis.json": "8b385dea254d7d80995e3b035578cfa4d97c9b079c4e88fdbb56b6a54e2e5c8f",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_gr_65536_1024/output/data/dense_h200_gpu1_20260928_01/mfu.json": "bd03d277823abc792797c127e8897d257685afd160de6ec4687ba168750fa0c5",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_gr_65536_1024/output/data/dense_h200_gpu1_20260928_01/nsys.sqlite": "9ff2d41554049ae70acf5ca4b82a2bb9e9db40debecd1c6283c8cc20ff2143f9",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_indexer_pattern_65536_1024/output/data/query_aware_fp32_65536_1024_20260925_01/request.json": "0bbabf07bc72f9804dbc2e9644cf708e21eafe237631f4a56c64b20f9cda7f2f",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_indexer_pattern_65536_1024/output/data/query_aware_fp32_65536_1024_20260925_01/metadata.json": "05c244ed62897a4f2d3e03642b79f053af3f74a3fa5e33380fcb124e78f17dc8",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_indexer_pattern_65536_1024/output/data/query_aware_fp32_65536_1024_20260925_01/block_ids.npy": "d87e29307f226aedb35e7f25c2b8a92b9fd987a0cb0d6ebc0cdbfb6ee1ca04f0",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_indexer_pattern_65536_1024/output/data/query_aware_fp32_65536_1024_20260925_01/valid_mask.npy": "9108a011bc3196cc1bfe4b760b22f871ede2dacc4c24d9a2b81c5a17c73e6fe7"
+    },
+    "source_sha256": {
+      "experiments/nosa_indexer_pattern_65536_1024/src/estimate.py": "27fa738beae455f1d7d65a047f57d3f47b9eb0c7254e76635c82d3965638b02b",
+      "experiments/nosa_indexer_pattern_65536_1024/src/dense_timing.py": "b4c7c9a2cb40ef08f563161684d582f9815e5537ddd805d5f4f72ce31a9c563c",
+      "experiments/nosa_indexer_pattern_65536_1024/src/analyze.py": "f9c8fd15ad747ad6136126da606e42bb18a7d6701e552d19986987961412893f",
+      "experiments/nosa_indexer_pattern_65536_1024/scripts/estimate.sh": "8e84bdfbf65f173b7629d173ead2ebafd8ada70c38813131509ef729f4367812",
+      "experiments/nosa_gr_65536_1024/src/mfu.py": "e30ee5ad7ca52e1de1f6f5f03f2b7b776f8ae707a0ae7468adfb00de2755ec98"
+    }
+  }
+}

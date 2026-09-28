@@ -25,6 +25,7 @@ if [[ "$mode" == cpu || "$mode" == all ]]; then
     tests/integration experiments/nosa_gr_65536_1024/tests \
     experiments/nosa_indexer_pattern_65536_1024/tests \
     experiments/indexer_block_sparse_profile/tests \
+    experiments/nosa_kernel_mfu/tests \
     -q -rs -p no:cacheprovider
 fi
 if [[ "$mode" == gpu || "$mode" == all ]]; then

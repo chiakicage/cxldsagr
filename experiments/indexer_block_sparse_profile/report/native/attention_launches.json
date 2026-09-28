@@ -1,0 +1,48 @@
+{
+  "run_id": "sparse_native_h200_gpu1_20260928_02",
+  "rows": [
+    {
+      "run_id": "sparse_native_h200_gpu1_20260928_02",
+      "phase": "full_prefill",
+      "iteration": 0,
+      "kernel_family": "grouped_attention_kernel",
+      "kernel_count": 2080,
+      "kernel_ns": 607934699,
+      "kernel_ms": 607.934699
+    },
+    {
+      "run_id": "sparse_native_h200_gpu1_20260928_02",
+      "phase": "full_prefill",
+      "iteration": 0,
+      "kernel_family": "attention_kernel",
+      "kernel_count": 2080,
+      "kernel_ns": 6144527,
+      "kernel_ms": 6.144527
+    },
+    {
+      "run_id": "sparse_native_h200_gpu1_20260928_02",
+      "phase": "extend",
+      "iteration": 0,
+      "kernel_family": "grouped_attention_kernel",
+      "kernel_count": 32,
+      "kernel_ns": 9836671,
+      "kernel_ms": 9.836671
+    },
+    {
+      "run_id": "sparse_native_h200_gpu1_20260928_02",
+      "phase": "extend",
+      "iteration": 0,
+      "kernel_family": "attention_kernel",
+      "kernel_count": 32,
+      "kernel_ns": 95424,
+      "kernel_ms": 0.095424
+    }
+  ],
+  "definitions": {
+    "attribution": "CUDA launch correlation within NOSA profile roots, using the same validated single process/thread/stream as module_mfu",
+    "duration": "Sum of GPU kernel end-start; grouped and fallback totals exactly conserve the module_mfu attention denominator",
+    "fallback_count": "Number of launched attention_kernel instances, not number of groups or queries that executed fallback work"
+  },
+  "source_sqlite_sha256": "352c1c72303a121ef286c25058bc3b4cbab92f431bb8e70d6a54d7f9468408e1",
+  "source_module_mfu_sha256": "a852e65b4f5191d4efa70cabe197dcebf65a06acb4a02943ea6e098a092bbe28"
+}

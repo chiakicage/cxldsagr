@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "native_run_id": "nosa_native_wgmma_20260928_02",
-  "triton_run_id": "nosa_triton_control_20260928_01",
+  "native_run_id": "sparse_native_h200_gpu1_20260928_02",
+  "triton_run_id": "sparse_triton_h200_gpu1_20260928_01",
   "workload": {
     "prefix_tokens": 65536,
     "new_tokens": 1024,
@@ -22,12 +22,12 @@
     "indexer_execution": "cached_flashinfer_v1"
   },
   "gpu": {
-    "name": "NVIDIA H200",
+    "name": "NVIDIA H20Z",
     "capability": [
       9,
       0
     ],
-    "uuid": "2522820c-89d9-aa17-f79c-ca8cc767fb77",
+    "uuid": "a2e4882b-3248-6018-14ab-90e45b5a5b04",
     "total_memory": 150121545728,
     "sm_count": 132
   },
@@ -193,81 +193,81 @@
       "phase": "full_prefill",
       "metric": "end_to_end",
       "timing_boundary": "unprofiled wall time",
-      "native_ms": 3429.5164681971073,
-      "triton_ms": 3726.671786978841,
-      "speedup_triton_over_native": 1.0866464183908549,
-      "native_run_id": "nosa_native_wgmma_20260928_02",
-      "triton_run_id": "nosa_triton_control_20260928_01"
+      "native_ms": 3304.487319663167,
+      "triton_ms": 3827.189391478896,
+      "speedup_triton_over_native": 1.1581794757405846,
+      "native_run_id": "sparse_native_h200_gpu1_20260928_02",
+      "triton_run_id": "sparse_triton_h200_gpu1_20260928_01"
     },
     {
       "phase": "full_prefill",
       "metric": "pooled_scores",
       "timing_boundary": "nsys correlated kernel duration sum",
-      "native_ms": 285.270451,
-      "triton_ms": 292.92689,
-      "speedup_triton_over_native": 1.0268392291355828,
-      "native_run_id": "nosa_native_wgmma_20260928_02",
-      "triton_run_id": "nosa_triton_control_20260928_01"
+      "native_ms": 255.734599,
+      "triton_ms": 293.169911,
+      "speedup_triton_over_native": 1.1463834465355234,
+      "native_run_id": "sparse_native_h200_gpu1_20260928_02",
+      "triton_run_id": "sparse_triton_h200_gpu1_20260928_01"
     },
     {
       "phase": "full_prefill",
       "metric": "block_sparse_attention",
       "timing_boundary": "nsys correlated kernel duration sum",
-      "native_ms": 874.408863,
-      "triton_ms": 1193.840392,
-      "speedup_triton_over_native": 1.3653114035281686,
-      "native_run_id": "nosa_native_wgmma_20260928_02",
-      "triton_run_id": "nosa_triton_control_20260928_01"
+      "native_ms": 614.079226,
+      "triton_ms": 1197.040926,
+      "speedup_triton_over_native": 1.9493265287564052,
+      "native_run_id": "sparse_native_h200_gpu1_20260928_02",
+      "triton_run_id": "sparse_triton_h200_gpu1_20260928_01"
     },
     {
       "phase": "full_prefill",
       "metric": "indexer_total",
       "timing_boundary": "nsys correlated kernel duration sum",
-      "native_ms": 667.225245,
-      "triton_ms": 677.387554,
-      "speedup_triton_over_native": 1.0152307021896332,
-      "native_run_id": "nosa_native_wgmma_20260928_02",
-      "triton_run_id": "nosa_triton_control_20260928_01"
+      "native_ms": 641.800457,
+      "triton_ms": 678.744956,
+      "speedup_triton_over_native": 1.0575638402825256,
+      "native_run_id": "sparse_native_h200_gpu1_20260928_02",
+      "triton_run_id": "sparse_triton_h200_gpu1_20260928_01"
     },
     {
       "phase": "extend",
       "metric": "end_to_end",
       "timing_boundary": "unprofiled wall time",
-      "native_ms": 58.13363566994667,
-      "triton_ms": 63.28347325325012,
-      "speedup_triton_over_native": 1.0885861949619258,
-      "native_run_id": "nosa_native_wgmma_20260928_02",
-      "triton_run_id": "nosa_triton_control_20260928_01"
+      "native_ms": 54.172055795788765,
+      "triton_ms": 63.93316760659218,
+      "speedup_triton_over_native": 1.1801872140056797,
+      "native_run_id": "sparse_native_h200_gpu1_20260928_02",
+      "triton_run_id": "sparse_triton_h200_gpu1_20260928_01"
     },
     {
       "phase": "extend",
       "metric": "pooled_scores",
       "timing_boundary": "nsys correlated kernel duration sum",
-      "native_ms": 8.290464,
-      "triton_ms": 8.815114,
-      "speedup_triton_over_native": 1.0632835508362377,
-      "native_run_id": "nosa_native_wgmma_20260928_02",
-      "triton_run_id": "nosa_triton_control_20260928_01"
+      "native_ms": 7.168534,
+      "triton_ms": 9.156495,
+      "speedup_triton_over_native": 1.2773176496059027,
+      "native_run_id": "sparse_native_h200_gpu1_20260928_02",
+      "triton_run_id": "sparse_triton_h200_gpu1_20260928_01"
     },
     {
       "phase": "extend",
       "metric": "block_sparse_attention",
       "timing_boundary": "nsys correlated kernel duration sum",
-      "native_ms": 13.931456,
-      "triton_ms": 18.450134,
-      "speedup_triton_over_native": 1.3243507354866568,
-      "native_run_id": "nosa_native_wgmma_20260928_02",
-      "triton_run_id": "nosa_triton_control_20260928_01"
+      "native_ms": 9.932095,
+      "triton_ms": 18.479678,
+      "speedup_triton_over_native": 1.8606022193706362,
+      "native_run_id": "sparse_native_h200_gpu1_20260928_02",
+      "triton_run_id": "sparse_triton_h200_gpu1_20260928_01"
     },
     {
       "phase": "extend",
       "metric": "indexer_total",
       "timing_boundary": "nsys correlated kernel duration sum",
-      "native_ms": 14.749536,
-      "triton_ms": 15.364716,
-      "speedup_triton_over_native": 1.041708430692328,
-      "native_run_id": "nosa_native_wgmma_20260928_02",
-      "triton_run_id": "nosa_triton_control_20260928_01"
+      "native_ms": 13.753867,
+      "triton_ms": 15.74344,
+      "speedup_triton_over_native": 1.1446555357849542,
+      "native_run_id": "sparse_native_h200_gpu1_20260928_02",
+      "triton_run_id": "sparse_triton_h200_gpu1_20260928_01"
     }
   ],
   "definitions": {
@@ -289,7 +289,7 @@
       "cache/indexer_cache.py": "da80484c5d2ad016b3119f80576e72d2956f8d9d1a5cc2804a0e6d668b80b2eb",
       "cache/manager.py": "3f8a3129900f8e5e1af6005fcc187f5d430c5ce5156ca80c169384694dd39f91",
       "executor/model_executor.py": "f585f9940d5fb506e7f8aaeafe8602f9877ac773f2183603744f2b3a2a48c919",
-      "experiments/indexer_block_sparse_profile/scripts/bottleneck.sh": "8669cf96426eced2bf6aa337015984ceb3bb2b400c61fc789d8571ca6403cb5f",
+      "experiments/indexer_block_sparse_profile/scripts/bottleneck.sh": "20a5fc5096f0c867d5b2c6fd30723d19dfdb26d8dc6e0d5752bfe9893af876e0",
       "experiments/indexer_block_sparse_profile/scripts/run.sh": "621f38bc7ee7e42f3e0450f89cbe81952a373d35587ef0fa85661d7569ef8ade",
       "experiments/indexer_block_sparse_profile/src/analyze.py": "0abfbe66485466126de39cbba9921e3f563fe63cefc242e471a3fafdf13225fc",
       "experiments/indexer_block_sparse_profile/src/bottleneck_report.py": "9e6be9e33220aba05dc9f7ece90406945aa4b41bc018de9133de8b74558ef656",
@@ -297,10 +297,10 @@
       "experiments/indexer_block_sparse_profile/src/cis_bottleneck.py": "4305d02f2ebc7e8ce8d60e53f12e436e532a62dde85ed35941324a53fe79e021",
       "experiments/indexer_block_sparse_profile/src/compare.py": "cb97b4d4113d2376d0141284d51c4110077644d22f4779e98f344dc4b89ea9e8",
       "experiments/indexer_block_sparse_profile/src/instrumentation.py": "eefc3b46808d5fead224522f143794b9fc4e5e9c3b44d3552d5c895ec7b9c185",
-      "experiments/indexer_block_sparse_profile/src/launch_analysis.py": "0717f21efe17b11c54b4e9b62e205e924202888aecd90b1faed966650ea4d926",
+      "experiments/indexer_block_sparse_profile/src/launch_analysis.py": "735ff7df70fb179d09f82191fb3989de7a42f94c814a672f6590b5a2b4eef160",
       "experiments/indexer_block_sparse_profile/src/launch_report.py": "237b4ee13adbef3df6bb6f9e5d2d18ab40f999deb094ba57ed4f07aa567cc917",
       "experiments/indexer_block_sparse_profile/src/mfu.py": "022f35b6935087a8f702a3458f9de54c102bd53fec4537340eb2646b464ba2ac",
-      "experiments/indexer_block_sparse_profile/src/module_mfu.py": "0ea0710dbeaf79c8aadc6cab98490073292b673e75ce4d756031dcd4c4c513c7",
+      "experiments/indexer_block_sparse_profile/src/module_mfu.py": "6cad77ea2a0ac74f6825c334e52eda73cde0441d608eb0b8575988a05f5f0520",
       "experiments/nosa_gr_65536_1024/src/analyze.py": "0126cc5c4ed401a77c87b5bba57ce3b759d92c1715dc60018611b09ae1f5aa09",
       "experiments/nosa_gr_65536_1024/src/capture.py": "ba9e591cae497bfd516d04ed8c789c674e7ccfe92be6ec20b8ece0bfbd6fac1b",
       "experiments/nosa_gr_65536_1024/src/instrumentation.py": "fdcc857f5d3128d0ab36c57ee99f34f3e844259ad5fe88318315258465598853",
@@ -321,14 +321,15 @@
       "models/nosa/scoring.py": "c4c7e75a15a5ffb95e935b02ec482586a288c64ad079a175b293db6baa3f92d8",
       "operators/flashinfer.py": "0573d16ce4dd3e13b3792c6b1a4b8c9bab1477ee0f7bfce2abfad87c4c305fd9",
       "operators/sm90/_native.py": "1a852683700af461fc2de5b12295678da86026b92b031b3b609aad6fa5af1ff3",
-      "operators/sm90/_nosa_attention_cuda.py": "52371a3e7441070f9dd124fca4b7664fc282a8022292fc36357e5ca11f63a9d3",
+      "operators/sm90/_nosa_attention_cuda.py": "66f737253c18dacf91eb066c2b07041864b91e7e7fa5f6e674943c424aca038e",
       "operators/sm90/_nosa_attention_triton.py": "c9b2060928cff8cbf594a876061546521064da78f52b3297922bcc5dd0f96985",
       "operators/sm90/_nosa_scores_cuda.py": "70a5cc50c3916675d7a23b9dca49e531a7bed9026e0f5f0bc254bd0a24bd170c",
-      "operators/sm90/csrc/nosa_attention.cu": "c669d9a3f1fa9be72cd2578e6bfeb797b765798e8498a1df154c932b120e514e",
-      "operators/sm90/csrc/nosa_scores.cu": "319c6a58c45e6e77fcf3b23d8d6e104f89c99d569e6d171f02412bc846b87830",
-      "operators/sm90/nosa_attention.py": "69c587aa7e15afe3dc4d813bab1a6b01785b5c3db9d6dca5bfa7e68159d5563d",
+      "operators/sm90/csrc/nosa_attention.cu": "158aad48fc48b0319bea8de939483580f40115d069813958537b956d97a8fefa",
+      "operators/sm90/csrc/nosa_attention_grouped.cuh": "21826cbc696c86de2d7fa5b8df185713e37827a8b80c909ad38bfd275383d8b9",
+      "operators/sm90/csrc/nosa_scores.cu": "0897a00d6d38dccf88566771f063b71e8de16f9458d1f4f6e3bcc71ff91e84d2",
+      "operators/sm90/nosa_attention.py": "0c1b422a5fe5c485927f017f4c2578271eaf6258d01cc3c1aa6d33d488d1d6f9",
       "operators/sm90/nosa_compression.py": "9655a9b4caeea836c846eef654f781318fc930e5ee95192fbeb6ee64dc8201f3",
-      "operators/sm90/nosa_indexer.py": "5319079fcd2810d3e8d0437b15d32c3b4fee9c020436b5aaf6f7178baf3ceedd",
+      "operators/sm90/nosa_indexer.py": "1c34d2ebddba31cd2d06d1468c36535a9ab835ee28e134a6a8b4bf1e32df028a",
       "operators/sm90/nosa_validation.py": "aded63a061790919d0596c18f4129d4c77782b53c4e762ae87f7bd3aa2bb9700",
       "operators/sm90/sparse_attention.py": "5cad42677974731057cbed607d138cf8cf296dc2094c44a09b68a61f0c43a786",
       "pyproject.toml": "5c0c8ec55158fadefd8da5b5a1e7288d9cca5cf04db42998ee5d4e85aa93b428",
@@ -337,10 +338,10 @@
       "uv.lock": "94ff0ab9a8e01a924575c9e2a8381fba8d4249eeb33a60eca3b35246e150bd8e"
     },
     "native_build_inputs": {
-      "tvm_ffi": "0.1.14.post0",
+      "tvm_ffi": "0.1.13.post3",
       "compiler": {
         "path": "/usr/local/cuda-13.2/bin/nvcc",
-        "version": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2026 NVIDIA Corporation\nBuilt on Thu_Mar_19_11:12:51_PM_PDT_2026\nCuda compilation tools, release 13.2, V13.2.78\nBuild cuda_13.2.r13.2/compiler.37668154_0"
+        "version": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2026 NVIDIA Corporation\nBuilt on Fri_May_08_10:53:34_AM_PDT_2026\nCuda compilation tools, release 13.2, V13.2.86\nBuild cuda_13.2.r13.2/compiler.37953736_0"
       },
       "cutlass": {
         "commit": "f3fde58372d33e9a5650ba7b80fc48b3b49d40c8",
@@ -356,22 +357,23 @@
       ],
       "source_sha256": {
         "operators/sm90/_native.py": "1a852683700af461fc2de5b12295678da86026b92b031b3b609aad6fa5af1ff3",
-        "operators/sm90/csrc/nosa_attention.cu": "c669d9a3f1fa9be72cd2578e6bfeb797b765798e8498a1df154c932b120e514e",
-        "operators/sm90/csrc/nosa_scores.cu": "319c6a58c45e6e77fcf3b23d8d6e104f89c99d569e6d171f02412bc846b87830"
+        "operators/sm90/csrc/nosa_attention.cu": "158aad48fc48b0319bea8de939483580f40115d069813958537b956d97a8fefa",
+        "operators/sm90/csrc/nosa_attention_grouped.cuh": "21826cbc696c86de2d7fa5b8df185713e37827a8b80c909ad38bfd275383d8b9",
+        "operators/sm90/csrc/nosa_scores.cu": "0897a00d6d38dccf88566771f063b71e8de16f9458d1f4f6e3bcc71ff91e84d2"
       }
     },
     "input_sha256": {
       "native": {
-        "metadata.json": "f3785a20073522c6cb036c6e15619740a5a3312911f98765bacd018b0774be85",
-        "summary.json": "550becc6285408f4de87736805b4907fee52780fdc3baa2bc1399a0d8e5c58fd",
-        "mfu.json": "4e8acdfb610a8e2ecdb7f46caf942281e9801a73e16e991062f9833617dc96ad",
-        "module_mfu.json": "3da3bdbd14ff125e7c0ced342a4c2de17c5201ec1aeae5253b7f81baac8b0e13"
+        "metadata.json": "ff22bf3f21c94db8c577590ee09d912d0f9733f4cde1b5038f027893be860725",
+        "summary.json": "1b5f4cd481d2efbb7da861c675bcc42068d5ca4d61412f396bcaa75f4d0a6391",
+        "mfu.json": "37d77a888e8aab196bb4b3c8e2c1dfe3e9e79d1a6c156ec4ca009b6c5e87946c",
+        "module_mfu.json": "a852e65b4f5191d4efa70cabe197dcebf65a06acb4a02943ea6e098a092bbe28"
       },
       "triton": {
-        "metadata.json": "221fca211d1b4fd0ab9d75b8f27feedef9963783ce995f8e8014e4d7b7cf87a3",
-        "summary.json": "e005ace2574aa7d02b9053cf5760a410c1cf93c1d30d1e66b932b7acf1c7d32b",
-        "mfu.json": "f0355ca1177a13df2a04b15e40320567a71ae41b863a6edb42301f2a689bd8c9",
-        "module_mfu.json": "24286a5612d67e899265f4a9fe30de251b54aa1a7c5747594884fc88a2668d15"
+        "metadata.json": "283f73d76916e5f4b47fd6ad8b5775dc0961602e5e367807b85d808d9b9f6142",
+        "summary.json": "24f3f5b26708b2a51ffc665e35aed313f9b10992f34ae842101c550604a1e27e",
+        "mfu.json": "a1fadfbfcbf9b98683a892b840ff7f57fb36a8d5fdb8e53ab76c684662069b93",
+        "module_mfu.json": "7bc38597a65083ff39053e5b5c9d72d553cc16ab7907f45c0f75abc44da016fe"
       }
     },
     "comparison_source_sha256": "cb97b4d4113d2376d0141284d51c4110077644d22f4779e98f344dc4b89ea9e8"

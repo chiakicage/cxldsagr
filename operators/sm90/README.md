@@ -7,9 +7,12 @@ Hopper 是项目主开发平台，优先面向 [NOSA](../../models/nosa/README.m
 其他已支持形状使用 [_nosa_attention_triton.py](_nosa_attention_triton.py)。
 输入 Q 为 `[query, query_head, D]`，K/V 为 `[token, KV_head, D]`，选择为逻辑 64-token
 block ID 与 validity mask，CIS 为 `[token, KV_head]` 的加性 logits bias。
-每 CTA 处理一个 query / KV head 的 GQA 组，producer 用 TMA 加载 K/V，
-consumer 流水执行 WGMMA QK/PV，融合 CIS、
-因果 mask、在线 softmax 和 AV；不物化逐 query 展开的选中 KV。
+原生路径在 query 数≥4 时，每 CTA 为同一 KV head 处理四个相邻 query 的 GQA 组
+（尾组可不足四个），实现见 [nosa_attention_grouped.cuh](csrc/nosa_attention_grouped.cuh)。
+producer 用 TMA 加载共享选块并集的 K/V，consumer 执行 WGMMA QK/PV，融合每个 query
+各自的选块 mask、CIS、因果 mask 和在线 softmax。随后发起 per-query repair kernel，
+按 fallback 掩码处理需要回退的组；两个 kernel 的耗时均计入 attention。
+query 数<4 时只使用 per-query kernel。不物化逐 query 展开的选中 KV。
 
 [nosa_indexer.py](nosa_indexer.py) 将两遍 tiled query-aware scoring 与五窗口 max pooling
 融合；[csrc/nosa_scores.cu](csrc/nosa_scores.cu) 分两次 launch：第一遍使用 TMA 与 WGMMA 双缓冲流水计算 softmax normalizer

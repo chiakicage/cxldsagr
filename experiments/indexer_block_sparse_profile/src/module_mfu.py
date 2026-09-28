@@ -73,7 +73,7 @@ SUPPORTED_GRAPHS = (
 )
 # The migrated native kernels and the remeasured Triton control share this
 # dispatcher/source tree. Native score scopes contain normalizer + score
-# launches; attention scopes contain one native WGMMA/TMA launch.
+# launches; this first native attention revision contains one WGMMA/TMA launch.
 SUPPORTED_GRAPHS += (
     SUPPORTED_GRAPHS[-1]
     | {
@@ -87,13 +87,29 @@ SUPPORTED_GRAPHS += (
     },
 )
 
+GROUPED_ATTENTION_SOURCE = "operators/sm90/csrc/nosa_attention_grouped.cuh"
+# The grouped revision leaves the five model projections and their ordering
+# unchanged. Each native attention call with >=4 query rows launches the
+# grouped kernel and then its per-query fallback, even if no group falls back.
+SUPPORTED_GRAPHS += (
+    SUPPORTED_GRAPHS[-1]
+    | {
+        "operators/sm90/nosa_indexer.py": "1c34d2ebddba31cd2d06d1468c36535a9ab835ee28e134a6a8b4bf1e32df028a",
+        "operators/sm90/nosa_attention.py": "0c1b422a5fe5c485927f017f4c2578271eaf6258d01cc3c1aa6d33d488d1d6f9",
+        "operators/sm90/_nosa_attention_cuda.py": "66f737253c18dacf91eb066c2b07041864b91e7e7fa5f6e674943c424aca038e",
+        "operators/sm90/csrc/nosa_scores.cu": "0897a00d6d38dccf88566771f063b71e8de16f9458d1f4f6e3bcc71ff91e84d2",
+        "operators/sm90/csrc/nosa_attention.cu": "158aad48fc48b0319bea8de939483580f40115d069813958537b956d97a8fefa",
+        GROUPED_ATTENTION_SOURCE: "21826cbc696c86de2d7fa5b8df185713e37827a8b80c909ad38bfd275383d8b9",
+    },
+)
+
 
 def _validate_source_graph(hashes):
-    if not any(
-        all(hashes.get(name) == expected for name, expected in graph.items())
-        for graph in SUPPORTED_GRAPHS
-    ):
-        raise ValueError("Unreviewed inference graph for unscoped GEMM attribution")
+    """Validate attribution anchors and return the reviewed attention group size."""
+    for graph in reversed(SUPPORTED_GRAPHS):
+        if all(hashes.get(name) == expected for name, expected in graph.items()):
+            return 4 if GROUPED_ATTENTION_SOURCE in graph else 1
+    raise ValueError("Unreviewed inference graph for unscoped GEMM attribution")
 
 
 def _cached_indexer(workload):
@@ -111,7 +127,9 @@ def _matrix_kernel(kernel):
     return name.startswith("nvjet_") or "gemm" in name
 
 
-def _validate_operator_kernels(stage, selected, backend, *, query_length, total_length):
+def _validate_operator_kernels(
+    stage, selected, backend, *, query_length, total_length, native_attention_group_size=4
+):
     """Require the reviewed operator inside its Python/NVTX boundary.
 
     A CUDA symbol may include namespaces, templates and a return type. Match
@@ -122,11 +140,12 @@ def _validate_operator_kernels(stage, selected, backend, *, query_length, total_
     """
     score_backend = None
     if stage == "block_sparse_attention":
-        expected = (
-            "nosa_attention::attention_kernel"
-            if backend == "cuda_tvm_ffi"
-            else "_nosa_block_attention",
-        )
+        if backend == "cuda_tvm_ffi":
+            expected = ("nosa_attention::attention_kernel",)
+            if native_attention_group_size == 4 and query_length >= 4:
+                expected = ("nosa_attention::grouped_attention_kernel", *expected)
+        else:
+            expected = ("_nosa_block_attention",)
     elif stage in ("compressed_scores", "pooled_scores"):
         compressed_count = max(0, (total_length - 32) // 16 + 1)
         native_min_count = 2047 if query_length >= 1024 else 511
@@ -202,7 +221,7 @@ def _require_marker(kernels, launches, begin, end, marker):
         raise ValueError(f"Expected exactly one {marker} kernel between its GEMM anchors")
 
 
-def _attribute_run(root, scopes, kernels, num_layers, workload):
+def _attribute_run(root, scopes, kernels, num_layers, workload, native_attention_group_size):
     kernels = sorted(kernels, key=lambda k: k["launch_start"])
     launches = [k["launch_start"] for k in kernels]
     calls = _workload_calls(root["phase"], num_layers, workload)
@@ -295,6 +314,7 @@ def _attribute_run(root, scopes, kernels, num_layers, workload):
                     backend,
                     query_length=score_rows,
                     total_length=start + length,
+                    native_attention_group_size=native_attention_group_size,
                 )
                 if score_backend is not None:
                     score_dispatch[score_backend] += 1
@@ -379,7 +399,7 @@ def _attribute_run(root, scopes, kernels, num_layers, workload):
     }
 
 
-def attribute_kernels(scopes, kernels, num_layers, workload):
+def attribute_kernels(scopes, kernels, num_layers, workload, *, native_attention_group_size=4):
     """Attribute launch-correlated kernels, independent of SQLite or model FLOPs.
 
     Times are integer nanoseconds. Scopes need start/end/text/globalTid;
@@ -390,9 +410,13 @@ def attribute_kernels(scopes, kernels, num_layers, workload):
 
     Returns per-phase/per-iteration module dictionaries plus per-layer calls.
     The fixed source graph is an external precondition, verified by analyze().
+    Its revision supplies native_attention_group_size; the default describes
+    the current four-query grouped implementation, while old snapshots use 1.
     Synthetic workloads are supported here to test attribution independently.
     """
     _integer(num_layers, "num_layers", minimum=1)
+    if native_attention_group_size not in (1, 4):
+        raise ValueError("Unsupported reviewed native attention group size")
     roots, stages = [], []
     for source in scopes:
         text = source.get("text", "")
@@ -487,7 +511,14 @@ def attribute_kernels(scopes, kernels, num_layers, workload):
             excluded.append(kernel)
     result = {
         "runs": [
-            _attribute_run(root, root_scopes[index], root_kernels[index], num_layers, workload)
+            _attribute_run(
+                root,
+                root_scopes[index],
+                root_kernels[index],
+                num_layers,
+                workload,
+                native_attention_group_size,
+            )
             for index, root in enumerate(roots)
         ],
         "validation": {
@@ -503,6 +534,7 @@ def attribute_kernels(scopes, kernels, num_layers, workload):
             "max_overlap_ns": max(overlaps, default=0),
             "overlap_tolerance": "<=1000 ns on the verified single CUDA stream",
             "gemm_order": list(LINEARS),
+            "native_attention_group_size": native_attention_group_size,
             "time_definition": "Sum of kernel end-start; not union active time or CUDA-event span",
         },
     }
@@ -540,23 +572,56 @@ def _sha256(path):
         return hashlib.file_digest(handle, "sha256").hexdigest()
 
 
-def validate_trace_gpu(path, device_id, gpu):
-    """Bind the actual kernel device in SQLite to the measured metadata GPU."""
-    with sqlite3.connect(Path(path).resolve().as_uri() + "?mode=ro", uri=True) as connection:
-        connection.row_factory = sqlite3.Row
-        rows = connection.execute(
-            "SELECT id,uuid,name,smCount,computeMajor,computeMinor FROM TARGET_INFO_GPU WHERE id=?",
-            (device_id,),
-        ).fetchall()
-    if len(rows) != 1:
-        raise ValueError("SQLite must identify exactly one GPU for the kernel device ID")
-    device = dict(rows[0])
+def validate_trace_gpu(path, device_id, gpu, *, global_pid=None):
+    """Bind a process-local CUDA ordinal to the captured physical GPU.
+
+    CUDA_VISIBLE_DEVICES can make a kernel's deviceId differ from
+    TARGET_INFO_GPU.id. Modern nsys exports record the process-local mapping
+    in TARGET_INFO_CUDA_DEVICE; PROCESSES binds it to the kernel globalPid.
+    Never infer that mapping from a matching model name or UUID alone.
+    """
+    _integer(device_id, "kernel.deviceId")
 
     def uuid(value):
         if not isinstance(value, str) or not value.strip():
             raise ValueError("GPU UUID is required in SQLite and metadata")
         return value.lower().removeprefix("gpu-")
 
+    mapping = None
+    with sqlite3.connect(Path(path).resolve().as_uri() + "?mode=ro", uri=True) as connection:
+        connection.row_factory = sqlite3.Row
+        tables = {
+            row[0]
+            for row in connection.execute("SELECT name FROM sqlite_master WHERE type='table'")
+        }
+        physical_id = device_id
+        if "TARGET_INFO_CUDA_DEVICE" in tables:
+            _integer(global_pid, "kernel.globalPid")
+            if "PROCESSES" not in tables:
+                raise ValueError("SQLite CUDA device mapping requires the kernel process table")
+            processes = connection.execute(
+                "SELECT pid FROM PROCESSES WHERE globalPid=?", (global_pid,)
+            ).fetchall()
+            if len(processes) != 1:
+                raise ValueError("SQLite must identify exactly one process for kernel globalPid")
+            pid = _integer(processes[0]["pid"], "process.pid")
+            mappings = connection.execute(
+                "SELECT gpuId,cudaId,pid,uuid,numMultiprocessors "
+                "FROM TARGET_INFO_CUDA_DEVICE WHERE pid=? AND cudaId=?",
+                (pid, device_id),
+            ).fetchall()
+            if len(mappings) != 1:
+                raise ValueError(
+                    "SQLite must identify exactly one process-local CUDA device mapping"
+                )
+            mapping = dict(mappings[0])
+            physical_id = _integer(mapping["gpuId"], "CUDA device mapping.gpuId")
+        rows = connection.execute(
+            "SELECT * FROM TARGET_INFO_GPU WHERE id=?", (physical_id,)
+        ).fetchall()
+    if len(rows) != 1:
+        raise ValueError("SQLite must identify exactly one GPU for the kernel device ID")
+    device = dict(rows[0])
     if uuid(device["uuid"]) != uuid(gpu.get("uuid")):
         raise ValueError("SQLite GPU UUID differs from benchmark metadata")
     if device["smCount"] != gpu.get("sm_count") or [
@@ -564,6 +629,15 @@ def validate_trace_gpu(path, device_id, gpu):
         device["computeMinor"],
     ] != gpu.get("capability"):
         raise ValueError("SQLite GPU architecture differs from benchmark metadata")
+    if "total_memory" in gpu and device.get("totalMemory") != gpu["total_memory"]:
+        raise ValueError("SQLite GPU memory differs from benchmark metadata")
+    if mapping is not None:
+        if mapping["uuid"] is not None and uuid(mapping["uuid"]) != uuid(device["uuid"]):
+            raise ValueError("SQLite CUDA device mapping UUID differs from its physical GPU")
+        if mapping["numMultiprocessors"] != device["smCount"]:
+            raise ValueError("SQLite CUDA device mapping SM count differs from its physical GPU")
+        device["cuda_device_mapping"] = mapping | {"globalPid": global_pid}
+    device["kernel_device_id"] = device_id
     return device
 
 
@@ -768,6 +842,7 @@ def build_module_report(metadata, summary, profile_metadata, attribution, *, pea
             "mfu_pct": "100 * useful matrix FLOPs / (sum of attributed GPU kernel durations in seconds * peak FLOP/s)",
             "kernel_attribution": "Host CUDA launch correlation within NVTX; GPU timestamps supply durations only",
             "native_score_dispatch": "Native QK requires >=2047 compressed keys for >=1024 query rows, otherwise >=511 keys; shorter scored chunks use exactly one Triton _scores kernel; eligible chunks use normalizer_kernel then scores_kernel",
+            "native_attention_dispatch": "The reviewed source revision determines the launch sequence: four-query grouped attention launches grouped_attention_kernel then attention_kernel for >=4 query rows; shorter calls and legacy revisions launch attention_kernel only. Both grouped/fallback durations belong to one attention module; useful QK/PV FLOPs are counted once per layer/query, independently of launch count or fallback activity",
             "unscoped_gemms": "Reviewed runtime source order [QKV,CIS,O,gate_up,down] plus CIS/attention/RoPE/norm/activation anchors",
             "kernel_shape_proof": "Captured config and source graph, audited resident Q/K/V shapes and complete layer/chunk counts; kernel names/grids are not shape evidence",
             "no_matrix_modules": "Compression, selection and other non-matrix modules have MFU null, not zero",
@@ -821,10 +896,17 @@ def analyze(data_dir, *, sqlite_path=None, peak_tflops=None, write=True):
     sources = _validate_inputs(data_dir, metadata, summary, profile_metadata)
     scopes, kernels = read_trace(sqlite_path)
     attribution = attribute_kernels(
-        scopes, kernels, metadata["model_config"]["num_hidden_layers"], summary["workload"]
+        scopes,
+        kernels,
+        metadata["model_config"]["num_hidden_layers"],
+        summary["workload"],
+        native_attention_group_size=_validate_source_graph(sources),
     )
     attribution["validation"]["trace_gpu"] = validate_trace_gpu(
-        sqlite_path, attribution["validation"]["device_id"], metadata["gpu"]
+        sqlite_path,
+        attribution["validation"]["device_id"],
+        metadata["gpu"],
+        global_pid=attribution["validation"]["global_pid"],
     )
     report = build_module_report(
         metadata, summary, profile_metadata, attribution, peak_tflops=peak_tflops
