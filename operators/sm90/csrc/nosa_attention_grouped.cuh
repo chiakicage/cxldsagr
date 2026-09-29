@@ -20,10 +20,10 @@ template <typename T> struct GroupedTraits {
   using QKMma = decltype(make_tiled_mma(QKOp{}));
   using PVMma = decltype(make_tiled_mma(PVOp{}));
   struct Shared {
-    alignas(128) T q[cosize_v<QLayout>], k[cosize_v<KVLayout>], v[cosize_v<KVLayout>];
-    float bias[64];
+    alignas(128) T q[cosize_v<QLayout>], k[2][cosize_v<KVLayout>], v[2][cosize_v<KVLayout>];
+    float bias[2][64];
     int sorted[4][64], blocks[256], membership[256], count;
-    Barrier k_ready, v_ready, k_free, v_free, bias_ready, bias_free;
+    Barrier k_ready[2], v_ready[2], k_free[2], v_free[2], bias_ready[2], bias_free[2];
   };
 };
 
@@ -58,12 +58,14 @@ __global__ __launch_bounds__(256, 2) void grouped_attention_kernel(
   int tid = threadIdx.x % 128, lane = tid % 32, warp = tid / 32;
   int query_base = blockIdx.x * 4;
   auto sq = make_tensor(make_smem_ptr(s.q), typename Tr::QLayout{});
-  auto sk = make_tensor(make_smem_ptr(s.k), typename Tr::KVLayout{});
-  auto sv = make_tensor(make_smem_ptr(s.v), typename Tr::KVLayout{});
   if (threadIdx.x == 0) {
     p.group_fallback[blockIdx.x * p.kv_heads + blockIdx.y] = 0;
-    s.k_ready.init(1); s.v_ready.init(1); s.k_free.init(128); s.v_free.init(128);
-    s.bias_ready.init(1); s.bias_free.init(128);
+    CUTE_UNROLL
+    for (int buffer = 0; buffer < 2; ++buffer) {
+      s.k_ready[buffer].init(1); s.v_ready[buffer].init(1);
+      s.k_free[buffer].init(128); s.v_free[buffer].init(128);
+      s.bias_ready[buffer].init(1); s.bias_free[buffer].init(128);
+    }
     cutlass::arch::fence_barrier_init();
   }
   // Sort each independent selection in registers; invalid slots sort last.
@@ -128,22 +130,24 @@ __global__ __launch_bounds__(256, 2) void grouped_attention_kernel(
       auto gk = maps.kt.get_tma_tensor(maps.ks)(_, _, blockIdx.y);
       auto gv = maps.vt.get_tma_tensor(maps.vs)(_, _, blockIdx.y);
       for (int slot = 0; slot < s.count; ++slot) {
-        int block = s.blocks[slot];
+        int block = s.blocks[slot], buffer = slot & 1, phase = (slot / 2 - 1) & 1;
+        auto sk = make_tensor(make_smem_ptr(s.k[buffer]), typename Tr::KVLayout{});
+        auto sv = make_tensor(make_smem_ptr(s.v[buffer]), typename Tr::KVLayout{});
         if (tid == 0) {
-          if (slot) s.k_free.wait((slot - 1) & 1);
-          tma_load(maps.kt, flat_divide(gk, Tile<_64, _128>{})(_, _, block, _0{}), sk, s.k_ready, 16384);
+          if (slot >= 2) s.k_free[buffer].wait(phase);
+          tma_load(maps.kt, flat_divide(gk, Tile<_64, _128>{})(_, _, block, _0{}), sk, s.k_ready[buffer], 16384);
         }
-        if (slot) s.bias_free.wait((slot - 1) & 1);
+        if (slot >= 2) s.bias_free[buffer].wait(phase);
         CUTE_UNROLL
         for(int offset=0;offset<64;offset+=32) {
           int token = block * 64 + tid + offset;
-          s.bias[tid + offset] = p.bias && token < p.tokens ? bias_at(p, token) : 0.f;
+          s.bias[buffer][tid + offset] = p.bias && token < p.tokens ? bias_at(p, token) : 0.f;
         }
         __syncwarp();
         if (tid == 0) {
-          s.bias_ready.arrive();
-          if (slot) s.v_free.wait((slot - 1) & 1);
-          tma_load(maps.vt, flat_divide(gv, Tile<_64, _128>{})(_, _, block, _0{}), sv, s.v_ready, 16384);
+          s.bias_ready[buffer].arrive();
+          if (slot >= 2) s.v_free[buffer].wait(phase);
+          tma_load(maps.vt, flat_divide(gv, Tile<_64, _128>{})(_, _, block, _0{}), sv, s.v_ready[buffer], 16384);
         }
         __syncwarp();
       }
@@ -151,33 +155,38 @@ __global__ __launch_bounds__(256, 2) void grouped_attention_kernel(
     return;
   }
   cutlass::arch::warpgroup_reg_alloc<192>();
-  auto svt = make_tensor(make_smem_ptr(s.v), typename Tr::VTLayout{});
   auto rp = partition_fragment_C(typename Tr::QKMma{}, Shape<_64, _64>{});
   auto ro = partition_fragment_C(typename Tr::PVMma{}, Shape<_64, _128>{});
   auto ps = make_tensor<T>(partition_shape_A(typename Tr::PVMma{}, Shape<_64, _64>{}));
   float maximum[2] = {-INFINITY, -INFINITY}, denominator[2] = {};
+  int value_shift = pv_scale_exponent<T>(s.count);
+  float value_rescale = __uint_as_float(uint32_t(127 + value_shift) << 23);
   clear(ro);
   if (s.count) {
-    s.k_ready.wait(0);
+    auto sk = make_tensor(make_smem_ptr(s.k[0]), typename Tr::KVLayout{});
+    s.k_ready[0].wait(0);
     mma(true, typename Tr::QKMma{}, sq, sk, rp, tid);
     warpgroup_commit_batch(); warpgroup_wait<0>();
   }
   for (int slot = 0; slot < s.count; ++slot) {
-    if (slot + 1 < s.count) s.k_free.arrive();
+    int buffer = slot & 1, phase = (slot / 2) & 1;
+    auto sv = make_tensor(make_smem_ptr(s.v[buffer]), typename Tr::KVLayout{});
+    auto svt = make_tensor(make_smem_ptr(s.v[buffer]), typename Tr::VTLayout{});
+    if (slot + 2 < s.count) s.k_free[buffer].arrive();
     int block = s.blocks[slot], query = query_base + warp;
     bool member = (s.membership[slot] >> warp) & 1;
     float biases[16];
     unsigned valid_tokens = 0;
-    s.bias_ready.wait(slot & 1);
+    s.bias_ready[buffer].wait(phase);
     CUTE_UNROLL
     for (int i = 0; i < 16; ++i) {
       int offset = (i / 2) * 8 + lane % 4 * 2 + i % 2;
       int token = block * 64 + offset;
       bool valid = member && token < p.tokens && token <= p.query_start + query;
       valid_tokens |= unsigned(valid) << i;
-      biases[i] = s.bias[offset] * 1.4426950408889634f;
+      biases[i] = s.bias[buffer][offset];
     }
-    s.bias_free.arrive();
+    if (slot + 2 < s.count) s.bias_free[buffer].arrive();
     CUTE_UNROLL
     for (int h = 0; h < 2; ++h) {
       float m = -INFINITY;
@@ -187,7 +196,7 @@ __global__ __launch_bounds__(256, 2) void grouped_attention_kernel(
         for (int j = 0; j < 2; ++j) {
           bool valid = valid_tokens & (1u << (i / 4 * 2 + j));
           float bias = biases[i / 4 * 2 + j];
-          rp(i + j) = valid ? (rp(i + j) * 0.1275174308245987f + bias) : -INFINITY;
+          rp(i + j) = valid ? __fadd_rn(__fmul_rn(rp(i + j), 0.08838834764831845f), bias) : -INFINITY;
           m = fmaxf(m, rp(i + j));
         }
       }
@@ -195,20 +204,20 @@ __global__ __launch_bounds__(256, 2) void grouped_attention_kernel(
       m = fmaxf(m, __shfl_xor_sync(0xffffffff, m, 2));
       m = fmaxf(m, maximum[h]);
       float safe = m == -INFINITY ? 0.f : m;
-      float alpha = fast_exp2(maximum[h] - safe), sum = 0.f;
+      float alpha = fast_exp2((maximum[h] - safe) * 1.4426950408889634f), sum = 0.f;
       if (alpha != 1.f) {
         CUTE_UNROLL
         for (int i = h * 2; i < 64; i += 4) { ro(i) *= alpha; ro(i + 1) *= alpha; }
       }
       CUTE_UNROLL
       for (int i = h * 2; i < 32; i += 4) {
-        float a = fast_exp2(rp(i) - safe), b = fast_exp2(rp(i + 1) - safe);
+        float a = fast_exp2((rp(i) - safe) * 1.4426950408889634f), b = fast_exp2((rp(i + 1) - safe) * 1.4426950408889634f);
         ps(i) = T(a); ps(i + 1) = T(b); sum += a + b;
       }
       denominator[h] = denominator[h] * alpha + sum;
       maximum[h] = m;
     }
-    s.v_ready.wait(slot & 1);
+    s.v_ready[buffer].wait(phase);
     int last = min(p.queries - 1, query_base + 3) + p.query_start;
     if ((block + 1) * 64 > last + 1) {
       CUTE_UNROLL
@@ -218,37 +227,28 @@ __global__ __launch_bounds__(256, 2) void grouped_attention_kernel(
       }
       consumer_sync(); cutlass::arch::fence_view_async_shared();
     }
-    // A shared PV tile cannot suppress NaN/Inf with a zero probability:
-    // IEEE 0 * NaN is NaN. Detect values that are masked by only some rows,
-    // then recompute this package with the independent-query path. The check
-    // reads shared V, and the repair kernel runs only for affected packages.
+    // A shared PV tile cannot suppress NaN/Inf with a zero probability.
+    // Physical-block flags are computed once before the grouped launch.
+    // Conservatively repair when nonfinite V might be masked by some rows.
     int all_members = (1 << min(4, p.queries - query_base)) - 1;
     int scan_from = s.membership[slot] == all_members ? max(0, p.query_start + query_base + 1 - block * 64) : 0;
     int scan_to = min(64, last + 1 - block * 64);
-    if (scan_from < scan_to) {
-      bool nonfinite = false;
-      constexpr uint32_t exponent = std::is_same_v<T, cutlass::bfloat16_t> ? 0x7f80u : 0x7c00u;
-      CUTE_UNROLL
-      for (int offset = tid * 8; offset < 64 * 128; offset += 128 * 8) {
-        int n = offset / 128, d = offset % 128;
-        if (n >= scan_from && n < scan_to) {
-          uint4 bits = *reinterpret_cast<uint4 const *>(&sv(n, d));
-          uint32_t words[4] = {bits.x, bits.y, bits.z, bits.w};
-          CUTE_UNROLL
-          for (int j = 0; j < 4; ++j)
-            nonfinite |= (words[j] & exponent) == exponent || ((words[j] >> 16) & exponent) == exponent;
-        }
-      }
-      if (__any_sync(0xffffffff, nonfinite) && lane == 0)
-        atomicExch(&p.group_fallback[blockIdx.x * p.kv_heads + blockIdx.y], 1);
+    if (scan_from < scan_to && p.block_nonfinite[block * p.kv_heads + blockIdx.y] && tid == 0)
+      p.group_fallback[blockIdx.x * p.kv_heads + blockIdx.y] = 1;
+    if constexpr (std::is_same_v<T, cutlass::bfloat16_t>) {
+      scale_bf16_v(s.v[buffer], tid, value_shift);
+      consumer_sync();
+      cutlass::arch::fence_view_async_shared();
     }
     mma_rs(typename Tr::PVMma{}, ps, svt, ro, tid);
     warpgroup_commit_batch();
     if (slot + 1 < s.count) {
-      s.k_ready.wait((slot + 1) & 1);
+      auto sk = make_tensor(make_smem_ptr(s.k[(slot + 1) & 1]), typename Tr::KVLayout{});
+      s.k_ready[(slot + 1) & 1].wait(((slot + 1) / 2) & 1);
       mma(true, typename Tr::QKMma{}, sq, sk, rp, tid);
       warpgroup_commit_batch(); warpgroup_wait<1>();
-      s.v_free.arrive(); warpgroup_wait<0>();
+      if (slot + 2 < s.count) s.v_free[buffer].arrive();
+      warpgroup_wait<0>();
     } else warpgroup_wait<0>();
   }
   int query = query_base + warp;
@@ -256,14 +256,14 @@ __global__ __launch_bounds__(256, 2) void grouped_attention_kernel(
   for (int h = 0; h < 2; ++h) {
     float sum = denominator[h];
     sum += __shfl_xor_sync(0xffffffff, sum, 1); sum += __shfl_xor_sync(0xffffffff, sum, 2);
-    float inv = sum > 0.f ? 1.f / sum : 1.f;
+    float inv = sum > 0.f ? value_rescale / sum : value_rescale;
     if (query < p.queries) {
       int head = blockIdx.y * 16 + lane / 4 + h * 8;
       CUTE_UNROLL
       for (int i = h * 2; i < 64; i += 4) {
         int dim = i / 4 * 8 + lane % 4 * 2;
         auto out = static_cast<T *>(p.out) + (int64_t(query) * p.heads + head) * 128 + dim;
-        out[0] = T(ro(i) * inv); out[1] = T(ro(i + 1) * inv);
+        out[0] = bounded_pv_output<T>(ro(i), inv); out[1] = bounded_pv_output<T>(ro(i + 1), inv);
       }
     }
   }

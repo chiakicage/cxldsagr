@@ -9,11 +9,14 @@ import pytest
 
 from experiments.indexer_block_sparse_profile.src.mfu import POLICY
 from experiments.indexer_block_sparse_profile.src.module_mfu import (
+    FUSED_SCORE_FAMILY,
     FUSED_STAGES,
     GROUPED_ATTENTION_SOURCE,
     PARENTS,
+    QK_MODULES,
     SUPPORTED_GRAPHS,
     _flops_by_module,
+    _fused_selection_flag,
     _validate_inputs,
     _validate_operator_kernels,
     _validate_source_graph,
@@ -33,22 +36,22 @@ def test_reviewed_graph_versions_accept_extra_captured_sources(graph):
 
 
 def test_unreferenced_grouped_header_does_not_change_legacy_graph_dispatch():
-    graph = SUPPORTED_GRAPHS[-2] | {
-        GROUPED_ATTENTION_SOURCE: SUPPORTED_GRAPHS[-1][GROUPED_ATTENTION_SOURCE]
+    graph = SUPPORTED_GRAPHS[3] | {
+        GROUPED_ATTENTION_SOURCE: SUPPORTED_GRAPHS[4][GROUPED_ATTENTION_SOURCE]
     }
     assert _validate_source_graph(graph) == 1
 
 
 @pytest.mark.parametrize("problem", ["missing", "changed", "mixed_dispatcher"])
 def test_grouped_graph_requires_matching_cuda_dispatcher_and_header(problem):
-    hashes = dict(SUPPORTED_GRAPHS[-1])
+    hashes = dict(SUPPORTED_GRAPHS[4])
     if problem == "missing":
         hashes.pop(GROUPED_ATTENTION_SOURCE)
     elif problem == "changed":
         hashes[GROUPED_ATTENTION_SOURCE] = "unreviewed_grouped_implementation"
     else:
         name = "operators/sm90/_nosa_attention_cuda.py"
-        hashes[name] = SUPPORTED_GRAPHS[-2][name]
+        hashes[name] = SUPPORTED_GRAPHS[3][name]
     with pytest.raises(ValueError, match="Unreviewed inference graph"):
         _validate_source_graph(hashes)
 
@@ -77,6 +80,10 @@ def trace(
     empty_cache_update=False,
     native=False,
     native_attention_group_size=4,
+    native_revision=1,
+    native_prepare=False,
+    native_ranked=False,
+    num_kv_heads=2,
 ):
     total = prefix + query_length
     workload = {
@@ -91,6 +98,16 @@ def trace(
         workload["indexer_query_chunk_size"] = indexer_query_chunk_size
     if native:
         workload.update(kernel_backend="cuda_tvm_ffi", selection_backend="flashinfer")
+        if native_revision >= 2:
+            workload.update(
+                native_kernel_revision=native_revision,
+                selection_backend="cuda_tvm_ffi",
+                indexer_execution=f"cached_native_v{native_revision}",
+            )
+    if native_prepare:
+        workload["indexer_preparation"] = "native_guarded_v1"
+    if native_ranked:
+        workload["indexer_preparation"] = "native_guarded_ranked_v1"
     scopes, kernels = [], []
     tid = (1 << 24) + 3
 
@@ -152,14 +169,84 @@ def trace(
                 native_score = native and position + query_length >= (
                     32768 if query_length >= 1024 else 8192
                 )
-                stage("indexer_validate", 220, 240)
-                kernel("_finite_partials", base + 225, duration=2)
-                kernel("_finite_reduce", base + 232, duration=2)
-                stage("indexer_cache_update", 245, 270)
-                if not empty_cache_update:
-                    kernel("_compress_records", base + 250, duration=6)
-                    kernel("_pool_cis_prefix", base + 260, duration=4)
-                if scored:
+                shared = (
+                    query_length >= 128
+                    and (position + query_length + 63) // 64 <= 1056
+                    and position // 64 >= 64
+                    and (position + query_length - 1) // 64 - position // 64 <= 16
+                )
+                prepared_ranking = native_ranked and shared
+                if native_prepare or native_ranked:
+                    stage(
+                        "native_prepare_ranked" if prepared_ranking else "native_prepare", 220, 270
+                    )
+                    kernel("nosa_prepare::finite_partials<bf16>", base + 225, duration=2)
+                    kernel(
+                        "nosa_prepare_ranked::guarded_compression_and_ranking<bf16>"
+                        if prepared_ranking
+                        else "nosa_prepare::guarded_compression<bf16,128>",
+                        base + 250,
+                        duration=6,
+                    )
+                else:
+                    stage("indexer_validate", 220, 240)
+                    kernel("_finite_partials", base + 225, duration=2)
+                    kernel("_finite_reduce", base + 232, duration=2)
+                    stage("indexer_cache_update", 245, 270)
+                    if not empty_cache_update:
+                        kernel("_compress_records", base + 250, duration=6)
+                        kernel("_pool_cis_prefix", base + 260, duration=4)
+                if scored and native and native_revision == 3:
+                    joint = query_length >= 128 and position + query_length >= 32768
+                    score_fused = (
+                        native_score
+                        and query_length >= 1024
+                        and (query_length + 15) // 16 * num_kv_heads >= 128
+                    )
+                    selection_fused = joint and score_fused and query_length <= 1088 and shared
+                    stage(
+                        "native_indexer" if joint else "pooled_scores", 280, 388 if joint else 300
+                    )
+                    if not joint:
+                        stage("native_selection", 302, 388)
+                    if selection_fused and not prepared_ranking:
+                        kernel("nosa_selection::prepare_prefix_ranking", base + 282, duration=2)
+                    if score_fused:
+                        kernel(
+                            f"{FUSED_SCORE_FAMILY}<cutlass::bfloat16_t, cutlass::bfloat16_t, true, {'true' if selection_fused else 'false'}, Map<Shape<16, 64>, 128>>()",
+                            base + 289,
+                            duration=6,
+                        )
+                    elif native_score:
+                        kernel("nosa_scores::normalizer_kernel<bf16>", base + 284, duration=2)
+                        kernel("nosa_scores::scores_kernel<bf16>", base + 289, duration=5)
+                    else:
+                        kernel("_scores", base + 285, duration=5)
+                    if not selection_fused:
+                        if shared and not prepared_ranking:
+                            kernel("nosa_selection::prepare_prefix_ranking", base + 305, duration=2)
+                        kernel(
+                            "nosa_selection::selection_prefix_kernel"
+                            if shared
+                            else "nosa_selection::selection_kernel",
+                            base + 325,
+                            duration=5,
+                        )
+                elif scored and native and native_revision == 2:
+                    if native_score:
+                        stage("native_indexer", 280, 388)
+                        kernel(
+                            "void nosa_scores::fused_scores::fused_scores_kernel<bf16>()",
+                            base + 285,
+                            duration=6,
+                        )
+                    else:
+                        stage("pooled_scores", 280, 300)
+                        kernel("_scores", base + 285, duration=5)
+                        stage("native_selection", 302, 388)
+                    kernel("nosa_selection::prepare_prefix_ranking", base + 305, duration=2)
+                    kernel("nosa_selection::selection_prefix_kernel", base + 325, duration=5)
+                elif scored:
                     for name, kernel_name, start in (
                         (
                             "pooled_scores",
@@ -219,6 +306,8 @@ def trace(
             stage("block_sparse_attention", 410, 480)
             grouped = native and native_attention_group_size == 4 and query_length >= 4
             if grouped:
+                if native_revision >= 2:
+                    kernel("nosa_attention::nonfinite_blocks_kernel", base + 415, duration=3)
                 kernel(
                     "void nosa_attention::grouped_attention_kernel<cutlass::gemm::Shape<64>>()",
                     base + 420,
@@ -237,6 +326,173 @@ def trace(
             kernel("act_and_mul_kernel", base + 570)
             kernel("nvjet_sm90_tst_256x128_64x4_1x2_h_bz_coopA_TNT", base + 600)
     return scopes, kernels, workload
+
+
+@pytest.mark.parametrize("native_prepare", [False, True])
+def test_native_joint_submission_splits_score_and_selection_without_losing_auxiliaries(
+    native_prepare,
+):
+    scopes, kernels, workload = trace(
+        prefix=31744,
+        query_length=1024,
+        cached=True,
+        native=True,
+        native_revision=2,
+        native_prepare=native_prepare,
+    )
+    result = attribute_kernels(scopes, kernels, 1, workload)
+    extend = next(run for run in result["runs"] if run["phase"] == "extend")
+    modules = extend["modules"]
+    assert modules["pooled_scores"]["kernel_count"] == 1
+    assert modules["pooled_scores"]["kernel_ns"] == 6 * TIME_SCALE
+    assert modules["native_selection"]["kernel_count"] == 2
+    assert modules["native_selection"]["kernel_ns"] == 7 * TIME_SCALE
+    assert modules["indexer_total"]["kernel_ns"] == (21 if native_prepare else 27) * TIME_SCALE
+    assert modules["native_prepare"]["kernel_count"] == (2 if native_prepare else 0)
+    assert modules["block_sparse_attention"]["kernel_count"] == 3
+    assert modules["block_sparse_attention"]["kernel_ns"] == 48 * TIME_SCALE
+    assert "native_indexer" not in modules
+    assert (
+        sum(
+            modules[name]["kernel_ns"]
+            for name in (
+                "indexer_validate",
+                "indexer_cache_update",
+                "native_prepare",
+                "pooled_scores",
+                "native_selection",
+            )
+        )
+        == modules["indexer_total"]["kernel_ns"]
+    )
+
+
+@pytest.mark.parametrize(
+    "missing",
+    ["prepare_prefix_ranking", "nonfinite_blocks_kernel", "finite_partials", "guarded_compression"],
+)
+def test_native_revision_requires_every_auxiliary_kernel(missing):
+    scopes, kernels, workload = trace(
+        prefix=31744,
+        query_length=1024,
+        cached=True,
+        native=True,
+        native_revision=2,
+        native_prepare=True,
+    )
+    kernels = [kernel for kernel in kernels if missing not in kernel["name"]]
+    with pytest.raises(ValueError, match="kernel sequence"):
+        attribute_kernels(scopes, kernels, 1, workload)
+
+
+@pytest.mark.parametrize("ranked", [False, True])
+def test_fused_selection_owns_combined_duration_and_mixed_prefill_dispatch(ranked):
+    scopes, kernels, workload = trace(
+        prefix=65536,
+        query_length=1024,
+        cached=True,
+        native=True,
+        native_revision=3,
+        native_prepare=True,
+        native_ranked=ranked,
+    )
+    report = attribute_kernels(scopes, kernels, 1, workload)
+    full, extend = report["runs"]
+    assert [call["indexer_qk_module"] for call in full["layer_calls"]] == (
+        [None] * 4 + ["pooled_scores"] * 27 + ["score_selection"] * 34
+    )
+    assert full["modules"]["score_selection"]["kernel_count"] == 34
+    assert full["modules"]["pooled_scores"]["kernel_count"] == 27
+    modules = extend["modules"]
+    assert modules["pooled_scores"]["kernel_count"] == 0
+    assert modules["score_selection"]["kernel_ns"] == 6 * TIME_SCALE
+    assert modules["score_selection"]["inclusive"]
+    assert modules["native_selection"]["kernel_count"] == (0 if ranked else 1)
+    assert modules["indexer_total"]["kernel_ns"] == (14 if ranked else 16) * TIME_SCALE
+    assert modules["block_sparse_attention"]["kernel_count"] == 3
+    for run in report["runs"]:
+        for call in run["layer_calls"]:
+            children = [
+                name
+                for name, parent in PARENTS.items()
+                if parent == "indexer_total" and name in call["modules"]
+            ]
+            child_ns = sum(call["modules"][name]["kernel_ns"] for name in children)
+            assert child_ns <= call["modules"]["indexer_total"]["kernel_ns"]
+
+
+@pytest.mark.parametrize("rows,kv_heads", [(128, 2), (512, 2), (1024, 1)])
+def test_native_joint_short_rows_or_small_grid_keeps_separate_score_selection(rows, kv_heads):
+    scopes, kernels, workload = trace(
+        prefix=65536,
+        query_length=rows,
+        cached=True,
+        native=True,
+        native_revision=3,
+        native_ranked=True,
+        num_kv_heads=kv_heads,
+    )
+    report = attribute_kernels(scopes, kernels, 1, workload, num_kv_heads=kv_heads)
+    extend = report["runs"][-1]
+    assert extend["layer_calls"][0]["native_joint_submission"]
+    assert extend["layer_calls"][0]["prepared_ranking"]
+    assert extend["modules"]["pooled_scores"]["kernel_count"] == 2
+    assert extend["modules"]["native_selection"]["kernel_count"] == 1
+    assert extend["modules"]["score_selection"]["kernel_count"] == 0
+
+
+@pytest.mark.parametrize("flag", ["true", "false", "1", "0"])
+def test_fused_template_parser_handles_nested_type_arguments(flag):
+    kernel = {
+        "name": f"void {FUSED_SCORE_FAMILY}<Type<A, B>, Type<C, D>, true, {flag}, Map<X, Y>>()"
+    }
+    assert _fused_selection_flag(kernel) is (flag in ("true", "1"))
+
+
+@pytest.mark.parametrize(
+    "problem", ["wrong_flag", "missing_finite", "missing_guard", "extra_ranking", "extra_selector"]
+)
+def test_fused_prepared_sequence_rejects_wrong_or_extra_work(problem):
+    scopes, kernels, workload = trace(
+        prefix=65536,
+        query_length=1024,
+        cached=True,
+        native=True,
+        native_revision=3,
+        native_ranked=True,
+    )
+    fused = next(kernel for kernel in reversed(kernels) if FUSED_SCORE_FAMILY in kernel["name"])
+    if problem == "wrong_flag":
+        fused["name"] = fused["name"].replace("true, true", "true, false")
+    elif problem in ("missing_finite", "missing_guard"):
+        family = (
+            "finite_partials" if problem == "missing_finite" else "guarded_compression_and_ranking"
+        )
+        kernels = [kernel for kernel in kernels if family not in kernel["name"]]
+    else:
+        extra = dict(fused)
+        extra["name"] = "nosa_selection::" + (
+            "prepare_prefix_ranking" if problem == "extra_ranking" else "selection_prefix_kernel"
+        )
+        extra["correlationId"] = len(kernels) + 1
+        extra["launch_start"] += TIME_SCALE
+        kernels.append(extra)
+    with pytest.raises(ValueError, match="kernel sequence"):
+        attribute_kernels(scopes, kernels, 1, workload)
+
+
+def test_fused_selection_cannot_be_classified_as_score_only():
+    kernel = {"name": f"{FUSED_SCORE_FAMILY}<bf16, bf16, true, true, Map<1,2>>()"}
+    for revision in (2, 3):
+        with pytest.raises(ValueError, match="kernel sequence"):
+            _validate_operator_kernels(
+                "pooled_scores",
+                [kernel],
+                "cuda_tvm_ffi",
+                query_length=1024,
+                total_length=66560,
+                native_revision=revision,
+            )
 
 
 def test_async_attribution_and_inclusive_indexer_children():
@@ -699,6 +955,142 @@ def test_module_report_counts_useful_matrix_work_once_and_accepts_absent_stages(
                 sum(call["modules"][name]["matrix_flops"] for call in run["layer_calls"])
                 == (expected[name])
             )
+
+
+def fused_module_report_fixture():
+    from experiments.indexer_block_sparse_profile.src.mfu import (
+        FUSED_NATIVE_SOURCES,
+        PRUNED_NATIVE_SOURCES,
+    )
+    from experiments.indexer_block_sparse_profile.tests.test_sparse_profile_mfu import native_inputs
+
+    scopes, kernels, workload = trace(
+        prefix=65536,
+        query_length=1024,
+        cached=True,
+        native=True,
+        native_revision=3,
+        native_ranked=True,
+    )
+    workload.update(POLICY, repeats=1, profile_repeats=1)
+    metadata, _ = native_inputs()
+    hashes = {name: "c" * 64 for name in FUSED_NATIVE_SOURCES | PRUNED_NATIVE_SOURCES}
+    metadata["source_sha256"].update(hashes)
+    metadata["native_build"]["source_sha256"].update(hashes)
+    metadata.update(
+        run_id="synthetic-fused",
+        model_config={
+            "num_hidden_layers": 1,
+            "hidden_size": 16,
+            "intermediate_size": 32,
+            "num_attention_heads": 4,
+            "num_key_value_heads": 2,
+            "head_dim": 4,
+        },
+        args=workload | {"mode": "benchmark", "kernel_backend": "native"},
+    )
+    summary = {
+        "schema_version": 1,
+        "run_id": metadata["run_id"],
+        "num_layers": 1,
+        "workload": workload,
+        "timings": {},
+        "profiles": {},
+    }
+    for phase, tokens in (("full_prefill", 66560), ("extend", 1024)):
+        present = {
+            scope["text"].split("/")[3]
+            for scope in scopes
+            if scope["text"].startswith(f"NOSA/{phase}/")
+        }
+        summary["timings"][phase] = {
+            "tokens": tokens,
+            "sample_count": 1,
+            "wall_ms": {"count": 1, "median": 100.0},
+        }
+        summary["profiles"][phase] = {
+            "sample_count": 1,
+            "stage_totals": {stage: {"cuda_elapsed_ms": {"median": 1.0}} for stage in present},
+        }
+    attribution = attribute_kernels(scopes, kernels, 1, workload)
+    profiles = {"instrumented_timings": {phase: [{}] for phase in summary["profiles"]}}
+    return metadata, summary, profiles, attribution
+
+
+def test_mixed_dispatch_flops_are_assigned_per_call_before_phase_aggregation():
+    metadata, summary, profiles, attribution = fused_module_report_fixture()
+    report = build_module_report(metadata, summary, profiles, attribution)
+    config = metadata["model_config"]
+    for run in report["runs"]:
+        modules = run["modules"]
+        expected = {name: 0 for name in QK_MODULES}
+        for call in run["layer_calls"]:
+            qk = _flops_by_module(config, call["query_start"], call["query_length"], 1024)[
+                "indexer_total"
+            ]
+            if owner := call["indexer_qk_module"]:
+                expected[owner] += qk
+            else:
+                assert qk == 0
+            assert sum(call["modules"][name]["matrix_flops"] for name in QK_MODULES) == qk
+        assert sum(expected.values()) == modules["indexer_total"]["matrix_flops"]
+        for name in QK_MODULES:
+            assert modules[name]["matrix_flops"] == expected[name]
+        for name in ("native_prepare", "native_prepare_ranked", "native_selection"):
+            assert modules[name]["matrix_flops"] == 0
+            assert modules[name]["mfu_pct"] is None
+        fused = report["phases"][run["phase"]]["modules"]["score_selection"]
+        assert fused["matrix_flops_per_run"] == expected["score_selection"] > 0
+        assert "event_interval_ms_median" not in fused
+        assert fused["mfu_pct_median"] == pytest.approx(
+            expected["score_selection"]
+            / fused["kernel_ms_median"]
+            / 1e9
+            / report["peak_tflops"]
+            * 100
+        )
+    full = report["phases"]["full_prefill"]["modules"]
+    assert (
+        0
+        < full["pooled_scores"]["matrix_flops_per_run"]
+        < full["score_selection"]["matrix_flops_per_run"]
+    )
+    extend = report["phases"]["extend"]["modules"]
+    assert extend["pooled_scores"]["matrix_flops_per_run"] == 0
+
+
+@pytest.mark.parametrize("problem", ["missing", "duplicate", "wrong_owner"])
+def test_module_report_rejects_ambiguous_per_call_qk_ownership(problem):
+    metadata, summary, profiles, attribution = fused_module_report_fixture()
+    call = attribution["runs"][-1]["layer_calls"][0]
+    if problem == "missing":
+        call["modules"]["score_selection"]["kernel_count"] = 0
+    elif problem == "duplicate":
+        call["modules"]["pooled_scores"]["kernel_count"] = 1
+    else:
+        call["indexer_qk_module"] = "pooled_scores"
+    with pytest.raises(ValueError, match="QK"):
+        build_module_report(metadata, summary, profiles, attribution)
+
+
+def test_module_report_rejects_inconsistent_qk_ownership_between_repeats():
+    metadata, summary, profiles, attribution = fused_module_report_fixture()
+    summary["workload"]["profile_repeats"] = 2
+    for phase in summary["profiles"]:
+        summary["profiles"][phase]["sample_count"] = 2
+        profiles["instrumented_timings"][phase] *= 2
+    repeat = deepcopy(attribution["runs"])
+    for run in repeat:
+        run["iteration"] = 1
+    call = repeat[-1]["layer_calls"][0]
+    call["modules"]["pooled_scores"] = call["modules"]["score_selection"]
+    call["modules"]["score_selection"] = {"kernel_count": 0, "kernel_ms": 0}
+    call["indexer_qk_module"] = "pooled_scores"
+    repeat[-1]["modules"]["pooled_scores"] = repeat[-1]["modules"]["score_selection"]
+    repeat[-1]["modules"]["score_selection"] = {"kernel_count": 0, "kernel_ms": 0}
+    attribution["runs"].extend(repeat)
+    with pytest.raises(ValueError, match="Repeated profile runs"):
+        build_module_report(metadata, summary, profiles, attribution)
 
 
 @pytest.mark.parametrize("change", ["missing_gemm", "extra_gemm", "missing_silu", "missing_scope"])

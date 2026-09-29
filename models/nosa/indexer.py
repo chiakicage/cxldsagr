@@ -158,9 +158,27 @@ class NosaIndexer:
                 ):
                     indexer_cache = cache_access.indexer_cache
 
+        prepared = None
+        if indexer_cache is not None:
+            prepared = prepare_native_indexer_inputs(
+                q,
+                keys,
+                cis,
+                context.query_start,
+                indexer_cache=indexer_cache,
+                layer_idx=context.layer_idx,
+                cache_owner=cache_access,
+            )
+            if isinstance(prepared, BlockSelection):
+                return prepared
+
         # Retain strict rejection of nonfinite inputs without materializing
         # elementwise masks across the entire resident prefix on Hopper.
-        if self.mode == "nosa" and q.is_cuda and self.backend in ("auto", "triton"):
+        if prepared is not None:
+            # Native preparation checked every Q value and the unvalidated
+            # resident suffix before writing any derived records.
+            finite = True
+        elif self.mode == "nosa" and q.is_cuda and self.backend in ("auto", "triton"):
             from operators.sm90.nosa_validation import all_finite
 
             validated = (
@@ -190,6 +208,7 @@ class NosaIndexer:
                         context.query_start,
                         indexer_cache=indexer_cache,
                         layer_idx=context.layer_idx,
+                        prepared=prepared,
                     )
                 return self._select(q, keys, context.query_start)
         finally:
@@ -304,7 +323,9 @@ class NosaIndexer:
 
         return BlockSelection(block_ids, policy.block_size, valid_mask=block_ids >= 0)
 
-    def _select_nosa(self, q, keys, cis, query_start, *, indexer_cache=None, layer_idx=0):
+    def _select_nosa(
+        self, q, keys, cis, query_start, *, indexer_cache=None, layer_idx=0, prepared=None
+    ):
         backend = self.backend
         if backend == "auto":
             backend = "triton" if q.is_cuda else "reference"
@@ -313,9 +334,14 @@ class NosaIndexer:
         if backend == "triton":
             from operators.sm90.nosa_indexer import select_contiguous_blocks
 
-            compressed_k, compressed_cis, pooled_cis, workspace = prepare_indexer_inputs(
-                keys, cis, len(q), indexer_cache=indexer_cache, layer_idx=layer_idx
-            )
+            if prepared is None:
+                prepared = (
+                    *prepare_indexer_inputs(
+                        keys, cis, len(q), indexer_cache=indexer_cache, layer_idx=layer_idx
+                    ),
+                    None,
+                )
+            compressed_k, compressed_cis, pooled_cis, workspace, ranking = prepared
             ids, valid = select_contiguous_blocks(
                 query,
                 compressed_k,
@@ -325,6 +351,7 @@ class NosaIndexer:
                 return_valid_mask=True,
                 pooled_cis=pooled_cis,
                 workspace=workspace,
+                prepared_ranking=ranking,
             )
             return BlockSelection(ids, 64, valid_mask=valid)
 
@@ -341,6 +368,137 @@ class NosaIndexer:
             )
             result[start:end, :, : selected.shape[-1]] = selected
         return BlockSelection(result, 64, valid_mask=result >= 0)
+
+
+def prepare_native_indexer_inputs(
+    q, keys, cis, query_start, *, indexer_cache, layer_idx, cache_owner=None
+):
+    """Validate and append owned records, returning None for other backends/layouts.
+
+    The numerical kernel leaves every derived buffer untouched on nonfinite
+    input. Only this model adapter publishes the reservation after the host
+    observes success. Validation scratch is borrowed from the request's serial
+    workspace and can be overwritten by selection after that synchronization.
+    A prepared CIS ranking occupies a separate aligned tail of that allocation
+    and remains live until selection consumes it. Supported owned appends use a
+    checked native submission and return their final BlockSelection; other
+    layouts retain the preparation tuple and ordinary selection path. Checked
+    validation scratch is disjoint from all output storage even on failure.
+    Cache transaction metadata belongs to the model and request, independently
+    of this scratch allocation.
+    """
+    from operators.sm90._native import native_enabled
+
+    if not native_enabled():
+        return None
+    from operators.sm90._nosa_prepare_cuda import PreparationScratch, prepare_out, supports
+    from operators.sm90._nosa_prepare_ranked_cuda import _geometry_supported, prepare_ranked_out
+
+    if not supports(q, keys, cis):
+        return None
+    length, heads, _ = keys.shape
+    count, stable = max(0, length // 16 - 1), max(0, (length - 16) // 64)
+    lengths = {"compressed_keys": count, "compressed_cis": count, "pooled_cis": stable}
+    reservation = indexer_cache.reserve_layer(layer_idx, length, lengths)
+    try:
+        validated_start = min(reservation.previous.validated_tokens, length)
+        compressed_start = min(reservation.previous.lengths["compressed_keys"], count)
+        pooled_start = min(reservation.previous.lengths["pooled_cis"], stable)
+        ranked = _geometry_supported(
+            q,
+            keys,
+            query_start=query_start,
+            validated_start=validated_start,
+            pooled_start=pooled_start,
+        )
+        blocks = (length + 63) // 64
+        checked = (
+            ranked
+            and cache_owner is not None
+            and q.ndim == 3
+            and q.shape[1:] == (heads * 16, 128)
+            and count >= 2047
+            and query_start + len(q) == length
+            and q.stride(-1) == 1
+            and q.data_ptr() % 16 == 0
+            and all(stride > 0 and stride % 8 == 0 for stride in q.stride()[:2])
+        )
+        if checked:
+            from operators.sm90._nosa_indexer_checked_cuda import select_prepared_out
+
+            rows = len(q)
+            score_bytes = rows * heads * blocks * keys.element_size()
+            validation_offset = (score_bytes + 255) // 256 * 256
+            ranking_offset = validation_offset + 3328
+            scratch_bytes = indexer_cache.workspace(ranking_offset + heads * 64 * 4, torch.uint8)
+            workspace = scratch_bytes[:score_bytes].view(keys.dtype).reshape(rows * heads, blocks)
+            ranking = scratch_bytes[ranking_offset:].view(torch.int32).reshape(heads, 64)
+            scratch = PreparationScratch(
+                scratch_bytes[validation_offset : validation_offset + 3072],
+                scratch_bytes[validation_offset + 3072 : validation_offset + 3073]
+                .view(torch.bool)
+                .reshape(()),
+                cache_owner.native_indexer_host_flag(),
+            )
+            ids = torch.empty((rows, heads, 64), dtype=torch.int64, device=q.device)
+            valid = torch.empty_like(ids, dtype=torch.bool)
+            normalizers = torch.empty((1, rows, heads, 16, 2), dtype=torch.float32, device=q.device)
+            select_prepared_out(
+                q.reshape(rows, heads, 16, 128),
+                keys,
+                cis,
+                **reservation.views,
+                workspace=workspace,
+                normalizers=normalizers,
+                block_ids=ids,
+                valid_mask=valid,
+                ranking=ranking,
+                query_start=query_start,
+                validated_start=validated_start,
+                compressed_start=compressed_start,
+                pooled_start=pooled_start,
+                scratch=scratch,
+            )
+            indexer_cache.finish_layer(layer_idx)
+            return BlockSelection(ids, 64, valid_mask=valid)
+        score_bytes = len(q) * heads * blocks * keys.element_size() if blocks > 64 else 0
+        ranking_offset = (max(3073, score_bytes) + 255) // 256 * 256
+        ranking_bytes = heads * 64 * 4 if ranked else 0
+        scratch_bytes = indexer_cache.workspace(ranking_offset + ranking_bytes, torch.uint8)
+        scratch = PreparationScratch(
+            scratch_bytes[:3072], scratch_bytes[3072:3073].view(torch.bool).reshape(())
+        )
+        ranking = (
+            scratch_bytes[ranking_offset:].view(torch.int32).reshape(heads, 64) if ranked else None
+        )
+        options = {"ranking": ranking, "query_start": query_start} if ranked else {}
+        prepare = prepare_ranked_out if ranked else prepare_out
+        finite = prepare(
+            q,
+            keys,
+            cis,
+            **reservation.buffers,
+            **options,
+            validated_start=validated_start,
+            compressed_start=compressed_start,
+            pooled_start=pooled_start,
+            scratch=scratch,
+        )
+        if not finite:
+            raise ValueError("NOSA indexer requires finite Q, K and CIS scores")
+        indexer_cache.finish_layer(layer_idx)
+    except BaseException:
+        indexer_cache.abort_layer(layer_idx)
+        raise
+    workspace = scratch_bytes[:score_bytes].view(keys.dtype) if score_bytes else None
+    buffers = reservation.views
+    return (
+        buffers["compressed_keys"],
+        buffers["compressed_cis"],
+        buffers["pooled_cis"],
+        workspace,
+        ranking,
+    )
 
 
 def prepare_indexer_inputs(keys, cis, query_count, *, indexer_cache=None, layer_idx=0):

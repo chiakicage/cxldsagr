@@ -1,4 +1,4 @@
-"""SM90 NOSA QK/pooling and FlashInfer's stable two-stage block selection.
+"""SM90 NOSA QK/pooling and stable two-stage block selection.
 
 BF16/FP16 QK uses Tensor Cores and FP32 normalization. Two passes avoid a
 Q-head-sized probability allocation. The second pass rounds each GQA sum to
@@ -518,8 +518,33 @@ def _short_selection(positions, heads, blocks, *, rows, device, query_start=0, r
 
 
 def _select_workspace(
-    workspace, cis, positions, query_start, rows, heads, *, pooled_cis, return_valid_mask
+    workspace,
+    cis,
+    positions,
+    query_start,
+    rows,
+    heads,
+    *,
+    pooled_cis,
+    return_valid_mask,
+    prepared_ranking=None,
 ):
+    from operators.sm90._native import native_enabled
+
+    if native_enabled() and workspace.dtype in (torch.bfloat16, torch.float16):
+        from operators.sm90._nosa_selection_cuda import select_pooled_blocks
+
+        return select_pooled_blocks(
+            workspace,
+            cis,
+            positions,
+            query_start,
+            rows,
+            heads,
+            pooled_cis=pooled_cis,
+            return_valid_mask=return_valid_mask,
+            prepared_ranking=prepared_ranking,
+        )
     if not rows:
         selected = torch.empty((0, 64), device=workspace.device, dtype=torch.int64)
     else:
@@ -594,8 +619,8 @@ def _select_blocks(
     query_start=0,
     pooled_cis=None,
     workspace=None,
+    prepared_ranking=None,
 ):
-    _validate_query(query, keys)
     rows, heads = query.shape[:2]
     _validate_cis(cis, rows, heads, len(keys), query.device, total_length, pooled_cis=pooled_cis)
     if positions is not None:
@@ -614,6 +639,15 @@ def _select_blocks(
             torch.promote_types(query.dtype, cis.dtype),
             query.device,
         )
+    if prepared_ranking is not None:
+        from operators.sm90._native import native_enabled
+        from operators.sm90._nosa_selection_cuda import _validate_prepared_ranking
+
+        if not native_enabled() or blocks <= 64:
+            raise ValueError("Prepared CIS ranking requires the native contiguous prefix path")
+        _validate_prepared_ranking(
+            prepared_ranking, workspace, positions, query_start, rows, heads, pooled_cis
+        )
     with torch.cuda.device(query.device):
         if blocks <= 64:
             return _short_selection(
@@ -625,6 +659,37 @@ def _select_blocks(
                 query_start=query_start,
                 return_valid_mask=return_valid_mask,
             )
+        from operators.sm90._native import native_enabled
+        from operators.sm90._nosa_scores_cuda import supports
+
+        # Joint submission must preserve the ordinary score dispatch's layout
+        # fallback. Broadcast, unaligned and non-TMA strides remain supported
+        # by the Triton score path followed by native selection.
+        if (
+            native_enabled()
+            and rows >= 128
+            and query.dtype == torch.bfloat16
+            and workspace.dtype == torch.bfloat16
+            and positions is None
+            and pooled_cis is not None
+            and pooled_cis.dtype == torch.bfloat16
+            and len(pooled_cis) >= blocks - 2
+            and 2047 <= len(keys)
+            and blocks <= 1056
+            and return_valid_mask
+            and supports(query, keys, workspace)
+        ):
+            from operators.sm90._nosa_indexer_cuda import select
+
+            return select(
+                query,
+                keys,
+                cis,
+                pooled_cis,
+                workspace,
+                query_start,
+                prepared_ranking=prepared_ranking,
+            )
         pooled_scores(query, keys, positions, query_start, total_length, workspace)
         return _select_workspace(
             workspace,
@@ -635,11 +700,13 @@ def _select_blocks(
             heads,
             pooled_cis=pooled_cis,
             return_valid_mask=return_valid_mask,
+            prepared_ranking=prepared_ranking,
         )
 
 
 def select_blocks(query, keys, cis, positions, total_length):
     """Explicit positions are range-checked once before launching QK/pooling."""
+    _validate_query(query, keys)
     return _select_blocks(query, keys, cis, positions, total_length, check_positions=True)
 
 
@@ -653,6 +720,7 @@ def select_contiguous_blocks(
     return_valid_mask=False,
     pooled_cis=None,
     workspace=None,
+    prepared_ranking=None,
 ):
     """Select a contiguous range using scalar positions and reusable flat scratch.
 
@@ -662,6 +730,10 @@ def select_contiguous_blocks(
     have at least Q*H*ceil(total_length/64) elements, 16-byte alignment, and
     dtype promoted from Q and CIS. FlashInfer allocates its values/ID outputs
     internally.
+
+    ``prepared_ranking`` may supply packed int32 [H,64] candidates from native
+    ranked preparation for this exact query start and stable pool. Its storage
+    must stay separate from ``workspace`` until this call finishes consuming it.
     """
     _validate_query(query, keys)
     if type(total_length) is not int or total_length <= 0:
@@ -681,4 +753,5 @@ def select_contiguous_blocks(
         query_start=query_start,
         pooled_cis=pooled_cis,
         workspace=workspace,
+        prepared_ranking=prepared_ranking,
     )

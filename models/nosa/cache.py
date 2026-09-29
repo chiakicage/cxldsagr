@@ -35,6 +35,7 @@ class NosaKVCache(ResidentCache):
         )
         super().__init__(spec, max_seq_len, device=device, dtype=dtype)
         self.indexer_cache = None
+        self._native_indexer_host_flag = None
         if with_cis:
             compressed, pooled = self._indexer_lengths(max_seq_len)
             self.indexer_cache = IndexerCache(
@@ -47,6 +48,17 @@ class NosaKVCache(ResidentCache):
                 },
                 device=self.device,
             )
+
+    def native_indexer_host_flag(self):
+        """One checked native flag for this request's serial CUDA stream."""
+        import torch
+
+        self._ensure_alive()
+        if self._native_indexer_host_flag is None:
+            self._native_indexer_host_flag = torch.empty(
+                (), dtype=torch.bool, device="cpu", pin_memory=True
+            )
+        return self._native_indexer_host_flag
 
     @staticmethod
     def _indexer_lengths(length):
@@ -115,6 +127,7 @@ class NosaKVCache(ResidentCache):
         if self.released:
             return
         super().release()
+        self._native_indexer_host_flag = None
         if self.indexer_cache is not None:
             self.indexer_cache.release()
 

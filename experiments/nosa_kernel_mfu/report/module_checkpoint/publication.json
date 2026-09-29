@@ -1,0 +1,39 @@
+{
+  "run_id": "kda_main_bf16_pair_v3_development",
+  "published_date": "2026-09-29",
+  "status": "accepted_module_development_checkpoint_target_incomplete",
+  "measurement_repeated_for_publication": false,
+  "original_measurement_root": "/tmp/nosa-main-bf16-pair-v3-root-20260929",
+  "original_manifest_sha256": "1c805899cc5c40f1cbec46d3328f0d9df0f44f17de6b1dc7180cd3fae174ee11",
+  "data_directory": "experiments/nosa_kernel_mfu/output/data/kda_main_bf16_pair_v3_development",
+  "profile_directory": "experiments/nosa_kernel_mfu/output/profile/kda_main_bf16_pair_v3_development",
+  "log_directory": "experiments/nosa_kernel_mfu/output/log/kda_main_bf16_pair_v3_development",
+  "report_files_sha256": {
+    "metadata.json": "7a45f3639c461770622ec94a05186fe807e2e110f6f42208cb28dff8565b8464",
+    "results.json": "008a57690b8d2a805612bbfa1956b9ebd9d5f1f610238cc94b369ae7641b0479",
+    "compact_summary.json": "e7c11ba10ccce43cb6ae3743e3e3f0c942ed825c904dd20c740cab0e4f12d659",
+    "attribution_check.json": "9b92c66e7edad0a59222337045165dc8dd89d89c610f5be4bdb4728f6fcc83f8"
+  },
+  "publication_format_changes": [
+    {
+      "file": "operators/sm90/_nosa_attention_fa3.py",
+      "before_sha256": "8039ffe4e9c632b41a6dba2c7b41fb25c034c3c8e820f47ad8f7b2238d118b23",
+      "after_sha256": "61e2379aedaad7dddbb7237b22d014d1d37f9f251f3010c51dbe5b46b2ccde10",
+      "AST_equal": true
+    },
+    {
+      "file": "operators/sm90/tests/test_nosa_attention_fa3_work_order.py",
+      "before_sha256": "303a9ca579f147fd030323f682150968da9374139bb2b724b037616ff96ce3cd",
+      "after_sha256": "19a0129cc1793fa3a394ae83e877188604dc3448473b73de1e6882726acd7b4f",
+      "AST_equal": true
+    },
+    {
+      "file": "operators/sm90/tests/test_nosa_attention_numerical_edges.py",
+      "before_sha256": "b61a8f80bbb50d265f2167bacf9576459d0c9226444f33589cda1a32ba4edd2f",
+      "after_sha256": "37c91ba636556b88abd62b4ac5e910d337880ec21005e3d171d734a45c36588e",
+      "AST_equal": true
+    }
+  ],
+  "measurement_boundary": "Complete resident module kernel sums; event API and wall API measured separately. Not a replacement for synthetic operator, full-model native/Triton or selection-pattern experiments.",
+  "source_note": "Original measured source hashes and source snapshots are preserved. Publication only reformats the attention Python adapter with identical AST; CUDA sources are unchanged. Attribution graph registration is added after this measurement."
+}

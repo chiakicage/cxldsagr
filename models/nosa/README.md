@@ -97,7 +97,7 @@ query-agnostic 使用压缩后的 CIS。相同分数优先较小 block ID。完�
 NOSA-8B 的 D128/GQA=16 默认启用迁移后的 CUDA/CuTe QK score 和 block sparse attention；
 QK 在短上下文按[算子阈值](../../operators/sm90/README.md)使用单 kernel Triton。
 其余已支持形状走 Triton。`CXLDSAGR_SM90_BACKEND=triton` 强制对照后端。
-原生构建要求 nvcc、TVM FFI 与共享 CUTLASS，见[算子说明](../../operators/sm90/README.md)。
+原生构建要求 nvcc、TVM FFI、共享 CUTLASS 和已安装的 FlashInfer 0.6.18，见[算子说明](../../operators/sm90/README.md)。
 CUDA 不支持的设备或 shape 明确失败。
 Triton 支持 SM90、FP16/BF16、head_dim 64/128、GQA group 1–32，使用 FP32 在线 softmax
 累积，AV 概率转回输入 dtype；数值不保证与 FP32 reference 逐位相等，indexer 的舍入
@@ -114,12 +114,23 @@ sparse cache 将 CIS 作为 `[layer, capacity, KV head]` 的命名 record，按�
 [IndexerCache](../../cache/indexer_cache.py)：按层惰性缓存压缩 K/CIS 和稳定 CIS pool，
 prefill 完成后仅追加新窗口。五窗口 pool 在块结束后再到来 16 tokens 才稳定，末尾最多
 两个块现场计算。有限值检查复用已校验前缀；外部 CIS 覆盖和 reference 仍独立检查与计算。
-Top-33 / Top-64 使用 FlashInfer；query scratch 跨阶段和层复用。上下文上限为 256K tokens。
+默认原生后端使用精确的 Top-33 / Top-64 选择，并在满足连续 query 与稳定 pool 条件时
+共享每 KV head 的 CIS prefix 排名；Triton 对照使用 FlashInfer。query scratch 跨阶段和层
+复用。原生后端对已验证布局合并有限值检查和增量压缩；检查失败时不写任何派生记录，
+由模型撤销预约并抛出 `ValueError`。满足连续追加条件时，准备阶段同时生成 CIS 排名，
+放在与评分 workspace 不重叠的临时区域；选块直接消费该排名。大 batch 的原生
+specialization 将评分、pooling 和稳定选块合并，其他已支持形状保留分离路径。
+支持的自有连续追加使用 checked C++ 入口合并准备与选块；请求持有可复用的 pinned
+host flag，模型在校验成功后完成派生预约。验证 scratch 与下游输出不重叠；原始输入
+非有限或输出别名非法时，在写入前拒绝。异步准备接口仍支持 CUDA Graph，带 host
+有限值检查的完整入口不支持捕获。
+上下文上限为 256K tokens。
 `cache.truncate(length)` 同步回退原始和派生记录，失败 append 随模型事务一起回滚。
 offload fetch 与 overlap 尚未实现。原 QA-only pattern 不启用此模式；
 新增完整 NOSA pattern 对照从独立空 cache 构建 sparse prefix，记录 attention 实际消费的选块。
 完整 sparse 路径的全模型 prefill/extend 测量见
 [64K+1K 端到端 profile](../../experiments/indexer_block_sparse_profile/README.md)。
+当前算子优化仍在补测，上述已发布全模型结果对应原报告注明的实现版本。
 
 ```bash
 source .venv/bin/activate

@@ -194,6 +194,60 @@ def test_fused_pipeline_scopes_are_siblings_and_restore_launch_helpers(monkeypat
     assert all(getattr(module, name) is launch for module, name, _ in helpers)
 
 
+@pytest.mark.parametrize("joint", [False, True])
+@pytest.mark.parametrize("ranked", [False, True])
+def test_native_preparation_and_selection_scopes_record_prepared_ranking(
+    monkeypatch, joint, ranked
+):
+    from experiments.indexer_block_sparse_profile.src.analyze import _validate_scopes
+    from operators.sm90 import (
+        _nosa_indexer_cuda,
+        _nosa_prepare_cuda,
+        _nosa_prepare_ranked_cuda,
+        _nosa_selection_cuda,
+    )
+
+    model = tiny_sparse_model()
+    preparation = _nosa_prepare_ranked_cuda if ranked else _nosa_prepare_cuda
+    preparation_name = "prepare_ranked_out" if ranked else "prepare_out"
+    selection = _nosa_indexer_cuda if joint else _nosa_selection_cuda
+    selection_name = "select" if joint else "select_pooled_blocks"
+    sentinel = object()
+
+    def launch(*args, **kwargs):
+        return sentinel
+
+    monkeypatch.setattr(preparation, preparation_name, launch)
+    monkeypatch.setattr(selection, selection_name, launch)
+
+    def select(q, keys, cis, query_start, **kwargs):
+        assert getattr(preparation, preparation_name)(q) is sentinel
+        assert (
+            getattr(selection, selection_name)(q, prepared_ranking=sentinel if ranked else None)
+            is sentinel
+        )
+        return BlockSelection(torch.zeros((len(q), keys.shape[1], 1), dtype=torch.long), 64)
+
+    monkeypatch.setattr(model.indexer, "_select_nosa", select)
+    with SparseScopes(model, clock=FakeClock()) as scopes:
+        model(torch.tensor([1, 2]), return_hidden=True)
+    records = scopes.collect()
+    _validate_scopes(records)
+    for parent in (record for record in records if record["stage"] == "indexer_total"):
+        children = [record for record in records if record["parent_scope_id"] == parent["scope_id"]]
+        assert [record["stage"] for record in children] == [
+            "native_prepare_ranked" if ranked else "native_prepare",
+            "native_indexer" if joint else "native_selection",
+        ]
+        assert children[-1]["prepared_ranking"] is ranked
+        children[-1]["prepared_ranking"] = not ranked
+        with pytest.raises(ValueError, match="prepared_ranking"):
+            _validate_scopes(records)
+        children[-1]["prepared_ranking"] = ranked
+    assert getattr(preparation, preparation_name) is launch
+    assert getattr(selection, selection_name) is launch
+
+
 def test_exception_restores_modules_hooks_and_nvtx_and_keeps_layer_attribution(monkeypatch):
     import models.nosa.indexer as indexer_module
     import models.nosa.scoring as scoring_module
@@ -264,3 +318,35 @@ def test_audit_timing_cpu_clock_and_overlap_contracts():
         SparseScopes(model, timing=False),
     ):
         pass
+
+
+def test_checked_native_scope_is_one_container_with_explicit_prepared_ranking(monkeypatch):
+    from experiments.indexer_block_sparse_profile.src.analyze import _validate_scopes
+    from operators.sm90 import _nosa_indexer_checked_cuda
+
+    model = tiny_sparse_model()
+    sentinel = object()
+
+    def launch(*args, **kwargs):
+        return sentinel
+
+    def select(q, keys, cis, query_start, **kwargs):
+        assert _nosa_indexer_checked_cuda.select_prepared_out(q) is sentinel
+        return BlockSelection(torch.zeros((len(q), keys.shape[1], 1), dtype=torch.long), 64)
+
+    monkeypatch.setattr(_nosa_indexer_checked_cuda, "select_prepared_out", launch)
+    monkeypatch.setattr(model.indexer, "_select_nosa", select)
+    with SparseScopes(model, clock=FakeClock()) as scopes:
+        model(torch.tensor([1, 2]), return_hidden=True)
+    records = scopes.collect()
+    _validate_scopes(records)
+    children = [record for record in records if record["stage"] == "native_checked_indexer"]
+    assert len(children) == 2
+    for child in children:
+        assert child["prepared_ranking"] is True
+        parent = next(
+            record for record in records if record["scope_id"] == child["parent_scope_id"]
+        )
+        assert parent["stage"] == "indexer_total"
+        assert 0 < child["cuda_elapsed_ms"] < parent["cuda_elapsed_ms"]
+    assert _nosa_indexer_checked_cuda.select_prepared_out is launch

@@ -67,13 +67,32 @@ def _load_run(data_dir, backend):
     for phase in PHASES:
         if modules["phases"][phase]["end_to_end"] != mfu["phases"][phase]:
             raise ValueError("Module report has different end-to-end measurements")
-        for name in MODULES:
-            row = modules["phases"][phase]["modules"][name]
-            _duration(row["kernel_ms_median"], f"{phase}.{name}.kernel_ms_median")
+        phase_modules = modules["phases"][phase]["modules"]
+        fused = phase_modules.get("score_selection")
+        if summary["workload"].get("native_kernel_revision", 1) >= 3 and fused is None:
+            raise ValueError("Fused-era reports must declare the score+selection module")
+        for name in (*MODULES, *(("score_selection",) if fused is not None else ())):
+            row = phase_modules[name]
+            _duration(
+                row["kernel_ms_median"],
+                f"{phase}.{name}.kernel_ms_median",
+                allow_zero=name in ("pooled_scores", "score_selection"),
+            )
             if row["sample_count"] != repeats or len(row["kernel_count_per_run"]) != repeats:
                 raise ValueError("Incomplete module timing samples")
             for count in row["kernel_count_per_run"]:
-                _integer(count, f"{phase}.{name}.kernel_count", minimum=1)
+                _integer(
+                    count,
+                    f"{phase}.{name}.kernel_count",
+                    minimum=0 if name in ("pooled_scores", "score_selection") else 1,
+                )
+            active = [count > 0 for count in row["kernel_count_per_run"]]
+            if any(active) != all(active) or any(active) != (row["kernel_ms_median"] > 0):
+                raise ValueError("Module kernel presence disagrees with its duration or repeats")
+        if not any(phase_modules["pooled_scores"]["kernel_count_per_run"]) and not (
+            fused is not None and all(fused["kernel_count_per_run"])
+        ):
+            raise ValueError("Scored comparison requires score-only or score+selection work")
     return {
         "metadata": metadata,
         "summary": summary,
@@ -104,8 +123,47 @@ def compare(native_data_dir, triton_data_dir):
     ]
     if builds[0] != builds[1]:
         raise ValueError("Native and Triton captures differ in native build inputs")
+    native_workload, triton_workload = (run["summary"]["workload"] for run in (native, triton))
+    for key, allowed in (
+        ("selection_backend", {("cuda_tvm_ffi", "flashinfer")}),
+        (
+            "attention_execution",
+            {("native_fa3_v2", "triton_v1"), ("native_fa3_v3", "triton_v1")},
+        ),
+        (
+            "indexer_execution",
+            {
+                ("cached_native_v2", "cached_flashinfer_v1"),
+                ("cached_native_v3", "cached_flashinfer_v1"),
+                ("cached_native_v4", "cached_flashinfer_v1"),
+                ("cached_native_v5", "cached_flashinfer_v1"),
+            },
+        ),
+        (
+            "indexer_preparation",
+            {
+                ("native_guarded_v1", "triton_v1"),
+                ("native_guarded_ranked_v1", "triton_v1"),
+                ("native_guarded_ranked_checked_v1", "triton_v1"),
+            },
+        ),
+    ):
+        pair = (native_workload.get(key), triton_workload.get(key))
+        if pair[0] != pair[1] and pair not in allowed:
+            raise ValueError(f"Native and Triton captures differ in unreviewed {key}")
     workloads = [
-        {key: value for key, value in run["summary"]["workload"].items() if key != "kernel_backend"}
+        {
+            key: value
+            for key, value in run["summary"]["workload"].items()
+            if key
+            not in (
+                "kernel_backend",
+                "attention_execution",
+                "selection_backend",
+                "indexer_execution",
+                "indexer_preparation",
+            )
+        }
         for run in (native, triton)
     ]
     if workloads[0] != workloads[1]:
@@ -118,9 +176,26 @@ def compare(native_data_dir, triton_data_dir):
         != triton["modules"]["provenance"]["analysis_source_sha256"]
     ):
         raise ValueError("Module reports use different analysis sources")
-    rows = []
+    rows, omitted = [], []
     for phase in PHASES:
+        has_fusion = any(
+            any(
+                run["modules"]["phases"][phase]["modules"]
+                .get("score_selection", {})
+                .get("kernel_count_per_run", [])
+            )
+            for run in (native, triton)
+        )
         for name in ("end_to_end", *MODULES):
+            if name == "pooled_scores" and has_fusion:
+                omitted.append(
+                    {
+                        "phase": phase,
+                        "metric": name,
+                        "reason": "Score+selection fusion removes or changes the score-only scope; compare complete indexer_total instead",
+                    }
+                )
+                continue
             if name == "end_to_end":
                 values = [run["mfu"]["phases"][phase]["wall_ms"] for run in (native, triton)]
                 boundary = "unprofiled wall time"
@@ -150,10 +225,12 @@ def compare(native_data_dir, triton_data_dir):
         "gpu": left["gpu"],
         "model_config": left["model_config"],
         "rows": rows,
+        "omitted_comparisons": omitted,
         "definitions": {
             "speedup_triton_over_native": "Triton median milliseconds / native median milliseconds; greater than 1 means native is faster",
             "boundaries": "End-to-end uses independent unprofiled wall timings; module rows use separate nsys captures and cannot be added to or subtracted from wall time",
-            "inclusive_modules": "indexer_total includes pooled_scores, validation, cache updates and selection; do not sum parent and child rows",
+            "inclusive_modules": "indexer_total includes scoring, validation, cache updates and selection, including fused kernels; do not sum parent and child rows",
+            "score_comparison": "pooled_scores ratios are omitted for any phase with score+selection fusion because the two backends no longer expose equivalent score-only work",
         },
         "provenance": {
             "request_sha256": left["request_sha256"],

@@ -133,6 +133,63 @@ def native_inputs(*, backend="native"):
     return metadata, summary
 
 
+@pytest.mark.parametrize(
+    "problem",
+    [
+        None,
+        "revision",
+        "execution",
+        "preparation",
+        "missing_fused_source",
+        "missing_checked_source",
+        "missing_pruned_source",
+        "missing_cutoff_source",
+    ],
+)
+def test_fused_native_dispatch_requires_matching_revision_and_complete_sources(problem):
+    from experiments.indexer_block_sparse_profile.src.capture import operator_workload
+    from experiments.indexer_block_sparse_profile.src.mfu import (
+        FUSED_NATIVE_SOURCES,
+        PRUNED_NATIVE_SOURCES,
+        validate_kernel_backend,
+    )
+
+    metadata, summary = native_inputs()
+    summary["workload"].update(operator_workload("native"))
+    summary["workload"].pop("attention_execution")
+    hashes = {
+        name: "c" * 64
+        for name in FUSED_NATIVE_SOURCES
+        | PRUNED_NATIVE_SOURCES
+        | {"operators/sm90/csrc/nosa_indexer_checked.cu"}
+    }
+    metadata["source_sha256"].update(hashes)
+    metadata["native_build"]["source_sha256"].update(hashes)
+    if problem == "revision":
+        summary["workload"]["native_kernel_revision"] = 2
+    elif problem == "execution":
+        summary["workload"]["indexer_execution"] = "cached_native_v2"
+    elif problem == "preparation":
+        summary["workload"]["indexer_preparation"] = "unreviewed"
+    elif problem and problem.startswith("missing_"):
+        source = (
+            "operators/sm90/csrc/"
+            + {
+                "missing_fused_source": "nosa_prepare_ranked.cu",
+                "missing_checked_source": "nosa_indexer_checked.cu",
+                "missing_pruned_source": "nosa_scores_pruned.cuh",
+                "missing_cutoff_source": "nosa_selection_cutoff.cuh",
+            }[problem]
+        )
+        for source_map in (metadata["source_sha256"], metadata["native_build"]["source_sha256"]):
+            del source_map[source]
+    if problem:
+        with pytest.raises(ValueError):
+            validate_kernel_backend(summary["workload"], metadata)
+    else:
+        assert validate_kernel_backend(summary["workload"], metadata) == "cuda_tvm_ffi"
+
+
 @pytest.mark.parametrize("backend", ["native", "triton"])
 def test_native_and_remeasured_triton_control_preserve_math_and_build_identity(backend):
     metadata, summary = native_inputs(backend=backend)

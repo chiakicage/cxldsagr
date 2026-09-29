@@ -147,6 +147,7 @@ def test_cuda_native_scores_large_uniform_logits_preserve_normalization(
 @torch.inference_mode()
 def test_cuda_native_scores_full_prefill_match_fp32_reference(dtype, backend, monkeypatch):
     from operators.sm90.nosa_indexer import _launch_scores as scores_out
+    from operators.sm90.nosa_indexer import _pool_qa
 
     monkeypatch.setenv("CXLDSAGR_SM90_BACKEND", backend)
 
@@ -163,3 +164,87 @@ def test_cuda_native_scores_full_prefill_match_fp32_reference(dtype, backend, mo
     # context length. Allow one dtype rounding step with a small zero floor.
     rtol = 0.008 if dtype == torch.bfloat16 else 0.0011
     torch.testing.assert_close(actual.float(), expected.float(), rtol=rtol, atol=1e-7)
+
+    # The fused large-query path writes pooled scores directly. Compare it
+    # against independently materialized, model-dtype reference scores so
+    # the GQA rounding and five-window halo are both exercised.
+    pooled = torch.empty(1024, 2, 1040, device="cuda", dtype=torch.float32)
+    expected_pool = torch.empty_like(pooled)
+    scores_out(query, keys, None, pooled, 65536, 1040, pool_output=True)
+    _pool_qa[(2048, 9)](expected, positions, expected_pool, 4159, 2, 1040, 0, False, 128)
+    torch.testing.assert_close(pooled, expected_pool, rtol=rtol, atol=1e-7)
+
+
+@requires_cuda
+@pytest.mark.parametrize("dtype", [torch.bfloat16, torch.float16])
+@torch.inference_mode()
+def test_cuda_native_fused_pooled_tail_uniform_logits_and_empty_rows(dtype):
+    from operators.sm90._nosa_scores_cuda import scores_out
+    from operators.sm90.nosa_indexer import _pool_qa
+
+    rows, count, blocks = 1025, 4159, 1040
+    query = torch.empty(rows + 1, 4608, device="cuda", dtype=dtype)[1:, :4096]
+    query = query.view(rows, 2, 16, 128)
+    query[::2].fill_(-64256.0)
+    query[1::2].fill_(64256.0)
+    keys = torch.ones(count, 2, 144, device="cuda", dtype=dtype)[..., :128]
+    positions = torch.arange(rows, device="cuda", dtype=torch.int64) * 64
+    positions[:4] = torch.tensor([0, 15, 31, 66559], device="cuda")
+
+    # Uniform positive/negative logits have an exact analytical softmax.
+    # Explicit positions cover empty rows and nonmonotonic causal boundaries.
+    eligible = ((positions - 31) // 16 + 1).clamp(0, count)
+    values = 16.0 / eligible.clamp_min(1).float()
+    reference_scores = torch.where(
+        torch.arange(count, device="cuda")[None, :] < eligible[:, None],
+        values[:, None],
+        0.0,
+    ).to(dtype)
+    reference_scores = reference_scores[:, None, :].expand(-1, 2, -1).contiguous()
+    expected = torch.empty(rows, 2, blocks, device="cuda", dtype=torch.float32)
+    _pool_qa[(rows * 2, 9)](reference_scores, positions, expected, count, 2, blocks, 0, False, 128)
+    actual = torch.full_like(expected, float("nan"))
+    stream = torch.cuda.Stream()
+    stream.wait_stream(torch.cuda.current_stream())
+    with torch.cuda.stream(stream):
+        scores_out(query, keys, positions, actual, 0, blocks, pool_output=True)
+        graph = torch.cuda.CUDAGraph()
+        with torch.cuda.graph(graph, stream=stream):
+            scores_out(query, keys, positions, actual, 0, blocks, pool_output=True)
+        actual.fill_(float("nan"))
+        graph.replay()
+    torch.cuda.current_stream().wait_stream(stream)
+    torch.testing.assert_close(actual, expected, rtol=0, atol=0)
+
+
+@requires_cuda
+@pytest.mark.parametrize("dtype", [torch.bfloat16, torch.float16])
+@pytest.mark.parametrize("rows", [2, 1025])
+@pytest.mark.parametrize("sign", [-1, 1])
+@torch.inference_mode()
+def test_cuda_native_scores_preserve_small_gaps_at_large_common_offset(dtype, rows, sign):
+    from operators.sm90._nosa_scores_cuda import scores_out
+    from operators.sm90.nosa_indexer import _pool_qa
+
+    count, blocks, start = 4159, 1040, 66559
+    query = torch.zeros(rows, 2, 16, 128, device="cuda", dtype=dtype)
+    query[..., 0], query[..., 1] = 256, 1
+    keys = torch.zeros(count, 2, 128, device="cuda", dtype=dtype)
+    keys[..., 0] = sign * 65504
+    keys[..., 1] = ((torch.arange(count, device="cuda") % 2) * 2)[:, None]
+    positions = torch.arange(start, start + rows, device="cuda")
+    # Each dot product is exactly representable in FP32. The natural-unit
+    # scaled logits retain a small gap on top of a large shared offset; scaling
+    # to base two before subtracting the maximum changes that gap.
+    expected = compressed_scores_reference(query[:1], keys, positions[:1])
+    expected = expected.expand(rows, -1, -1).contiguous()
+    actual = torch.empty_like(expected)
+    scores_out(query, keys, None, actual, start, 0, pool_output=False)
+    tolerance = 0.008 if dtype == torch.bfloat16 else 0.0011
+    torch.testing.assert_close(actual, expected, rtol=tolerance, atol=1e-7)
+
+    expected_pool = torch.empty(rows, 2, blocks, device="cuda", dtype=torch.float32)
+    _pool_qa[(rows * 2, 9)](expected, positions, expected_pool, count, 2, blocks, 0, False, 128)
+    actual_pool = torch.empty_like(expected_pool)
+    scores_out(query, keys, None, actual_pool, start, blocks, pool_output=True)
+    torch.testing.assert_close(actual_pool, expected_pool, rtol=tolerance, atol=1e-7)

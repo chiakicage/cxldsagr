@@ -24,6 +24,7 @@ from experiments.indexer_block_sparse_profile.src.analyze import (
     _integer,
 )
 from experiments.indexer_block_sparse_profile.src.mfu import (
+    NATIVE_INDEXER_REVISIONS,
     build_report,
     matrix_flops,
     validate_kernel_backend,
@@ -34,13 +35,44 @@ STAGE_RANGE = re.compile(r"NOSA/(full_prefill|extend)/layer_(\d+)/([a-z_]+)/q(\d
 LINEARS = ("qkv_proj", "cis_projection", "o_proj", "gate_up_proj", "down_proj")
 MODULES = (
     *LINEARS,
-    *[stage for stage in STAGES if stage != "cis_projection"],
+    *[
+        stage
+        for stage in STAGES
+        if stage not in ("cis_projection", "native_indexer", "native_checked_indexer")
+    ],
     "cis_projection_gemm",
+    "score_selection",
+    "native_finite_check",
+    "native_ranked_compression",
     "other_non_matrix",
 )
 PARENTS = {stage: "indexer_total" for stage in NESTED_STAGES} | {
-    "cis_projection_gemm": "cis_projection"
+    "cis_projection_gemm": "cis_projection",
+    "score_selection": "indexer_total",
+    "native_finite_check": "indexer_total",
+    "native_ranked_compression": "indexer_total",
 }
+QK_MODULES = ("compressed_scores", "pooled_scores", "score_selection")
+INCLUSIVE_MODULES = {*STAGES, "score_selection", "native_finite_check", "native_ranked_compression"}
+FUSED_SCORE_FAMILY = "nosa_scores::fused_scores::fused_scores_kernel"
+PRUNED_SCORE_FAMILY = "nosa_scores::pruned_scores::fused_scores_kernel"
+FUSED_SCORE_FAMILIES = (FUSED_SCORE_FAMILY, PRUNED_SCORE_FAMILY)
+FA3_ATTENTION_SEQUENCE = (
+    "nosa_fa3::prepare",
+    "flashinfer::PrefillWithKVCacheKernel",
+    "nosa_attention::attention_kernel",
+)
+FA3_SORTED_ATTENTION_SEQUENCE = (
+    FA3_ATTENTION_SEQUENCE[0],
+    "nosa_fa3::sort_work_by_union_size",
+    *FA3_ATTENTION_SEQUENCE[1:],
+)
+FA3_MAIN_TEMPLATE = re.compile(
+    r"flashinfer::PrefillWithKVCacheKernel\s*<\s*nosa_fa3::ML\s*,\s*"
+    r"nosa_fa3::EP\s*,\s*nosa_fa3::KT\s*,\s*(?:\(bool\)\s*)?(?:0|false)\s*,\s*"
+    r"(?:\(bool\)\s*)?(?:0|false)\s*,\s*nosa_fa3::Scheduler\s*,\s*"
+    r"(?:\(bool\)\s*)?(?:0|false)\s*>"
+)
 # These inference graphs share the reviewed unscoped GEMM order. Keep complete
 # versions so an old captured snapshot remains analyzable after optimization.
 _LEGACY_GRAPH = {
@@ -104,6 +136,66 @@ SUPPORTED_GRAPHS += (
 )
 
 
+# The accepted BF16-pair/FA3-v3 checkpoint retains the five model projections
+# and their unscoped GEMM order. Pin all captured inference/cache/kernel sources.
+# The second version only reformats the FA3 Python adapter (identical AST).
+# Legacy graphs above remain available for their original published reports.
+_BF16_PAIR_GRAPH = {
+    "cache/contracts.py": "58575f1c9aee3f2843b7f2bce07f1589ea8cb9a712b050991199a95639f97f73",
+    "cache/indexer_cache.py": "da80484c5d2ad016b3119f80576e72d2956f8d9d1a5cc2804a0e6d668b80b2eb",
+    "cache/manager.py": "3f8a3129900f8e5e1af6005fcc187f5d430c5ce5156ca80c169384694dd39f91",
+    "executor/model_executor.py": "f585f9940d5fb506e7f8aaeafe8602f9877ac773f2183603744f2b3a2a48c919",
+    "layers/attention.py": "91eccef789f099017c229b99d1d0ccc9d66ce980ab6dbc772a25fe031f6f34d3",
+    "layers/feed_forward.py": "95dcebaa67b4f2069f580ac0831ef8335fc15b022e802708e24f58c02408de4a",
+    "layers/normalization.py": "426b2cd0e1da6c944ff661a93d55eee2b064585d5c5f6c6e6a0b80ca3bc98af0",
+    "models/nosa/attention.py": "1592ff0607cda99b94e75fa62ca4a64f4ec086be4e7aa4cd8714f610c6f07d84",
+    "models/nosa/cache.py": "4fa806fae9e4882086d6409c06f34706d5519a428fa4943cbf6ea2cd6cf10ed7",
+    "models/nosa/config.py": "eaa168a439fada20f13b6d0a44c801de30e3b1c04d3e5ac43d4273a3454db165",
+    "models/nosa/indexer.py": "480890dfa8744ff7ca88f90c1878673b57c98319b42da936b3b66f8da2d99bf7",
+    "models/nosa/infer.py": "909541308008b155071db3af00927f4861b201ae7fc8e7c0bd9291ee1b19c672",
+    "models/nosa/layers.py": "cf54c7c1e96483175da788491450bd264fae322a6c1452f830b5ce721f308b43",
+    "models/nosa/model.py": "5acbd9c5349f75b5b02366849ef7cd76d6f5b0676126bc789b8384939dfc51a5",
+    "models/nosa/request_format.py": "25c775ba0b76cab91663b827fc8b38fc20511895a5e6eff3054273cbfe418825",
+    "models/nosa/rotary.py": "f14c898cd77a72bd4e6908ef59b0b5fe5d42b2ebadb34aa5db092577d154dbde",
+    "models/nosa/scoring.py": "c4c7e75a15a5ffb95e935b02ec482586a288c64ad079a175b293db6baa3f92d8",
+    "operators/flashinfer.py": "0573d16ce4dd3e13b3792c6b1a4b8c9bab1477ee0f7bfce2abfad87c4c305fd9",
+    "operators/sm90/_native.py": "e7fc70b219647303b3295c38f536e1014ab52f4b0a0dcb7f8108b8c0ca2a8f26",
+    "operators/sm90/_nosa_attention_cuda.py": "5a2c61297c343ce51f9227b48906fb4f77a1b730b1e3116815f9890255f84afa",
+    "operators/sm90/_nosa_attention_fa3.py": "8039ffe4e9c632b41a6dba2c7b41fb25c034c3c8e820f47ad8f7b2238d118b23",
+    "operators/sm90/_nosa_attention_triton.py": "c9b2060928cff8cbf594a876061546521064da78f52b3297922bcc5dd0f96985",
+    "operators/sm90/_nosa_indexer_checked_cuda.py": "a59f41bdf0468a21d9e96ae180d9b8217dcbebbb07d6c7c8770700570739cdba",
+    "operators/sm90/_nosa_indexer_cuda.py": "a6a518524bce510c034b8e153f7fefa05d2a3f5c0e892923328f9a85389bc35b",
+    "operators/sm90/_nosa_prepare_cuda.py": "bc9c2276dabdf2c9786dd29b8b48a484df10df0ba9be8e14bc5b85f527c2bbe2",
+    "operators/sm90/_nosa_prepare_ranked_cuda.py": "a2a704f1c7338400347619ca9129bc2919ba20552ffa676ca351d23762b3f237",
+    "operators/sm90/_nosa_scores_cuda.py": "70a5cc50c3916675d7a23b9dca49e531a7bed9026e0f5f0bc254bd0a24bd170c",
+    "operators/sm90/_nosa_selection_cuda.py": "71df015af61a1d3f554eae950e3ab57f2a641324a1fe58ae353c6e5422028a24",
+    "operators/sm90/csrc/nosa_attention.cu": "01c0699b507baebe005b2df44e2f78ec149083a6239b96e7d24990edf2bf09f4",
+    "operators/sm90/csrc/nosa_attention_fa3.cu": "f98b5ae4ea4bcc5c3dc5a597958627d6c186f22d1db7108162a2a328401c2f80",
+    "operators/sm90/csrc/nosa_attention_grouped.cuh": "30f35b34a80c2a26c249b92e055c3158a5a2e40e5c818ff9dadc3074dc525927",
+    "operators/sm90/csrc/nosa_indexer.cu": "91e4639259cd02839fa4d2606b118ff40343ac75f0419274ec4f3a868e42ed34",
+    "operators/sm90/csrc/nosa_indexer_checked.cu": "49a303a3f89886ebd373611fde3faa7b6ee0adae3c8f1ebc78855734b2b1b16d",
+    "operators/sm90/csrc/nosa_prepare.cu": "340f7455f11f602ac4e0380ff7bd6963e2cdaa32275bbd470ae763ea0a0a1715",
+    "operators/sm90/csrc/nosa_prepare_ranked.cu": "1c40cdd8edcf6da94cc0ec59e4477035c8db91441b1c3acb76bfcdd163388d09",
+    "operators/sm90/csrc/nosa_scores.cu": "d5c5b543e08a6e164701b9e5070458079c8c843f35a99de96b4c66427dfb01af",
+    "operators/sm90/csrc/nosa_scores_fused.cuh": "56e6cbe675525b419db3699ae57dcf984ab64bf9e12f1bbe3b49ffd21bcd197a",
+    "operators/sm90/csrc/nosa_scores_pruned.cuh": "99e0e6ce9f5685e639016e24732cce249a3b2c043ff0629b021866ad0f051409",
+    "operators/sm90/csrc/nosa_selection.cu": "f2ce6b685336002d5e137ed1af05d1b2bfdda37f89b57323d053a8daa953e9e9",
+    "operators/sm90/csrc/nosa_selection_cutoff.cuh": "7eaabb06b7d39d5ea0779ea209b80a3e7d54e3b137748a35f4cb47836a7f00fe",
+    "operators/sm90/csrc/nosa_selection_prefix.cuh": "e5b447d6427271df99751c93e6d8c14e3cedc7fee9d76c130d8967410a3b6b35",
+    "operators/sm90/nosa_attention.py": "0c1b422a5fe5c485927f017f4c2578271eaf6258d01cc3c1aa6d33d488d1d6f9",
+    "operators/sm90/nosa_compression.py": "9655a9b4caeea836c846eef654f781318fc930e5ee95192fbeb6ee64dc8201f3",
+    "operators/sm90/nosa_indexer.py": "9686ae49a9c63279f3f505c709bacb9b1c3c6f496880bb2508cae0377bb823da",
+    "operators/sm90/nosa_validation.py": "aded63a061790919d0596c18f4129d4c77782b53c4e762ae87f7bd3aa2bb9700",
+    "operators/sm90/sparse_attention.py": "5cad42677974731057cbed607d138cf8cf296dc2094c44a09b68a61f0c43a786",
+    "serving/run_gr.py": "fe94fcd9011c75adbc4530759e4a8dd92d4f1a9a5f64b20b0732a5bc776a5695",
+    "serving/runner.py": "bd36c4b8725bbe99f934a1ebee604a7e7b471c6c06859b3d0a1bc91c7686a421",
+}
+_BF16_PAIR_FORMATTED_GRAPH = _BF16_PAIR_GRAPH | {
+    "operators/sm90/_nosa_attention_fa3.py": "61e2379aedaad7dddbb7237b22d014d1d37f9f251f3010c51dbe5b46b2ccde10",
+}
+SUPPORTED_GRAPHS += (_BF16_PAIR_GRAPH, _BF16_PAIR_FORMATTED_GRAPH)
+
+
 def _validate_source_graph(hashes):
     """Validate attribution anchors and return the reviewed attention group size."""
     for graph in reversed(SUPPORTED_GRAPHS):
@@ -114,11 +206,18 @@ def _validate_source_graph(hashes):
 
 def _cached_indexer(workload):
     execution = workload.get("indexer_execution")
-    if execution not in (None, "cached_flashinfer_v1"):
+    revisions = NATIVE_INDEXER_REVISIONS
+    if execution not in (None, "cached_flashinfer_v1", *revisions):
         raise ValueError(f"Unsupported indexer_execution: {execution}")
-    cached = execution == "cached_flashinfer_v1"
+    cached = execution is not None
+    if execution in revisions and (
+        workload.get("native_kernel_revision") != revisions[execution]
+        or workload.get("selection_backend") != "cuda_tvm_ffi"
+        or workload.get("kernel_backend") != "cuda_tvm_ffi"
+    ):
+        raise ValueError(f"{execution} requires the reviewed native kernel revision and selection")
     if cached and workload.get("indexer_query_chunk_size") is not None:
-        raise ValueError("cached_flashinfer_v1 requires whole-batch query dispatch")
+        raise ValueError(f"{execution} requires whole-batch query dispatch")
     return cached
 
 
@@ -127,26 +226,131 @@ def _matrix_kernel(kernel):
     return name.startswith("nvjet_") or "gemm" in name
 
 
-def _validate_operator_kernels(
-    stage, selected, backend, *, query_length, total_length, native_attention_group_size=4
-):
-    """Require the reviewed operator inside its Python/NVTX boundary.
+def _kernel_family(kernel, family):
+    return re.search(rf"(?<![\w:]){re.escape(family)}(?=[<(\s]|$)", kernel["name"]) is not None
 
-    A CUDA symbol may include namespaces, templates and a return type. Match
-    the operator family instead of assuming Triton's exact bare symbol name.
-    The reviewed native dispatcher keeps short compressed-key sequences on
-    Triton. Derive that branch from the captured query geometry; kernel names
-    must then match the exact branch, including both native launches in order.
+
+def _fused_selection_flag(kernel, family=FUSED_SCORE_FAMILY):
+    """Read the Selection template parameter, not the misleading score family name.
+
+    Revision 3 instantiates <T, O, Pool, Selection, Map>. Nested template commas
+    in dtype/Map names must not change which argument is interpreted as a bool.
+    Older score-only captures may lack the Selection parameter altogether.
     """
+    match = re.search(re.escape(family) + r"\s*<", kernel["name"])
+    if match is None:
+        return None
+    arguments, current, depth = [], [], 0
+    for character in kernel["name"][match.end() :]:
+        if character == "<":
+            depth += 1
+        elif character == ">":
+            if depth == 0:
+                arguments.append("".join(current).strip())
+                break
+            depth -= 1
+        if character == "," and depth == 0:
+            arguments.append("".join(current).strip())
+            current = []
+            if len(arguments) == 4:
+                break
+        else:
+            current.append(character)
+    booleans = {"true": True, "false": False, "1": True, "0": False}
+    arguments = [re.sub(r"^\(bool\)\s*", "", argument) for argument in arguments]
+    if len(arguments) < 4 or arguments[2] not in booleans:
+        return None
+    return booleans.get(arguments[3])
+
+
+def _shared_selection(query_length, total_length):
+    start = total_length - query_length
+    first = start // 64
+    return (
+        query_length >= 128
+        and (total_length + 63) // 64 <= 1056
+        and first >= 64
+        and (total_length - 1) // 64 - first <= 16
+    )
+
+
+def _joint_submission(query_length, total_length, revision):
+    return (
+        query_length >= (128 if revision >= 3 else 1024)
+        and total_length // 16 - 1 >= 2047
+        and (total_length + 63) // 64 <= 1056
+    )
+
+
+def _native_selection_kernels(query_length, total_length, *, prepared_ranking=False):
+    """Exact BF16 whole-batch dispatch; ranked preparation removes one launch."""
+    shared = _shared_selection(query_length, total_length)
+    if prepared_ranking and not shared:
+        raise ValueError("Prepared ranking requires the reviewed causal prefix selection path")
+    if not shared:
+        return ("nosa_selection::selection_kernel",)
+    return (() if prepared_ranking else ("nosa_selection::prepare_prefix_ranking",)) + (
+        "nosa_selection::selection_prefix_kernel",
+    )
+
+
+def _validate_operator_kernels(
+    stage,
+    selected,
+    backend,
+    *,
+    query_length,
+    total_length,
+    native_attention_group_size=4,
+    native_revision=1,
+    prepared_ranking=False,
+    num_kv_heads=2,
+    attention_execution=None,
+):
+    """Require the reviewed call's complete kernel sequence and fusion kind."""
+    if native_revision not in (1, 2, 3, 4, 5):
+        raise ValueError("Unreviewed native kernel revision")
+    if stage == "native_checked_indexer":
+        if (
+            native_revision < 4
+            or not prepared_ranking
+            or not _joint_submission(query_length, total_length, native_revision)
+        ):
+            raise ValueError("Checked native scope requires the reviewed ranked joint dispatch")
+        options = {
+            "query_length": query_length,
+            "total_length": total_length,
+            "native_attention_group_size": native_attention_group_size,
+            "native_revision": native_revision,
+            "prepared_ranking": True,
+            "num_kv_heads": num_kv_heads,
+        }
+        _validate_operator_kernels("native_prepare_ranked", selected[:2], backend, **options)
+        return _validate_operator_kernels("native_indexer", selected[2:], backend, **options)
     score_backend = None
+    alternatives = []
+    selection_fused = False
     if stage == "block_sparse_attention":
         if backend == "cuda_tvm_ffi":
             expected = ("nosa_attention::attention_kernel",)
             if native_attention_group_size == 4 and query_length >= 4:
                 expected = ("nosa_attention::grouped_attention_kernel", *expected)
+                if native_revision >= 2:
+                    expected = ("nosa_attention::nonfinite_blocks_kernel", *expected)
+            if attention_execution in ("native_fa3_v2", "native_fa3_v3"):
+                if query_length >= 1:
+                    alternatives.append(expected)
+                    expected = FA3_ATTENTION_SEQUENCE
+                    if attention_execution == "native_fa3_v3":
+                        heads = _integer(num_kv_heads, "num_kv_heads", minimum=1)
+                        rows = _integer(query_length, "query_length", minimum=1)
+                        if (rows + 7) // 8 * heads == 256:
+                            expected = FA3_SORTED_ATTENTION_SEQUENCE
+                elif not query_length:
+                    expected = ()
         else:
             expected = ("_nosa_block_attention",)
-    elif stage in ("compressed_scores", "pooled_scores"):
+    elif stage in ("compressed_scores", "pooled_scores", "native_indexer"):
         compressed_count = max(0, (total_length - 32) // 16 + 1)
         native_min_count = 2047 if query_length >= 1024 else 511
         score_backend = (
@@ -159,15 +363,90 @@ def _validate_operator_kernels(
             if score_backend == "cuda_tvm_ffi"
             else ("_scores",)
         )
+        score_fused = (
+            native_revision >= 2
+            and score_backend == "cuda_tvm_ffi"
+            and stage != "compressed_scores"
+            and query_length >= 1024
+            and (query_length + 15) // 16 * num_kv_heads >= 128
+        )
+        if score_fused:
+            if native_revision >= 3:
+                expected = (FUSED_SCORE_FAMILY,)
+            else:
+                alternatives.append((FUSED_SCORE_FAMILY,))
+        if stage == "native_indexer":
+            if native_revision < 2 or backend != "cuda_tvm_ffi":
+                raise ValueError("Native joint submission requires the reviewed native revision")
+            if not _joint_submission(query_length, total_length, native_revision):
+                raise ValueError("Native joint scope disagrees with its query geometry")
+            selection_fused = (
+                native_revision >= 3
+                and score_fused
+                and query_length <= 1088
+                and _shared_selection(query_length, total_length)
+            )
+            if selection_fused:
+                expected = (
+                    () if prepared_ranking else ("nosa_selection::prepare_prefix_ranking",)
+                ) + (FUSED_SCORE_FAMILY,)
+                alternatives = []
+                if (
+                    native_revision >= 5
+                    and query_length == 1024
+                    and total_length == 66560
+                    and num_kv_heads == 2
+                ):
+                    # A failed resource guard retains the original fused kernel.
+                    alternatives.append(expected)
+                    expected = (*expected[:-1], PRUNED_SCORE_FAMILY)
+            else:
+                suffix = _native_selection_kernels(
+                    query_length, total_length, prepared_ranking=prepared_ranking
+                )
+                expected += suffix
+                alternatives = [sequence + suffix for sequence in alternatives]
+    elif stage == "native_selection":
+        if native_revision < 2 or backend != "cuda_tvm_ffi":
+            raise ValueError("Native selection requires the reviewed native revision")
+        expected = _native_selection_kernels(
+            query_length, total_length, prepared_ranking=prepared_ranking
+        )
+    elif stage in ("native_prepare", "native_prepare_ranked"):
+        if native_revision < 2 or backend != "cuda_tvm_ffi":
+            raise ValueError("Native preparation requires the reviewed native revision")
+        if stage == "native_prepare_ranked":
+            if native_revision < 3 or not _shared_selection(query_length, total_length):
+                raise ValueError("Ranked preparation disagrees with the reviewed append geometry")
+            expected = (
+                "nosa_prepare::finite_partials",
+                "nosa_prepare_ranked::guarded_compression_and_ranking",
+            )
+        else:
+            expected = ("nosa_prepare::finite_partials", "nosa_prepare::guarded_compression")
     else:
-        return
-    # Demangled names can begin with a return type and append template args,
-    # but a longer identifier (e.g. scores_kernel_helper) is another kernel.
-    if len(selected) != len(expected) or any(
-        re.search(rf"(?<![\w:]){re.escape(family)}(?=[<(\s]|$)", kernel["name"]) is None
-        for family, kernel in zip(expected, selected, strict=True)
-    ):
-        raise ValueError(f"Scope {stage} must contain exactly the kernel sequence {expected}")
+        return None
+
+    def matches(sequence):
+        if len(selected) != len(sequence):
+            return False
+        for family, kernel in zip(sequence, selected, strict=True):
+            if not _kernel_family(kernel, family):
+                return False
+            if family == "flashinfer::PrefillWithKVCacheKernel" and not FA3_MAIN_TEMPLATE.search(
+                kernel["name"]
+            ):
+                return False
+            if family in FUSED_SCORE_FAMILIES:
+                flag = _fused_selection_flag(kernel, family)
+                if flag is not selection_fused and not (native_revision < 3 and flag is None):
+                    return False
+        return True
+
+    if not any(matches(sequence) for sequence in (expected, *alternatives)):
+        raise ValueError(
+            f"Scope {stage} must contain exactly a reviewed kernel sequence: {(expected, *alternatives)}"
+        )
     return score_backend
 
 
@@ -200,7 +479,7 @@ def _empty_module(name):
         "kernel_ms": 0.0,
         "kernel_count": 0,
         "parent_module": PARENTS.get(name),
-        "inclusive": name in STAGES,
+        "inclusive": name in INCLUSIVE_MODULES,
     }
 
 
@@ -221,7 +500,9 @@ def _require_marker(kernels, launches, begin, end, marker):
         raise ValueError(f"Expected exactly one {marker} kernel between its GEMM anchors")
 
 
-def _attribute_run(root, scopes, kernels, num_layers, workload, native_attention_group_size):
+def _attribute_run(
+    root, scopes, kernels, num_layers, workload, native_attention_group_size, num_kv_heads
+):
     kernels = sorted(kernels, key=lambda k: k["launch_start"])
     launches = [k["launch_start"] for k in kernels]
     calls = _workload_calls(root["phase"], num_layers, workload)
@@ -260,6 +541,7 @@ def _attribute_run(root, scopes, kernels, num_layers, workload, native_attention
     covered = set()
     layer_calls = []
     score_dispatch = Counter()
+    attention_dispatch = Counter()
     cached = _cached_indexer(workload)
     backend = validate_kernel_backend(workload)
     query_tile = (
@@ -288,6 +570,36 @@ def _attribute_run(root, scopes, kernels, num_layers, workload, native_attention
         scored = (start + length + 63) // 64 > 64
         if cached:
             expected = list(FUSED_STAGES if scored else FUSED_STAGES[:2])
+            if scored and workload.get("indexer_execution") in (
+                "cached_native_v2",
+                "cached_native_v3",
+                "cached_native_v4",
+                "cached_native_v5",
+            ):
+                joint = _joint_submission(
+                    length, start + length, workload.get("native_kernel_revision", 1)
+                )
+                expected = [
+                    *FUSED_STAGES[:2],
+                    *(["native_indexer"] if joint else ["pooled_scores", "native_selection"]),
+                ]
+            if workload.get("indexer_preparation") == "native_guarded_v1":
+                expected[:2] = ["native_prepare"]
+            elif workload.get("indexer_preparation") in (
+                "native_guarded_ranked_v1",
+                "native_guarded_ranked_checked_v1",
+            ):
+                expected[:2] = [
+                    "native_prepare_ranked"
+                    if _shared_selection(length, start + length)
+                    else "native_prepare"
+                ]
+                if (
+                    workload.get("indexer_preparation") == "native_guarded_ranked_checked_v1"
+                    and _shared_selection(length, start + length)
+                    and _joint_submission(length, start + length, 4)
+                ):
+                    expected = ["native_checked_indexer"]
         else:
             tiles = (length + query_tile - 1) // query_tile if scored else 0
             expected = ["compression_k", "compression_cis"] + [
@@ -298,6 +610,7 @@ def _attribute_run(root, scopes, kernels, num_layers, workload, native_attention
                 "Indexer child count/order disagrees with query tiling or short-context bypass"
             )
         per_call = {name: _empty_module(name) for name in MODULES if name != "other_non_matrix"}
+        prepared_ranking = bool(group["native_prepare_ranked"] or group["native_checked_indexer"])
         for stage in STAGES:
             for scope_index, scope in enumerate(group[stage]):
                 selected = _scope_kernels(scope, kernels, launches)
@@ -315,13 +628,75 @@ def _attribute_run(root, scopes, kernels, num_layers, workload, native_attention
                     query_length=score_rows,
                     total_length=start + length,
                     native_attention_group_size=native_attention_group_size,
+                    native_revision=workload.get("native_kernel_revision", 1),
+                    prepared_ranking=prepared_ranking,
+                    num_kv_heads=num_kv_heads,
+                    attention_execution=workload.get("attention_execution"),
                 )
+                if stage == "block_sparse_attention":
+                    actual_attention = (
+                        workload["attention_execution"]
+                        if any(_kernel_family(k, "nosa_fa3::prepare") for k in selected)
+                        else "native_grouped_v2"
+                        if any(
+                            _kernel_family(k, "nosa_attention::grouped_attention_kernel")
+                            for k in selected
+                        )
+                        else "native_per_query_v1"
+                        if backend == "cuda_tvm_ffi"
+                        else "triton_v1"
+                    )
+                    attention_dispatch[actual_attention] += 1
                 if score_backend is not None:
                     score_dispatch[score_backend] += 1
-                _add_kernels(modules[stage], selected)
-                _add_kernels(per_call[stage], selected)
+                if stage in ("native_indexer", "native_checked_indexer"):
+                    preparation = (
+                        (
+                            ("native_finite_check", selected[:1]),
+                            ("native_ranked_compression", selected[1:2]),
+                        )
+                        if stage == "native_checked_indexer"
+                        else ()
+                    )
+                    if preparation:
+                        selected = selected[2:]
+                    fused = [
+                        kernel
+                        for kernel in selected
+                        if any(
+                            _kernel_family(kernel, family)
+                            and _fused_selection_flag(kernel, family) is True
+                            for family in FUSED_SCORE_FAMILIES
+                        )
+                    ]
+                    scores = [
+                        kernel
+                        for kernel in selected
+                        if "nosa_scores::" in kernel["name"] and kernel not in fused
+                    ]
+                    selection = [
+                        kernel for kernel in selected if "nosa_selection::" in kernel["name"]
+                    ]
+                    if len(scores) + len(selection) + len(fused) != len(selected):
+                        raise ValueError("Unattributed kernel within native joint submission")
+                    for name, family in (
+                        ("pooled_scores", scores),
+                        ("native_selection", selection),
+                        ("score_selection", fused),
+                        *preparation,
+                    ):
+                        _add_kernels(modules[name], family)
+                        _add_kernels(per_call[name], family)
+                else:
+                    _add_kernels(modules[stage], selected)
+                    _add_kernels(per_call[stage], selected)
                 if stage in PRIMARY_STAGES:
                     covered.update(k["correlationId"] for k in selected)
+        qk_modules = [name for name in QK_MODULES if per_call[name]["kernel_count"]]
+        if len(qk_modules) != int(scored):
+            raise ValueError(
+                "Each scored call must own QK in exactly one score or score+selection module"
+            )
         gemms = dict(zip(LINEARS, matrices[5 * call_index : 5 * (call_index + 1)], strict=True))
         for name, kernel in gemms.items():
             owner = primary_owner(kernel)
@@ -367,6 +742,12 @@ def _attribute_run(root, scopes, kernels, num_layers, workload, native_attention
                 "layer_idx": layer,
                 "query_start": start,
                 "query_length": length,
+                "indexer_qk_module": qk_modules[0] if qk_modules else None,
+                "native_joint_submission": bool(
+                    group["native_indexer"] or group["native_checked_indexer"]
+                ),
+                "prepared_ranking": prepared_ranking,
+                "attention_execution": actual_attention,
                 "modules": per_call,
                 "gemm_correlations": {
                     name: kernel["correlationId"] for name, kernel in gemms.items()
@@ -393,13 +774,16 @@ def _attribute_run(root, scopes, kernels, num_layers, workload, native_attention
         "kernel_ms": total_ns / 1e6,
         "kernel_count": len(kernels),
         "score_dispatch_scope_counts": dict(sorted(score_dispatch.items())),
+        "attention_dispatch_scope_counts": dict(sorted(attention_dispatch.items())),
         "modules": modules,
         "layer_calls": layer_calls,
         "root_scope": {name: root[name] for name in ("start", "end", "text", "globalTid")},
     }
 
 
-def attribute_kernels(scopes, kernels, num_layers, workload, *, native_attention_group_size=4):
+def attribute_kernels(
+    scopes, kernels, num_layers, workload, *, native_attention_group_size=4, num_kv_heads=2
+):
     """Attribute launch-correlated kernels, independent of SQLite or model FLOPs.
 
     Times are integer nanoseconds. Scopes need start/end/text/globalTid;
@@ -411,10 +795,12 @@ def attribute_kernels(scopes, kernels, num_layers, workload, *, native_attention
     Returns per-phase/per-iteration module dictionaries plus per-layer calls.
     The fixed source graph is an external precondition, verified by analyze().
     Its revision supplies native_attention_group_size; the default describes
-    the current four-query grouped implementation, while old snapshots use 1.
+    the preserved four-query native fallback, while old snapshots use 1.
+    FA3 has an independent eight-query mainloop and three or four launches.
     Synthetic workloads are supported here to test attribution independently.
     """
     _integer(num_layers, "num_layers", minimum=1)
+    _integer(num_kv_heads, "num_kv_heads", minimum=1)
     if native_attention_group_size not in (1, 4):
         raise ValueError("Unsupported reviewed native attention group size")
     roots, stages = [], []
@@ -518,6 +904,7 @@ def attribute_kernels(scopes, kernels, num_layers, workload, *, native_attention
                 num_layers,
                 workload,
                 native_attention_group_size,
+                num_kv_heads,
             )
             for index, root in enumerate(roots)
         ],
@@ -535,6 +922,10 @@ def attribute_kernels(scopes, kernels, num_layers, workload, *, native_attention
             "overlap_tolerance": "<=1000 ns on the verified single CUDA stream",
             "gemm_order": list(LINEARS),
             "native_attention_group_size": native_attention_group_size,
+            "fa3_attention_group_size": 8
+            if workload.get("attention_execution") in ("native_fa3_v2", "native_fa3_v3")
+            else None,
+            "num_key_value_heads": num_kv_heads,
             "time_definition": "Sum of kernel end-start; not union active time or CUDA-event span",
         },
     }
@@ -717,13 +1108,16 @@ def _validate_inputs(data_dir, metadata, summary, profile_metadata):
     return verified
 
 
-def _flops_by_module(config, prefix, query, chunk_size, *, cached=False):
+def _flops_by_module(config, prefix, query, chunk_size, *, cached=False, qk_module=None):
     flops = matrix_flops(config, prefix, query, chunk_size)
+    if qk_module is None:
+        qk_module = "pooled_scores" if cached else "compressed_scores"
+    if qk_module not in QK_MODULES:
+        raise ValueError("Useful indexer QK requires a score or score+selection module")
     return {
         **{name: flops.get(name, 0) for name in MODULES},
         "indexer_total": flops["indexer_qk"],
-        "compressed_scores": 0 if cached else flops["indexer_qk"],
-        "pooled_scores": flops["indexer_qk"] if cached else 0,
+        **{name: flops["indexer_qk"] if name == qk_module else 0 for name in QK_MODULES},
         "cis_projection_gemm": flops["cis_projection"],
     }
 
@@ -761,17 +1155,25 @@ def build_module_report(metadata, summary, profile_metadata, attribution, *, pea
             if phase == "full_prefill"
             else (workload["prefix_tokens"], workload["new_tokens"])
         )
-        flops = _flops_by_module(config, prefix, query, workload["chunk_size"], cached=cached)
-        for name, module in run["modules"].items():
-            _add_mfu(module, flops[name], peak)
+        phase_flops = _flops_by_module(config, prefix, query, workload["chunk_size"], cached=cached)
         for call in run["layer_calls"]:
             one_layer = config | {"num_hidden_layers": 1}
+            owners = [name for name in QK_MODULES if call["modules"][name]["kernel_count"]]
+            scored = (call["query_start"] + call["query_length"] + 63) // 64 > 64
+            if len(owners) != int(scored):
+                raise ValueError(
+                    "Each scored call must own QK in exactly one score or score+selection module"
+                )
+            owner = owners[0] if owners else None
+            if call.get("indexer_qk_module") != owner:
+                raise ValueError("Recorded indexer QK owner disagrees with its attributed kernels")
             call_flops = _flops_by_module(
                 one_layer,
                 call["query_start"],
                 call["query_length"],
                 workload["chunk_size"],
                 cached=cached,
+                qk_module=owner,
             )
             for name, module in call["modules"].items():
                 _add_mfu(module, call_flops[name], peak)
@@ -787,25 +1189,35 @@ def build_module_report(metadata, summary, profile_metadata, attribution, *, pea
                 "gate_up_proj": [length, 2 * config["intermediate_size"], config["hidden_size"]],
                 "down_proj": [length, config["hidden_size"], config["intermediate_size"]],
             }
-        # Sum per-layer/chunk FLOPs to audit both causal work and inferred shapes.
-        for name in run["modules"]:
-            if (
-                name != "other_non_matrix"
-                and sum(call["modules"][name]["matrix_flops"] for call in run["layer_calls"])
-                != flops[name]
-            ):
+        # Dispatch can mix score-only and fused score+selection within a phase.
+        # Sum the actual per-call owners before attaching phase-level MFU.
+        for name, module in run["modules"].items():
+            flops = (
+                sum(call["modules"][name]["matrix_flops"] for call in run["layer_calls"])
+                if name != "other_non_matrix"
+                else 0
+            )
+            if name not in QK_MODULES and flops != phase_flops[name]:
                 raise ValueError("Layer/chunk matrix FLOPs do not conserve the phase work count")
+            _add_mfu(module, flops, peak)
+        if (
+            sum(run["modules"][name]["matrix_flops"] for name in QK_MODULES)
+            != phase_flops["indexer_total"]
+        ):
+            raise ValueError("Score modules must count each useful indexer QK exactly once")
     phases = {}
     for phase in PHASES:
         selected = [run for run in runs if run["phase"] == phase]
         modules = {}
         for name in MODULES:
             values = [run["modules"][name] for run in selected]
+            if len({value["matrix_flops"] for value in values}) != 1:
+                raise ValueError("Repeated profile runs disagree on module matrix FLOP ownership")
             kernel_ms_median = statistics.median(value["kernel_ms"] for value in values)
             modules[name] = {
                 "sample_count": len(values),
                 "parent_module": PARENTS.get(name),
-                "inclusive": name in STAGES,
+                "inclusive": name in INCLUSIVE_MODULES,
                 "matrix_flops_per_run": values[0]["matrix_flops"],
                 "kernel_ms_median": kernel_ms_median,
                 "kernel_count_per_run": [value["kernel_count"] for value in values],
@@ -813,7 +1225,19 @@ def build_module_report(metadata, summary, profile_metadata, attribution, *, pea
                 if values[0]["mfu_pct"] is not None
                 else None,
             }
-            if name in summary["profiles"][phase]["stage_totals"]:
+            has_unscoped_joint_kernels = name in (
+                "pooled_scores",
+                "native_selection",
+                "score_selection",
+            ) and any(
+                call.get("native_joint_submission") and call["modules"][name]["kernel_count"]
+                for run in selected
+                for call in run["layer_calls"]
+            )
+            if (
+                name in summary["profiles"][phase]["stage_totals"]
+                and not has_unscoped_joint_kernels
+            ):
                 interval = summary["profiles"][phase]["stage_totals"][name]["cuda_elapsed_ms"][
                     "median"
                 ]
@@ -841,14 +1265,18 @@ def build_module_report(metadata, summary, profile_metadata, attribution, *, pea
         | {
             "mfu_pct": "100 * useful matrix FLOPs / (sum of attributed GPU kernel durations in seconds * peak FLOP/s)",
             "kernel_attribution": "Host CUDA launch correlation within NVTX; GPU timestamps supply durations only",
-            "native_score_dispatch": "Native QK requires >=2047 compressed keys for >=1024 query rows, otherwise >=511 keys; shorter scored chunks use exactly one Triton _scores kernel; eligible chunks use normalizer_kernel then scores_kernel",
-            "native_attention_dispatch": "The reviewed source revision determines the launch sequence: four-query grouped attention launches grouped_attention_kernel then attention_kernel for >=4 query rows; shorter calls and legacy revisions launch attention_kernel only. Both grouped/fallback durations belong to one attention module; useful QK/PV FLOPs are counted once per layer/query, independently of launch count or fallback activity",
+            "native_score_dispatch": "Native QK requires >=2047 compressed keys for >=1024 query rows, otherwise >=511 keys; other scored chunks use one Triton _scores kernel. Reviewed native geometry selects normalizer+scores, fused score-only, or fused score+selection; exact kernel sequence and the Selection template flag are validated per call",
+            "score_selection": "The fused score+selection kernel owns one useful indexer QK and its entire combined duration. It is never reported as score-only. FLOPs are assigned per layer/query call before phase aggregation, including mixed full_prefill dispatch",
+            "pruned_score_selection": "Revision 5 permits the bounded second-pass pruning kernel only for 1024 queries, 66560 total tokens and two KV heads. Its exact normalizer, bound construction, partial cutoff, surviving QK and final selection all remain in score_selection. The original fused kernel is accepted as the resource-guard fallback. Pruning and recomputation do not change useful QK FLOPs",
+            "native_preparation": "Basic and ranked preparation, finite checks and any separate ranking kernels remain within indexer_total. Preparation/ranking has no useful matrix FLOPs; fusion or QK recomputation does not increase useful QK",
+            "checked_submission": "The checked native scope is a host container: finite_partials belongs to native_finite_check, guarded_compression_and_ranking to native_ranked_compression, and the remaining exact score/selection sequence to its QK owner. Their kernel durations remain inside indexer_total; pinned flag copies and host synchronization do not add matrix FLOPs or kernel time",
+            "native_attention_dispatch": "The reviewed source revision and attention_execution determine the complete launch sequence. native_fa3_v2 uses prepare, FA3 main with direct output and nonfinite detection, and native repair for eligible queries >=1. native_fa3_v3 inserts sort_work_by_union_size between prepare and FA3 exactly when ceil(query_length/8)*num_key_value_heads==256; other positive eligible shapes keep the three-kernel sequence, and empty queries launch nothing. The sorter is included in attention time and adds no useful matrix FLOPs. FP16 or incompatible strides retain the previously reviewed native-sequence alternatives; their stride eligibility is not independently established by this attribution. Grouped native paths include their scan and fallback kernels. Every kernel belongs to one attention module; useful QK/PV FLOPs are counted once per layer/query, independently of launch count or fallback activity",
             "unscoped_gemms": "Reviewed runtime source order [QKV,CIS,O,gate_up,down] plus CIS/attention/RoPE/norm/activation anchors",
             "kernel_shape_proof": "Captured config and source graph, audited resident Q/K/V shapes and complete layer/chunk counts; kernel names/grids are not shape evidence",
-            "no_matrix_modules": "Compression, selection and other non-matrix modules have MFU null, not zero",
+            "no_matrix_modules": "Compression, standalone selection and other non-matrix modules have MFU null, not zero",
             "nested_modules": "Indexer children and cis_projection_gemm are inclusive subsets; never add them to their parents",
             "scope_denominator": "CIS/indexer/attention scopes include all correlated kernels, including non-matrix work; cis_projection_gemm is an additional delta-only view",
-            "event_interval_metric": "Secondary recorded CUDA-event interval MFU includes submission/launch gaps and is distinct from kernel-duration MFU",
+            "event_interval_metric": "Secondary recorded CUDA-event interval MFU includes submission/launch gaps and is distinct from kernel-duration MFU. No event interval is fabricated for fused score+selection or partial views split from a joint submission",
             "profile_limit": "Kernel metrics come from instrumented nsys runs; end-to-end MFU remains the independent uninstrumented wall-time result",
         },
     }
@@ -901,6 +1329,7 @@ def analyze(data_dir, *, sqlite_path=None, peak_tflops=None, write=True):
         metadata["model_config"]["num_hidden_layers"],
         summary["workload"],
         native_attention_group_size=_validate_source_graph(sources),
+        num_kv_heads=metadata["model_config"]["num_key_value_heads"],
     )
     attribution["validation"]["trace_gpu"] = validate_trace_gpu(
         sqlite_path,

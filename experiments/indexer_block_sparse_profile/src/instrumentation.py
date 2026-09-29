@@ -278,6 +278,23 @@ class SparseScopes:
         self._wrap_function(operator_module, "_select_validated_scores", "select_from_scores")
         for stage in ("pooled_scores", "topk_qa", "prepare_cis", "topk_cis", "finish_selection"):
             self._wrap_function(operator_module, stage, stage)
+        from operators.sm90 import (
+            _nosa_indexer_checked_cuda,
+            _nosa_indexer_cuda,
+            _nosa_prepare_cuda,
+            _nosa_prepare_ranked_cuda,
+            _nosa_selection_cuda,
+        )
+
+        self._wrap_function(_nosa_indexer_cuda, "select", "native_indexer")
+        self._wrap_function(
+            _nosa_indexer_checked_cuda, "select_prepared_out", "native_checked_indexer"
+        )
+        self._wrap_function(_nosa_selection_cuda, "select_pooled_blocks", "native_selection")
+        self._wrap_function(_nosa_prepare_cuda, "prepare_out", "native_prepare")
+        self._wrap_function(
+            _nosa_prepare_ranked_cuda, "prepare_ranked_out", "native_prepare_ranked"
+        )
         for layer_idx, layer in enumerate(self.model.model.layers):
             before = layer.self_attn.register_forward_pre_hook(
                 self._attention_enter(layer_idx), with_kwargs=True
@@ -302,6 +319,10 @@ class SparseScopes:
                 self._compression_calls[-1] += 1
                 label = ("compression_k", "compression_cis")[index] if index < 2 else "compression"
             with self._scope(label, self._frame()) as record:
+                if stage in ("native_indexer", "native_selection"):
+                    record["prepared_ranking"] = kwargs.get("prepared_ranking") is not None
+                if stage == "native_checked_indexer":
+                    record["prepared_ranking"] = True
                 if self.audit and args and isinstance(args[0], torch.Tensor):
                     record["details"] = {"input_shape": list(args[0].shape)}
                 result = original(*args, **kwargs)

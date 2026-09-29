@@ -1,10 +1,5 @@
 """Local Hopper WGMMA/TMA attention, bound through TVM FFI."""
 
-import torch
-import tvm_ffi
-
-from operators.sm90._native import load_module
-
 
 def supports_native_attention(q, keys, values):
     """TMA specialization for NOSA-8B; general layouts retain the Triton path."""
@@ -20,24 +15,6 @@ def supports_native_attention(q, keys, values):
 
 
 def launch_nosa_block_attention(q, keys, values, selection, query_start, cis_bias):
-    output = torch.empty(q.shape, dtype=q.dtype, device=q.device)
-    if not len(q):
-        return output
-    module = load_module("nosa_attention")
-    empty = torch.empty(0, dtype=torch.bool, device=q.device)
-    group_fallback = torch.empty(
-        ((len(q) + 3) // 4, keys.shape[1]), dtype=torch.int32, device=q.device
-    )
-    with torch.cuda.device(q.device), tvm_ffi.use_torch_stream():
-        module.forward(
-            q,
-            keys,
-            values,
-            selection.block_ids,
-            selection.valid_mask if selection.valid_mask is not None else empty,
-            cis_bias if cis_bias is not None else empty,
-            output,
-            group_fallback,
-            query_start,
-        )
-    return output
+    from operators.sm90._nosa_attention_fa3 import launch_nosa_fa3_attention
+
+    return launch_nosa_fa3_attention(q, keys, values, selection, query_start, cis_bias)

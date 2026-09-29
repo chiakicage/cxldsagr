@@ -13,7 +13,15 @@ from pathlib import Path
 
 _ROOT = Path(__file__).resolve().parents[2]
 _SOURCE = Path(__file__).resolve().parent / "csrc"
-_COMPONENTS = {"nosa_scores", "nosa_attention"}
+_COMPONENTS = {
+    "nosa_scores",
+    "nosa_attention",
+    "nosa_selection",
+    "nosa_indexer",
+    "nosa_prepare",
+    "nosa_prepare_ranked",
+    "nosa_indexer_checked",
+}
 _SOURCE_SUFFIXES = {".cu", ".cuh", ".c", ".cpp", ".h", ".hpp"}
 _CUDA_FLAGS = (
     "-O3",
@@ -64,7 +72,7 @@ def _toolchain():
 def build_info():
     """Serializable build provenance without compiling or initializing CUDA."""
     paths = [Path(__file__), *_source_files()]
-    return {
+    info = {
         **_toolchain(),
         "selected_backend": backend_name(),
         "source_sha256": {
@@ -72,6 +80,10 @@ def build_info():
             for path in paths
         },
     }
+    from operators.sm90._nosa_attention_fa3 import build_info as attention_build_info
+
+    info["attention_fa3"] = attention_build_info()
+    return info
 
 
 def _source_files():

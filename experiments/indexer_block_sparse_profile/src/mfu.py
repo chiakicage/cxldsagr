@@ -37,6 +37,108 @@ NATIVE_SOURCES = {
     "operators/sm90/csrc/nosa_attention.cu",
     "operators/sm90/csrc/nosa_scores.cu",
 }
+FUSED_NATIVE_SOURCES = {
+    "operators/sm90/csrc/nosa_indexer.cu",
+    "operators/sm90/csrc/nosa_scores_fused.cuh",
+    "operators/sm90/csrc/nosa_selection.cu",
+    "operators/sm90/csrc/nosa_selection_prefix.cuh",
+    "operators/sm90/csrc/nosa_prepare.cu",
+    "operators/sm90/csrc/nosa_prepare_ranked.cu",
+}
+PRUNED_NATIVE_SOURCES = {
+    "operators/sm90/csrc/nosa_scores_pruned.cuh",
+    "operators/sm90/csrc/nosa_selection_cutoff.cuh",
+}
+NATIVE_INDEXER_REVISIONS = {f"cached_native_v{revision}": revision for revision in (2, 3, 4, 5)}
+
+
+FA3_SOURCE_PATHS = {
+    "_nosa_attention_fa3.py": "operators/sm90/_nosa_attention_fa3.py",
+    "nosa_attention_fa3.cu": "operators/sm90/csrc/nosa_attention_fa3.cu",
+    "nosa_attention.cu": "operators/sm90/csrc/nosa_attention.cu",
+    "nosa_attention_grouped.cuh": "operators/sm90/csrc/nosa_attention_grouped.cuh",
+}
+FA3_EXTRA_FLAGS = [
+    "-use_fast_math",
+    "-DFA3_GROUP=8",
+    "-DFA3_KV=128",
+    "-DFA3_TMA=1",
+    "-DFA3_STAGES=2",
+]
+FA3_CTA_ORDER = {
+    "cta_order": "descending_union_tiles",
+    "cta_order_work_items": 256,
+    "cta_order_ties": "ascending_logical_batch",
+}
+
+
+def _validate_fa3_build(metadata, attention_execution):
+    """Check the separate FA3 compiler flags and installed-header identity."""
+    build = metadata["native_build"]
+    fa3 = build.get("attention_fa3")
+    if not isinstance(fa3, dict) or not fa3:
+        raise ValueError("FA3-era captures require native_build.attention_fa3")
+    toolchain = {name: build[name] for name in ("tvm_ffi", "compiler", "cutlass", "cuda_flags")}
+    if fa3.get("toolchain") != toolchain:
+        raise ValueError("FA3 toolchain disagrees with common native build metadata")
+    if fa3.get("cuda_flags") != build["cuda_flags"] + FA3_EXTRA_FLAGS:
+        raise ValueError("FA3 requires its reviewed separate CUDA compiler flags")
+    if fa3.get("torch") != metadata.get("torch") or not fa3.get("torch"):
+        raise ValueError("FA3 torch version disagrees with runtime metadata")
+    if fa3.get("flashinfer") != "0.6.18" or fa3["flashinfer"] != metadata.get("flashinfer"):
+        raise ValueError("FA3 requires the reviewed installed FlashInfer 0.6.18 headers")
+    include = fa3.get("flashinfer_include")
+    digest = fa3.get("flashinfer_headers_sha256")
+    if (
+        not isinstance(include, str)
+        or not include.startswith("/")
+        or (
+            not isinstance(digest, str)
+            or len(digest) != 64
+            or any(character not in "0123456789abcdef" for character in digest)
+        )
+    ):
+        raise ValueError("FA3 requires its installed include path and complete header fingerprint")
+    if any(
+        fa3.get(name) != expected
+        for name, expected in (
+            ("group_queries", 8),
+            ("kv_tile_tokens", 128),
+            ("stages", 2),
+            ("minimum_fa3_queries", 1),
+            ("q_transfer", "direct_strided_tma"),
+            ("output_store", "direct"),
+            ("numerical_repair", "nonfinite_output_postcheck"),
+            ("native_pv_accumulation", "bf16_power_of_two_scale_finite_output_guard"),
+        )
+    ):
+        raise ValueError(
+            "Unreviewed FA3 geometry, query cutoff, transfer or numerical configuration"
+        )
+    ordering_fields = set(FA3_CTA_ORDER).intersection(fa3)
+    if attention_execution == "native_fa3_v2" and ordering_fields:
+        raise ValueError("FA3 v2 cannot declare the v3 CTA ordering contract")
+    # Triton controls retain the same native build provenance as their paired
+    # native run, so accept either the legacy v2 or complete v3 build contract.
+    if (attention_execution == "native_fa3_v3" or ordering_fields) and any(
+        type(fa3.get(name)) is not type(expected) or fa3.get(name) != expected
+        for name, expected in FA3_CTA_ORDER.items()
+    ):
+        raise ValueError("Missing or unreviewed FA3 CTA ordering contract")
+    hashes = fa3.get("source_sha256")
+    captured = metadata["source_sha256"]
+    if (
+        not isinstance(hashes, dict)
+        or set(hashes) != set(FA3_SOURCE_PATHS)
+        or any(
+            not isinstance(hashes[name], str)
+            or len(hashes[name]) != 64
+            or any(character not in "0123456789abcdef" for character in hashes[name])
+            or captured.get(path) != hashes[name]
+            for name, path in FA3_SOURCE_PATHS.items()
+        )
+    ):
+        raise ValueError("FA3 source fingerprints disagree with captured wrapper/kernel sources")
 
 
 def validate_kernel_backend(workload, metadata=None):
@@ -51,14 +153,70 @@ def validate_kernel_backend(workload, metadata=None):
     if backend not in ("triton", "cuda_tvm_ffi"):
         raise ValueError(f"Unsupported kernel_backend: {backend}")
     if "kernel_backend" not in workload:
-        if "selection_backend" in workload or (
-            metadata is not None
-            and ("native_build" in metadata or "kernel_backend" in metadata.get("args", {}))
+        if (
+            "selection_backend" in workload
+            or "indexer_preparation" in workload
+            or (
+                metadata is not None
+                and ("native_build" in metadata or "kernel_backend" in metadata.get("args", {}))
+            )
         ):
             raise ValueError("Native-era capture metadata requires an explicit kernel_backend")
         return backend
-    if workload.get("selection_backend") != "flashinfer":
-        raise ValueError("Declared kernel_backend requires selection_backend='flashinfer'")
+    attention = workload.get("attention_execution")
+    if attention not in (None, "native_fa3_v2", "native_fa3_v3", "triton_v1"):
+        raise ValueError("Unreviewed attention_execution")
+    if attention is not None and attention not in (
+        ("native_fa3_v2", "native_fa3_v3") if backend == "cuda_tvm_ffi" else ("triton_v1",)
+    ):
+        raise ValueError("attention_execution disagrees with kernel_backend")
+    selection = workload.get("selection_backend")
+    if selection not in ("flashinfer", "cuda_tvm_ffi"):
+        raise ValueError("Declared kernel_backend requires a reviewed selection_backend")
+    if selection == "cuda_tvm_ffi" and (
+        backend != "cuda_tvm_ffi"
+        or workload.get("indexer_execution") not in NATIVE_INDEXER_REVISIONS
+    ):
+        raise ValueError("Native selection requires a reviewed cached native dispatcher")
+    preparation = workload.get("indexer_preparation")
+    if preparation not in (
+        None,
+        "triton_v1",
+        "native_guarded_v1",
+        "native_guarded_ranked_v1",
+        "native_guarded_ranked_checked_v1",
+    ):
+        raise ValueError("Unreviewed indexer_preparation")
+    if preparation in (
+        "native_guarded_v1",
+        "native_guarded_ranked_v1",
+        "native_guarded_ranked_checked_v1",
+    ) and (
+        backend != "cuda_tvm_ffi"
+        or workload.get("indexer_execution") not in NATIVE_INDEXER_REVISIONS
+    ):
+        raise ValueError("Native preparation requires a reviewed cached native dispatcher")
+    if preparation == "native_guarded_ranked_v1" and workload.get("indexer_execution") not in (
+        "cached_native_v3",
+        "cached_native_v4",
+        "cached_native_v5",
+    ):
+        raise ValueError("Ranked preparation requires cached_native_v3")
+    revision = NATIVE_INDEXER_REVISIONS.get(workload.get("indexer_execution"))
+    if (
+        revision is not None
+        and revision >= 3
+        and (
+            backend != "cuda_tvm_ffi"
+            or selection != "cuda_tvm_ffi"
+            or workload.get("native_kernel_revision") != revision
+        )
+    ):
+        raise ValueError(
+            "Cached native dispatch requires its matching revision and native selection"
+        )
+    if preparation == "native_guarded_ranked_checked_v1" and revision not in (4, 5):
+        raise ValueError("Checked ranked preparation requires cached_native_v4 or cached_native_v5")
     if metadata is None:
         return backend
     selected = "native" if backend == "cuda_tvm_ffi" else "triton"
@@ -87,6 +245,12 @@ def validate_kernel_backend(workload, metadata=None):
     captured = metadata.get("source_sha256", {})
     if not isinstance(hashes, dict) or not NATIVE_SOURCES.issubset(hashes):
         raise ValueError("native_build requires complete native source fingerprints")
+    if revision is not None and revision >= 3 and not FUSED_NATIVE_SOURCES.issubset(hashes):
+        raise ValueError("Fused native dispatch requires all score/selection/preparation sources")
+    if revision in (4, 5) and "operators/sm90/csrc/nosa_indexer_checked.cu" not in hashes:
+        raise ValueError("Checked native dispatch requires its complete source fingerprint")
+    if workload.get("native_kernel_revision") == 5 and not PRUNED_NATIVE_SOURCES.issubset(hashes):
+        raise ValueError("Pruned native revision requires complete bound and cutoff sources")
     if not isinstance(captured, dict) or any(not isinstance(name, str) for name in captured):
         raise ValueError("Captured source fingerprints must map source paths to hashes")
     compiled_sources = {name for name in captured if name.startswith("operators/sm90/csrc/")}
@@ -100,6 +264,10 @@ def validate_kernel_backend(workload, metadata=None):
         for name, digest in hashes.items()
     ):
         raise ValueError("native_build source fingerprints disagree with captured sources")
+    if "attention_fa3" in build and attention is None:
+        raise ValueError("FA3-era captures require an explicit attention_execution")
+    if attention is not None or "attention_fa3" in build:
+        _validate_fa3_build(metadata, attention)
     return backend
 
 
@@ -231,6 +399,7 @@ def build_report(metadata, summary, *, peak_tflops=None):
             "sparse_backend_api": workload["backend"],
             "kernel_backend": kernel_backend,
             "selection_backend": workload.get("selection_backend"),
+            "attention_execution": workload.get("attention_execution"),
             "tvm_ffi": metadata.get("tvm_ffi"),
             "native_build": metadata.get("native_build"),
         },

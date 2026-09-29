@@ -3,7 +3,12 @@
 import pytest
 import torch
 
-from experiments.indexer_block_sparse_profile.src.capture import rewind_cache, validate_workload
+from experiments.indexer_block_sparse_profile.src.capture import (
+    operator_workload,
+    rewind_cache,
+    validate_workload,
+)
+from experiments.indexer_block_sparse_profile.src.mfu import validate_kernel_backend
 from models.nosa.cache import NosaKVCache
 from models.nosa.config import NosaConfig
 
@@ -16,6 +21,28 @@ FIELDS = (
     "profile_repeats",
 )
 DEFAULTS = dict(zip(FIELDS, (65536, 1024, 1024, 2, 5, 1), strict=True))
+
+
+@pytest.mark.parametrize("backend", ["native", "triton"])
+def test_capture_declares_the_current_score_selection_and_preparation_dispatch(backend):
+    workload = operator_workload(backend)
+    assert workload["attention_execution"] == (
+        "native_fa3_v3" if backend == "native" else "triton_v1"
+    )
+    assert validate_kernel_backend(workload) == (
+        "cuda_tvm_ffi" if backend == "native" else "triton"
+    )
+    assert workload["indexer_execution"] == (
+        "cached_native_v5" if backend == "native" else "cached_flashinfer_v1"
+    )
+    assert workload["indexer_preparation"] == (
+        "native_guarded_ranked_checked_v1" if backend == "native" else "triton_v1"
+    )
+
+
+def test_capture_rejects_unknown_operator_backend():
+    with pytest.raises(ValueError):
+        operator_workload("unknown")
 
 
 @pytest.mark.parametrize(

@@ -13,6 +13,10 @@ CIS 打分的 resident block sparse 推理（CPU reference / SM90 CUDA、Triton�
 offloading 仅预留接口。DeepGEMM 使用上游 `nv_dev`
 子模块，其依赖更新尚未经过 GPU 构建和模型验证。
 
+NOSA SM90 已接入增量 indexer、融合选块与精确剪枝，以及 FA3 resident block sparse
+attention。当前完整模块检查点的 indexer MFU 为 24.7%–25.5%，attention 为 39.3%–40.4%；
+40% 目标尚未全部达成。实现与测量边界见 [当前检查点](docs/nosa_sm90_checkpoint.md)。
+
 ```text
 operators/sm90/                  Hopper NOSA block sparse / indexer；fetch 接口待实现
 operators/sm120/                 sparse MLA 扩展与现有算子基准

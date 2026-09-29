@@ -1,0 +1,80 @@
+[
+  {
+    "layer": 0,
+    "module": "indexer_total",
+    "kernel_us": 141.471,
+    "mfu_pct": 24.74084978804139,
+    "eager_api_us": 330.30399680137634,
+    "wall_api_us": 338.8635,
+    "composition_check": {
+      "incremental_matches_independent_full_compression": true,
+      "selection_matches_standalone_operator_exactly": true,
+      "selection_differs_from_capture_elements": 0
+    }
+  },
+  {
+    "layer": 0,
+    "module": "block_sparse_attention_total",
+    "kernel_us": 175.39100000000002,
+    "mfu_pct": 39.31184510766264,
+    "eager_api_us": 288.08000683784485,
+    "wall_api_us": 293.98400000000004,
+    "composition_check": {
+      "incremental_matches_independent_full_compression": true,
+      "selection_matches_standalone_operator_exactly": true,
+      "selection_differs_from_capture_elements": 0
+    }
+  },
+  {
+    "layer": 15,
+    "module": "indexer_total",
+    "kernel_us": 137.854,
+    "mfu_pct": 25.389997826425088,
+    "eager_api_us": 345.3439921140671,
+    "wall_api_us": 351.797,
+    "composition_check": {
+      "incremental_matches_independent_full_compression": true,
+      "selection_matches_standalone_operator_exactly": true,
+      "selection_differs_from_capture_elements": 0
+    }
+  },
+  {
+    "layer": 15,
+    "module": "block_sparse_attention_total",
+    "kernel_us": 173.247,
+    "mfu_pct": 39.79834470598659,
+    "eager_api_us": 289.63200747966766,
+    "wall_api_us": 295.69599999999997,
+    "composition_check": {
+      "incremental_matches_independent_full_compression": true,
+      "selection_matches_standalone_operator_exactly": true,
+      "selection_differs_from_capture_elements": 0
+    }
+  },
+  {
+    "layer": 31,
+    "module": "indexer_total",
+    "kernel_us": 137.504,
+    "mfu_pct": 25.454625031737287,
+    "eager_api_us": 335.04000306129456,
+    "wall_api_us": 341.541,
+    "composition_check": {
+      "incremental_matches_independent_full_compression": true,
+      "selection_matches_standalone_operator_exactly": true,
+      "selection_differs_from_capture_elements": 0
+    }
+  },
+  {
+    "layer": 31,
+    "module": "block_sparse_attention_total",
+    "kernel_us": 170.87900000000002,
+    "mfu_pct": 40.34986057548357,
+    "eager_api_us": 281.8240076303482,
+    "wall_api_us": 287.7605,
+    "composition_check": {
+      "incremental_matches_independent_full_compression": true,
+      "selection_matches_standalone_operator_exactly": true,
+      "selection_differs_from_capture_elements": 0
+    }
+  }
+]

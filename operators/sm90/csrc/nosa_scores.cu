@@ -8,9 +8,11 @@
 // no EzKernelKit headers or libraries are used.
 #include <cute/tensor.hpp>
 #include <cutlass/arch/barrier.h>
+#include <cutlass/arch/reg_reconfig.h>
 #include <cutlass/half.h>
 #include <cutlass/bfloat16.h>
 #include <cuda_runtime.h>
+#include <cuda_fp16.h>
 #include <cuda.h>
 #include <tvm/ffi/container/tensor.h>
 #include <tvm/ffi/error.h>
@@ -18,16 +20,20 @@
 #include <tvm/ffi/function.h>
 #include <cmath>
 #include <cstdint>
+#include "nosa_selection_prefix.cuh"
+#include "nosa_selection_cutoff.cuh"
 
 namespace nosa_scores {
 using namespace cute;
 using tvm::ffi::TensorView;
 constexpr int kColumns = 128;
-// Keep maxima and denominators in base two, as in high-performance attention
-// softmax schedules; each score requires one approximate exponent instruction.
-__device__ __forceinline__ float exp2_approx(float x) {
+// Keep scaled logits and maxima in natural units. Converting a large common
+// offset to base two before subtraction loses small, meaningful differences.
+// Only the centered difference is converted for the approximate exponent.
+__device__ __forceinline__ float exp_approx(float x) {
   float result;
-  asm("ex2.approx.ftz.f32 %0, %1;" : "=f"(result) : "f"(x));
+  float exponent = x * 1.4426950408889634f;
+  asm("ex2.approx.ftz.f32 %0, %1;" : "=f"(result) : "f"(exponent));
   return result;
 }
 using Barrier = cutlass::arch::ClusterTransactionBarrier;
@@ -47,6 +53,10 @@ struct Params {
   int64_t query_start;
   int64_t qr, qh, qg, kc, kh;
   bool contiguous, pos64;
+  int device;
+  unsigned const* ranking = nullptr;
+  int64_t* ids = nullptr;
+  bool* valid = nullptr;
 };
 
 template <typename T> struct Traits {
@@ -86,10 +96,10 @@ __device__ __forceinline__ void issue(Shared& smem, int buffer, Acc& acc) {
   warpgroup_fence_operand(acc);
 }
 
-template <bool Masked, typename Acc>
+template <bool Masked, bool Record = false, typename Acc>
 __device__ __forceinline__ void normalize_tile(Acc& score, int tile, int count,
-    int64_t position, float (&maximum)[2], float (&denominator)[2]) {
-  constexpr float scale = 0.12751743082459868f;  // log2(e) / sqrt(128)
+    int64_t position, float (&maximum)[2], float (&denominator)[2], __half2* tile_summaries = nullptr) {
+  constexpr float scale = 0.08838834764831845f;  // 1 / sqrt(128)
   int lane = threadIdx.x % 32;
   CUTE_UNROLL
   for (int row = 0; row < 2; ++row) {
@@ -98,26 +108,37 @@ __device__ __forceinline__ void normalize_tile(Acc& score, int tile, int count,
     for (int i = row * 2; i < size(score); i += 4) {
       int col = tile * kColumns + 8 * (i / 4) + (lane % 4) * 2;
       if constexpr (Masked) {
-        score(i) = col < count && col * 16 + 31 <= position ? score(i) * scale : -INFINITY;
-        score(i + 1) = col + 1 < count && (col + 1) * 16 + 31 <= position ? score(i + 1) * scale : -INFINITY;
+        score(i) = col < count && col * 16 + 31 <= position ? __fmul_rn(score(i), scale) : -INFINITY;
+        score(i + 1) = col + 1 < count && (col + 1) * 16 + 31 <= position ? __fmul_rn(score(i + 1), scale) : -INFINITY;
       } else {
-        score(i) *= scale;
-        score(i + 1) *= scale;
+        score(i) = __fmul_rn(score(i), scale);
+        score(i + 1) = __fmul_rn(score(i + 1), scale);
       }
       block_max = fmaxf(block_max, fmaxf(score(i), score(i + 1)));
     }
     block_max = fmaxf(block_max, __shfl_xor_sync(0xffffffff, block_max, 1));
     block_max = fmaxf(block_max, __shfl_xor_sync(0xffffffff, block_max, 2));
+    if constexpr (Record) {
+      // Lane three owns aligned column 127 for this per-head row. Capture
+      // its natural-unit RN logit before exponentiation. Both summaries are
+      // rounded toward +infinity, preserving the later upper-bound proof.
+      // One packed word retains the four-tile conflict-free shared layout.
+      if (lane % 4 == 3) {
+        float halo = score(size(score) - 3 + row * 2);
+        tile_summaries[(lane / 4 + row * 8) * 36 + tile] =
+            __halves2half2(__float2half_ru(block_max), __float2half_ru(halo));
+      }
+    }
     float next_max = fmaxf(maximum[row], block_max);
     float safe = next_max == -INFINITY ? 0.0f : next_max;
     float local_sum = 0.0f;
     CUTE_UNROLL
     for (int i = row * 2; i < size(score); i += 4) {
-      local_sum += exp2_approx(score(i) - safe) + exp2_approx(score(i + 1) - safe);
+      local_sum += exp_approx(score(i) - safe) + exp_approx(score(i + 1) - safe);
     }
     // Each of the four lanes keeps its partial denominator until the first
     // pass finishes; only maxima need a cross-lane reduction every tile.
-    denominator[row] = denominator[row] * exp2_approx(maximum[row] - safe) + local_sum;
+    denominator[row] = denominator[row] * exp_approx(maximum[row] - safe) + local_sum;
     maximum[row] = next_max;
   }
 }
@@ -228,7 +249,7 @@ __device__ __forceinline__ void write_result(const Params& p, Shared& smem, Acc&
   int tid = threadIdx.x, lane = tid % 32, warp = tid / 32;
   int row = blockIdx.x * 4 + warp, head = blockIdx.y;
   constexpr int BlocksPerTile = (kColumns - 1) / 4;
-  constexpr float scale = 0.12751743082459868f;  // log2(e) / sqrt(128)
+  constexpr float scale = 0.08838834764831845f;  // 1 / sqrt(128)
   // The normalizer stores the rounded FP32 scaled logit. Reproduce that
   // rounding before subtraction; an FFMA here keeps extra low bits and can
   // bias even a uniform softmax when logits are large. Likewise, retain max
@@ -238,11 +259,11 @@ __device__ __forceinline__ void write_result(const Params& p, Shared& smem, Acc&
     int local = 8 * (i / 4) + (lane % 4) * 2, col = start + local;
     float a = 0.0f, b = 0.0f;
     if (!Masked || (col >= 0 && col < p.count && col * 16 + 31 <= position))
-      a = exp2_approx(__fmul_rn(acc(i), scale) - maximum[0]) * inv[0]
-        + exp2_approx(__fmul_rn(acc(i + 2), scale) - maximum[1]) * inv[1];
+      a = exp_approx(__fmul_rn(acc(i), scale) - maximum[0]) * inv[0]
+        + exp_approx(__fmul_rn(acc(i + 2), scale) - maximum[1]) * inv[1];
     if (!Masked || (col + 1 >= 0 && col + 1 < p.count && (col + 1) * 16 + 31 <= position))
-      b = exp2_approx(__fmul_rn(acc(i + 1), scale) - maximum[0]) * inv[0]
-        + exp2_approx(__fmul_rn(acc(i + 3), scale) - maximum[1]) * inv[1];
+      b = exp_approx(__fmul_rn(acc(i + 1), scale) - maximum[0]) * inv[0]
+        + exp_approx(__fmul_rn(acc(i + 3), scale) - maximum[1]) * inv[1];
     CUTE_UNROLL
     for (int offset = 4; offset <= 16; offset *= 2) {
       a += __shfl_xor_sync(0xffffffff, a, offset);
@@ -307,7 +328,7 @@ __global__ __launch_bounds__(128) void scores_kernel(__grid_constant__ const Par
         int64_t index = ((int64_t(split) * p.rows + row) * p.heads + head) * 16 + group;
         float other = p.normalizers[index * 2], s = p.normalizers[index * 2 + 1];
         float next = fmaxf(m, other), safe = next == -INFINITY ? 0.0f : next;
-        sum = sum * exp2_approx(m - safe) + s * exp2_approx(other - safe);
+        sum = sum * exp_approx(m - safe) + s * exp_approx(other - safe);
         m = next;
       }
     }
@@ -326,13 +347,60 @@ __global__ __launch_bounds__(128) void scores_kernel(__grid_constant__ const Par
   else write_result<T, O, Pool, true>(p, smem, acc, start, position, maximum, inv);
 }
 
+// A context ID is unique even after context destruction. Cache attributes
+// for the actual loaded kernel, device, and shared-memory requirement.
 template <typename Kernel>
-void configure(Kernel kernel, int shared) {
-  auto error = cudaFuncSetAttribute(kernel, cudaFuncAttributeMaxDynamicSharedMemorySize, shared);
-  TVM_FFI_ICHECK(error == cudaSuccess) << cudaGetErrorString(error);
-  error = cudaFuncSetAttribute(kernel, cudaFuncAttributePreferredSharedMemoryCarveout,
-                              cudaSharedmemCarveoutMaxShared);
-  TVM_FFI_ICHECK(error == cudaSuccess) << cudaGetErrorString(error);
+bool configure(Kernel kernel, int shared, int device, bool register_guard = false) {
+  static auto get_context_id = [] {
+    void* entry = nullptr;
+#if CUDART_VERSION >= 12050
+    auto error = cudaGetDriverEntryPointByVersion("cuCtxGetId", &entry, 12000,
+                                                  cudaEnableDefault, nullptr);
+#else
+    auto error = cudaGetDriverEntryPoint("cuCtxGetId", &entry, cudaEnableDefault, nullptr);
+#endif
+    TVM_FFI_ICHECK(error == cudaSuccess && entry) << cudaGetErrorString(error);
+    return reinterpret_cast<decltype(&cuCtxGetId)>(entry);
+  }();
+  unsigned long long context = 0;
+  TVM_FFI_ICHECK(get_context_id(nullptr, &context) == CUDA_SUCCESS);
+  struct Entry {
+    unsigned long long context;
+    const void* kernel;
+    int shared, device;
+    bool register_guard, feasible;
+  };
+  static thread_local Entry entries[16] = {};
+  static thread_local unsigned next = 0;
+  auto pointer = reinterpret_cast<const void*>(kernel);
+  for (const auto& entry : entries)
+    if (entry.context == context && entry.kernel == pointer && entry.shared == shared &&
+        entry.device == device && entry.register_guard == register_guard)
+      return entry.feasible;
+  bool feasible = true;
+  if (register_guard) {
+    cudaFuncAttributes attributes{};
+    auto error = cudaFuncGetAttributes(&attributes, pointer);
+    TVM_FFI_ICHECK(error == cudaSuccess) << cudaGetErrorString(error);
+    // The 640-thread launch must provide at least 96 initial registers/thread
+    // before four consumer WGs request 112 and the producer WG releases to 24.
+    feasible = attributes.numRegs >= 96;
+  }
+  if (feasible) {
+    auto error = cudaFuncSetAttribute(pointer, cudaFuncAttributeMaxDynamicSharedMemorySize, shared);
+    TVM_FFI_ICHECK(error == cudaSuccess) << cudaGetErrorString(error);
+    error = cudaFuncSetAttribute(pointer, cudaFuncAttributePreferredSharedMemoryCarveout,
+                                cudaSharedmemCarveoutMaxShared);
+    TVM_FFI_ICHECK(error == cudaSuccess) << cudaGetErrorString(error);
+    if (register_guard) {
+      int resident = 0;
+      error = cudaOccupancyMaxActiveBlocksPerMultiprocessor(&resident, kernel, 640, shared);
+      TVM_FFI_ICHECK(error == cudaSuccess) << cudaGetErrorString(error);
+      feasible = resident >= 1;
+    }
+  }
+  entries[next++ % 16] = {context, pointer, shared, device, register_guard, feasible};
+  return feasible;
 }
 
 template <typename T, typename O, bool Pool>
@@ -352,14 +420,17 @@ void launch(const Params& p, cudaStream_t stream) {
   auto kernel = scores_kernel<T, O, Pool, decltype(map)>;
   int normalizer_shared = sizeof(typename Traits<T>::template Shared<>);
   int score_shared = sizeof(typename Traits<T>::template Shared<1>);
-  configure(normalizer, normalizer_shared);
-  configure(kernel, score_shared);
+  configure(normalizer, normalizer_shared, p.device);
+  configure(kernel, score_shared, p.device);
   normalizer<<<dim3((p.rows + 3) / 4, p.heads, p.splits), 128, normalizer_shared, stream>>>(p, map);
   int tiles = Pool ? (p.blocks + (kColumns - 1) / 4 - 1) / ((kColumns - 1) / 4) : (p.count + kColumns - 1) / kColumns;
   kernel<<<dim3((p.rows + 3) / 4, p.heads, tiles), 128, score_shared, stream>>>(p, map);
   auto error = cudaGetLastError();
   TVM_FFI_ICHECK(error == cudaSuccess) << cudaGetErrorString(error);
 }
+
+#include "nosa_scores_fused.cuh"
+#include "nosa_scores_pruned.cuh"
 
 void scores_out(TensorView q, TensorView k, TensorView positions, TensorView out, TensorView normalizers,
                 int64_t query_start, int64_t blocks, bool contiguous, bool pool_output) {
@@ -404,9 +475,21 @@ void scores_out(TensorView q, TensorView k, TensorView positions, TensorView out
   TVM_FFI_ICHECK(normalizers.size(0) > 0 && normalizers.size(0) <= 16);
   Params p{data(q), data(k), data(positions), data(out), static_cast<float*>(static_cast<void*>(data(normalizers))), int(normalizers.size(0)),
     int(q.size(0)), int(q.size(1)), int(k.size(0)), int(blocks), query_start,
-    q.stride(0), q.stride(1), q.stride(2), k.stride(0), k.stride(1), contiguous, positions.dtype().bits == 64};
+    q.stride(0), q.stride(1), q.stride(2), k.stride(0), k.stride(1), contiguous, positions.dtype().bits == 64, q.device().device_id};
   if (!p.rows) return;
   auto stream = static_cast<cudaStream_t>(TVMFFIEnvGetStream(kDLCUDA, q.device().device_id));
+  // A sufficiently large grid amortizes the shared K schedule.
+  // The dispatch is shape-based; values and cached selections do not affect it.
+  if (pool_output && p.rows >= 1024 && ((p.rows + 15) / 16) * p.heads >= 128) {
+    if (q.dtype().code == kDLBfloat) {
+      if (out.dtype().bits == 32) fused_scores::launch<cutlass::bfloat16_t, float, true>(p, stream);
+      else fused_scores::launch<cutlass::bfloat16_t, cutlass::bfloat16_t, true>(p, stream);
+    } else {
+      if (out.dtype().bits == 32) fused_scores::launch<cutlass::half_t, float, true>(p, stream);
+      else fused_scores::launch<cutlass::half_t, cutlass::half_t, true>(p, stream);
+    }
+    return;
+  }
   if (q.dtype().code == kDLBfloat) {
     if (!pool_output) launch<cutlass::bfloat16_t, cutlass::bfloat16_t, false>(p, stream);
     else if (out.dtype().bits == 32) launch<cutlass::bfloat16_t, float, true>(p, stream);
@@ -420,3 +503,44 @@ void scores_out(TensorView q, TensorView k, TensorView positions, TensorView out
 }  // namespace nosa_scores
 
 TVM_FFI_DLL_EXPORT_TYPED_FUNC(scores_out, nosa_scores::scores_out);
+
+
+// Ranking must be prepared from the guarded BF16 CIS prefix before this call.
+bool fused_select_out(tvm::ffi::TensorView q, tvm::ffi::TensorView k,
+                      tvm::ffi::TensorView ranking, tvm::ffi::TensorView ids,
+                      tvm::ffi::TensorView valid, int64_t query_start, int64_t blocks) {
+  auto data=[](tvm::ffi::TensorView t) { return static_cast<char*>(t.data_ptr())+t.byte_offset(); };
+  auto same_device=[&](tvm::ffi::TensorView t) {
+    return t.device().device_type==kDLCUDA && t.device().device_id==q.device().device_id;
+  };
+  TVM_FFI_ICHECK(q.device().device_type==kDLCUDA && same_device(k) && same_device(ranking) && same_device(ids) && same_device(valid));
+  TVM_FFI_ICHECK(q.ndim()==4 && k.ndim()==3 && q.size(1)==k.size(1));
+  TVM_FFI_ICHECK(q.dtype().code==kDLBfloat && q.dtype().bits==16 && q.dtype()==k.dtype());
+  TVM_FFI_ICHECK(q.size(2)==16 && q.size(3)==128 && k.size(2)==128);
+  TVM_FFI_ICHECK(q.size(0)>=1024 && q.size(0)<=1088 && k.size(0)>0 && k.size(0)<=16383);
+  TVM_FFI_ICHECK(((q.size(0)+15)/16)*q.size(1)>=128);
+  TVM_FFI_ICHECK(query_start/64>=64 && (query_start+q.size(0)-1)/64-query_start/64<=16);
+  TVM_FFI_ICHECK(blocks>64 && blocks<=1056 && query_start/64<=blocks-1);
+  TVM_FFI_ICHECK(q.stride(3)==1 && k.stride(2)==1);
+  TVM_FFI_ICHECK(reinterpret_cast<uintptr_t>(data(q))%16==0 && reinterpret_cast<uintptr_t>(data(k))%16==0);
+  for(int d=0;d<3;++d) TVM_FFI_ICHECK(q.stride(d)>0 && q.stride(d)%8==0);
+  for(int d=0;d<2;++d) TVM_FFI_ICHECK(k.stride(d)>0 && k.stride(d)%8==0);
+  TVM_FFI_ICHECK(ranking.ndim()==2 && ranking.size(0)==q.size(1) && ranking.size(1)==64 && ranking.IsContiguous());
+  TVM_FFI_ICHECK(ranking.dtype().code==kDLInt && ranking.dtype().bits==32);
+  TVM_FFI_ICHECK(ids.ndim()==3 && ids.size(0)==q.size(0) && ids.size(1)==q.size(1) && ids.size(2)==64 && ids.IsContiguous());
+  TVM_FFI_ICHECK(ids.dtype().code==kDLInt && ids.dtype().bits==64);
+  TVM_FFI_ICHECK(valid.ndim()==3 && valid.size(0)==q.size(0) && valid.size(1)==q.size(1) && valid.size(2)==64 && valid.IsContiguous() && valid.dtype().bits==8);
+  nosa_scores::Params p{data(q),data(k),nullptr,nullptr,nullptr,1,
+    int(q.size(0)),int(q.size(1)),int(k.size(0)),int(blocks),query_start,
+    q.stride(0),q.stride(1),q.stride(2),k.stride(0),k.stride(1),true,true,q.device().device_id,
+    reinterpret_cast<unsigned const*>(data(ranking)),reinterpret_cast<int64_t*>(data(ids)),reinterpret_cast<bool*>(data(valid))};
+  auto stream=static_cast<cudaStream_t>(TVMFFIEnvGetStream(kDLCUDA,q.device().device_id));
+  // Enable pruning only for the measured 64K-prefix + 1K-query geometry.
+  // Shorter prefixes can retain too many tiles; they keep the fused schedule.
+  if (p.rows == 1024 && p.heads == 2 && p.count == 4159 && p.blocks == 1040 &&
+      p.query_start == 65536 &&
+      nosa_scores::pruned_scores::launch<cutlass::bfloat16_t,cutlass::bfloat16_t,true,true>(p,stream))
+    return true;
+  return nosa_scores::fused_scores::launch<cutlass::bfloat16_t,cutlass::bfloat16_t,true,true>(p,stream);
+}
+TVM_FFI_DLL_EXPORT_TYPED_FUNC(fused_select_out,fused_select_out);

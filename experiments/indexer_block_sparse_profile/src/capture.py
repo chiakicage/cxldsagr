@@ -36,6 +36,21 @@ ROOT = Path(__file__).resolve().parents[3]
 EXPERIMENT = ROOT / "experiments/indexer_block_sparse_profile"
 
 
+def operator_workload(kernel_backend):
+    """Declare the reviewed dispatch, including mixed paths within full prefill."""
+    if kernel_backend not in ("native", "triton"):
+        raise ValueError("kernel_backend must be native or triton")
+    native = kernel_backend == "native"
+    return {
+        "kernel_backend": "cuda_tvm_ffi" if native else "triton",
+        "selection_backend": "cuda_tvm_ffi" if native else "flashinfer",
+        "native_kernel_revision": 5,
+        "attention_execution": "native_fa3_v3" if native else "triton_v1",
+        "indexer_execution": "cached_native_v5" if native else "cached_flashinfer_v1",
+        "indexer_preparation": "native_guarded_ranked_checked_v1" if native else "triton_v1",
+    }
+
+
 def validate_workload(prefix_tokens, new_tokens, chunk_size, warmup, repeats, profile_repeats):
     for name, value in (
         ("prefix_tokens", prefix_tokens),
@@ -316,8 +331,7 @@ def run(args):
         "chunk_size": args.chunk_size,
         "attention_mode": "sparse",
         "backend": "triton",
-        "kernel_backend": "cuda_tvm_ffi" if args.kernel_backend == "native" else "triton",
-        "selection_backend": "flashinfer",
+        **operator_workload(args.kernel_backend),
         "dtype": "bfloat16",
         "block_size": 64,
         "block_budget": 64,
@@ -358,7 +372,6 @@ def run(args):
         sparse_backend="triton",
     )
     workload["indexer_query_chunk_size"] = model.indexer.effective_query_chunk_size(device)
-    workload["indexer_execution"] = "cached_flashinfer_v1"
     if args.mode != "benchmark" and measurements["workload"] != workload:
         raise ValueError("Profile must use the benchmark run ID and workload")
     config = model.config

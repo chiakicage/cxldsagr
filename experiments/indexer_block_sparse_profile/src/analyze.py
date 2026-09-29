@@ -30,6 +30,11 @@ NESTED_STAGES = (
     "compressed_scores",
     "select_from_scores",
     *FUSED_STAGES,
+    "native_indexer",
+    "native_selection",
+    "native_prepare",
+    "native_prepare_ranked",
+    "native_checked_indexer",
 )
 STAGES = (*PRIMARY_STAGES, *NESTED_STAGES)
 WORKLOAD = {
@@ -104,8 +109,18 @@ def _validate_scopes(records):
         if scope in scopes:
             raise ValueError("scope_id must be unique within one profile run")
         scopes[scope] = record
+    ranked_parents = {
+        _integer(record["parent_scope_id"], "parent_scope_id")
+        for record in records
+        if record["stage"] in ("native_prepare_ranked", "native_checked_indexer")
+    }
     for record in records:
         parent_id = record["parent_scope_id"]
+        if "prepared_ranking" in record and (
+            record["stage"] not in ("native_indexer", "native_selection", "native_checked_indexer")
+            or not isinstance(record["prepared_ranking"], bool)
+        ):
+            raise ValueError("prepared_ranking must be a boolean on native selection scopes")
         if record["stage"] in PRIMARY_STAGES:
             if parent_id is not None:
                 raise ValueError("Primary profile stages must be top-level scopes")
@@ -117,6 +132,10 @@ def _validate_scopes(records):
         for name in ("layer_idx", "query_start", "query_length", "call_id"):
             if record.get(name) != parent.get(name):
                 raise ValueError(f"Nested stage and indexer_total must share {name}")
+        if "prepared_ranking" in record and record["prepared_ranking"] != (
+            parent_id in ranked_parents
+        ):
+            raise ValueError("Native selection prepared_ranking disagrees with its preparation")
 
 
 def _profile_run(records, phase, num_layers):
