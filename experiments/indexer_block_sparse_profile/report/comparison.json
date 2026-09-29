@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "native_run_id": "sparse_native_h200_gpu1_20260928_02",
-  "triton_run_id": "sparse_triton_h200_gpu1_20260928_01",
+  "native_run_id": "sparse_native_h200_gpu1_20260929_01",
+  "triton_run_id": "sparse_triton_h200_gpu1_20260929_01",
   "workload": {
     "prefix_tokens": 65536,
     "new_tokens": 1024,
@@ -9,7 +9,7 @@
     "chunk_size": 1024,
     "attention_mode": "sparse",
     "backend": "triton",
-    "selection_backend": "flashinfer",
+    "native_kernel_revision": 5,
     "dtype": "bfloat16",
     "block_size": 64,
     "block_budget": 64,
@@ -18,8 +18,7 @@
     "warmup": 2,
     "repeats": 5,
     "profile_repeats": 1,
-    "indexer_query_chunk_size": null,
-    "indexer_execution": "cached_flashinfer_v1"
+    "indexer_query_chunk_size": null
   },
   "gpu": {
     "name": "NVIDIA H20Z",
@@ -193,87 +192,80 @@
       "phase": "full_prefill",
       "metric": "end_to_end",
       "timing_boundary": "unprofiled wall time",
-      "native_ms": 3304.487319663167,
-      "triton_ms": 3827.189391478896,
-      "speedup_triton_over_native": 1.1581794757405846,
-      "native_run_id": "sparse_native_h200_gpu1_20260928_02",
-      "triton_run_id": "sparse_triton_h200_gpu1_20260928_01"
-    },
-    {
-      "phase": "full_prefill",
-      "metric": "pooled_scores",
-      "timing_boundary": "nsys correlated kernel duration sum",
-      "native_ms": 255.734599,
-      "triton_ms": 293.169911,
-      "speedup_triton_over_native": 1.1463834465355234,
-      "native_run_id": "sparse_native_h200_gpu1_20260928_02",
-      "triton_run_id": "sparse_triton_h200_gpu1_20260928_01"
+      "native_ms": 2430.9780336916447,
+      "triton_ms": 3799.3213683366776,
+      "speedup_triton_over_native": 1.562877704232929,
+      "native_run_id": "sparse_native_h200_gpu1_20260929_01",
+      "triton_run_id": "sparse_triton_h200_gpu1_20260929_01"
     },
     {
       "phase": "full_prefill",
       "metric": "block_sparse_attention",
       "timing_boundary": "nsys correlated kernel duration sum",
-      "native_ms": 614.079226,
-      "triton_ms": 1197.040926,
-      "speedup_triton_over_native": 1.9493265287564052,
-      "native_run_id": "sparse_native_h200_gpu1_20260928_02",
-      "triton_run_id": "sparse_triton_h200_gpu1_20260928_01"
+      "native_ms": 353.702909,
+      "triton_ms": 1195.548621,
+      "speedup_triton_over_native": 3.380092700905663,
+      "native_run_id": "sparse_native_h200_gpu1_20260929_01",
+      "triton_run_id": "sparse_triton_h200_gpu1_20260929_01"
     },
     {
       "phase": "full_prefill",
       "metric": "indexer_total",
       "timing_boundary": "nsys correlated kernel duration sum",
-      "native_ms": 641.800457,
-      "triton_ms": 678.744956,
-      "speedup_triton_over_native": 1.0575638402825256,
-      "native_run_id": "sparse_native_h200_gpu1_20260928_02",
-      "triton_run_id": "sparse_triton_h200_gpu1_20260928_01"
+      "native_ms": 279.321483,
+      "triton_ms": 678.139654,
+      "speedup_triton_over_native": 2.427810588417934,
+      "native_run_id": "sparse_native_h200_gpu1_20260929_01",
+      "triton_run_id": "sparse_triton_h200_gpu1_20260929_01"
     },
     {
       "phase": "extend",
       "metric": "end_to_end",
       "timing_boundary": "unprofiled wall time",
-      "native_ms": 54.172055795788765,
-      "triton_ms": 63.93316760659218,
-      "speedup_triton_over_native": 1.1801872140056797,
-      "native_run_id": "sparse_native_h200_gpu1_20260928_02",
-      "triton_run_id": "sparse_triton_h200_gpu1_20260928_01"
-    },
-    {
-      "phase": "extend",
-      "metric": "pooled_scores",
-      "timing_boundary": "nsys correlated kernel duration sum",
-      "native_ms": 7.168534,
-      "triton_ms": 9.156495,
-      "speedup_triton_over_native": 1.2773176496059027,
-      "native_run_id": "sparse_native_h200_gpu1_20260928_02",
-      "triton_run_id": "sparse_triton_h200_gpu1_20260928_01"
+      "native_ms": 36.51975840330124,
+      "triton_ms": 63.72914835810661,
+      "speedup_triton_over_native": 1.745059418365313,
+      "native_run_id": "sparse_native_h200_gpu1_20260929_01",
+      "triton_run_id": "sparse_triton_h200_gpu1_20260929_01"
     },
     {
       "phase": "extend",
       "metric": "block_sparse_attention",
       "timing_boundary": "nsys correlated kernel duration sum",
-      "native_ms": 9.932095,
-      "triton_ms": 18.479678,
-      "speedup_triton_over_native": 1.8606022193706362,
-      "native_run_id": "sparse_native_h200_gpu1_20260928_02",
-      "triton_run_id": "sparse_triton_h200_gpu1_20260928_01"
+      "native_ms": 5.767519,
+      "triton_ms": 18.459062,
+      "speedup_triton_over_native": 3.2005203623949914,
+      "native_run_id": "sparse_native_h200_gpu1_20260929_01",
+      "triton_run_id": "sparse_triton_h200_gpu1_20260929_01"
     },
     {
       "phase": "extend",
       "metric": "indexer_total",
       "timing_boundary": "nsys correlated kernel duration sum",
-      "native_ms": 13.753867,
-      "triton_ms": 15.74344,
-      "speedup_triton_over_native": 1.1446555357849542,
-      "native_run_id": "sparse_native_h200_gpu1_20260928_02",
-      "triton_run_id": "sparse_triton_h200_gpu1_20260928_01"
+      "native_ms": 4.839768,
+      "triton_ms": 15.736421,
+      "speedup_triton_over_native": 3.251482509078947,
+      "native_run_id": "sparse_native_h200_gpu1_20260929_01",
+      "triton_run_id": "sparse_triton_h200_gpu1_20260929_01"
+    }
+  ],
+  "omitted_comparisons": [
+    {
+      "phase": "full_prefill",
+      "metric": "pooled_scores",
+      "reason": "Score+selection fusion removes or changes the score-only scope; compare complete indexer_total instead"
+    },
+    {
+      "phase": "extend",
+      "metric": "pooled_scores",
+      "reason": "Score+selection fusion removes or changes the score-only scope; compare complete indexer_total instead"
     }
   ],
   "definitions": {
     "speedup_triton_over_native": "Triton median milliseconds / native median milliseconds; greater than 1 means native is faster",
     "boundaries": "End-to-end uses independent unprofiled wall timings; module rows use separate nsys captures and cannot be added to or subtracted from wall time",
-    "inclusive_modules": "indexer_total includes pooled_scores, validation, cache updates and selection; do not sum parent and child rows"
+    "inclusive_modules": "indexer_total includes scoring, validation, cache updates and selection, including fused kernels; do not sum parent and child rows",
+    "score_comparison": "pooled_scores ratios are omitted for any phase with score+selection fusion because the two backends no longer expose equivalent score-only work"
   },
   "provenance": {
     "request_sha256": "65d62f9ee9662fbe4b1d95d8c5440f16e70336a10b1eb2c860c55d8af3176b6b",
@@ -291,16 +283,16 @@
       "executor/model_executor.py": "f585f9940d5fb506e7f8aaeafe8602f9877ac773f2183603744f2b3a2a48c919",
       "experiments/indexer_block_sparse_profile/scripts/bottleneck.sh": "20a5fc5096f0c867d5b2c6fd30723d19dfdb26d8dc6e0d5752bfe9893af876e0",
       "experiments/indexer_block_sparse_profile/scripts/run.sh": "621f38bc7ee7e42f3e0450f89cbe81952a373d35587ef0fa85661d7569ef8ade",
-      "experiments/indexer_block_sparse_profile/src/analyze.py": "0abfbe66485466126de39cbba9921e3f563fe63cefc242e471a3fafdf13225fc",
+      "experiments/indexer_block_sparse_profile/src/analyze.py": "f0bc8278a3671b39396f33de841165667205ccc6223fa0ba2bb364c54eccc206",
       "experiments/indexer_block_sparse_profile/src/bottleneck_report.py": "9e6be9e33220aba05dc9f7ece90406945aa4b41bc018de9133de8b74558ef656",
-      "experiments/indexer_block_sparse_profile/src/capture.py": "6cc6632ca6e4ea744362535e86ffb062b7e989f1574ab4fe53da4d1e9fa4cc69",
+      "experiments/indexer_block_sparse_profile/src/capture.py": "a8c698b851fe29ff25e7ab177dade307a8621206e6f80b4534ebe7169d89ce65",
       "experiments/indexer_block_sparse_profile/src/cis_bottleneck.py": "4305d02f2ebc7e8ce8d60e53f12e436e532a62dde85ed35941324a53fe79e021",
-      "experiments/indexer_block_sparse_profile/src/compare.py": "cb97b4d4113d2376d0141284d51c4110077644d22f4779e98f344dc4b89ea9e8",
-      "experiments/indexer_block_sparse_profile/src/instrumentation.py": "eefc3b46808d5fead224522f143794b9fc4e5e9c3b44d3552d5c895ec7b9c185",
+      "experiments/indexer_block_sparse_profile/src/compare.py": "0c9ecd22a2b35a9aa81575bae7fa979dda7e7e12f0e220a27e98972865cbaa35",
+      "experiments/indexer_block_sparse_profile/src/instrumentation.py": "ef4c5cc57870f7c997500722be79845d8b24cb142c6193c09b9745e9cf3c0942",
       "experiments/indexer_block_sparse_profile/src/launch_analysis.py": "735ff7df70fb179d09f82191fb3989de7a42f94c814a672f6590b5a2b4eef160",
       "experiments/indexer_block_sparse_profile/src/launch_report.py": "237b4ee13adbef3df6bb6f9e5d2d18ab40f999deb094ba57ed4f07aa567cc917",
-      "experiments/indexer_block_sparse_profile/src/mfu.py": "022f35b6935087a8f702a3458f9de54c102bd53fec4537340eb2646b464ba2ac",
-      "experiments/indexer_block_sparse_profile/src/module_mfu.py": "6cad77ea2a0ac74f6825c334e52eda73cde0441d608eb0b8575988a05f5f0520",
+      "experiments/indexer_block_sparse_profile/src/mfu.py": "c64c7335b2a5f9ed1640f0912ebdea5c7d55f21a39b1f8bd735f8640aff92cfd",
+      "experiments/indexer_block_sparse_profile/src/module_mfu.py": "cc850b04552c4c835d26473cf71feb3a0c9181c80027f6857765997769b47495",
       "experiments/nosa_gr_65536_1024/src/analyze.py": "0126cc5c4ed401a77c87b5bba57ce3b759d92c1715dc60018611b09ae1f5aa09",
       "experiments/nosa_gr_65536_1024/src/capture.py": "ba9e591cae497bfd516d04ed8c789c674e7ccfe92be6ec20b8ece0bfbd6fac1b",
       "experiments/nosa_gr_65536_1024/src/instrumentation.py": "fdcc857f5d3128d0ab36c57ee99f34f3e844259ad5fe88318315258465598853",
@@ -310,9 +302,9 @@
       "layers/feed_forward.py": "95dcebaa67b4f2069f580ac0831ef8335fc15b022e802708e24f58c02408de4a",
       "layers/normalization.py": "426b2cd0e1da6c944ff661a93d55eee2b064585d5c5f6c6e6a0b80ca3bc98af0",
       "models/nosa/attention.py": "1592ff0607cda99b94e75fa62ca4a64f4ec086be4e7aa4cd8714f610c6f07d84",
-      "models/nosa/cache.py": "aa8e5f9a71a4c715e22567e9dcaa0d88d795c9a76a127431e7eb2045658d2f1d",
+      "models/nosa/cache.py": "4fa806fae9e4882086d6409c06f34706d5519a428fa4943cbf6ea2cd6cf10ed7",
       "models/nosa/config.py": "eaa168a439fada20f13b6d0a44c801de30e3b1c04d3e5ac43d4273a3454db165",
-      "models/nosa/indexer.py": "e5f636a626ca2319698fb28ce49c9637088bc3af4b98ba197feafbd72f165633",
+      "models/nosa/indexer.py": "480890dfa8744ff7ca88f90c1878673b57c98319b42da936b3b66f8da2d99bf7",
       "models/nosa/infer.py": "909541308008b155071db3af00927f4861b201ae7fc8e7c0bd9291ee1b19c672",
       "models/nosa/layers.py": "cf54c7c1e96483175da788491450bd264fae322a6c1452f830b5ce721f308b43",
       "models/nosa/model.py": "5acbd9c5349f75b5b02366849ef7cd76d6f5b0676126bc789b8384939dfc51a5",
@@ -320,16 +312,32 @@
       "models/nosa/rotary.py": "f14c898cd77a72bd4e6908ef59b0b5fe5d42b2ebadb34aa5db092577d154dbde",
       "models/nosa/scoring.py": "c4c7e75a15a5ffb95e935b02ec482586a288c64ad079a175b293db6baa3f92d8",
       "operators/flashinfer.py": "0573d16ce4dd3e13b3792c6b1a4b8c9bab1477ee0f7bfce2abfad87c4c305fd9",
-      "operators/sm90/_native.py": "1a852683700af461fc2de5b12295678da86026b92b031b3b609aad6fa5af1ff3",
-      "operators/sm90/_nosa_attention_cuda.py": "66f737253c18dacf91eb066c2b07041864b91e7e7fa5f6e674943c424aca038e",
+      "operators/sm90/_native.py": "e7fc70b219647303b3295c38f536e1014ab52f4b0a0dcb7f8108b8c0ca2a8f26",
+      "operators/sm90/_nosa_attention_cuda.py": "5a2c61297c343ce51f9227b48906fb4f77a1b730b1e3116815f9890255f84afa",
+      "operators/sm90/_nosa_attention_fa3.py": "61e2379aedaad7dddbb7237b22d014d1d37f9f251f3010c51dbe5b46b2ccde10",
       "operators/sm90/_nosa_attention_triton.py": "c9b2060928cff8cbf594a876061546521064da78f52b3297922bcc5dd0f96985",
+      "operators/sm90/_nosa_indexer_checked_cuda.py": "a59f41bdf0468a21d9e96ae180d9b8217dcbebbb07d6c7c8770700570739cdba",
+      "operators/sm90/_nosa_indexer_cuda.py": "a6a518524bce510c034b8e153f7fefa05d2a3f5c0e892923328f9a85389bc35b",
+      "operators/sm90/_nosa_prepare_cuda.py": "bc9c2276dabdf2c9786dd29b8b48a484df10df0ba9be8e14bc5b85f527c2bbe2",
+      "operators/sm90/_nosa_prepare_ranked_cuda.py": "a2a704f1c7338400347619ca9129bc2919ba20552ffa676ca351d23762b3f237",
       "operators/sm90/_nosa_scores_cuda.py": "70a5cc50c3916675d7a23b9dca49e531a7bed9026e0f5f0bc254bd0a24bd170c",
-      "operators/sm90/csrc/nosa_attention.cu": "158aad48fc48b0319bea8de939483580f40115d069813958537b956d97a8fefa",
-      "operators/sm90/csrc/nosa_attention_grouped.cuh": "21826cbc696c86de2d7fa5b8df185713e37827a8b80c909ad38bfd275383d8b9",
-      "operators/sm90/csrc/nosa_scores.cu": "0897a00d6d38dccf88566771f063b71e8de16f9458d1f4f6e3bcc71ff91e84d2",
+      "operators/sm90/_nosa_selection_cuda.py": "71df015af61a1d3f554eae950e3ab57f2a641324a1fe58ae353c6e5422028a24",
+      "operators/sm90/csrc/nosa_attention.cu": "01c0699b507baebe005b2df44e2f78ec149083a6239b96e7d24990edf2bf09f4",
+      "operators/sm90/csrc/nosa_attention_fa3.cu": "f98b5ae4ea4bcc5c3dc5a597958627d6c186f22d1db7108162a2a328401c2f80",
+      "operators/sm90/csrc/nosa_attention_grouped.cuh": "30f35b34a80c2a26c249b92e055c3158a5a2e40e5c818ff9dadc3074dc525927",
+      "operators/sm90/csrc/nosa_indexer.cu": "91e4639259cd02839fa4d2606b118ff40343ac75f0419274ec4f3a868e42ed34",
+      "operators/sm90/csrc/nosa_indexer_checked.cu": "49a303a3f89886ebd373611fde3faa7b6ee0adae3c8f1ebc78855734b2b1b16d",
+      "operators/sm90/csrc/nosa_prepare.cu": "340f7455f11f602ac4e0380ff7bd6963e2cdaa32275bbd470ae763ea0a0a1715",
+      "operators/sm90/csrc/nosa_prepare_ranked.cu": "1c40cdd8edcf6da94cc0ec59e4477035c8db91441b1c3acb76bfcdd163388d09",
+      "operators/sm90/csrc/nosa_scores.cu": "d5c5b543e08a6e164701b9e5070458079c8c843f35a99de96b4c66427dfb01af",
+      "operators/sm90/csrc/nosa_scores_fused.cuh": "56e6cbe675525b419db3699ae57dcf984ab64bf9e12f1bbe3b49ffd21bcd197a",
+      "operators/sm90/csrc/nosa_scores_pruned.cuh": "99e0e6ce9f5685e639016e24732cce249a3b2c043ff0629b021866ad0f051409",
+      "operators/sm90/csrc/nosa_selection.cu": "f2ce6b685336002d5e137ed1af05d1b2bfdda37f89b57323d053a8daa953e9e9",
+      "operators/sm90/csrc/nosa_selection_cutoff.cuh": "7eaabb06b7d39d5ea0779ea209b80a3e7d54e3b137748a35f4cb47836a7f00fe",
+      "operators/sm90/csrc/nosa_selection_prefix.cuh": "e5b447d6427271df99751c93e6d8c14e3cedc7fee9d76c130d8967410a3b6b35",
       "operators/sm90/nosa_attention.py": "0c1b422a5fe5c485927f017f4c2578271eaf6258d01cc3c1aa6d33d488d1d6f9",
       "operators/sm90/nosa_compression.py": "9655a9b4caeea836c846eef654f781318fc930e5ee95192fbeb6ee64dc8201f3",
-      "operators/sm90/nosa_indexer.py": "1c34d2ebddba31cd2d06d1468c36535a9ab835ee28e134a6a8b4bf1e32df028a",
+      "operators/sm90/nosa_indexer.py": "9686ae49a9c63279f3f505c709bacb9b1c3c6f496880bb2508cae0377bb823da",
       "operators/sm90/nosa_validation.py": "aded63a061790919d0596c18f4129d4c77782b53c4e762ae87f7bd3aa2bb9700",
       "operators/sm90/sparse_attention.py": "5cad42677974731057cbed607d138cf8cf296dc2094c44a09b68a61f0c43a786",
       "pyproject.toml": "5c0c8ec55158fadefd8da5b5a1e7288d9cca5cf04db42998ee5d4e85aa93b428",
@@ -356,26 +364,91 @@
         "-lineinfo"
       ],
       "source_sha256": {
-        "operators/sm90/_native.py": "1a852683700af461fc2de5b12295678da86026b92b031b3b609aad6fa5af1ff3",
-        "operators/sm90/csrc/nosa_attention.cu": "158aad48fc48b0319bea8de939483580f40115d069813958537b956d97a8fefa",
-        "operators/sm90/csrc/nosa_attention_grouped.cuh": "21826cbc696c86de2d7fa5b8df185713e37827a8b80c909ad38bfd275383d8b9",
-        "operators/sm90/csrc/nosa_scores.cu": "0897a00d6d38dccf88566771f063b71e8de16f9458d1f4f6e3bcc71ff91e84d2"
+        "operators/sm90/_native.py": "e7fc70b219647303b3295c38f536e1014ab52f4b0a0dcb7f8108b8c0ca2a8f26",
+        "operators/sm90/csrc/nosa_attention.cu": "01c0699b507baebe005b2df44e2f78ec149083a6239b96e7d24990edf2bf09f4",
+        "operators/sm90/csrc/nosa_attention_fa3.cu": "f98b5ae4ea4bcc5c3dc5a597958627d6c186f22d1db7108162a2a328401c2f80",
+        "operators/sm90/csrc/nosa_attention_grouped.cuh": "30f35b34a80c2a26c249b92e055c3158a5a2e40e5c818ff9dadc3074dc525927",
+        "operators/sm90/csrc/nosa_indexer.cu": "91e4639259cd02839fa4d2606b118ff40343ac75f0419274ec4f3a868e42ed34",
+        "operators/sm90/csrc/nosa_indexer_checked.cu": "49a303a3f89886ebd373611fde3faa7b6ee0adae3c8f1ebc78855734b2b1b16d",
+        "operators/sm90/csrc/nosa_prepare.cu": "340f7455f11f602ac4e0380ff7bd6963e2cdaa32275bbd470ae763ea0a0a1715",
+        "operators/sm90/csrc/nosa_prepare_ranked.cu": "1c40cdd8edcf6da94cc0ec59e4477035c8db91441b1c3acb76bfcdd163388d09",
+        "operators/sm90/csrc/nosa_scores.cu": "d5c5b543e08a6e164701b9e5070458079c8c843f35a99de96b4c66427dfb01af",
+        "operators/sm90/csrc/nosa_scores_fused.cuh": "56e6cbe675525b419db3699ae57dcf984ab64bf9e12f1bbe3b49ffd21bcd197a",
+        "operators/sm90/csrc/nosa_scores_pruned.cuh": "99e0e6ce9f5685e639016e24732cce249a3b2c043ff0629b021866ad0f051409",
+        "operators/sm90/csrc/nosa_selection.cu": "f2ce6b685336002d5e137ed1af05d1b2bfdda37f89b57323d053a8daa953e9e9",
+        "operators/sm90/csrc/nosa_selection_cutoff.cuh": "7eaabb06b7d39d5ea0779ea209b80a3e7d54e3b137748a35f4cb47836a7f00fe",
+        "operators/sm90/csrc/nosa_selection_prefix.cuh": "e5b447d6427271df99751c93e6d8c14e3cedc7fee9d76c130d8967410a3b6b35"
+      },
+      "attention_fa3": {
+        "toolchain": {
+          "tvm_ffi": "0.1.13.post3",
+          "compiler": {
+            "path": "/usr/local/cuda-13.2/bin/nvcc",
+            "version": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2026 NVIDIA Corporation\nBuilt on Fri_May_08_10:53:34_AM_PDT_2026\nCuda compilation tools, release 13.2, V13.2.86\nBuild cuda_13.2.r13.2/compiler.37953736_0"
+          },
+          "cutlass": {
+            "commit": "f3fde58372d33e9a5650ba7b80fc48b3b49d40c8",
+            "version_header_sha256": "471048c340f3a7d8b2bc1618919fd4368c05f357755e2445c34fda652182783d"
+          },
+          "cuda_flags": [
+            "-O3",
+            "-std=c++20",
+            "--expt-relaxed-constexpr",
+            "--expt-extended-lambda",
+            "-gencode=arch=compute_90a,code=sm_90a",
+            "-lineinfo"
+          ]
+        },
+        "torch": "2.12.1+cu130",
+        "flashinfer": "0.6.18",
+        "flashinfer_include": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/lib/python3.12/site-packages/flashinfer/data/include",
+        "flashinfer_headers_sha256": "105e29e4777712c9b029e577ec6aa161ed2884e88c312c38c50d64ddde1696c1",
+        "cuda_flags": [
+          "-O3",
+          "-std=c++20",
+          "--expt-relaxed-constexpr",
+          "--expt-extended-lambda",
+          "-gencode=arch=compute_90a,code=sm_90a",
+          "-lineinfo",
+          "-use_fast_math",
+          "-DFA3_GROUP=8",
+          "-DFA3_KV=128",
+          "-DFA3_TMA=1",
+          "-DFA3_STAGES=2"
+        ],
+        "source_sha256": {
+          "_nosa_attention_fa3.py": "61e2379aedaad7dddbb7237b22d014d1d37f9f251f3010c51dbe5b46b2ccde10",
+          "nosa_attention_fa3.cu": "f98b5ae4ea4bcc5c3dc5a597958627d6c186f22d1db7108162a2a328401c2f80",
+          "nosa_attention.cu": "01c0699b507baebe005b2df44e2f78ec149083a6239b96e7d24990edf2bf09f4",
+          "nosa_attention_grouped.cuh": "30f35b34a80c2a26c249b92e055c3158a5a2e40e5c818ff9dadc3074dc525927"
+        },
+        "group_queries": 8,
+        "minimum_fa3_queries": 1,
+        "cta_order": "descending_union_tiles",
+        "cta_order_work_items": 256,
+        "cta_order_ties": "ascending_logical_batch",
+        "q_transfer": "direct_strided_tma",
+        "output_store": "direct",
+        "numerical_repair": "nonfinite_output_postcheck",
+        "native_pv_accumulation": "bf16_power_of_two_scale_finite_output_guard",
+        "kv_tile_tokens": 128,
+        "stages": 2
       }
     },
     "input_sha256": {
       "native": {
-        "metadata.json": "ff22bf3f21c94db8c577590ee09d912d0f9733f4cde1b5038f027893be860725",
-        "summary.json": "1b5f4cd481d2efbb7da861c675bcc42068d5ca4d61412f396bcaa75f4d0a6391",
-        "mfu.json": "37d77a888e8aab196bb4b3c8e2c1dfe3e9e79d1a6c156ec4ca009b6c5e87946c",
-        "module_mfu.json": "a852e65b4f5191d4efa70cabe197dcebf65a06acb4a02943ea6e098a092bbe28"
+        "metadata.json": "0b51ccf817fcbe8cb8d28bb8fb8f4a4233903f04cab787e4c6f929040d4c92fc",
+        "summary.json": "8e144cc4efd9c3cfcea1cf1038f0b217972e1671c159a463144614fd95ddf6a2",
+        "mfu.json": "b0c0add413b15498af464c1b259cf608da247777af6c7a5a8c2f14e0dfa3d20a",
+        "module_mfu.json": "5bd148e025c9a7aff1268373c4ad2e4dcc1fa8e8722fbca999357a3d965ad478"
       },
       "triton": {
-        "metadata.json": "283f73d76916e5f4b47fd6ad8b5775dc0961602e5e367807b85d808d9b9f6142",
-        "summary.json": "24f3f5b26708b2a51ffc665e35aed313f9b10992f34ae842101c550604a1e27e",
-        "mfu.json": "a1fadfbfcbf9b98683a892b840ff7f57fb36a8d5fdb8e53ab76c684662069b93",
-        "module_mfu.json": "7bc38597a65083ff39053e5b5c9d72d553cc16ab7907f45c0f75abc44da016fe"
+        "metadata.json": "c7382ec2a7d8fffbc06b453221b23069f6e7b748698b0a5a49162991fb33505c",
+        "summary.json": "72245185e09255234ef155c178e06fee1b727bf5eb1775a83f1d9d0ebaa2b82e",
+        "mfu.json": "6783b8eba6522de64bff4e7894b613bd3fd402d97303a1b6ca7a8478fcf46ea0",
+        "module_mfu.json": "d155d97966363e35782b9bd327286e1f71f5435aea2eda278538e21866ad93b9"
       }
     },
-    "comparison_source_sha256": "cb97b4d4113d2376d0141284d51c4110077644d22f4779e98f344dc4b89ea9e8"
+    "comparison_source_sha256": "0c9ecd22a2b35a9aa81575bae7fa979dda7e7e12f0e220a27e98972865cbaa35"
   }
 }

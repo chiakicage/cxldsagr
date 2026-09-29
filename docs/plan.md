@@ -765,9 +765,9 @@ Private diagnostic files are not paper deliverables:
    behavior and measure both complete modules on all3 layers. Continue targeted
    profiling and optimization; individual-kernel wins do not establish40% MFU.
 3. Run final global CPU/GPU checks and register exact final SUPPORTED_GRAPHS.
-4. Rerun affected experiments: `nosa_kernel_mfu`, `indexer_block_sparse_profile`,
-   and sparse/full-NOSA parts of `nosa_indexer_pattern_65536_1024`. Use matched
-   native/Triton controls, appropriate current captures and complete provenance.
+4. Rerun affected experiments: `nosa_kernel_mfu` and sparse/full-NOSA parts of
+   `nosa_indexer_pattern_65536_1024` remain pending. The matched full-model
+   `indexer_block_sparse_profile` rerun completed on 2026-09-29 (see below).
 5. Publish accepted new run IDs and reports, then replace and clean superseded
    affected report/raw artifacts in the same update.
 
@@ -779,8 +779,13 @@ Python formatting and reviewed attribution-graph registration are added at
 publication. See `docs/nosa_sm90_checkpoint.md`. This checkpoint publication
 does not mark the40% goal complete or replace the distinct pending experiments.
 
-Until then preserve published `kernel_mfu_h200_gpu1_20260928_071840`,
-`sparse_native_h200_gpu1_20260928_02` and`sparse_triton_h200_gpu1_20260928_01`
-with their original source version020961b and measurement meaning. Old values
-must not be labeled as new implementation results. Public report replacement
-and the40% objective are both unfinished.
+The full-model comparison has since been published at `94bf521` as
+`sparse_native_h200_gpu1_20260929_01` and `sparse_triton_h200_gpu1_20260929_01`.
+Both runs passed source/request/device identity, complete kernel attribution
+and candidate-output checks; 553 experiment CPU tests and 361 global GPU tests
+passed. The corresponding older sparse report and raw artifacts were replaced
+after acceptance. See the [updated report](../experiments/indexer_block_sparse_profile/README.md).
+
+Preserve `kernel_mfu_h200_gpu1_20260928_071840` and affected pattern reports with
+their original implementation and measurement meaning until their own reruns
+pass acceptance. Their replacement and the 40% objective remain unfinished.

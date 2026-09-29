@@ -1,0 +1,36 @@
+{
+  "run_id": "sparse_native_h200_gpu1_20260929_01",
+  "rows": [
+    {
+      "phase": "full_prefill",
+      "iteration": 0,
+      "kernel_family": "nosa_scores::fused_scores::fused_scores_kernel",
+      "kernel_count": 1056,
+      "kernel_ns": 154867463
+    },
+    {
+      "phase": "full_prefill",
+      "iteration": 0,
+      "kernel_family": "nosa_scores::pruned_scores::fused_scores_kernel",
+      "kernel_count": 32,
+      "kernel_ns": 4289517
+    },
+    {
+      "phase": "extend",
+      "iteration": 0,
+      "kernel_family": "nosa_scores::fused_scores::fused_scores_kernel",
+      "kernel_count": 0,
+      "kernel_ns": 0
+    },
+    {
+      "phase": "extend",
+      "iteration": 0,
+      "kernel_family": "nosa_scores::pruned_scores::fused_scores_kernel",
+      "kernel_count": 32,
+      "kernel_ns": 4243575
+    }
+  ],
+  "source_sqlite_sha256": "113cd8a59813f4fb7242f2125cfbe28366645fd4d2e9e6b7dec2cb5e27a1c822",
+  "source_module_mfu_sha256": "5bd148e025c9a7aff1268373c4ad2e4dcc1fa8e8722fbca999357a3d965ad478",
+  "definition": "Exact CUDA symbol counts and end-start durations within each profile root; the two fused families conserve score_selection count/ns."
+}

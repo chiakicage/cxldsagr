@@ -19,20 +19,22 @@ score/indexer QK has 34,616,115,200; 40% requires 172.374 and 87.503 us.
 
 ## Baseline and validation
 
-Existing valid reports remain published during development:
+Published reports and their implementation boundaries:
 
 - `kernel_mfu_h200_gpu1_20260928_071840`: seeded synthetic same-input
-  native/Triton graph and eager operator timing; all query rows checked.
-- `sparse_native_h200_gpu1_20260928_02` and
-  `sparse_triton_h200_gpu1_20260928_01`: independent sparse model trajectories,
-  64K+1K full-prefill and extend, end-to-end timing and module breakdown.
+  native/Triton graph and eager operator timing at `020961b`; rerun pending.
+- `sparse_native_h200_gpu1_20260929_01` and
+  `sparse_triton_h200_gpu1_20260929_01`: independent sparse model trajectories
+  at `94bf521`, 64K+1K full-prefill and extend, end-to-end timing and module
+  breakdown. Same-source and output acceptance passed; the superseded sparse
+  reports and raw artifacts have been replaced.
 
-Current native paths use CUDA/CuTe WGMMA and model-owned incremental compressed
-records. Score uses two QK passes; attention uses four-query block unions plus
-per-query repair. Native graph synthetic 64K attention/score are 468.68/216.17
-us in the existing report. These numbers describe the existing implementation,
-not any future candidate. First capture real layer inputs and profile the
-unchanged implementation with line information before choosing a candidate.
+Current native paths use model-owned incremental compressed records, fused
+score/selection with exact pruning at the target shape, and eight-query FA3 v3
+attention with complete preparation, work sorting and per-query repair.
+The still-pending synthetic report's 468.68/216.17 us attention/score values
+describe `020961b` only. Current model measurements and their distinct timing
+boundaries are in the [sparse profile report](../experiments/indexer_block_sparse_profile/README.md).
 
 Relevant existing acceptance commands (set CUDA_VISIBLE_DEVICES to an idle GPU):
 

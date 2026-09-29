@@ -89,6 +89,7 @@ FlashInfer Hopper headers；FA3 的独立 flags、版本和 header 哈希记录�
 `CXLDSAGR_SM90_BACKEND=triton` 可显式选择 Triton 对照；默认 `native`。
 模型已有的 `sparse_backend="triton"` 接口保留，当前指向这个 SM90 dispatcher。
 当前已验收的 BF16-pair / FA3 v3 实现见 [实现检查点](../../docs/nosa_sm90_checkpoint.md)，
-完整模块数据已发布，40% 目标与受影响的完整实验补测尚未完成。
-原 `020961b` 新旧后端同源测量及其适用边界见
-[indexer_block_sparse_profile](../../experiments/indexer_block_sparse_profile/README.md)。
+完整模块数据已发布，两个完整模块均达 40% 的目标尚未完成。
+`94bf521` 的完整模型 native/Triton 同源对照已于 2026-09-29 补测，见
+[indexer_block_sparse_profile](../../experiments/indexer_block_sparse_profile/README.md)；
+synthetic operator 对照及受影响的 full-NOSA pattern 仍待补测。

@@ -68,9 +68,12 @@ metadata 的 `git_commit` 指测量时未提交工作树的基线；实际实现
 NumPy 数组排序阶段长时间未完成，限制线程数后仍未消除，已停止；不将其计为通过。
 该未完成检查仍需后续排查，当前结果不能表述为本次全局 CPU/GPU 回归全部通过。
 
-本次是实现检查点。Synthetic operator 对照、完整模型 native/Triton 对照，以及受影响的
-full-NOSA pattern 尚待按当前实现补测；对应 README 保留原 run ID、原报告和适用边界。
-未通过性能验收的私有候选不属于本次实现。
+完整模型 native/Triton 对照已于 2026-09-29 按本检查点 `94bf521` 补测，run ID 为
+`sparse_native_h200_gpu1_20260929_01` 与 `sparse_triton_h200_gpu1_20260929_01`。
+两组同源和输出验收通过，已发布[端到端与模块报告](../experiments/indexer_block_sparse_profile/README.md)
+并替换该实验的旧报告及运行产物；这不表示两个完整模块的 40% MFU 目标已达成。
+Synthetic operator 对照及受影响的 full-NOSA pattern 仍待补测，对应 README 继续保留
+原 run ID、原报告和适用边界。未通过性能验收的私有候选不属于本次实现。
 
 入口：[SM90 算子](../operators/sm90/README.md)、[NOSA 模型](../models/nosa/README.md)、
 [后续优化计划](plan.md)。

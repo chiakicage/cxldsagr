@@ -130,7 +130,8 @@ offload fetch 与 overlap 尚未实现。原 QA-only pattern 不启用此模式�
 新增完整 NOSA pattern 对照从独立空 cache 构建 sparse prefix，记录 attention 实际消费的选块。
 完整 sparse 路径的全模型 prefill/extend 测量见
 [64K+1K 端到端 profile](../../experiments/indexer_block_sparse_profile/README.md)。
-当前算子优化仍在补测，上述已发布全模型结果对应原报告注明的实现版本。
+BF16-pair / FA3 v3 检查点 `94bf521` 的全模型 native/Triton 对照已于 2026-09-29 补测，
+run ID、实际 kernel 调度及测量边界见报告；受影响的 full-NOSA pattern 仍待补测。
 
 ```bash
 source .venv/bin/activate
