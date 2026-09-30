@@ -5,6 +5,7 @@
 
 | 实验 | 内容与状态 | 仓库根目录运行入口 |
 | --- | --- | --- |
+| [GR serving cache](gr_cache_serving/README.md) | 三层 DSA 的 ECHO / 全量预取 / 阻塞 fetch；已完成 512 请求串行同步原型对照，非统一预算或在线 serving 结果 | `bash experiments/gr_cache_serving/scripts/run_replay.sh --help` |
 | [CPU DRAM 带宽](cpu_dram_bandwidth/README.md) | 双路 Xeon 8558P / DDR5-4400；理论 563.2 GB/s，当前容器 IMC 顺序读约 428 GB/s、应用约 435 GB/s，含 NUMA 与线程扫描 | `bash experiments/cpu_dram_bandwidth/scripts/run.sh <run_id> --imc` |
 | [NOSA indexer + block sparse profile](indexer_block_sparse_profile/README.md) | H200 BF16 64K+1K；BF16-pair / FA3 v3 的 native/Triton 端到端与模块 kernel MFU 已于 2026-09-29 补测 | `bash experiments/indexer_block_sparse_profile/scripts/run.sh <run_id>` |
 | [NOSA kernel MFU](nosa_kernel_mfu/README.md) | H200 synthetic resident attention / pooled score 已测量；本次均未达到 30% 有效 MFU | `bash experiments/nosa_kernel_mfu/scripts/run.sh <run_id> --peak-tflops 989` |

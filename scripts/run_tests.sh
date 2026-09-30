@@ -21,9 +21,14 @@ if [[ ! "$mode" =~ ^(cpu|gpu|all)$ ]]; then
 fi
 if [[ "$mode" == cpu || "$mode" == all ]]; then
   CUDA_VISIBLE_DEVICES='' .venv/bin/python -m pytest \
-    models/nosa/tests operators/sm90/tests cache/tests executor/tests serving/tests GR/tests \
+    models/nosa/tests models/deepseek_v32/tests/test_echo_adapter.py \
+    models/deepseek_v32/tests/test_echo_cache.py models/deepseek_v32/tests/test_echo_dense.py \
+    models/deepseek_v32/tests/test_echo_kernel.py \
+    models/deepseek_v32/tests/test_echo_recall.py \
+    operators/sm90/tests cache/tests executor/tests serving/tests GR/tests \
     tests/integration experiments/nosa_gr_65536_1024/tests \
     experiments/nosa_indexer_pattern_65536_1024/tests \
+    experiments/gr_cache_serving/tests \
     experiments/indexer_block_sparse_profile/tests \
     experiments/nosa_kernel_mfu/tests \
     -q -rs -p no:cacheprovider

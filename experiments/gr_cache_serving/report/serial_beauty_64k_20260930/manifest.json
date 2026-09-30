@@ -1,0 +1,18 @@
+{
+  "run_ids": [
+    "serial_beauty_64k_echo_i64_r1_20260930",
+    "serial_beauty_64k_sparse_i64_r1_20260930",
+    "serial_beauty_64k_dense_i64_r1_20260930",
+    "serial_beauty_64k_resident_i64_r1_20260930"
+  ],
+  "run_summary_sha256": {
+    "serial_beauty_64k_echo_i64_r1_20260930": "1d3d5bf504b17f13bcfde526ffc82e7d963838e044ff74daaad4bb3a3bdb79ce",
+    "serial_beauty_64k_sparse_i64_r1_20260930": "8eca6f614e2754c1187f50d9bfa38fef4b01e64520e2389d72e42cc9d59d3b07",
+    "serial_beauty_64k_dense_i64_r1_20260930": "707c4c1af3e6c5a8eb986ef409ee3a2b8d72e2ab541e15ea3cb1504a5d71d59a",
+    "serial_beauty_64k_resident_i64_r1_20260930": "6a9ae4bd2a80556594d980d45e4154f57f4691d18ddafa1dae0541e3ee2360a6"
+  },
+  "report_source_sha256": "184521d1fa131a2fddc4ece4f1784b7038d80279caea4dae7935670f64a30671",
+  "matplotlib_version": "3.10.7",
+  "aggregation": "median of each run's statistic; min/max across repetitions, not confidence intervals",
+  "limits": "one synthetic trace; synchronous three-layer prototype; ECHO patched; no equal-total-HBM enforcement, online arrivals, hit-rate or transfer instrumentation"
+}
