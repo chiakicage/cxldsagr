@@ -7,9 +7,15 @@ indexer、block sparse attention 和 CIS 的开销。主指标来自未启用 pr
 模块分解和 Nsight Systems 时间线由第二个进程采集。两组使用同一请求、checkpoint、
 源码、设备和测量参数，仅切换 `--kernel-backend`。
 
-当前实现为 `94bf521` 的 BF16-pair indexer / FA3 v3 attention，见
+本报告已发布测量对应 `94bf521` 的 BF16-pair indexer / FA3 v3 attention，见
 [实现检查点](../../docs/nosa_sm90_checkpoint.md)和 [SM90 算子](../../operators/sm90/README.md)。
 实际实现身份以每次 metadata 的源码 SHA256、构建信息和 `sources/` 快照为准。
+
+2026-09-30 新增 NOSA offload 分支后，模型与 cache 依赖的源码图已扩展。下文数字、
+run ID 和保存的源码快照仍属于当时测量的 resident 执行图，不能作为新增 offload
+执行图的结果；当前分支尚未在本实验完成改动后补测与验收。原报告与产物保留至受影响
+范围补测验收后再更新。新增 sparse fetch 回放的状态与测量边界见
+[独立 offload 实验](../nosa_offload_overlap/README.md)，不以其替代本实验的全模型测量。
 
 | 阶段 | 起始缓存 | 模型输入 | 执行方式 | 主指标 |
 | --- | --- | --- | --- | --- |

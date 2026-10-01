@@ -2,7 +2,8 @@
 
 本次发布当前已验收的 resident indexer 与 block sparse attention 实现，继续保留
 完整 NOSA 33/64、CIS bias、因果遮罩和稳定并列排序。40% useful MFU 目标尚未全部达到；
-当前实现不包含 DRAM/CXL offloading。
+本文记录的 resident 实现检查点不包含 DRAM/CXL offloading。后续 NOSA pinned-DRAM
+融合 fetch / attention 路径见 [offload 实验](../experiments/nosa_offload_overlap/README.md)。
 
 ## Indexer
 
