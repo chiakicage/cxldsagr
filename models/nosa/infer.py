@@ -206,6 +206,24 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--dtype", choices=("bfloat16", "float16"), default="bfloat16")
     parser.add_argument("--attention-mode", choices=("dense", "sparse"), default="dense")
     parser.add_argument("--sparse-backend", choices=("auto", "reference", "triton"), default="auto")
+    parser.add_argument("--cache-backend", choices=("resident", "offload"), default="resident")
+    parser.add_argument(
+        "--offload-query-tile-size",
+        type=int,
+        default=128,
+        help="Query group size for first-use fetch byte counters",
+    )
+    parser.add_argument(
+        "--offload-fetch-ctas",
+        type=int,
+        default=96,
+        help="Maximum CTAs contributing spare producer warps to fetch",
+    )
+    parser.add_argument(
+        "--no-fetch-overlap",
+        action="store_true",
+        help="Fetch the full sparse union before whole-query attention",
+    )
     parser.add_argument("--temperature", type=float, default=0.0, help="0: greedy; >0: sampling")
     parser.add_argument("--top-p", type=float, default=1.0)
     parser.add_argument("--seed", type=int, default=0)
@@ -282,6 +300,10 @@ def main(argv: list[str] | None = None) -> None:
             dtype=dtype,
             attention_mode=args.attention_mode,
             sparse_backend=args.sparse_backend,
+            cache_backend=args.cache_backend,
+            offload_query_tile_size=args.offload_query_tile_size,
+            offload_fetch_ctas=args.offload_fetch_ctas,
+            offload_overlap=not args.no_fetch_overlap,
         )
         torch.cuda.synchronize(device)
         load_seconds = time.perf_counter() - load_start
@@ -297,6 +319,7 @@ def main(argv: list[str] | None = None) -> None:
         print(tokenizer.decode(generated_ids, skip_special_tokens=True))
         stats["load_seconds"] = load_seconds
         stats["attention_mode"] = args.attention_mode
+        stats["cache_backend"] = args.cache_backend
         if args.attention_mode == "sparse":
             stats["sparse_backend"] = (
                 "triton" if args.sparse_backend == "auto" else args.sparse_backend

@@ -16,6 +16,24 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--dtype", choices=("bfloat16", "float16"), default="bfloat16")
     parser.add_argument("--attention-mode", choices=("dense", "sparse"), default="dense")
     parser.add_argument("--sparse-backend", choices=("auto", "reference", "triton"), default="auto")
+    parser.add_argument("--cache-backend", choices=("resident", "offload"), default="resident")
+    parser.add_argument(
+        "--offload-query-tile-size",
+        type=int,
+        default=128,
+        help="Query group size for first-use fetch byte counters",
+    )
+    parser.add_argument(
+        "--offload-fetch-ctas",
+        type=int,
+        default=96,
+        help="Maximum CTAs contributing spare producer warps to fetch",
+    )
+    parser.add_argument(
+        "--no-fetch-overlap",
+        action="store_true",
+        help="Fetch the full sparse union before whole-query attention",
+    )
     parser.add_argument("--count", type=int, default=1)
     parser.add_argument("--num-users", type=int, default=1000)
     parser.add_argument("--seed", type=int, default=42)
@@ -73,6 +91,10 @@ def main(argv: list[str] | None = None) -> None:
             dtype=getattr(torch, args.dtype),
             attention_mode=args.attention_mode,
             sparse_backend=args.sparse_backend,
+            cache_backend=args.cache_backend,
+            offload_query_tile_size=args.offload_query_tile_size,
+            offload_fetch_ctas=args.offload_fetch_ctas,
+            offload_overlap=not args.no_fetch_overlap,
         )
         runner = GRRunner(ModelExecutor(model, chunk_size=args.prefill_chunk_size), device=device)
         for result in runner.run(generator.iter_generate(args.count)):
