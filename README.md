@@ -6,8 +6,8 @@
 HBM 与 CPU DRAM，希望在有限 HBM 下复用更多历史 KV，并降低 offload 的服务开销。
 当前验证模型为 NOSA 与 DeepSeek V3.2，优先 NOSA，主要开发平台为 SM90 / Hopper。
 
-[研究叙事](docs/research.md)、[研究状态](docs/status.md)和[研究路线](docs/roadmap.md)
-按实验室四环节记录当前理解、具体缺口与探索任务，允许交叉推进和人直接修正。
+[研究状态](docs/status.md)按实验室四环节记录当前理解和缺口，
+[下一步任务](docs/roadmap.md)列出待做事项，允许交叉推进和人直接修正。
 `GR/` 已支持固定 history 与候选变化；本地 `serving/` 仍逐请求分配和释放 cache，跨请求 history KV 复用与服务吞吐验证尚未完成。
 
 NOSA 支持 dense、完整 sparse policy 与显式 pinned-DRAM offload。Offload 主 kernel
@@ -36,7 +36,7 @@ experiments/                    各实验的源码、脚本、报告和原始产
 experiments/legacy/deepseek_v32/ 有效历史报告、CPU 重建工具与独立 DeepGEMM 基准
 3rdparty/                       共享 CUTLASS、DeepGEMM、DeepJIT 子模块
 GR/                             请求内容、热度和调度工具
-docs/                           给人的研究叙事、状态和任务；agents/ 保存内部执行文档
+docs/                           给人的研究状态与下一步任务；agents/ 保存内部执行文档
 skills/research-supervisor/      项目内持续维护的 Research Supervisor
 ```
 
@@ -98,6 +98,6 @@ Supervisor 可直接使用项目文件，无需安装。在本项目对话中请
 
 ```text
 请读取 skills/research-supervisor/SKILL.md 并运行 Supervisor，
-维护 docs/research.md、docs/status.md 和 docs/roadmap.md，
+维护 docs/status.md 和简短的 docs/roadmap.md 待办清单，
 内部记录放到 docs/agents/research-supervisor/，保留我的修正并更新相关内容。
 ```

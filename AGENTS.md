@@ -9,12 +9,16 @@
 
 ## 项目内 Research Supervisor
 
-- 用户要求运行 Supervisor、讨论研究进展、修正研究理解、安排研究探索或准备研究汇报时，
+- 用户要求运行 Supervisor、讨论研究进展、修正研究理解或安排研究探索时，
   读取项目内 [skills/research-supervisor/SKILL.md](skills/research-supervisor/SKILL.md)，
   每次使用读取当前版本，不安装或同步到 Codex 用户技能目录。
-- 研究状态维护在 [docs/status.md](docs/status.md)，四环节叙事在 `docs/research.md`，
-  研究任务与推进建议在 `docs/roadmap.md`；Supervisor 内部依据在 `docs/agents/research-supervisor/`。
-  人可以直接修改状态表；后续运行保留修正并更新受影响的叙事和任务。
+- 研究状态维护在 [docs/status.md](docs/status.md)，下一步任务在 `docs/roadmap.md`；
+  Supervisor 内部依据在 `docs/agents/research-supervisor/`。人可以直接修改状态表，
+  后续运行保留修正并更新受影响的判断和任务。
+- Supervisor 不生成论文或组会叙事，这些产物由其他 agent 完成。
+  项目的探索历程不能充当呈现给读者的研究任务或问题定义。
+- `docs/roadmap.md` 保持简短，只列当前待做或进行中的任务及对应研究条目；
+  完成或取消后移出清单，研究发现回写状态表，详细计划与必要历史留在 `docs/agents/`。
 - 当前研究先关注 HBM 与 CPU DRAM，GR serving 是待完善的候选场景；
   不从项目名称自动加入 CXL/RDMA，也不把已有设计当成场景和 motivation 已成立。
 - 普通工程任务按下述约定执行，无需启动完整研究梳理；若结果改变已有研究判断，
@@ -233,7 +237,7 @@
 ## 文档与验证
 
 - `docs/` 中面向人类的文档应讲清研究理解、当前问题、计划及必要的技术分析。
-  `docs/research.md`、`docs/status.md`、`docs/roadmap.md` 由 Research Supervisor 维护，
+  `docs/status.md`、`docs/roadmap.md` 由 Research Supervisor 维护，
   保留研究者直接修正；职责与阅读入口见 [docs/README.md](docs/README.md)。
 - agent 的任务契约、实现计划、详细验收、交接、证据索引和内部状态统一放在 `docs/agents/`。
   KDA 文档按实现组件放在 `docs/agents/kda/<component>/`，使用 `task.md`、
@@ -241,7 +245,7 @@
   当前计划与历史候选分开，保留 run ID、源码身份和验证边界，执行材料可使用英文。
   系统工程材料放在 `docs/agents/system/`，Supervisor 内部记录放在
   `docs/agents/research-supervisor/`；不再在 `docs/` 根目录放 `draft.md`、`plan.md` 等执行文档。
-  执行 agent 维护自己的内部材料，将研究含义返回给 Supervisor，由其同步人类状态和叙事。
+  执行 agent 维护自己的内部材料，将研究含义返回给 Supervisor，由其更新研究状态和下一步任务。
 - 具体实验的报告、数据和源码仍按 `experiments/` 约定维护，模块说明留在模块 README。
   文档分层不复制或重命名实验运行产物；迁移文档时更新导航链接，保留历史命令和测量含义。
 - 给 agent 的目录维护、实现职责、依赖管理和后续开发约定写在 `AGENTS.md`。

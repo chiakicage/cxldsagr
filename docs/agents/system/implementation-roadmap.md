@@ -3,12 +3,12 @@
 供系统编码与实验执行者维护。内容合并自 `1971047` 的工程材料，整理于 2026-10-02；
 原实验日期、run ID 和测量边界保留，本次未运行新实验。固定 history、变化 candidate、
 prefill-only 是候选方案，其代表性与模型、数据适配仍待确定。研究判断与任务取舍以
-[四环节状态表](../../status.md)、[研究叙事](../../research.md)和[研究路线](../../roadmap.md)为准。
+[四环节状态表](../../status.md)和[下一步任务](../../roadmap.md)为准。
 
 原方案日期：2026-10-01。若采用固定 history 的 GR 候选场景，可将 NOSA 的 async sparse
 KV fetching attention 推进到有限 HBM 下的多用户 prefill serving。以下保留候选开发拆分，
 不代表已选定路线、已执行或必须按此顺序推进；研究探索可交叉进行。
-研究问题见[research.md](research-context.md)，已完成范围见[系统状态](implementation-status.md)。
+候选场景与方案见[系统工程背景](research-context.md)，已完成范围见[系统状态](implementation-status.md)。
 
 相关工作核对与开发并行，计划在系统方案固化前完成首轮比较，明确与 sparse attention、
 prefix caching、KV offloading 及 prefetch 的差异。
