@@ -15,10 +15,8 @@ class NosaSparseAttention:
         self.backend = backend
 
     def __call__(self, q, selection, cache_access, context):
-        from operators.sm90.nosa_attention import (
-            nosa_block_sparse_attention,
-            reference_nosa_block_sparse_attention,
-        )
+        from operators.nosa.attention.device_only.api import nosa_block_sparse_attention
+        from operators.nosa.attention.reference.torch import reference_nosa_block_sparse_attention
 
         if selection is None:
             raise ValueError("NOSA sparse attention requires a block selection")

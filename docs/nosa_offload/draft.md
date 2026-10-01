@@ -128,8 +128,8 @@ residency and CXL/RDMA remain outside the implemented or measured path.
 
 Source ownership is [backing](../../cache/host_backing.py),
 [NOSA adaptation](../../models/nosa/offload_cache.py),
-[workspace](../../operators/sm90/nosa_offload.py),
-[native preparation](../../operators/sm90/csrc/nosa_offload.cu) and
-[fused kernel](../../operators/sm90/csrc/nosa_offload_fused.cu).
+[workspace](../../operators/nosa/attention/offload/api.py),
+[native preparation](../../operators/nosa/attention/offload/csrc/nosa_offload.cu) and
+[fused kernel](../../operators/nosa/attention/offload/csrc/nosa_offload_fused.cu).
 Correctness tests remain in module test directories; failed diagnostics remain
 in `/tmp`. Unaffected resident reports retain their source and measurement identity.

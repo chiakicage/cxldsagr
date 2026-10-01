@@ -263,7 +263,7 @@ def test_cuda_offload_compression_selection_and_retry_match_resident(monkeypatch
 @pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA unavailable")
 @torch.inference_mode()
 def test_cuda_offload_compression_preserves_native_cancellation_and_overflow():
-    from operators.sm90._nosa_prepare_cuda import PreparationScratch, prepare_out
+    from operators.nosa.indexer._prepare_cuda import PreparationScratch, prepare_out
 
     if torch.cuda.get_device_capability() != (9, 0):
         pytest.fail("NOSA offload checks require SM90/Hopper")

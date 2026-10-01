@@ -76,5 +76,5 @@ NumPy 数组排序阶段长时间未完成，限制线程数后仍未消除，�
 Synthetic operator 对照及受影响的 full-NOSA pattern 仍待补测，对应 README 继续保留
 原 run ID、原报告和适用边界。未通过性能验收的私有候选不属于本次实现。
 
-入口：[SM90 算子](../operators/sm90/README.md)、[NOSA 模型](../models/nosa/README.md)、
+入口：[SM90 算子](../operators/nosa/README.md)、[NOSA 模型](../models/nosa/README.md)、
 [后续优化计划](plan.md)。

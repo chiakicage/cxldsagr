@@ -1,5 +1,8 @@
 # NOSA indexer + block sparse：64K + 1K 端到端性能
 
+2026-10-01 目录整理：算子已迁至 `operators/nosa/`、`operators/deepseek_v32/` 和
+`operators/common/`。本页性能仍对应下文原 run ID 与源码快照；目录迁移后的性能未重新测量。
+
 ## 实验目的与测量边界
 
 测量完整 NOSA sparse 模型的单请求前向延迟，比较当前 native 与 Triton 后端，并定位
@@ -8,7 +11,7 @@ indexer、block sparse attention 和 CIS 的开销。主指标来自未启用 pr
 源码、设备和测量参数，仅切换 `--kernel-backend`。
 
 本报告已发布测量对应 `94bf521` 的 BF16-pair indexer / FA3 v3 attention，见
-[实现检查点](../../docs/nosa_sm90_checkpoint.md)和 [SM90 算子](../../operators/sm90/README.md)。
+[实现检查点](../../docs/nosa_sm90_checkpoint.md)和 [SM90 算子](../../operators/nosa/README.md)。
 实际实现身份以每次 metadata 的源码 SHA256、构建信息和 `sources/` 快照为准。
 
 2026-09-30 新增 NOSA offload 分支后，模型与 cache 依赖的源码图已扩展。下文数字、
@@ -74,7 +77,7 @@ Triton control 使用现有两遍 fused QK/pooling、FlashInfer Top-33/Top-64 �
 block sparse attention。Native 的 score 与 selection 已融合，不能以 `pooled_scores`
 对子项做 score-only 加速比；有效对照是完整 `indexer_total`。
 
-Native 通过 TVM FFI 编译自有 `operators/sm90/csrc/`，复用共享 CUTLASS 和已安装的
+Native 通过 TVM FFI 编译 `operators/nosa/` 下各功能的 `csrc/`，复用共享 CUTLASS 和已安装的
 FlashInfer headers，不加载 EzKernelKit。BF16 pooled-score scratch 为 4.0625 MiB，QA/CIS
 及模型各层复用；kernel 临时空间不计入请求 resident KV cache 容量。旧模型接口
 `sparse_backend="triton"` 仍指 SM90 dispatcher，实际后端以上表和 metadata 为准。

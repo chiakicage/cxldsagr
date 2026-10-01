@@ -85,7 +85,7 @@ class NosaOffloadCache(HostBackingCache):
     def attention_workspace(self):
         self._ensure_alive()
         if self._attention_workspace is None:
-            from operators.sm90.nosa_offload import NosaFetchWorkspace
+            from operators.nosa.attention.offload.api import NosaFetchWorkspace
 
             self._attention_workspace = NosaFetchWorkspace(
                 self.max_seq_len,
@@ -171,7 +171,7 @@ class NosaOffloadCache(HostBackingCache):
                 )
                 keys = torch.cat((boundary, suffix), dim=0)
             if self.device.type == "cuda":
-                from operators.sm90.nosa_offload_compression import append_compressed
+                from operators.nosa.indexer.offload_compression import append_compressed
 
                 append_compressed(
                     keys,

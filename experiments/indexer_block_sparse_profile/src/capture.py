@@ -184,7 +184,7 @@ def timed_forward(model, ids, cache, prefix_length, chunk_size):
 
 
 def runtime_metadata(args, model, original_context):
-    from operators.sm90._native import build_info
+    from operators.nosa._native import build_info
 
     props = torch.cuda.get_device_properties(model.model.embed_tokens.weight.device)
     checkpoint = args.model_path.resolve()

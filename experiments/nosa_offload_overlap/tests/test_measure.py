@@ -59,7 +59,9 @@ def test_metadata_includes_actual_fused_build(monkeypatch):
     }
     monkeypatch.setattr(measure, "build_info", lambda: {"selected_backend": "native"})
     monkeypatch.setitem(
-        sys.modules, "operators.sm90._nosa_offload_fused", SimpleNamespace(build_info=lambda: fused)
+        sys.modules,
+        "operators.nosa.attention.offload._fused",
+        SimpleNamespace(build_info=lambda: fused),
     )
     assert measure.native_build_metadata() == {"selected_backend": "native", "offload_fused": fused}
 
@@ -69,13 +71,13 @@ def test_source_snapshot_covers_cooperative_runtime_and_planner():
 
     hashes = source_hashes()
     assert {
-        "operators/sm90/_nosa_offload_fused.py",
-        "operators/sm90/nosa_offload.py",
-        "operators/sm90/csrc/nosa_offload_fused.cu",
-        "operators/sm90/csrc/nosa_offload.cu",
-        "operators/sm90/csrc/nosa_attention_fa3.cu",
-        "operators/sm90/csrc/nosa_attention.cu",
-        "operators/sm90/csrc/nosa_attention_grouped.cuh",
+        "operators/nosa/attention/offload/_fused.py",
+        "operators/nosa/attention/offload/api.py",
+        "operators/nosa/attention/offload/csrc/nosa_offload_fused.cu",
+        "operators/nosa/attention/offload/csrc/nosa_offload.cu",
+        "operators/nosa/attention/device_only/csrc/nosa_attention_fa3.cu",
+        "operators/nosa/attention/device_only/csrc/nosa_attention.cu",
+        "operators/nosa/attention/device_only/csrc/nosa_attention_grouped.cuh",
     } <= hashes.keys()
 
 

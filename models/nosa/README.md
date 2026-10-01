@@ -21,7 +21,7 @@ stripe，跨 CTA 只读一次 host K/V。完整 32 层 checkpoint 检查 1 passe
   支持 32-block 分析预算，以及显式完整 NOSA 两阶段选块。
 - [scoring.py](scoring.py)：query-agnostic CIS 打分与 32-token / stride-16 压缩。
 - [attention.py](attention.py)：resident / offload sparse adapter，调用
-  [SM90 算子](../../operators/sm90/README.md) 或 CPU 数学参考。
+  [SM90 算子](../../operators/nosa/README.md) 或 CPU 数学参考。
 - [infer.py](infer.py)：本地 tokenizer、chat template、采样与命令行入口。
 - 现有 DeepSeek 实验见 [DeepSeek V3.2](../deepseek_v32/README.md)。
 
@@ -102,9 +102,9 @@ query-agnostic 使用压缩后的 CIS。相同分数优先较小 block ID。完�
 
 `auto` 在 CPU 使用 reference、CUDA 使用 SM90 dispatcher；历史接口名 `triton` 保留。
 NOSA-8B 的 D128/GQA=16 默认启用迁移后的 CUDA/CuTe QK score 和 block sparse attention；
-QK 在短上下文按[算子阈值](../../operators/sm90/README.md)使用单 kernel Triton。
+QK 在短上下文按[算子阈值](../../operators/nosa/README.md)使用单 kernel Triton。
 其余已支持形状走 Triton。`CXLDSAGR_SM90_BACKEND=triton` 强制对照后端。
-原生构建要求 nvcc、TVM FFI、共享 CUTLASS 和已安装的 FlashInfer 0.6.18，见[算子说明](../../operators/sm90/README.md)。
+原生构建要求 nvcc、TVM FFI、共享 CUTLASS 和已安装的 FlashInfer 0.6.18，见[算子说明](../../operators/nosa/README.md)。
 CUDA 不支持的设备或 shape 明确失败。
 Triton 支持 SM90、FP16/BF16、head_dim 64/128、GQA group 1–32，使用 FP32 在线 softmax
 累积，AV 概率转回输入 dtype；数值不保证与 FP32 reference 逐位相等，indexer 的舍入

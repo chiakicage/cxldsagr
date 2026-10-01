@@ -31,11 +31,9 @@ from experiments.nosa_offload_overlap.src.analyze import (
     validate_fetch_stripes,
 )
 from layers.attention import BlockSelection
-from operators.sm90._native import build_info
-from operators.sm90.nosa_attention import (
-    nosa_block_sparse_attention,
-    reference_nosa_block_sparse_attention,
-)
+from operators.nosa._native import build_info
+from operators.nosa.attention.device_only.api import nosa_block_sparse_attention
+from operators.nosa.attention.reference.torch import reference_nosa_block_sparse_attention
 
 ROOT = Path(__file__).resolve().parents[3]
 EXPERIMENT = Path(__file__).resolve().parents[1]
@@ -54,7 +52,7 @@ def distribution(values):
 
 def native_build_metadata():
     """Record the actual cooperative build, including its pinned FA3 headers."""
-    from operators.sm90._nosa_offload_fused import build_info as fused_build_info
+    from operators.nosa.attention.offload._fused import build_info as fused_build_info
 
     return {**build_info(), "offload_fused": fused_build_info()}
 
@@ -160,7 +158,7 @@ def required_order():
 def synthetic_case(args):
     """Generate random activations, then obtain full NOSA selection outside timing."""
     from models.nosa.indexer import prepare_indexer_inputs
-    from operators.sm90.nosa_indexer import select_contiguous_blocks
+    from operators.nosa.indexer.api import select_contiguous_blocks
 
     generator = torch.Generator(device=args.device).manual_seed(args.seed)
     kwargs = {"device": args.device, "dtype": torch.bfloat16, "generator": generator}
@@ -225,7 +223,7 @@ def reference_acceptance(q, keys, values, selection, bias, prefix, outputs, *, a
 
 
 def benchmark_case(cpu, args, *, label, prefix, work_profile=None):
-    from operators.sm90.nosa_offload import NosaFetchWorkspace
+    from operators.nosa.attention.offload.api import NosaFetchWorkspace
 
     _validate_case(cpu, prefix, args.queries)
     tensors = {name: copy_to_device(cpu[name], args.device) for name in required_order()}

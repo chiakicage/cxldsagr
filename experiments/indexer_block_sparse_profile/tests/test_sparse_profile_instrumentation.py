@@ -118,7 +118,7 @@ def test_audit_runs_without_clock_and_reports_resident_selection_geometry():
 
 def test_operator_children_are_nested_in_the_matching_indexer_call(monkeypatch):
     import models.nosa.indexer as indexer_module
-    import operators.sm90.nosa_indexer as operator_module
+    import operators.nosa.indexer.api as operator_module
 
     model = tiny_sparse_model()
 
@@ -159,8 +159,8 @@ def test_operator_children_are_nested_in_the_matching_indexer_call(monkeypatch):
 
 def test_fused_pipeline_scopes_are_siblings_and_restore_launch_helpers(monkeypatch):
     import models.nosa.indexer as indexer_module
-    import operators.sm90.nosa_indexer as operator_module
-    import operators.sm90.nosa_validation as validation_module
+    import operators.nosa.indexer.api as operator_module
+    import operators.nosa.indexer.validation as validation_module
 
     model = tiny_sparse_model()
     helpers = (
@@ -200,12 +200,10 @@ def test_native_preparation_and_selection_scopes_record_prepared_ranking(
     monkeypatch, joint, ranked
 ):
     from experiments.indexer_block_sparse_profile.src.analyze import _validate_scopes
-    from operators.sm90 import (
-        _nosa_indexer_cuda,
-        _nosa_prepare_cuda,
-        _nosa_prepare_ranked_cuda,
-        _nosa_selection_cuda,
-    )
+    from operators.nosa.indexer import _indexer_cuda as _nosa_indexer_cuda
+    from operators.nosa.indexer import _prepare_cuda as _nosa_prepare_cuda
+    from operators.nosa.indexer import _prepare_ranked_cuda as _nosa_prepare_ranked_cuda
+    from operators.nosa.indexer import _selection_cuda as _nosa_selection_cuda
 
     model = tiny_sparse_model()
     preparation = _nosa_prepare_ranked_cuda if ranked else _nosa_prepare_cuda
@@ -322,7 +320,7 @@ def test_audit_timing_cpu_clock_and_overlap_contracts():
 
 def test_checked_native_scope_is_one_container_with_explicit_prepared_ranking(monkeypatch):
     from experiments.indexer_block_sparse_profile.src.analyze import _validate_scopes
-    from operators.sm90 import _nosa_indexer_checked_cuda
+    from operators.nosa.indexer import _indexer_checked_cuda as _nosa_indexer_checked_cuda
 
     model = tiny_sparse_model()
     sentinel = object()

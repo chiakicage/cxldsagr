@@ -110,7 +110,7 @@ def test_offload_fetch_producer_count_rejects_invalid_values(value):
 def test_checkpoint_offload_options_reach_lazy_workspace(
     tmp_path, monkeypatch, options, expected_ctas
 ):
-    import operators.sm90.nosa_offload as offload_operator
+    import operators.nosa.attention.offload.api as offload_operator
 
     source = initialized_sparse_model(tiny_config())
     write_checkpoint(tmp_path, source.config, dict(source.state_dict()))

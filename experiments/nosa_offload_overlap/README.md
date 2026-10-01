@@ -1,5 +1,8 @@
 # NOSA sparse fetch 与 attention overlap
 
+2026-10-01 目录整理：算子已迁至 `operators/nosa/`、`operators/deepseek_v32/` 和
+`operators/common/`。本页性能仍对应下文原 run ID 与源码快照；目录迁移后的性能未重新测量。
+
 本实验在真实 NOSA 单层输入上，比较 resident attention、一次取齐稀疏并集后执行完整
 attention 的串行对照，以及在同一 CUDA 主 kernel 中执行 sparse fetch 与 attention
 的融合实现。目标形状为 65536-token prefix + 1024-token suffix，BF16，32 Q heads /
@@ -13,8 +16,8 @@ copy/softmax overlap 中位数为 **95.09% / 95.34% / 94.94%**，全部 9 个 pr
 
 ## 实现与读取语义
 
-实现位于 [SM90 offload 算子](../../operators/sm90/nosa_offload.py)和
-[融合 CUDA kernel](../../operators/sm90/csrc/nosa_offload_fused.cu)。GPU first-use planner
+实现位于 [SM90 offload 算子](../../operators/nosa/attention/offload/api.py)和
+[融合 CUDA kernel](../../operators/nosa/attention/offload/csrc/nosa_offload_fused.cu)。GPU first-use planner
 对 `(KV head, logical block)` 去重，一个 256-thread compactor 生成精确选页队列。
 每个 64-token 页分为 **8 个互不重叠的 8-token stripe**。主 kernel 中所有 CTA 都
 执行 persistent FA3；默认最多 96 个 CTA 同时使用 producer warpgroup 中的
@@ -237,8 +240,8 @@ python -m experiments.nosa_offload_overlap.src.report \
   --output-dir experiments/nosa_offload_overlap/report/fused_confirmation
 ```
 
-调用模块：`operators.sm90.nosa_offload.NosaFetchWorkspace`、
-`operators.sm90._nosa_offload_fused`、`operators.sm90.nosa_attention`、
+调用模块：`operators.nosa.attention.offload.api.NosaFetchWorkspace`、
+`operators.nosa.attention.offload._fused`、`operators.nosa.attention.device_only.api`、
 `layers.attention.BlockSelection`。输入加载及 fingerprint 显式复用
 `experiments.nosa_kernel_mfu.src.capture_inputs` / `src.measure`，源码快照复用
 `experiments.nosa_gr_65536_1024.src.sources`。`--synthetic` 是合成激活和选择，不能作为真实

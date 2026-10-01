@@ -183,7 +183,7 @@ class NosaIndexer:
             # resident suffix before writing any derived records.
             finite = True
         elif self.mode == "nosa" and q.is_cuda and self.backend in ("auto", "triton"):
-            from operators.sm90.nosa_validation import all_finite
+            from operators.nosa.indexer.validation import all_finite
 
             validated = (
                 indexer_cache.layer_state(context.layer_idx).validated_tokens
@@ -261,7 +261,7 @@ class NosaIndexer:
         try:
             with torch.autocast(device_type=q.device.type, enabled=False):
                 if q.is_cuda and self.backend in ("auto", "triton"):
-                    from operators.sm90.nosa_indexer import select_contiguous_blocks
+                    from operators.nosa.indexer.api import select_contiguous_blocks
 
                     blocks = (length + 63) // 64
                     workspace = (
@@ -415,7 +415,7 @@ class NosaIndexer:
         kv_heads = keys.shape[1]
         query = q.reshape(len(q), kv_heads, q.shape[1] // kv_heads, q.shape[-1])
         if backend == "triton":
-            from operators.sm90.nosa_indexer import select_contiguous_blocks
+            from operators.nosa.indexer.api import select_contiguous_blocks
 
             if prepared is None:
                 prepared = (
@@ -470,12 +470,12 @@ def prepare_native_indexer_inputs(
     Cache transaction metadata belongs to the model and request, independently
     of this scratch allocation.
     """
-    from operators.sm90._native import native_enabled
+    from operators.nosa._native import native_enabled
 
     if not native_enabled():
         return None
-    from operators.sm90._nosa_prepare_cuda import PreparationScratch, prepare_out, supports
-    from operators.sm90._nosa_prepare_ranked_cuda import _geometry_supported, prepare_ranked_out
+    from operators.nosa.indexer._prepare_cuda import PreparationScratch, prepare_out, supports
+    from operators.nosa.indexer._prepare_ranked_cuda import _geometry_supported, prepare_ranked_out
 
     if not supports(q, keys, cis):
         return None
@@ -507,7 +507,7 @@ def prepare_native_indexer_inputs(
             and all(stride > 0 and stride % 8 == 0 for stride in q.stride()[:2])
         )
         if checked:
-            from operators.sm90._nosa_indexer_checked_cuda import select_prepared_out
+            from operators.nosa.indexer._indexer_checked_cuda import select_prepared_out
 
             rows = len(q)
             score_bytes = rows * heads * blocks * keys.element_size()
@@ -591,7 +591,7 @@ def prepare_indexer_inputs(keys, cis, query_count, *, indexer_cache=None, layer_
     supplies NOSA's C/S bounds and numerical update; shorter offline reads slice
     an already materialized prefix and recompute their own unstable CIS tail.
     """
-    from operators.sm90.nosa_compression import update_compressed_cache
+    from operators.nosa.indexer.compression import update_compressed_cache
 
     length, heads, dim = keys.shape
     count, stable = max(0, length // 16 - 1), max(0, (length - 16) // 64)

@@ -38,7 +38,7 @@ from experiments.nosa_gr_65536_1024.src.capture import execution_split
 from experiments.nosa_gr_65536_1024.src.sources import source_hashes
 from models.nosa.infer import DEFAULT_MODEL_PATH
 from models.nosa.model import NosaForCausalLM
-from operators.sm90._native import build_info
+from operators.nosa._native import build_info
 
 ROOT = Path(__file__).resolve().parents[3]
 PREFIX, NEW, CHUNK = 65536, 1024, 1024
