@@ -85,6 +85,12 @@ torch = { index = "pytorch-cu130" }
 deep-gemm = { path = "3rdparty/DeepGEMM" }
 flash-mla-sm120 = { path = "operators/sm120/sparse_mla_sm120", editable = true }
 
+# 显式使用官方索引，避免镜像重定向和下载超时。
+[[tool.uv.index]]
+name = "pypi"
+url = "https://pypi.org/simple"
+default = true
+
 [[tool.uv.index]]
 name = "pytorch-cu130"
 url = "https://download.pytorch.org/whl/cu130"
