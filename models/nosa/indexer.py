@@ -111,6 +111,10 @@ class NosaIndexer:
 
     @torch.no_grad()
     def __call__(self, q, cache_access: CacheAccess, context: AttentionContext) -> BlockSelection:
+        from models.nosa.offload_cache import NosaOffloadCache
+
+        if isinstance(cache_access, NosaOffloadCache):
+            return self._select_offloaded(q, cache_access, context)
         layer_view = getattr(cache_access, "layer_view", None)
         if not callable(layer_view):
             raise NotImplementedError("NOSA reference indexer requires resident cache layer views")
@@ -211,6 +215,85 @@ class NosaIndexer:
                         prepared=prepared,
                     )
                 return self._select(q, keys, context.query_start)
+        finally:
+            if old_precision is not None:
+                torch.backends.cuda.matmul.fp32_precision = old_precision
+
+    def _select_offloaded(self, q, cache_access, context):
+        """Select resident compressed records without requesting full resident K."""
+        if self.mode != "nosa":
+            raise NotImplementedError("NOSA offload requires the full NOSA selection policy")
+        if isinstance(context.auxiliary_state, NosaAttentionState):
+            raise TypeError("Offload selection does not support external CIS overrides")
+        if not isinstance(q, torch.Tensor):
+            raise TypeError("Q must be a tensor")
+        if q.ndim != 3 or any(size <= 0 for size in q.shape) or not q.is_floating_point():
+            raise ValueError("Q must have nonempty floating-point [token, head, head_dim] shape")
+        heads, dimension = cache_access.config.num_key_value_heads, cache_access.config.head_dim
+        if q.shape[-1] != dimension or q.shape[1] % heads:
+            raise ValueError(
+                "Q/K head dimensions must agree and Q heads must divide into KV groups"
+            )
+        if q.device != cache_access.device or q.dtype != cache_access.dtype:
+            raise ValueError("Q must match the offload cache device and dtype")
+        if type(context.query_start) is not int or context.query_start < 0:
+            raise ValueError("query_start must be a nonnegative integer")
+        if type(context.query_length) is not int or context.query_length != len(q):
+            raise ValueError("query_length must match the number of Q tokens")
+        length = context.query_start + context.query_length
+        if length > cache_access.visible_length(context.layer_idx):
+            raise ValueError("Offload K does not cover the query positions")
+        if self.backend == "triton" and not q.is_cuda:
+            raise ValueError("Triton NOSA selection requires CUDA inputs")
+        # Reject a bad query before touching any pending derived records.
+        if not torch.isfinite(q).all():
+            raise ValueError("NOSA indexer requires finite Q, K and CIS scores")
+        records = cache_access.prepare_indexer_inputs(context.layer_idx)
+        count, stable = cache_access._indexer_lengths(length)
+        compressed_keys = records["compressed_keys"][:count]
+        compressed_cis = records["compressed_cis"][:count]
+        pooled_cis = records["pooled_cis"][:stable]
+        grouped = q.reshape(len(q), heads, q.shape[1] // heads, dimension)
+        old_precision = None
+        if q.is_cuda and self.backend == "reference":
+            old_precision = torch.backends.cuda.matmul.fp32_precision
+            torch.backends.cuda.matmul.fp32_precision = "ieee"
+        try:
+            with torch.autocast(device_type=q.device.type, enabled=False):
+                if q.is_cuda and self.backend in ("auto", "triton"):
+                    from operators.sm90.nosa_indexer import select_contiguous_blocks
+
+                    blocks = (length + 63) // 64
+                    workspace = (
+                        cache_access.indexer_cache.workspace(len(q) * heads * blocks, q.dtype)
+                        if blocks > 64
+                        else None
+                    )
+                    ids, valid = select_contiguous_blocks(
+                        grouped,
+                        compressed_keys,
+                        compressed_cis,
+                        context.query_start,
+                        length,
+                        return_valid_mask=True,
+                        pooled_cis=pooled_cis,
+                        workspace=workspace,
+                    )
+                    return BlockSelection(ids, 64, valid_mask=valid)
+                positions = torch.arange(context.query_start, length, device=q.device)
+                ids = torch.full((len(q), heads, 64), -1, dtype=torch.long, device=q.device)
+                chunk = self.effective_query_chunk_size(q.device)
+                for start in range(0, len(q), chunk):
+                    stop = min(start + chunk, len(q))
+                    selected = select_nosa_blocks_reference(
+                        grouped[start:stop],
+                        compressed_keys,
+                        compressed_cis,
+                        positions[start:stop],
+                        length,
+                    )
+                    ids[start:stop, :, : selected.shape[-1]] = selected
+                return BlockSelection(ids, 64, valid_mask=ids >= 0)
         finally:
             if old_precision is not None:
                 torch.backends.cuda.matmul.fp32_precision = old_precision

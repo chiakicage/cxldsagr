@@ -61,6 +61,10 @@ class NosaForCausalLM(nn.Module):
         indexer=None,
         attention_mode="dense",
         sparse_backend="auto",
+        cache_backend="resident",
+        offload_query_tile_size=128,
+        offload_fetch_ctas=96,
+        offload_overlap=True,
     ):
         super().__init__()
         self.config = config
@@ -68,12 +72,26 @@ class NosaForCausalLM(nn.Module):
             raise ValueError("attention_mode must be dense or sparse")
         if sparse_backend not in ("auto", "reference", "triton"):
             raise ValueError("sparse_backend must be auto, reference or triton")
+        if cache_backend not in ("resident", "offload"):
+            raise ValueError("cache_backend must be resident or offload")
+        if cache_backend == "offload" and attention_mode != "sparse":
+            raise ValueError("Offloaded NOSA cache requires attention_mode='sparse'")
+        if type(offload_query_tile_size) is not int or offload_query_tile_size <= 0:
+            raise ValueError("offload_query_tile_size must be a positive integer")
+        if type(offload_fetch_ctas) is not int or offload_fetch_ctas <= 0:
+            raise ValueError("offload_fetch_ctas must be a positive integer")
+        if type(offload_overlap) is not bool:
+            raise ValueError("offload_overlap must be boolean")
         if attention_mode == "sparse" and any(
             value is not None for value in (attention, main_attention, indexer)
         ):
             raise ValueError("sparse mode owns attention and indexer; do not override them")
         self.attention_mode = attention_mode
         self.sparse_backend = sparse_backend
+        self.cache_backend = cache_backend
+        self.offload_query_tile_size = offload_query_tile_size
+        self.offload_fetch_ctas = offload_fetch_ctas
+        self.offload_overlap = offload_overlap
         self.attention = FlashInferFullAttention() if attention is None else attention
         self._dense_main_attention = DenseMainAttention(self.attention)
         self.main_attention = (
@@ -100,6 +118,19 @@ class NosaForCausalLM(nn.Module):
     def _allocate_cache(self, max_seq_len: int) -> NosaKVCache:
         # Read placement now: from_pretrained constructs on meta before loading.
         weight = self.model.embed_tokens.weight
+        if self.cache_backend == "offload":
+            from models.nosa.offload_cache import NosaOffloadCache
+
+            return NosaOffloadCache(
+                self.config,
+                max_seq_len,
+                device=weight.device,
+                dtype=weight.dtype,
+                with_cis=True,
+                query_tile_size=self.offload_query_tile_size,
+                fetch_ctas=self.offload_fetch_ctas,
+                overlap=self.offload_overlap,
+            )
         return NosaKVCache(
             self.config,
             max_seq_len,
@@ -202,6 +233,10 @@ class NosaForCausalLM(nn.Module):
         indexer=None,
         attention_mode="dense",
         sparse_backend="auto",
+        cache_backend="resident",
+        offload_query_tile_size=128,
+        offload_fetch_ctas=96,
+        offload_overlap=True,
     ):
         """Strictly load single-file or indexed safetensors, one tensor at a time.
 
@@ -231,6 +266,10 @@ class NosaForCausalLM(nn.Module):
             indexer=indexer,
             attention_mode=attention_mode,
             sparse_backend=sparse_backend,
+            cache_backend=cache_backend,
+            offload_query_tile_size=offload_query_tile_size,
+            offload_fetch_ctas=offload_fetch_ctas,
+            offload_overlap=offload_overlap,
         )
         expected = dict(model.named_parameters())
         allowed_extra = {}
