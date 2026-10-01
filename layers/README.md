@@ -23,11 +23,22 @@ NOSA 的 LongRoPE 由模型复用 FP32 cos/sin cache，并通过 FlashInfer
 selection、cache access 和 layer/query 位置上下文。实际 dense adapter 从 resident view
 取 K/V，调用现有 [FlashInfer 后端](../operators/flashinfer.py)。
 
-未来 cache access 可以描述 HBM 驻留块和 host 来源，不要求提前 gather 所有选中 KV。
-[SM90 入口](../operators/sm90/README.md) 将负责 attention 与 fetch 的重叠执行。
+cache access 可描述 resident view 或 host 来源与 device append，不要求提前 gather
+所有选中 KV；[NOSA SM90 实现](../operators/sm90/nosa_offload.py) 在单个 cooperative
+主 kernel 中调度稀疏 fetch 与 persistent attention。所有 CTA 保留 attention，
+启用 fetch 的 CTA 用 producer warpgroup 的三个空闲 warp，动态领取唯一页中
+互不重叠的 8-token stripe。每个历史向量只读一次；全部 8 个 stripe 经 acq_rel
+完成链后，TMA acquire-ready 并复用 HBM。两 KV heads / 256 work batches 时，
+fetch 与 compute 都优先 head 1 再 head 0，其他几何保留原调度。
 NOSA indexer 已实现 resident K 上的 query-aware 参考选块，见
 [pattern 实验](../experiments/nosa_indexer_pattern_65536_1024/README.md)。QA-only 模式旁路记录选择，
 dense adapter 仍拒绝非空 selection；完整 NOSA 对照还记录实际 sparse 传播中的选择。
 完整 NOSA 由模型的
-[sparse adapter](../models/nosa/attention.py) 读取 resident K/V/CIS，调用 SM90 CUDA/CuTe 或 Triton
-block sparse 算子；query-agnostic 分数和选块策略仍归模型。offload 路径明确报未实现。
+[sparse adapter](../models/nosa/attention.py) 在 resident 模式读取 K/V/CIS，调用 SM90
+CUDA/CuTe 或 Triton block sparse 算子；显式 offload 模式使用 pinned 历史 K/V、resident
+CIS 与 native SM90 fetch workspace。query-agnostic 分数和选块策略仍归模型。
+通用 `SM90SparseAttention` 占位接口仍明确报未实现，NOSA adapter 已有专用执行路径。
+完整 32 层 checkpoint 检查 1 passed：resident/offload 分别从独立空 cache
+构建 64K sparse prefix，再执行 1K extend，全部 normalized hidden 逐位相同，max_abs=0。
+[单层回放](../experiments/nosa_offload_overlap/README.md) 独立验证完整调用延迟与
+stripe / page-envelope 两种 overlap，不作为完整模型性能测量。

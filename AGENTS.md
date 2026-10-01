@@ -10,19 +10,71 @@
   main attention 契约。共享层接收显式维度和参数，不反向导入模型配置。
 - 模型结构、权重加载、位置编码、稀疏选择语义、KV 布局适配放在
   `models/deepseek_v32/`、`models/nosa/`。`models/` 只保留模型推理相关代码及其测试；
-  接入另一架构时复用对应模型目录，不按架构复制模型树。此次分层仅接入 NOSA，
-  DeepSeek V3.2 / SM120 保留既有组织。
+  接入另一架构时复用对应模型目录，不按架构复制模型树。共享分层当前接入 NOSA；
+  DeepSeek V3.2 / SM120 保留既有组织，新增 standalone SM90 ECHO 仍放在同一
+  `models/deepseek_v32/`，不依赖 SGLang 或 SM120 扩展。
 - `executor/` 负责通用模型分块执行和输出选择，不读取 GR 请求；`serving/` 负责 GR
   请求适配及串行请求生命周期，不包含网络服务或 CXL/RDMA 依赖。
 - `cache/` 管理请求级缓存分配、逐层写入、提交、重置和释放。模型提供 KV 布局和
-  兼容信息；所有模型层成功执行后统一推进有效长度。当前后端仅为模型设备上的
-  resident cache，CPU 用于参考测试；local DRAM backing 与 HBM caching 尚未实现。
+  兼容信息；所有模型层成功执行后统一推进有效长度。`CacheManager` 接收模型 allocator，
+  NOSA 默认 resident，显式 offload 使用 `cache/host_backing.py` 与
+  `models/nosa/offload_cache.py`：pinned local DRAM 保存历史 K/V，CIS 和压缩派生记录
+  resident；CPU 用于参考测试。NOSA 共享一层完整逻辑地址范围的 HBM staging，
+  尚无有限 slots 或淘汰策略，不将该实现表述为通用 HBM caching 已完成。
+  独立 `cache/sparse_token_cache.py` 为 DeepSeek SM90 ECHO
+  提供 pinned local DRAM backing、有限 HBM slots、精确 recall 与缓存事务；record
+  宽度和 dtype 由模型提供，不能将其有限 HBM pool 能力归于 NOSA。
   `cache/indexer_cache.py` 管理请求级派生 record 与共享 scratch；压缩和稳定 pool 的
   语义由模型声明。派生缓存随 KV 统一提交、回滚和截短，不占用通用 opaque layer state。
 - main attention 接收逻辑块选择、cache access 与执行上下文，不能把「全部 KV
-  已完成搬入 HBM」作为通用前置条件。未来 fetch/compute overlap 由 SM90 算子实现；
-  resident NOSA block sparse attention 已接入 SM90 CUDA/CuTe 与 Triton；offload 入口仍只预留接口，
-  调用未实现路径须明确失败，不将 resident 验证表述为 offload 验证。
+  已完成搬入 HBM」作为通用前置条件。resident NOSA block sparse attention 已接入
+  SM90 CUDA/CuTe 与 Triton；显式 NOSA offload 通过 `operators/sm90/nosa_offload.py`
+  实现 BF16 / D128 / GQA16 native attention 与稀疏 fetch。当前融合版本在一个
+  cooperative CUDA 主 kernel 内保留所有 CTA 的 persistent FA3 计算；默认最多
+  96 个 CTA 使用 producer warpgroup 的 warp 1–3（96 线程）读取 host，warp 0
+  保留 TMA，两个 consumer warpgroup 保留 attention。每次层调用按
+  `(KV head, logical block)` 去重并压成唯一页队列，每个 64-token 页拆为 8 个
+  不交叠的 8-token stripe；leader 原子领取 `(page, stripe)`，经 shared slot 和
+  96-thread barrier 广播，每个历史向量只执行一次 `.cv` host load。每 stripe
+  writer 完成 fence/barrier 后，leader 以 acq_rel RMW 累计 ready；跨 CTA 完成链
+  达到 ready=8 后，TMA acquire 并执行 async-proxy fence 再读取 HBM。空尾 stripe
+  不读 host、仍参与完成；最后完成者只累计一次整页字节。
+  仅两 KV heads 且 `ceil(queries / 8) * KV_heads == 256` 时，fetch 与 compute
+  都按 head 1 → head 0；head 内保留 block 0 优先/其余 block 降序的 fetch 顺序
+  和原 compute cost/tie 顺序。其他几何保留 block-major fetch 与原 attention 调度。
+  串行与融合共用新 native initialization，合并全容量 metadata reset、历史
+  page-0 padding 和 strided suffix staging；first-use planning 保留独立依赖
+  launch。初始化、planning、compaction、prepare / repair 与 launch gaps 全部计时。
+  不依赖 host memory 的 L2 复用，不得按八-query group 重复搬运；保留原 selection、
+  CIS、causal mask 与 numerical repair。prepare / repair helper 全部计入算子时间，
+  cooperative launch 与 occupancy 检查须保证全部 CTA 可同时驻留；producer /
+  consumer 的 24 / 240 动态寄存器预算须满足本 CTA 的 64512-register pool，
+  不能只按整个 SM 的寄存器上限检查，避免 `setmaxnreg` 等待死锁。
+  `query_tile_size` 仅分组统计首次读取流量，不再拆分 attention；`fetch_ctas` 控制
+  参与 fetch 的 attention CTA 数上限，不划出专用 fetch CTA。`overlap=False`
+  一次 fetch 完整稀疏并集，再执行原 FA3 整批 attention。
+  事务提交及 staging 复用须等待相关异步操作完成。CUDA Graph capture、有限 HBM
+  slots / eviction 与 CXL/RDMA 尚未支持或验证；不支持路径明确失败，不将 resident
+  检查、算子回放或 CPU reference 表述为完整模型 offload 性能验证。
+  NOSA 完整 checkpoint 数值验收须为 resident/offload 分别从独立空 cache 构建
+  sparse prefix，比较全部 extend hidden；cache 分配统计不等于进程峰值显存。
+  NOSA overlap 性能对照须包括完整 query batch 的稀疏并集一次 fetch 后计算，
+  以此为整体延迟验收门槛；若候选拆分 query tiles，另加相同拆分的串行调度对照。
+  单 kernel 的完整执行窗口不能同时充当 fetch 与 attention 的区间；须使用 kernel
+  内部实际工作区间证明重叠，且执行窗口相交不能替代整体延迟收益判断。
+  stripe 路径同时报告 page envelope 与非空 stripe-copy window 两套指标；envelope
+  须等于本页全部非空 stripe 的 min(start)/max(end)，不能以其空隙充当真实 copy。
+  90% 验收要求每个 profiled sample 的两种 ratio 都 >= 0.9，不能只检查中位数。
+  每轮实现更新须重新验收正确性、唯一读取和内部 overlap，并以新 run ID 发布受
+  影响的性能结果；旧结果按下述实验规则保留至替换完成，不以旧验证冒充新实现结果。
+- DeepSeek SM90 ECHO 使用完整 checkpoint 的 61 层、embedding、dense / grouped MoE、
+  final norm 与 LM head；按 token chunk 依次执行全部层，限制临时 hidden 显存。主 KV
+  使用 BF16 512 latent + 64 RoPE record，indexer FP8 K/scales 仍 resident。融合
+  indexer prefetch 后必须执行精确 top-k / residual recall；工作集超过 HBM pool 时
+  拆分 query 消费，不裁剪每 query 的精确选择。全部层和 GPU 同步成功后统一提交；
+  失败只回滚本次启动的事务。完整 resident/offload 对照从独立空 cache 构建 prefix，
+  每次 extend 恢复相同 prefix HBM residency；权重加载、编译和状态恢复不计入执行时间。
+  layer 0 / layer 3 或单算子正确性检查不替代完整 64K + 1K 的性能测量。
 - NOSA query-aware indexer 已有 resident K 上的 PyTorch FP32 参考实现：64-token block、
   默认 `block_budget=64`，1 sink + 16 causal local（含当前块）+ 47 query-aware top-k；
   支持 `block_budget=32`，保持 1 sink + 16 local，query-aware top-k 改为 15。
@@ -33,7 +85,8 @@
   inclusive local 为当前块加前 16 块，query-aware 阶段含 sink/local 共保留 33 块，
   再按 query-agnostic CIS 补满 64 块。A/delta 从 checkpoint 严格加载；
   `softplus(delta(V)) * A` 同时用于压缩后选块及 attention 加性 bias。
-  K/V/CIS 作为同一 resident cache step 提交，CPU reference 与 SM90 CUDA/Triton 均可运行。
+  K/V/CIS 作为同一 cache step 提交；resident 支持 CPU reference 与 SM90 CUDA/Triton，
+  offload 另遵循上述 native SM90 限制。
   两种 policy 不混用；原 query-aware pattern 实验在 dense 激活上旁路选块，不改变 dense 基线。
   完整 NOSA pattern 对照分别采集同一 dense 激活上的 QA-only/full NOSA 选择，以及真实
   sparse 传播中 attention 实际消费的选择；dense/sparse prefix 从独立空 cache 构建。

@@ -7,9 +7,11 @@
 | --- | --- | --- |
 | [CPU DRAM 带宽](cpu_dram_bandwidth/README.md) | 双路 Xeon 8558P / DDR5-4400；理论 563.2 GB/s，当前容器 IMC 顺序读约 428 GB/s、应用约 435 GB/s，含 NUMA 与线程扫描 | `bash experiments/cpu_dram_bandwidth/scripts/run.sh <run_id> --imc` |
 | [NOSA indexer + block sparse profile](indexer_block_sparse_profile/README.md) | H200 BF16 64K+1K；BF16-pair / FA3 v3 的 native/Triton 端到端与模块 kernel MFU 已于 2026-09-29 补测 | `bash experiments/indexer_block_sparse_profile/scripts/run.sh <run_id>` |
+| [NOSA sparse fetch + attention overlap](nosa_offload_overlap/README.md) | 单主 kernel 内 stripe fetch 只读一次 host 并与 attention 重叠；两次 64K + 1K 单层回放均快于整批稀疏串行对照；全部 profile 样本的 page/stripe 两项 softmax overlap ≥90%；完整模型数值检查通过 | `bash experiments/nosa_offload_overlap/scripts/run.sh <run_id>` |
 | [NOSA kernel MFU](nosa_kernel_mfu/README.md) | H200 synthetic resident attention / pooled score 已测量；本次均未达到 30% 有效 MFU | `bash experiments/nosa_kernel_mfu/scripts/run.sh <run_id> --peak-tflops 989` |
 | [NOSA GR 65536 + 1024](nosa_gr_65536_1024/README.md) | H200 dense 前向、模块 MFU 与 Nsight 活动分析已补测；计时边界见报告 | `bash experiments/nosa_gr_65536_1024/scripts/run.sh <run_id>` |
 | [NOSA indexer pattern 65536 + 1024](nosa_indexer_pattern_65536_1024/README.md) | H200 完整 NOSA 三组对照与 QA32 已补测，QA64 已复核；容量、传输与 overlap 离线分析已更新 | `bash experiments/nosa_indexer_pattern_65536_1024/scripts/sparse_compare.sh <run_id>` |
+| [DeepSeek V3.2 ECHO prefill/extend](deepseek_v32_echo_prefill/README.md) | 保留修复前 SM90 完整 61 层、64K + 1K 报告；KV gather 对齐修复后的完整模型性能待补测 | `bash experiments/deepseek_v32_echo_prefill/scripts/run.sh` |
 | [旧 DeepSeek / SM120](legacy/deepseek_v32/README.md) | 旧脚本、测试和历史报告整体归档 | 见归档 README |
 
 ```bash

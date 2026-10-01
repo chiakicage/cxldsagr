@@ -1,6 +1,8 @@
 # SM90 / Hopper
 
 Hopper 是项目主开发平台，优先面向 [NOSA](../../models/nosa/README.md)。
+本目录另有 [DeepSeek V3.2 ECHO](../../models/deepseek_v32/README.md) 的独立
+prefill/extend 算子，见文末。两模型分别提供自己的 offload 布局与调度适配。
 [nosa_attention.py](nosa_attention.py) 提供 resident NOSA block sparse attention，以及
 独立 FP32 数学参考。默认 NOSA-8B specialization 使用本项目的
 [csrc/nosa_attention_fa3.cu](csrc/nosa_attention_fa3.cu)，复用已安装的 FlashInfer 0.6.18
@@ -73,9 +75,66 @@ reference（默认 64）。连续入口以标量 `query_start + row` 计算位�
 末尾最多两个未稳定 block 在选择阶段计算。已提交的压缩前缀不重算；融合有限值检查
 只扫描当前 Q 和尚未校验的自有 K/CIS 后缀，外部 tensor view 仍扫描完整输入。
 
-[sparse_attention.py](sparse_attention.py) 仍预留 offloaded cache fetch 与 sparse compute
-重叠执行入口，调用抛出 `NotImplementedError`。resident kernel 不实现 DRAM 读取、
-搬运、缓存淘汰或 overlap，不能将其作为 offloading 验证。
+[nosa_offload.py](nosa_offload.py) 的 `NosaFetchWorkspace` 通过
+[_nosa_offload_fused.py](_nosa_offload_fused.py) 加载
+[csrc/nosa_offload_fused.cu](csrc/nosa_offload_fused.cu)，在一个 cooperative CUDA
+主 kernel 内融合 NOSA sparse host fetch 与 persistent FA3 attention。
+当前仅支持 native SM90、BF16、D128、GQA16，保留原 attention 的分组、算术与
+numerical repair；首次使用计划仍由 [nosa_offload.cu](csrc/nosa_offload.cu) 生成。
+GPU planner 对 `(KV head, block)` 去重，compactor 生成唯一页队列；每个
+64-token 页拆为 8 个不交叠的 8-token stripe，由 fetch leader 原子领取
+`(page, stripe)`，经 shared slot 和 96-thread barrier 广播。每个历史 K/V
+16-byte 向量有唯一线程，以一次 `ld.global.cv.v4.u32` 读取并写入 HBM staging。
+不同 CTA 可并行读取同页的不同 stripe，跨 query group 的复用只读取 HBM。
+
+每个 stripe 的全部 writer 完成 stores / thread fences / 96-thread barrier 后，
+leader 对 page ready 执行 `atom.acq_rel.gpu.global.add.u32`。跨 CTA 的 RMW 链
+累计到 ready=8，TMA warp acquire 观察到 8 后执行 async-proxy fence，再读取完整
+页；仅最后完成者累计一次整页字节。尾页空 stripe 不读取 host、没有 trace/payload，
+但仍参与完成计数，保证尾页也完成同一协议。
+
+所有 CTA 保留 persistent FA3；最多 96 个 CTA 使用 producer warpgroup 的 warp
+1–3 fetch，warp 0 保留 TMA，两个 consumer warpgroup 保留 attention。只有
+`KV_heads == 2 && ceil(queries / 8) * KV_heads == 256` 时，fetch 与 compute
+都优先 head 1、再 head 0。每个 head 内 fetch 为 block 0 优先、其余 block 降序，
+compute 保留原 cost 排序与 logical-batch ties。其他几何回到 block-major fetch
+队列和原 FA3 调度。24 / 240 动态寄存器满足本 CTA 的 64512-register pool，
+cooperative occupancy 检查保证全部 CTA 同时驻留。
+
+native initialization 合并全容量 metadata 清零、历史 page-0 padding 和 strided
+suffix staging；first-use planner 仍在后续有 stream 依赖的独立 launch。强串行
+对照也使用同一初始化，再一次读取完整稀疏并集并运行原整批 FA3。初始化、planning、
+compaction、prepare / sort / main / repair、输出/完成依赖与 launch gaps 全部计入
+完整调用延迟。selection、CIS、causal mask 和每个 query 的算术次序保持原语义。
+
+schema 3 分别记录非空 stripe-copy window、每页的 min(start)/max(end)
+envelope 和 softmax update。stripe 起点在任务领取/解码与同步之后、host load
+之前；终点在 stores / fences / barrier 之后、ready RMW 与计数之前。page
+envelope 可能包含 stripe 间隙，因此分别将两类窗口取并集，与同一 softmax union
+求交，再除以各自 union 持续时间。并行区间只计一次，不能用 envelope 间隙充当真实
+copy。90% 验收要求每个 profiled sample 的两种 ratio 都 >= 0.9，中位数不能替代
+全部样本通过。二者都只覆盖 attention 的 softmax 部分，不代表完整 attention
+隐藏率、PCIe 线上占用或整体加速比；逻辑 payload 也不证明物理链路字节数。
+
+`fetch_ctas=96` 是参与 fetch 的 attention CTA 数上限，实际不超过 grid 大小。
+`query_tile_size=128` 只分组统计首次读取字节，attention 始终处理完整 query batch。
+`overlap=False` 使用相同 native initialization 和 `.cv` 读取策略，一次取齐精确
+稀疏并集后运行原 FA3 / repair。返回值在 caller stream 就绪；输入/backing 须
+保持有效直至完成，staging/queue/scratch 等待前次操作完成后才能复用。
+全局 CPU 回归为 1339 passed、674 skipped、34 subtests passed；SM90 GPU
+环境专项为 62 passed，另重复通过的 3 个增强 trace 场景不重复计数。
+完整 32 层 checkpoint 检查 1 passed：resident/offload 分别从独立空 cache
+构建 64K sparse prefix，再执行 1K extend，全部 normalized hidden 逐位相同，max_abs=0。
+L0/L15/L31 的 20 次主测中，完整调用中位延迟相对重新测量的整批稀疏并集串行
+对照下降 23.80% / 23.30% / 19.87%；独立 40 次确认下降 23.70% / 23.35% / 21.51%。
+三个层的 page-envelope 与 stripe-copy 两套 overlap 中位数均为
+95.0938% / 95.3356% / 94.9440%；9 个 profiled sample 的最小值为 92.2007%，全部满足两项 >=90%。
+
+结果来自固定 L0/L15/L31 单层算子回放，完整模型 offload 性能尚未测量。staging
+仍为一层完整逻辑地址，无有限 slots / eviction。CUDA Graph capture、并发 Python
+调用、跨请求 residency 和 CXL/RDMA 不支持或未验证，主存读取未限速到 50 GB/s。
+正式来源见 [offload 实验](../../experiments/nosa_offload_overlap/README.md)。
+通用 [sparse_attention.py](sparse_attention.py) 仍是明确失败的接口占位；NOSA 使用专用路径。
 
 NOSA 默认 dense 路径使用共享 [FlashInfer Full Attention](../flashinfer.py) 适配。
 本地实现按 EzKernelKit 的 Hopper 调度模式适配 NOSA 布局、CIS 与五窗口 pooling；
@@ -93,3 +152,30 @@ FlashInfer Hopper headers；FA3 的独立 flags、版本和 header 哈希记录�
 `94bf521` 的完整模型 native/Triton 同源对照已于 2026-09-29 补测，见
 [indexer_block_sparse_profile](../../experiments/indexer_block_sparse_profile/README.md)；
 synthetic operator 对照及受影响的 full-NOSA pattern 仍待补测。
+
+## DeepSeek V3.2 ECHO prefill/extend
+
+[echo_indexer.py](echo_indexer.py) 与 [csrc/echo_indexer.cu](csrc/echo_indexer.cu) 复刻
+ECHO 的 SM90 extend 分支，在 indexer 计算中融合 pinned-host KV prefetch。
+输入为 64 个 128 维 FP8 index heads；coarse histogram 只预取精确 top-2048 的子集，
+随后由模型完成精确 top-k 与 residual recall。复用顶层共享 CUTLASS 头文件，保留上游
+MIT 许可与提交来源，不加载 SGLang、DeepGEMM 或 SM120 扩展。
+
+[deepseek_mla.py](deepseek_mla.py) 用 Triton tensor-core online softmax 消费每 query
+的逻辑或物理 token ID，支持 BF16 576 维 latent/RoPE key 与 512 维 latent value。
+[deepseek_linear.py](deepseek_linear.py) 直接消费 checkpoint FP8 权重与 128×128 FP32
+block scales，activation 按 128 维量化并使用 UE8M0 scales；grouped MoE 通过 GPU
+routing plan 按 expert tile 执行，gate/up/down 共用路由，无逐 token Python GEMM。
+CPU reference 用于小规模数学测试，CUDA 路径要求 SM90。
+
+[kv_transfer.py](kv_transfer.py) 与 [csrc/kv_transfer.cu](csrc/kv_transfer.cu) 在当前
+CUDA stream 上直接读取 mapped pinned host records；与
+[SparseTokenCache](../../cache/sparse_token_cache.py) 配合管理有限 HBM slots、淘汰、
+精确补取和 ID remap。主 MLA KV 为 BF16 1152 B/token，indexer K/scales 保持 resident。
+
+修复前算子数值检查及真实 checkpoint layer 0 / layer 3 检查已通过，完整 61 层的
+64K + 1K resident/offload 测量已验收，末 token logits bitwise 相同。
+KV gather 现支持非对齐连续视图的逐字节复制；修复后的完整模型性能待补测，见
+[ECHO 实验](../../experiments/deepseek_v32_echo_prefill/README.md)。全局 GPU 回归入口为
+`bash scripts/run_tests.sh gpu`，需要可用 Hopper、nvcc、共享 CUTLASS、TVM FFI 与 Triton；
+该入口也运行既有 NOSA 检查，因此同时需要 FlashInfer。
