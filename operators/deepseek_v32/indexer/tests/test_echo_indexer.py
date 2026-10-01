@@ -3,13 +3,13 @@
 import pytest
 import torch
 
-from operators.sm90.echo_indexer import build_info, logits
+from operators.deepseek_v32.indexer.echo import build_info, logits
 
 
 def test_echo_metadata_and_cpu_rejection():
     info = build_info()
     assert len(info["upstream_revision"]) == 40
-    assert "operators/sm90/csrc/echo_logits.cuh" in info["source_sha256"]
+    assert "operators/deepseek_v32/indexer/csrc/echo_logits.cuh" in info["source_sha256"]
     with pytest.raises(ValueError, match="CUDA Q"):
         logits(torch.zeros(1, 64, 128), torch.zeros(8, 128), None, None, 7)
 

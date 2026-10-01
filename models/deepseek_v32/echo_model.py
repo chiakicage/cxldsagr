@@ -245,7 +245,7 @@ class CheckpointLinear:
 
     def __call__(self, x):
         if self.scales is not None:
-            from operators.sm90.deepseek_linear import fp8_linear
+            from operators.deepseek_v32.linear.fp8 import fp8_linear
 
             return fp8_linear(x, self.weight, self.scales)
         return F.linear(x, self.weight)

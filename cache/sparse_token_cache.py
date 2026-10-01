@@ -160,7 +160,7 @@ class SparseTokenCache:
         if self.offload:
             missing = unique[self.host_to_device[unique] == MISSING]
             if missing.numel():
-                from operators.sm90.kv_transfer import gather_host_records
+                from operators.common.kv_transfer import gather_host_records
 
                 chosen = self._available_slots(unique, missing.numel())
                 gather_host_records(self.host, self.records, missing, chosen)

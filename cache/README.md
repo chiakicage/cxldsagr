@@ -41,7 +41,7 @@ transfer stream 写回主存。它不提供完整 resident `layer_view`；提交
 31 个历史边界 token，不为 indexer 重载整个 K prefix。KV、CIS 和派生记录统一
 commit/abort/truncate；CPU reference 保留相同事务语义。
 
-请求共享 [SM90 NosaFetchWorkspace](../operators/sm90/nosa_offload.py)，为一层的完整
+请求共享 [SM90 NosaFetchWorkspace](../operators/nosa/attention/offload/api.py)，为一层的完整
 逻辑 token 地址范围分配 HBM staging，按 `(KV head, block)` 去重并稀疏读取。当前
 融合主 kernel 的所有 CTA 都执行 attention，启用 fetch 的 CTA 以三个空闲
 producer warp 动态领取唯一页中的 8-token stripe；每个历史 K/V 向量只读一次。

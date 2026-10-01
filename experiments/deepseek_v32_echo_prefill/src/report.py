@@ -25,7 +25,7 @@ PHASES = ("prefill", "extend")
 EXPERIMENT = "deepseek_v32_echo_prefill"
 BEGIN = "<!-- BEGIN ECHO GENERATED RESULTS -->"
 END = "<!-- END ECHO GENERATED RESULTS -->"
-REQUIRED_SOURCES = frozenset(
+LEGACY_REQUIRED_SOURCES = frozenset(
     {
         "models/deepseek_v32/echo_model.py",
         "models/deepseek_v32/echo_block.py",
@@ -40,6 +40,26 @@ REQUIRED_SOURCES = frozenset(
         "operators/sm90/csrc/echo_indexer.cu",
         "operators/sm90/csrc/echo_logits.cuh",
         "operators/sm90/csrc/kv_transfer.cu",
+        f"experiments/{EXPERIMENT}/src/measure.py",
+    }
+)
+REQUIRED_SOURCES = frozenset(
+    {
+        "models/deepseek_v32/echo_model.py",
+        "models/deepseek_v32/echo_block.py",
+        "models/deepseek_v32/echo_attention.py",
+        "models/deepseek_v32/echo_infer.py",
+        "cache/sparse_token_cache.py",
+        "operators/deepseek_v32/linear/fp8.py",
+        "operators/deepseek_v32/attention/_validation.py",
+        "operators/deepseek_v32/attention/device_only/mla.py",
+        "operators/deepseek_v32/attention/offload/mla.py",
+        "operators/deepseek_v32/indexer/echo.py",
+        "operators/common/kv_transfer.py",
+        "operators/deepseek_v32/indexer/csrc/echo_helpers.cuh",
+        "operators/deepseek_v32/indexer/csrc/echo_indexer.cu",
+        "operators/deepseek_v32/indexer/csrc/echo_logits.cuh",
+        "operators/common/csrc/kv_transfer.cu",
         f"experiments/{EXPERIMENT}/src/measure.py",
     }
 )
@@ -83,7 +103,10 @@ def sha256(path):
 def validate_sources_and_request(result, directory):
     sources = result.get("source_sha256")
     require(
-        isinstance(sources, dict) and REQUIRED_SOURCES <= sources.keys(),
+        isinstance(sources, dict)
+        and any(
+            required <= sources.keys() for required in (LEGACY_REQUIRED_SOURCES, REQUIRED_SOURCES)
+        ),
         "Required implementation snapshots are missing",
     )
     require(

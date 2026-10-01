@@ -13,11 +13,11 @@ uses Triton tensor-core dots for both QK and PV without materializing gathered
 ``[query, selected_token, dimension]`` cache tensors or attention matrices.
 """
 
-import math
-
 import torch
 import triton
 import triton.language as tl
+
+from operators.deepseek_v32.attention._validation import _validate
 
 
 @triton.jit
@@ -105,25 +105,6 @@ def _sparse_mla_kernel(
     )
 
 
-def _validate(q, kv, indices, scale, value_dim):
-    if q.ndim != 3 or kv.ndim != 2 or indices.ndim != 2:
-        raise ValueError("Expected q [Q,H,D], kv [N,D], and indices [Q,K]")
-    if q.shape[0] != indices.shape[0] or q.shape[-1] != kv.shape[-1]:
-        raise ValueError("Query, cache, and selection dimensions do not agree")
-    if not isinstance(value_dim, int) or not 1 <= value_dim <= q.shape[-1]:
-        raise ValueError("value_dim must be an integer in [1, query dimension]")
-    if value_dim > 512 or q.shape[-1] - value_dim > 128:
-        raise ValueError("Supported dimensions are value_dim <= 512 and position dimension <= 128")
-    if q.device != kv.device or q.device != indices.device:
-        raise ValueError("q, kv, and indices must be on the same device")
-    if q.dtype != kv.dtype or not q.is_floating_point():
-        raise ValueError("q and kv must share a floating-point dtype")
-    if indices.dtype not in (torch.int32, torch.int64):
-        raise ValueError("indices must be int32 or int64")
-    if not math.isfinite(scale):
-        raise ValueError("scale must be finite")
-
-
 def sparse_mla(q, kv, indices, scale, value_dim=512):
     """Apply sparse MLA to BF16/FP16 queries and a shared latent KV cache.
 
@@ -131,7 +112,7 @@ def sparse_mla(q, kv, indices, scale, value_dim=512):
     participates once, including repeated IDs. Negative and out-of-range IDs
     are padding and never read cache memory; all-padding rows return zeros.
     Strided views are supported. This is an inference-only SM90 operator;
-    use :func:`reference_sparse_mla` for a CPU/FP32 correctness oracle.
+    use ``attention.reference.torch.reference_sparse_mla`` as the FP32 oracle.
     """
     _validate(q, kv, indices, scale, value_dim)
     if q.device.type != "cuda" or torch.cuda.get_device_capability(q.device) != (9, 0):
@@ -165,22 +146,4 @@ def sparse_mla(q, kv, indices, scale, value_dim=512):
             num_warps=8 if value_dim > 128 else 4,
             num_stages=1,
         )
-    return output
-
-
-@torch.no_grad()
-def reference_sparse_mla(q, kv, indices, scale, value_dim=512):
-    """FP32 oracle with the same selected-slot and padding semantics."""
-    _validate(q, kv, indices, scale, value_dim)
-    output = torch.zeros((*q.shape[:2], value_dim), dtype=q.dtype, device=q.device)
-    # Keep arithmetic FP32 even if the surrounding caller uses autocast.
-    with torch.autocast(device_type=q.device.type, enabled=False):
-        for row in range(q.shape[0]):
-            selected = indices[row]
-            selected = selected[(selected >= 0) & (selected < kv.shape[0])].long()
-            if not selected.numel():
-                continue
-            records = kv[selected].float()
-            logits = q[row].float() @ records.T * scale
-            output[row] = (logits.softmax(dim=-1) @ records[:, :value_dim]).to(q.dtype)
     return output

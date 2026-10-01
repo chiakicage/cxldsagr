@@ -76,18 +76,23 @@ def cache(mode, tokens, slots):
     return [copy.deepcopy(row) for _ in range(61)]
 
 
-@pytest.fixture
-def valid_run(tmp_path):
-    run_id = "test_fixture_61_layers"
-    directory = tmp_path / "output" / "data" / run_id
-    directory.mkdir(parents=True)
+def archive_sources(directory, required):
     sources = {}
-    for relative in report.REQUIRED_SOURCES:
+    for relative in required:
         path = directory / "source" / relative
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(f"# Unit-test source archive fixture: {relative}\n")
         sources[relative] = hashlib.sha256(path.read_bytes()).hexdigest()
     (directory / "sources.json").write_text(json.dumps(sources))
+    return sources
+
+
+@pytest.fixture
+def valid_run(tmp_path):
+    run_id = "test_fixture_61_layers"
+    directory = tmp_path / "output" / "data" / run_id
+    directory.mkdir(parents=True)
+    sources = archive_sources(directory, report.REQUIRED_SOURCES)
     request = {
         "model": "deepseek_v32",
         "prompt": "Unit-test fixture with readable history and candidates.",
@@ -165,6 +170,45 @@ def valid_run(tmp_path):
 
 def rewrite(path, result):
     path.write_text(json.dumps(result))
+
+
+@pytest.mark.parametrize("layout", ["legacy", "model"])
+def test_complete_source_layouts_validate_their_archived_files(valid_run, layout):
+    path, result = valid_run
+    required = report.LEGACY_REQUIRED_SOURCES if layout == "legacy" else report.REQUIRED_SOURCES
+    result["source_sha256"] = archive_sources(path.parent, required)
+    rewrite(path, result)
+    assert report.make_summary(path)["provenance"]["source_sha256"] == result["source_sha256"]
+
+
+@pytest.mark.parametrize(
+    "layout,missing",
+    [
+        (layout, source)
+        for layout, required in (
+            ("legacy", report.LEGACY_REQUIRED_SOURCES),
+            ("model", report.REQUIRED_SOURCES),
+        )
+        for source in sorted(required)
+    ],
+)
+def test_each_source_layout_requires_every_runtime_dependency(valid_run, layout, missing):
+    path, result = valid_run
+    required = report.LEGACY_REQUIRED_SOURCES if layout == "legacy" else report.REQUIRED_SOURCES
+    result["source_sha256"] = archive_sources(path.parent, required - {missing})
+    with pytest.raises(report.InvalidResult, match="Required implementation snapshots"):
+        report.validate_sources_and_request(result, path.parent)
+
+
+def test_incomplete_source_layouts_cannot_be_combined_into_one_complete_run(valid_run):
+    path, result = valid_run
+    required = (report.LEGACY_REQUIRED_SOURCES | report.REQUIRED_SOURCES) - {
+        "operators/sm90/deepseek_mla.py",
+        "operators/deepseek_v32/attention/_validation.py",
+    }
+    result["source_sha256"] = archive_sources(path.parent, required)
+    with pytest.raises(report.InvalidResult, match="Required implementation snapshots"):
+        report.validate_sources_and_request(result, path.parent)
 
 
 def test_valid_summary_keeps_independent_timing_and_byte_boundaries(valid_run):

@@ -9,10 +9,11 @@ NOSA 复用 [共享层](../layers/README.md)、[执行器](../executor/README.md
 | 模型 | 当前内容 |
 | --- | --- |
 | [NOSA](nosa/README.md) | FlashInfer Full Attention / SM90 block sparse、CIS 与 indexer、resident / pinned DRAM offload cache、GR 前向及文本生成 |
-| [DeepSeek V3.2](deepseek_v32/README.md) | 独立 SM90 完整 61 层 ECHO prefill/extend、indexer 融合 prefetch、bounded HBM / pinned DRAM KV；保留 SM120 synthetic decode/extend |
+| [DeepSeek V3.2](deepseek_v32/README.md) | 独立 SM90 完整 61 层 ECHO prefill/extend、indexer 融合 prefetch、bounded HBM / pinned DRAM KV |
 
-DeepSeek SM90 不依赖 SGLang。完整 61 层的 64K + 1K resident/offload 测量已验收，
-保存的末 token logits bitwise 相同；测量边界与结果见 [ECHO 实验](../experiments/deepseek_v32_echo_prefill/README.md)。
+DeepSeek SM90 不依赖 SGLang。保留的完整 61 层、64K + 1K resident/offload 报告中，
+末 token logits bitwise 相同；KV gather 对齐修复后的完整模型性能待补测，目录迁移
+也不产生新的性能结果。测量边界与版本见 [ECHO 实验](../experiments/deepseek_v32_echo_prefill/README.md)。
 NOSA 默认 resident，显式 offload 使用 native SM90 sparse fetch / attention overlap；
 唯一页内的 8 个 token stripe 各只读取一次 host，完成后 attention 复用 HBM。
 完整 32 层从独立空 cache 构建 64K sparse prefix + 1K extend，数值逐位一致。

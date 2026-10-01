@@ -1,18 +1,24 @@
 # 项目约定
 
 本项目研究通用 sparse attention offloading，选取 DeepSeek V3.2 和 NOSA 验证方案。
-后续开发优先 NOSA，主要平台为 SM90 / Hopper；保留现有 DeepSeek V3.2 / SM120 实验。
+后续开发优先 NOSA，主要平台为 SM90 / Hopper；SM120 可执行代码已移除，保留有效历史报告。
 
 ## 目录与职责
 
-- 自有硬件算子放在 `operators/sm90/`、`operators/sm120/`；共享第三方库放在 `3rdparty/`。
+- 自有算子按模型放在 `operators/nosa/`、`operators/deepseek_v32/`，模型内部按
+  `indexer/`、`attention/`、`linear/` 等实际功能组织。attention 分为 `reference/`、
+  `device_only/`、`offload/`；reference 可独立导入，不加载 Triton 或 native 扩展。
+  架构和后端是实现属性，不再作为算子的顶层目录；不为分类复制 kernel。
+  ECHO 融合 indexer/prefetch 仍归 indexer，offload attention 复用 device-only MLA。
+  真正通用的 record 搬运放 `operators/common/`，宽度和 dtype 由调用者提供；
+  共享第三方库放 `3rdparty/`。各功能的单元测试放就近 `tests/`，不新增 `__init__.py`。
+  JIT 路径和指纹必须覆盖实际源码及本地 include 依赖，不能跨模型扫描全部算子源码。
 - `operators/` 的共享适配只封装现有后端调用；`layers/` 保存共享普通层及 indexer /
   main attention 契约。共享层接收显式维度和参数，不反向导入模型配置。
 - 模型结构、权重加载、位置编码、稀疏选择语义、KV 布局适配放在
   `models/deepseek_v32/`、`models/nosa/`。`models/` 只保留模型推理相关代码及其测试；
   接入另一架构时复用对应模型目录，不按架构复制模型树。共享分层当前接入 NOSA；
-  DeepSeek V3.2 / SM120 保留既有组织，新增 standalone SM90 ECHO 仍放在同一
-  `models/deepseek_v32/`，不依赖 SGLang 或 SM120 扩展。
+  standalone SM90 ECHO 放在 `models/deepseek_v32/`，不依赖 SGLang 或 SM120 扩展。
 - `executor/` 负责通用模型分块执行和输出选择，不读取 GR 请求；`serving/` 负责 GR
   请求适配及串行请求生命周期，不包含网络服务或 CXL/RDMA 依赖。
 - `cache/` 管理请求级缓存分配、逐层写入、提交、重置和释放。模型提供 KV 布局和
@@ -28,7 +34,7 @@
   语义由模型声明。派生缓存随 KV 统一提交、回滚和截短，不占用通用 opaque layer state。
 - main attention 接收逻辑块选择、cache access 与执行上下文，不能把「全部 KV
   已完成搬入 HBM」作为通用前置条件。resident NOSA block sparse attention 已接入
-  SM90 CUDA/CuTe 与 Triton；显式 NOSA offload 通过 `operators/sm90/nosa_offload.py`
+  SM90 CUDA/CuTe 与 Triton；显式 NOSA offload 通过 `operators/nosa/attention/offload/api.py`
   实现 BF16 / D128 / GQA16 native attention 与稀疏 fetch。当前融合版本在一个
   cooperative CUDA 主 kernel 内保留所有 CTA 的 persistent FA3 计算；默认最多
   96 个 CTA 使用 producer warpgroup 的 warp 1–3（96 线程）读取 host，warp 0
@@ -163,10 +169,10 @@
   支持 `--help`，创建分类输出目录并保留子进程失败状态。不同运行用不同 run ID，
   不覆盖仍然有效的旧结果；受性能优化或正确性修正影响的旧结果保留至新结果验收并发布，
   再按上述规则替换和删除。
-- 旧 DeepSeek 及配套 SM120 实验集中保存在 `experiments/legacy/deepseek_v32/`，
-  作为整体归档，不强行套用新目录层级或拆分历史数据；仅修复导入、入口和导航链接。
-  仅保留符合其目的的有效实验；这不豁免上述结果有效性要求。保留报告中的原命令与
-  原测量含义，当前运行方式写在归档 README。
+- 旧 DeepSeek / SM120 的有效报告集中保存在 `experiments/legacy/deepseek_v32/`。
+  已删除依赖 SM120 的模型、算子及测量入口；历史原命令与测量含义保留，复现使用
+  整理前 Git revision，见归档 README。独立 DeepGEMM 基准和 CPU 报告重建工具可保留，
+  不得再导入已删除的模型/测量脚本；这不豁免上述结果有效性要求。
 
 ## 全局测试
 
@@ -187,8 +193,8 @@
   扩展包及导入名称。
 - 实验命令默认从仓库根目录运行。模型直接脚本入口保持可用；实验整理后统一使用上节的新
   模块入口，不在旧目录遗留兼容壳文件。旧命令只在历史运行记录中保留，无需安装仓库。
-- 用 `pyproject.toml` 和 `uv.lock` 管理环境，依赖改动同步维护两者。当前 SM120 扩展
-  放入显式 `sm120` 依赖组，基础环境不默认安装；未接入后端前不虚设 SM90 安装组。
+- 用 `pyproject.toml` 和 `uv.lock` 管理环境，依赖改动同步维护两者。基础环境用于
+  Hopper；独立历史 DeepGEMM 基准使用可选 `legacy` 依赖组，不恢复 SM120 扩展或安装组。
 
 ## 第三方依赖
 

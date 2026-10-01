@@ -1,5 +1,8 @@
 # DeepSeek V3.2 ECHO prefill/extend
 
+2026-10-01 目录整理：算子已迁至 `operators/nosa/`、`operators/deepseek_v32/` 和
+`operators/common/`。本页性能仍对应下文原 run ID 与源码快照；目录迁移后的性能未重新测量。
+
 本实验复刻 ECHO 的 extend indexer 内融合 KV prefetch，比较完整 DeepSeek V3.2
 的 65,536-token prefix prefill + 1,024-token extend，在 resident 与 local DRAM
 offload 两种模式下的端到端延迟、attention 时间和实际 KV 搬运量。
@@ -15,9 +18,8 @@ Run ID：`20260930T0115Z_echo_full61_fp8`。本次 offload 降低主 KV 的 HBM 
 没有触发本次发现的非对齐 storage-offset 问题；其结果只说明旧实现和原测量边界，
 不能用于证明修复后延迟。修复后的 gather 会检查源、目标行地址，非对齐视图使用逐字节复制。
 旧报告及对应运行产物保留到补测验收并发布完成；NOSA overlap 不调用此 gather，结果不受影响。
-当前补测受环境准备阻塞：项目 `.venv` 的目标不存在，按锁文件恢复依赖时镜像下载超时。
-本次使用可用的 Torch 2.10.0+cu132 / TVM FFI 0.1.12 在 H200 上通过了 12 项 gather
-对齐/非对齐检查及 4 项缓存回归；这些是代码正确性检查，不是新一轮性能实验。
+2026-10-01 已恢复项目锁定环境；目录迁移后的 gather 对齐/非对齐检查及缓存回归
+已通过。完整模型性能仍未补测；这些代码正确性检查不构成新一轮性能实验。
 
 ECHO 参考提交为 `bc1b75c1000010d0ac6f032ebaac283255c050b1`，上游
 `DeepGEMM/deep_gemm/include/deep_gemm/impls/sm90_fp8_mqa_logits.cuh` 的 extend 分支。
@@ -208,8 +210,9 @@ CUDA_VISIBLE_DEVICES=6 bash experiments/deepseek_v32_echo_prefill/scripts/ncu.sh
 ```
 
 调用模块：`models.deepseek_v32.echo_infer`、`echo_block`、`echo_attention`、
-`echo_model`；`cache.sparse_token_cache`；`operators.sm90.echo_indexer`、
-`deepseek_mla`、`deepseek_linear`、`kv_transfer`；共享 `GR.input_generator`。
+`echo_model`；`cache.sparse_token_cache`；`operators.deepseek_v32.indexer.echo`、
+`operators.deepseek_v32.attention.device_only.mla`、`operators.deepseek_v32.attention.offload.mla`、
+`operators.deepseek_v32.linear.fp8`、`operators.common.kv_transfer`；共享 `GR.input_generator`。
 
 运行参数、输入、完整结果、源码 SHA256 在 `output/data/<run_id>/`，stdout/stderr
 分别在 `output/log/<run_id>/`，Chrome/Nsight 原始 trace 在 `output/profile/<run_id>/`。

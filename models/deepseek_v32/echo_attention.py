@@ -5,7 +5,8 @@ from contextlib import nullcontext
 import torch
 
 from cache.sparse_token_cache import SparseTokenCache, WorkingSetTooLarge
-from operators.sm90.deepseek_mla import sparse_mla
+from operators.deepseek_v32.attention.device_only.mla import sparse_mla
+from operators.deepseek_v32.attention.offload.mla import sparse_mla_from_pool
 
 
 class EchoAttentionRunner:
@@ -55,10 +56,10 @@ class EchoAttentionRunner:
             right = self._consume(q[middle:], indices[middle:], scope)
             return torch.cat((left, right))
         with scope("sparse_mla"):
-            return sparse_mla(q, self.cache.records, physical, self.cfg.attention_scale)
+            return sparse_mla_from_pool(q, self.cache.records, physical, self.cfg.attention_scale)
 
     def forward(self, hidden, *, scope=None, capture_indices=False, normalized=False):
-        from operators.sm90.echo_indexer import logits as index_logits
+        from operators.deepseek_v32.indexer.echo import logits as index_logits
 
         scope = scope or (lambda _: nullcontext())
         outputs = []

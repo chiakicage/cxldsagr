@@ -1,7 +1,7 @@
 import pytest
 import torch
 
-from operators.sm90.kv_transfer import gather_host_records
+from operators.common.kv_transfer import gather_host_records
 
 
 @pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA required")

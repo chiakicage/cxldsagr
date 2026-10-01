@@ -19,7 +19,7 @@ from models.deepseek_v32.echo_model import (
     Config,
     rms_norm,
 )
-from operators.sm90.deepseek_linear import grouped_fp8_linear, prepare_expert_routing
+from operators.deepseek_v32.linear.fp8 import grouped_fp8_linear, prepare_expert_routing
 
 
 def route_experts(hidden, gate_weight, correction_bias, cfg):

@@ -99,11 +99,14 @@ def source_manifest():
     files = {
         Path(__file__),
         Path(__file__).parents[1] / "scripts/ncu.sh",
-        _ROOT / "operators/sm90/echo_indexer.py",
-        _ROOT / "operators/sm90/deepseek_mla.py",
-        _ROOT / "operators/sm90/kv_transfer.py",
-        _ROOT / "operators/sm90/csrc/kv_transfer.cu",
-        *_ROOT.glob("operators/sm90/csrc/echo_*.cu*"),
+        *(
+            path
+            for directory in ("operators/deepseek_v32", "operators/common")
+            for path in (_ROOT / directory).rglob("*")
+            if path.is_file()
+            and "tests" not in path.relative_to(_ROOT / directory).parts
+            and path.suffix in {".py", ".cu", ".cuh", ".cpp", ".h", ".hpp"}
+        ),
     }
     return {str(path.relative_to(_ROOT)): file_sha256(path) for path in sorted(files)}
 
@@ -119,7 +122,7 @@ def prepare_replay(data, kernel, pool_slots, prefetch_limit):
         pass
 
     if kernel.startswith("indexer"):
-        from operators.sm90.echo_indexer import logits
+        from operators.deepseek_v32.indexer.echo import logits
 
         q, k, weights, scales = (
             data[name].to(device)
@@ -197,7 +200,7 @@ def prepare_replay(data, kernel, pool_slots, prefetch_limit):
             return result
 
     elif kernel == "mla":
-        from operators.sm90.deepseek_mla import sparse_mla
+        from operators.deepseek_v32.attention.device_only.mla import sparse_mla
 
         q, kv, indices = (data[name].to(device) for name in ("q", "kv", "indices"))
 
@@ -214,7 +217,7 @@ def prepare_replay(data, kernel, pool_slots, prefetch_limit):
             excludes="indexer_topk_transfers_and_original_physical_pool_layout",
         )
     else:
-        from operators.sm90.kv_transfer import gather_host_records
+        from operators.common.kv_transfer import gather_host_records
 
         selected = data["indices"]
         host_ids_cpu = selected[(selected >= 0) & (selected < start)].unique(sorted=True).long()

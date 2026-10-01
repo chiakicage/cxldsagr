@@ -3,7 +3,7 @@
 import pytest
 import torch
 
-from operators.sm90.deepseek_linear import (
+from operators.deepseek_v32.linear.fp8 import (
     fp8_linear,
     grouped_fp8_linear,
     prepare_expert_routing,

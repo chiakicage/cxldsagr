@@ -15,7 +15,7 @@ from pathlib import Path
 import torch
 
 UPSTREAM_REVISION = "bc1b75c1000010d0ac6f032ebaac283255c050b1"
-_ROOT = Path(__file__).resolve().parents[2]
+_ROOT = Path(__file__).resolve().parents[3]
 _SOURCE = Path(__file__).resolve().parent / "csrc"
 _FLAGS = [
     "-O3",

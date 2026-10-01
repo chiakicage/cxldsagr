@@ -19,7 +19,7 @@ from GR.scheduling import ScheduleConfig
 from models.deepseek_v32 import request_format
 from models.deepseek_v32.echo_infer import DeepSeekEchoModel
 from models.deepseek_v32.echo_model import Config
-from operators.sm90.echo_indexer import build_info
+from operators.deepseek_v32.indexer.echo import build_info
 
 
 class Scopes:
@@ -111,11 +111,14 @@ def source_manifest():
     root = Path(__file__).resolve().parents[3]
     paths = [
         *root.glob("models/deepseek_v32/echo_*.py"),
-        *root.glob("operators/sm90/deepseek_*.py"),
-        *root.glob("operators/sm90/echo_*.py"),
-        *root.glob("operators/sm90/csrc/echo_*"),
-        root / "operators/sm90/kv_transfer.py",
-        root / "operators/sm90/csrc/kv_transfer.cu",
+        *(
+            path
+            for directory in ("operators/deepseek_v32", "operators/common")
+            for path in (root / directory).rglob("*")
+            if path.is_file()
+            and "tests" not in path.relative_to(root / directory).parts
+            and path.suffix in {".py", ".cu", ".cuh", ".cpp", ".h", ".hpp"}
+        ),
         root / "cache/sparse_token_cache.py",
         Path(__file__).resolve(),
     ]
@@ -135,7 +138,7 @@ def timed(model, ids, label, *, annotate=False):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--model", type=Path, default=Path("/mnt/user-ssd/chenkaiqi/DeepSeek-V3.2"))
+    parser.add_argument("--model", type=Path, default=Path("/preset-models"))
     parser.add_argument("--devices", default="0,1,2,6,7")
     parser.add_argument("--prefix", type=int, default=65536)
     parser.add_argument("--extend", type=int, default=1024)
