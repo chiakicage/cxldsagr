@@ -2,36 +2,43 @@
 
 ## 实验目的与内容
 
-整体归档旧 DeepSeek V3.2 attention decode/extend、DeepGEMM、GR checkpoint/indexer、
-KV 命中及 offloading 预算实验，以及其 SM120/RTX 5080 的配套硬件测量报告。
-旧目录内部不再按新模板拆分：根目录保留脚本与实验说明，`tests/` 保留测试，`docs/` 保留历史报告/图表。
-模型实现仍在 `models/deepseek_v32/`，独立算子工程仍在 `operators/sm120/`。
+保留旧 DeepSeek V3.2 attention decode/extend、DeepGEMM、GR checkpoint/indexer、
+KV 命中及 offloading 预算实验，以及 SM120/RTX 5080 的有效历史报告、图表和数据。
+报告内容与原始测量命令保持原样。项目自有 SM120 算子、旧模型实现、测量调度脚本
+及其测试已删除；本目录只保留无需旧模型的 CPU 数据分析工具和独立 DeepGEMM 基准。
 
-## 当前运行方式与调用模块
+## 历史结果复现
 
-从仓库根目录运行，新模块前缀为 `experiments.legacy.deepseek_v32`：
+旧 SM120 模型、扩展及完整实验入口保存在整理前 revision
+`397e64530c976a64f39afb742ead0e8913b0736e`（原 SM120 代码基线为 `639cc96`）。
+复现历史 GPU 测量须在该 revision 的独立 checkout 中，按照当时 README 准备依赖、
+对应 GPU、配置、checkpoint 和输入数据。报告中的旧路径及命令只说明当时运行方式，
+不能作为当前工作树的入口。此次目录清理没有重新测量，也不改变历史结果的实现版本。
+
+## 当前保留工具与调用模块
+
+从仓库根目录运行，CPU 报告工具读取原有 `GR/generated/` 或归档数据，
+不执行 SM120 模型。安装绘图依赖后可检查入口：
 
 ```bash
-python3 scripts/prepare_3rdparty.py --init
-uv sync --group sm120 --group analysis
-.venv/bin/python -m experiments.legacy.deepseek_v32.sweep_gr_content_matrix --help
-.venv/bin/python -m experiments.legacy.deepseek_v32.measure_gr_multilayer_hits --help
-.venv/bin/python -m experiments.legacy.deepseek_v32.deepgemm_v32_benchmark --quick
-.venv/bin/python -m pytest experiments/legacy/deepseek_v32/tests -q
+uv sync --group analysis
+.venv/bin/python -m experiments.legacy.deepseek_v32.report_gr_mla_cache --help
+.venv/bin/python -m experiments.legacy.deepseek_v32.report_gr_content_matrix --help
+.venv/bin/python -m experiments.legacy.deepseek_v32.export_gr_kv_hits --help
+.venv/bin/python -m experiments.legacy.deepseek_v32.render_extend_timeline --help
 ```
 
-- `measure_gr_*` / `validate_gr_numerics` 调用 `models.deepseek_v32` 的模型、算子适配和数学参考，
-  读取 `weights/DeepSeek-V3.2/`；生成请求时显式选择 GR 的 `deepseek_v32` 格式。
-- `sweep_gr_*` 用新的 `-m experiments.legacy.deepseek_v32.<module>` 子进程入口调度。
-- `profile_deepseek_v32_*` 调用 DeepSeek runner、DeepGEMM 与 SM120 sparse MLA 扩展。
-- `report_gr_*` / `export_gr_kv_hits` / `analyze_gr_kv_coverage` 读取旧 GR 结果，整理表格与可视化。
-- `deepgemm_v32_benchmark.py` 是从 `operators/sm120/benchmarks/` 移入的历史实验脚本。
+- `report_gr_*` / `export_gr_kv_hits` / `analyze_gr_kv_coverage` 读取旧 GR 结果，
+  整理表格与可视化；`render_extend_timeline` 绘制已有 profile 数据。
+- `report_gr_mla_cache` 保留原汇总计算，已移除 GPU 测量选项；其常量供其他报告工具复用。
+- `deepgemm_v32_benchmark.py` 独立调用共享 DeepGEMM，不依赖已删除的 SM120 扩展。
+  该工具需要本地 `docs/config.json` 及对应 GPU/工具链；先执行
+  `python3 scripts/prepare_3rdparty.py --init` 和 `uv sync --group legacy`，再运行
+  `.venv/bin/python -m experiments.legacy.deepseek_v32.deepgemm_v32_benchmark --quick`。
+  当前 DeepGEMM 更新尚未完成 GPU 复测，不能把历史报告视为当前版本结果。
 
-归档脚本仍保留原有数据布局；报告写入本归档 `docs/`，共享历史 GR 产物路径不重新组织。
-原始历史报告内的命令记录当时的位置，不是当前入口；当前入口以上方示例为准。
-缺少 SM120 扩展、对应 GPU、配置或 checkpoint 时不能运行 GPU 验证；迁移未重新测量。
-本次环境没有安装 `deep_gemm`，相关 CLI 和两份 legacy 测试在导入依赖时受阻；
-已静态检查新的模块导入、子进程入口和报告导航，不将其记作 GPU 验证通过。
+保留工具沿用原数据布局及报告生成语义；本次仅检查导入与 CLI，不生成或覆盖历史报告。
+没有恢复历史输入数据时，`--help` 成功也不代表能够重建完整报告。
 
 ## 实验结果与结论索引
 

@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torch
 
-from experiments.legacy.deepseek_v32.sweep_gr_mla_cache import HISTORIES, NEW_TOKENS
+from experiments.legacy.deepseek_v32.report_gr_mla_cache import HISTORIES, NEW_TOKENS
 
 
 def export_case(source, target, history, new):

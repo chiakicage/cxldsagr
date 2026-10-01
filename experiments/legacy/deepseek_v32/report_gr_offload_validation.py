@@ -3,7 +3,7 @@
 import json
 from pathlib import Path
 
-from experiments.legacy.deepseek_v32.sweep_gr_mla_cache import HISTORIES, NEW_TOKENS
+from experiments.legacy.deepseek_v32.report_gr_mla_cache import HISTORIES, NEW_TOKENS
 
 
 def main():
@@ -138,9 +138,9 @@ AI 单位 FLOP/B，MiB=2²⁰ B。“预算占比”是 50 GB/s 理想搬运时�
 
 ## 复现
 
+GPU 测量与 checkpoint 数值测试须在整理前 revision `397e645` 运行。已有结果时，当前工作树可重新生成 CPU 报告：
+
 ```bash
-env PATH="$PWD/.venv/bin:$PATH" .venv/bin/python -m experiments.legacy.deepseek_v32.sweep_gr_multilayer_hits
-env PATH="$PWD/.venv/bin:$PATH" .venv/bin/python -m pytest experiments/legacy/deepseek_v32/tests/test_gr_checkpoint_math.py -q
 .venv/bin/python -m experiments.legacy.deepseek_v32.report_gr_offload_validation
 .venv/bin/python -m experiments.legacy.deepseek_v32.report_gr_multilayer_hits
 ```

@@ -6,7 +6,7 @@ from pathlib import Path
 import numpy as np
 
 from experiments.legacy.deepseek_v32.export_gr_kv_hits import plt
-from experiments.legacy.deepseek_v32.sweep_gr_mla_cache import HISTORIES, NEW_TOKENS
+from experiments.legacy.deepseek_v32.report_gr_mla_cache import HISTORIES, NEW_TOKENS
 
 
 def main():

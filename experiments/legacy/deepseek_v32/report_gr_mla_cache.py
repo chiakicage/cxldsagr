@@ -1,9 +1,7 @@
-"""Measure or summarize GR layer-0 MLA cache unions and ideal offload costs."""
+"""Summarize recorded GR layer-0 MLA cache unions and ideal offload costs."""
 
 import argparse
 import json
-import subprocess
-import sys
 from pathlib import Path
 
 HISTORIES = (4096, 8192, 16384, 32768, 65536, 524288, 1048576)
@@ -12,7 +10,6 @@ NEW_TOKENS = (1024, 2048, 4096)
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--measure", action="store_true", help="Run selected GPU cases afresh")
     parser.add_argument("--root", type=Path, default=Path("GR/generated/cache_union_sweep"))
     parser.add_argument(
         "--report",
@@ -27,25 +24,6 @@ def main():
     for h in args.histories:
         for n in NEW_TOKENS:
             out = args.root / f"h{h}_n{n}"
-            if args.measure:
-                out.mkdir(parents=True, exist_ok=True)
-                with (out / "run.log").open("w") as log:
-                    subprocess.run(
-                        [
-                            sys.executable,
-                            "-m",
-                            "experiments.legacy.deepseek_v32.measure_gr_mla_cache_union",
-                            "--history",
-                            str(h),
-                            "--new",
-                            str(n),
-                            "--output",
-                            str(out),
-                        ],
-                        stdout=log,
-                        stderr=subprocess.STDOUT,
-                        check=True,
-                    )
             r = json.loads((out / "result.json").read_text())
             assert r["history_tokens"] == h and r["new_tokens"] == n
             assert r.get("query_union_tokens", r["queries_computed_together"]) == n
@@ -259,15 +237,15 @@ t_page = B_page / (50 × 10⁹)
 
 ## 复现
 
-在仓库根目录运行，模型默认位于 `weights/DeepSeek-V3.2`：
+取得历史测量数据需使用整理前 revision `397e645` 的测量入口，模型默认位于
+`weights/DeepSeek-V3.2`。已有数据时，在当前仓库根目录运行：
 
 ```bash
-env PATH="$PWD/.venv/bin:$PATH" .venv/bin/python -m experiments.legacy.deepseek_v32.sweep_gr_mla_cache --measure
 # 已有 21 组结果时，只重新汇总：
-.venv/bin/python -m experiments.legacy.deepseek_v32.sweep_gr_mla_cache
+.venv/bin/python -m experiments.legacy.deepseek_v32.report_gr_mla_cache
 ```
 
-[测量脚本](../../measure_gr_mla_cache_union.py)负责生成输入和执行真实 indexer；[汇总脚本](../../sweep_gr_mla_cache.py)计算字节量、FLOPs 和传输预算。输入、top-k 索引、日志与结果 JSON 保存在 `GR/generated/cache_union_sweep/`，由 Git 忽略；仓库只保留脚本和此 Markdown 汇总。此前的 [64K + 4K 单组报告](gr_cache_union_64k_4k.md)可用于交叉核对。
+整理前 revision `397e645` 中的测量脚本负责生成输入和执行真实 indexer；[汇总脚本](../../report_gr_mla_cache.py)计算字节量、FLOPs 和传输预算。输入、top-k 索引、日志与结果 JSON 保存在 `GR/generated/cache_union_sweep/`，由 Git 忽略；仓库只保留脚本和此 Markdown 汇总。此前的 [64K + 4K 单组报告](gr_cache_union_64k_4k.md)可用于交叉核对。
 """
     report = report.replace("21 组", f"{len(rows)} 组")
     args.report.write_text(report)

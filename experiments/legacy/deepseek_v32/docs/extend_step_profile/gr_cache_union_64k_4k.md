@@ -37,7 +37,7 @@
 PATH="$PWD/.venv/bin:$PATH" .venv/bin/python -m model_run.deepseek_v32.measure_gr_mla_cache_union
 ```
 
-脚本：[measure_gr_mla_cache_union.py](../../measure_gr_mla_cache_union.py)。模型来自本地 `models/DeepSeek-V3.2`，依赖 `safetensors` 已加入项目配置。
+脚本：`experiments/legacy/deepseek_v32/measure_gr_mla_cache_union.py`（源码见 `397e645`；[复现说明](../../README.md)）。模型来自本地 `models/DeepSeek-V3.2`，依赖 `safetensors` 已加入项目配置。
 
 输入和原始统计保留在本地 `GR/generated/cache_union_64k_4k/`，该目录受 Git 忽略规则保护：
 

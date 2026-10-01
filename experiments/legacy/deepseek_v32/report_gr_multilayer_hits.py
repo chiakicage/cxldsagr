@@ -6,7 +6,7 @@ import tempfile
 from pathlib import Path
 
 from experiments.legacy.deepseek_v32.export_gr_kv_hits import export_case, plot_cases
-from experiments.legacy.deepseek_v32.sweep_gr_mla_cache import HISTORIES, NEW_TOKENS
+from experiments.legacy.deepseek_v32.report_gr_mla_cache import HISTORIES, NEW_TOKENS
 
 
 def main():
@@ -92,16 +92,16 @@ Q/K 投影、indexer 投影、dense FFN 使用 checkpoint FP8 权重和 MXFP8 ac
 - NPY 回放输入：`GR/generated/multilayer_hits_validated/layer{0,1,2}_replay/h{H}_n{T}/`，包括原始索引、去重 token、源字节偏移、紧凑索引、引用数、连续段和 manifest；格式同原 [位置报告](gr_kv_hit_distribution.md)。
 - 汇总：`GR/generated/multilayer_hits_validated/summary.json`。KV 内容及中间 hidden states 不落盘；这些是地址搬运实验输入。
 
+原 GPU 测量入口保存在整理前 revision `397e645`；已有结果时，当前工作树只需执行以下 CPU 报告命令：
+
 ```bash
-env PATH="$PWD/.venv/bin:$PATH" .venv/bin/python -m experiments.legacy.deepseek_v32.sweep_gr_mla_cache --measure --histories 524288 1048576
-env PATH="$PWD/.venv/bin:$PATH" .venv/bin/python -m experiments.legacy.deepseek_v32.sweep_gr_multilayer_hits --histories 524288 1048576 --skip-completed
-.venv/bin/python -m experiments.legacy.deepseek_v32.sweep_gr_mla_cache
+.venv/bin/python -m experiments.legacy.deepseek_v32.report_gr_mla_cache
 .venv/bin/python -m experiments.legacy.deepseek_v32.export_gr_kv_hits
 .venv/bin/python -m experiments.legacy.deepseek_v32.report_gr_offload_validation
 .venv/bin/python -m experiments.legacy.deepseek_v32.report_gr_multilayer_hits
 ```
 
-只跑一个形状：`.venv/bin/python -m experiments.legacy.deepseek_v32.measure_gr_multilayer_hits --history 65536 --new 4096 --validate`。显存测量包含实际层间 forward，生成图表和回放 NPY 仅需 CPU。原始产物由 Git 忽略，脚本、报告与图片保留。
+历史显存测量包含实际层间 forward，生成图表和回放 NPY 仅需 CPU。原始产物由 Git 忽略，报告工具、报告与图片保留。
 """
     (report_dir / "gr_multilayer_kv_hits.md").write_text(report)
     print(

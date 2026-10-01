@@ -12,7 +12,7 @@
 | [NOSA GR 65536 + 1024](nosa_gr_65536_1024/README.md) | H200 dense 前向、模块 MFU 与 Nsight 活动分析已补测；计时边界见报告 | `bash experiments/nosa_gr_65536_1024/scripts/run.sh <run_id>` |
 | [NOSA indexer pattern 65536 + 1024](nosa_indexer_pattern_65536_1024/README.md) | H200 完整 NOSA 三组对照与 QA32 已补测，QA64 已复核；容量、传输与 overlap 离线分析已更新 | `bash experiments/nosa_indexer_pattern_65536_1024/scripts/sparse_compare.sh <run_id>` |
 | [DeepSeek V3.2 ECHO prefill/extend](deepseek_v32_echo_prefill/README.md) | 保留修复前 SM90 完整 61 层、64K + 1K 报告；KV gather 对齐修复后的完整模型性能待补测 | `bash experiments/deepseek_v32_echo_prefill/scripts/run.sh` |
-| [旧 DeepSeek / SM120](legacy/deepseek_v32/README.md) | 旧脚本、测试和历史报告整体归档 | 见归档 README |
+| [旧 DeepSeek / SM120](legacy/deepseek_v32/README.md) | 有效历史报告、CPU 重建工具与独立 DeepGEMM 基准；SM120 执行入口已移除 | 见归档 README |
 
 ```bash
 bash experiments/nosa_gr_65536_1024/scripts/run.sh --help

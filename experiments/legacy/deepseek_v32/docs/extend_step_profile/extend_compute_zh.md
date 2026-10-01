@@ -476,7 +476,7 @@ FFN 只处理新增 token，不读取历史 KV。因此下面的 1K、4K 整批�
 
 算子 GPU 时间取一次预热后的 CUPTI profile，按最内层 scope 互斥归因；GEMM 行包含 API 内 scale 打包和归约。无插桩端到端另测 5 次均值，不与 GPU exclusive 行相加。两组输出的形状与有限值检查均通过；未新增数值误差对比。这里测的是 dense FFN，不能代表后续 MoE 层的耗时。
 
-复现脚本为 [profile_deepseek_v32_ffn.py](../../profile_deepseek_v32_ffn.py)：
+复现脚本为 `experiments/legacy/deepseek_v32/profile_deepseek_v32_ffn.py`（源码见 `397e645`；[复现说明](../../README.md)）：
 
 ```bash
 PATH="$PWD/.venv/bin:$PATH" .venv/bin/python -m model_run.deepseek_v32.profile_deepseek_v32_ffn \
@@ -496,14 +496,16 @@ PATH="$PWD/.venv/bin:$PATH" .venv/bin/python -m model_run.deepseek_v32.profile_d
 
 ## 源码与核查记录
 
-- [extend 主循环、cache 追加、logits 与 top-k](../../../../../models/deepseek_v32/deepseek_v32_extend.py)
-- [投影、GroupedLinear 和输出投影](../../../../../models/deepseek_v32/deepseek_v32_decode.py)
-- [Norm、RoPE 和 indexer 量化](../../../../../models/deepseek_v32/deepseek_v32_ops.py)
-- [融合 activation 量化和 cache 写入](../../../../../models/deepseek_v32/deepseek_v32_extend_kernels.py)
+以下普通代码路径对应已移除的历史实现，源码见 `397e645`；[复现说明](../../README.md)。
+
+- extend 主循环、cache 追加、logits 与 top-k：`models/deepseek_v32/deepseek_v32_extend.py`
+- 投影、GroupedLinear 和输出投影：`models/deepseek_v32/deepseek_v32_decode.py`
+- Norm、RoPE 和 indexer 量化：`models/deepseek_v32/deepseek_v32_ops.py`
+- 融合 activation 量化和 cache 写入：`models/deepseek_v32/deepseek_v32_extend_kernels.py`
 - [DeepGEMM scale 布局转换](../../../../../3rdparty/DeepGEMM/csrc/apis/layout.hpp)
 - [SM120 MMA 指令封装](../../../../../3rdparty/DeepGEMM/deep_gemm/include/deep_gemm/mma/sm120.cuh)
 - [MQA logits 内核](../../../../../3rdparty/DeepGEMM/deep_gemm/include/deep_gemm/impls/sm120_fp8_mqa_logits.cuh)
-- [Sparse MLA prefill 内核](../../../../../operators/sm120/sparse_mla_sm120/csrc/kernel/prefill/prefill_kernel.cuh)
+- Sparse MLA prefill 内核：`operators/sm120/sparse_mla_sm120/csrc/kernel/prefill/prefill_kernel.cuh`
 - [各投影和 logits 的模板、缓存路径、SASS 记录](gemm_precision.json)
 
 文中精度描述以当前源码、默认参数和已有 SASS 核查为依据。后续微基准已确认 MXFP8 MMA 的吞吐约为普通 FP8 MMA 的两倍；本项目采用 BF16 123、FP8 247、MXFP8 487 TFLOPS 作为对应精度的实测峰值参考，见 [5080 微基准](../5080_microbench.md)。

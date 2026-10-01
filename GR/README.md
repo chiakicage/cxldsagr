@@ -180,12 +180,15 @@ DeepSeek tokenizer：/mnt/nfs/share/models/DeepSeek-V3.2/tokenizer.json
 
 ## 三层内容交叉实验
 
-这些历史实验显式选择 `deepseek_v32`，保留原有模板与长度档位。`experiments.legacy.deepseek_v32.sweep_gr_content_matrix` 使用 5 个 history 长度 × 7 个 new 长度 × 3 份 history × 3 份 item，共 315 份输入，各测第 0/1/2 层，共 945 组层级结果。每个 history 长度下的三份内容固定；同一 item 长度的三份候选内容在不同 history 间复用，通过 SHA-256 校验独立组合。
+这些历史实验显式选择 `deepseek_v32`，保留原有模板与长度档位。原内容矩阵使用 5 个 history 长度 × 7 个 new 长度 × 3 份 history × 3 份 item，共 315 份输入，各测第 0/1/2 层，共 945 组层级结果。每个 history 长度下的三份内容固定；同一 item 长度的三份候选内容在不同 history 间复用，通过 SHA-256 校验独立组合。
 
 测量边界沿用 KV 实验口径：history 包含 23-token 固定指令，new 是完整候选后缀。因此测量配置将 generator 的 user 预算设为 `history - instruction_tokens`，item 预算设为 `new + instruction_tokens`，总 token 数和实际 KV 边界精确匹配。
 
+GPU 测量入口已随 SM120 清理移除，复现须使用整理前 revision `397e645`，
+详见 [历史实验归档](../experiments/legacy/deepseek_v32/README.md)。已有原始结果时，
+当前工作树保留 CPU 报告入口：
+
 ```bash
-env PATH="$PWD/.venv/bin:$PATH" .venv/bin/python -m experiments.legacy.deepseek_v32.sweep_gr_content_matrix
 .venv/bin/python -m experiments.legacy.deepseek_v32.report_gr_content_matrix
 ```
 
