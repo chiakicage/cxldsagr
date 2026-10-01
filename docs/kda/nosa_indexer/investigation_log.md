@@ -1,24 +1,17 @@
-# NOSA SM90 KDA execution plan
+# NOSA indexer: investigation log
 
-## Acceptance and measurement
+These are records from the resident KDA work on 2026-09-28/29, reorganized
+from the former combined execution plan. Wording such as “current”, “active”,
+“latest” and “pending” refers to that historical point. Later entries can close
+an earlier pending gate; use the component checkpoint and current plan for
+present status. The document move did not execute any candidate.
 
-Continue until complete resident NOSA indexer and complete block sparse
-attention each reach 40% useful MFU on all three captured layers. Only L31
-attention reaches the target in the latest checkpoint; the goal is unfinished.
-Workload:65536 prefix +1024 queries, BF16,32 Q heads,2 KV heads,D128;
-full NOSA33/64 selection, CIS, exact masking and stable score ties.
-The actual GPU reports NVIDIA H20Z/SM90,132 SMs. The denominator remains
-989 TFLOPS. Useful FLOPs exclude masked/padded work and QK recomputation:
-indexer34,616,115,200; attention68,190,994,432. Forty percent requires
-87.503 us and172.374 us respectively.
+Private `/tmp` paths preserve original evidence locations and are not guaranteed
+to remain available. They are not experiment deliverables. Unpaired development
+runs, partial-kernel timings, CPU-only gates and unexecuted harnesses retain
+their original limitations. Rejected or unmeasured candidates are not integrated.
 
-Count validation, incremental derived-cache preparation, selection and all
-auxiliary kernels. Report complete kernel sums separately from event API and
-wall completion intervals. Prefix construction, ordinary K/V/CIS append writes
-and transaction setup are outside this append-module measurement. These are
-resident measurements, not offloading results.
-
-## Integrated implementation
+## Accepted implementation detail at publication
 
 - Model-owned incremental compression and stable CIS pool; finite validation
   and ranked preparation share request scratch. The checked combined C++ entry
@@ -26,28 +19,19 @@ resident measurements, not offloading results.
   uses a request-owned pinned status flag. Model code retains reserve/finish/
   abort ownership. Invalid Q/new K/new CIS preserves all derived bytes. The
   checked entry rejects graph capture; async preparation remains capturable.
+
 - Large score/selection uses Q16/N128, four consumer warpgroups, a producer
   warpgroup and three K buffers. Two consumer cohorts alternate first-pass
   QK and normalization. The second pass and exact selector share one kernel;
   ranked preparation removes a separate CIS ranking launch. Current fused
   implementation has96 initial registers and zero stack/LDL/STL in the
   accepted descriptor+tail combination; main remeasurement has passed.
+
 - Score and attention preserve explicit FP32 RN scaling/addition, natural-unit
   maxima and subtraction, then convert centered differences for exp2. This
   fixes confirmed large-common-offset and QK/CIS-cancellation failures in HEAD
   and earlier candidates. Existing numerical tolerances remain unchanged.
-- BF16 attention with matching K/V strides uses installed FlashInfer 0.6.18
-  FA3 headers from q>=1, eight-query unions, KV128 and two stages. Q moves
-  directly from its original strides through TMA; the epilogue writes final
-  output and marks nonfinite converted values. For ceil(queries/8) * KV_heads ==256, actual union-tile counts now
-  order work by descending size with ascending logical-batch ties. The complete
-  path has four kernels: selection preparation, work sort, FA3 and native repair.
-  Other positive FA3 geometries retain three kernels. Empty queries launch
-  nothing; FP16 and independent K/V strides retain native dispatch.
-- Native BF16 PV divides V by a power of two based on actual compacted token
-  count, then restores scale after normalization. Integer conversion preserves
-  subnormal and nonfinite values. A finite-output conversion guard also applies
-  to FP16. This fixes confirmed finite-V unnormalized accumulation overflow.
+
 - Exact second-pass pruning is integrated only for rows=1024, KV heads=2,
   compressed count=4159, blocks=1040 and query_start=65536. Both QK passes use
   aligned N128 operands. Upward FP16 tile-max/last-column summaries bound the
@@ -70,6 +54,7 @@ resident measurements, not offloading results.
   graph warning),990 CPU tests (589 resource/CUDA skips,34 subtests), and91
   focused attention tests. These earlier acceptance stages are superseded by the
   latest361-test GPU check and completed descriptor+tail measurement below.
+
 - Build provenance records FA3 flags, installed-header hash, version and source
   hashes. Revision5 identifies the narrow pruning path; native_fa3_v3 requires
   the exact four-kernel sequence for256 work items, three for other positive
@@ -80,7 +65,7 @@ resident measurements, not offloading results.
   Publication now registers the exact48-source BF16-pair graph and its
   AST-equivalent formatted-adapter variant; unknown source changes still fail.
 
-## Latest verified BF16 pair conversion checkpoint
+## BF16-pair publication checkpoint
 
 The exact pair-conversion patch is integrated from
 `/tmp/nosa-bf16-pair-pack-root-20260929` after all109 frozen files and all five
@@ -113,7 +98,7 @@ Attention code is unchanged. This unpaired checkpoint does not replace private
 paired A/B evidence or paper experiments. The following checkpoint predates
 BF16 pair conversion.
 
-## Current private investigations (runtime unchanged)
+## Final recorded private gates
 
 The fixed tail-only cluster2 prototype preserves source-level owner semantics,
 uses separate Q8 TMA/GMMA layouts and unique outgoing halos. A host CuTe check
@@ -163,60 +148,6 @@ integration, broader GPU testing or NCU follows. Frozen CPU evidence:
 `/tmp/nosa-tail-only-cluster2-split-cfg-candidate-20260929/CPU_GATE.md`;
 GPU gate: `/tmp/nosa-cluster2-complete-gate-root-20260929/REPORT.md`.
 
-The first rolled-group4 native repair stopped at its CPU gate:64 registers,
-8-byte stack and4 LDL/3 STL, attributable to compaction loop/remainder state.
-Its targeted restore64 successor removes spills and passes focused correctness,
-with9 ordinary functions' SASS/control/resources unchanged. Natural L0 complete
-graph API improves172.647→171.283us (paired1.413us,60/60 wins), but legal
-union512 all-fallback regresses830.577→895.925us (+7.868%,0/60 wins), exceeding
-the predeclared2% limit. It is rejected. No other fallback timing, L15/L31,
-full7055 poison sweep or NCU follows that failure. Frozen report:
-`/tmp/nosa-attention-fa3-group4-restore64-20260929/REPORT.md`.
-A distinct four-concurrent-engine CTA repair passes its padded layout proof:
-39936-byte stride,159744 total,114688 host CuTe addresses and36864 transpose
-checks. The initial39552-byte-stride review did not establish that proof; it
-is not evidence that the old stride is incorrect. The subsequent fixed CPU
-prototype fails:64 registers,16-byte stack,11 LDL/3 STL, with24/104 retained.
-One HGMMA24/EX2-12 body remains. Original9 functions' SASS/control is identical,
-but their shared alignment changes16->1024 and prepare static shared grows
-9488->10240. Actual and diagnostic10-function.text/resource correspondence,
-base0x400, padded offsets, TMA and descriptor checks pass. No GPU or occupancy
-query followed the failure. Frozen evidence:
-`/tmp/nosa-attention-parallel4-swizzle-proof-20260929/ERRATUM.md` and
-`/tmp/nosa-attention-fa3-parallel4-padded-20260929/CPU_GATE.md`.
-A separate host proof covers runtime1024 alignment with1023 guard bytes and
-160767 total dynamic reservation,7340032 address translations over64 possible
-base phases. That proof alone does not establish ordinary-resource restoration
-or fix spills. The completed spill audit identifies tid,2*engine and warp;
-the bounded unsigned-coordinate audit preserves signed views for CuTe/model
-arithmetic. A single combined CPU prototype used runtime-aligned
-private storage, mask/shift thread extraction with bounded int views, and
-barrier-ID recomputation inside each original volatile barrier asm. It keeps
-the39936 engine stride,1024 threads,four concurrent256-thread engines and
-24/104 allocation. The first build stops at a PTX syntax error:zero-operand
-inline asm emits the escaped `%%tid.x` literally. No candidate binary/resource
-result exists from that build. A separate syntax-only successor changes those
-two strings to `%tid.x`,preserving the exact configuration and all other
-source; no resource sweep or GPU acceptance/performance claim. Evidence:
-`/tmp/nosa-attention-parallel4-alignment-audit-root-20260929/REPORT.md`.
-Supporting frozen reviews:
-`/tmp/nosa-attention-parallel4-spill-audit-20260929/REPORT.md` and
-`/tmp/nosa-attention-parallel4-coordinate-domain-20260929/REPORT.md`.
-Current private build:
-`/tmp/nosa-attention-fa3-parallel4-resource-syntax-20260929`;
-the failed build remains separately frozen at
-`/tmp/nosa-attention-fa3-parallel4-resource-fix-20260929`.
-The syntax successor passes the complete CPU gate:REG64,zero spills,24/104,
-all9 ordinary raw.text/resources/shared alignments unchanged,and actual full64
-address/TMA/GMMA/barrier/exit review. GPU1 focused checks pass real L0,three
-legal all-fallback inputs,tails,20 isolated flags and235 poison sweeps. Actual
-loaded repair confirmsREG64/local0/maxThreads1024,excluding the spilled
-compatibility image. Natural L0 complete GPU graph API nevertheless fails:
-175.129595→175.356483us,paired saving−0.290241us,10/60wins. No fallback timing,
-other layers,broad suite or NCU follows;the candidate is rejected. All94 CPU
-files remain unchanged before/after the gate. Result:
-`/tmp/nosa-attention-parallel4-gate-root-20260929/REPORT.md`.
-
 The Q4/N128 double-accumulator review rejects the proposed160-thread/static192
 two-CTA resource estimate. SM90 allocates registers within four subpartitions:
 192 registers rounds to6144/warp,allowing8 warps/SM,but two160-thread CTAs need
@@ -252,18 +183,6 @@ C7518 serialization. No Driver/GPU call was made and it is not integrated.
 Admission:`/tmp/nosa-fixed-pair-readonly-history-review-20260929/REPORT.md`;
 candidate:`/tmp/nosa-q4-fixed-pair-candidate-20260929`.
 
-The fixed standalone256-item single-warp attention sorter has passed its
-native resource comparison:REG32,zero stack/local/shared traffic
-and no CTA barriers; all8 other kernels remain unchanged. It preserves the
-exact descending ceil(count/2),ascending-ID key and uses8 keys per lane.
-The previous256-thread sort has30 static SHFL instructions across8 warps;
-the new single warp has240,so aggregate shuffle work is unchanged. The old
-audit's36 VIMNMX omitted36 predicated instructions; the candidate's separate
-erratum corrects that count to72. CPU evidence is frozen. Its prepared GPU gate
-was not run after the user requested publication of the current accepted
-implementation; no performance result exists and the sorter is not integrated.
-Candidate:`/tmp/nosa-attention-warp256-sort-candidate-20260929`.
-
 A new audit corrected the interpretation of the older Q16/N64x2 first-pass
 failure:89.496-versus75.655us belonged to a serialized binary, with24 HGMMA/
 24 waits. An unchanged-source CPU diagnostic reproduces it and reports ptxas
@@ -285,7 +204,15 @@ three8-MMA batches and partial overlap remain. No other widths, full-fused
 expansion or NCU follow this failure. Frozen report:
 `/tmp/nosa-firstpass-n32-n96-audit-root-20260929/REPORT.md`.
 
-## Latest verified descriptor+tail checkpoint
+## Earlier joint development measurements
+
+The following checkpoints include companion attention measurements on the same
+runs. Most changes were to the indexer; unchanged attention observations are
+not causal speedup evidence. The seed-support/common-page checkpoint changed
+both components and preserves both patch identities. These older snapshots
+do not replace the final BF16-pair checkpoint.
+
+### descriptor+tail checkpoint
 
 Q descriptor lifetime plus per-warp tail keep was integrated. That checkpoint header
 SHA256 `28eef5b9cb1a816d8e4c7abb4c2e2baa227a2cb4ea2be653ae86b47e4a2d518f`.
@@ -318,7 +245,7 @@ Paper reruns/publication and the40% objective remain incomplete.
 
 The following offset checkpoint predates the combined change.
 
-## Latest verified offset-lifetime checkpoint
+### offset-lifetime checkpoint
 
 The validated offset-lifetime patch is integrated after all58 delivery hashes
 and the exact constexpr parent were checked. Current pruned header SHA256 is
@@ -343,7 +270,7 @@ attention287.056/285.376/279.072 us; wall339.192/367.957/351.083 and
 This is an unpaired development checkpoint; published experiments remain
 pending rerun. The following constexpr checkpoint predates this change.
 
-## Latest verified constexpr checkpoint
+### constexpr checkpoint
 
 The guarded-geometry constexpr candidate is now integrated from
 `/tmp/nosa-pruned-constexpr-root-20260929/candidate.patch`, SHA256
@@ -373,7 +300,7 @@ indexer and295.376/290.928/283.760 us for attention; wall medians are370.525/
 passes40% in these complete kernel sums. No paper report has been replaced.
 The checkpoint below predates the constexpr specialization.
 
-## Previous seed-support/common-page checkpoint
+### seed-support/common-page checkpoint
 
 The exact seed-support cutoff patch and attention common-page fast path are
 now integrated after private acceptance. The124-test focused attention suite,990-test CPU regression (601 skips), and
@@ -423,7 +350,7 @@ Patch SHA256:
 Attribution stays native_fa3_v3 with the exact source hash; there is no new
 launch-sequence or numerical contract. All main components have recompiled and passed the full GPU regression.
 
-## Previous verified checkpoint
+### checkpoint
 
 Input capture: `kda_inputs_baseline_20260928_1345`, actual sparse-model layers
 0/15/31 with original strides. Complete main development run:
@@ -467,26 +394,17 @@ The unchanged acceptance tolerance is rtol=atol=.016; the separately recorded
 stricter atol=.001 diagnostic has0/7/976 native outside elements, out of
 4,194,304 elements per layer, and is not declared passed.
 
-## Active independent work
+## Earlier candidate handoffs and investigations
 
-Root owns integration, complete-module measurement and publication. Independent
-candidates stay in /tmp and use separate GPUs; frozen deliveries are immutable.
-
-Current work after BF16 pair main acceptance:
+These entries preceded later gates above. In particular, tail-only cluster2
+and dynamic tail service were subsequently rejected or stopped; an earlier
+“pending” statement does not reopen them. Integration remains owned by the
+main implementation, and immutable deliveries retain their private evidence.
 
 - Root finished the pair checkpoint (126 frozen run files) and rejected the
   pool-init barrier and prefix-rank zero-sentinel points after their measured
   gates. Main runtime sources still match the accepted measurement snapshot.
-- Attention warp0 kth mapping passes static/correctness gates but fails its
-  one L0 complete-API timing gate by4.104 us paired,0/60 wins. Its69 frozen
-  files are verified at `/tmp/nosa-attention-fa3-warp-kth-20260929/REPORT.md`;
-  no broader measurement follows. That report corrects prior EP/audit naming:
-  QueryEmpty enum0 maps to hardware barrier8; initialization uses hardware0.
-  The old EP serial-row/shared-residency rejection remains valid, but a pending
-  QueryEmpty arrive is not a hardware-barrier0 hazard.
-- A fixed rolled group4 native repair wrapper is under read-only review:
-  512 CTAs may avoid repair8's parallelism shortage, but loop/register lifetime,
-  code size and all-fallback throughput still need evidence. No prototype yet.
+
 - Tail-only cluster4 indexer collaboration stops at its capacity gate: Driver
   query of the accepted cubin finds30 active clusters versus32 required for
   the128-CTA grid, losing the current single-wave first pass. No prototype.
@@ -499,28 +417,27 @@ Current work after BF16 pair main acceptance:
   `/tmp/nosa-tail-only-cluster4-protocol-root-20260929/PROTOCOL_REVIEW.md`.
   These are distinct from prior one-pass cluster logit storage.
 
-Current private follow-on work after the offset checkpoint:
-
 - Q descriptor lifetime is privately accepted and frozen at
   `/tmp/nosa-q-descriptor-lifetime-root-20260929/REPORT.md`. Three-layer fused
   paired savings3.983/2.360/2.595 us,60/60 each; all3 real/reference/poison,
   30 synthetic,5 edges and36 native tests pass. Stack48→0B and LDL/STL15/12→0/0;
   actual full NCU local load/store sectors are zero. Source3b698215, binaryf1ec0f6c.
+
 - Tail per-warp keep is independently accepted at
   `/tmp/nosa-tail-warp-keep-20260929/REPORT.md`: paired savings4.139/3.665/3.995 us,
   all60/60. Every WG keeps its original collective/wait/release; the guard
   skips only excluded rows' tail max/inverse reads and normalized writeout.
   Eight direct-pruning oracle cases preserve actual top33 IDs/keys and full
   final CIS selection; discarded below-cut pool entries may differ.
+
 - The private combination source4549e5cb passes L15 against descriptor-only
   source127.773→123.886 us (paired4.086 us saving,60/60). It retains zero spill
   and13 unchanged other SASS functions. Combined acceptance, main rebuild and complete-module measurement have
   passed. Latest complete MFU is recorded above; private timings remain partial.
+
 - Per-WG leader arrivals are semantically reviewed but rejected by the single
   L15 GPU gate: paired+2.303 us,0/60 wins, stack48→72B. No other leader variant
   was tested. `/tmp/nosa-wg-release-candidate-20260929/REPORT.md`.
-
-Completed follow-on work from the constexpr checkpoint:
 
 - The offset-lifetime patch is privately accepted and now integrated:
   `/tmp/nosa-constexpr-offset-liveness-audit-20260929/probe.patch`, SHA256
@@ -529,17 +446,13 @@ Completed follow-on work from the constexpr checkpoint:
   all existing real/synthetic/edge acceptance passes. Stack104→48 B, with
   unchanged96 initial registers and13 other kernel functions. Do not infer a
   large speedup from reduced stack; the eliminated masked LDLs are rare.
+
 - The one-WG representative barrier audit passed, but its GPU candidate
   regressed as recorded above and is rejected.
+
 - Two initial seed tiles were rejected offline: total seed+tail WG work grows
   4.20/16.57/20.05%, and all worst work chains lengthen. No implementation.
   `/tmp/nosa-seed2-feasibility-20260929/REPORT.md`.
-- Three-stage/global-CIS stopped after historical/resource review. The old
-  packed-Q/O measurement cannot be relabeled as current performance; no new
-  prototype was run. `/tmp/nosa-attention-stage3-global-cis-audit-20260929/AUDIT.md`.
-
-The entries below retain the accepted stages leading to the current source;
-their original private measurements are distinct from the latest main run.
 
 - Q8 tail delivery is integrated from
   `/tmp/nosa-q16-split-tail-delivery-20260929/integration.patch`, SHA256
@@ -558,21 +471,7 @@ their original private measurements are distinct from the latest main run.
   L15 (60/60 losses), despite bitwise max/inverse and zero spills; it is stopped.
   Separate WGMMA/normalizer warpgroups with FP32 shared handoff subsequently
   stopped at the resource/bandwidth feasibility gate, as recorded below.
-- Sorted attention is integrated from
-  `/tmp/nosa-attention-fa3-sorted-delivery-20260929/delta_from_safe_pv.patch`,
-  together with `/tmp/nosa-fa3-v3-attribution-20260929/attribution.patch`.
-  Private complete graph API medians on GPU7 are175.888/175.194/171.074 us,
-  versus189.627/185.611/178.170 us paired baselines. These are the sorting-only
-  private measurements; latest main complete kernel sums appear above.
-  All112 attention tests and17 extended mapping/poison cases pass privately;
-  all3 real-layer outputs match the preceding implementation bitwise.
-  A separate cooperative prepare+sort fusion was tested. Actual launch
-  support is present and the256-CTA grid fits its792-CTA residency capacity;
-  graph and exact-output acceptance pass, but complete timings show no
-  consistent gain. Cooperative fusion is rejected. The common-page mask fast
-  path has passed extended acceptance and is integrated as described above.
-  The subsequent eight-query repair CTA regressed all-fallback calls and was
-  rejected, as recorded below.
+
 - GPU1: final seed-cut early acceptance passes numerical/oracle/graph checks
   but regresses L15/L31 by about0.4 us and is rejected. The exact seed-support
   first cutoff is integrated. A fixed264-worker Q4 tail service plus latest
@@ -590,8 +489,6 @@ the87.503 us complete-indexer budget. Full/source NCU showed first-pass Tensor
 52.9% and XU57.9% at1.81GHz, so this is not a claimed hardware lower bound.
 
 ## Rejected directions and evidence
-
-Private diagnostic files are not paper deliverables:
 
 - Packed BF16 integer pooling stops at the native-benefit gate. A robust
   NaN/sentinel encoding can preserve the pool, but its filtering/decoding
@@ -616,24 +513,12 @@ Private diagnostic files are not paper deliverables:
   BAR sites7→6,96 initial registers and zero spill;13 other functions match.
   `/tmp/nosa-pool-init-barrier-root-20260929/REPORT.md`.
 
-- Inline epilogue repair retaining the native schedule stops offline: up to8
-  rows serialize while FA3 retains197712 B shared and1 CTA/SM, versus native
-  repair39552 B and4 CTAs/SM. Prior separate repair8 regressed valid fallback
-  calls47–68%; pointer/flag/barrier lifetime requirements are documented.
-  `/tmp/nosa-attention-inline-ep-repair-audit-20260929/REPORT.md`.
-
 - First-pass31+2 peeling preserves tested L15 exact/reference/poison behavior,
   but regresses fused122.772→123.135 us (paired+0.207 us,13/60 wins); with
   ranking paired+0.174 us,9/60 wins. It retains96 initial registers, zero
   stack/local and13 identical other functions. No broader testing or NCU.
   `/tmp/nosa-firstpass-peel-pair-root-20260929/REPORT.md`.
 
-- CTA-local histogram inversion preserves attention mapping/numerics but
-  regresses L0 complete API by3.452/3.481/3.514 us in three paired trials.
-  It removes the sort launch but adds startup work to all256 CTAs. All124
-  tests,91 mappings,17 edges,7055 poison cases and3 real bitwise checks pass;
-  performance rejection stops further layer/fallback/NCU measurements.
-  `/tmp/nosa-attention-fa3-inline-histogram-20260929/REPORT.md`.
 - Single-warp prefix ranking passes tested exact outputs and invalid-input
   write protection, but L15 complete preparation regresses12.196→19.780 us,
   0/60 wins. Registers rise72→80 without spills; the removal of rank CTA
@@ -665,16 +550,21 @@ Private diagnostic files are not paper deliverables:
 
 - Full FP32 logits materialization and one-pass cluster layouts lost to storage,
   synchronization or spilling; see `/tmp/nosa-score-next-20260929/REPORT.md`.
+
 - Mixed polynomial/SFU exponentials were slower despite sampled accuracy;
   hardware exp remains. `/tmp/nosa-score-poly-root-20260929/REPORT.md`.
+
 - N256/Q8/two-consumer first pass remains88.138 vs76.747 us after removing
   spilling; `/tmp/nosa-score-n256-root-20260929/REPORT.md`.
+
 - Four-cohort N128 first pass is77.918 vs76.418 us, with exact numerics and
   zero stack; `/tmp/nosa-score-cohort4-root-20260929/REPORT.md`.
+
 - Raw-QK max before RN scaling passes100,564,992 raw-value checks,36 native
   tests and24 synthetic selector cases. Its first-pass floor improves~2.1%,
   but full fused gain is only0.4 us and score-only regresses~0.9 us. It remains
   private; `/tmp/nosa-normalizer-rawmax-v1-20260929/REPORT.md`.
+
 - Persistent ranking snapshots save about1 us on the target append but add
   maintenance and boundary regressions. Shared compression layout eliminates
   bank conflicts without consistent append benefit. Neither is integrated;
@@ -686,42 +576,31 @@ Private diagnostic files are not paper deliverables:
   FP16 input rounding alone can exceed the existing inverse tolerance. This
   stops at offline ISA/SASS and numerical review; no GPU speed claim.
   `/tmp/nosa-half2-exp2-audit-20260929/REPORT.md`.
+
 - Q16 static112 with32-thread producer fails the actual512-thread kernel limit.
   A512-thread static128 inline-producer alternative removes spills but regresses
   all3 layers by0.2–0.5 us. `/tmp/nosa-prune-producer32-root-20260929/REPORT.md`.
-- Attention group12/KV64, owned group4 with actual two-CTA residency, and
-  group8/KV192 all regress. Sorted+masked-CIS rewrite also regresses; accepted
-  sorting keeps arithmetic unchanged. Producer16 is illegal for setmaxnreg.
 
-- Runtime selection-based query grouping was examined only offline. Greedy
-  64-query windows reduce total KV128 tile counts by6.19/3.50/3.42% across
-  L0/L15/L31, before Q gathering, grouping and output/causal mapping costs.
-  This does not justify a GPU prototype or speedup claim.
-  `/tmp/nosa-attention-query-grouping-root-20260929/REPORT.md`.
 - Final seed-cut certificate is rejected: it saves0.67 us on L0 but regresses
   L15/L31 by about0.4 us despite exact oracle/real/poison acceptance.
   `/tmp/nosa-final-cut-certificate-20260929/REPORT.md`.
+
 - Shared FP32 handoff to separate first-pass normalizer WGs stops offline:
   the extra shared traffic and full-stage63488>61440 register demand do not
   support the required50–55 us first-pass window.
   `/tmp/nosa-q16-shared-handoff-feasibility-20260929/REPORT.md`.
+
 - Fixed Q4 dynamic tail service stops after current-phase diagnosis: L31's
   measured conditional tail window is smaller than the new service/selector
   chain even before stage1 export. Instrumentation speeds the full kernel by
   about3.3 us, so this is not a hard impossibility bound.
   `/tmp/nosa-current-fused-phase-20260929/REPORT.md`.
-- Repair8 saves normal helper time but regresses valid all-fallback complete
-  calls47–68%; the separate required-flag2048-CTA candidate has no stable
-  complete-call gain. Neither is integrated.
-  `/tmp/nosa-attention-fa3-repair8-20260929/REPORT.md` and
-  `/tmp/nosa-attention-fa3-required-flag-20260929/REPORT.md`.
-- Fixed128-CTA two-work pairing stops offline: real tile-count scheduling is
-  worse than132-SM dynamic assignment and cross-work membership reuse needs
-  extra synchronization. `/tmp/nosa-attention-paired-cta-audit-20260929/AUDIT.md`.
+
 - Per-CTA shared CIS sorting passes the exact CPU/L15 GPU gate but saves only
   0.072 us in fused L15,37/60 wins; no stable full-fused gain. Both baseline
   and candidate have104-byte stack. No broad follow-up is run.
   `/tmp/nosa-cis-shared-sort-20260929/REPORT.md`.
+
 - Interleaving the two independent normalizer head sums regresses fused L15
   129.951→132.454 us,0/60 wins; it stops after the single-instance gate.
   `/tmp/nosa-normalizer-head-interleave-root-20260929/REPORT.md`.
@@ -730,24 +609,12 @@ Private diagnostic files are not paper deliverables:
   0/−1.97/−1.04%, while seed+tail TMA requests rise40–50%; L0/L31 worst
   chains remain unchanged. Finite captured top33 IDs/keys stay exact.
   `/tmp/nosa-q8-local-seed-audit-root-20260929/REPORT.md`.
-- Attention rescale attribution is corrected in the new frozen audit:
-  line64's3229 samples belong to elementwise exp, not rescale_o. Main-loop
-  rescale skips entire warps93.5–93.9% of the time; replacing that branch
-  with unconditional predicated FMUL issuance has no supported advantage.
-  `/tmp/nosa-attention-rescale-exp-audit-20260929/REPORT.md`.
 
 - Exact per-row all-exp-first rewriting stops offline: current firstpass SASS
   already overlaps62/66 exponentials with at least two other MUFU results
   before first use; pair/serial additions fill existing scheduling slots.
   No independent dependency removal was identified, so no compile was run.
   `/tmp/nosa-inplace-exact-exp-audit-20260929/REPORT.md`.
-- Attention initial-scale-one removes first-PV dead rescaling semantically and
-  passes numerical tests, but L31 complete timings are unstable; the candidate
-  is rejected without further fallback/NCU runs. Its report preserves the full
-  distributions: `/tmp/nosa-attention-fa3-initial-scale-one-20260929/REPORT.md`.
-  Attention already generates in-place exp before the original sum;60/64 sum
-  operations are interleaved before the final exp, so this adds no new source
-  candidate. `/tmp/nosa-attention-exp-order-audit-20260929/REPORT.md`.
 
 - Exact FTZ skipping stops at the distribution gate: all three real layers
   have zero finite score or denominator-rescale exp2 inputs<=−127. Mask/padding
@@ -757,35 +624,12 @@ Private diagnostic files are not paper deliverables:
   proof. No skip implementation or compile.
   `/tmp/nosa-exact-ftz-distribution-20260929/REPORT.md`.
 
-## Final acceptance and publication still required
+## Publication boundary
 
-1. Finish main acceptance of the integrated finite-V repair and exact pruning,
-   preserving unchanged numerical tolerances, full policy and real/synthetic data.
-2. Freeze sources, recompile in main, validate graph/fallback/alias/cache
-   behavior and measure both complete modules on all3 layers. Continue targeted
-   profiling and optimization; individual-kernel wins do not establish40% MFU.
-3. Run final global CPU/GPU checks and register exact final SUPPORTED_GRAPHS.
-4. Rerun affected experiments: `nosa_kernel_mfu` and sparse/full-NOSA parts of
-   `nosa_indexer_pattern_65536_1024` remain pending. The matched full-model
-   `indexer_block_sparse_profile` rerun completed on 2026-09-29 (see below).
-5. Publish accepted new run IDs and reports, then replace and clean superseded
-   affected report/raw artifacts in the same update.
-
-The user subsequently requested a summary and publication of the current
-implementation before further optimization. The BF16-pair/FA3-v3 checkpoint
-is therefore being committed with its existing accepted complete-module
-measurement, keeping the original run ID and source hashes. Only equivalent
-Python formatting and reviewed attribution-graph registration are added at
-publication. See `docs/nosa_sm90_checkpoint.md`. This checkpoint publication
-does not mark the40% goal complete or replace the distinct pending experiments.
-
-The full-model comparison has since been published at `94bf521` as
-`sparse_native_h200_gpu1_20260929_01` and `sparse_triton_h200_gpu1_20260929_01`.
-Both runs passed source/request/device identity, complete kernel attribution
-and candidate-output checks; 553 experiment CPU tests and 361 global GPU tests
-passed. The corresponding older sparse report and raw artifacts were replaced
-after acceptance. See the [updated report](../experiments/indexer_block_sparse_profile/README.md).
-
-Preserve `kernel_mfu_h200_gpu1_20260928_071840` and affected pattern reports with
-their original implementation and measurement meaning until their own reruns
-pass acceptance. Their replacement and the 40% objective remain unfinished.
+The BF16-pair/FA3-v3 checkpoint was published before further optimization at
+the user’s request. Existing run IDs and source hashes were retained; only
+equivalent Python adapter formatting and reviewed attribution registration
+were added. Full-model native/Triton reruns completed at `94bf521`; synthetic
+MFU, affected pattern replacement and the 40% objective remained unfinished.
+The detailed current report identities and next acceptance steps are in the
+[KDA index](../README.md) and [implementation plan](implementation_plan.md).

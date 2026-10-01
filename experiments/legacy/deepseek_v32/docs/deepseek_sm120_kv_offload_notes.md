@@ -4,7 +4,7 @@
 
 本页记录当时 DeepSeek V3.2 / RTX 5080 的布局、测量和后续设想。SM120 代码已从
 当前工作树移除；以下历史命令保持原样，须在整理前 revision `397e645` 运行。
-复现入口见 [历史实验归档](../experiments/legacy/deepseek_v32/README.md)，
+复现入口见 [历史实验归档](../README.md)，
 本页数字不代表当前 NOSA / SM90 或 DeepSeek ECHO 实现。
 
 ## 背景
@@ -138,7 +138,7 @@ host_bytes ~= batch * topk * 656B
 
 - `operators/sm120/sparse_mla_sm120/benchmarks/mapped_kv_record_kernel.cu`：standalone CUDA benchmark，用来测 GPU 直接读 CPU mapped pinned memory 的 KV-sized records。
 - `operators/sm120/sparse_mla_sm120/benchmarks/benchmark_decode_fp8.py`：当时的 sparse MLA decode benchmark，里面有 logical KV traffic 和按 head-group 重复读取后的 traffic 估算。
-- [5080_microbench.md](../experiments/legacy/deepseek_v32/docs/5080_microbench.md)：本机 RTX 5080 的指令级 compute 基线（CUDA core / tensor core）；上文基线表中的 GEMM 与 HBM bandwidth 数字为同机独立测量。
+- [5080_microbench.md](5080_microbench.md)：本机 RTX 5080 的指令级 compute 基线（CUDA core / tensor core）；上文基线表中的 GEMM 与 HBM bandwidth 数字为同机独立测量。
 
 ## 下一步要测什么
 

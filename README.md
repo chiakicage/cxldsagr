@@ -1,8 +1,14 @@
 # cxldsagr
 
-通用 **sparse attention offloading** 实验项目：KV cache 可保存在 CPU / host memory，
-GPU 根据稀疏选择读取所需 KV，研究显存占用、传输、计算与调度之间的关系。
-当前验证模型为 NOSA 与 DeepSeek V3.2，主要开发平台为 SM90 / Hopper。
+面向生成式推荐的 **sparse attention offloading** 研究项目。请求由固定 user history
+和每轮变化的 candidate items 组成，只执行 prefill。目标是在有限 HBM 下复用更多
+用户的 history KV，按稀疏选择加载所需数据，并通过 async sparse KV fetching
+attention 重叠加载与计算，降低请求延迟、提高吞吐。
+当前验证模型为 NOSA 与 DeepSeek V3.2，优先 NOSA，主要开发平台为 SM90 / Hopper。
+
+[研究思路](docs/research.md)、[当前系统状态](docs/status.md)和[后续计划](docs/roadmap.md)
+记录研究假设、实现边界与推进顺序。`GR/` 已支持固定 history 与候选变化；本地
+`serving/` 仍逐请求分配和释放 cache，跨请求 history KV 复用与服务吞吐验证尚未完成。
 
 NOSA 支持 dense、完整 sparse policy 与显式 pinned-DRAM offload。Offload 主 kernel
 融合唯一页的 stripe fetch 和 persistent FA3 attention；HBM staging 仍覆盖一层完整
@@ -13,7 +19,7 @@ DeepSeek V3.2 支持独立完整 61 层 ECHO prefill/extend，不依赖 SGLang�
 KV prefetch，主 KV 使用 resident 存储或有限 HBM pool 与 pinned DRAM backing。
 保留的完整 64K + 1K 报告显示 resident/offload 末 token logits 逐位一致；KV gather
 对齐修复后的完整模型性能待补测，见 [ECHO 实验](experiments/deepseek_v32_echo_prefill/README.md)。
-本次目录迁移和回归检查不替代这些报告对应的测量。
+报告数字保留各自 run ID 与源码快照，目录迁移和回归检查不替代性能复测。
 
 ```text
 operators/nosa/                  indexer；attention/reference、device_only、offload
@@ -30,7 +36,7 @@ experiments/                    各实验的源码、脚本、报告和原始产
 experiments/legacy/deepseek_v32/ 有效历史报告、CPU 重建工具与独立 DeepGEMM 基准
 3rdparty/                       共享 CUTLASS、DeepGEMM、DeepJIT 子模块
 GR/                             请求内容、热度和调度工具
-docs/                           跨实验设计文档
+docs/                           研究思路、系统状态和计划；kda/ 按组件保存优化文档
 ```
 
 SM120 扩展、旧 synthetic 模型与相关可执行测量入口已清理。历史报告保留原测量含义，
@@ -81,6 +87,7 @@ NOSA_OFFLOAD_CHECKPOINT=/mnt/ssd-wlcb/chenkaiqi/NOSA-8B \
 
 ## 文档
 
+- [项目文档导航](docs/README.md)、[KDA 组件文档](docs/kda/README.md)
 - [模型](models/README.md)、[算子目录与类型](operators/README.md)、[实验](experiments/README.md)
 - [共享层](layers/README.md)、[缓存](cache/README.md)、[执行器](executor/README.md)、[serving](serving/README.md)
-- [第三方依赖](3rdparty/README.md)、[GR](GR/README.md)、[KV offload 分析](docs/kv_cache_offload.md)
+- [第三方依赖](3rdparty/README.md)、[GR](GR/README.md)、[DeepSeek / SM120 历史资料](experiments/legacy/deepseek_v32/README.md)

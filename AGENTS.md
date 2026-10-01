@@ -2,6 +2,11 @@
 
 本项目研究通用 sparse attention offloading，选取 DeepSeek V3.2 和 NOSA 验证方案。
 后续开发优先 NOSA，主要平台为 SM90 / Hopper；SM120 可执行代码已移除，保留有效历史报告。
+研究场景为只有 prefill 的生成式推荐：同一用户暂定固定 history、每轮更新 candidate，
+目标是跨请求复用 history KV，并以按需加载及 fetch/attention overlap 降低 offload 开销。
+这属于研究目标；当前 serving 仍逐请求释放 cache，不能将生成器的固定前缀语义表述为
+已经实现跨请求 KV 复用。研究思路、当前状态与开发计划分别见 `docs/research.md`、
+`docs/status.md` 和 `docs/roadmap.md`。
 
 ## 目录与职责
 
@@ -215,6 +220,12 @@
 
 ## 文档与验证
 
+- `docs/` 最外层保存中文研究思路、系统实现状态、后续计划和导航。KDA 材料统一放
+  `docs/kda/`，按实现组件建立独立目录；使用 `task.md`、`implementation_plan.md`、
+  `checkpoint.md`、`investigation_log.md` 等能说明用途的文件名。当前计划与历史候选
+  分开，保留测量 run ID、源码身份和验证边界；agent 执行材料可以使用英文。
+  有效旧 DeepSeek / SM120 笔记随 `experiments/legacy/deepseek_v32/` 归档，保留历史
+  命令，只更新导航。新增实现或发布结果时同步更新 `docs/status.md` 与相关计划。
 - 给 agent 的目录维护、实现职责、依赖管理和后续开发约定写在 `AGENTS.md`。
   README 保留项目介绍、实际状态、入口索引和可用命令，避免重复维护约定。
 - 保留有效实验报告的平台、依赖和测量含义；目录迁移或上游源码支持某架构不等于
