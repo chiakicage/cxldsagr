@@ -87,6 +87,6 @@ fused main、准备操作分类正确，以及 serial fetch / attention 没有 k
 没有 50 GB/s 限速。有限 HBM slots / eviction、跨请求 residency、CUDA Graph capture、
 CXL/RDMA 仍未接入或验证。
 
-输入、依赖、重复次数、数据和生成方式见[实验报告](../../../experiments/nosa_offload_overlap/README.md)。
+输入、依赖、重复次数、数据和生成方式见[实验报告](../../../../experiments/nosa_offload_overlap/README.md)。
 后续改动须按[执行与验收计划](implementation_plan.md)重新验收并生成新的 run ID，原数字不能
 作为改动后实现的结果。

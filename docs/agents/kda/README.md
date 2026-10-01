@@ -1,8 +1,9 @@
-# KDA 组件文档
+# KDA agent 内部组件文档
 
-这里集中保存 NOSA kernel 开发的任务约束、实现检查点和候选调查记录。当前研究方向见
-[研究思路](../research.md)，系统范围和后续工作见[实现状态](../status.md)与
-[路线图](../roadmap.md)。本次整理只调整文档，不产生新的正确性或性能结果。
+这里集中保存供执行 agent 使用的 NOSA kernel 任务约束、实现检查点和候选调查记录。
+面向人的研究主线见[研究思路](../../research.md)，当前判断与缺口见
+[研究状态](../../status.md)，后续研究工作见[路线图](../../roadmap.md)。
+本次整理只调整文档，不产生新的正确性或性能结果。
 
 | 组件 | 任务与计划 | 已验收实现 | 候选记录 |
 | --- | --- | --- | --- |
@@ -10,7 +11,7 @@
 | Resident block sparse attention | [任务](nosa_sparse_attention/task.md)、[计划](nosa_sparse_attention/implementation_plan.md) | [2026-09-29 检查点](nosa_sparse_attention/checkpoint.md) | [调查记录](nosa_sparse_attention/investigation_log.md) |
 | Offload fetch / attention | [任务](nosa_offload_attention/task.md)、[计划](nosa_offload_attention/implementation_plan.md) | [2026-09-30 检查点](nosa_offload_attention/checkpoint.md) | 失败诊断原保存在 `/tmp`，未迁为实验结果 |
 
-面向读者的检查点使用中文；任务、执行约束和历史技术记录保留英文。历史记录中
+各组件检查点使用中文；任务、执行约束和历史技术记录保留英文。历史记录中
 `current`、`active`、`latest` 指原记录时点，不能据此判断当前状态；以各组件检查点为准。
 `/tmp` 路径是原证据位置，不保证临时文件仍然存在，也不作为仓库文档链接。
 
@@ -33,7 +34,7 @@ setup；不属于 offloading 测量。完整 kernel 时间总和、CUDA-event AP
 
 以下是原 run `kda_main_bf16_pair_v3_development` 的完整模块 kernel 时间总和，使用实际
 sparse-model L0/L15/L31 captures、GPU0、10 次 warmup、30 次 eager samples 和 3 次 profiler
-repeats。完整数据见[模块检查点报告](../../experiments/nosa_kernel_mfu/README.md#完整模块检查点)。
+repeats。完整数据见[模块检查点报告](../../../experiments/nosa_kernel_mfu/README.md#完整模块检查点)。
 
 | Layer | Indexer µs | Indexer MFU | Attention µs | Attention MFU |
 | --- | ---: | ---: | ---: | ---: |
@@ -58,13 +59,13 @@ AST 等价格式化变体确定。
 
 | 实验 | 原 run / 实现 | 状态与边界 |
 | --- | --- | --- |
-| [完整模型 native / Triton](../../experiments/indexer_block_sparse_profile/README.md) | `sparse_native_h200_gpu1_20260929_01`、`sparse_triton_h200_gpu1_20260929_01`，`94bf521` | 2026-09-29 已按独立 sparse 轨迹补测 64K+1K full-prefill / extend；同源、设备、请求、完整归因及输出验收通过，旧 sparse 报告和运行产物已替换。该次报告记录 553 项实验 CPU 测试、361 项全局 GPU 测试通过。 |
-| [Synthetic operator 对照](../../experiments/nosa_kernel_mfu/README.md) | `kernel_mfu_h200_gpu1_20260928_071840`，`020961b` | 补测未完成；原 468.68 / 216.17 µs attention / score 数字只描述旧实现。完整模块检查点另列，不把两类结果混用。 |
-| [Full-NOSA pattern](../../experiments/nosa_indexer_pattern_65536_1024/README.md) | 以原实验 README 中的 run ID 和实现记录为准 | 受影响的 sparse / full-NOSA 部分待补测；旧结果保留原边界，未受影响的 dense-only 部分不因此重跑。 |
+| [完整模型 native / Triton](../../../experiments/indexer_block_sparse_profile/README.md) | `sparse_native_h200_gpu1_20260929_01`、`sparse_triton_h200_gpu1_20260929_01`，`94bf521` | 2026-09-29 已按独立 sparse 轨迹补测 64K+1K full-prefill / extend；同源、设备、请求、完整归因及输出验收通过，旧 sparse 报告和运行产物已替换。该次报告记录 553 项实验 CPU 测试、361 项全局 GPU 测试通过。 |
+| [Synthetic operator 对照](../../../experiments/nosa_kernel_mfu/README.md) | `kernel_mfu_h200_gpu1_20260928_071840`，`020961b` | 补测未完成；原 468.68 / 216.17 µs attention / score 数字只描述旧实现。完整模块检查点另列，不把两类结果混用。 |
+| [Full-NOSA pattern](../../../experiments/nosa_indexer_pattern_65536_1024/README.md) | 以原实验 README 中的 run ID 和实现记录为准 | 受影响的 sparse / full-NOSA 部分待补测；旧结果保留原边界，未受影响的 dense-only 部分不因此重跑。 |
 
 上述状态描述原 resident 检查点。2026-09-30 新增 offload 分支后，模型/cache 源码图
 已扩展，当前分支的完整模型实验尚未补测；2026-10-01 算子目录迁移后的性能也未重新
-测量。当前项目进度统一见[系统状态](../status.md)，原 run 不作为这些改动后的实测结果。
+测量。当前研究进度统一见[研究状态](../../status.md)，原 run 不作为这些改动后的实测结果。
 
 正确性测试用于代码验收，不能替代模型质量或论文实验结论。保留待替换的报告和运行产物，
 直到新实现的正确性、来源稳定性与测量完整性通过；发布新 run 后，再同步替换和清理受影响的

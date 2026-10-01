@@ -50,8 +50,5 @@ uv sync --group analysis
   [offload 数值验证](docs/extend_step_profile/gr_multilayer_offload_validation.md)：内容、层间访问和缓存预算。
 - [CPU 带宽](docs/cpu_memory_bandwidth_results.md)、[PCIe 根因](docs/gpu_cpu_pcie_bandwidth_root_cause.md)、
   [GPU 直接读 host](docs/gpu_host_direct_ld_results.md)：当时硬件的数据访问结果。
-- [KV offload 笔记](docs/deepseek_sm120_kv_offload_notes.md)：2026-07-01 的 RTX 5080
-  record 布局、mapped-memory 测量和当时的 decode 设想；原位于 `docs/kv_cache_offload.md`，
-  本次仅迁移文档并更新导航，保留原始数据与命令。
 
 各报告的平台、精度、结果和结论保持原义；它们不证明当前 NOSA/SM90 的稀疏或 offloading 路径已实现。

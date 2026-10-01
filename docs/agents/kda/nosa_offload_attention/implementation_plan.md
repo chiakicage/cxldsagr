@@ -54,4 +54,4 @@ Bounded HBM slots/eviction, cross-request residency, CUDA Graph capture and
 CXL/RDMA remain outside the implemented or measured path. The full-checkpoint
 resident/offload test establishes numerical equivalence only; fixed-input
 single-layer replay does not establish full-model or serving performance.
-Follow the [system roadmap](../../roadmap.md) for broader system work.
+Follow the [system roadmap](../../../roadmap.md) for broader system work.

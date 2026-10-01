@@ -38,5 +38,5 @@ score-only 或 private fused-kernel 时间替代。详细源码身份、paired �
 原 run 和适用边界见[共用报告状态](../README.md#resident-联合验收与报告状态)。
 本页没有把路径整理当作新测量，也没有把历史候选升级为已集成实现。
 
-入口：[SM90 算子](../../../operators/nosa/README.md)、
-[NOSA 模型](../../../models/nosa/README.md)、[后续计划](implementation_plan.md)。
+入口：[SM90 算子](../../../../operators/nosa/README.md)、
+[NOSA 模型](../../../../models/nosa/README.md)、[后续计划](implementation_plan.md)。

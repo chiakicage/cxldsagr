@@ -11,7 +11,7 @@ indexer、block sparse attention 和 CIS 的开销。主指标来自未启用 pr
 源码、设备和测量参数，仅切换 `--kernel-backend`。
 
 本报告已发布测量对应 `94bf521` 的 BF16-pair indexer / FA3 v3 attention，见
-[实现检查点](../../docs/kda/README.md#resident-联合验收与报告状态)和 [SM90 算子](../../operators/nosa/README.md)。
+[实现检查点](../../docs/agents/kda/README.md#resident-联合验收与报告状态)和 [SM90 算子](../../operators/nosa/README.md)。
 实际实现身份以每次 metadata 的源码 SHA256、构建信息和 `sources/` 快照为准。
 
 2026-09-30 新增 NOSA offload 分支后，模型与 cache 依赖的源码图已扩展。下文数字、

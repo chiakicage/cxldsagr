@@ -79,10 +79,10 @@ The accepted implementation build key is `484e32532ba74fb6`. See the
 [2026-09-30 checkpoint](checkpoint.md) for run IDs, results, correctness and
 measurement limits; future changes require new acceptance and run identities.
 
-Source ownership is [backing](../../../cache/host_backing.py),
-[NOSA adaptation](../../../models/nosa/offload_cache.py),
-[workspace](../../../operators/nosa/attention/offload/api.py),
-[native preparation](../../../operators/nosa/attention/offload/csrc/nosa_offload.cu) and
-[fused kernel](../../../operators/nosa/attention/offload/csrc/nosa_offload_fused.cu).
+Source ownership is [backing](../../../../cache/host_backing.py),
+[NOSA adaptation](../../../../models/nosa/offload_cache.py),
+[workspace](../../../../operators/nosa/attention/offload/api.py),
+[native preparation](../../../../operators/nosa/attention/offload/csrc/nosa_offload.cu) and
+[fused kernel](../../../../operators/nosa/attention/offload/csrc/nosa_offload_fused.cu).
 Correctness tests remain in module test directories; failed diagnostics remain
 in `/tmp`. Unaffected resident reports retain their source and measurement identity.

@@ -2,11 +2,23 @@
 
 本项目研究通用 sparse attention offloading，选取 DeepSeek V3.2 和 NOSA 验证方案。
 后续开发优先 NOSA，主要平台为 SM90 / Hopper；SM120 可执行代码已移除，保留有效历史报告。
-研究场景为只有 prefill 的生成式推荐：同一用户暂定固定 history、每轮更新 candidate，
-目标是跨请求复用 history KV，并以按需加载及 fetch/attention overlap 降低 offload 开销。
-这属于研究目标；当前 serving 仍逐请求释放 cache，不能将生成器的固定前缀语义表述为
-已经实现跨请求 KV 复用。研究思路、当前状态与开发计划分别见 `docs/research.md`、
-`docs/status.md` 和 `docs/roadmap.md`。
+
+当前探索的一种 GR serving 方案是固定 history、变化 candidate 的 prefill 负载，
+其代表性及模型、数据适配仍待确定。`GR/` 的固定前缀语义不等于跨请求 KV 复用；
+当前 `serving/` 仍逐请求创建并释放 cache。
+
+## 项目内 Research Supervisor
+
+- 用户要求运行 Supervisor、讨论研究进展、修正研究理解、安排研究探索或准备研究汇报时，
+  读取项目内 [skills/research-supervisor/SKILL.md](skills/research-supervisor/SKILL.md)，
+  每次使用读取当前版本，不安装或同步到 Codex 用户技能目录。
+- 研究状态维护在 [docs/status.md](docs/status.md)，四环节叙事在 `docs/research.md`，
+  研究任务与推进建议在 `docs/roadmap.md`；Supervisor 内部依据在 `docs/agents/research-supervisor/`。
+  人可以直接修改状态表；后续运行保留修正并更新受影响的叙事和任务。
+- 当前研究先关注 HBM 与 CPU DRAM，GR serving 是待完善的候选场景；
+  不从项目名称自动加入 CXL/RDMA，也不把已有设计当成场景和 motivation 已成立。
+- 普通工程任务按下述约定执行，无需启动完整研究梳理；若结果改变已有研究判断，
+  将研究含义同步到对应条目，详细实现和验证仍留在工程/实验材料中。
 
 ## 目录与职责
 
@@ -220,12 +232,18 @@
 
 ## 文档与验证
 
-- `docs/` 最外层保存中文研究思路、系统实现状态、后续计划和导航。KDA 材料统一放
-  `docs/kda/`，按实现组件建立独立目录；使用 `task.md`、`implementation_plan.md`、
-  `checkpoint.md`、`investigation_log.md` 等能说明用途的文件名。当前计划与历史候选
-  分开，保留测量 run ID、源码身份和验证边界；agent 执行材料可以使用英文。
-  有效旧 DeepSeek / SM120 笔记随 `experiments/legacy/deepseek_v32/` 归档，保留历史
-  命令，只更新导航。新增实现或发布结果时同步更新 `docs/status.md` 与相关计划。
+- `docs/` 中面向人类的文档应讲清研究理解、当前问题、计划及必要的技术分析。
+  `docs/research.md`、`docs/status.md`、`docs/roadmap.md` 由 Research Supervisor 维护，
+  保留研究者直接修正；职责与阅读入口见 [docs/README.md](docs/README.md)。
+- agent 的任务契约、实现计划、详细验收、交接、证据索引和内部状态统一放在 `docs/agents/`。
+  KDA 文档按实现组件放在 `docs/agents/kda/<component>/`，使用 `task.md`、
+  `implementation_plan.md`、`checkpoint.md`、`investigation_log.md` 等明确用途的文件名；
+  当前计划与历史候选分开，保留 run ID、源码身份和验证边界，执行材料可使用英文。
+  系统工程材料放在 `docs/agents/system/`，Supervisor 内部记录放在
+  `docs/agents/research-supervisor/`；不再在 `docs/` 根目录放 `draft.md`、`plan.md` 等执行文档。
+  执行 agent 维护自己的内部材料，将研究含义返回给 Supervisor，由其同步人类状态和叙事。
+- 具体实验的报告、数据和源码仍按 `experiments/` 约定维护，模块说明留在模块 README。
+  文档分层不复制或重命名实验运行产物；迁移文档时更新导航链接，保留历史命令和测量含义。
 - 给 agent 的目录维护、实现职责、依赖管理和后续开发约定写在 `AGENTS.md`。
   README 保留项目介绍、实际状态、入口索引和可用命令，避免重复维护约定。
 - 保留有效实验报告的平台、依赖和测量含义；目录迁移或上游源码支持某架构不等于

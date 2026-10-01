@@ -1,14 +1,14 @@
 # cxldsagr
 
-面向生成式推荐的 **sparse attention offloading** 研究项目。请求由固定 user history
-和每轮变化的 candidate items 组成，只执行 prefill。目标是在有限 HBM 下复用更多
-用户的 history KV，按稀疏选择加载所需数据，并通过 async sparse KV fetching
-attention 重叠加载与计算，降低请求延迟、提高吞吐。
+**sparse attention offloading** 研究项目，从 sparse KV fetching 与 attention 重叠
+的设计出发，探索生成式推荐 serving 场景。当前一种候选方案是固定 user history、
+每轮变化 candidate items 的 prefill 负载；模型、数据及场景代表性仍待完善。存储先关注
+HBM 与 CPU DRAM，希望在有限 HBM 下复用更多历史 KV，并降低 offload 的服务开销。
 当前验证模型为 NOSA 与 DeepSeek V3.2，优先 NOSA，主要开发平台为 SM90 / Hopper。
 
-[研究思路](docs/research.md)、[当前系统状态](docs/status.md)和[后续计划](docs/roadmap.md)
-记录研究假设、实现边界与推进顺序。`GR/` 已支持固定 history 与候选变化；本地
-`serving/` 仍逐请求分配和释放 cache，跨请求 history KV 复用与服务吞吐验证尚未完成。
+[研究叙事](docs/research.md)、[研究状态](docs/status.md)和[研究路线](docs/roadmap.md)
+按实验室四环节记录当前理解、具体缺口与探索任务，允许交叉推进和人直接修正。
+`GR/` 已支持固定 history 与候选变化；本地 `serving/` 仍逐请求分配和释放 cache，跨请求 history KV 复用与服务吞吐验证尚未完成。
 
 NOSA 支持 dense、完整 sparse policy 与显式 pinned-DRAM offload。Offload 主 kernel
 融合唯一页的 stripe fetch 和 persistent FA3 attention；HBM staging 仍覆盖一层完整
@@ -36,7 +36,8 @@ experiments/                    各实验的源码、脚本、报告和原始产
 experiments/legacy/deepseek_v32/ 有效历史报告、CPU 重建工具与独立 DeepGEMM 基准
 3rdparty/                       共享 CUTLASS、DeepGEMM、DeepJIT 子模块
 GR/                             请求内容、热度和调度工具
-docs/                           研究思路、系统状态和计划；kda/ 按组件保存优化文档
+docs/                           给人的研究叙事、状态和任务；agents/ 保存内部执行文档
+skills/research-supervisor/      项目内持续维护的 Research Supervisor
 ```
 
 SM120 扩展、旧 synthetic 模型与相关可执行测量入口已清理。历史报告保留原测量含义，
@@ -87,7 +88,16 @@ NOSA_OFFLOAD_CHECKPOINT=/mnt/ssd-wlcb/chenkaiqi/NOSA-8B \
 
 ## 文档
 
-- [项目文档导航](docs/README.md)、[KDA 组件文档](docs/kda/README.md)
+- [文档分工](docs/README.md)、[项目内 Research Supervisor](skills/research-supervisor/SKILL.md)
+- [KDA 组件文档](docs/agents/kda/README.md)
 - [模型](models/README.md)、[算子目录与类型](operators/README.md)、[实验](experiments/README.md)
 - [共享层](layers/README.md)、[缓存](cache/README.md)、[执行器](executor/README.md)、[serving](serving/README.md)
 - [第三方依赖](3rdparty/README.md)、[GR](GR/README.md)、[DeepSeek / SM120 历史资料](experiments/legacy/deepseek_v32/README.md)
+
+Supervisor 可直接使用项目文件，无需安装。在本项目对话中请求：
+
+```text
+请读取 skills/research-supervisor/SKILL.md 并运行 Supervisor，
+维护 docs/research.md、docs/status.md 和 docs/roadmap.md，
+内部记录放到 docs/agents/research-supervisor/，保留我的修正并更新相关内容。
+```
