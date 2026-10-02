@@ -1,0 +1,295 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1240" height="820" viewBox="0 0 1240 820">
+<rect width="100%" height="100%" fill="white"/>
+<style>text{font-family:Arial,sans-serif;font-size:13px;fill:#222}</style>
+<text x="70" y="23">Serving latency versus user population; mean = solid, p95 = dashed; all requests retain cache misses</text>
+<text x="70" y="57" font-weight="bold">deepseek_v32 · gr_serving_h200_20261002_h64k_01 · prefix 65536, candidate 128 · seed 42</text>
+<text x="70" y="85">All requests</text>
+<text x="35" y="99">ms</text>
+<path d="M 70 338.0 H 575" stroke="#ddd"/>
+<text x="62" y="342.0" text-anchor="end">0</text>
+<path d="M 70 279.25 H 575" stroke="#ddd"/>
+<text x="62" y="283.25" text-anchor="end">2.96e+03</text>
+<path d="M 70 220.5 H 575" stroke="#ddd"/>
+<text x="62" y="224.5" text-anchor="end">5.92e+03</text>
+<path d="M 70 161.75 H 575" stroke="#ddd"/>
+<text x="62" y="165.75" text-anchor="end">8.87e+03</text>
+<path d="M 70 103.0 H 575" stroke="#ddd"/>
+<text x="62" y="107.0" text-anchor="end">1.18e+04</text>
+<text x="70.0" y="358" text-anchor="middle">1</text>
+<text x="76.91780821917808" y="358" text-anchor="middle">8</text>
+<text x="100.63600782778865" y="358" text-anchor="middle">32</text>
+<text x="132.26027397260273" y="358" text-anchor="middle">64</text>
+<text x="195.5088062622309" y="358" text-anchor="middle">128</text>
+<text x="322.0058708414873" y="358" text-anchor="middle">256</text>
+<text x="575.0" y="358" text-anchor="middle">512</text>
+<text x="322.5" y="378" text-anchor="middle">configured users</text>
+<polyline points="70.00,307.57 76.92,218.80 100.64,159.65 132.26,189.24 195.51,159.70 322.01,159.68 575.00,159.63" fill="none" stroke="#0072b2" stroke-width="2"/>
+<circle cx="70.00" cy="307.57" r="3.5" fill="#0072b2" stroke="#0072b2"><title>dense_prefetch, 1 users, all, n=6, mean_ms=1532.394</title></circle>
+<circle cx="76.92" cy="218.80" r="3.5" fill="#0072b2" stroke="#0072b2"><title>dense_prefetch, 8 users, all, n=6, mean_ms=6001.793</title></circle>
+<circle cx="100.64" cy="159.65" r="3.5" fill="#0072b2" stroke="#0072b2"><title>dense_prefetch, 32 users, all, n=6, mean_ms=8980.068</title></circle>
+<circle cx="132.26" cy="189.24" r="3.5" fill="#0072b2" stroke="#0072b2"><title>dense_prefetch, 64 users, all, n=6, mean_ms=7490.158</title></circle>
+<circle cx="195.51" cy="159.70" r="3.5" fill="#0072b2" stroke="#0072b2"><title>dense_prefetch, 128 users, all, n=6, mean_ms=8977.520</title></circle>
+<circle cx="322.01" cy="159.68" r="3.5" fill="#0072b2" stroke="#0072b2"><title>dense_prefetch, 256 users, all, n=6, mean_ms=8978.640</title></circle>
+<circle cx="575.00" cy="159.63" r="3.5" fill="#0072b2" stroke="#0072b2"><title>dense_prefetch, 512 users, all, n=6, mean_ms=8981.261</title></circle>
+<polyline points="70.00,204.01 76.92,159.57 100.64,159.63 132.26,159.60 195.51,159.68 322.01,159.65 575.00,159.60" fill="none" stroke="#0072b2" stroke-width="2" stroke-dasharray="6 4"/>
+<circle cx="70.00" cy="204.01" r="3.5" fill="white" stroke="#0072b2"><title>dense_prefetch, 1 users, all, n=6, p95_ms=6746.644</title></circle>
+<circle cx="76.92" cy="159.57" r="3.5" fill="white" stroke="#0072b2"><title>dense_prefetch, 8 users, all, n=6, p95_ms=8984.261</title></circle>
+<circle cx="100.64" cy="159.63" r="3.5" fill="white" stroke="#0072b2"><title>dense_prefetch, 32 users, all, n=6, p95_ms=8981.391</title></circle>
+<circle cx="132.26" cy="159.60" r="3.5" fill="white" stroke="#0072b2"><title>dense_prefetch, 64 users, all, n=6, p95_ms=8983.001</title></circle>
+<circle cx="195.51" cy="159.68" r="3.5" fill="white" stroke="#0072b2"><title>dense_prefetch, 128 users, all, n=6, p95_ms=8978.915</title></circle>
+<circle cx="322.01" cy="159.65" r="3.5" fill="white" stroke="#0072b2"><title>dense_prefetch, 256 users, all, n=6, p95_ms=8980.049</title></circle>
+<circle cx="575.00" cy="159.60" r="3.5" fill="white" stroke="#0072b2"><title>dense_prefetch, 512 users, all, n=6, p95_ms=8982.720</title></circle>
+<polyline points="70.00,299.30 76.92,182.52 100.64,108.76 132.26,149.12 195.51,111.82 322.01,111.71 575.00,109.93" fill="none" stroke="#d55e00" stroke-width="2"/>
+<circle cx="70.00" cy="299.30" r="3.5" fill="#d55e00" stroke="#d55e00"><title>echo, 1 users, all, n=6, mean_ms=1948.811</title></circle>
+<circle cx="76.92" cy="182.52" r="3.5" fill="#d55e00" stroke="#d55e00"><title>echo, 8 users, all, n=6, mean_ms=7828.654</title></circle>
+<circle cx="100.64" cy="108.76" r="3.5" fill="#d55e00" stroke="#d55e00"><title>echo, 32 users, all, n=6, mean_ms=11542.575</title></circle>
+<circle cx="132.26" cy="149.12" r="3.5" fill="#d55e00" stroke="#d55e00"><title>echo, 64 users, all, n=6, mean_ms=9510.424</title></circle>
+<circle cx="195.51" cy="111.82" r="3.5" fill="#d55e00" stroke="#d55e00"><title>echo, 128 users, all, n=6, mean_ms=11388.761</title></circle>
+<circle cx="322.01" cy="111.71" r="3.5" fill="#d55e00" stroke="#d55e00"><title>echo, 256 users, all, n=6, mean_ms=11394.247</title></circle>
+<circle cx="575.00" cy="109.93" r="3.5" fill="#d55e00" stroke="#d55e00"><title>echo, 512 users, all, n=6, mean_ms=11483.558</title></circle>
+<polyline points="70.00,168.69 76.92,103.08 100.64,103.00 132.26,111.36 195.51,111.69 322.01,111.53 575.00,108.15" fill="none" stroke="#d55e00" stroke-width="2" stroke-dasharray="6 4"/>
+<circle cx="70.00" cy="168.69" r="3.5" fill="white" stroke="#d55e00"><title>echo, 1 users, all, n=6, p95_ms=8525.017</title></circle>
+<circle cx="76.92" cy="103.08" r="3.5" fill="white" stroke="#d55e00"><title>echo, 8 users, all, n=6, p95_ms=11828.788</title></circle>
+<circle cx="100.64" cy="103.00" r="3.5" fill="white" stroke="#d55e00"><title>echo, 32 users, all, n=6, p95_ms=11832.665</title></circle>
+<circle cx="132.26" cy="111.36" r="3.5" fill="white" stroke="#d55e00"><title>echo, 64 users, all, n=6, p95_ms=11411.848</title></circle>
+<circle cx="195.51" cy="111.69" r="3.5" fill="white" stroke="#d55e00"><title>echo, 128 users, all, n=6, p95_ms=11395.325</title></circle>
+<circle cx="322.01" cy="111.53" r="3.5" fill="white" stroke="#d55e00"><title>echo, 256 users, all, n=6, p95_ms=11402.947</title></circle>
+<circle cx="575.00" cy="108.15" r="3.5" fill="white" stroke="#d55e00"><title>echo, 512 users, all, n=6, p95_ms=11573.336</title></circle>
+<polyline points="70.00,307.59 76.92,218.43 100.64,158.96 132.26,188.67 195.51,158.95 322.01,158.96 575.00,158.97" fill="none" stroke="#009e73" stroke-width="2"/>
+<circle cx="70.00" cy="307.59" r="3.5" fill="#009e73" stroke="#009e73"><title>hbm, 1 users, all, n=6, mean_ms=1531.409</title></circle>
+<circle cx="76.92" cy="218.43" r="3.5" fill="#009e73" stroke="#009e73"><title>hbm, 8 users, all, n=6, mean_ms=6020.747</title></circle>
+<circle cx="100.64" cy="158.96" r="3.5" fill="#009e73" stroke="#009e73"><title>hbm, 32 users, all, n=6, mean_ms=9015.053</title></circle>
+<circle cx="132.26" cy="188.67" r="3.5" fill="#009e73" stroke="#009e73"><title>hbm, 64 users, all, n=6, mean_ms=7518.982</title></circle>
+<circle cx="195.51" cy="158.95" r="3.5" fill="#009e73" stroke="#009e73"><title>hbm, 128 users, all, n=6, mean_ms=9015.451</title></circle>
+<circle cx="322.01" cy="158.96" r="3.5" fill="#009e73" stroke="#009e73"><title>hbm, 256 users, all, n=6, mean_ms=9015.197</title></circle>
+<circle cx="575.00" cy="158.97" r="3.5" fill="#009e73" stroke="#009e73"><title>hbm, 512 users, all, n=6, mean_ms=9014.593</title></circle>
+<polyline points="70.00,204.03 76.92,158.99 100.64,158.93 132.26,158.94 195.51,158.92 322.01,158.92 575.00,158.93" fill="none" stroke="#009e73" stroke-width="2" stroke-dasharray="6 4"/>
+<circle cx="70.00" cy="204.03" r="3.5" fill="white" stroke="#009e73"><title>hbm, 1 users, all, n=6, p95_ms=6745.386</title></circle>
+<circle cx="76.92" cy="158.99" r="3.5" fill="white" stroke="#009e73"><title>hbm, 8 users, all, n=6, p95_ms=9013.366</title></circle>
+<circle cx="100.64" cy="158.93" r="3.5" fill="white" stroke="#009e73"><title>hbm, 32 users, all, n=6, p95_ms=9016.597</title></circle>
+<circle cx="132.26" cy="158.94" r="3.5" fill="white" stroke="#009e73"><title>hbm, 64 users, all, n=6, p95_ms=9015.739</title></circle>
+<circle cx="195.51" cy="158.92" r="3.5" fill="white" stroke="#009e73"><title>hbm, 128 users, all, n=6, p95_ms=9016.885</title></circle>
+<circle cx="322.01" cy="158.92" r="3.5" fill="white" stroke="#009e73"><title>hbm, 256 users, all, n=6, p95_ms=9016.816</title></circle>
+<circle cx="575.00" cy="158.93" r="3.5" fill="white" stroke="#009e73"><title>hbm, 512 users, all, n=6, p95_ms=9016.444</title></circle>
+<polyline points="70.00,304.83 76.92,208.89 100.64,145.68 132.26,177.73 195.51,145.83 322.01,145.54 575.00,145.96" fill="none" stroke="#cc79a7" stroke-width="2"/>
+<circle cx="70.00" cy="304.83" r="3.5" fill="#cc79a7" stroke="#cc79a7"><title>serial_sparse, 1 users, all, n=6, mean_ms=1669.999</title></circle>
+<circle cx="76.92" cy="208.89" r="3.5" fill="#cc79a7" stroke="#cc79a7"><title>serial_sparse, 8 users, all, n=6, mean_ms=6500.928</title></circle>
+<circle cx="100.64" cy="145.68" r="3.5" fill="#cc79a7" stroke="#cc79a7"><title>serial_sparse, 32 users, all, n=6, mean_ms=9683.415</title></circle>
+<circle cx="132.26" cy="177.73" r="3.5" fill="#cc79a7" stroke="#cc79a7"><title>serial_sparse, 64 users, all, n=6, mean_ms=8069.785</title></circle>
+<circle cx="195.51" cy="145.83" r="3.5" fill="#cc79a7" stroke="#cc79a7"><title>serial_sparse, 128 users, all, n=6, mean_ms=9675.854</title></circle>
+<circle cx="322.01" cy="145.54" r="3.5" fill="#cc79a7" stroke="#cc79a7"><title>serial_sparse, 256 users, all, n=6, mean_ms=9690.901</title></circle>
+<circle cx="575.00" cy="145.96" r="3.5" fill="#cc79a7" stroke="#cc79a7"><title>serial_sparse, 512 users, all, n=6, mean_ms=9669.446</title></circle>
+<polyline points="70.00,192.37 76.92,144.82 100.64,145.13 132.26,145.76 195.51,145.63 322.01,145.23 575.00,145.89" fill="none" stroke="#cc79a7" stroke-width="2" stroke-dasharray="6 4"/>
+<circle cx="70.00" cy="192.37" r="3.5" fill="white" stroke="#cc79a7"><title>serial_sparse, 1 users, all, n=6, p95_ms=7332.534</title></circle>
+<circle cx="76.92" cy="144.82" r="3.5" fill="white" stroke="#cc79a7"><title>serial_sparse, 8 users, all, n=6, p95_ms=9726.765</title></circle>
+<circle cx="100.64" cy="145.13" r="3.5" fill="white" stroke="#cc79a7"><title>serial_sparse, 32 users, all, n=6, p95_ms=9711.167</title></circle>
+<circle cx="132.26" cy="145.76" r="3.5" fill="white" stroke="#cc79a7"><title>serial_sparse, 64 users, all, n=6, p95_ms=9679.715</title></circle>
+<circle cx="195.51" cy="145.63" r="3.5" fill="white" stroke="#cc79a7"><title>serial_sparse, 128 users, all, n=6, p95_ms=9686.025</title></circle>
+<circle cx="322.01" cy="145.23" r="3.5" fill="white" stroke="#cc79a7"><title>serial_sparse, 256 users, all, n=6, p95_ms=9706.350</title></circle>
+<circle cx="575.00" cy="145.89" r="3.5" fill="white" stroke="#cc79a7"><title>serial_sparse, 512 users, all, n=6, p95_ms=9673.041</title></circle>
+<text x="685" y="85">Revisits only (exclude first visit)</text>
+<text x="650" y="99">ms</text>
+<path d="M 685 338.0 H 1190" stroke="#ddd"/>
+<text x="677" y="342.0" text-anchor="end">0</text>
+<path d="M 685 279.25 H 1190" stroke="#ddd"/>
+<text x="677" y="283.25" text-anchor="end">2.96e+03</text>
+<path d="M 685 220.5 H 1190" stroke="#ddd"/>
+<text x="677" y="224.5" text-anchor="end">5.92e+03</text>
+<path d="M 685 161.75 H 1190" stroke="#ddd"/>
+<text x="677" y="165.75" text-anchor="end">8.87e+03</text>
+<path d="M 685 103.0 H 1190" stroke="#ddd"/>
+<text x="677" y="107.0" text-anchor="end">1.18e+04</text>
+<text x="685.0" y="358" text-anchor="middle">1</text>
+<text x="691.917808219178" y="358" text-anchor="middle">8</text>
+<text x="715.6360078277886" y="358" text-anchor="middle">32</text>
+<text x="747.2602739726027" y="358" text-anchor="middle">64</text>
+<text x="810.5088062622309" y="358" text-anchor="middle">128</text>
+<text x="937.0058708414873" y="358" text-anchor="middle">256</text>
+<text x="1190.0" y="358" text-anchor="middle">512</text>
+<text x="937.5" y="378" text-anchor="middle">configured users</text>
+<polyline points="685.00,337.15 691.92,337.15 747.26,337.14" fill="none" stroke="#0072b2" stroke-width="2"/>
+<circle cx="685.00" cy="337.15" r="3.5" fill="#0072b2" stroke="#0072b2"><title>dense_prefetch, 1 users, revisit, n=5, mean_ms=42.612</title></circle>
+<circle cx="691.92" cy="337.15" r="3.5" fill="#0072b2" stroke="#0072b2"><title>dense_prefetch, 8 users, revisit, n=2, mean_ms=42.731</title></circle>
+<circle cx="747.26" cy="337.14" r="3.5" fill="#0072b2" stroke="#0072b2"><title>dense_prefetch, 64 users, revisit, n=1, mean_ms=43.456</title></circle>
+<polyline points="685.00,337.15 691.92,337.15 747.26,337.14" fill="none" stroke="#0072b2" stroke-width="2" stroke-dasharray="6 4"/>
+<circle cx="685.00" cy="337.15" r="3.5" fill="white" stroke="#0072b2"><title>dense_prefetch, 1 users, revisit, n=5, p95_ms=42.654</title></circle>
+<circle cx="691.92" cy="337.15" r="3.5" fill="white" stroke="#0072b2"><title>dense_prefetch, 8 users, revisit, n=2, p95_ms=42.752</title></circle>
+<circle cx="747.26" cy="337.14" r="3.5" fill="white" stroke="#0072b2"><title>dense_prefetch, 64 users, revisit, n=1, p95_ms=43.456</title></circle>
+<polyline points="685.00,336.61 691.92,336.59 747.26,336.61" fill="none" stroke="#d55e00" stroke-width="2"/>
+<circle cx="685.00" cy="336.61" r="3.5" fill="#d55e00" stroke="#d55e00"><title>echo, 1 users, revisit, n=5, mean_ms=69.964</title></circle>
+<circle cx="691.92" cy="336.59" r="3.5" fill="#d55e00" stroke="#d55e00"><title>echo, 8 users, revisit, n=2, mean_ms=70.755</title></circle>
+<circle cx="747.26" cy="336.61" r="3.5" fill="#d55e00" stroke="#d55e00"><title>echo, 64 users, revisit, n=1, mean_ms=69.854</title></circle>
+<polyline points="685.00,336.59 691.92,336.59 747.26,336.61" fill="none" stroke="#d55e00" stroke-width="2" stroke-dasharray="6 4"/>
+<circle cx="685.00" cy="336.59" r="3.5" fill="white" stroke="#d55e00"><title>echo, 1 users, revisit, n=5, p95_ms=70.827</title></circle>
+<circle cx="691.92" cy="336.59" r="3.5" fill="white" stroke="#d55e00"><title>echo, 8 users, revisit, n=2, p95_ms=70.775</title></circle>
+<circle cx="747.26" cy="336.61" r="3.5" fill="white" stroke="#d55e00"><title>echo, 64 users, revisit, n=1, p95_ms=69.854</title></circle>
+<polyline points="685.00,337.17 691.92,337.17 747.26,337.17" fill="none" stroke="#009e73" stroke-width="2"/>
+<circle cx="685.00" cy="337.17" r="3.5" fill="#009e73" stroke="#009e73"><title>hbm, 1 users, revisit, n=5, mean_ms=41.808</title></circle>
+<circle cx="691.92" cy="337.17" r="3.5" fill="#009e73" stroke="#009e73"><title>hbm, 8 users, revisit, n=2, mean_ms=41.665</title></circle>
+<circle cx="747.26" cy="337.17" r="3.5" fill="#009e73" stroke="#009e73"><title>hbm, 64 users, revisit, n=1, mean_ms=41.893</title></circle>
+<polyline points="685.00,337.15 691.92,337.17 747.26,337.17" fill="none" stroke="#009e73" stroke-width="2" stroke-dasharray="6 4"/>
+<circle cx="685.00" cy="337.15" r="3.5" fill="white" stroke="#009e73"><title>hbm, 1 users, revisit, n=5, p95_ms=43.005</title></circle>
+<circle cx="691.92" cy="337.17" r="3.5" fill="white" stroke="#009e73"><title>hbm, 8 users, revisit, n=2, p95_ms=41.714</title></circle>
+<circle cx="747.26" cy="337.17" r="3.5" fill="white" stroke="#009e73"><title>hbm, 64 users, revisit, n=1, p95_ms=41.893</title></circle>
+<polyline points="685.00,336.96 691.92,336.96 747.26,336.96" fill="none" stroke="#cc79a7" stroke-width="2"/>
+<circle cx="685.00" cy="336.96" r="3.5" fill="#cc79a7" stroke="#cc79a7"><title>serial_sparse, 1 users, revisit, n=5, mean_ms=52.158</title></circle>
+<circle cx="691.92" cy="336.96" r="3.5" fill="#cc79a7" stroke="#cc79a7"><title>serial_sparse, 8 users, revisit, n=2, mean_ms=52.231</title></circle>
+<circle cx="747.26" cy="336.96" r="3.5" fill="#cc79a7" stroke="#cc79a7"><title>serial_sparse, 64 users, revisit, n=1, mean_ms=52.609</title></circle>
+<polyline points="685.00,336.96 691.92,336.96 747.26,336.96" fill="none" stroke="#cc79a7" stroke-width="2" stroke-dasharray="6 4"/>
+<circle cx="685.00" cy="336.96" r="3.5" fill="white" stroke="#cc79a7"><title>serial_sparse, 1 users, revisit, n=5, p95_ms=52.463</title></circle>
+<circle cx="691.92" cy="336.96" r="3.5" fill="white" stroke="#cc79a7"><title>serial_sparse, 8 users, revisit, n=2, p95_ms=52.333</title></circle>
+<circle cx="747.26" cy="336.96" r="3.5" fill="white" stroke="#cc79a7"><title>serial_sparse, 64 users, revisit, n=1, p95_ms=52.609</title></circle>
+<path d="M 70 406 h 20" stroke="#0072b2" stroke-width="3"/>
+<text x="96" y="410">dense_prefetch</text>
+<path d="M 350 406 h 20" stroke="#d55e00" stroke-width="3"/>
+<text x="376" y="410">echo</text>
+<path d="M 630 406 h 20" stroke="#009e73" stroke-width="3"/>
+<text x="656" y="410">hbm</text>
+<path d="M 910 406 h 20" stroke="#cc79a7" stroke-width="3"/>
+<text x="936" y="410">serial_sparse</text>
+<text x="70" y="447" font-weight="bold">nosa · gr_serving_h200_20261002_h64k_01 · prefix 65536, candidate 128 · seed 42</text>
+<text x="70" y="475">All requests</text>
+<text x="35" y="489">ms</text>
+<path d="M 70 728.0 H 575" stroke="#ddd"/>
+<text x="62" y="732.0" text-anchor="end">0</text>
+<path d="M 70 669.25 H 575" stroke="#ddd"/>
+<text x="62" y="673.25" text-anchor="end">1.22e+03</text>
+<path d="M 70 610.5 H 575" stroke="#ddd"/>
+<text x="62" y="614.5" text-anchor="end">2.44e+03</text>
+<path d="M 70 551.75 H 575" stroke="#ddd"/>
+<text x="62" y="555.75" text-anchor="end">3.65e+03</text>
+<path d="M 70 493.0 H 575" stroke="#ddd"/>
+<text x="62" y="497.0" text-anchor="end">4.87e+03</text>
+<text x="70.0" y="748" text-anchor="middle">1</text>
+<text x="76.91780821917808" y="748" text-anchor="middle">8</text>
+<text x="100.63600782778865" y="748" text-anchor="middle">32</text>
+<text x="132.26027397260273" y="748" text-anchor="middle">64</text>
+<text x="195.5088062622309" y="748" text-anchor="middle">128</text>
+<text x="322.0058708414873" y="748" text-anchor="middle">256</text>
+<text x="575.0" y="748" text-anchor="middle">512</text>
+<text x="322.5" y="768" text-anchor="middle">configured users</text>
+<polyline points="70.00,701.62 76.92,629.59 100.64,581.39 132.26,605.23 195.51,581.41 322.01,581.39 575.00,581.41" fill="none" stroke="#0072b2" stroke-width="2"/>
+<circle cx="70.00" cy="701.62" r="3.5" fill="#0072b2" stroke="#0072b2"><title>dense_prefetch, 1 users, all, n=6, mean_ms=546.805</title></circle>
+<circle cx="76.92" cy="629.59" r="3.5" fill="#0072b2" stroke="#0072b2"><title>dense_prefetch, 8 users, all, n=6, mean_ms=2039.718</title></circle>
+<circle cx="100.64" cy="581.39" r="3.5" fill="#0072b2" stroke="#0072b2"><title>dense_prefetch, 32 users, all, n=6, mean_ms=3038.732</title></circle>
+<circle cx="132.26" cy="605.23" r="3.5" fill="#0072b2" stroke="#0072b2"><title>dense_prefetch, 64 users, all, n=6, mean_ms=2544.632</title></circle>
+<circle cx="195.51" cy="581.41" r="3.5" fill="#0072b2" stroke="#0072b2"><title>dense_prefetch, 128 users, all, n=6, mean_ms=3038.276</title></circle>
+<circle cx="322.01" cy="581.39" r="3.5" fill="#0072b2" stroke="#0072b2"><title>dense_prefetch, 256 users, all, n=6, mean_ms=3038.809</title></circle>
+<circle cx="575.00" cy="581.41" r="3.5" fill="#0072b2" stroke="#0072b2"><title>dense_prefetch, 512 users, all, n=6, mean_ms=3038.392</title></circle>
+<polyline points="70.00,617.53 76.92,581.35 100.64,581.14 132.26,580.57 195.51,581.18 322.01,581.15 575.00,581.17" fill="none" stroke="#0072b2" stroke-width="2" stroke-dasharray="6 4"/>
+<circle cx="70.00" cy="617.53" r="3.5" fill="white" stroke="#0072b2"><title>dense_prefetch, 1 users, all, n=6, p95_ms=2289.764</title></circle>
+<circle cx="76.92" cy="581.35" r="3.5" fill="white" stroke="#0072b2"><title>dense_prefetch, 8 users, all, n=6, p95_ms=3039.578</title></circle>
+<circle cx="100.64" cy="581.14" r="3.5" fill="white" stroke="#0072b2"><title>dense_prefetch, 32 users, all, n=6, p95_ms=3044.025</title></circle>
+<circle cx="132.26" cy="580.57" r="3.5" fill="white" stroke="#0072b2"><title>dense_prefetch, 64 users, all, n=6, p95_ms=3055.820</title></circle>
+<circle cx="195.51" cy="581.18" r="3.5" fill="white" stroke="#0072b2"><title>dense_prefetch, 128 users, all, n=6, p95_ms=3043.052</title></circle>
+<circle cx="322.01" cy="581.15" r="3.5" fill="white" stroke="#0072b2"><title>dense_prefetch, 256 users, all, n=6, p95_ms=3043.684</title></circle>
+<circle cx="575.00" cy="581.17" r="3.5" fill="white" stroke="#0072b2"><title>dense_prefetch, 512 users, all, n=6, p95_ms=3043.227</title></circle>
+<polyline points="70.00,707.77 76.92,650.93 100.64,612.89 132.26,632.18 195.51,612.65 322.01,612.61 575.00,612.55" fill="none" stroke="#d55e00" stroke-width="2"/>
+<circle cx="70.00" cy="707.77" r="3.5" fill="#d55e00" stroke="#d55e00"><title>hbm, 1 users, all, n=6, mean_ms=419.271</title></circle>
+<circle cx="76.92" cy="650.93" r="3.5" fill="#d55e00" stroke="#d55e00"><title>hbm, 8 users, all, n=6, mean_ms=1597.407</title></circle>
+<circle cx="100.64" cy="612.89" r="3.5" fill="#d55e00" stroke="#d55e00"><title>hbm, 32 users, all, n=6, mean_ms=2385.956</title></circle>
+<circle cx="132.26" cy="632.18" r="3.5" fill="#d55e00" stroke="#d55e00"><title>hbm, 64 users, all, n=6, mean_ms=1986.029</title></circle>
+<circle cx="195.51" cy="612.65" r="3.5" fill="#d55e00" stroke="#d55e00"><title>hbm, 128 users, all, n=6, mean_ms=2390.786</title></circle>
+<circle cx="322.01" cy="612.61" r="3.5" fill="#d55e00" stroke="#d55e00"><title>hbm, 256 users, all, n=6, mean_ms=2391.577</title></circle>
+<circle cx="575.00" cy="612.55" r="3.5" fill="#d55e00" stroke="#d55e00"><title>hbm, 512 users, all, n=6, mean_ms=2392.946</title></circle>
+<polyline points="70.00,642.01 76.92,612.93 100.64,612.66 132.26,612.89 195.51,612.38 322.01,612.54 575.00,612.36" fill="none" stroke="#d55e00" stroke-width="2" stroke-dasharray="6 4"/>
+<circle cx="70.00" cy="642.01" r="3.5" fill="white" stroke="#d55e00"><title>hbm, 1 users, all, n=6, p95_ms=1782.263</title></circle>
+<circle cx="76.92" cy="612.93" r="3.5" fill="white" stroke="#d55e00"><title>hbm, 8 users, all, n=6, p95_ms=2385.025</title></circle>
+<circle cx="100.64" cy="612.66" r="3.5" fill="white" stroke="#d55e00"><title>hbm, 32 users, all, n=6, p95_ms=2390.581</title></circle>
+<circle cx="132.26" cy="612.89" r="3.5" fill="white" stroke="#d55e00"><title>hbm, 64 users, all, n=6, p95_ms=2385.904</title></circle>
+<circle cx="195.51" cy="612.38" r="3.5" fill="white" stroke="#d55e00"><title>hbm, 128 users, all, n=6, p95_ms=2396.448</title></circle>
+<circle cx="322.01" cy="612.54" r="3.5" fill="white" stroke="#d55e00"><title>hbm, 256 users, all, n=6, p95_ms=2393.143</title></circle>
+<circle cx="575.00" cy="612.36" r="3.5" fill="white" stroke="#d55e00"><title>hbm, 512 users, all, n=6, p95_ms=2396.880</title></circle>
+<polyline points="70.00,699.80 76.92,621.55 100.64,568.82 132.26,594.58 195.51,569.57 322.01,569.51 575.00,569.62" fill="none" stroke="#009e73" stroke-width="2"/>
+<circle cx="70.00" cy="699.80" r="3.5" fill="#009e73" stroke="#009e73"><title>overlap, 1 users, all, n=6, mean_ms=584.399</title></circle>
+<circle cx="76.92" cy="621.55" r="3.5" fill="#009e73" stroke="#009e73"><title>overlap, 8 users, all, n=6, mean_ms=2206.346</title></circle>
+<circle cx="100.64" cy="568.82" r="3.5" fill="#009e73" stroke="#009e73"><title>overlap, 32 users, all, n=6, mean_ms=3299.240</title></circle>
+<circle cx="132.26" cy="594.58" r="3.5" fill="#009e73" stroke="#009e73"><title>overlap, 64 users, all, n=6, mean_ms=2765.396</title></circle>
+<circle cx="195.51" cy="569.57" r="3.5" fill="#009e73" stroke="#009e73"><title>overlap, 128 users, all, n=6, mean_ms=3283.677</title></circle>
+<circle cx="322.01" cy="569.51" r="3.5" fill="#009e73" stroke="#009e73"><title>overlap, 256 users, all, n=6, mean_ms=3284.890</title></circle>
+<circle cx="575.00" cy="569.62" r="3.5" fill="#009e73" stroke="#009e73"><title>overlap, 512 users, all, n=6, mean_ms=3282.611</title></circle>
+<polyline points="70.00,608.75 76.92,569.11 100.64,568.64 132.26,565.99 195.51,569.19 322.01,569.30 575.00,569.34" fill="none" stroke="#009e73" stroke-width="2" stroke-dasharray="6 4"/>
+<circle cx="70.00" cy="608.75" r="3.5" fill="white" stroke="#009e73"><title>overlap, 1 users, all, n=6, p95_ms=2471.655</title></circle>
+<circle cx="76.92" cy="569.11" r="3.5" fill="white" stroke="#009e73"><title>overlap, 8 users, all, n=6, p95_ms=3293.314</title></circle>
+<circle cx="100.64" cy="568.64" r="3.5" fill="white" stroke="#009e73"><title>overlap, 32 users, all, n=6, p95_ms=3303.073</title></circle>
+<circle cx="132.26" cy="565.99" r="3.5" fill="white" stroke="#009e73"><title>overlap, 64 users, all, n=6, p95_ms=3357.894</title></circle>
+<circle cx="195.51" cy="569.19" r="3.5" fill="white" stroke="#009e73"><title>overlap, 128 users, all, n=6, p95_ms=3291.554</title></circle>
+<circle cx="322.01" cy="569.30" r="3.5" fill="white" stroke="#009e73"><title>overlap, 256 users, all, n=6, p95_ms=3289.310</title></circle>
+<circle cx="575.00" cy="569.34" r="3.5" fill="white" stroke="#009e73"><title>overlap, 512 users, all, n=6, p95_ms=3288.409</title></circle>
+<polyline points="70.00,698.13 76.92,581.63 100.64,536.62 132.26,586.21 195.51,558.22 322.01,558.30 575.00,558.32" fill="none" stroke="#cc79a7" stroke-width="2"/>
+<circle cx="70.00" cy="698.13" r="3.5" fill="#cc79a7" stroke="#cc79a7"><title>serial_sparse, 1 users, all, n=6, mean_ms=619.078</title></circle>
+<circle cx="76.92" cy="581.63" r="3.5" fill="#cc79a7" stroke="#cc79a7"><title>serial_sparse, 8 users, all, n=6, mean_ms=3033.725</title></circle>
+<circle cx="100.64" cy="536.62" r="3.5" fill="#cc79a7" stroke="#cc79a7"><title>serial_sparse, 32 users, all, n=6, mean_ms=3966.581</title></circle>
+<circle cx="132.26" cy="586.21" r="3.5" fill="#cc79a7" stroke="#cc79a7"><title>serial_sparse, 64 users, all, n=6, mean_ms=2938.883</title></circle>
+<circle cx="195.51" cy="558.22" r="3.5" fill="#cc79a7" stroke="#cc79a7"><title>serial_sparse, 128 users, all, n=6, mean_ms=3519.007</title></circle>
+<circle cx="322.01" cy="558.30" r="3.5" fill="#cc79a7" stroke="#cc79a7"><title>serial_sparse, 256 users, all, n=6, mean_ms=3517.257</title></circle>
+<circle cx="575.00" cy="558.32" r="3.5" fill="#cc79a7" stroke="#cc79a7"><title>serial_sparse, 512 users, all, n=6, mean_ms=3516.992</title></circle>
+<polyline points="70.00,600.80 76.92,493.31 100.64,493.00 132.26,557.80 195.51,557.99 322.01,558.05 575.00,558.01" fill="none" stroke="#cc79a7" stroke-width="2" stroke-dasharray="6 4"/>
+<circle cx="70.00" cy="600.80" r="3.5" fill="white" stroke="#cc79a7"><title>serial_sparse, 1 users, all, n=6, p95_ms=2636.400</title></circle>
+<circle cx="76.92" cy="493.31" r="3.5" fill="white" stroke="#cc79a7"><title>serial_sparse, 8 users, all, n=6, p95_ms=4864.395</title></circle>
+<circle cx="100.64" cy="493.00" r="3.5" fill="white" stroke="#cc79a7"><title>serial_sparse, 32 users, all, n=6, p95_ms=4870.782</title></circle>
+<circle cx="132.26" cy="557.80" r="3.5" fill="white" stroke="#cc79a7"><title>serial_sparse, 64 users, all, n=6, p95_ms=3527.792</title></circle>
+<circle cx="195.51" cy="557.99" r="3.5" fill="white" stroke="#cc79a7"><title>serial_sparse, 128 users, all, n=6, p95_ms=3523.761</title></circle>
+<circle cx="322.01" cy="558.05" r="3.5" fill="white" stroke="#cc79a7"><title>serial_sparse, 256 users, all, n=6, p95_ms=3522.491</title></circle>
+<circle cx="575.00" cy="558.01" r="3.5" fill="white" stroke="#cc79a7"><title>serial_sparse, 512 users, all, n=6, p95_ms=3523.437</title></circle>
+<text x="685" y="475">Revisits only (exclude first visit)</text>
+<text x="650" y="489">ms</text>
+<path d="M 685 728.0 H 1190" stroke="#ddd"/>
+<text x="677" y="732.0" text-anchor="end">0</text>
+<path d="M 685 669.25 H 1190" stroke="#ddd"/>
+<text x="677" y="673.25" text-anchor="end">1.22e+03</text>
+<path d="M 685 610.5 H 1190" stroke="#ddd"/>
+<text x="677" y="614.5" text-anchor="end">2.44e+03</text>
+<path d="M 685 551.75 H 1190" stroke="#ddd"/>
+<text x="677" y="555.75" text-anchor="end">3.65e+03</text>
+<path d="M 685 493.0 H 1190" stroke="#ddd"/>
+<text x="677" y="497.0" text-anchor="end">4.87e+03</text>
+<text x="685.0" y="748" text-anchor="middle">1</text>
+<text x="691.917808219178" y="748" text-anchor="middle">8</text>
+<text x="715.6360078277886" y="748" text-anchor="middle">32</text>
+<text x="747.2602739726027" y="748" text-anchor="middle">64</text>
+<text x="810.5088062622309" y="748" text-anchor="middle">128</text>
+<text x="937.0058708414873" y="748" text-anchor="middle">256</text>
+<text x="1190.0" y="748" text-anchor="middle">512</text>
+<text x="937.5" y="768" text-anchor="middle">configured users</text>
+<polyline points="685.00,725.64 691.92,725.64 747.26,725.62" fill="none" stroke="#0072b2" stroke-width="2"/>
+<circle cx="685.00" cy="725.64" r="3.5" fill="#0072b2" stroke="#0072b2"><title>dense_prefetch, 1 users, revisit, n=5, mean_ms=48.847</title></circle>
+<circle cx="691.92" cy="725.64" r="3.5" fill="#0072b2" stroke="#0072b2"><title>dense_prefetch, 8 users, revisit, n=2, mean_ms=48.855</title></circle>
+<circle cx="747.26" cy="725.62" r="3.5" fill="#0072b2" stroke="#0072b2"><title>dense_prefetch, 64 users, revisit, n=1, mean_ms=49.255</title></circle>
+<polyline points="685.00,725.63 691.92,725.64 747.26,725.62" fill="none" stroke="#0072b2" stroke-width="2" stroke-dasharray="6 4"/>
+<circle cx="685.00" cy="725.63" r="3.5" fill="white" stroke="#0072b2"><title>dense_prefetch, 1 users, revisit, n=5, p95_ms=49.198</title></circle>
+<circle cx="691.92" cy="725.64" r="3.5" fill="white" stroke="#0072b2"><title>dense_prefetch, 8 users, revisit, n=2, p95_ms=48.934</title></circle>
+<circle cx="747.26" cy="725.62" r="3.5" fill="white" stroke="#0072b2"><title>dense_prefetch, 64 users, revisit, n=1, p95_ms=49.255</title></circle>
+<polyline points="685.00,726.56 691.92,726.54 747.26,726.53" fill="none" stroke="#d55e00" stroke-width="2"/>
+<circle cx="685.00" cy="726.56" r="3.5" fill="#d55e00" stroke="#d55e00"><title>hbm, 1 users, revisit, n=5, mean_ms=29.851</title></circle>
+<circle cx="691.92" cy="726.54" r="3.5" fill="#d55e00" stroke="#d55e00"><title>hbm, 8 users, revisit, n=2, mean_ms=30.321</title></circle>
+<circle cx="747.26" cy="726.53" r="3.5" fill="#d55e00" stroke="#d55e00"><title>hbm, 64 users, revisit, n=1, mean_ms=30.388</title></circle>
+<polyline points="685.00,726.56 691.92,726.53 747.26,726.53" fill="none" stroke="#d55e00" stroke-width="2" stroke-dasharray="6 4"/>
+<circle cx="685.00" cy="726.56" r="3.5" fill="white" stroke="#d55e00"><title>hbm, 1 users, revisit, n=5, p95_ms=29.920</title></circle>
+<circle cx="691.92" cy="726.53" r="3.5" fill="white" stroke="#d55e00"><title>hbm, 8 users, revisit, n=2, p95_ms=30.464</title></circle>
+<circle cx="747.26" cy="726.53" r="3.5" fill="white" stroke="#d55e00"><title>hbm, 64 users, revisit, n=1, p95_ms=30.388</title></circle>
+<polyline points="685.00,725.82 691.92,725.80 747.26,725.78" fill="none" stroke="#009e73" stroke-width="2"/>
+<circle cx="685.00" cy="725.82" r="3.5" fill="#009e73" stroke="#009e73"><title>overlap, 1 users, revisit, n=5, mean_ms=45.220</title></circle>
+<circle cx="691.92" cy="725.80" r="3.5" fill="#009e73" stroke="#009e73"><title>overlap, 8 users, revisit, n=2, mean_ms=45.651</title></circle>
+<circle cx="747.26" cy="725.78" r="3.5" fill="#009e73" stroke="#009e73"><title>overlap, 64 users, revisit, n=1, mean_ms=45.975</title></circle>
+<polyline points="685.00,725.80 691.92,725.80 747.26,725.78" fill="none" stroke="#009e73" stroke-width="2" stroke-dasharray="6 4"/>
+<circle cx="685.00" cy="725.80" r="3.5" fill="white" stroke="#009e73"><title>overlap, 1 users, revisit, n=5, p95_ms=45.678</title></circle>
+<circle cx="691.92" cy="725.80" r="3.5" fill="white" stroke="#009e73"><title>overlap, 8 users, revisit, n=2, p95_ms=45.653</title></circle>
+<circle cx="747.26" cy="725.78" r="3.5" fill="white" stroke="#009e73"><title>overlap, 64 users, revisit, n=1, p95_ms=45.975</title></circle>
+<polyline points="685.00,725.94 691.92,725.93 747.26,725.86" fill="none" stroke="#cc79a7" stroke-width="2"/>
+<circle cx="685.00" cy="725.94" r="3.5" fill="#cc79a7" stroke="#cc79a7"><title>serial_sparse, 1 users, revisit, n=5, mean_ms=42.721</title></circle>
+<circle cx="691.92" cy="725.93" r="3.5" fill="#cc79a7" stroke="#cc79a7"><title>serial_sparse, 8 users, revisit, n=2, mean_ms=42.941</title></circle>
+<circle cx="747.26" cy="725.86" r="3.5" fill="#cc79a7" stroke="#cc79a7"><title>serial_sparse, 64 users, revisit, n=1, mean_ms=44.369</title></circle>
+<polyline points="685.00,725.93 691.92,725.93 747.26,725.86" fill="none" stroke="#cc79a7" stroke-width="2" stroke-dasharray="6 4"/>
+<circle cx="685.00" cy="725.93" r="3.5" fill="white" stroke="#cc79a7"><title>serial_sparse, 1 users, revisit, n=5, p95_ms=42.956</title></circle>
+<circle cx="691.92" cy="725.93" r="3.5" fill="white" stroke="#cc79a7"><title>serial_sparse, 8 users, revisit, n=2, p95_ms=42.973</title></circle>
+<circle cx="747.26" cy="725.86" r="3.5" fill="white" stroke="#cc79a7"><title>serial_sparse, 64 users, revisit, n=1, p95_ms=44.369</title></circle>
+<path d="M 70 796 h 20" stroke="#0072b2" stroke-width="3"/>
+<text x="96" y="800">dense_prefetch</text>
+<path d="M 350 796 h 20" stroke="#d55e00" stroke-width="3"/>
+<text x="376" y="800">hbm</text>
+<path d="M 630 796 h 20" stroke="#009e73" stroke-width="3"/>
+<text x="656" y="800">overlap</text>
+<path d="M 910 796 h 20" stroke="#cc79a7" stroke-width="3"/>
+<text x="936" y="800">serial_sparse</text>
+</svg>

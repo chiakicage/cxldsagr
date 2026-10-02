@@ -1,0 +1,107 @@
+{
+  "run_id": "gr_serving_h200_20261002_h16k_01",
+  "source_sha256": "45511acf6b7ec0e0a9bf3e21a4f9b1c9b74f88a46f03303f3f93cc9460dfd44c",
+  "measurement_status": "accepted",
+  "audit_status": "accepted",
+  "source_directory": "experiments/gr_serving/output/data/gr_serving_h200_20261002_h16k_01",
+  "copied_files": {
+    "summary.csv": {
+      "source": "analysis/summary.csv",
+      "sha256": "6da3f94c091d0509dd91dbba442f3ea99f9d1283257dd55e79d54ede3b0c2505"
+    },
+    "summary.json": {
+      "source": "analysis/summary.json",
+      "sha256": "1d5d75729eadc46d32c398f4be2bb95843bdae6aed7fe23c9bcc0e61c39f2f30"
+    },
+    "summary.svg": {
+      "source": "analysis/summary.svg",
+      "sha256": "721d4bcd0121717fb57343ced63abfe30f15287d72d8da275f5d754d6b8fcc22"
+    },
+    "per_request.csv": {
+      "source": "analysis/per_request.csv",
+      "sha256": "a27db59aab392c49723ddd19de69b17efb05588bec1820dd2ae58c24e622a443"
+    },
+    "per_request.svg": {
+      "source": "analysis/per_request.svg",
+      "sha256": "4a3a7087db7f41bbe834c74d7e2947a8da18f833e25cb6f1c7ca14d2dff90f7a"
+    },
+    "metadata.json": {
+      "source": "metadata.json",
+      "sha256": "c3fdeefa65b2ff24552d6a09d6e8f304c739f1f167d7ce2486ceade478aaf6ca"
+    },
+    "source_manifest.json": {
+      "source": "source_manifest.json",
+      "sha256": "38aa4a382c9e010a53ed0d0d315b5c991b51c897293a5ea7274d5a7837c25d56"
+    },
+    "audit.json": {
+      "source": "audit.json",
+      "sha256": "b9fef64139febe6f3e4a474361a9762e889f695b899ee8d166f6534b68482858"
+    }
+  },
+  "supplemental_renderer": {
+    "path": "experiments/gr_serving/output/data/gr_serving_h200_20261002_h16k_01/render_report.py",
+    "sha256": "71704ada5c64e417f4af703f21043eca5d3232bb5e26934cc6dc0ef93bec166d",
+    "command": ".venv/bin/python experiments/gr_serving/output/data/gr_serving_h200_20261002_h16k_01/render_report.py --summary experiments/gr_serving/report/h16k/summary.json --metadata experiments/gr_serving/report/h16k/metadata.json --output-dir experiments/gr_serving/report/h16k",
+    "input_summary_sha256": "1d5d75729eadc46d32c398f4be2bb95843bdae6aed7fe23c9bcc0e61c39f2f30",
+    "changes": "Categorical user-population x spacing and independent all/revisit y axes; unchanged measured means/p95. 4K renderer reused byte-for-byte.",
+    "matplotlib_version": "3.11.1"
+  },
+  "derived_tables": {
+    "population_coverage.csv": "Per-population requests/observed_users/revisits/max_revisits_observed from metadata cases; all model/scheme cases asserted equal. first_visits equals observed_users.",
+    "cache_and_memory.csv": "Per model/scheme maximum of each audit.case_audit.peaks field and metadata.cases GPU allocator peaks over seven populations; admission capacity/reservations from audit; evictions/revisit misses summed over cases."
+  },
+  "interpretation": [
+    "HBM and DRAM budgets are artificial cache quotas, not whole-device memory limits.",
+    "NOSA HBM has 13 revisit misses among 63 revisits; offload schemes have none on this trace.",
+    "DeepSeek HBM evicts sessions but every observed revisit still hits; no measured revisit capacity benefit.",
+    "CUDA allocator peaks include model-transition retention and are not isolated model or activation peaks.",
+    "64K remains a separate pending run; no extrapolation from this matrix."
+  ],
+  "profile": {
+    "run_id": "gr_serving_h200_20261002_h16k_profile_01",
+    "source_directory": "experiments/gr_serving/output/data/gr_serving_h200_20261002_h16k_profile_01",
+    "status": "accepted",
+    "formal_run_id": "gr_serving_h200_20261002_h16k_01",
+    "formal_source_sha256": "45511acf6b7ec0e0a9bf3e21a4f9b1c9b74f88a46f03303f3f93cc9460dfd44c",
+    "source_sha256": "cd72caf5edbac19a54d162e26d3339b05dd0671048162d970729669af5d0c48b",
+    "formal_source_comparison": {
+      "source_sha256": "45511acf6b7ec0e0a9bf3e21a4f9b1c9b74f88a46f03303f3f93cc9460dfd44c",
+      "allowed_diagnostic_source_changes": [],
+      "reason": "Only the post-run profile entry point and its CPU tests may differ. Neither is executed by the formal latency measurement. Saved formal copies are verified against its manifest; current diagnostic copies have their own profile snapshot. All other formal sources, including performance/runtime code, must be unchanged."
+    },
+    "overlap_claim": {
+      "threshold": 0.9,
+      "samples": 3,
+      "all_samples_both_ratios_at_least_90_percent": false,
+      "below_threshold_samples_remain_valid": true
+    },
+    "scope": "Layer 31, first three revisits of the chosen saved NOSA population, one sample each",
+    "files": {
+      "profile_metadata.json": {
+        "source": "metadata.json",
+        "sha256": "de94f39e5316f5b6d2992ade6fa1f98600e8a3f5e00164286154664b93664bca"
+      },
+      "profile_analysis.json": {
+        "source": "analysis.json",
+        "sha256": "61f9975dc0f9496960cda23243f0851adb99d85d7a9c5b8583569ca5b2e93a6f"
+      }
+    }
+  },
+  "visual_inspection": {
+    "status": "passed",
+    "checked": [
+      "all fourteen original per_request panels",
+      "all four summary_readable panels"
+    ],
+    "original_summary_limitation": "Original numeric x-axis crowds 1/8 labels; original file is preserved. Readable rendering uses categorical spacing."
+  },
+  "report_generation": "Original five analysis files copied byte-for-byte from accepted analysis outputs; summary.png/per_request.png render original SVGs via librsvg/cairo. Derived tables select/aggregate verified metadata/audit fields. summary_readable SVG/PNG reuse the 4K renderer without alteration.",
+  "derived_files_sha256": {
+    "cache_and_memory.csv": "e7fb837e41f2f0f81267e71437f28a7ac31c8434c7fab994253a09bc61656cb6",
+    "per_request.png": "b6a004093d2e74b2288172237864569343711cb38884e089adf6c4bb10036bf2",
+    "population_coverage.csv": "9b186041d37dc1d1522623437c29a4ea23e0c46faf1ac3ccef21b61bc4cfafa3",
+    "summary.png": "070224e8022b266ee27aab95be6ef420d37fed0482577afcb74e2b29f3686249",
+    "summary_readable.png": "6c8bafaa5a56f050b529fff36081f1b36b6e0f9f9df8409b20c8a51022c34f1f",
+    "summary_readable.svg": "abf71642a55e52d205499bec0fe40cdd51318a3a155aee31872f50e31f260011"
+  }
+}
