@@ -1,5 +1,10 @@
 # 模型执行器
 
+[serving_backend.py](serving_backend.py) 定义跨请求 serving 的 token-only 模型适配契约：
+session 容量估计、分配、prefix 构建、完整 candidate hidden 输出、truncate 和同步释放。
+DeepSeek 与 NOSA 在模型目录实现该契约；用户身份、热度、预算准入和 LRU 由 serving/cache
+负责，执行器不读取 GR 请求。
+
 [model_executor.py](model_executor.py) 提供与 GR 请求格式无关的 token tensor 执行接口。
 `ModelExecutor(model, cache_manager=None, chunk_size=1024)` 负责分配/释放 session，
 并用共享分块循环执行 `prefill` 和 `extend`。prefill 要求空 cache，extend 要求已有前缀；

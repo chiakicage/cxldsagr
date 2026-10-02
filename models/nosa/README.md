@@ -9,14 +9,17 @@ K/V 与 SM90 sparse fetch / attention overlap。当前在同一个 cooperative C
 主 kernel 中融合稀疏 fetch 与整批 attention，每个唯一页拆成 8 个不交叠 token
 stripe，跨 CTA 只读一次 host K/V。完整 32 层 checkpoint 检查 1 passed：resident/offload 分别从独立空 cache
 构建 64K sparse prefix，再执行 1K extend，全部 normalized hidden 逐位相同，max_abs=0。
-单层性能和 stripe / page-envelope overlap 见下文；完整模型 offload 性能与
-批量调度尚未完成。
+单层性能和 stripe / page-envelope overlap 见下文。新增跨请求保留 prefix 的
+串行 serving 适配见下节；原 4K / 16K / 64K 短轨迹数据通过数值与计量检查，
+但实际用户规模与复访压力不足，需重构负载后补测，详见
+[GR serving 实验](../../experiments/gr_serving/README.md)。
 
 - [model.py](model.py)：模型参数树、权重加载与前向；保留原有导入接口。
 - [config.py](config.py)、[rotary.py](rotary.py)：NOSA 配置与 LongRoPE。
 - [layers.py](layers.py)：NOSA projection、attention 与 decoder 组合。
 - [cache.py](cache.py)：NOSA KV 布局及 resident session 适配。
 - [offload_cache.py](offload_cache.py)：pinned 历史 K/V、resident CIS/压缩记录及共享 staging。
+- [serving.py](serving.py)：完整 NOSA 的跨请求 prefix session、四种缓存方案及预算适配。
 - [indexer.py](indexer.py)：64-token block，默认 1 sink + 16 local + 47 query-aware top-k；
   支持 32-block 分析预算，以及显式完整 NOSA 两阶段选块。
 - [scoring.py](scoring.py)：query-agnostic CIS 打分与 32-token / stride-16 压缩。
@@ -30,6 +33,41 @@ stripe，跨 CTA 只读一次 host K/V。完整 32 层 checkpoint 检查 1 passe
 [缓存管理器](../../cache/README.md) 管理逐层写入、有效长度提交及请求释放。
 main attention 接收逻辑块选择与 cache access；显式 offload 由 SM90 算子在单个
 cooperative 主 kernel 内调度 fetch/compute。dense 路径不执行 indexer，仍使用 resident cache。
+
+## 跨请求 GR serving
+
+[NosaServingBackend](serving.py) 连接 [PersistentGRRunner](../../serving/persistent.py)，
+支持 `hbm`、`serial_sparse`、`dense_prefetch` 与 `overlap`。四种方案均执行完整
+32 层 NOSA sparse 模型，保留相同的 CIS、selection 和 causal mask；`dense_prefetch`
+表示搬运完整历史 K/V，attention 本身仍为 sparse。
+
+每个用户持有自己的稳定 prefix session。命中时直接复用，candidate 执行后统一截短回
+prefix；全局 LRU 按相同 HBM / CPU DRAM cache 上限准入，淘汰时释放该用户的两级缓存。
+`hbm` 不使用 CPU KV backing。旧 `serving.run_gr` / `GRRunner` 仍逐请求创建、释放 session，
+跨请求复用由新的 persistent 入口提供。
+
+`dense_prefetch` 使用 pinned 历史 K/V、两个完整逻辑层的 HBM staging 及独立 copy stream。
+下一层拷贝与当前层计算流水执行，event 保护 staging 复用与读取。两种 sparse offload
+复用现有原生算子：串行方案先取齐完整 query batch 的稀疏并集，overlap 使用 cooperative
+FA3。NOSA 当前仍没有有限 token slots 或 token 淘汰；新 LRU 的粒度是整个用户 session。
+预算包括 K/V/CIS、派生 indexer records、staging、拥有的 pending append 和 scratch，
+模型权重及临时计算内存单独统计。
+
+2026-10-02，CPU 专项为 10 passed；单卡 SM90 完整 checkpoint 分别通过 8192+128 与
+65536+1024 两组检查。每种方案从独立空 cache 构建 sparse prefix，再处理两次不同候选，
+全部候选 hidden 均与 HBM 逐位相同，max_abs=0。以下为完整 64K+1K 正确性入口，
+不构成 serving 性能结果：
+
+```bash
+CUDA_VISIBLE_DEVICES=1 PATH="$PWD/.venv/bin:/usr/local/cuda/bin:$PATH" \
+  NOSA_SERVING_CHECKPOINT=/mnt/ssd-wlcb/chenkaiqi/NOSA-8B \
+  NOSA_SERVING_PREFIX_TOKENS=65536 NOSA_SERVING_SUFFIX_TOKENS=1024 \
+  .venv/bin/python -m pytest -s -q -p no:cacheprovider \
+  models/nosa/tests/test_serving.py::test_cuda_serving_checkpoint_independent_prefixes_and_revisits
+```
+
+多用户热度工作负载、逐请求及复访延迟、正式运行状态见
+[GR serving 实验](../../experiments/gr_serving/README.md)。
 
 ## 模型与 attention 语义
 
@@ -231,8 +269,9 @@ envelope 可能包含 stripe 间隙，因此分别将两类窗口取并集，与
 copy。90% 验收要求每个 profiled sample 的两种 ratio 都 >= 0.9，中位数不能替代
 全部样本通过。二者都只覆盖 attention 的 softmax 部分，不代表完整 attention
 隐藏率、PCIe 线上占用或整体加速比；逻辑 payload 也不证明物理链路字节数。
-完整模型 offload 性能尚未测量，来源与测量边界见
-[offload overlap 实验](../../experiments/nosa_offload_overlap/README.md)。本机传输
+以上为算子级结果，来源与测量边界见
+[offload overlap 实验](../../experiments/nosa_offload_overlap/README.md)；完整模型的串行
+hidden-output 延迟另见 [GR serving 实验](../../experiments/gr_serving/README.md)。本机传输
 没有强制限速到 50 GB/s；此前分析与 resident profile 不属于本实现实测结果。
 
 ## 运行

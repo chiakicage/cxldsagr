@@ -5,7 +5,12 @@
 
 当前探索的一种 GR serving 方案是固定 history、变化 candidate 的 prefill 负载，
 其代表性及模型、数据适配仍待确定。`GR/` 的固定前缀语义不等于跨请求 KV 复用；
-当前 `serving/` 仍逐请求创建并释放 cache。
+`serving/runner.py` 保留逐请求创建并释放 cache 的旧入口；
+`serving/persistent.py` 使用 `cache/prefix_pool.py` 保留跨请求用户历史。
+该路径在相同 HBM / CPU DRAM 硬预算下按用户 session 做 LRU；候选执行成功后 truncate
+到固定历史，历史 token 身份变化或容量不足时重建。首次访问与复访由用户访问次数区分，
+不能将缓存 miss 的复访计成首次访问。模型权重与普通 activation 单独报告，cache 预算
+包含索引、映射、staging、cache scratch 与待提交 append，分配前预留并核验实际容量。
 
 ## 项目内 Research Supervisor
 
@@ -41,7 +46,7 @@
   接入另一架构时复用对应模型目录，不按架构复制模型树。共享分层当前接入 NOSA；
   standalone SM90 ECHO 放在 `models/deepseek_v32/`，不依赖 SGLang 或 SM120 扩展。
 - `executor/` 负责通用模型分块执行和输出选择，不读取 GR 请求；`serving/` 负责 GR
-  请求适配及串行请求生命周期，不包含网络服务或 CXL/RDMA 依赖。
+  请求适配、串行请求生命周期及跨请求固定历史复用，不包含网络服务或 CXL/RDMA 依赖。
 - `cache/` 管理请求级缓存分配、逐层写入、提交、重置和释放。模型提供 KV 布局和
   兼容信息；所有模型层成功执行后统一推进有效长度。`CacheManager` 接收模型 allocator，
   NOSA 默认 resident，显式 offload 使用 `cache/host_backing.py` 与
@@ -102,6 +107,16 @@
   失败只回滚本次启动的事务。完整 resident/offload 对照从独立空 cache 构建 prefix，
   每次 extend 恢复相同 prefix HBM residency；权重加载、编译和状态恢复不计入执行时间。
   layer 0 / layer 3 或单算子正确性检查不替代完整 64K + 1K 的性能测量。
+- 单卡 GR serving 的 DeepSeek 对照另用 `models/deepseek_v32/serving_backend.py`：
+  按用户要求将真实 checkpoint 前三层独立复制成 10 个 dense block，不执行 MoE；
+  每个副本复制对应 source block 的 hidden 与 residual 输入，不串接出未经验证的深层
+  激活轨迹。独立权重、KV 与 indexer 状态不可因输入相同而共享；含 embedding、final
+  norm 与 LM head 共 7,827,793,408 参数，明确称为 checkpoint 工作负载替身，不能
+  表述为经过训练的 DeepSeek 8B 或完整 61 层验证。比较 `hbm`、`echo`、`serial_sparse`
+  与 `dense_prefetch`；后者使用双 layer staging 和独立 stream 逐层预取完整历史主 KV，
+  stage 复用须等待前一个 consumer 完成。DeepSeek serving 计算全部 candidate hidden
+  和最后 token LM head，NOSA serving 当前只计算 hidden，跨模型延迟不能忽略这一区别。
+  此特定工作负载不修改上面的完整 DeepSeek 模型验证要求。
 - NOSA query-aware indexer 已有 resident K 上的 PyTorch FP32 参考实现：64-token block、
   默认 `block_budget=64`，1 sink + 16 causal local（含当前块）+ 47 query-aware top-k；
   支持 `block_budget=32`，保持 1 sink + 16 local，query-aware top-k 改为 15。

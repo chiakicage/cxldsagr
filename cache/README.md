@@ -1,5 +1,18 @@
 # KV cache 管理
 
+[prefix_pool.py](prefix_pool.py) 提供 serving 使用的 `PrefixSessionPool`：以用户固定
+历史的 token 身份管理跨请求 session，按 LRU 整用户淘汰。分配前同时检查 HBM / DRAM
+峰值预留，执行后核验实际 cache tensor 容量；模型提供布局、分配、统计与同步释放。
+预算包含 KV、索引派生记录、映射、cache scratch、staging 和待提交 append，模型权重及
+普通计算 activation 另计。候选 suffix 由 serving 在执行完成后 truncate，保留用户历史。
+这一层是有限预算的用户 session 管理，不改变 NOSA 内部仍采用完整逻辑地址 staging、
+没有页级有限 slots / eviction 的事实。运行入口见 [serving](../serving/README.md)。
+
+当前预算核验依赖模型的预留与 tensor 统计。DeepSeek 在 recall、预取槽位回收和 remap
+过程中分配的临时 cache scratch 尚需完整峰值审计，执行后采样不能证明硬预算覆盖了
+所有瞬时分配；ECHO 的主动预取淘汰策略也待修正核查。见
+[系统审计范围](../docs/agents/system/implementation-status.md)。
+
 [manager.py](manager.py) 提供 `CacheManager` 与 `ResidentCache`。
 模型通过 `CacheSpec` 声明层数、上下文容量上限、命名 record shape 和兼容信息；
 共享管理器不假设 NOSA GQA 或 DeepSeek packed MLA 布局。
