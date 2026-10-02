@@ -13,6 +13,11 @@ KV fetching attention 推进到有限 HBM 下的多用户 prefill serving。以�
 相关工作核对与开发并行，计划在系统方案固化前完成首轮比较，明确与 sparse attention、
 prefix caching、KV offloading 及 prefetch 的差异。
 
+2026-10-02 状态更新：下文第 2 节的跨请求历史复用及串行多用户入口已经实现，第 4 节
+的到达/排队与吞吐尚未实现。当前优先审计并修正 ECHO MFU/cache 策略与 DeepSeek MFU，
+在有效复访压力下补测 baseline；细节见[系统状态](implementation-status.md)。以下开发
+拆分保留能力边界，不把已完成的生命周期工作重新列为当前待办。
+
 ## 1. 建立当前实现的完整模型性能基线
 
 先回答单层收益能否保留到整个 NOSA 模型。对同一 checkpoint 和请求，比较 resident
@@ -31,8 +36,8 @@ final norm 与完成同步；加载权重和编译不计入推理。Cache 分配
 
 ## 2. 实现跨请求固定 history 复用
 
-目前 `serving` 在每条请求后释放 cache。下一步增加用户 prefix 的长期持有与查找，
-先在串行请求下把生命周期做正确，再扩展调度。目标流程是：
+`serving.persistent` 与 `cache.prefix_pool` 已增加用户 prefix 的长期持有与查找，
+原 `serving.runner` 仍在每条请求后释放 cache。当前串行路径实现的流程是：
 
 ```text
 首次访问：校验请求 → 构建固定 prefix → 保存可复用状态 → 执行 candidate

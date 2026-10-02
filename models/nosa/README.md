@@ -392,6 +392,7 @@ normalized hidden states，跳过 LM head；不与 `logits_to_keep` 同时使用
 生成 CLI 仍默认返回 logits。64K+1K 实验测量完整 prefill 与 prefix 已就绪后的候选 extend，
 不执行自回归生成。
 
-分块执行 `executor.model_executor.run_chunks` 返回最后一个 chunk 的输出；serving 从中
-取末 token hidden，不累积整条请求的全部 hidden。每请求独立创建和释放 cache；同一请求
-的 candidate extend 使用其已完成的 stable prefix，当前没有跨请求的用户前缀缓存。
+分块执行 `executor.model_executor.run_chunks` 返回最后一个 chunk 的输出；旧
+`serving.runner` / `run_gr` 从中取末 token hidden，每请求独立创建和释放 cache。
+`serving.persistent` / `run_multi_user` 则通过 NOSA serving adapter 返回完整 candidate
+hidden，并跨请求保留固定用户历史；两条路径的输出范围和 cache 生命周期不同。

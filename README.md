@@ -8,17 +8,25 @@ HBM 与 CPU DRAM，希望在有限 HBM 下复用更多历史 KV，并降低 offl
 
 [研究状态](docs/status.md)按实验室四环节记录当前理解和缺口，
 [下一步任务](docs/roadmap.md)列出待做事项，允许交叉推进和人直接修正。
-`GR/` 已支持固定 history 与候选变化；本地 `serving/` 仍逐请求分配和释放 cache，跨请求 history KV 复用与服务吞吐验证尚未完成。
+`GR/` 支持固定 history 与候选变化；本地 serving 已增加按用户 LRU 保留历史的路径，
+在统一 HBM / DRAM 预算下对比首次访问与复访延迟。单卡 DeepSeek dense 层替身和 NOSA-8B
+的旧短轨迹有数值与计量记录，见 [GR serving 实验](experiments/gr_serving/README.md)。
+ECHO 实现的 MFU/cache 策略及 DeepSeek MFU 存在问题，相关 baseline 比较当前不成立，
+需审计、修正和复测。旧负载也没有建立有意义的实际用户规模与复访容量压力；
+新的负载尚无验收通过的替换结果。
+原逐请求分配释放的 NOSA 入口继续保留；当前没有网络服务或到达队列吞吐测量。
 
 NOSA 支持 dense、完整 sparse policy 与显式 pinned-DRAM offload。Offload 主 kernel
 融合唯一页的 stripe fetch 和 persistent FA3 attention；HBM staging 仍覆盖一层完整
 逻辑地址，尚无有限 slots / eviction。已有完整模型数值验证和单层 overlap 性能报告，
-完整模型 offload 性能尚未测量，见 [NOSA 实验](experiments/nosa_offload_overlap/README.md)。
+完整模型的串行 GR serving 延迟另见上述实验；不包含 LM head 或并发服务测量。
+算子结果见 [NOSA 实验](experiments/nosa_offload_overlap/README.md)。
 
 DeepSeek V3.2 支持独立完整 61 层 ECHO prefill/extend，不依赖 SGLang。Indexer 融合
 KV prefetch，主 KV 使用 resident 存储或有限 HBM pool 与 pinned DRAM backing。
 保留的完整 64K + 1K 报告显示 resident/offload 末 token logits 逐位一致；KV gather
 对齐修复后的完整模型性能待补测，见 [ECHO 实验](experiments/deepseek_v32_echo_prefill/README.md)。
+前三层算子诊断不能替代完整模型验证，其 MFU 与性能归因也待上述基线问题修正后复核。
 报告数字保留各自 run ID 与源码快照，目录迁移和回归检查不替代性能复测。
 
 ```text
@@ -59,6 +67,7 @@ CXLDSAGR_SM90_BACKEND=native python -m models.nosa.infer \
   --prompt "请解释 KV cache 的作用。" --disable-thinking
 
 python -m serving.run_gr --help
+python -m serving.run_multi_user --help
 python -m models.deepseek_v32.echo_infer --model /preset-models --help
 bash experiments/deepseek_v32_echo_prefill/scripts/run.sh --help
 ```

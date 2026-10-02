@@ -77,7 +77,8 @@ initialization，合并 metadata reset、page-0 padding 与 strided suffix stagi
 `150825168 B`、offload pinned host `2181038080 B`；不包含模型权重，也不是进程峰值显存。
 单层性能与 stripe / page-envelope overlap 结果见 [NOSA 模型](../models/nosa/README.md)及
 [offload 实验](../experiments/nosa_offload_overlap/README.md)。此实现使用本机 pinned
-DRAM，未验证 CXL/RDMA，也不提供跨请求 prefix residency。
+DRAM，未验证 CXL/RDMA；offload 算子本身不复用跨请求已取回的 HBM 块。
+用户固定 history 的跨请求保留由 `serving.persistent` / `prefix_pool` 管理。
 
 ## DeepSeek ECHO token cache
 
