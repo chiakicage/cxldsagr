@@ -152,7 +152,8 @@ def kernel_category(name):
     return "other"
 
 
-def _read_capture(path):
+def _read_capture(path, *, scope_pattern=None):
+    pattern = _SCOPE if scope_pattern is None else scope_pattern
     with closing(sqlite3.connect(path.as_uri() + "?mode=ro", uri=True)) as connection:
         connection.row_factory = sqlite3.Row
         connection.execute("PRAGMA query_only=ON")
@@ -170,7 +171,7 @@ def _read_capture(path):
         scopes = []
         for row in _rows(connection, "NVTX_EVENTS"):
             text = _name(row, strings, ("text", "textId"), "")
-            match = _SCOPE.fullmatch(text)
+            match = pattern.fullmatch(text)
             if not match:
                 continue
             start, end = _time(row, "NVTX_EVENTS")

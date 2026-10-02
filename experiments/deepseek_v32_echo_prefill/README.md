@@ -1,5 +1,263 @@
 # DeepSeek V3.2 ECHO prefill/extend
 
+**2026-10-02 状态修正：ECHO baseline 尚未成立。** 研究者指出当前 ECHO 实现的
+MFU 和 cache 策略有问题，DeepSeek 当前实现的 MFU 也不太正确。因此，本页相关
+MFU、性能归因及 ECHO baseline 比较暂不可用于研究结论；此前数值一致性和采样归因
+审计通过，不等于 cache 策略合理或 baseline 实现效率已经验收。具体根因尚待核查，
+不能据此断言某个 FLOPs 公式错误，也不能将低 MFU 数字直接视为 ECHO 方法的局限。
+
+前三层 run `20261002_echo_layers3_mfu_01` 已采集并发布，以下保留该版本的原始
+数字、报告素材和对应运行产物以便复核，待修正后以新 run ID 补测验收，再统一替换
+和清理。本轮只修正状态与结论边界，未修复实现、未重新运行 GPU 性能实验。
+该 run 仅执行 checkpoint 第 0–2 层，包含真实顺序的 hidden/residual 传播，
+没有复制层、没有 MoE；其单卡 resident/ECHO 记录不替代完整 61 层或 GR serving
+的性能验证。下文完整 61 层旧报告保留其原测量边界，并同样受 baseline 待修正限制。
+
+本轮硬件为物理 GPU 1，UUID `GPU-a2226185-cb05-a411-80da-f365154128fe`；
+驱动名称为 NVIDIA M403，PCI `10de:2335` 与本地 PCI 数据库对应 H200 SXM 141GB，
+SM90 / 132 SM。使用默认频率与本机 pinned CPU DRAM；GPU 0 有其他任务，
+GPU 1 采集前空闲。时钟记录是采前快照，不是连续 DVFS 采样。
+PyTorch 2.12.1+cu130、Triton 3.7.1、Nsight Systems 2025.6.3、
+Nsight Compute 2026.1.1；完整环境和官网 dense peak 换算证据见
+[summary.json](report/layers3/summary.json)。
+
+使用原 run 保存的同一 GR 请求 token IDs，边界严格为 65,536 + 1,024。
+两种模式各自从空 cache 构建 prefix，每次 extend 恢复相同的 prefix HBM residency。
+各阶段预热 1 次；加载、编译、状态恢复和数值比较在计时外。正式延迟不安装诊断包装，
+prefix 与 extend 的四份独立 nsys capture 才开启逐算子 NVTX 包装。
+
+八项数值检查均逐元素一致（max_abs=0）：包括两模式的全部 1,024×7,168 extend
+normalized hidden 和最后 token logits，以及插桩/未插桩对照；prefix 核验最后
+token logits。独立审计重算 5,496 次矩阵调用 FLOPs，复核 136,887 个 kernel，
+归因覆盖率为 100%，计数和时间守恒。三个层的 query 拆分无遗漏或重复，
+resident/offload 的 useful FLOPs 按当时口径相同。详见[独立审计](report/layers3/postrun_audit.json)。
+审计文件中的 `accepted` / `verified_mfu` 记录当时的计数、归因和算术检查状态，
+不构成对最新 MFU 问题或 cache 策略的复核结论。
+Checkpoint 记录配置、tokenizer 与权重索引 hash，未对全部权重 shard 内容另做 hash。
+
+<!-- BEGIN LAYERS3 PROFILE RESULTS -->
+## 前三层重新测量：`20261002_echo_layers3_mfu_01`
+
+**旧实现记录，baseline 待修正复测。** 下列延迟与 MFU 数字保留原 run 的测量口径，
+不作为已验收 baseline 或方法优劣证据。ECHO 的 MFU/cache 策略及 DeepSeek 实现
+MFU 问题尚未完成定位和修正；已有数值、计数与归因检查不覆盖这些问题。
+
+完整 checkpoint 的第 0–2 层依次传播 hidden/residual，包含 embedding、final norm 和最后 token LM head。Prefix=65,536，extend=1,024，chunk=1,024，offload pool=16,384 tokens/层。仅代表前三层。
+
+| 阶段 | Resident 中位延迟 (ms) | Offload 中位延迟 (ms) | 每种模式重复次数 |
+| --- | ---: | ---: | ---: |
+| prefix | 2668.638 | 3540.019 | 3 |
+| extend | 46.830 | 65.675 | 5 |
+
+![前三层无插桩延迟](report/layers3/latency.svg)
+
+原报告的计算口径为 MFU = useful matrix FLOPs /（同算子实际 GPU kernel duration 之和 × 对应精度 dense peak），其有效性待复核。FMA 计 2 FLOPs；FP8/BF16/FP32 分母分别为 1979.0/989.5/67.0 TFLOPS；TF32 关闭。前缀汇总全部 chunk 与三层，extend 汇总三层的一次完整 query batch（含实际 offload leaf 拆分）。LM head 每个阶段仅执行最后一个 token。非矩阵算子的 MFU 为 N/A。
+
+每种模式、每个阶段各采集一次独立 annotated profile；算子 MFU 没有重复采样置信区间。FP8Linear 的分母包含量化和 GEMM，indexer 包含 logits API 的辅助 kernel；这些是原报告按完整算子计算的数值，不能视为已通过最新复核的 MFU，也不同于单 GEMM 或 Tensor pipe active 指标。
+
+![四组逐算子 MFU](report/layers3/mfu.svg)
+
+### Prefix 矩阵算子
+
+| 算子 | 精度 | Resident kernel ms | MFU (%) | Offload kernel ms | MFU (%) |
+| --- | --- | ---: | ---: | ---: | ---: |
+| q_a_proj | FP8 | 13.740 | 15.92 | 13.724 | 15.94 |
+| q_b_proj | FP8 | 32.205 | 23.29 | 32.178 | 23.31 |
+| q_absorb | BF16 | 9.894 | 33.69 | 9.887 | 33.72 |
+| kv_a_proj | FP8 | 13.666 | 6.00 | 13.648 | 6.01 |
+| index_q_proj | FP8 | 11.522 | 21.70 | 11.491 | 21.76 |
+| index_k_proj | FP8 | 13.677 | 1.33 | 13.658 | 1.33 |
+| index_weights_proj | FP32 | 7.574 | 35.55 | 7.586 | 35.49 |
+| indexer | FP8 | 116.057 | 45.96 | 395.046 | 13.50 |
+| mla_qk_pv | BF16 | 1387.094 | 8.04 | 1380.362 | 8.08 |
+| v_expand | BF16 | 9.420 | 35.39 | 9.491 | 35.12 |
+| o_proj | FP8 | 108.385 | 21.53 | 108.365 | 21.53 |
+| mlp_gate | FP8 | 103.953 | 25.25 | 103.988 | 25.24 |
+| mlp_up | FP8 | 103.496 | 25.36 | 103.519 | 25.36 |
+| mlp_down | FP8 | 119.162 | 22.03 | 119.068 | 22.05 |
+| lm_head | BF16 | 0.421 | 0.44 | 0.422 | 0.44 |
+
+Indexer 行在 offload 中包含融合 prefetch；MLA 行共同计入 QK/PV。
+
+下表按最内层 scope 归因；attention_projection、dense_mlp 等父 scope 仅保留未归入子算子的剩余 kernel。这里只列 kernel 时间，cache_write 的 memcpy、CPU API 等另见完整数据，0 ms kernel 不表示没有搬运或同步开销。
+
+| 非矩阵 scope（MFU N/A） | Resident kernel ms | Offload kernel ms |
+| --- | ---: | ---: |
+| apply_rope | 64.693 | 64.548 |
+| attention_output | 8.329 | 8.282 |
+| attention_projection | 74.743 | 74.740 |
+| cache_write | 0.463 | 0.000 |
+| dense_mlp | 44.366 | 44.386 |
+| embedding | 0.408 | 0.409 |
+| exact_topk | 149.456 | 149.440 |
+| final_norm_lm_head | 0.012 | 0.012 |
+| forward_misc | 0.022 | 0.021 |
+| hidden_transfer | 0.000 | 0.000 |
+| index_layer_norm | 0.719 | 0.718 |
+| indexer_aux | 0.000 | N/A |
+| indexer_prefetch_aux | N/A | 0.000 |
+| input_residual_norm | 12.300 | 12.280 |
+| layer_misc | 0.000 | 1.984 |
+| normalized_hadamard | 97.522 | 97.555 |
+| offload_exact_recall | N/A | 84.405 |
+| offload_prepare | 0.000 | 61.349 |
+| post_attention_residual_norm | 16.927 | 16.943 |
+| quantize_index | 31.296 | 31.299 |
+| rms_norm | 43.372 | 43.283 |
+| sparse_mla_aux | 0.000 | 0.000 |
+
+### Extend 矩阵算子
+
+| 算子 | 精度 | Resident kernel ms | MFU (%) | Offload kernel ms | MFU (%) |
+| --- | --- | ---: | ---: | ---: | ---: |
+| q_a_proj | FP8 | 0.214 | 15.97 | 0.215 | 15.93 |
+| q_b_proj | FP8 | 0.506 | 23.18 | 0.508 | 23.07 |
+| q_absorb | BF16 | 0.155 | 33.58 | 0.154 | 33.73 |
+| kv_a_proj | FP8 | 0.213 | 6.01 | 0.215 | 5.96 |
+| index_q_proj | FP8 | 0.180 | 21.69 | 0.180 | 21.68 |
+| index_k_proj | FP8 | 0.213 | 1.33 | 0.214 | 1.33 |
+| index_weights_proj | FP32 | 0.118 | 35.56 | 0.118 | 35.74 |
+| indexer | FP8 | 3.641 | 46.14 | 12.181 | 13.79 |
+| mla_qk_pv | BF16 | 22.066 | 8.03 | 21.935 | 8.07 |
+| v_expand | BF16 | 0.148 | 35.11 | 0.149 | 34.98 |
+| o_proj | FP8 | 1.697 | 21.48 | 1.707 | 21.36 |
+| mlp_gate | FP8 | 1.629 | 25.18 | 1.634 | 25.11 |
+| mlp_up | FP8 | 1.625 | 25.25 | 1.627 | 25.21 |
+| mlp_down | FP8 | 1.872 | 21.91 | 1.873 | 21.90 |
+| lm_head | BF16 | 0.422 | 0.44 | 0.421 | 0.44 |
+
+Indexer 行在 offload 中包含融合 prefetch；MLA 行共同计入 QK/PV。
+
+下表按最内层 scope 归因；attention_projection、dense_mlp 等父 scope 仅保留未归入子算子的剩余 kernel。这里只列 kernel 时间，cache_write 的 memcpy、CPU API 等另见完整数据，0 ms kernel 不表示没有搬运或同步开销。
+
+| 非矩阵 scope（MFU N/A） | Resident kernel ms | Offload kernel ms |
+| --- | ---: | ---: |
+| apply_rope | 1.013 | 1.011 |
+| attention_output | 0.130 | 0.129 |
+| attention_projection | 1.171 | 1.169 |
+| cache_write | 0.008 | 0.000 |
+| dense_mlp | 0.692 | 0.694 |
+| embedding | 0.006 | 0.006 |
+| exact_topk | 4.005 | 4.006 |
+| final_norm_lm_head | 0.011 | 0.011 |
+| forward_misc | 0.004 | 0.004 |
+| hidden_transfer | 0.000 | 0.000 |
+| index_layer_norm | 0.011 | 0.011 |
+| indexer_aux | 0.000 | N/A |
+| indexer_prefetch_aux | N/A | 0.000 |
+| input_residual_norm | 0.194 | 0.193 |
+| layer_misc | 0.000 | 0.064 |
+| normalized_hadamard | 1.526 | 1.523 |
+| offload_exact_recall | N/A | 1.671 |
+| offload_prepare | 0.000 | 0.972 |
+| post_attention_residual_norm | 0.264 | 0.266 |
+| quantize_index | 0.487 | 0.490 |
+| rms_norm | 0.684 | 0.685 |
+| sparse_mla_aux | 0.000 | 0.000 |
+
+GPU kernel 时间、CPU API 时间、NVTX host 区间、无插桩 wall time 分别保存，不相加为端到端分解。Padding 工作另列 `executed_matmul_flops`，不计入 useful MFU；cuBLAS 内部 padding 未知，保留空值。
+
+正确性与覆盖验收、硬件 identity、源码及输入 SHA256、完整 NCU full/source 的验证记录见 [summary.json](report/layers3/summary.json)。逐层及 pooled 数据见 [operator_mfu.csv](report/layers3/operator_mfu.csv)、[operator_mfu_by_layer.csv](report/layers3/operator_mfu_by_layer.csv)、[nonmatrix.csv](report/layers3/nonmatrix.csv)。
+
+NCU 是同 run 对应真实层激活的独立 replay，不替代 NSYS 实际调用的 MFU 或正式 wall 延迟；其 cache 状态、排除项和报告 SHA256 单独保存。NCU run IDs：`20261002_echo_layers3_ncu_indexer_resident_01`, `20261002_echo_layers3_ncu_indexer_offload_01`, `20261002_echo_layers3_ncu_mla_01`。
+
+生成命令：
+
+```bash
+python -m experiments.deepseek_v32_echo_prefill.src.publish_layers --run-id 20261002_echo_layers3_mfu_01 --ncu-run-id 20261002_echo_layers3_ncu_indexer_resident_01 --ncu-run-id 20261002_echo_layers3_ncu_indexer_offload_01 --ncu-run-id 20261002_echo_layers3_ncu_mla_01 --publish
+```
+<!-- END LAYERS3 PROFILE RESULTS -->
+
+## 原 run 的诊断记录与待核查项
+
+原 run 中 ECHO 的 prefix 比 resident 慢 32.65%，extend 慢 40.24%。这些差值只记录
+当时三层实现的执行结果，不能作为有效 ECHO baseline 比较，不能外推全部 61 层。
+下列 kernel/API 观察保留为复核线索；MFU 解释、性能归因与优化次序须待实现及 cache
+策略核查后重建。
+
+- Extend 的 resident MLA 为 22.066 ms，占该 capture 全部 kernel 时间的 49.14%；
+  offload 为 21.935 ms。原报告 MFU 为 8.03% / 8.07%，现列为待复核数字。
+  该项同时计入 QK 与 PV，原归因没有把同一 kernel 时间重复分给两者。
+- 三层 extend 的完整 logits API GPU 时间由 3.641 ms 增至 12.181 ms；原报告
+  MFU 为 46.14% / 13.79%，现列为待复核数字。融合预取、histogram 和辅助 kernel
+  的时间均包含在原分母，不能把两项差值全称为 KV 传输时间。
+- 同一组 annotated extend 中，
+  `cudaStreamSynchronize` 从 3 次增至 124 次，其 API 时间由 0.020 ms 增至
+  35.554 ms；GPU activity envelope 内 gap 从 3.226 ms 增至 13.129 ms。
+  API 时间包含等待 GPU，不是能从 wall time 直接扣掉的独立 CPU 成本；这些记录
+  尚未解释 cache 策略问题的具体根因。
+- index_k_proj 的三层 extend 约 0.214 ms，最后单 token 的 LM head 约 0.421 ms。
+  原报告分别给出约 1.33% / 0.44% MFU；本轮不再据此排列优化优先级。
+
+### 新 NCU：真实第 2 层输入
+
+三个 kernel 分别采集 full + PmSampling + PmSampling_WarpStates，以及独立
+SourceCounters；每次预热 2 次、采一个目标 launch，kernel replay、cache-control all、
+clock-control none。NCU 2026.1.1 无 source set，因此使用 SourceCounters section。
+这六份新报告的来源 run ID、native report hash、source/PM 摘要见
+[summary.json](report/layers3/summary.json)，精确指标见[ncu_metrics.csv](report/layers3/ncu_metrics.csv)。
+
+| NCU 指标 | Resident indexer | Fused indexer/prefetch | Sparse MLA |
+| --- | ---: | ---: | ---: |
+| Replay duration (ms) | 1.119 | 2.423 | 7.413 |
+| Achieved occupancy (%) | 14.06 | 26.56 | 12.49 |
+| Tensor pipe active (% elapsed) | 51.64 | 23.10 | 12.16 |
+| HBM throughput (% peak) | 5.38 | 3.50 | 1.27 |
+| Registers/thread | 112 | 96 | 163 |
+| Local spilling requests | 0 | 21,450,007 | 0 |
+
+融合 indexer 的 source sampling 在 CUTLASS `barrier.h:424` 的等待位置记录
+80,394 个 long-scoreboard samples，伴随 21.45M spilling requests；这些是待核查的
+寄存器压力与同步等待线索，尚未建立 baseline 问题的根因。MLA 的 L1/TEX throughput
+为 67.45%，occupancy 仅 12.49%；
+`mla.py:75–76` 的 KV load 合计 174,621 个 long-scoreboard samples，`:79` QK dot
+有 113,651 个 short-scoreboard samples。两者的 HBM throughput 都很低，现有数据
+不支持 HBM 带宽饱和的解释。
+
+NCU fused replay 使用冷历史 pool、offset=0、最多预取 8,192 records；未恢复模型
+执行时的 cache 命中与 histogram 状态。MLA replay 使用完整 resident KV 与逻辑选择，
+不是 offload 物理 pool。NCU duration 不替代前面来自真实调用的算子 MFU/延迟，
+也不能据此计算完整模型 offload 收益。
+
+## 前三层复现入口
+
+从仓库根目录执行，选择空闲的同型号 GPU；`--physical-device` 必须与可见设备 UUID
+一致。旧请求文件只作为固定输入复用，不复用旧性能数字：
+
+```bash
+CUDA_VISIBLE_DEVICES=1 \
+TMPDIR=/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-profile \
+ECHO_RUN_ID=<NEW_RUN_ID> \
+bash experiments/deepseek_v32_echo_prefill/scripts/profile_layers.sh \
+  --physical-device 1 --model /preset-models \
+  --request experiments/deepseek_v32_echo_prefill/output/data/20260930T0115Z_echo_full61_fp8/request.json
+
+CUDA_VISIBLE_DEVICES=1 \
+bash experiments/deepseek_v32_echo_prefill/scripts/ncu.sh \
+  --input experiments/deepseek_v32_echo_prefill/output/data/<NEW_RUN_ID>/kernel_inputs_layer_2.pt \
+  --kernel indexer-offload --run-id <NEW_NCU_RUN_ID>
+```
+
+`--kernel` 分别选择 `indexer-resident`、`indexer-offload`、`mla`，使用不同 run ID。
+NCU 提取入口沿用下文的 `src.analyze_ncu`；报告生成命令见前面的结果区段。
+脚本拒绝覆盖已有 run。原始 nsys 在
+`output/profile/20261002_echo_layers3_mfu_01/`，SQLite、调用形状与 FLOPs ledger、
+源码快照、数值张量、独立审计源码在对应 `output/data/`；原始 NCU 在各自 run 的
+`output/profile/`。完整 kernel 名称清单在该主 run 的 `analysis/kernel_inventory.csv`。
+原分析中的 staging 路径到当前路径的映射及 SHA 验证保存在独立审计内。
+
+新增入口复用 `DeepSeekEchoModel(num_layers=3)`、原 indexer/MLA/linear 与
+`SparseTokenCache`；诊断包装仅存在于实验中，不替换模型计算。
+调用模块还包括本实验的 `operator_instrumentation`、`operator_flops`、
+`operator_report`、`profile_hardware`、`publish_layers`；NCU 摘要复用
+`profile_summary.collect_ncu`。相关 CPU 回归为 163 passed，正式 GPU profile 与
+数值验收另按上述 run 记录；CPU 测试本身不是实验结果。
+
+## 完整 61 层原报告（修复后性能仍待补测）
+
+以下保留原完整模型 run 的结果与测量边界。前三层诊断与其范围不同，未将旧数据
+改写为新实现结果，也未用三层结果替代完整 checkpoint 验证。
+
 2026-10-01 目录整理：算子已迁至 `operators/nosa/`、`operators/deepseek_v32/` 和
 `operators/common/`。本页性能仍对应下文原 run ID 与源码快照；目录迁移后的性能未重新测量。
 
@@ -8,7 +266,8 @@
 offload 两种模式下的端到端延迟、attention 时间和实际 KV 搬运量。
 
 **现有报告对应修复前版本；2026-10-01 的 KV gather 对齐修复后，完整模型性能尚未补测。**
-旧版完整 61 层、64K + 1K 的 resident/offload 测量已验收，最终 logits 逐位一致。
+旧版完整 61 层、64K + 1K 的 resident/offload 记录曾完成数值与测量检查，最终
+logits 逐位一致；这不构成当前 MFU/cache 策略问题下的 baseline 验收。
 Run ID：`20260930T0115Z_echo_full61_fp8`。本次 offload 降低主 KV 的 HBM 分配，
 但增加端到端延迟；具体数值与测量边界见下文。旧 SM120 实验不受新增路径影响。
 
@@ -63,7 +322,10 @@ prefix 状态做 1 次 extend 预热、5 次正式 extend 和 1 次 annotated ex
 kernel 输入的运行不参与计时。仅一个 GR 请求、一个 seed，prefix 无重复方差估计。
 
 <!-- BEGIN ECHO GENERATED RESULTS -->
-## 已验收结果
+## 完整模型旧记录（baseline 待修正复测）
+
+以下保留原 run 的数字与来源，不用于当前 ECHO baseline 的性能结论。
+除 gather 修复后的完整模型补测外，还须处理研究者指出的 MFU/cache 策略问题。
 
 来源 run ID：`20260930T0115Z_echo_full61_fp8`。完整 61 层 checkpoint，65,536-token prefix 从空 cache 构建，随后执行 1,024-token extend；只输出最后 token 的完整词表 logits。
 设备：cuda:0, cuda:1, cuda:2, cuda:6, cuda:7；chunk=1024；每层 offload pool=16384 tokens；预热 1 次。硬件详情、依赖版本、源码 SHA256 与逐阶段数据见 [summary.json](report/summary.json)。
@@ -123,14 +385,15 @@ Offload trace 中有 75,893 次 kernel（resident 为 19,205 次），907 次 ex
 
 `cudaStreamSynchronize` 从 resident 的 4 次 / 0.028 ms 增至 offload 的
 8,907 次 / 713.430 ms。该 API 时间包含等待 GPU 的时间，并与 GPU 工作重叠；
-它支持“缓存控制和同步是主要额外开销”的判断，不代表可直接从 wall time 扣除的
-独立 CPU 时间。当前 chunk 先写 host 再回读 HBM、每次预取前预留至多 8192 slots，
-以及递归失败节点重复执行 GPU unique/sort，是后续应针对性减少的工作。
+它记录缓存控制相关的等待，不能直接确定当前 baseline 问题的根因，也不代表可从
+wall time 扣除的独立 CPU 时间。当前 chunk 先写 host 再回读 HBM、每次预取前
+预留至多 8192 slots，以及递归失败节点重复执行 GPU unique/sort，是 cache 策略
+复核时应检查的实现行为；本轮未验证哪一项构成问题或其修正效果。
 
 两份 trace 各有 12 个范围外活动，合计仅 0.035 / 0.036 ms，均有 API correlation，
 属于输入检查、输出检查或小拷贝，已计入 capture 总量。Annotated wall 为
-1186.285 / 2550.058 ms；offload 插桩开销约 14.9%，性能结论使用正式测量的
-1171.554 / 2220.250 ms。逐阶段表和指标来源见 [nsys_stages.csv](report/nsys_stages.csv)
+1186.285 / 2550.058 ms；offload 插桩开销约 14.9%，原报告的无插桩延迟为
+1171.554 / 2220.250 ms，现不用于 baseline 性能结论。逐阶段表和指标来源见 [nsys_stages.csv](report/nsys_stages.csv)
 及 [profile_summary.json](report/profile_summary.json)。
 
 ## 真实第 30 层的 NCU 诊断
@@ -169,7 +432,8 @@ Indexer 输入为 FP8 Q `[1024,64,128]`、K `[66560,128]`；MLA 为 BF16 Q
 3.83%，不能称为 HBM 带宽饱和。SourceCounters 中，CUTLASS `barrier.h:424` 的
 `mbarrier.try_wait` 对应 62,127 个 long-scoreboard samples；
 `echo_logits.cuh:906` 的候选 logits 读取为 5,494 samples。加上 14.51M 次 spilling
-requests，证据指向融合后的同步、寄存器压力与访存延迟。NCU 对 local-memory
+requests，作为融合后的同步、寄存器压力与访存延迟的核查线索，尚不确定 baseline
+问题的根因。NCU 对 local-memory
 开销给出的 kernel 层估计改善空间为 20.34%，不是已实现收益或端到端加速预测。
 
 MLA 的 grid 足够大，62.06 waves/SM；每 SM 仅一个 block，约 149.5 KB 动态 shared
@@ -184,9 +448,9 @@ long-scoreboard samples，`:79` 的 QK dot 对应 113,971 个 short-scoreboard s
 fused 有明显中段下降后恢复。PM 来自多次 replay、不同 metric 采样序列，保留原始
 correlation IDs 和样本顺序，不用这些曲线推导单次执行的精确 prefetch overlap。
 
-后续优化优先级：先减少整模型 cache ensure/unique 与同步次数；再降低 fused
-indexer 的寄存器溢出和 barrier 等待；最后针对 MLA 的 shared-memory/寄存器占用
-改进 pipeline。这里给出证据支持的方向，本次未进行这些优化，未声称已获得收益。
+下一步应先复核 DeepSeek/ECHO 的实现效率、MFU 口径和 cache 策略，明确 baseline
+验收标准，再决定具体优化次序。cache ensure/unique、同步、fused indexer 的
+spilling/barrier 和 MLA 资源占用保留为候选核查项；本轮未定位根因、未修复或复测。
 
 ## 运行
 
@@ -234,7 +498,8 @@ NCU 原始报告用 `python -m experiments.deepseek_v32_echo_prefill.src.analyze
 --report <full.ncu-rep> --report <source.ncu-rep> --run-id <ncu_run_id>` 提取，默认写入
 对应 `output/data/<ncu_run_id>/ncu_analysis.json`；再次分析须用 `--output` 选择新的
 JSON 路径。API 的逐实例读取经过 PC sample 总和与 aggregate 对照，保留零值及原始
-correlation IDs。精选 profile 数据由以下命令生成，输入均来自本次已验收运行：
+correlation IDs。原精选 profile 数据由以下命令生成，输入来自上述旧 run；这些记录
+保留原检查状态，不构成当前 baseline 验收：
 
 ```bash
 python -m experiments.deepseek_v32_echo_prefill.src.profile_summary \

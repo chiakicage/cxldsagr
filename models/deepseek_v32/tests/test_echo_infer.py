@@ -1,3 +1,4 @@
+import json
 from contextlib import nullcontext
 from types import SimpleNamespace
 
@@ -16,6 +17,66 @@ def test_contiguous_placement_respects_unequal_memory_budgets():
 def test_impossible_placement_fails_without_partial_model():
     with pytest.raises(RuntimeError, match="complete FP8"):
         plan_layer_devices([5, 5, 5], [0, 1], [9, 9])
+
+
+@pytest.fixture
+def constructor_fixture(monkeypatch, tmp_path):
+    """Track checkpoint access and placement without constructing CUDA blocks."""
+    config = SimpleNamespace(num_hidden_layers=61, max_seq_len=128)
+    names = ["model.embed_tokens.weight", "model.norm.weight", "lm_head.weight"]
+    names += [f"model.layers.{layer}.input_layernorm.weight" for layer in range(61)]
+    reader = SimpleNamespace(
+        tensor_files=dict.fromkeys(names, "model.safetensors"),
+        tensor_metadata={name: {"data_offsets": [0, 16]} for name in names},
+        get_tensor=lambda _name: SimpleNamespace(to=lambda _device: None),
+    )
+    (tmp_path / "model.safetensors.index.json").write_text(
+        json.dumps({"weight_map": reader.tensor_files})
+    )
+    loaded = []
+
+    def block(_path, layer, _device, **_kwargs):
+        loaded.append(layer)
+        return SimpleNamespace()
+
+    monkeypatch.setattr("models.deepseek_v32.echo_infer.Config.from_checkpoint", lambda _: config)
+    monkeypatch.setattr("models.deepseek_v32.echo_infer.CheckpointReader", lambda _: reader)
+    monkeypatch.setattr("models.deepseek_v32.echo_block.CheckpointBlock", block)
+    monkeypatch.setattr(torch.cuda, "device", lambda *_args, **_kwargs: nullcontext())
+    monkeypatch.setattr(torch.cuda, "get_device_capability", lambda _: (9, 0))
+    monkeypatch.setattr(torch.cuda, "mem_get_info", lambda _: (80 * 2**30, 80 * 2**30))
+    monkeypatch.setattr(DeepSeekEchoModel, "synchronize", lambda _: None)
+    return tmp_path, reader, loaded
+
+
+@pytest.mark.parametrize("num_layers", [None, 3])
+def test_constructor_loads_exactly_selected_checkpoint_prefix(constructor_fixture, num_layers):
+    path, _, loaded = constructor_fixture
+    model = DeepSeekEchoModel(path, devices=[0], capacity=16, num_layers=num_layers)
+    expected_layers = 61 if num_layers is None else num_layers
+    assert loaded == list(range(expected_layers))
+    assert model.num_layers == len(model.blocks) == len(model.placement) == expected_layers
+    assert model.cfg.num_hidden_layers == 61
+
+
+def test_partial_model_allows_missing_unselected_layers_but_checks_selected(constructor_fixture):
+    path, reader, loaded = constructor_fixture
+    del reader.tensor_files["model.layers.60.input_layernorm.weight"]
+    DeepSeekEchoModel(path, devices=[0], capacity=16, num_layers=3)
+    assert loaded == [0, 1, 2]
+    with pytest.raises(ValueError, match="incomplete checkpoint.*model.layers.60"):
+        DeepSeekEchoModel(path, devices=[0], capacity=16)
+    del reader.tensor_files["model.layers.2.input_layernorm.weight"]
+    with pytest.raises(ValueError, match="incomplete checkpoint.*model.layers.2"):
+        DeepSeekEchoModel(path, devices=[0], capacity=16, num_layers=3)
+
+
+@pytest.mark.parametrize("num_layers", [0, -1, 62, True, 3.5])
+def test_invalid_layer_limit_fails_before_loading(constructor_fixture, num_layers):
+    path, _, loaded = constructor_fixture
+    with pytest.raises(ValueError, match="num_layers"):
+        DeepSeekEchoModel(path, devices=[0], capacity=16, num_layers=num_layers)
+    assert loaded == []
 
 
 class FakeCache:
@@ -127,6 +188,33 @@ def test_chunked_prefill_and_extend_preserve_causal_history_and_logit_selection(
     assert all(block.cache.length == block.cache.written == 8 for block in chunked.blocks)
     assert chunked.sync_observations == [[(0, 5)] * 3, [(5, 8)] * 3]
     assert all(block.cache.commits == 2 for block in chunked.blocks)
+
+
+@pytest.mark.parametrize("all_logits", [False, True])
+def test_hidden_output_contains_every_token_and_preserves_logits(fake_model_factory, all_logits):
+    chunked = fake_model_factory(chunk_size=2)
+    unchunked = fake_model_factory(chunk_size=32)
+    logits_model = fake_model_factory(chunk_size=2)
+    for ids in ([1, 4, 2, 7, 3], [5, 8, 6]):
+        actual = chunked.forward(ids, return_hidden=True, all_logits=all_logits)
+        expected = unchunked.forward(ids, return_hidden=True, all_logits=all_logits)
+        all_expected_logits = logits_model.forward(ids, all_logits=True)
+        assert actual["hidden"].shape == (len(ids), 8)
+        assert actual["hidden"].dtype == torch.bfloat16
+        torch.testing.assert_close(actual, expected, rtol=0, atol=0)
+        torch.testing.assert_close(
+            torch.nn.functional.linear(actual["hidden"], chunked.head_weight).float(),
+            all_expected_logits,
+            rtol=0,
+            atol=0,
+        )
+        torch.testing.assert_close(
+            actual["logits"],
+            all_expected_logits if all_logits else all_expected_logits[-1:],
+            rtol=0,
+            atol=0,
+        )
+    assert chunked.length == unchunked.length == logits_model.length == 8
 
 
 def test_each_chunk_executes_all_61_layers_before_next_chunk(fake_model_factory):

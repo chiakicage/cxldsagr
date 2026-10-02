@@ -57,12 +57,14 @@ def plan_layer_devices(sizes, devices, budgets):
 
 
 class DeepSeekEchoModel:
-    """All checkpoint transformer layers, embedding, final norm, and LM head.
+    """Checkpoint transformer layers, embedding, final norm, and LM head.
 
     Weights remain on their assigned devices. Hidden states cross NVLink at
     placement boundaries; neither weights nor historical main KV are implicitly
     copied wholesale during an extend step. This is sequential layer placement,
-    not tensor-parallel serving or continuous batching.
+    not tensor-parallel serving or continuous batching. By default all checkpoint
+    layers execute; ``num_layers`` explicitly selects a contiguous prefix for
+    diagnostics, with each layer consuming the preceding layer's real output.
     """
 
     def __init__(
@@ -75,11 +77,19 @@ class DeepSeekEchoModel:
         slots=16384,
         chunk_size=1024,
         reserve_gib=5,
+        num_layers=None,
     ):
         from models.deepseek_v32.echo_block import CheckpointBlock
 
         self.path = Path(model_path)
         self.cfg = Config.from_checkpoint(self.path)
+        self.num_layers = self.cfg.num_hidden_layers if num_layers is None else num_layers
+        if (
+            not isinstance(self.num_layers, int)
+            or isinstance(self.num_layers, bool)
+            or not 1 <= self.num_layers <= self.cfg.num_hidden_layers
+        ):
+            raise ValueError("num_layers must select 1 through all checkpoint transformer layers")
         if capacity > self.cfg.max_seq_len:
             raise ValueError("requested context exceeds checkpoint max_position_embeddings")
         self.devices = [torch.device("cuda", int(index)) for index in devices]
@@ -89,6 +99,14 @@ class DeepSeekEchoModel:
         index = self.path / "model.safetensors.index.json"
         if index.is_file():
             expected = json.loads(index.read_text())["weight_map"]
+            if self.num_layers < self.cfg.num_hidden_layers:
+                prefixes = tuple(f"model.layers.{layer}." for layer in range(self.num_layers))
+                expected = {
+                    name: shard
+                    for name, shard in expected.items()
+                    if name.startswith(prefixes)
+                    or name in ("model.embed_tokens.weight", "model.norm.weight", "lm_head.weight")
+                }
             missing = [name for name in expected if name not in self.reader.tensor_files]
             if missing:
                 raise ValueError(
@@ -98,7 +116,7 @@ class DeepSeekEchoModel:
         for name in ("model.embed_tokens.weight", "model.norm.weight", "lm_head.weight"):
             if name not in self.reader.tensor_files:
                 raise ValueError(f"incomplete checkpoint: missing {name}")
-        sizes = layer_parameter_bytes(self.reader, self.cfg.num_hidden_layers)
+        sizes = layer_parameter_bytes(self.reader, self.num_layers)
         budgets = []
         for device in self.devices:
             with torch.cuda.device(device):
@@ -131,7 +149,7 @@ class DeepSeekEchoModel:
                     chunk_size=chunk_size,
                 )
                 self.blocks.append(block)
-            print(f"loaded layer {layer + 1}/{self.cfg.num_hidden_layers} on {device}", flush=True)
+            print(f"loaded layer {layer + 1}/{self.num_layers} on {device}", flush=True)
         self.length = 0
         self.offload = offload
         self.synchronize()
@@ -159,7 +177,15 @@ class DeepSeekEchoModel:
         self.length, self.offload = 0, offload
 
     @torch.inference_mode()
-    def forward(self, token_ids, *, scope=None, all_logits=False):
+    def forward(self, token_ids, *, scope=None, all_logits=False, return_hidden=False):
+        """Execute a cache step, optionally returning every token's normalized hidden.
+
+        The default returns last-token logits, or all logits with ``all_logits``.
+        ``return_hidden=True`` returns ``{"hidden": ..., "logits": ...}``, where
+        hidden includes all input tokens after the final RMSNorm. For a truncated
+        diagnostic model these are outputs after its selected transformer prefix,
+        not the full checkpoint's hidden states or language-model predictions.
+        """
         scope = scope or (lambda _: nullcontext())
         ids = torch.as_tensor(token_ids, dtype=torch.long, device=self.devices[0])
         if ids.ndim != 1 or ids.numel() < 1 or self.length + ids.numel() > self.capacity:
@@ -172,6 +198,7 @@ class DeepSeekEchoModel:
                 block.cache.begin_step(ids.numel())
                 started.append(block.cache)
             logits_parts = []
+            hidden_parts = []
             for chunk_start in range(0, ids.numel(), self.chunk_size):
                 chunk_stop = min(ids.numel(), chunk_start + self.chunk_size)
                 with torch.cuda.device(self.devices[0]), scope("embedding"):
@@ -185,19 +212,26 @@ class DeepSeekEchoModel:
                                 residual = residual.to(device, non_blocking=True)
                         with scope(f"layer_{layer}"):
                             hidden, residual = block.forward(hidden, residual, scope=scope)
-                if all_logits or chunk_stop == ids.numel():
+                if return_hidden or all_logits or chunk_stop == ids.numel():
                     with torch.cuda.device(self.devices[-1]), scope("final_norm_lm_head"):
                         hidden = hidden.to(self.devices[-1], non_blocking=True)
                         residual = residual.to(self.devices[-1], non_blocking=True)
-                        selected = hidden if all_logits else hidden[-1:]
-                        selected_residual = residual if all_logits else residual[-1:]
+                        all_hidden = return_hidden or all_logits
+                        selected = hidden if all_hidden else hidden[-1:]
+                        selected_residual = residual if all_hidden else residual[-1:]
                         normalized = rms_norm(
                             selected.float() + selected_residual.float(),
                             self.final_norm,
                             self.cfg.norm_eps,
                         ).bfloat16()
-                        logits_parts.append(F.linear(normalized, self.head_weight).float())
+                        if return_hidden:
+                            hidden_parts.append(normalized)
+                        if all_logits or chunk_stop == ids.numel():
+                            head_input = normalized if all_logits else normalized[-1:]
+                            logits_parts.append(F.linear(head_input, self.head_weight).float())
             output = torch.cat(logits_parts)
+            if return_hidden:
+                output = {"hidden": torch.cat(hidden_parts), "logits": output}
             # Synchronization surfaces asynchronous execution failures before
             # advancing valid length for any layer.
             self.synchronize()
@@ -262,6 +296,9 @@ def main():
     parser.add_argument("--offload", action="store_true")
     parser.add_argument("--slots", type=int, default=16384)
     parser.add_argument("--chunk-size", type=int, default=1024)
+    parser.add_argument(
+        "--num-layers", type=int, help="execute only the first N checkpoint layers for diagnostics"
+    )
     args = parser.parse_args()
     ids = json.loads(args.input_ids.read_text())
     model = DeepSeekEchoModel(
@@ -271,6 +308,7 @@ def main():
         offload=args.offload,
         slots=args.slots,
         chunk_size=args.chunk_size,
+        num_layers=args.num_layers,
     )
     model.forward(ids[: args.history])
     result = model.forward(ids[args.history :])
