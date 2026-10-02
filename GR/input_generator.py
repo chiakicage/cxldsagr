@@ -113,11 +113,17 @@ class InputGenerator:
         text_config: TextConfig | None = None,
         schedule_config: ScheduleConfig | None = None,
         titles: dict[int, str] | None = None,
+        context_limit: int | None = None,
     ):
         if model not in MODEL_FORMATS:
             raise ValueError(f"unsupported model: {model}")
         self.model = model
         self.request_format = MODEL_FORMATS[model]
+        if context_limit is not None:
+            _integer("context_limit", context_limit, 1)
+        self.context_limit = (
+            self.request_format.MAX_INPUT_TOKENS if context_limit is None else context_limit
+        )
         self.prefix = self.request_format.prefix(INSTRUCTION)
         self.ending = self.request_format.ENDING
         self.population = population
@@ -133,11 +139,13 @@ class InputGenerator:
             * len(self.request_format.ITEM_LENGTHS),
             max_input_tokens=self.request_format.MAX_INPUT_TOKENS,
         )
-        if model == "nosa" and (
+        if (
             max(self.text_config.user_lengths) + max(self.text_config.item_lengths)
-            > self.request_format.MAX_INPUT_TOKENS
+            > self.context_limit
         ):
-            raise ValueError("NOSA request exceeds the supported 32768-token context")
+            raise ValueError(
+                f"{model} request exceeds the configured {self.context_limit}-token context"
+            )
         self.schedule_config = schedule_config or ScheduleConfig(sampling="weighted")
         self.seed = self.schedule_config.seed
         self.users = sorted(population.weights)
@@ -388,6 +396,7 @@ def create_input_generator(
     tokenizer: Tokenizer | str | Path | None = None,
     text_config: TextConfig | None = None,
     schedule_config: ScheduleConfig | None = None,
+    context_limit: int | None = None,
 ) -> InputGenerator:
     """Load resources once and return a reusable, in-memory request generator.
 
@@ -398,6 +407,8 @@ def create_input_generator(
     By default, synthesize heat from the bundled Beauty curve and use rule-based
     product names. Curve mode requires num_users > 0; curve_field defaults to
     interaction_count (Amazon) or pv_share (industrial).
+    An explicit context_limit overrides the format's generation boundary only;
+    callers must separately validate backend support and model quality.
     """
     if model not in MODEL_FORMATS:
         raise ValueError(f"unsupported model: {model}")
@@ -464,6 +475,7 @@ def create_input_generator(
         text_config=text_config,
         schedule_config=schedule,
         titles=titles,
+        context_limit=context_limit,
     )
 
 

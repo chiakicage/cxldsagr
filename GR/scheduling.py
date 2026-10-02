@@ -35,10 +35,13 @@ class ScheduleConfig:
     arrival: str = "poisson"
     sampling: str = "weighted"
     start_timestamp: float = 0.0
+    max_revisits: int | None = None
 
     def __post_init__(self):
         _integer("seed", self.seed)
         _integer("qps", self.qps, 1)
+        if self.max_revisits is not None:
+            _integer("max_revisits", self.max_revisits)
         if self.arrival not in ("poisson", "constant", "timeslot"):
             raise ValueError("arrival must be poisson, constant, or timeslot")
         if self.sampling not in ("weighted", "uniform", "sequential"):
@@ -97,9 +100,14 @@ def _schedule(
     gaps = gap_rng.choices(GAP_SECONDS, weights=GAP_WEIGHTS, k=len(users))
     cooling: list[tuple[int, int]] = []
     active_count = len(users)
+    remaining_users = len(users)
+    visits = [0] * len(users)
+    max_visits = None if cfg.max_revisits is None else cfg.max_revisits + 1
     slot = used = 0
     timestamp = cfg.start_timestamp
     for order in range(count):
+        if not remaining_users:
+            return
         if cfg.arrival == "timeslot":
             if used == cfg.qps:
                 slot += 1
@@ -117,7 +125,8 @@ def _schedule(
             timestamp = cfg.start_timestamp + slot
             sampler.set(index, 0)
             active_count -= 1
-            heapq.heappush(cooling, (slot + gaps[index], index))
+            if max_visits is None or visits[index] + 1 < max_visits:
+                heapq.heappush(cooling, (slot + gaps[index], index))
             used += 1
         else:
             index = order % len(users) if cfg.sampling == "sequential" else sampler.draw(rng)
@@ -125,4 +134,10 @@ def _schedule(
                 timestamp += clock_rng.expovariate(cfg.qps)
             else:
                 timestamp = cfg.start_timestamp + order / cfg.qps
+        if max_visits is not None:
+            visits[index] += 1
+            if visits[index] == max_visits:
+                remaining_users -= 1
+                if cfg.arrival != "timeslot":
+                    sampler.set(index, 0)
         yield users[index], timestamp
