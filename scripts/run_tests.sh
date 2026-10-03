@@ -25,6 +25,7 @@ if [[ "$mode" == cpu || "$mode" == all ]]; then
     models/deepseek_v32/tests/test_echo_cache.py models/deepseek_v32/tests/test_echo_dense.py \
     models/deepseek_v32/tests/test_echo_kernel.py \
     models/deepseek_v32/tests/test_echo_recall.py \
+    models/deepseek_v32/tests/test_echo_index.py \
     operators/sm90/tests cache/tests executor/tests serving/tests GR/tests \
     tests/integration experiments/nosa_gr_65536_1024/tests \
     experiments/nosa_indexer_pattern_65536_1024/tests \

@@ -92,14 +92,14 @@ def _positive(config: Mapping, key: str) -> int:
 
 
 def validate_checkpoint_config(config: Mapping, num_layers: int) -> None:
-    if type(num_layers) is not int or num_layers not in (1, 2, 3):
-        raise AdapterError("num_layers must be 1, 2, or 3")
+    if type(num_layers) is not int or not 1 <= num_layers <= 5:
+        raise AdapterError("num_layers must be between 1 and 5")
     if config.get("model_type") != "deepseek_v32" or config.get("architectures") != [ARCHITECTURE]:
         raise AdapterError("expected DeepSeek V3.2 CausalLM checkpoint architecture")
-    if num_layers > min(
-        _positive(config, "num_hidden_layers"), _positive(config, "first_k_dense_replace")
-    ):
-        raise AdapterError("selected layers exceed the original dense MLP prefix")
+    if num_layers > _positive(config, "num_hidden_layers"):
+        raise AdapterError("selected layers exceed the checkpoint")
+    if num_layers > _positive(config, "first_k_dense_replace"):
+        validate_moe_config(config)
     for name in (
         "hidden_size",
         "vocab_size",
@@ -133,12 +133,68 @@ def validate_checkpoint_config(config: Mapping, num_layers: int) -> None:
         raise AdapterError("expected BF16 activation dtype in checkpoint config")
 
 
+def validate_moe_config(config: Mapping) -> None:
+    for name in (
+        "moe_intermediate_size",
+        "n_routed_experts",
+        "n_shared_experts",
+        "moe_layer_freq",
+        "num_experts_per_tok",
+        "n_group",
+        "topk_group",
+    ):
+        _positive(config, name)
+    if (
+        config.get("topk_method") != "noaux_tc"
+        or config.get("scoring_func") != "sigmoid"
+        or config.get("norm_topk_prob") is not True
+        or not isinstance(config.get("routed_scaling_factor"), (int, float))
+        or config["routed_scaling_factor"] <= 0
+        or config["n_routed_experts"] % config["n_group"]
+        or config["topk_group"] > config["n_group"]
+        or config["num_experts_per_tok"]
+        > config["topk_group"] * config["n_routed_experts"] // config["n_group"]
+    ):
+        raise AdapterError("unsupported or inconsistent grouped MoE routing configuration")
+
+
+def layer_mlp_shapes(config: Mapping, layer: int) -> tuple[dict, dict]:
+    """Checkpoint projections and unquantized router tensors, shared with the audit."""
+    h = config["hidden_size"]
+    quantized, plain = {}, {}
+    if layer < config["first_k_dense_replace"]:
+        groups = {"mlp": config["intermediate_size"]}
+    else:
+        validate_moe_config(config)
+        if layer % config["moe_layer_freq"]:
+            groups = {"mlp": config["intermediate_size"]}
+        else:
+            experts = config["n_routed_experts"]
+            groups = {f"mlp.experts.{i}": config["moe_intermediate_size"] for i in range(experts)}
+            groups["mlp.shared_experts"] = (
+                config["moe_intermediate_size"] * config["n_shared_experts"]
+            )
+            plain = {
+                "mlp.gate.weight": (experts, h),
+                "mlp.gate.e_score_correction_bias": (experts,),
+            }
+    for prefix, intermediate in groups.items():
+        quantized.update(
+            {
+                f"{prefix}.gate_proj": (intermediate, h),
+                f"{prefix}.up_proj": (intermediate, h),
+                f"{prefix}.down_proj": (h, intermediate),
+            }
+        )
+    return quantized, plain
+
+
 def _tensor_specs(config: Mapping, num_layers: int) -> dict[str, TensorSpec]:
     h, q, kv = (config[name] for name in ("hidden_size", "q_lora_rank", "kv_lora_rank"))
     heads, rope, nope = (
         config[name] for name in ("num_attention_heads", "qk_rope_head_dim", "qk_nope_head_dim")
     )
-    vd, intermediate = config["v_head_dim"], config["intermediate_size"]
+    vd = config["v_head_dim"]
     ih, idim = config["index_n_heads"], config["index_head_dim"]
     plain_dtypes = ("BF16", "F16", "F32")
     specs = {"model.embed_tokens.weight": TensorSpec((config["vocab_size"], h), plain_dtypes)}
@@ -150,9 +206,6 @@ def _tensor_specs(config: Mapping, num_layers: int) -> dict[str, TensorSpec]:
         "self_attn.o_proj": (h, heads * vd),
         "self_attn.indexer.wq_b": (ih * idim, q),
         "self_attn.indexer.wk": (idim, h),
-        "mlp.gate_proj": (intermediate, h),
-        "mlp.up_proj": (intermediate, h),
-        "mlp.down_proj": (h, intermediate),
     }
     plain = {
         "input_layernorm.weight": (h,),
@@ -165,13 +218,15 @@ def _tensor_specs(config: Mapping, num_layers: int) -> dict[str, TensorSpec]:
     }
     for layer in range(num_layers):
         prefix = f"model.layers.{layer}."
-        for name, shape in projections.items():
+        mlp, router = layer_mlp_shapes(config, layer)
+        for name, shape in (projections | mlp).items():
             specs[prefix + name + ".weight"] = TensorSpec(shape, ("F8_E4M3",))
             specs[prefix + name + ".weight_scale_inv"] = TensorSpec(
                 tuple((dim + 127) // 128 for dim in shape), ("F32",)
             )
-        for name, shape in plain.items():
-            specs[prefix + name] = TensorSpec(shape, plain_dtypes)
+        for name, shape in (plain | router).items():
+            dtypes = ("F32",) if name.endswith("e_score_correction_bias") else plain_dtypes
+            specs[prefix + name] = TensorSpec(shape, dtypes)
     return specs
 
 
@@ -398,9 +453,15 @@ def _make_model_class(runtime: SimpleNamespace, selection: CheckpointSelection) 
                 raise AdapterError("the reduced ECHO adapter currently requires TP=PP=1")
             self.fuse_qkv_a_proj = True
             self.num_fused_shared_experts = 0
-            self._routed_experts_weights_of_layer = source.LazyValue(dict)
             self.model = source.DeepseekV2Model(
                 config, quant_config, prefix=source.add_prefix("model", prefix)
+            )
+            self._routed_experts_weights_of_layer = source.LazyValue(
+                lambda: {
+                    i: layer.mlp.get_moe_weights()
+                    for i, layer in enumerate(self.model.layers)
+                    if isinstance(layer.mlp, source.DeepseekV2MoE)
+                }
             )
             self.model.norm = ResidualMerge()
 

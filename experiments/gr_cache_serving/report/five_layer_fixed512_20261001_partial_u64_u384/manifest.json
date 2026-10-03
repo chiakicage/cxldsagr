@@ -1,0 +1,41 @@
+{
+  "experiment_profile": "fixed_budget_512",
+  "run_ids": [
+    "five_layer_fixed512_20261001_u64_resident_r1",
+    "five_layer_fixed512_20261001_u64_sparse_sync_r1",
+    "five_layer_fixed512_20261001_u64_echo_gr_adapted_r1",
+    "five_layer_fixed512_20261001_u64_dense_prefetch_r1",
+    "five_layer_fixed512_20261001_u128_resident_r1",
+    "five_layer_fixed512_20261001_u128_sparse_sync_r1",
+    "five_layer_fixed512_20261001_u128_echo_gr_adapted_r1",
+    "five_layer_fixed512_20261001_u128_dense_prefetch_r1",
+    "five_layer_fixed512_20261001_u256_resident_r1",
+    "five_layer_fixed512_20261001_u256_sparse_sync_r1",
+    "five_layer_fixed512_20261001_u256_echo_gr_adapted_r1",
+    "five_layer_fixed512_20261001_u256_dense_prefetch_r1",
+    "five_layer_fixed512_20261001_u384_resident_r1",
+    "five_layer_fixed512_20261001_u384_sparse_sync_r1",
+    "five_layer_fixed512_20261001_u384_echo_gr_adapted_r1",
+    "five_layer_fixed512_20261001_u384_dense_prefetch_r1"
+  ],
+  "summary_sha256": {
+    "five_layer_fixed512_20261001_u64_resident_r1": "83fc2a74eaad8281107ee2a4523d2727acc91651867858b71cfd2bf1a5792a4d",
+    "five_layer_fixed512_20261001_u64_sparse_sync_r1": "fbb2f4a5ffa11b5bf32dc0212b5ba5e60590299baa11b124904a03aa17634ee3",
+    "five_layer_fixed512_20261001_u64_echo_gr_adapted_r1": "6ca6eca866a783c57bb71b8f3284e8005fa1a390d7777f2b9fcd48347ad534ee",
+    "five_layer_fixed512_20261001_u64_dense_prefetch_r1": "4cb4ae727617ea49efe09968f9c27cdc3dba4e2dcebf74056281960e025a0cd1",
+    "five_layer_fixed512_20261001_u128_resident_r1": "9a3ffe991c0a3177bad123f8e569b9b942df309992e3068b855b2c6ccd49cac9",
+    "five_layer_fixed512_20261001_u128_sparse_sync_r1": "781159792561dc6986b81293d2b455dbe15e2c53c1d7d03457cfdb6146ea4251",
+    "five_layer_fixed512_20261001_u128_echo_gr_adapted_r1": "074b8ab7ed35a0a63b02c75d366160f76c5a70b4804a6ddfff1024cb275ba460",
+    "five_layer_fixed512_20261001_u128_dense_prefetch_r1": "51e5d3ba3cbabd9bd4e87200bb12d365d69cade441a3b7b77ffb1266cbc0e233",
+    "five_layer_fixed512_20261001_u256_resident_r1": "6dbd0dfac288cc6af81abe34a2b83219774a04ecb2d7122f7be5481e962a10b9",
+    "five_layer_fixed512_20261001_u256_sparse_sync_r1": "3f8c2fc1b8f9e99a2533f0dbd0d2a039a22f07305868c5cdb667b99fef63772b",
+    "five_layer_fixed512_20261001_u256_echo_gr_adapted_r1": "7b42a65292cdb0983c215003e7d3548c2c76949d93f1f211b09e3f0f1f2c7e1d",
+    "five_layer_fixed512_20261001_u256_dense_prefetch_r1": "cb9b61be579f05cda246ad1fa0ea4652549565f6ed7194605a84c01ccc4b113f",
+    "five_layer_fixed512_20261001_u384_resident_r1": "8af905745f5eac4950ad474d72fb803be1b25ebed3e0adccff45bcd7c435c109",
+    "five_layer_fixed512_20261001_u384_sparse_sync_r1": "92318102bc182b3c6e31353c4ac9534e11a7d6ee18ed0cd78d7c9c1c0b377bee",
+    "five_layer_fixed512_20261001_u384_echo_gr_adapted_r1": "71268ea9ea4157b2ba1a9d3ddb4a88e099d12b033582e4243c65199156cceeac",
+    "five_layer_fixed512_20261001_u384_dense_prefetch_r1": "1132bb8deec2ee6901329f789d0e2bcd4e14f13cd641089fe9208b6e3fc24549"
+  },
+  "report_source_sha256": "f1eef30d8917fbab7b80e0d3a944e7eb3fdfc84245b7421647b8c58dfb68a181",
+  "limits": "truncated model; one cold-start synthetic trace per size; no queue, quality, optimized pool allocation or overlap evidence; NVML sampling misses sub-interval peaks"
+}

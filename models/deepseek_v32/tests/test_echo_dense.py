@@ -5,7 +5,9 @@ from __future__ import annotations
 import gc
 import unittest
 import weakref
+from concurrent.futures import ThreadPoolExecutor
 from contextlib import nullcontext
+from threading import Event as ThreadEvent
 from types import SimpleNamespace
 from unittest.mock import patch
 
@@ -90,6 +92,10 @@ def make_controller(prefix=2):
             calls.append(("sync", self.name))
 
     controller = object.__new__(DensePrefetchController)
+    controller.schedule = "layer_end"
+    controller.transport = "cpu_staging"
+    controller._executor = None
+    controller._prefetch_futures = [None] * 3
     controller.device = "fake_cuda"
     compute = Stream("compute")
     controller.torch = SimpleNamespace(
@@ -170,20 +176,27 @@ class DensePlanTests(unittest.TestCase):
             {"prefix_tokens": 3},
             {"prefix_tokens": -1},
             {"prefix_tokens": True},
-            {"num_layers": 4},
+            {"num_layers": 6},
             {"num_layers": True},
             {"max_context_tokens": 0},
             {"host_capacity_tokens": 0},
         ):
             with self.subTest(overrides=overrides), self.assertRaises(ValueError):
                 plan_dense_batch(**(base | overrides))
+        self.assertEqual(plan_dense_batch(**(base | {"num_layers": 5})).h2d_bytes, 2 * 5 * 1152)
 
     def test_two_scratch_buffers_and_original_pool_exclusion_explicit(self):
         values = dense_allocation_plan(65536 + 1024, 128 * 65536)
         expected = 2 * (65536 + 1024 + 64) * 1152
         self.assertEqual(values["scratch_buffers"], 2)
         self.assertEqual(values["scratch_hbm_bytes"], expected)
-        self.assertEqual(values["pinned_staging_bytes"], expected)
+        self.assertEqual(values["pinned_staging_bytes"], 0)
+        self.assertEqual(
+            dense_allocation_plan(65536 + 1024, 128 * 65536, transport="cpu_staging")[
+                "pinned_staging_bytes"
+            ],
+            expected,
+        )
         self.assertEqual(
             values["additional_persistent_hbm_bytes"],
             expected + (128 * 65536 + 1) * 4 + (65536 + 1024 + 1) * 4,
@@ -196,6 +209,41 @@ class DensePlanTests(unittest.TestCase):
 
 
 class DensePipelineTests(unittest.TestCase):
+    def test_direct_gpu_gather_has_no_cpu_staging_or_worker(self):
+        controller, calls, batch, attention = self.async_controller()
+        controller._executor.shutdown(wait=True)
+        controller._executor = None
+        controller.transport = "gpu_direct"
+        controller._host_staging = ()
+        controller._prefix_ids_gpu = [9, 3]
+        controller._direct_gather = lambda host, indices, out: calls.append(
+            ("direct", host, tuple(indices), out.name)
+        )
+        with controller.forward_batch(batch):
+            for layer in range(3):
+                controller._before_layer(layer)
+                calls.append(("indexer", layer))
+                attention(layer)
+                controller._after_layer(layer)
+        self.assertEqual(
+            [c for c in calls if c[0] == "direct"],
+            [
+                ("direct", "host0", (9, 3), "scratch0"),
+                ("direct", "host1", (9, 3), "scratch1"),
+                ("direct", "host2", (9, 3), "scratch0"),
+            ],
+        )
+        self.assertFalse(any(c[0] in ("gather", "sync") for c in calls))
+        waits = [i for i, c in enumerate(calls) if c[:2] == ("wait", "compute")]
+        for layer, i in enumerate(waits):
+            self.assertLess(calls.index(("indexer", layer)), i)
+        self.assertTrue(any(c[:2] == ("wait", "copy") for c in calls))
+        self.assertLess(
+            calls.index(("direct", "host1", (9, 3), "scratch1")), calls.index(("attention",))
+        )
+        with self.assertRaisesRegex(RuntimeError, "twice"):
+            controller._submit_prefix(0)
+
     def test_ping_pong_waits_for_both_dma_source_and_compute_destination(self):
         controller, calls = make_controller()
         with controller.forward_batch(object()):
@@ -227,6 +275,135 @@ class DensePipelineTests(unittest.TestCase):
             controller.last_batch_stats["h2d_payload_bytes_per_layer"], [2304, 2304, 2304]
         )
         self.assertEqual(controller.last_batch_stats["device_generated_suffix_bytes"], 3 * 1152)
+
+    def async_controller(self, prefix=2):
+        controller, calls = make_controller(prefix)
+        controller.schedule = "attention_window"
+        controller._executor = ThreadPoolExecutor(max_workers=1)
+        self.addCleanup(controller.close)
+        controller.torch.inference_mode = nullcontext
+        controller.torch.cuda.device = lambda device: nullcontext()
+        batch = SimpleNamespace(out_cache_loc=object(), req_pool_indices_cpu=[0])
+        controller.source = SimpleNamespace(NSA_FUSE_TOPK=True)
+        controller.pool = SimpleNamespace(
+            size=16,
+            set_mla_kv_buffer=lambda *a, **kw: calls.append(("host_write",)),
+        )
+        controller.backend = SimpleNamespace(
+            forward_metadata=object(),
+            _forward_flashmla_prefill=lambda **kw: calls.append(("attention",)),
+        )
+        controller._mapping = Mapping([-1] * 17)
+        controller._mapping[0] = 0
+        for dense, host in enumerate(controller._plan.host_locations, 1):
+            controller._mapping[host] = dense
+
+        def attention(layer_id):
+            layer = SimpleNamespace(
+                layer_id=layer_id,
+                is_cross_attention=False,
+                v_head_dim=512,
+                head_dim=576,
+                tp_q_head_num=128,
+                scaling=0.1,
+            )
+            q, k, v, qr, kr = (Buffer(name, calls) for name in ("q", "k", "v", "qr", "kr"))
+            return controller._forward_extend(
+                q,
+                k,
+                v,
+                layer,
+                batch,
+                q_rope=qr,
+                k_rope=kr,
+                topk_indices=Vector([9, 7, -1, 0]),
+            )
+
+        return controller, calls, batch, attention
+
+    def test_async_gather_does_not_block_layer_or_indexer_submission(self):
+        controller, calls, batch, attention = self.async_controller()
+        entered, release = ThreadEvent(), ThreadEvent()
+        original = controller.torch.index_select
+
+        def gather(host, *args, **kwargs):
+            if host == "host1":
+                entered.set()
+                if not release.wait(5):
+                    raise TimeoutError("test did not release gather")
+            original(host, *args, **kwargs)
+
+        controller.torch.index_select = gather
+        with controller.forward_batch(batch):
+            controller._before_layer(0)
+            self.assertFalse(any(c[0] == "wait" and c[1] == "compute" for c in calls))
+            attention(0)
+            try:
+                self.assertTrue(entered.wait(5))
+                calls.append(("ffn0",))
+                controller._after_layer(0)
+                controller._before_layer(1)
+                calls.append(("indexer1",))
+                self.assertFalse(controller._prefetch_futures[1].done())
+                self.assertEqual(len([c for c in calls if c[:2] == ("wait", "compute")]), 1)
+            finally:
+                release.set()
+            attention(1)
+            controller._after_layer(1)
+            controller._before_layer(2)
+            attention(2)
+            controller._after_layer(2)
+        self.assertLess(calls.index(("indexer1",)), calls.index(("gather", "host1", "stage1")))
+        waits = [i for i, c in enumerate(calls) if c[:2] == ("wait", "compute")]
+        self.assertLess(calls.index(("indexer1",)), waits[1])
+        for i in waits:
+            self.assertLess(calls.index(("record", calls[i][2], "copy")), i)
+        # Slot zero reuse still protects both its CPU source and GPU destination.
+        gather2 = calls.index(("gather", "host2", "stage0"))
+        self.assertTrue(any(c[0] == "sync" for c in calls[:gather2]))
+        self.assertTrue(any(c[:2] == ("wait", "copy") for c in calls[gather2:]))
+        self.assertEqual(controller.last_batch_stats["h2d_payload_bytes"], 6 * MLA_RECORD_BYTES)
+
+    def test_async_worker_failure_poisoning_and_drain(self):
+        controller, _calls, batch, attention = self.async_controller()
+
+        def fail(*args, **kwargs):
+            raise ValueError("gather failed")
+
+        controller.torch.index_select = fail
+        with self.assertRaisesRegex(ValueError, "gather failed"), controller.forward_batch(batch):
+            controller._before_layer(0)
+            attention(0)
+        self.assertTrue(controller._failed)
+        self.assertIsNone(controller._active_batch)
+        self.assertTrue(all(f is None or f.done() for f in controller._prefetch_futures))
+
+    def test_async_cold_batch_and_no_duplicate_submission(self):
+        controller, calls, batch, attention = self.async_controller(prefix=0)
+        with controller.forward_batch(batch):
+            for layer in range(3):
+                controller._before_layer(layer)
+                attention(layer)
+                controller._after_layer(layer)
+        self.assertFalse(any(c[0] == "gather" for c in calls))
+        self.assertEqual(controller.last_batch_stats["h2d_payload_bytes"], 0)
+        with self.assertRaisesRegex(RuntimeError, "twice"):
+            controller._submit_prefix(0)
+
+    def test_async_failure_drains_before_batch_state_is_released(self):
+        controller, _calls, batch, _attention = self.async_controller()
+        original = controller._prefetch_worker
+
+        def worker(layer_id):
+            self.assertIs(controller._active_batch, batch)
+            original(layer_id)
+
+        controller._prefetch_worker = worker
+        with self.assertRaisesRegex(RuntimeError, "model failed"), controller.forward_batch(batch):
+            raise RuntimeError("model failed")
+        self.assertTrue(controller._prefetch_futures[0].done())
+        controller.close()
+        self.assertIsNone(controller._executor)
 
     def test_cold_request_transfers_no_uninitialized_host_suffix(self):
         controller, calls = make_controller(prefix=0)

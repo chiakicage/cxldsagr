@@ -225,8 +225,20 @@ class CheckpointTests(unittest.TestCase):
             with self.subTest(layers=layers), self.assertRaises(preflight.AuditError):
                 preflight.expected_tensors(self.config, layers)
         self.config["first_k_dense_replace"] = 1
-        with self.assertRaisesRegex(preflight.AuditError, "dense MLP"):
+        with self.assertRaisesRegex(preflight.AuditError, "moe_intermediate_size"):
             preflight.expected_tensors(self.config, 2)
+
+    def test_moe_header_spec_agrees_with_runtime_adapter(self):
+        from models.deepseek_v32.echo_adapter import _tensor_specs
+        from models.deepseek_v32.tests.test_echo_adapter import fixture_config
+
+        config = fixture_config()
+        specs = preflight.expected_tensors(config, 5)
+        runtime = _tensor_specs(config, 5)
+        self.assertEqual(set(specs), set(runtime))
+        for name, spec in specs.items():
+            self.assertEqual(tuple(spec["shape"]), runtime[name].shape)
+            self.assertTrue(set(runtime[name].dtypes) <= set(spec["dtypes"]))
 
     def test_capacity_uses_bf16_mla_and_explicit_index_payload(self):
         config = {

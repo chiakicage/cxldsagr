@@ -21,6 +21,17 @@ def fixture_config():
         "architectures": [adapter.ARCHITECTURE],
         "num_hidden_layers": 61,
         "first_k_dense_replace": 3,
+        "moe_intermediate_size": 2048,
+        "n_routed_experts": 256,
+        "n_shared_experts": 1,
+        "moe_layer_freq": 1,
+        "num_experts_per_tok": 8,
+        "n_group": 8,
+        "topk_group": 4,
+        "topk_method": "noaux_tc",
+        "scoring_func": "sigmoid",
+        "norm_topk_prob": True,
+        "routed_scaling_factor": 2.5,
         "hidden_size": 7168,
         "vocab_size": 129280,
         "q_lora_rank": 1536,
@@ -156,7 +167,6 @@ class EchoAdapterTests(unittest.TestCase):
     def test_wrong_model_moe_layers_and_layout_rejected(self):
         for key, value in (
             ("model_type", "nosa"),
-            ("first_k_dense_replace", 2),
             ("index_head_dim", 64),
             ("kv_lora_rank", 256),
             ("hidden_act", "relu"),
@@ -165,9 +175,51 @@ class EchoAdapterTests(unittest.TestCase):
                 config = dict(self.config, **{key: value})
                 with self.assertRaises(adapter.AdapterError):
                     adapter.validate_checkpoint_config(config, 3)
-        for layers in (0, 4, True):
+        for layers in (0, 6, True):
             with self.subTest(layers=layers), self.assertRaises(adapter.AdapterError):
                 adapter.validate_checkpoint_config(self.config, layers)
+
+    def test_five_layers_include_every_expert_router_and_shared_expert(self):
+        adapter.validate_checkpoint_config(self.config, 5)
+        specs = adapter._tensor_specs(self.config, 5)
+        self.assertEqual(len(specs), 3212)
+        for layer in (3, 4):
+            for expert in range(256):
+                for projection in ("gate_proj", "up_proj", "down_proj"):
+                    name = f"model.layers.{layer}.mlp.experts.{expert}.{projection}"
+                    self.assertEqual(specs[name + ".weight"].dtypes, ("F8_E4M3",))
+                    self.assertIn(name + ".weight_scale_inv", specs)
+            self.assertEqual(specs[f"model.layers.{layer}.mlp.gate.weight"].shape, (256, 7168))
+            bias = specs[f"model.layers.{layer}.mlp.gate.e_score_correction_bias"]
+            self.assertEqual((bias.shape, bias.dtypes), ((256,), ("F32",)))
+            self.assertIn(f"model.layers.{layer}.mlp.shared_experts.down_proj.weight", specs)
+            self.assertNotIn(f"model.layers.{layer}.mlp.down_proj.weight", specs)
+
+    def test_moe_router_configuration_is_validated(self):
+        for key, value in (
+            ("topk_method", "greedy"),
+            ("n_group", 7),
+            ("topk_group", 9),
+            ("n_routed_experts", 0),
+            ("moe_intermediate_size", 0),
+            ("num_experts_per_tok", 257),
+            ("routed_scaling_factor", 0),
+        ):
+            with self.subTest(key=key), self.assertRaises(adapter.AdapterError):
+                adapter.validate_checkpoint_config(self.config | {key: value}, 5)
+
+    def test_missing_moe_expert_or_router_fails_before_loading(self):
+        specs = adapter._tensor_specs(self.config, 5)
+        self.index = {"weight_map": {name: "first.safetensors" for name in specs}}
+        for name in (
+            "model.layers.4.mlp.experts.255.down_proj.weight_scale_inv",
+            "model.layers.3.mlp.gate.e_score_correction_bias",
+        ):
+            removed = self.index["weight_map"].pop(name)
+            self.write_metadata()
+            with self.assertRaisesRegex(adapter.AdapterError, "missing required"):
+                adapter.inspect_checkpoint(self.root, 5)
+            self.index["weight_map"][name] = removed
 
     def test_path_traversal_and_symlink_escape_rejected(self):
         for name in ("../outside.safetensors", "/tmp/outside.safetensors", "a\\b.safetensors"):

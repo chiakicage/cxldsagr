@@ -162,6 +162,23 @@ class EchoCacheManagerTests(unittest.TestCase):
         self.assertFalse(result.prefix_reused)
         self.assertEqual(runner.count("prefill"), 4)
 
+    def test_fixed_cache_evicts_before_prefill_independently_of_population(self):
+        for capacity in (93, 128):
+            manager, runner = self.make_manager(capacity=capacity * 64 + 128)
+            for uid in range(capacity):
+                manager.execute(request(uid))
+            manager.execute(request(0, candidate=(4, 5)))
+            before = len(runner.calls)
+            result = manager.execute(request(capacity))
+            self.assertEqual(result.evicted_user_ids, (1,))
+            self.assertEqual(
+                [call[0] for call in runner.calls[before:]], ["release", "prefill", "extend"]
+            )
+            self.assertEqual(manager.retained_tokens, capacity * 64)
+            rebuilt = manager.execute(request(1))
+            self.assertFalse(rebuilt.prefix_reused)
+            self.assertEqual(rebuilt.evicted_user_ids, (2,))
+
     def test_observed_heat_decays_without_oracle_metadata_access(self):
         class OracleGuard(dict):
             def __getitem__(self, key):

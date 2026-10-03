@@ -45,6 +45,10 @@ class EchoRunnerTests(unittest.TestCase):
         for kwargs in (
             {"mode": "echo"},
             {"mode": "dense_attention"},
+            {"mode": "resident", "dense_prefetch_schedule": "layer_end"},
+            {"mode": "dense_prefetch", "dense_prefetch_schedule": "invalid"},
+            {"mode": "resident", "dense_prefetch_transport": "gpu_direct"},
+            {"mode": "dense_prefetch", "dense_prefetch_transport": "invalid"},
             {"prefill_chunk": 65},
             {"max_total_tokens": 1024},
             {"mode": "sparse_sync", "max_total_tokens": 8192},

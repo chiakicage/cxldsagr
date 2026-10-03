@@ -2,12 +2,16 @@
 set -euo pipefail
 
 if [[ "${1:-}" == --help ]]; then
-  echo "Usage: bash scripts/run_echo_tests.sh [resident|sparse_sync|echo_gr_adapted|dense_prefetch|all]"
-  echo "Real-weight, three-layer GR correctness only; no benchmark or report output."
+  echo "Usage: bash scripts/run_echo_tests.sh [resident|sparse_sync|echo_gr_adapted|dense_prefetch|dense_pair|all]"
+  echo "dense_pair checks both dense schedules against a fresh resident reference."
+  echo "SPARSEGR_ECHO_DENSE_SCHEDULE selects attention_window (default) or layer_end."
+  echo "SPARSEGR_ECHO_DENSE_TRANSPORT selects gpu_direct (default) or cpu_staging."
+  echo "Real-weight GR correctness only; SPARSEGR_ECHO_TEST_LAYERS=1..5 (default 3)."
   echo "Requires ECHO/.venv with custom kernels and a matching CUDA toolkit."
   echo "Override CUDA_HOME or SPARSEGR_ECHO_MODEL when needed."
   echo "all also compares all three offload modes with a temporary resident reference."
   echo "SPARSEGR_ECHO_TEST_TRACE optionally selects GR JSONL with >=3 users and revisits."
+  echo "SPARSEGR_ECHO_TEST_FIXED_BUDGET=1 verifies full 93/128-user pools; requires 5 layers and 64K trace."
   echo "Default logical top-k order is a correctness-only control, never a timing path."
   echo "SPARSEGR_ECHO_TEST_TOPK_ORDER=native disables it; native 64K is nondeterministic."
   echo "ECHO fused mode defaults to the pinned phase-snapshot kernel overlay."
@@ -21,7 +25,7 @@ if [[ $# -gt 1 ]]; then
 fi
 mode="${1:-resident}"
 case "$mode" in
-  resident|sparse_sync|echo_gr_adapted|dense_prefetch|all) ;;
+  resident|sparse_sync|echo_gr_adapted|dense_prefetch|dense_pair|all) ;;
   *) echo "Unsupported mode: $mode" >&2; exit 2 ;;
 esac
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
@@ -65,10 +69,27 @@ if ! command -v timeout >/dev/null; then
   exit 1
 fi
 echo "Correctness-only top-k order: $SPARSEGR_ECHO_TEST_TOPK_ORDER (no performance measurement)"
+if [[ "$mode" == dense_pair ]]; then
+  timeout --signal=TERM --kill-after=10s "${timeout_seconds}s" \
+    "$echo_env/bin/python" -m unittest discover -s tests/integration -p test_echo_dense_gather.py -v
+  reference_dir="$(mktemp -d -t dense-pair-check.XXXXXXXX)"
+  trap 'rm -rf -- "$reference_dir"' EXIT
+  export SPARSEGR_ECHO_REFERENCE="$reference_dir/resident.pt"
+  SPARSEGR_ECHO_MODE=resident SPARSEGR_ECHO_TEST_FIXED_BUDGET=0 \
+    timeout --signal=TERM --kill-after=10s "${timeout_seconds}s" \
+    "$echo_env/bin/python" -m unittest discover -s tests/integration -p test_echo_gr_prefix.py -v
+  for schedule in layer_end attention_window; do
+    echo "Dense correctness schedule: $schedule"
+    SPARSEGR_ECHO_MODE=dense_prefetch SPARSEGR_ECHO_DENSE_SCHEDULE="$schedule" \
+      timeout --signal=TERM --kill-after=10s "${timeout_seconds}s" \
+      "$echo_env/bin/python" -m unittest discover -s tests/integration -p test_echo_gr_prefix.py -v
+  done
+  exit 0
+fi
 if [[ "$mode" == all ]]; then
   timeout --signal=TERM --kill-after=10s "${timeout_seconds}s" \
     "$echo_env/bin/python" -m unittest discover \
-    -s tests/integration -p test_echo_recall_address.py -v
+    -s tests/integration -p 'test_echo_*address.py' -v
   reference_dir="$(mktemp -d -t echo-gr-check.XXXXXXXX)"
   trap 'rm -rf -- "$reference_dir"' EXIT
   export SPARSEGR_ECHO_REFERENCE="$reference_dir/resident.pt"

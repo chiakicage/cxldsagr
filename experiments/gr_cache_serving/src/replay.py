@@ -1,4 +1,4 @@
-"""Measure the existing synchronous three-layer GR prototype, not online serving.
+"""Measure the synchronous reduced-layer GR prototype, not online serving.
 
 No model math, cache policy, top-k reordering, or artificial arrivals are added.
 Model initialization and kernel warmup are excluded; all measured requests start
@@ -20,7 +20,7 @@ import sys
 import tempfile
 import time
 from collections import Counter
-from contextlib import contextmanager
+from contextlib import contextmanager, nullcontext
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -59,6 +59,7 @@ def summarize(rows):
         "all": distribution([row["service_ms"] for row in rows]),
         "first_visit": distribution([row["service_ms"] for row in rows if row["first_visit"]]),
         "prefix_hit": distribution([row["service_ms"] for row in rows if row["prefix_reused"]]),
+        "revisit": distribution([row["service_ms"] for row in rows if not row["first_visit"]]),
         "revisit_reprefill": distribution(
             [
                 row["service_ms"]
@@ -72,11 +73,19 @@ def summarize(rows):
             [row["candidate_ms"] for row in rows if row["prefix_reused"]]
         ),
         "host_evictions": sum(len(row["evicted_user_ids"]) for row in rows),
+        "prefill_count": sum(not row["prefix_reused"] for row in rows),
+        "prefill_total_ms": math.fsum(row["prefill_ms"] for row in rows),
         "inverse_mean_service_requests_per_s": len(rows) * 1000 / service_ms
         if service_ms
         else None,
         "prefix_hit_fraction": sum(row["prefix_reused"] for row in rows) / len(rows)
         if rows
+        else None,
+        "revisit_prefix_hit_fraction": (
+            sum(row["prefix_reused"] for row in rows if not row["first_visit"])
+            / sum(not row["first_visit"] for row in rows)
+        )
+        if any(not row["first_visit"] for row in rows)
         else None,
     }
 
@@ -144,10 +153,22 @@ def source_fingerprints():
         "models/deepseek_v32/echo_adapter.py",
         "models/deepseek_v32/echo_cache.py",
         "models/deepseek_v32/echo_dense.py",
+        "operators/sm90/pinned_gather.py",
         "models/deepseek_v32/echo_kernel.py",
         "models/deepseek_v32/echo_recall.py",
+        "models/deepseek_v32/echo_index.py",
+        "serving/echo_budget.py",
+        "experiments/gr_cache_serving/src/memory_guard.py",
+        "experiments/gr_cache_serving/src/host_memory.py",
+        "experiments/gr_cache_serving/src/fixed_budget.py",
+        "experiments/gr_cache_serving/src/transfer.py",
         "experiments/gr_cache_serving/src/replay.py",
+        "experiments/gr_cache_serving/src/preflight.py",
+        "experiments/gr_cache_serving/src/workload.py",
         "experiments/gr_cache_serving/scripts/run_replay.sh",
+        "experiments/gr_cache_serving/scripts/run_fixed_budget_sweep.sh",
+        "experiments/gr_cache_serving/scripts/run_dense_window.sh",
+        "experiments/gr_cache_serving/scripts/run_dense_direct.sh",
     ]
     return {name: hashlib.sha256((ROOT / name).read_bytes()).hexdigest() for name in paths}
 
@@ -173,11 +194,20 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--trace", type=Path, required=True)
     parser.add_argument("--mode", choices=MODES, required=True)
+    parser.add_argument("--dense-prefetch-schedule", choices=("layer_end", "attention_window"))
+    parser.add_argument("--dense-prefetch-transport", choices=("gpu_direct", "cpu_staging"))
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument(
         "--model-path", type=Path, default=Path("/mnt/nfs/share/models/DeepSeek-V3.2")
     )
     parser.add_argument("--host-users", type=int, default=128)
+    parser.add_argument("--profile", choices=("fixed_budget_512",))
+    parser.add_argument("--host-cache-budget-gib", type=float)
+    parser.add_argument("--layers", type=int, choices=(1, 2, 3, 4, 5), default=3)
+    parser.add_argument("--hbm-budget-gib", type=float)
+    parser.add_argument("--workspace-reserve-gib", type=float, default=8)
+    parser.add_argument("--non-torch-reserve-gib", type=float, default=2)
+    parser.add_argument("--collect-transfers", action="store_true")
     parser.add_argument("--device-cache-tokens", type=int, default=66624)
     parser.add_argument("--repetition", type=int, default=1)
     parser.add_argument(
@@ -186,6 +216,10 @@ def main(argv=None):
         help="per-request logging; not valid performance output",
     )
     args = parser.parse_args(argv)
+    if args.dense_prefetch_schedule is not None and args.mode != "dense_prefetch":
+        parser.error("--dense-prefetch-schedule requires --mode dense_prefetch")
+    if args.dense_prefetch_transport is not None and args.mode != "dense_prefetch":
+        parser.error("--dense-prefetch-transport requires --mode dense_prefetch")
     if os.environ.get("CUDA_LAUNCH_BLOCKING") == "1" and not args.diagnostic:
         parser.error("CUDA_LAUNCH_BLOCKING=1 requires --diagnostic; cannot publish performance")
     if args.diagnostic and args.output_dir.resolve().is_relative_to(ROOT / "experiments"):
@@ -207,27 +241,106 @@ def main(argv=None):
     if prefix % 64 or args.device_cache_tokens < prefix + suffix:
         parser.error("current runner needs aligned prefix and device capacity >= active context")
 
+    host_memory_preflight = None
+    host_plan = host_availability = host_guard = None
+    if args.host_cache_budget_gib is not None:
+        from experiments.gr_cache_serving.src.host_memory import (
+            HostCacheGuard,
+            inspect_host_availability,
+            plan_host_cache,
+        )
+
+        host_plan = plan_host_cache(
+            users=args.host_users,
+            layers=args.layers,
+            prefix=prefix,
+            suffix=suffix,
+            budget_bytes=int(args.host_cache_budget_gib * 2**30),
+        )
+        host_availability = inspect_host_availability(host_plan)
+    if args.mode != "resident":
+        from experiments.gr_cache_serving.src.host_memory import inspect_pinned_capacity
+
+        host_memory_preflight = inspect_pinned_capacity(host_tokens * args.layers * 1152)
+
     import torch
 
+    from experiments.gr_cache_serving.src.transfer import TransferMeter
     from models.deepseek_v32.echo_kernel import PREFETCH_PHASE_PATCH_ID
     from serving.echo_cache_manager import EchoCacheManager
     from serving.echo_runner import open_echo_runner
 
+    budget = guard = None
+    if args.hbm_budget_gib is not None:
+        from experiments.gr_cache_serving.src.memory_guard import MemoryGuard
+        from experiments.gr_cache_serving.src.preflight import audit_checkpoint
+        from serving.echo_budget import GIB, plan_echo_budget
+
+        audit = audit_checkpoint(args.model_path, args.layers)
+        budget = plan_echo_budget(
+            mode=args.mode,
+            num_layers=args.layers,
+            users=args.host_users,
+            prefix_tokens=prefix,
+            suffix_tokens=suffix,
+            checkpoint_stored_bytes=audit["selected_stored_bytes"],
+            total_hbm_bytes=int(args.hbm_budget_gib * GIB),
+            workspace_reserve_bytes=int(args.workspace_reserve_gib * GIB),
+            non_torch_reserve_bytes=int(args.non_torch_reserve_gib * GIB),
+            device_cache_tokens=args.device_cache_tokens,
+        )
+        if args.profile:
+            from experiments.gr_cache_serving.src.fixed_budget import validate_configuration
+
+            validate_configuration(args, trace_metadata, budget)
+        host_tokens = budget.logical_pool_tokens
+        args.device_cache_tokens = budget.device_cache_tokens
+        guard = MemoryGuard(
+            torch,
+            total_bytes=budget.total_hbm_bytes,
+            non_torch_reserve_bytes=budget.non_torch_reserve_bytes,
+        )
+    elif args.profile:
+        parser.error("fixed-budget profile requires the common GPU budget")
+    if host_plan:
+        host_guard = HostCacheGuard(torch, host_plan)
+
     started = datetime.now(UTC).isoformat()
     init_start = time.perf_counter()
     rows = []
-    with open_echo_runner(
-        model_path=args.model_path,
-        echo_path=ROOT / "3rdparty/ECHO",
-        num_layers=3,
-        mode=args.mode,
-        max_total_tokens=host_tokens,
-        device_cache_tokens=args.device_cache_tokens,
-        prefill_chunk=1024,
-        kernel_patch=PREFETCH_PHASE_PATCH_ID if args.mode == "echo_gr_adapted" else None,
-    ) as runner:
+    with (
+        guard if guard else nullcontext(),
+        open_echo_runner(
+            model_path=args.model_path,
+            echo_path=ROOT / "3rdparty/ECHO",
+            num_layers=args.layers,
+            mode=args.mode,
+            max_total_tokens=host_tokens,
+            device_cache_tokens=args.device_cache_tokens,
+            prefill_chunk=1024,
+            kernel_patch=PREFETCH_PHASE_PATCH_ID if args.mode == "echo_gr_adapted" else None,
+            mem_fraction_static=budget.torch_limit_bytes
+            / torch.cuda.get_device_properties(0).total_memory
+            if budget
+            else 0.6,
+            dense_context_tokens=budget.dense_context_tokens if budget else None,
+            dense_prefetch_schedule=args.dense_prefetch_schedule,
+            dense_prefetch_transport=args.dense_prefetch_transport,
+        ) as runner,
+    ):
         init_seconds = time.perf_counter() - init_start
         accounting = pool_accounting(runner)
+        accounting["common_budget_plan"] = budget.metadata() if budget else None
+        accounting["equal_total_hbm_budget_enforced"] = budget is not None
+        if host_guard:
+            expected_host_bytes = (
+                0 if args.mode == "resident" else host_plan["main_kv_tensor_bytes"]
+            )
+            if accounting["host_mla_buffers_bytes"] != expected_host_bytes:
+                raise MemoryError("actual Host KV layout differs from the fixed budget plan")
+            host_guard.sample(runner)
+        if guard:
+            guard.check()
         warm_start = time.perf_counter()
         warm = EchoCacheManager(runner, host_capacity_tokens=host_tokens, hbm_retained_users=None)
         try:
@@ -255,9 +368,14 @@ def main(argv=None):
         visits = Counter()
         loop_start = time.perf_counter()
         try:
-            with timed_phases(runner) as phase:
+            with (
+                timed_phases(runner) as phase,
+                TransferMeter(runner) if args.collect_transfers else nullcontext() as meter,
+            ):
                 for ordinal, request in enumerate(trace):
                     phase.update(prefill_ms=0.0, candidate_ms=0.0)
+                    if meter:
+                        meter.begin_request()
                     uid = request["user_id"]
                     if args.diagnostic:
                         print(
@@ -287,6 +405,11 @@ def main(argv=None):
                         )
                         raise
                     elapsed = (time.perf_counter_ns() - begin) / 1e6
+                    transfer = meter.finish_request() if meter else {}
+                    if guard:
+                        guard.check()
+                    if host_guard:
+                        host_guard.sample(runner, manager)
                     # Validation is outside the timed service interval, never called a quality score.
                     if not bool(torch.isfinite(result.hidden_states).all()):
                         raise RuntimeError(f"nonfinite output at request {ordinal}")
@@ -305,6 +428,15 @@ def main(argv=None):
                             - phase["candidate_ms"],
                             "evicted_user_ids": list(result.evicted_user_ids),
                             "retained_prefix_tokens": result.retained_tokens,
+                            "d2h_mla_payload_bytes": (
+                                ((0 if result.prefix_reused else prefix) + suffix)
+                                * 1152
+                                * args.layers
+                                if args.mode != "resident"
+                                else 0
+                            ),
+                            "d2h_counter_scope": "derived from all successful real KV writes, not PCIe bus traffic",
+                            **transfer,
                         }
                     )
                     visits[uid] += 1
@@ -331,6 +463,11 @@ def main(argv=None):
         gpu_name = torch.cuda.get_device_name()
         gpu_total = torch.cuda.get_device_properties(0).total_memory
 
+    memory_guard = guard.metadata if guard else None
+    if args.profile:
+        from experiments.gr_cache_serving.src.fixed_budget import validate_outcomes
+
+        validate_outcomes(rows, budget.retained_users_capacity)
     if source_fingerprints() != source_snapshot:
         raise RuntimeError("measurement sources changed during replay; refusing to publish")
     summary = summarize(rows)
@@ -341,6 +478,7 @@ def main(argv=None):
             if args.diagnostic
             else "synchronous_gr_prototype_replay",
             "mode": args.mode,
+            "experiment_profile": args.profile,
             "repetition": args.repetition,
             "started_utc": started,
             "trace_path": str(args.trace.resolve()),
@@ -350,10 +488,27 @@ def main(argv=None):
             "source_sha256": source_snapshot,
             "pool_accounting": accounting,
             "host_users_capacity": args.host_users,
+            "workload_population_users": trace_metadata["stats"]["population_users"],
+            "host_cache_capacity_users": 0 if args.mode == "resident" else args.host_users,
             "configured_device_cache_tokens": args.device_cache_tokens,
+            "budget_plan": budget.metadata() if budget else None,
+            "memory_guard": memory_guard,
+            "host_memory_preflight": host_memory_preflight,
+            "host_budget_plan": host_plan,
+            "host_availability_preflight": host_availability,
+            "host_memory_observation": host_guard.metadata() if host_guard else None,
+            "transfer_instrumentation": {
+                "enabled": args.collect_transfers,
+                "scope": "MLA payload only; GPU counter snapshots included in service time, reduction/readback excluded; no bus overhead or index/model traffic",
+            },
+            "retained_users_capacity": budget.retained_users_capacity
+            if budget
+            else args.host_users,
             "hbm_retained_users": None,
             "online_heat_policy": "none; native ECHO FIFO/priority admission",
             "host_policy": "whole-prefix LRU",
+            "eviction_tier": "HBM" if args.mode == "resident" else "host",
+            "legacy_host_evictions_field": "counts prefix evictions from eviction_tier, including HBM-only",
             "final_retained_prefix_tokens": final_prefix_tokens,
             "model_init_seconds_excluded": init_seconds,
             "warmup_seconds_excluded": warm_seconds,
@@ -363,11 +518,12 @@ def main(argv=None):
             "measurement": {
                 "timer": "perf_counter_ns around EchoCacheManager.execute",
                 "included": "validation/hash, host LRU, cold prefill when needed, candidate, synchronous forward completion and suffix release",
-                "excluded": "trace loading, model startup, kernel warmup, output finite check, logging, teardown",
+                "excluded": "trace loading, model startup, kernel warmup, output finite check, logging, teardown"
+                + (", Host allocator/metadata/RSS checks" if host_guard else ""),
                 "synchronization": "existing runner synchronizes every forward including each 1024-token prefill chunk",
                 "arrival_policy": "as-fast-as-possible serial trace order; timestamps not replayed; no queue/network/batching",
                 "throughput": "inverse mean service time, NOT measured online requests/s or SLO capacity",
-                "output": "candidate hidden states on GPU, complete first 3 layers; no final norm/head/recommendation",
+                "output": f"candidate hidden states on GPU, complete first {args.layers} layers; no final norm/head/recommendation",
                 "numerical_validation": "every output finite; prior controlled-order integration tests, not native bitwise parity",
             },
             "loop_wall_seconds_including_checks_and_logging": loop_seconds,
@@ -402,6 +558,11 @@ def main(argv=None):
         with (stage / "requests.jsonl").open("w") as handle:
             for row in rows:
                 handle.write(json.dumps(row) + "\n")
+        snapshot = {
+            name: {"sha256": digest, "text": (ROOT / name).read_text()}
+            for name, digest in source_snapshot.items()
+        }
+        (stage / "source_snapshot.json").write_text(json.dumps(snapshot, indent=2) + "\n")
         _publish_directory(stage, args.output_dir)
     print(json.dumps({"output_dir": str(args.output_dir), "summary": summarize(rows)}), flush=True)
 

@@ -73,8 +73,8 @@ def scoped_logical_topk_order(model_runner):
     source = importlib.import_module("sglang.srt.layers.attention.nsa_backend")
     pool = model_runner.token_to_kv_pool
     layers = tuple(model_runner.model.model.layers)
-    if len(layers) not in (1, 2, 3):
-        raise ValueError("test control supports only the first 1-3 layers")
+    if len(layers) not in (1, 2, 3, 4, 5):
+        raise ValueError("test control supports only the first 1-5 layers")
     marker = "_gr_correctness_topk_control"
     if hasattr(model_runner, marker):
         raise RuntimeError("top-k correctness controls cannot be nested")

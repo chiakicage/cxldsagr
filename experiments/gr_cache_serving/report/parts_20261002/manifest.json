@@ -1,0 +1,24 @@
+{
+  "run_ids": [
+    "parts_20261002_dsa",
+    "parts_20261002_dense"
+  ],
+  "summary_sha256": {
+    "parts_20261002_dsa": "85e566791fb5cb2d6d9b213ece393a2f05a21746e7f6cfe67b14e6cb724e775d",
+    "parts_20261002_dense": "2a94e65b1c62688f044d9802469943b5baf19bb1be9720a8bab1d9d1817820bc"
+  },
+  "analyzer_sha256": "bbc19201cb2af51c82d066c3e0674c019eb01547cdd9a04a36d63310015894bb",
+  "coverage": [
+    {
+      "unattributed_gpu_sum_ms": 0.33066,
+      "unattributed_gpu_events": 58,
+      "total_gpu_events": 87742
+    },
+    {
+      "unattributed_gpu_sum_ms": 0.27866,
+      "unattributed_gpu_events": 42,
+      "total_gpu_events": 73780
+    }
+  ],
+  "limits": "Diagnostic sample: 2 first visits, 4 revisits; profiler overhead; CPU/GPU durations are not additive; no-traced-GPU-activity is not a stall root-cause attribution."
+}

@@ -1,0 +1,37 @@
+{
+  "run_ids": [
+    "dense_window_20261002_u64_attention_window_r1",
+    "dense_window_20261002_u64_layer_end_r1",
+    "dense_window_20261002_u128_attention_window_r1",
+    "dense_window_20261002_u128_layer_end_r1"
+  ],
+  "summary_sha256": {
+    "dense_window_20261002_u64_attention_window_r1": "83456f21603a629060a43620bdd0f91b52ae0787953682e756b77cc18b4b1511",
+    "dense_window_20261002_u64_layer_end_r1": "6fa754a0398a5a93ca8204ef2c937d6933fa7b39001f02fa127f198a05918cef",
+    "dense_window_20261002_u128_attention_window_r1": "0d5a287da841ef74bfd69d6813252a88ba3c5e60c313fce8d15ef1598a92fccf",
+    "dense_window_20261002_u128_layer_end_r1": "7daec6e85818db331b17b4d24e1622874a3cae6567c9f5d4260bbc3d5212c4bf"
+  },
+  "source_sha256": {
+    "serving/echo_runner.py": "e1ec150277e84b6fe03b13b58518e9530f41519f5940e3333963bd65c601e55a",
+    "serving/echo_cache_manager.py": "3e785fb339d1ad4b187084c538822dec28ee7b0fe5e1d8f8728d5b04ca06bc0e",
+    "models/deepseek_v32/echo_adapter.py": "14d91f5d6c37759a2efd40fb7ce3bda1eb737e7982f6348e074665e65948817c",
+    "models/deepseek_v32/echo_cache.py": "411afc395fc2bfe080a58b89c232c1443ec3a819550d940dd34f40941f432037",
+    "models/deepseek_v32/echo_dense.py": "e5655cb77db436099fe7a7e86ac0a466c3517d25e47935f6449262065e73cc05",
+    "models/deepseek_v32/echo_kernel.py": "846dcd02eb2ddede791275720502b95f7fafe950b0d8a7fea031437212db2edf",
+    "models/deepseek_v32/echo_recall.py": "d49fbaf66d42e2972e8a6cb5c2f9e50436cc1d9cc3dc57602556da76466525cf",
+    "models/deepseek_v32/echo_index.py": "7a57732fb9a672b91dc750d4d431545429fb19d83881af747a742f32e5f33079",
+    "serving/echo_budget.py": "ce28f283bcd6ee2ee5763161564953f1680e2fa0c6d0675350b3a8a18747b8da",
+    "experiments/gr_cache_serving/src/memory_guard.py": "b51a15d348deffcb3508be6509d53b89293835b92d6d602a8d543309340b924a",
+    "experiments/gr_cache_serving/src/host_memory.py": "75d54ce324e71b20c9ea17b67e837f4e90334f6bd6226d9ca04524bf0f0f234e",
+    "experiments/gr_cache_serving/src/fixed_budget.py": "5cbb12f301921b44b76976d67929eae0675c498f07cd28e5a2cb5141f2a3481f",
+    "experiments/gr_cache_serving/src/transfer.py": "55274fe21a1e300d1284e4e260655c85bfa597d597af6712bbc848de4ce4159f",
+    "experiments/gr_cache_serving/src/replay.py": "49ba2cb247afb1256bcc55418bb5f6e03bc7b519bd2ffd4e33a5bd2eab00e7fa",
+    "experiments/gr_cache_serving/src/preflight.py": "1201aec4a6f370627ce1386b02c19cf4e164d6451e15afa376d051a83340d550",
+    "experiments/gr_cache_serving/src/workload.py": "91834c4f73a0661c3a5e4d2633b7dce5835df764871e20f5cdbabb6e6af1716e",
+    "experiments/gr_cache_serving/scripts/run_replay.sh": "156aba8b34f10ea15544a48c47c1f357cc5019658c2e51ce4ff810d52e67796d",
+    "experiments/gr_cache_serving/scripts/run_fixed_budget_sweep.sh": "684e1fa5dff3746a5eccdee118e0cf92d24fa07ba88bc90db8e821fa2c2f4821",
+    "experiments/gr_cache_serving/scripts/run_dense_window.sh": "8267acbdd813cdbedebd9847de3cf904ee07913f603d16211e684e870c5677f8"
+  },
+  "report_source_sha256": "4545dada5ac8754eacc8f84d90ea776d6ff3c049102167456d6ca07fdea35f2f",
+  "limits": "One seed/run; native top-k; serial cold-start synthetic GR; no timeline-derived overlap percentage or online throughput claim."
+}

@@ -1,0 +1,18 @@
+{
+  "experiment_profile": "fixed_budget_512",
+  "partial_matrix": true,
+  "run_ids": [
+    "dense_direct_20261002_u64_sparse_sync_r1",
+    "dense_direct_20261002_u64_dense_prefetch_r1",
+    "dense_direct_20261002_u128_dense_prefetch_r1",
+    "dense_direct_20261002_u128_sparse_sync_r1"
+  ],
+  "summary_sha256": {
+    "dense_direct_20261002_u64_sparse_sync_r1": "4d1b89641a658ad3f2bbbcdc9d81680f2d02873495488a0e51116aea54609b79",
+    "dense_direct_20261002_u64_dense_prefetch_r1": "01522371f0e973bfa07e36374a7f7215d26af8f9f5271a35c1c5db2ac0d7639c",
+    "dense_direct_20261002_u128_dense_prefetch_r1": "a27d1acf8ce2755c745d48d3960205169cb0278ad8399c91413fc824b88e6a28",
+    "dense_direct_20261002_u128_sparse_sync_r1": "bebd492beaac1ed2648c3b5c559aaccd1a026b11b375e4431a4a0a1f66043e42"
+  },
+  "report_source_sha256": "f980b3296bf8d18a54c5527c22672a7f5b0ca27f3c951e15d646c031edd2a691",
+  "limits": "truncated model; one cold-start synthetic trace per size; no queue, quality, optimized pool allocation or overlap evidence; NVML sampling misses sub-interval peaks"
+}

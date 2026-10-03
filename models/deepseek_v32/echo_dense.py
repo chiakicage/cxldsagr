@@ -11,12 +11,15 @@ from __future__ import annotations
 
 import hashlib
 import importlib
+from concurrent.futures import ThreadPoolExecutor, wait
 from contextlib import ExitStack, contextmanager
 from dataclasses import dataclass
 from pathlib import Path
 
 DENSE_ADAPTATION_ID = "gr_dense_all_prefix_transfer_v1"
 DENSE_MODE = "dense_all_prefix_staging_v1"
+DENSE_SCHEDULES = ("layer_end", "attention_window")
+DENSE_TRANSPORTS = ("gpu_direct", "cpu_staging")
 MLA_RECORD_BYTES = 576 * 2
 
 
@@ -55,8 +58,8 @@ def plan_dense_batch(
     ):
         if type(value) is not int or value <= 0:
             raise ValueError(f"{name} must be a positive integer")
-    if num_layers not in (1, 2, 3):
-        raise ValueError("dense adaptation supports only the complete first 1-3 layers")
+    if num_layers not in (1, 2, 3, 4, 5):
+        raise ValueError("dense adaptation supports only the complete first 1-5 layers")
     locations = tuple(host_locations)
     if not locations or len(locations) > max_context_tokens:
         raise ValueError("complete active context must fit both dense scratch buffers")
@@ -70,7 +73,11 @@ def plan_dense_batch(
     return DenseBatchPlan(locations, prefix_tokens, num_layers)
 
 
-def dense_allocation_plan(max_context_tokens: int, host_capacity_tokens: int) -> dict:
+def dense_allocation_plan(
+    max_context_tokens: int, host_capacity_tokens: int, *, transport="gpu_direct"
+) -> dict:
+    if transport not in DENSE_TRANSPORTS:
+        raise ValueError("unknown dense transport")
     for value in (max_context_tokens, host_capacity_tokens):
         if type(value) is not int or value <= 0:
             raise ValueError("capacities must be positive integers")
@@ -83,7 +90,7 @@ def dense_allocation_plan(max_context_tokens: int, host_capacity_tokens: int) ->
         "mapping_hbm_bytes": mapping,
         "positions_hbm_bytes": positions,
         "additional_persistent_hbm_bytes": scratch + mapping + positions,
-        "pinned_staging_bytes": scratch,
+        "pinned_staging_bytes": scratch if transport == "cpu_staging" else 0,
         "full_hbm_budget_verified": False,
         "excluded_from_additional_bytes": (
             "original_write_pool, resident_index, pool_metadata, model, activations, "
@@ -110,16 +117,37 @@ def _override_extend(backend, replacement):
 class DensePrefetchController:
     """Serial single-request EXTEND controller, installed by the scoped factory.
 
-    Existing history is gathered into pinned CPU staging and copied in full,
+    Existing history is read directly by a GPU kernel from pinned Host KV in full,
     regardless of original-pool hits. New suffix KV is generated on this layer,
     written by the original host-pool method, and appended directly to scratch.
-    A post-layer hook queues the next layer's transfer while current-layer GPU
-    work may still be running. Only a GPU timeline can establish actual overlap.
+    The attention-window schedule submits the next layer's transfer beside
+    main attention. Only the KV consumer waits. The optional CPU-staging control
+    uses a worker; GPU-direct submission needs no CPU gather or worker.
+    The layer-end schedule submits at the end of the preceding layer instead.
+    Neither schedule alone establishes measured GPU overlap.
     """
 
-    def __init__(self, runner, *, max_context_tokens: int):
+    def __init__(
+        self,
+        runner,
+        *,
+        max_context_tokens: int,
+        schedule="attention_window",
+        transport="gpu_direct",
+    ):
         from models.deepseek_v32.echo_adapter import verify_echo_checkout
 
+        if schedule not in DENSE_SCHEDULES:
+            raise ValueError(f"dense schedule must be one of {DENSE_SCHEDULES}")
+        self.schedule = schedule
+        if transport not in DENSE_TRANSPORTS:
+            raise ValueError(f"dense transport must be one of {DENSE_TRANSPORTS}")
+        self.transport = transport
+        self._direct_gather = None
+        if transport == "gpu_direct":
+            from operators.sm90.pinned_gather import gather_pinned_rows
+
+            self._direct_gather = gather_pinned_rows
         self.torch = importlib.import_module("torch")
         self.source = importlib.import_module("sglang.srt.layers.attention.nsa_backend")
         indexer = importlib.import_module("sglang.srt.layers.attention.nsa.nsa_indexer")
@@ -183,8 +211,13 @@ class DensePrefetchController:
         self._device_buffers = tuple(
             self.torch.zeros(shape, dtype=self.torch.bfloat16, device=self.device) for _ in range(2)
         )
-        self._host_staging = tuple(
-            self.torch.empty(shape, dtype=self.torch.bfloat16, pin_memory=True) for _ in range(2)
+        self._host_staging = (
+            tuple(
+                self.torch.empty(shape, dtype=self.torch.bfloat16, pin_memory=True)
+                for _ in range(2)
+            )
+            if transport == "cpu_staging"
+            else ()
         )
         self._mapping = self.torch.full(
             (self.pool.size + 1,), -1, dtype=self.torch.int32, device=self.device
@@ -208,12 +241,24 @@ class DensePrefetchController:
             "echo_revision": revision,
             "echo_patch_sha256": patch_sha256,
             "policy": "all-prefix-transfer ablation",
-            "storage": "staging+original_write_pool",
+            "storage": "double_hbm_scratch+original_write_pool",
+            "transport": transport,
+            "transport_version": "gpu_pinned_gather_v1"
+            if transport == "gpu_direct"
+            else "cpu_gather_dma_v1",
             "gpu_correctness": "not_checked_by_controller",
             "measured_overlap": "unverified",
             "transfer_scope": "existing prefix only; new suffix generated and appended on device",
+            "schedule": schedule,
+            "schedule_version": "dense_attention_window_gpu_submit_v1"
+            if transport == "gpu_direct" and schedule == "attention_window"
+            else "dense_attention_window_worker_v1"
+            if schedule == "attention_window"
+            else "dense_layer_end_sync_v1",
         }
-        self.memory_accounting = dense_allocation_plan(max_context_tokens, self.pool.size)
+        self.memory_accounting = dense_allocation_plan(
+            max_context_tokens, self.pool.size, transport=transport
+        )
         self.memory_accounting.update(
             retained_original_write_pool_hbm_bytes=sum(
                 value.numel() * value.element_size() for value in self.pool.device_pool.kv_buffer
@@ -225,6 +270,12 @@ class DensePrefetchController:
             original_host_kv_bytes=sum(
                 value.numel() * value.element_size() for value in self._host_layers
             ),
+        )
+        self._prefetch_futures = [None] * self.num_layers
+        self._executor = (
+            ThreadPoolExecutor(max_workers=1, thread_name_prefix="dense-prefetch")
+            if schedule == "attention_window" and transport == "cpu_staging"
+            else None
         )
 
     def _ensure_alive(self):
@@ -243,7 +294,7 @@ class DensePrefetchController:
             raise ValueError("dense adaptation accepts one ordinary EXTEND request only")
         if self._last_compute_event is not None:
             self._last_compute_event.synchronize()
-        # CPU gather must not observe an unfinished prior GPU -> host write.
+        # Neither transport may read unfinished prior GPU -> host writes.
         for streams in self.pool.host_transfer_streams:
             for stream in streams:
                 stream.synchronize()
@@ -270,6 +321,8 @@ class DensePrefetchController:
         ):
             raise ValueError("dense adaptation rejects padded or inconsistent EXTEND allocation")
         self._prefix_ids_cpu = host_ids_cpu[:prefix]
+        self._prefix_ids_gpu = host_ids_gpu[:prefix]
+        self._copy_stream.wait_stream(self.torch.cuda.current_stream(self.device))
         self._mapping.fill_(-1)
         self._mapping[0] = 0
         self._mapping[host_ids_gpu] = self._positions[1 : total + 1]
@@ -277,9 +330,59 @@ class DensePrefetchController:
         self._current_layer = None
         self._attention_seen = False
         self._copy_events = [None] * self.num_layers
+        self._prefetch_futures = [None] * self.num_layers
+
+    def _prefetch_worker(self, layer_id):
+        # Both inference mode and the current CUDA device are thread-local.
+        with self.torch.inference_mode(), self.torch.cuda.device(self.device):
+            self._enqueue_prefix(layer_id)
+
+    def _submit_prefix(self, layer_id):
+        if self.schedule == "layer_end" or self.transport == "gpu_direct":
+            if self._copy_events[layer_id] is not None:
+                raise RuntimeError("dense prefix submitted twice")
+            self._enqueue_prefix(layer_id)
+        else:
+            if self._prefetch_futures[layer_id] is not None:
+                raise RuntimeError("dense prefix submitted twice")
+            self._prefetch_futures[layer_id] = self._executor.submit(
+                self._prefetch_worker, layer_id
+            )
+
+    def _wait_prefix(self, layer_id):
+        if self.schedule == "attention_window" and self.transport == "cpu_staging":
+            future = self._prefetch_futures[layer_id]
+            if future is None:
+                raise RuntimeError("dense prefix was not submitted")
+            # CUDA must not wait on an event that the producer has not recorded.
+            future.result()
+        self.torch.cuda.current_stream(self.device).wait_event(self._copy_events[layer_id])
+
+    def _drain_prefetch(self):
+        futures = [future for future in self._prefetch_futures if future is not None]
+        wait(futures)
+        for future in futures:
+            future.result()
 
     def _enqueue_prefix(self, layer_id):
         slot = layer_id % 2
+        if self.transport == "gpu_direct":
+            count = self._plan.prefix_tokens
+            with self.torch.cuda.stream(self._copy_stream):
+                released = self._buffer_released[slot]
+                if released is not None:
+                    self._copy_stream.wait_event(released)
+                if count:
+                    self._direct_gather(
+                        self._host_layers[layer_id],
+                        self._prefix_ids_gpu,
+                        self._device_buffers[slot][1 : count + 1],
+                    )
+                ready = self.torch.cuda.Event()
+                ready.record(self._copy_stream)
+            self._copy_events[layer_id] = ready
+            self._staged_prefix_tokens[layer_id] = count
+            return
         previous_copy = self._staging_ready[slot]
         if previous_copy is not None:
             # Pinned CPU memory cannot be overwritten until its prior DMA is done.
@@ -306,9 +409,14 @@ class DensePrefetchController:
         self._ensure_alive()
         if self._active_batch is None or self._current_layer is not None:
             raise RuntimeError("layer execution must occur inside controller.forward_batch")
-        if layer_id != self._next_layer or self._copy_events[layer_id] is None:
+        if layer_id != self._next_layer or (
+            self._copy_events[layer_id] is None
+            if self.schedule == "layer_end" or self.transport == "gpu_direct"
+            else self._prefetch_futures[layer_id] is None
+        ):
             raise RuntimeError("dense layer execution order changed")
-        self.torch.cuda.current_stream(self.device).wait_event(self._copy_events[layer_id])
+        if self.schedule == "layer_end":
+            self._wait_prefix(layer_id)
         self._current_layer = layer_id
         self._attention_seen = False
 
@@ -321,8 +429,8 @@ class DensePrefetchController:
         self._last_compute_event = event
         self._next_layer += 1
         self._current_layer = None
-        if self._next_layer < self.num_layers:
-            self._enqueue_prefix(self._next_layer)
+        if self.schedule == "layer_end" and self._next_layer < self.num_layers:
+            self._submit_prefix(self._next_layer)
 
     def _forward_extend(
         self,
@@ -357,6 +465,8 @@ class DensePrefetchController:
             metadata=metadata,
             host_transfer_req_pool_indices=forward_batch.req_pool_indices_cpu,
         )
+        if self.schedule == "attention_window":
+            self._wait_prefix(layer.layer_id)
         prefix, total = self._plan.prefix_tokens, self._plan.total_tokens
         scratch = self._device_buffers[layer.layer_id % 2]
         scratch[prefix + 1 : total + 1, :, :512].copy_(k.reshape(-1, 1, 512))
@@ -381,9 +491,12 @@ class DensePrefetchController:
         )
         q_nope = q.view(-1, layer.tp_q_head_num, layer.v_head_dim)
         q_rope = q_rope.view(-1, layer.tp_q_head_num, layer.head_dim - layer.v_head_dim)
+        q_all = self.torch.cat([q_nope, q_rope], dim=-1)
         self._attention_seen = True
+        if self.schedule == "attention_window" and layer.layer_id + 1 < self.num_layers:
+            self._submit_prefix(layer.layer_id + 1)
         return self.backend._forward_flashmla_prefill(
-            q_all=self.torch.cat([q_nope, q_rope], dim=-1),
+            q_all=q_all,
             kv_cache=scratch,
             page_table_1=dense_selection,
             sm_scale=layer.scaling,
@@ -400,8 +513,9 @@ class DensePrefetchController:
             self._staged_prefix_tokens = [0] * self.num_layers
             self._prepare_batch(batch)
             self._active_batch = batch
-            self._enqueue_prefix(0)
+            self._submit_prefix(0)
             yield
+            self._drain_prefetch()
             if self._next_layer != self.num_layers or self._current_layer is not None:
                 raise RuntimeError("forward did not execute every complete model layer")
             self.last_batch_stats = {
@@ -418,19 +532,36 @@ class DensePrefetchController:
                 "device_generated_suffix_bytes": (
                     self._plan.suffix_tokens * self.num_layers * MLA_RECORD_BYTES
                 ),
-                "copy_submission": "next layer after current-layer kernel enqueue",
+                "copy_submission": (
+                    "GPU pinned gather beside current main-attention submission; consumer waits after indexer"
+                    if self.transport == "gpu_direct" and self.schedule == "attention_window"
+                    else "single worker beside current main-attention submission; consumer waits after indexer"
+                    if self.schedule == "attention_window"
+                    else "next layer after current-layer kernel enqueue"
+                ),
+                "schedule": self.schedule,
+                "transport": self.transport,
             }
         except BaseException:
             self._failed = True
             raise
         finally:
-            self._active_batch = None
+            try:
+                self._drain_prefetch()
+            except BaseException:
+                if not self._failed:
+                    self._failed = True
+                    raise
+            finally:
+                self._active_batch = None
 
     def close(self):
         if self._closed:
             return
         self._closed = True
         try:
+            if self._executor is not None:
+                self._executor.shutdown(wait=True, cancel_futures=True)
             # Includes failed forwards without a post-layer completion event.
             self.torch.cuda.synchronize(self.device)
         except BaseException:
@@ -447,6 +578,8 @@ class DensePrefetchController:
             self._mapping = None
             self._positions = None
             self._prefix_ids_cpu = None
+            self._prefix_ids_gpu = None
+            self._direct_gather = None
             self._active_batch = None
             self._plan = None
             self._copy_stream = None
@@ -454,10 +587,14 @@ class DensePrefetchController:
             self._staging_ready = ()
             self._buffer_released = ()
             self._last_compute_event = None
+            self._prefetch_futures = ()
+            self._executor = None
 
 
 @contextmanager
-def scoped_dense_prefetch(runner, *, max_context_tokens: int):
+def scoped_dense_prefetch(
+    runner, *, max_context_tokens: int, schedule="attention_window", transport="gpu_direct"
+):
     """Install on an existing ModelRunner while scoped_echo_adapter remains open.
 
     Set NSA_KV_OFFLOAD=1 and both SGLANG_NSA_FUSE_LOGITS_RECALL_* flags to 0
@@ -471,7 +608,9 @@ def scoped_dense_prefetch(runner, *, max_context_tokens: int):
     The reported additional persistent tensors do not replace a full memory audit:
     original pool metadata and transient workspaces require global measurement.
     """
-    controller = DensePrefetchController(runner, max_context_tokens=max_context_tokens)
+    controller = DensePrefetchController(
+        runner, max_context_tokens=max_context_tokens, schedule=schedule, transport=transport
+    )
     with ExitStack() as stack:
         stack.callback(controller.close)
         stack.enter_context(_override_extend(runner.attn_backend, controller._forward_extend))

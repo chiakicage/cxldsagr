@@ -53,14 +53,16 @@ for result in runner.run(generator.iter_generate(2)):
 `--sparse-backend auto` 在 CUDA 上使用 SM90 Triton。两者均为全 HBM resident cache；
 local DRAM offloading 尚未实现。
 
-## 三层 ECHO 适配
+## 截断 ECHO 适配
 
 独立的 [echo_runner.py](echo_runner.py) 接入研究用 ECHO 环境，不改变上面的 NOSA 入口。
-它配合 [三层模型适配器](../models/deepseek_v32/echo_adapter.py)，显式保留 prefix handle，
+它配合 [前 1-5 层模型适配器](../models/deepseek_v32/echo_adapter.py)，显式保留 prefix handle，
 逐候选分支恢复预取阈值、返回完整 candidate hidden、等待传输完成后释放私有 suffix。
 prefix 必须 64-token 对齐；暂时要求整个活动 context 能放进每层 device pool，容量不足明确失败。
 runner 本身只管理显式 handle；自动复用与淘汰由下述 manager 管理。
 已通过真实三层模型 4K + 1K、64K + 1K 的受控 GPU 缓存正确性检查；不等于完成论文性能测量。
+五层（包括两层完整 MoE）也已通过上述两种长度的四路径交叉检查。默认仍为三层，
+通过 `num_layers=5` / `SPARSEGR_ECHO_TEST_LAYERS=5` 选择新配置。
 
 支持选择 `resident`、`sparse_sync`、`echo_gr_adapted` 和 `dense_prefetch`，
 不同模式必须在新进程中启动。后三者使用 ECHO host pool；
@@ -77,7 +79,10 @@ source/patched header SHA、include manifest、扩展及初始化器 SHA 随 pro
 offload 模式还应用 `echo_extend_recall_int64_address_v1`，修复大 Host pool 的
 extend recall 地址乘法溢出；记录 `provenance["recall_address_fix"]`，不修改上游文件或 policy。
 `dense_prefetch` 另加两个逐层预取 buffer，保留原 write pool，相关额外容量记录在
-`provenance["dense_memory_accounting"]`；尚未实施三组统一总字节预算。
+`provenance["dense_memory_accounting"]`。新 [echo_budget.py](echo_budget.py) 为容量实验规划
+共同 HBM 上限下的有限 resident 用户数，offload 保留显式指定的 device pool；
+实验入口另外执行 Torch allocator cap 与 NVML 采样保护，不将不同实际分配量说成相同。
+`mem_fraction_static` 只供上游容量规划，不能单独当作全进程显存硬上限。
 实际模型保留原 checkpoint 的 FP8 量化与 scales；BF16 指 activation 和 MLA KV，
 不是全部权重精度。ECHO 的重叠对象是 fetch/indexer；同层 fetch/main-attention 流水未实现，
 dense 跨层传输是否实际重叠仍须 timeline 证明。

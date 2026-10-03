@@ -34,6 +34,33 @@ uv sync --group sm120
 
 ## ECHO 真实权重适配
 
+### Dense 预取调度
+
+`scoped_dense_prefetch(..., schedule="attention_window", transport="gpu_direct")` 默认在
+独立 CUDA stream 上由 GPU kernel 直接读取 pinned Host KV，写入连续 HBM scratch。
+使用 `operators/sm90/pinned_gather.py`，Host 地址乘法为 int64；没有 CPU KV gather、
+pinned staging 或 DMA copy。与 DSA recall 相同的是 GPU-issued Host load，
+并非相同的完整 kernel：Dense 不执行按需筛选、分配和缓存映射更新。
+在第 L 层 main attention 提交处发起 L+1 层任务，后续输出投影、FFN
+及 L+1 层 Q/indexer 可继续提交；直到 L+1 层写入/读取 attention scratch 前才等待该层
+copy-ready event。GPU direct 路径在主线程提交 kernel 并记录 event，不需要 Future。
+首层在 batch 准备后启动，无法借用不存在的前层 attention 窗口。
+
+双份 HBM scratch 的容量不变，覆盖等待旧层释放；请求边界及关闭时同步相关 GPU 工作。
+新 suffix 仍在设备端生成，不搬运未初始化的 Host 数据。
+这里只提供可用的依赖窗口，不保证覆盖完整窗口或已测得实际 overlap 比例。
+
+`schedule="layer_end"` 选择层末提交；`transport="cpu_staging"` 显式保留旧传输作对照。
+旧传输使用双份 pinned staging，提前调度时使用一个后台 worker，复用前等 DMA，
+batch/异常路径排空 worker，关闭先 join 再同步 CUDA。
+`open_echo_runner` 对应参数为 `dense_prefetch_schedule`，回放参数为
+`--dense-prefetch-schedule attention_window|layer_end`，两者写入 provenance。
+传输参数为 `dense_prefetch_transport` / `--dense-prefetch-transport gpu_direct|cpu_staging`，
+传输版本、调度和源码均写入 provenance，不能混成同一条性能曲线。
+新实现的正确性及配对性能状态见 [GR 实验报告](../../experiments/gr_cache_serving/README.md)。
+
+### Checkpoint 加载
+
 `echo_adapter.py` 的 `inspect_checkpoint(model_path, num_layers)` 仅用标准库读取 config、
 index 和文件元数据。`scoped_echo_adapter(echo_path, model_path, num_layers)` 延迟导入固定
 `bc1b75c1000010d0ac6f032ebaac283255c050b1` 的 ECHO；记录其 tracked patch 摘要，并在作用域内
@@ -42,7 +69,10 @@ index 和文件元数据。`scoped_echo_adapter(echo_path, model_path, num_layer
 在作用域内将 `bindings.loader_class` 赋给 `server_args.load_format`，并用
 `json_model_override_args='{"num_hidden_layers":3}'` 初始化本地 `ModelRunner`。
 loader 在 `safe_open/get_tensor` 前按索引选择 shard/权重，只加载完整 embedding 和所选
-各层的 attention、indexer、norm、dense MLP 与 FP8 scales；保留原 ECHO 权重后处理和模型数学。
+各层的 attention、indexer、norm、MLP 与 FP8 scales；保留原 ECHO 权重后处理和模型数学。
+默认三层，支持前 1-5 层；第四、五层加载完整 MoE 的所有 routed/shared experts、router
+与 correction bias。五层共 3212 个张量、6 个 checkpoint 分片，不只加载命中的专家。
+2026-09-30 五层 4K/64K 四路径受控正确性已通过；容量性能扫描状态见实验 README。
 实际要求 checkpoint 的 FP8 量化配置与 128x128 block scales，拒绝去掉量化配置的运行时。
 activation 与 MLA KV 使用 BF16，index K 为 FP8、scale 为 FP32；容量 preflight 的
 “假设 FP8 解量化为 BF16”一列不表示实际权重已全部改成 BF16。
@@ -50,7 +80,8 @@ activation 与 MLA KV 使用 BF16，index K 为 FP8、scale 为 FP32；容量 pr
 `next_token_logits` 是形状 `[tokens, 0]` 的空占位，仅满足 SGLang DP 裁剪契约，禁止采样。
 
 当前限定 TP=PP=1、真实 token embedding 与 prefill/extend，拒绝 dummy loader、
-`FAKE_P_NODE`、`DS_DEBUG_LAYERS` 和越过 dense MLP 前缀的层选择。
+`FAKE_P_NODE`、`DS_DEBUG_LAYERS` 和超过五层的选择。MoE routing 配置、专家数量/形状与
+FP8 scale 均严格校验；仍然拒绝缺失参数、不同 checkpoint 语义或 dummy 模型。
 每种后端配置使用独立进程，先设置 ECHO 环境变量再导入；作用域恢复注册表，不卸载已导入模块。
 作用域必须覆盖整个 runner 生命周期：其中还应用 [echo_cache.py](echo_cache.py) 的
 `gr_extend_recall_free_slots_v1` 修复，将 extend recall 的驱逐数改为
@@ -64,6 +95,12 @@ serving 负责 prefix 与 candidate 生命周期；缓存身份必须包含完�
 `bindings.model_instance_id`。元数据指纹不是权重内容校验和。
 
 ### SM90 fused prefetch overlay
+
+五层容量扫描额外使用 [echo_index.py](echo_index.py) 的
+`echo_index_read_int64_address_v1`：对单层超过 2 GiB 的 index buffer，在原 GetK/GetS
+执行字节偏移乘法前将 page ID 提升到 int64。小 buffer 不安装作用域，写入路径已有 int64
+location。原文件不修改，校验固定源码 SHA 并记录适配器 SHA；边界检查位于
+`tests/integration/test_echo_index_address.py`。
 
 另在 2026-09-30 多用户完整回放中定位了独立的大地址问题：原 extend recall 在
 `host_idx * 576` 中使用 signed int32，约 373 万个 Host token 后可能地址溢出。

@@ -257,10 +257,26 @@ def open_echo_runner(
     device_cache_tokens: int = 8192,
     prefill_chunk: int = 1024,
     kernel_patch: str | None = None,
+    mem_fraction_static: float = 0.6,
+    dense_context_tokens: int | None = None,
+    dense_prefetch_schedule: str | None = None,
+    dense_prefetch_transport: str | None = None,
 ):
     """Build the ECHO backend with explicit model and optional kernel adapters."""
     if mode not in ("resident", "echo_gr_adapted", "sparse_sync", "dense_prefetch"):
         raise ValueError("mode must be resident, echo_gr_adapted, sparse_sync, or dense_prefetch")
+    if dense_prefetch_transport is not None:
+        from models.deepseek_v32.echo_dense import DENSE_TRANSPORTS
+
+        if mode != "dense_prefetch" or dense_prefetch_transport not in DENSE_TRANSPORTS:
+            raise ValueError("dense_prefetch_transport requires dense mode and a valid transport")
+    if dense_prefetch_schedule is not None:
+        from models.deepseek_v32.echo_dense import DENSE_SCHEDULES
+
+        if mode != "dense_prefetch" or dense_prefetch_schedule not in DENSE_SCHEDULES:
+            raise ValueError("dense_prefetch_schedule requires dense mode and a valid schedule")
+    if not 0 < mem_fraction_static < 1:
+        raise ValueError("mem_fraction_static must be between zero and one")
     for name, value in (
         ("max_total_tokens", max_total_tokens),
         ("device_cache_tokens", device_cache_tokens),
@@ -322,7 +338,7 @@ def open_echo_runner(
                 dp_size=1,
                 max_running_requests=1,
                 max_total_tokens=max_total_tokens,
-                mem_fraction_static=0.6,
+                mem_fraction_static=mem_fraction_static,
                 chunked_prefill_size=prefill_chunk,
                 disable_cuda_graph=True,
                 enable_piecewise_cuda_graph=False,
@@ -351,6 +367,24 @@ def open_echo_runner(
                 server_args=args,
             )
             with ExitStack() as backend_scopes:
+                if runner.token_to_kv_pool_allocator.size != max_total_tokens:
+                    raise MemoryError("ECHO silently changed the requested logical pool capacity")
+                index_fix = {
+                    "enabled": False,
+                    "reason": "index buffers fit signed int32 byte offsets",
+                }
+                if any(
+                    buf.nbytes > 2**31 - 1
+                    for buf in runner.token_to_kv_pool.index_k_with_scale_buffer
+                ):
+                    from sglang.srt.layers.attention.nsa import index_buf_accessor
+
+                    from models.deepseek_v32.echo_index import scoped_index_address_fix
+
+                    index_fix = backend_scopes.enter_context(
+                        scoped_index_address_fix(index_buf_accessor, torch)
+                    )
+                    index_fix["enabled"] = True
                 recall_address_fix = None
                 if mode != "resident":
                     from sglang.srt.mem_cache import recall_ops
@@ -365,7 +399,12 @@ def open_echo_runner(
                     from models.deepseek_v32.echo_dense import scoped_dense_prefetch
 
                     dense = backend_scopes.enter_context(
-                        scoped_dense_prefetch(runner, max_context_tokens=device_cache_tokens)
+                        scoped_dense_prefetch(
+                            runner,
+                            max_context_tokens=dense_context_tokens or device_cache_tokens,
+                            schedule=dense_prefetch_schedule or "attention_window",
+                            transport=dense_prefetch_transport or "gpu_direct",
+                        )
                     )
                 local = EchoPrefixRunner(
                     runner,
@@ -376,6 +415,10 @@ def open_echo_runner(
                 local.provenance = {
                     "mode": mode,
                     "num_layers": num_layers,
+                    "layer_mlp_classes": [
+                        type(layer.mlp).__name__ for layer in runner.model.model.layers
+                    ],
+                    "moe_runner_backend": str(args.moe_runner_backend),
                     "model_instance_id": bindings.model_instance_id,
                     "checkpoint_metadata_sha256": bindings.selection.metadata_sha256,
                     "weight_payload_fingerprint": "not_hashed; reuse limited to this model instance",
@@ -384,6 +427,7 @@ def open_echo_runner(
                     "cache_adaptations": bindings.cache_adaptations,
                     "cache_adapter_sha256": bindings.cache_adapter_sha256,
                     "kernel_overlay": kernel_info,
+                    "index_address_fix": index_fix,
                     "recall_address_fix": recall_address_fix,
                     "timing_scope": "synchronous correctness path; not a performance benchmark",
                 }

@@ -132,21 +132,23 @@ def _positive(config: dict, key: str) -> int:
 
 
 def expected_tensors(config: dict, layers: int) -> dict:
-    if type(layers) is not int or layers not in (1, 2, 3):
-        raise AuditError("layers must be 1, 2, or 3")
+    from models.deepseek_v32.echo_adapter import AdapterError, layer_mlp_shapes
+
+    if type(layers) is not int or not 1 <= layers <= 5:
+        raise AuditError("layers must be between 1 and 5")
     if config.get("model_type") != "deepseek_v32":
         raise AuditError("only deepseek_v32 checkpoint metadata is supported")
-    if layers > min(
-        _positive(config, "num_hidden_layers"), _positive(config, "first_k_dense_replace")
-    ):
-        raise AuditError("selected layers extend beyond the dense MLP prefix")
+    if layers > _positive(config, "num_hidden_layers"):
+        raise AuditError("selected layers extend beyond the checkpoint")
+    _positive(config, "first_k_dense_replace")
     if config.get("attention_bias", False):
         raise AuditError("attention_bias=True is not supported")
     h, v = _positive(config, "hidden_size"), _positive(config, "vocab_size")
     q, kv = _positive(config, "q_lora_rank"), _positive(config, "kv_lora_rank")
     heads = _positive(config, "num_attention_heads")
     rope, nope = _positive(config, "qk_rope_head_dim"), _positive(config, "qk_nope_head_dim")
-    vd, intermediate = _positive(config, "v_head_dim"), _positive(config, "intermediate_size")
+    vd = _positive(config, "v_head_dim")
+    _positive(config, "intermediate_size")
     ih, idim = _positive(config, "index_n_heads"), _positive(config, "index_head_dim")
     quant = config.get("quantization_config") or {}
     if not isinstance(quant, dict):
@@ -172,9 +174,6 @@ def expected_tensors(config: dict, layers: int) -> dict:
         "self_attn.o_proj": [h, heads * vd],
         "self_attn.indexer.wq_b": [ih * idim, q],
         "self_attn.indexer.wk": [idim, h],
-        "mlp.gate_proj": [intermediate, h],
-        "mlp.up_proj": [intermediate, h],
-        "mlp.down_proj": [h, intermediate],
     }
     plain = {
         "input_layernorm.weight": [h],
@@ -187,7 +186,12 @@ def expected_tensors(config: dict, layers: int) -> dict:
     }
     for layer in range(layers):
         prefix = f"model.layers.{layer}."
-        for name, shape in projections.items():
+        try:
+            mlp, router = layer_mlp_shapes(config, layer)
+        except AdapterError as exc:
+            raise AuditError(str(exc)) from exc
+        for name, shape in (projections | mlp).items():
+            shape = list(shape)
             specs[prefix + name + ".weight"] = {"shape": shape, "dtypes": matrix_dtypes}
             if fp8:
                 scale_shape = [(dim + tile - 1) // tile for dim, tile in zip(shape, block)]
@@ -195,8 +199,9 @@ def expected_tensors(config: dict, layers: int) -> dict:
                     "shape": scale_shape,
                     "dtypes": ["F32", "F8_E8M0"],
                 }
-        for name, shape in plain.items():
-            specs[prefix + name] = {"shape": shape, "dtypes": ["BF16", "F16", "F32"]}
+        for name, shape in (plain | router).items():
+            dtypes = ["F32"] if name.endswith("e_score_correction_bias") else ["BF16", "F16", "F32"]
+            specs[prefix + name] = {"shape": list(shape), "dtypes": dtypes}
     return specs
 
 
@@ -410,7 +415,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--model-path", type=Path, required=True)
     parser.add_argument("--echo-path", type=Path, default=Path("3rdparty/ECHO"))
-    parser.add_argument("--layers", type=int, choices=(1, 2, 3), default=3)
+    parser.add_argument("--layers", type=int, choices=(1, 2, 3, 4, 5), default=3)
     parser.add_argument("--prefix-tokens", type=positive_int, default=65536)
     parser.add_argument("--candidate-tokens", type=positive_int, default=1024)
     parser.add_argument("--num-users", type=positive_int, default=128)

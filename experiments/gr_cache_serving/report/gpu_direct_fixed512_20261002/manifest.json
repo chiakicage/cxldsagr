@@ -1,0 +1,42 @@
+{
+  "experiment_profile": "fixed_budget_512",
+  "partial_matrix": false,
+  "run_ids": [
+    "gpu_direct_fixed512_20261002_u64_resident_r1",
+    "gpu_direct_fixed512_20261002_u64_sparse_sync_r1",
+    "gpu_direct_fixed512_20261002_u64_echo_gr_adapted_r1",
+    "gpu_direct_fixed512_20261002_u64_dense_prefetch_r1",
+    "gpu_direct_fixed512_20261002_u128_resident_r1",
+    "gpu_direct_fixed512_20261002_u128_sparse_sync_r1",
+    "gpu_direct_fixed512_20261002_u128_echo_gr_adapted_r1",
+    "gpu_direct_fixed512_20261002_u128_dense_prefetch_r1",
+    "gpu_direct_fixed512_20261002_u256_resident_r1",
+    "gpu_direct_fixed512_20261002_u256_sparse_sync_r1",
+    "gpu_direct_fixed512_20261002_u256_echo_gr_adapted_r1",
+    "gpu_direct_fixed512_20261002_u256_dense_prefetch_r1",
+    "gpu_direct_fixed512_20261002_u384_resident_r1",
+    "gpu_direct_fixed512_20261002_u384_sparse_sync_r1",
+    "gpu_direct_fixed512_20261002_u384_echo_gr_adapted_r1",
+    "gpu_direct_fixed512_20261002_u384_dense_prefetch_r1"
+  ],
+  "summary_sha256": {
+    "gpu_direct_fixed512_20261002_u64_resident_r1": "64f17fce03cdb77b11c0f2bc272bb503169a92576470d2d7660798be8aea39c8",
+    "gpu_direct_fixed512_20261002_u64_sparse_sync_r1": "614df127f67163efe539ef37385e26b3e88835dfb17643940e4b7ce9a0614f2c",
+    "gpu_direct_fixed512_20261002_u64_echo_gr_adapted_r1": "1199f7d3222d9c655e9a6ff245cb55da679b1485101949e265eb2a6c416db07b",
+    "gpu_direct_fixed512_20261002_u64_dense_prefetch_r1": "17da2ac837afe820c05b061a7fe8a3db3fbc17bc933ff5befb4bb40716221f55",
+    "gpu_direct_fixed512_20261002_u128_resident_r1": "418cf3e3afa222149f274372435f960334409f0758d2fb17d5c05cc8c65de286",
+    "gpu_direct_fixed512_20261002_u128_sparse_sync_r1": "f73b97887ade578ef216a094f17f5c2a86f82cc504fdc07d50c5d58410206ac8",
+    "gpu_direct_fixed512_20261002_u128_echo_gr_adapted_r1": "6ac6ba74a543795e552e5be5e39c8a9de9eb4a7be61b7cb829e9367143abfd84",
+    "gpu_direct_fixed512_20261002_u128_dense_prefetch_r1": "c7c68b7b0c50f664dd19789c89f9c0ea7daa43484375be41caed8128151e683c",
+    "gpu_direct_fixed512_20261002_u256_resident_r1": "86d433e1225585b88d9a494c681f7aca13ca87910c851b05d01a43e743b3f6b1",
+    "gpu_direct_fixed512_20261002_u256_sparse_sync_r1": "327f62b763bed117fe14a745719406f7743cfbdb1ec2e1d4a55f6e32b588b189",
+    "gpu_direct_fixed512_20261002_u256_echo_gr_adapted_r1": "ac547c2688eb3c240a57c06903ccf75e906e6aaae3507b22f527a322147b69c5",
+    "gpu_direct_fixed512_20261002_u256_dense_prefetch_r1": "0b9085301c2f339b1776d981137da45e43130277f786243065b883028013a9f3",
+    "gpu_direct_fixed512_20261002_u384_resident_r1": "501979a4338822edc39fc50143f5786706ff9af0ca09add3e7639c4fba0ca81b",
+    "gpu_direct_fixed512_20261002_u384_sparse_sync_r1": "25ea2d92e4903b8b45359e6292213154c58ebbb0993b4b5f35a0061f52ef2faa",
+    "gpu_direct_fixed512_20261002_u384_echo_gr_adapted_r1": "167bb3631a664d4ca9bd8a37abc7614f101f9928f8f7dab04f6d2847ed26c22f",
+    "gpu_direct_fixed512_20261002_u384_dense_prefetch_r1": "0dc4cbf271de95429f0251ee6118be81de416d3351f064c635a2715486a689cf"
+  },
+  "report_source_sha256": "f980b3296bf8d18a54c5527c22672a7f5b0ca27f3c951e15d646c031edd2a691",
+  "limits": "truncated model; one cold-start synthetic trace per size; no queue, quality, optimized pool allocation or overlap evidence; NVML sampling misses sub-interval peaks"
+}

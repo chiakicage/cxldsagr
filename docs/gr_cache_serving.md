@@ -2,6 +2,14 @@
 
 日期：2026-09-29。本文是实现规格，不是性能报告。
 
+2026-09-30 主实验配置更新：固定 embedding + 前五层（3 dense FFN + 2 MoE）、64K 历史、
+1K 候选，扫描 64/128/256/384/512 用户，64 为低压力控制点。增加有限 HBM-only 用户 LRU
+对照，复访延迟包含淘汰后的重算。默认三层和下文三层算术保留为前期设计背景，不能套用
+于五层容量；当前五层配置、预算与运行状态见 [实验 README](../experiments/gr_cache_serving/README.md)。
+目前完成 64/128 用户四组和 256 用户 HBM-only；完整扫描被 pinned Host 内存容量阻塞。
+本机总主存中的 256 GiB 位于 node 3 的 `ZONE_MOVABLE`，小规模 CUDA 注册探测会将页面迁移
+到普通节点；不能将总主存视作可 pinned 容量。另须计入 Torch pinned allocator 的 2 次幂取整。
+
 ## 要回答的问题
 
 GR 请求使用已有 `GR` 生成器：按用户热度有放回采样，同一用户的历史固定，
@@ -30,7 +38,8 @@ CXL / RDMA 集成是另一项交付，本实验不修改或自动同步该仓库
 activation 与 MLA KV 为 BF16，index K 为 FP8、scale 为 FP32。
 “BF16 activation/KV”不表示所有模型权重均转成 BF16。
 
-本机为 H100 PCIe 80GB、约 381GiB 主存。只读 checkpoint header 的参数容量如下，
+本机为 H100 PCIe 80GB、约 381GiB 总主存，其中约 125.50 GiB 为 managed non-Movable 内存。
+只读 checkpoint header 的参数容量如下，
 不含激活、KV、临时解量化及工作区，也不含最终 norm 和 LM head：
 
 | 范围，均含 embedding | 原始权重和 scales | 假设 FP8 解量化 BF16、原 F32 参数保留 |
