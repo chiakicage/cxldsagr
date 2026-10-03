@@ -1,5 +1,8 @@
 # NOSA attention / indexer score 的有效 MFU
 
+2026-10-01 目录整理：算子已迁至 `operators/nosa/`、`operators/deepseek_v32/` 和
+`operators/common/`。本页性能仍对应下文原 run ID 与源码快照；目录迁移后的性能未重新测量。
+
 ## 实验目的与边界
 
 独立测量 `block_sparse_attention` 和 `pooled_scores` 的有效矩阵 MFU，检验两个算子
@@ -27,7 +30,7 @@ attention 输出及 native score 临时缓冲在算子调用内分配，graph �
 graph replay 输出还须与同后端 eager 输出精确一致。attention 使用既有 BF16/CIS 算子
 契约的 `rtol=atol=0.016`，同时记录更严格 `atol=0.001, rtol=0.016` 的超限元素数及相对 L2
 误差；score 记录绝对、相对 L2 和最大相对误差。完整数值回归仍属于
-`operators/sm90/tests/`，验收记录不能作为模型等价性证明。
+`operators/nosa/` 下各功能的 `tests/`，验收记录不能作为模型等价性证明。
 
 MFU = 有效矩阵 FLOPs /（时间 × 标称 dense BF16 Tensor Core 峰值）。H200 默认峰值
 989 TFLOPS；其他 SKU 必须显式指定。attention 仅计选中因果 token 的 QK+AV；score
@@ -64,7 +67,7 @@ API 延迟；不把局部 score 的 Graph 时间代入完整 indexer 分母。�
 失败输出留在实验目录外。测量过程中源码变化会拒绝发布，已有 run ID 拒绝覆盖。
 
 `src/measure.py` 调用 `models.nosa.indexer` 的压缩与 FP32 score reference、
-`operators.sm90.nosa_indexer` 和 `operators.sm90.nosa_attention` 的现有算子；
+`operators.nosa.indexer.api` 和 `operators.nosa.attention.device_only.api` 的现有算子；
 复用 `experiments.indexer_block_sparse_profile.src.mfu.work_counts` 的 FLOP 口径，
 以及 `experiments.nosa_gr_65536_1024.src.sources.source_hashes` 的源码记录。
 不在实验中实现模型计算或优化 kernel。
@@ -158,7 +161,7 @@ BF16 的独立构造用例相对 FP32 reference 偏差为 2.54%，超出既有 0
 并完成 361 项 GPU 回归和 18 组完整模块归因检查。旧报告不能证明上述边界的正确性；
 尚无证据表明原实验输入触发这些问题，原产物保留至受影响实验补测验收后再替换。
 
-当前已验收实现与未完成事项见 [实现检查点](../../docs/nosa_sm90_checkpoint.md)；
+当前已验收实现与未完成事项见 [实现检查点](../../docs/agents/kda/README.md#resident-联合验收与报告状态)；
 完整模块 run `kda_main_bf16_pair_v3_development` 的原始摘要和源码指纹已在
 [模块检查点报告](../nosa_kernel_mfu/README.md#完整模块检查点) 发布。
 该三层模块测量不替代本节原实验，原表格数字及 run ID 保持原测量含义。

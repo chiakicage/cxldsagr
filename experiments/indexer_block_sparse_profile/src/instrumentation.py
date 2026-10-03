@@ -237,8 +237,8 @@ class SparseScopes:
     def _install(self):
         import models.nosa.indexer as indexer_module
         import models.nosa.scoring as scoring_module
-        import operators.sm90.nosa_indexer as operator_module
-        import operators.sm90.nosa_validation as validation_module
+        import operators.nosa.indexer.api as operator_module
+        import operators.nosa.indexer.validation as validation_module
 
         original_indexer = self.model.indexer
         original_attention = self.model.main_attention
@@ -278,13 +278,11 @@ class SparseScopes:
         self._wrap_function(operator_module, "_select_validated_scores", "select_from_scores")
         for stage in ("pooled_scores", "topk_qa", "prepare_cis", "topk_cis", "finish_selection"):
             self._wrap_function(operator_module, stage, stage)
-        from operators.sm90 import (
-            _nosa_indexer_checked_cuda,
-            _nosa_indexer_cuda,
-            _nosa_prepare_cuda,
-            _nosa_prepare_ranked_cuda,
-            _nosa_selection_cuda,
-        )
+        from operators.nosa.indexer import _indexer_checked_cuda as _nosa_indexer_checked_cuda
+        from operators.nosa.indexer import _indexer_cuda as _nosa_indexer_cuda
+        from operators.nosa.indexer import _prepare_cuda as _nosa_prepare_cuda
+        from operators.nosa.indexer import _prepare_ranked_cuda as _nosa_prepare_ranked_cuda
+        from operators.nosa.indexer import _selection_cuda as _nosa_selection_cuda
 
         self._wrap_function(_nosa_indexer_cuda, "select", "native_indexer")
         self._wrap_function(

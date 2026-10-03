@@ -5,6 +5,8 @@ import json
 import pytest
 
 from experiments.indexer_block_sparse_profile.src.mfu import (
+    MODEL_FA3_SOURCE_PATHS,
+    MODEL_NATIVE_SOURCES,
     NATIVE_SOURCES,
     POLICY,
     WORKLOAD,
@@ -131,6 +133,123 @@ def native_inputs(*, backend="native"):
         },
     )
     return metadata, summary
+
+
+def model_native_inputs(*, backend="native"):
+    from experiments.indexer_block_sparse_profile.src.capture import operator_workload
+    from experiments.indexer_block_sparse_profile.tests.test_fa3_module_mfu import add_fa3_build
+
+    metadata, summary = native_inputs(backend=backend)
+    add_fa3_build(metadata, version=3)
+    summary["workload"].update(operator_workload(backend))
+    hashes = {name: "a" * 64 for name in MODEL_NATIVE_SOURCES}
+    captured = dict(hashes)
+    fa3_sources = {
+        name: captured.setdefault(path, "f" * 64) for name, path in MODEL_FA3_SOURCE_PATHS.items()
+    }
+    # Source collection deliberately includes uncompiled code. These records
+    # must not be mistaken for dependencies of the seven native components.
+    captured.update(
+        {
+            "operators/nosa/attention/common.py": "b" * 64,
+            "operators/nosa/attention/reference/torch.py": "b" * 64,
+            "operators/nosa/attention/offload/csrc/nosa_offload_fused.cu": "b" * 64,
+            "operators/nosa/indexer/csrc/nosa_offload_compression.cu": "b" * 64,
+            "operators/common/csrc/kv_transfer.cu": "b" * 64,
+        }
+    )
+    metadata["source_sha256"] = captured
+    metadata["native_build"]["source_sha256"] = hashes
+    metadata["native_build"]["attention_fa3"]["source_sha256"] = fa3_sources
+    return metadata, summary
+
+
+def test_model_native_requirements_cover_each_component_local_include():
+    from operators.nosa import _native
+
+    actual = {
+        str(path.relative_to(_native._ROOT))
+        for path in [*_native._source_files(), _native._MODEL / "_native.py"]
+    }
+    assert actual == MODEL_NATIVE_SOURCES
+
+
+@pytest.mark.parametrize("backend", ["native", "triton"])
+def test_model_native_and_separate_fa3_builds_preserve_useful_math(backend):
+    metadata, summary = model_native_inputs(backend=backend)
+    result = build_report(metadata, summary)
+    assert result["phases"] == build_report(*inputs())["phases"]
+    assert result["implementation"]["native_build"] == metadata["native_build"]
+    assert (
+        "operators/nosa/attention/device_only/csrc/nosa_attention_fa3.cu"
+        not in metadata["native_build"]["source_sha256"]
+    )
+
+
+@pytest.mark.parametrize("source", sorted(MODEL_NATIVE_SOURCES))
+@pytest.mark.parametrize("missing_from", ["build", "capture"])
+def test_model_native_build_requires_every_component_dependency(source, missing_from):
+    metadata, summary = model_native_inputs()
+    target = metadata["native_build"] if missing_from == "build" else metadata
+    del target["source_sha256"][source]
+    with pytest.raises(ValueError):
+        validate_kernel_backend(summary["workload"], metadata)
+
+
+@pytest.mark.parametrize("name,path", sorted(MODEL_FA3_SOURCE_PATHS.items()))
+@pytest.mark.parametrize("missing_from", ["build", "capture"])
+def test_model_fa3_build_requires_each_separate_dependency(name, path, missing_from):
+    metadata, summary = model_native_inputs()
+    if missing_from == "build":
+        del metadata["native_build"]["attention_fa3"]["source_sha256"][name]
+    else:
+        del metadata["source_sha256"][path]
+    with pytest.raises(ValueError):
+        validate_kernel_backend(summary["workload"], metadata)
+
+
+@pytest.mark.parametrize(
+    "problem",
+    [
+        "native_mismatch",
+        "native_invalid_hash",
+        "fa3_mismatch",
+        "fa3_invalid_hash",
+        "legacy_fa3_key",
+        "legacy_native_source",
+        "missing_fa3",
+        "missing_attention_declaration",
+        "unrecorded_extra_dependency",
+    ],
+)
+def test_model_build_rejects_inconsistent_or_mixed_source_identity(problem):
+    metadata, summary = model_native_inputs()
+    build = metadata["native_build"]
+    native = "operators/nosa/indexer/csrc/nosa_scores.cu"
+    if problem == "native_mismatch":
+        build["source_sha256"][native] = "0" * 64
+    elif problem == "native_invalid_hash":
+        metadata["source_sha256"][native] = build["source_sha256"][native] = "invalid"
+    elif problem == "fa3_mismatch":
+        build["attention_fa3"]["source_sha256"]["_fa3.py"] = "0" * 64
+    elif problem == "fa3_invalid_hash":
+        source = MODEL_FA3_SOURCE_PATHS["_fa3.py"]
+        metadata["source_sha256"][source] = "invalid"
+        build["attention_fa3"]["source_sha256"]["_fa3.py"] = "invalid"
+    elif problem == "legacy_fa3_key":
+        sources = build["attention_fa3"]["source_sha256"]
+        sources["_nosa_attention_fa3.py"] = sources.pop("_fa3.py")
+    elif problem == "legacy_native_source":
+        source = "operators/sm90/csrc/nosa_scores.cu"
+        metadata["source_sha256"][source] = build["source_sha256"][source] = "a" * 64
+    elif problem == "missing_fa3":
+        del build["attention_fa3"]
+    elif problem == "missing_attention_declaration":
+        del summary["workload"]["attention_execution"]
+    else:
+        build["source_sha256"]["operators/nosa/indexer/csrc/detail/pipeline.cuh"] = "a" * 64
+    with pytest.raises(ValueError):
+        validate_kernel_backend(summary["workload"], metadata)
 
 
 @pytest.mark.parametrize(

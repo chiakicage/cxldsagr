@@ -1,0 +1,120 @@
+{
+  "run_id": "gr_serving_h200_20261002_h4k_01",
+  "source_sha256": "67f91c34ead43d4056500661caa1c67e8ef8a50bc25327e081a0561bbab43060",
+  "measurement_status": "accepted",
+  "audit_status": "accepted",
+  "source_directory": "experiments/gr_serving/output/data/gr_serving_h200_20261002_h4k_01",
+  "report_generation": "Original five analysis files copied byte-for-byte from measure.py/report.py outputs. population_coverage.csv selects invariant per-population case counts from metadata.json; cache_and_memory.csv aggregates case maxima from audit.json and metadata.json. summary.png and per_request.png render the original same-named SVGs at intrinsic dimensions via librsvg/cairo. summary_readable.svg/png are generated from the verified summary JSON by the separately recorded Matplotlib renderer.",
+  "copied_files": {
+    "summary.csv": {
+      "source": "analysis/summary.csv",
+      "sha256": "dbf6223803120c75257fe71b9490ca3294fd109286ae556a83e1cba94fe2d942"
+    },
+    "summary.json": {
+      "source": "analysis/summary.json",
+      "sha256": "4b7fef7e6f19c18d7293bc5e948035bc8ca404dbd04906bf7e4226b9804e4775"
+    },
+    "summary.svg": {
+      "source": "analysis/summary.svg",
+      "sha256": "02ff8d450eebef5744ae2c800815c14c21a037e70c4c3d0bb8333496bb952280"
+    },
+    "per_request.csv": {
+      "source": "analysis/per_request.csv",
+      "sha256": "1a9d257a86135fe28b2b433ac8eec8396ac39d4462f0881719a246029b3b4c92"
+    },
+    "per_request.svg": {
+      "source": "analysis/per_request.svg",
+      "sha256": "9a9558a989dea2d024b14068bd00a7047c79a887a0d0de3bb11477d345cd80c3"
+    },
+    "metadata.json": {
+      "source": "metadata.json",
+      "sha256": "a9390fafc357451d695b07568ab0472c1df6d6793cc624abdfc9af040f843d4a"
+    },
+    "source_manifest.json": {
+      "source": "source_manifest.json",
+      "sha256": "d5820f0213619fd6cb5f3a7f475d6418ea628e5075ad618b34805c4d3017411c"
+    },
+    "audit.json": {
+      "source": "audit.json",
+      "sha256": "590ed70625974f1d8cd034a23cbfa4ca2ca0c6535392afe2ee69dd655b8a8a9a"
+    }
+  },
+  "derived_files_sha256": {
+    "cache_and_memory.csv": "087402bcc001ecd14d815e356e34aecad9029090d6bdcd2cccdaf10465dff166",
+    "per_request.png": "7ccaaba6b7494f672dec7f0a0b31de606f0854bc597e5c516f43d7885e9802ea",
+    "population_coverage.csv": "9b186041d37dc1d1522623437c29a4ea23e0c46faf1ac3ccef21b61bc4cfafa3",
+    "summary.png": "9445163738021ad3da9acd7275a515171490c828f71dc150722a951a29d3861d",
+    "summary_readable.png": "ad0e8354dbbd505cebe2fcfda19015ad6cea8b79723e355fd2da4152b6de333c",
+    "summary_readable.svg": "36a3f6d1a3e7c399f1c4f5a088a75e83eac2b62df627a712b205157ed45e40ea"
+  },
+  "interpretation": [
+    "Counts are a bounded heat-weighted sample of the population, not a mandatory pass over all users.",
+    "All revisits hit whole-user prefix sessions; capacity benefits are not established by this 4K trace.",
+    "CUDA allocator peaks include all live allocations and retained allocator blocks; they are not isolated cache or physical process peaks.",
+    "16K/64K are pending; separate 4K native overlap profiling is published as layer-31 mechanism evidence only."
+  ],
+  "supplemental_renderer": {
+    "path": "experiments/gr_serving/output/data/gr_serving_h200_20261002_h4k_01/render_report.py",
+    "sha256": "71704ada5c64e417f4af703f21043eca5d3232bb5e26934cc6dc0ef93bec166d",
+    "command": ".venv/bin/python experiments/gr_serving/output/data/gr_serving_h200_20261002_h4k_01/render_report.py --summary experiments/gr_serving/report/h4k/summary.json --metadata experiments/gr_serving/report/h4k/metadata.json --output-dir experiments/gr_serving/report/h4k",
+    "matplotlib_version": "3.11.1",
+    "input_summary_sha256": "4b7fef7e6f19c18d7293bc5e948035bc8ca404dbd04906bf7e4226b9804e4775",
+    "changes": "Categorical user-population x spacing and independent all/revisit y axes. Means/p95 read directly from verified summary.json."
+  },
+  "derived_tables": {
+    "population_coverage.csv": "Per-population requests/observed_users/revisits/max_revisits_observed from metadata cases; assert all model/scheme cases agree. first_visits equals observed_users.",
+    "cache_and_memory.csv": "Per model/scheme maximum of each audit.case_audit.peaks field and metadata.cases GPU allocator peaks over seven populations; admission capacity and per-session reservations from audit. Evictions/revisit misses sum over the seven cases."
+  },
+  "visual_inspection": {
+    "status": "passed",
+    "checked": [
+      "all four summary_readable panels",
+      "all fourteen per_request panels",
+      "raw summary SVG render"
+    ],
+    "raw_summary_limitation": "Original numeric x-axis 1/8 labels overlap and common model y scale compresses revisits; raw audited file preserved. Supplemental summary resolves presentation issues."
+  },
+  "profile": {
+    "run_id": "gr_serving_h200_20261002_h4k_profile_02",
+    "source_directory": "experiments/gr_serving/output/data/gr_serving_h200_20261002_h4k_profile_02",
+    "status": "accepted",
+    "formal_run_id": "gr_serving_h200_20261002_h4k_01",
+    "formal_source_sha256": "67f91c34ead43d4056500661caa1c67e8ef8a50bc25327e081a0561bbab43060",
+    "source_sha256": "cd72caf5edbac19a54d162e26d3339b05dd0671048162d970729669af5d0c48b",
+    "formal_source_comparison": {
+      "source_sha256": "67f91c34ead43d4056500661caa1c67e8ef8a50bc25327e081a0561bbab43060",
+      "allowed_diagnostic_source_changes": [
+        {
+          "path": "experiments/gr_serving/src/profile.py",
+          "formal_sha256": "4073d59b668c8af391cde5befa6f51ca41e5e427f1c3899074aa03c6fbfaa062",
+          "profile_sha256": "83d185b77ea556fcdba7a334c0e021355f8622edfc61581f0d2ede0a33f6185c",
+          "formal_source_copy_verified": true
+        },
+        {
+          "path": "experiments/gr_serving/tests/test_profile.py",
+          "formal_sha256": "bc5ecc44363baa3b7d3bac93b89fbedad5a79146b3b7b74734bd2490adb70382",
+          "profile_sha256": "3dca07217e829327f9671b11b4203a411112ecde415116b59c9ba65c3413d5f2",
+          "formal_source_copy_verified": true
+        }
+      ],
+      "reason": "Only the post-run profile entry point and its CPU tests may differ. Neither is executed by the formal latency measurement. Saved formal copies are verified against its manifest; current diagnostic copies have their own profile snapshot. All other formal sources, including performance/runtime code, must be unchanged."
+    },
+    "overlap_claim": {
+      "threshold": 0.9,
+      "samples": 3,
+      "all_samples_both_ratios_at_least_90_percent": false,
+      "below_threshold_samples_remain_valid": true
+    },
+    "scope": "Layer 31, first three revisits of the chosen saved NOSA population, one sample each",
+    "files": {
+      "profile_metadata.json": {
+        "source": "metadata.json",
+        "sha256": "22b8c60d4ebfa89b8f864db51b72c83d9b21c7a26b287824296f777d7f912eae"
+      },
+      "profile_analysis.json": {
+        "source": "analysis.json",
+        "sha256": "49e57b81e8023bdd8c51d31b5127fd2cbae450dbffc26d1c03b982f400330cdc"
+      }
+    }
+  }
+}

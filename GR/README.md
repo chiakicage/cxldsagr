@@ -49,6 +49,44 @@ revisit = generator.for_user(uid, visit_index=1)
 
 ## 直接运行
 
+只构造用户访问序列及其分布（不生成文本或运行模型）：
+
+```bash
+.venv/bin/python -m GR.sample_distribution \
+  --dataset industrial_10M --field pv_share --users 64 256 1024 \
+  --requests 4096 --seed 42 \
+  --output-dir GR/generated/industrial_10m_pv_share_t4096_seed42
+```
+
+每档独立按热度有放回抽取 4096 次，不设复访上限。输出 `requests_<N>.csv` 的完整访问
+序列、`users_<N>.csv` 的全部用户概率及访问/复访次数（含未访问用户）、`histogram.csv`、
+`summary.csv`、PNG/SVG/PDF 分布图及带源码/数据指纹的 `manifest.json`。柱状图统计访问
+次数（含首访）；累计图按输入热度排名。输出目录必须尚不存在。`industrial_*` 曲线来自
+归档的合成热度，不将此请求流称为真实工业日志。
+
+原始 industrial 10M CSV 不可访问时，可用保存的 `pv_int` 累计曲线和全量汇总重建独立
+参考直方图：
+
+```bash
+.venv/bin/python -m GR.reconstruct_histogram \
+  --output-dir GR/generated/industrial_10m_pv_int_reference_250m
+```
+
+该图保持 1000 万用户和 2.5 亿次访问，不重新采样事件。每个累计曲线区间的访问量按
+均值的 floor/ceil 分配，保留整数人数和总访问量；由于段内频次已丢失，这是近似重建，
+不是原 CSV 的精确直方图。例如重建 P99 为 233，原全量汇总为 232。输出完整整数计数
+表、宽桶表、区间重建记录、PNG/SVG/PDF 图及指纹；此图与小规模抽样分布分开保存。
+
+缩放权重的参考柱状图使用独立字段与输出目录：
+
+```bash
+.venv/bin/python -m GR.reconstruct_histogram --field pv_scaled_1_100 \
+  --output-dir GR/generated/industrial_10m_pv_scaled_1_100_reference
+```
+
+该字段是 1–100 的热度权重，不是访问次数；图中标明总权重和平均权重。输出
+`weight_counts.csv`、`histogram.csv` 及 `scaled_weight_per_user` 图，仍标注为曲线重建近似。
+
 ```bash
 .venv/bin/python -m GR.input_generator \
   --heat-source curve --curve-dataset beauty \
@@ -131,7 +169,17 @@ Details for (A): designed for travel.
 - `--heat-path PATH`：覆盖所选数据集的时间映射或 industrial CSV 路径。工业数据支持流式蓄水池抽样；选取全部 10M 用户时仍需为其采样权重和调度状态预留内存。
 - `--sampling weighted`（默认）：按归一化权重有放回抽样。也可用 `uniform` 或 `sequential` 做对照；热度概率仅在 weighted 模式实际使用。
 
-不保证每个用户访问固定次数；需要复访时，应设置足够多请求或减少活跃用户数量。热度分布与 industrial 字段差异见 [分析记录](analysis/README.md)。
+使用 weighted、constant/poisson 到达及默认 `max_revisits=None` 时，以所选热度
+`p_i = c_i / sum(c)` 独立、有放回抽取 `--count T` 条请求。有限 T 下的实际请求份额
+围绕目标概率波动；不设置逐人配额、强制覆盖或复访保证。实际出现人数 `N_actual`
+和每人复访次数 `r_i = max(n_i - 1, 0)` 是抽样后的统计结果，随 T 和随机种子变化。
+热度分布与 industrial 字段差异见 [分析记录](analysis/README.md)。
+
+Python API 可用 `ScheduleConfig(max_revisits=8)` 限制每个用户最多复访 8 次（不含首访，
+即最多 9 次访问）；默认 `None` 保持无限制。weighted 模式继续按热度抽样，达到上限的
+用户移出候选集合，其余权重重新归一化。请求总数是上限；所有用户耗尽后迭代器提前结束。
+不强制首访、不补齐每人次数；全局请求数未用完前只有抽样过程决定谁被访问。该上限也适用
+于 uniform、sequential 及 timeslot 调度，timeslot 仍保留原冷却时间约束。
 
 ## 3. 时间分布
 
@@ -140,6 +188,11 @@ Details for (A): designed for travel.
 - `--arrival timeslot`：每秒最多 qps 条，并使用参考脚本的 5–65 秒用户冷却间隔分布。无用户可用时跳到下一可用时刻；该约束会改变实际用户占比，不能把它与独立 weighted 抽样等同。
 
 这里生成的是模拟时间戳，不会按墙钟时间睡眠或发送请求。`iter_generate` 每次调用重置随机状态、时钟和复访计数。
+
+`InputGenerator` 和 `create_input_generator` 可显式传入 `context_limit`，覆盖请求格式的
+默认生成边界（NOSA 默认为 32768 tokens）。例如较长的 NOSA 系统实验可同时设置足够的
+`TextConfig.max_input_tokens` 和 `context_limit=65664`，生成 65536 + 128 tokens。
+该参数只放宽文本生成边界，不验证推理后端支持情况或长上下文模型质量；调用方须分别验证。
 
 ## 输出和复现
 
@@ -180,12 +233,15 @@ DeepSeek tokenizer：/mnt/nfs/share/models/DeepSeek-V3.2/tokenizer.json
 
 ## 三层内容交叉实验
 
-这些历史实验显式选择 `deepseek_v32`，保留原有模板与长度档位。`experiments.legacy.deepseek_v32.sweep_gr_content_matrix` 使用 5 个 history 长度 × 7 个 new 长度 × 3 份 history × 3 份 item，共 315 份输入，各测第 0/1/2 层，共 945 组层级结果。每个 history 长度下的三份内容固定；同一 item 长度的三份候选内容在不同 history 间复用，通过 SHA-256 校验独立组合。
+这些历史实验显式选择 `deepseek_v32`，保留原有模板与长度档位。原内容矩阵使用 5 个 history 长度 × 7 个 new 长度 × 3 份 history × 3 份 item，共 315 份输入，各测第 0/1/2 层，共 945 组层级结果。每个 history 长度下的三份内容固定；同一 item 长度的三份候选内容在不同 history 间复用，通过 SHA-256 校验独立组合。
 
 测量边界沿用 KV 实验口径：history 包含 23-token 固定指令，new 是完整候选后缀。因此测量配置将 generator 的 user 预算设为 `history - instruction_tokens`，item 预算设为 `new + instruction_tokens`，总 token 数和实际 KV 边界精确匹配。
 
+GPU 测量入口已随 SM120 清理移除，复现须使用整理前 revision `397e645`，
+详见 [历史实验归档](../experiments/legacy/deepseek_v32/README.md)。已有原始结果时，
+当前工作树保留 CPU 报告入口：
+
 ```bash
-env PATH="$PWD/.venv/bin:$PATH" .venv/bin/python -m experiments.legacy.deepseek_v32.sweep_gr_content_matrix
 .venv/bin/python -m experiments.legacy.deepseek_v32.report_gr_content_matrix
 ```
 

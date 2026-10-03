@@ -12,7 +12,20 @@ import pytest
 import torch
 from tokenizers import Tokenizer, models, pre_tokenizers, processors
 
-from models.nosa.infer import encode_prompt, generate, load_tokenizer
+from models.nosa.infer import _build_parser, encode_prompt, generate, load_tokenizer
+
+
+def test_cli_offload_defaults_and_explicit_producer_count():
+    parser = _build_parser()
+    defaults = parser.parse_args(["--prompt", "hello"])
+    assert defaults.offload_fetch_ctas == 96
+    assert defaults.offload_query_tile_size == 128
+    assert not defaults.no_fetch_overlap
+    selected = parser.parse_args(
+        ["--prompt", "hello", "--offload-fetch-ctas", "6", "--no-fetch-overlap"]
+    )
+    assert selected.offload_fetch_ctas == 6
+    assert selected.no_fetch_overlap
 
 
 class ScriptedModel:

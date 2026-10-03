@@ -51,12 +51,47 @@ PRUNED_NATIVE_SOURCES = {
 }
 NATIVE_INDEXER_REVISIONS = {f"cached_native_v{revision}": revision for revision in (2, 3, 4, 5)}
 
+# The model-organized loader records the local include closure of its seven
+# components. FA3 has a separate build, and captured offload/common sources are
+# not implicitly compiled by this loader. Keep the historical flat-layout
+# requirements above unchanged so archived metadata remains verifiable.
+MODEL_NATIVE_SOURCES = {
+    "operators/nosa/_native.py",
+    "operators/nosa/attention/device_only/csrc/nosa_attention.cu",
+    "operators/nosa/attention/device_only/csrc/nosa_attention_grouped.cuh",
+    *(
+        f"operators/nosa/indexer/csrc/{name}"
+        for name in (
+            "nosa_indexer.cu",
+            "nosa_indexer_checked.cu",
+            "nosa_prepare.cu",
+            "nosa_prepare_ranked.cu",
+            "nosa_scores.cu",
+            "nosa_scores_fused.cuh",
+            "nosa_scores_pruned.cuh",
+            "nosa_selection.cu",
+            "nosa_selection_cutoff.cuh",
+            "nosa_selection_prefix.cuh",
+        )
+    ),
+}
 
 FA3_SOURCE_PATHS = {
     "_nosa_attention_fa3.py": "operators/sm90/_nosa_attention_fa3.py",
     "nosa_attention_fa3.cu": "operators/sm90/csrc/nosa_attention_fa3.cu",
     "nosa_attention.cu": "operators/sm90/csrc/nosa_attention.cu",
     "nosa_attention_grouped.cuh": "operators/sm90/csrc/nosa_attention_grouped.cuh",
+}
+MODEL_FA3_SOURCE_PATHS = {
+    "_fa3.py": "operators/nosa/attention/device_only/_fa3.py",
+    **{
+        name: f"operators/nosa/attention/device_only/csrc/{name}"
+        for name in (
+            "nosa_attention_fa3.cu",
+            "nosa_attention.cu",
+            "nosa_attention_grouped.cuh",
+        )
+    },
 }
 FA3_EXTRA_FLAGS = [
     "-use_fast_math",
@@ -72,7 +107,7 @@ FA3_CTA_ORDER = {
 }
 
 
-def _validate_fa3_build(metadata, attention_execution):
+def _validate_fa3_build(metadata, attention_execution, source_paths=FA3_SOURCE_PATHS):
     """Check the separate FA3 compiler flags and installed-header identity."""
     build = metadata["native_build"]
     fa3 = build.get("attention_fa3")
@@ -129,13 +164,13 @@ def _validate_fa3_build(metadata, attention_execution):
     captured = metadata["source_sha256"]
     if (
         not isinstance(hashes, dict)
-        or set(hashes) != set(FA3_SOURCE_PATHS)
+        or set(hashes) != set(source_paths)
         or any(
             not isinstance(hashes[name], str)
             or len(hashes[name]) != 64
             or any(character not in "0123456789abcdef" for character in hashes[name])
             or captured.get(path) != hashes[name]
-            for name, path in FA3_SOURCE_PATHS.items()
+            for name, path in source_paths.items()
         )
     ):
         raise ValueError("FA3 source fingerprints disagree with captured wrapper/kernel sources")
@@ -243,19 +278,32 @@ def validate_kernel_backend(workload, metadata=None):
         raise ValueError("native_build requires shared CUTLASS commit and header fingerprint")
     hashes = build.get("source_sha256")
     captured = metadata.get("source_sha256", {})
-    if not isinstance(hashes, dict) or not NATIVE_SOURCES.issubset(hashes):
+    if not isinstance(hashes, dict) or any(not isinstance(name, str) for name in hashes):
         raise ValueError("native_build requires complete native source fingerprints")
-    if revision is not None and revision >= 3 and not FUSED_NATIVE_SOURCES.issubset(hashes):
-        raise ValueError("Fused native dispatch requires all score/selection/preparation sources")
-    if revision in (4, 5) and "operators/sm90/csrc/nosa_indexer_checked.cu" not in hashes:
-        raise ValueError("Checked native dispatch requires its complete source fingerprint")
-    if workload.get("native_kernel_revision") == 5 and not PRUNED_NATIVE_SOURCES.issubset(hashes):
-        raise ValueError("Pruned native revision requires complete bound and cutoff sources")
     if not isinstance(captured, dict) or any(not isinstance(name, str) for name in captured):
         raise ValueError("Captured source fingerprints must map source paths to hashes")
-    compiled_sources = {name for name in captured if name.startswith("operators/sm90/csrc/")}
-    if not compiled_sources.issubset(hashes):
-        raise ValueError("Captured native sources are missing from native_build")
+    model_layout = "operators/nosa/_native.py" in hashes
+    if model_layout:
+        if not MODEL_NATIVE_SOURCES.issubset(hashes):
+            raise ValueError("Model native build requires all seven components and local includes")
+        if any(name.startswith("operators/sm90/") for name in hashes):
+            raise ValueError("Native build cannot mix historical and model source layouts")
+    else:
+        if not NATIVE_SOURCES.issubset(hashes):
+            raise ValueError("native_build requires complete native source fingerprints")
+        if revision is not None and revision >= 3 and not FUSED_NATIVE_SOURCES.issubset(hashes):
+            raise ValueError(
+                "Fused native dispatch requires all score/selection/preparation sources"
+            )
+        if revision in (4, 5) and "operators/sm90/csrc/nosa_indexer_checked.cu" not in hashes:
+            raise ValueError("Checked native dispatch requires its complete source fingerprint")
+        if workload.get("native_kernel_revision") == 5 and not PRUNED_NATIVE_SOURCES.issubset(
+            hashes
+        ):
+            raise ValueError("Pruned native revision requires complete bound and cutoff sources")
+        compiled_sources = {name for name in captured if name.startswith("operators/sm90/csrc/")}
+        if not compiled_sources.issubset(hashes):
+            raise ValueError("Captured native sources are missing from native_build")
     if any(
         not isinstance(digest, str)
         or len(digest) != 64
@@ -264,10 +312,14 @@ def validate_kernel_backend(workload, metadata=None):
         for name, digest in hashes.items()
     ):
         raise ValueError("native_build source fingerprints disagree with captured sources")
-    if "attention_fa3" in build and attention is None:
+    if (model_layout or "attention_fa3" in build) and attention is None:
         raise ValueError("FA3-era captures require an explicit attention_execution")
-    if attention is not None or "attention_fa3" in build:
-        _validate_fa3_build(metadata, attention)
+    if model_layout or attention is not None or "attention_fa3" in build:
+        _validate_fa3_build(
+            metadata,
+            attention,
+            MODEL_FA3_SOURCE_PATHS if model_layout else FA3_SOURCE_PATHS,
+        )
     return backend
 
 

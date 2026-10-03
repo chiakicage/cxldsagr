@@ -25,16 +25,10 @@ from experiments.indexer_block_sparse_profile.src.mfu import work_counts
 from experiments.nosa_gr_65536_1024.src.sources import source_hashes
 from layers.attention import BlockSelection
 from models.nosa.indexer import compressed_scores_reference, prepare_indexer_inputs
-from operators.sm90._native import build_info
-from operators.sm90.nosa_attention import (
-    nosa_block_sparse_attention,
-    reference_nosa_block_sparse_attention,
-)
-from operators.sm90.nosa_indexer import (
-    _pool_qa,
-    pooled_scores,
-    select_contiguous_blocks,
-)
+from operators.nosa._native import build_info
+from operators.nosa.attention.device_only.api import nosa_block_sparse_attention
+from operators.nosa.attention.reference.torch import reference_nosa_block_sparse_attention
+from operators.nosa.indexer.api import _pool_qa, pooled_scores, select_contiguous_blocks
 
 ROOT = Path(__file__).resolve().parents[3]
 EXPERIMENT = Path(__file__).resolve().parents[1]
@@ -266,7 +260,8 @@ def benchmark_case(tensor_inputs, prefix, args, *, label):
                 lambda: pooled_scores(grouped, compressed, None, prefix, len(keys), workspace),
             ),
         ):
-            from operators.sm90 import _nosa_attention_cuda, _nosa_scores_cuda
+            from operators.nosa.attention.device_only import _cuda as _nosa_attention_cuda
+            from operators.nosa.indexer import _scores_cuda as _nosa_scores_cuda
 
             owner, entry = (
                 (_nosa_attention_cuda, "launch_nosa_block_attention")

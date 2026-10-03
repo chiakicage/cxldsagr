@@ -18,15 +18,17 @@ def source_hashes(*extra_sources):
         "serving",
         "GR",
         "operators",
-        "operators/sm90",
         "experiments/nosa_gr_65536_1024/src",
     ):
         paths.update((root / directory).glob("*.py"))
-    paths.update(
-        path
-        for path in (root / "operators/sm90/csrc").rglob("*")
-        if path.is_file() and path.suffix in NATIVE_SOURCE_SUFFIXES
-    )
+    for directory in ("operators/nosa", "operators/common"):
+        paths.update(
+            path
+            for path in (root / directory).rglob("*")
+            if path.is_file()
+            and "tests" not in path.relative_to(root / directory).parts
+            and path.suffix in {".py", *NATIVE_SOURCE_SUFFIXES}
+        )
     paths.update(Path(path).resolve() for path in extra_sources)
     return {
         str(path.relative_to(root)): hashlib.sha256(path.read_bytes()).hexdigest()

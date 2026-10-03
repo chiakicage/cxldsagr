@@ -1,96 +1,112 @@
 # cxldsagr
 
-通用 **sparse attention offloading** 实验项目：让 KV cache 驻留在 CPU / host
-memory 等显存之外的位置，GPU 根据稀疏访问需求读取或搬入所需 KV，研究显存占用、
-数据传输、计算与调度的关系。
+**sparse attention offloading** 研究项目，从 sparse KV fetching 与 attention 重叠
+的设计出发，探索生成式推荐 serving 场景。当前一种候选方案是固定 user history、
+每轮变化 candidate items 的 prefill 负载；模型、数据及场景代表性仍待完善。存储先关注
+HBM 与 CPU DRAM，希望在有限 HBM 下复用更多历史 KV，并降低 offload 的服务开销。
+当前验证模型为 NOSA 与 DeepSeek V3.2，优先 NOSA，主要开发平台为 SM90 / Hopper。
 
-当前选择 DeepSeek V3.2 和 NOSA，重点是 **NOSA + SM90 / Hopper**。
-已有 DeepSeek V3.2 / SM120 的 attention decode、extend 和部分 checkpoint 层实验；
-NOSA 已提供基于 FlashInfer Full Attention 的单 GPU 模型推理，以及直接消费 GR 输入的
-本地串行执行框架。模型层、执行器与缓存管理已分离，当前 KV 全部驻留 HBM；
-NOSA 已提供 query-aware indexer 参考实现与 GR 选块容量实验，以及包含 query-agnostic
-CIS 打分的 resident block sparse 推理（CPU reference / SM90 CUDA、Triton）。local DRAM
-offloading 仅预留接口。DeepGEMM 使用上游 `nv_dev`
-子模块，其依赖更新尚未经过 GPU 构建和模型验证。
+[研究状态](docs/status.md)按实验室四环节记录当前理解和缺口，
+[下一步任务](docs/roadmap.md)列出待做事项，允许交叉推进和人直接修正。
+`GR/` 支持固定 history 与候选变化；本地 serving 已增加按用户 LRU 保留历史的路径，
+在统一 HBM / DRAM 预算下对比首次访问与复访延迟。单卡 DeepSeek dense 层替身和 NOSA-8B
+的旧短轨迹有数值与计量记录，见 [GR serving 实验](experiments/gr_serving/README.md)。
+ECHO 实现的 MFU/cache 策略及 DeepSeek MFU 存在问题，相关 baseline 比较当前不成立，
+需审计、修正和复测。旧负载也没有建立有意义的实际用户规模与复访容量压力；
+新的负载尚无验收通过的替换结果。
+原逐请求分配释放的 NOSA 入口继续保留；当前没有网络服务或到达队列吞吐测量。
 
-NOSA SM90 已接入增量 indexer、融合选块与精确剪枝，以及 FA3 resident block sparse
-attention。当前完整模块检查点的 indexer MFU 为 24.7%–25.5%，attention 为 39.3%–40.4%；
-40% 目标尚未全部达成。实现与测量边界见 [当前检查点](docs/nosa_sm90_checkpoint.md)。
+NOSA 支持 dense、完整 sparse policy 与显式 pinned-DRAM offload。Offload 主 kernel
+融合唯一页的 stripe fetch 和 persistent FA3 attention；HBM staging 仍覆盖一层完整
+逻辑地址，尚无有限 slots / eviction。已有完整模型数值验证和单层 overlap 性能报告，
+完整模型的串行 GR serving 延迟另见上述实验；不包含 LM head 或并发服务测量。
+算子结果见 [NOSA 实验](experiments/nosa_offload_overlap/README.md)。
+
+DeepSeek V3.2 支持独立完整 61 层 ECHO prefill/extend，不依赖 SGLang。Indexer 融合
+KV prefetch，主 KV 使用 resident 存储或有限 HBM pool 与 pinned DRAM backing。
+保留的完整 64K + 1K 报告显示 resident/offload 末 token logits 逐位一致；KV gather
+对齐修复后的完整模型性能待补测，见 [ECHO 实验](experiments/deepseek_v32_echo_prefill/README.md)。
+前三层算子诊断不能替代完整模型验证，其 MFU 与性能归因也待上述基线问题修正后复核。
+报告数字保留各自 run ID 与源码快照，目录迁移和回归检查不替代性能复测。
 
 ```text
-operators/sm90/                  Hopper NOSA block sparse / indexer；fetch 接口待实现
-operators/sm120/                 sparse MLA 扩展与现有算子基准
-layers/                         普通层与 indexer / main attention 契约
-models/nosa/                     NOSA 模型结构、权重、位置编码与 KV 布局适配
-models/deepseek_v32/             DeepSeek V3.2 decode/extend 与稀疏索引
+operators/nosa/                  indexer；attention/reference、device_only、offload
+operators/deepseek_v32/          indexer；attention 三类；linear / grouped MoE
+operators/common/               模型无关的 host record 搬运
+layers/                         普通层与 indexer / attention 契约
+models/nosa/                    NOSA 结构、权重、位置编码、选择语义与 KV 布局
+models/deepseek_v32/             完整 ECHO checkpoint 推理及请求适配
 executor/                       通用 prefill / extend 分块执行
-cache/                          请求级 KV cache 管理，当前仅 resident 后端
-serving/                        GR 输入驱动的本地串行执行
-tests/                          跨模块正确性测试
-experiments/                     每个实验独立目录，含 src、scripts、tests 和 output
-experiments/legacy/              旧 DeepSeek / SM120 等历史归档
-3rdparty/DeepGEMM/               DeepGEMM nv_dev 子模块
-3rdparty/cutlass/                共享 CUTLASS 子模块
-3rdparty/DeepJIT/                共享 DeepJIT 子模块
-GR/                             请求输入、用户热度与到达时间生成
-docs/                           跨实验设计文档
-weights/                         本地权重与 tokenizer
+cache/                          请求事务、resident / host backing、有限 token pool
+serving/                        GR 驱动的本地串行执行
+tests/integration/              跨模块正确性测试
+experiments/                    各实验的源码、脚本、报告和原始产物
+experiments/legacy/deepseek_v32/ 有效历史报告、CPU 重建工具与独立 DeepGEMM 基准
+3rdparty/                       共享 CUTLASS、DeepGEMM、DeepJIT 子模块
+GR/                             请求内容、热度和调度工具
+docs/                           给人的研究状态与下一步任务；agents/ 保存内部执行文档
+skills/research-supervisor/      项目内持续维护的 Research Supervisor
 ```
+
+SM120 扩展、旧 synthetic 模型与相关可执行测量入口已清理。历史报告保留原测量含义，
+复现所需的 Git revision 见 [legacy README](experiments/legacy/deepseek_v32/README.md)。
 
 ## 运行
 
-先按 [第三方依赖说明](3rdparty/README.md) 准备源码。以下命令均从仓库根目录执行，
-依赖版本由 `uv.lock` 固定，使用原有 CUDA 13 环境配置。
-
 ```bash
 python3 scripts/prepare_3rdparty.py --init
-
-# 基础环境
 uv sync
-
-# NOSA Full Attention（激活环境以便 FlashInfer 找到 ninja）
 source .venv/bin/activate
-python -m models.nosa.infer --prompt "请解释 KV cache 的作用。" --disable-thinking
 
-# NOSA block sparse（Hopper，加载 A/delta，启用 query-aware + query-agnostic 选块）
-python -m models.nosa.infer --attention-mode sparse --prompt "请解释 KV cache 的作用。" --disable-thinking
+python -m models.nosa.infer --model-path /mnt/ssd-wlcb/chenkaiqi/NOSA-8B \
+  --attention-mode sparse --prompt "请解释 KV cache 的作用。" --disable-thinking
 
-# 本地 GR 请求：prefix prefill + candidate extend，输出完成摘要
-python -m serving.run_gr --count 1
+CXLDSAGR_SM90_BACKEND=native python -m models.nosa.infer \
+  --model-path /mnt/ssd-wlcb/chenkaiqi/NOSA-8B --attention-mode sparse \
+  --cache-backend offload --offload-fetch-ctas 96 \
+  --prompt "请解释 KV cache 的作用。" --disable-thinking
 
-# 全局 CPU 回归（省略模式时也默认 cpu）
-bash scripts/run_tests.sh cpu
-
-# DeepSeek V3.2 / SM120 实验及报告依赖
-uv sync --group sm120 --group analysis
-
-.venv/bin/python models/deepseek_v32/deepseek_v32_decode.py --quick
-.venv/bin/python models/deepseek_v32/deepseek_v32_extend.py
-.venv/bin/python -m experiments.legacy.deepseek_v32.sweep_gr_content_matrix
-.venv/bin/python experiments/legacy/deepseek_v32/deepgemm_v32_benchmark.py --quick
+python -m serving.run_gr --help
+python -m serving.run_multi_user --help
+python -m models.deepseek_v32.echo_infer --model /preset-models --help
+bash experiments/deepseek_v32_echo_prefill/scripts/run.sh --help
 ```
 
-模型实验需要对应配置、权重或 tokenizer，见 [NOSA](models/nosa/README.md) 和
-[DeepSeek V3.2](models/deepseek_v32/README.md)。
-构建与测试命令见 [SM120 算子](operators/sm120/README.md)。
-全局回归使用 `bash scripts/run_tests.sh [cpu|gpu|all]`，结果直接输出终端。
-`gpu` / `all` 需要 Hopper CUDA、nvcc、共享 CUTLASS、TVM FFI、Triton 与 FlashInfer，CLI 集成测试使用临时小模型权重。
+本机 NOSA checkpoint 位于 `/mnt/ssd-wlcb/chenkaiqi/NOSA-3B`、
+`/mnt/ssd-wlcb/chenkaiqi/NOSA-8B`，DeepSeek V3.2 位于 `/preset-models`。
+原始权重保持外部存储，不提交仓库。模型形状支持范围见各模型与算子 README。
 
-## 提交检查
+## 验证
 
 ```bash
-uv tool install pre-commit
-pre-commit install
-pre-commit run --all-files
+bash scripts/run_tests.sh cpu
+bash scripts/run_tests.sh gpu
+
+# 额外启用 checkpoint 元数据与完整 NOSA-8B 64K + 1K 数值检查
+NOSA_MODEL_PATH=/mnt/ssd-wlcb/chenkaiqi/NOSA-8B \
+NOSA_OFFLOAD_CHECKPOINT=/mnt/ssd-wlcb/chenkaiqi/NOSA-8B \
+  bash scripts/run_tests.sh gpu
 ```
 
-提交时自动执行 Ruff 检查、可安全自动修复及格式化，沿用 `pyproject.toml` 的排除目录。
-若 hook 修改了文件，重新暂存后再次提交。
+默认运行 CPU 回归。GPU 模式要求 Hopper、nvcc、CUTLASS、TVM FFI、Triton 和 FlashInfer，
+缺少环境时失败；测试结果直接输出终端。普通 CLI 集成检查使用临时小模型权重，
+不能代替完整 checkpoint 检查。性能实验另从 [实验索引](experiments/README.md) 进入。
+
+提交检查使用 `uv tool install pre-commit` 和 `pre-commit install`；hook 自动执行 Ruff。
+独立历史 DeepGEMM 基准使用 `uv sync --group legacy`，图表工具另加 `--group analysis`。
 
 ## 文档
 
-- [模型索引](models/README.md)、[实验索引](experiments/README.md)、[算子索引](operators/README.md)
-- [本地 serving](serving/README.md)、[模型执行器](executor/README.md)、[缓存管理](cache/README.md)、[共享层](layers/README.md)
-- [GR 输入生成](GR/README.md)、[DeepSeek 实验权重](experiments/legacy/deepseek_v32/deepseek_v32_two_dense.md)
-- [KV cache offload 分析](docs/kv_cache_offload.md)、[SM120 sparse MLA 实现](DSA.md)
-- [RTX 5080 DeepGEMM 结果](experiments/legacy/deepseek_v32/docs/deepgemm_v32_5080_results.md)、[DeepSeek extend 分析](experiments/legacy/deepseek_v32/docs/extend_step_profile/extend_compute_zh.md)
+- [文档分工](docs/README.md)、[项目内 Research Supervisor](skills/research-supervisor/SKILL.md)
+- [KDA 组件文档](docs/agents/kda/README.md)
+- [模型](models/README.md)、[算子目录与类型](operators/README.md)、[实验](experiments/README.md)
+- [共享层](layers/README.md)、[缓存](cache/README.md)、[执行器](executor/README.md)、[serving](serving/README.md)
+- [第三方依赖](3rdparty/README.md)、[GR](GR/README.md)、[DeepSeek / SM120 历史资料](experiments/legacy/deepseek_v32/README.md)
+
+Supervisor 可直接使用项目文件，无需安装。在本项目对话中请求：
+
+```text
+请读取 skills/research-supervisor/SKILL.md 并运行 Supervisor，
+维护 docs/status.md 和简短的 docs/roadmap.md 待办清单，
+内部记录放到 docs/agents/research-supervisor/，保留我的修正并更新相关内容。
+```

@@ -1,0 +1,29 @@
+"""Token-only model adapter contract for persistent prefix execution."""
+
+from typing import Any, Protocol
+
+import torch
+
+
+class ServingBackend(Protocol):
+    scheme: str
+    device: torch.device
+    max_seq_len: int
+
+    def estimate_session_bytes(self, capacity: int, prefix_tokens: int) -> dict[str, int]: ...
+
+    def create_session(self, capacity: int) -> Any: ...
+
+    def prefill(self, session: Any, ids: torch.Tensor) -> None: ...
+
+    def extend(self, session: Any, ids: torch.Tensor) -> torch.Tensor: ...
+
+    def truncate(self, session: Any, prefix: int) -> None: ...
+
+    def session_bytes(self, session: Any) -> dict[str, int]: ...
+
+    def release_session(self, session: Any) -> None: ...
+
+    def synchronize(self) -> None: ...
+
+    def describe(self) -> dict: ...

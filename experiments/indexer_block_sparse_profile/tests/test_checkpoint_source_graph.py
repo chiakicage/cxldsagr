@@ -1,6 +1,6 @@
 """Keep the published inference tree analyzable without accepting unknown code."""
 
-import hashlib
+import json
 from pathlib import Path
 
 import pytest
@@ -14,13 +14,19 @@ from experiments.indexer_block_sparse_profile.src.module_mfu import (
 ROOT = Path(__file__).resolve().parents[3]
 
 
-def test_published_checkpoint_matches_actual_inference_sources():
-    actual = {
-        name: hashlib.sha256((ROOT / name).read_bytes()).hexdigest()
-        for name in _BF16_PAIR_FORMATTED_GRAPH
-    }
-    assert actual == _BF16_PAIR_FORMATTED_GRAPH
-    assert _validate_source_graph(actual) == 4
+@pytest.mark.parametrize("backend", ["native", "triton"])
+def test_published_checkpoint_matches_its_recorded_inference_sources(backend):
+    # Published measurements belong to their captured source tree. Additive
+    # offload development must not silently relabel them as current-code runs.
+    # The runtime source-graph gate below still rejects every unknown revision.
+    metadata = json.loads(
+        (
+            ROOT / "experiments/indexer_block_sparse_profile/report" / backend / "metadata.json"
+        ).read_text()
+    )
+    recorded = {name: metadata["source_sha256"][name] for name in _BF16_PAIR_FORMATTED_GRAPH}
+    assert recorded == _BF16_PAIR_FORMATTED_GRAPH
+    assert _validate_source_graph(recorded) == 4
 
 
 def test_original_measured_checkpoint_remains_analyzable():

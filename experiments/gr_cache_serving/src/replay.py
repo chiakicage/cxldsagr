@@ -153,7 +153,7 @@ def source_fingerprints():
         "models/deepseek_v32/echo_adapter.py",
         "models/deepseek_v32/echo_cache.py",
         "models/deepseek_v32/echo_dense.py",
-        "operators/sm90/pinned_gather.py",
+        "operators/common/pinned_gather.py",
         "models/deepseek_v32/echo_kernel.py",
         "models/deepseek_v32/echo_recall.py",
         "models/deepseek_v32/echo_index.py",

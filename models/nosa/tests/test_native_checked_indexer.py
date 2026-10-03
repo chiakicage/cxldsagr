@@ -7,7 +7,7 @@ from layers.attention import AttentionContext
 from models.nosa.cache import NosaKVCache
 from models.nosa.config import NosaConfig
 from models.nosa.indexer import NosaIndexer
-from operators.sm90 import _nosa_indexer_checked_cuda
+from operators.nosa.indexer import _indexer_checked_cuda as _nosa_indexer_checked_cuda
 
 pytestmark = pytest.mark.skipif(not torch.cuda.is_available(), reason="Hopper CUDA required")
 

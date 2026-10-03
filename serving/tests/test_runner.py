@@ -228,6 +228,9 @@ def test_cli_defaults_and_help_without_runtime_imports():
         42,
     )
     assert args.prefill_chunk_size == 1024
+    assert args.offload_fetch_ctas == 96
+    assert args.offload_query_tile_size == 128
+    assert not args.no_fetch_overlap
     assert args.user_lengths is None and args.item_lengths is None
     root = Path(__file__).resolve().parents[2]
     code = (
@@ -247,7 +250,8 @@ def test_cli_defaults_and_help_without_runtime_imports():
     assert "--user-lengths" in result.stdout
 
 
-def test_cli_streams_summary_without_feature_vectors(monkeypatch, capsys):
+@pytest.mark.parametrize("offload_args,fetch_ctas", [([], 96), (["--offload-fetch-ctas", "6"], 6)])
+def test_cli_streams_summary_without_feature_vectors(monkeypatch, capsys, offload_args, fetch_ctas):
     import GR.input_generator as generator_module
     import models.nosa.model as model_module
 
@@ -266,9 +270,12 @@ def test_cli_streams_summary_without_feature_vectors(monkeypatch, capsys):
     import serving.runner as runner_module
 
     monkeypatch.setattr(model_module.NosaConfig, "from_pretrained", lambda path: Model.config)
-    monkeypatch.setattr(
-        model_module.NosaForCausalLM, "from_pretrained", lambda *args, **kwargs: Model()
-    )
+
+    def load_model(*args, **kwargs):
+        assert kwargs["offload_fetch_ctas"] == fetch_ctas
+        return Model()
+
+    monkeypatch.setattr(model_module.NosaForCausalLM, "from_pretrained", load_model)
     monkeypatch.setattr(torch.cuda, "is_available", lambda: True)
     monkeypatch.setattr(torch.cuda, "current_device", lambda: 0)
     monkeypatch.setattr(torch.cuda, "set_device", lambda device: None)
@@ -296,6 +303,7 @@ def test_cli_streams_summary_without_feature_vectors(monkeypatch, capsys):
             "128",
             "--item-lengths",
             "256",
+            *offload_args,
         ]
     )
     row = json.loads(capsys.readouterr().out)

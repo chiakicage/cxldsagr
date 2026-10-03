@@ -1,0 +1,189 @@
+{
+  "schema_version": 3,
+  "run_id": "gr_serving_h200_20261002_h4k_profile_02",
+  "work_interval_schema_version": 3,
+  "fetch_coverage": "per_page_copy_envelopes",
+  "byte_accounting": "logical_unique_kv_payload",
+  "fetch_definition": "Each selected (block, KV head) has one row for its unique logical K+V bytes and the envelope from the earliest nonempty stripe start to the latest nonempty stripe end. An envelope can contain gaps between stripe copy windows; its union alone does not establish copy-window occupancy or an overlap threshold. Page envelopes are retained as a separate metric and checked against every nonempty stripe.",
+  "fetch_stripes": 8,
+  "stripe_coverage": "nonempty_stripe_copy_windows",
+  "stripe_definition": "Each selected page is partitioned into fetch_stripes equal token ranges within its 64-token block. Each nonempty historical range has one kind-3 row, starting after task claim and metadata decoding, before the participating fetch-thread barrier and host loads, and ending after stores, per-thread fences and the participating fetch-thread barrier, before counters and ready publication. Empty historical ranges have no row or payload. The union counts concurrent stripe windows once and excludes gaps covered only by page envelopes; it is not PCIe/CXL wire occupancy or individual vector load latency.",
+  "status": "accepted",
+  "records": [
+    {
+      "case": "request_000002",
+      "mode": "serialized",
+      "sample": 0,
+      "work_metrics": {
+        "clock": "device_globaltimer_ns",
+        "math_coverage": "none",
+        "fetch_work_union_us": 83.456,
+        "softmax_union_us": 0.0,
+        "fetch_math_overlap_us": 0.0,
+        "fetch_without_softmax_us": 83.456,
+        "fetch_math_overlap_fraction": null,
+        "instrumented_span_us": 83.456,
+        "copied_bytes": 4161536,
+        "fetch_interval_count": 127,
+        "softmax_interval_count": 0
+      },
+      "stripe_metrics": null,
+      "both_overlap_ratios_at_least_90_percent": null
+    },
+    {
+      "case": "request_000003",
+      "mode": "serialized",
+      "sample": 0,
+      "work_metrics": {
+        "clock": "device_globaltimer_ns",
+        "math_coverage": "none",
+        "fetch_work_union_us": 83.36,
+        "softmax_union_us": 0.0,
+        "fetch_math_overlap_us": 0.0,
+        "fetch_without_softmax_us": 83.36,
+        "fetch_math_overlap_fraction": null,
+        "instrumented_span_us": 83.36,
+        "copied_bytes": 4161536,
+        "fetch_interval_count": 127,
+        "softmax_interval_count": 0
+      },
+      "stripe_metrics": null,
+      "both_overlap_ratios_at_least_90_percent": null
+    },
+    {
+      "case": "request_000007",
+      "mode": "serialized",
+      "sample": 0,
+      "work_metrics": {
+        "clock": "device_globaltimer_ns",
+        "math_coverage": "none",
+        "fetch_work_union_us": 83.328,
+        "softmax_union_us": 0.0,
+        "fetch_math_overlap_us": 0.0,
+        "fetch_without_softmax_us": 83.328,
+        "fetch_math_overlap_fraction": null,
+        "instrumented_span_us": 83.328,
+        "copied_bytes": 4161536,
+        "fetch_interval_count": 127,
+        "softmax_interval_count": 0
+      },
+      "stripe_metrics": null,
+      "both_overlap_ratios_at_least_90_percent": null
+    },
+    {
+      "case": "request_000002",
+      "mode": "overlap",
+      "sample": 0,
+      "work_metrics": {
+        "clock": "device_globaltimer_ns",
+        "math_coverage": "softmax_only",
+        "fetch_work_union_us": 175.296,
+        "softmax_union_us": 131.648,
+        "fetch_math_overlap_us": 127.744,
+        "fetch_without_softmax_us": 47.552,
+        "fetch_math_overlap_fraction": 0.728733114275283,
+        "instrumented_span_us": 179.264,
+        "copied_bytes": 4161536,
+        "fetch_interval_count": 127,
+        "softmax_interval_count": 1035
+      },
+      "stripe_metrics": {
+        "clock": "device_globaltimer_ns",
+        "math_coverage": "softmax_only",
+        "fetch_stripe_union_us": 175.296,
+        "softmax_union_us": 131.648,
+        "fetch_stripe_math_overlap_us": 127.744,
+        "fetch_stripe_without_softmax_us": 47.552,
+        "fetch_stripe_math_overlap_fraction": 0.728733114275283,
+        "page_envelope_only_union_us": 0.0,
+        "page_envelope_only_math_overlap_us": 0.0,
+        "page_minus_stripe_math_overlap_fraction": 0.0,
+        "copied_bytes": 4161536,
+        "stripe_interval_count": 1016,
+        "fetch_interval_count": 127,
+        "softmax_interval_count": 1035
+      },
+      "both_overlap_ratios_at_least_90_percent": false
+    },
+    {
+      "case": "request_000003",
+      "mode": "overlap",
+      "sample": 0,
+      "work_metrics": {
+        "clock": "device_globaltimer_ns",
+        "math_coverage": "softmax_only",
+        "fetch_work_union_us": 174.688,
+        "softmax_union_us": 133.952,
+        "fetch_math_overlap_us": 129.856,
+        "fetch_without_softmax_us": 44.832,
+        "fetch_math_overlap_fraction": 0.7433595896684374,
+        "instrumented_span_us": 179.232,
+        "copied_bytes": 4161536,
+        "fetch_interval_count": 127,
+        "softmax_interval_count": 1033
+      },
+      "stripe_metrics": {
+        "clock": "device_globaltimer_ns",
+        "math_coverage": "softmax_only",
+        "fetch_stripe_union_us": 174.688,
+        "softmax_union_us": 133.952,
+        "fetch_stripe_math_overlap_us": 129.856,
+        "fetch_stripe_without_softmax_us": 44.832,
+        "fetch_stripe_math_overlap_fraction": 0.7433595896684374,
+        "page_envelope_only_union_us": 0.0,
+        "page_envelope_only_math_overlap_us": 0.0,
+        "page_minus_stripe_math_overlap_fraction": 0.0,
+        "copied_bytes": 4161536,
+        "stripe_interval_count": 1016,
+        "fetch_interval_count": 127,
+        "softmax_interval_count": 1033
+      },
+      "both_overlap_ratios_at_least_90_percent": false
+    },
+    {
+      "case": "request_000007",
+      "mode": "overlap",
+      "sample": 0,
+      "work_metrics": {
+        "clock": "device_globaltimer_ns",
+        "math_coverage": "softmax_only",
+        "fetch_work_union_us": 174.72,
+        "softmax_union_us": 135.584,
+        "fetch_math_overlap_us": 131.456,
+        "fetch_without_softmax_us": 43.264,
+        "fetch_math_overlap_fraction": 0.7523809523809524,
+        "instrumented_span_us": 179.104,
+        "copied_bytes": 4161536,
+        "fetch_interval_count": 127,
+        "softmax_interval_count": 1033
+      },
+      "stripe_metrics": {
+        "clock": "device_globaltimer_ns",
+        "math_coverage": "softmax_only",
+        "fetch_stripe_union_us": 174.72,
+        "softmax_union_us": 135.584,
+        "fetch_stripe_math_overlap_us": 131.456,
+        "fetch_stripe_without_softmax_us": 43.264,
+        "fetch_stripe_math_overlap_fraction": 0.7523809523809524,
+        "page_envelope_only_union_us": 0.0,
+        "page_envelope_only_math_overlap_us": 0.0,
+        "page_minus_stripe_math_overlap_fraction": 0.0,
+        "copied_bytes": 4161536,
+        "stripe_interval_count": 1016,
+        "fetch_interval_count": 127,
+        "softmax_interval_count": 1033
+      },
+      "both_overlap_ratios_at_least_90_percent": false
+    }
+  ],
+  "overlap_claim": {
+    "threshold": 0.9,
+    "samples": 3,
+    "all_samples_both_ratios_at_least_90_percent": false,
+    "below_threshold_samples_remain_valid": true
+  },
+  "definition": "Independent page-envelope and nonempty stripe-copy unions intersect actual consumer softmax intervals on device globaltimer. Exact stripe min/max define each page envelope. Softmax is partial attention coverage; these ratios are not wire traffic or full-attention latency hiding. Serial records have page copy windows only; unmeasured math overlap is null, not inferred zero.",
+  "scope": "Layer 31, first three revisits of the chosen saved NOSA population, one sample each",
+  "latency_source": "Separate uninstrumented formal run only",
+  "work_intervals_sha256": "4a325f0b839a448738bf2429039e2d13f3c5f7528b6986b345006fee5de83fa2"
+}

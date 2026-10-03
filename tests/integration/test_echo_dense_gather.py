@@ -9,7 +9,7 @@ class DirectGatherTests(unittest.TestCase):
     def test_pinned_reads_addressing_and_slot_reuse(self):
         import torch
 
-        from operators.sm90.pinned_gather import gather_pinned_rows
+        from operators.common.pinned_gather import gather_pinned_rows
 
         self.assertTrue(torch.cuda.is_available())
         high = (2**32 // 1152) + 17

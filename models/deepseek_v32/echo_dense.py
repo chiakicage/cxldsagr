@@ -145,7 +145,7 @@ class DensePrefetchController:
         self.transport = transport
         self._direct_gather = None
         if transport == "gpu_direct":
-            from operators.sm90.pinned_gather import gather_pinned_rows
+            from operators.common.pinned_gather import gather_pinned_rows
 
             self._direct_gather = gather_pinned_rows
         self.torch = importlib.import_module("torch")

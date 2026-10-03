@@ -1,28 +1,122 @@
 # 项目约定
 
 本项目研究通用 sparse attention offloading，选取 DeepSeek V3.2 和 NOSA 验证方案。
-后续开发优先 NOSA，主要平台为 SM90 / Hopper；保留现有 DeepSeek V3.2 / SM120 实验。
+后续开发优先 NOSA，主要平台为 SM90 / Hopper；SM120 可执行代码已移除，保留有效历史报告。
+
+当前探索的一种 GR serving 方案是固定 history、变化 candidate 的 prefill 负载，
+其代表性及模型、数据适配仍待确定。`GR/` 的固定前缀语义不等于跨请求 KV 复用；
+`serving/runner.py` 保留逐请求创建并释放 cache 的旧入口；
+`serving/persistent.py` 使用 `cache/prefix_pool.py` 保留跨请求用户历史。
+该路径在相同 HBM / CPU DRAM 硬预算下按用户 session 做 LRU；候选执行成功后 truncate
+到固定历史，历史 token 身份变化或容量不足时重建。首次访问与复访由用户访问次数区分，
+不能将缓存 miss 的复访计成首次访问。模型权重与普通 activation 单独报告，cache 预算
+包含索引、映射、staging、cache scratch 与待提交 append，分配前预留并核验实际容量。
+
+## 项目内 Research Supervisor
+
+- 用户要求运行 Supervisor、讨论研究进展、修正研究理解或安排研究探索时，
+  读取项目内 [skills/research-supervisor/SKILL.md](skills/research-supervisor/SKILL.md)，
+  每次使用读取当前版本，不安装或同步到 Codex 用户技能目录。
+- 研究状态维护在 [docs/status.md](docs/status.md)，下一步任务在 `docs/roadmap.md`；
+  Supervisor 内部依据在 `docs/agents/research-supervisor/`。人可以直接修改状态表，
+  后续运行保留修正并更新受影响的判断和任务。
+- Supervisor 不生成论文或组会叙事，这些产物由其他 agent 完成。
+  项目的探索历程不能充当呈现给读者的研究任务或问题定义。
+- `docs/roadmap.md` 保持简短，只列当前待做或进行中的任务及对应研究条目；
+  完成或取消后移出清单，研究发现回写状态表，详细计划与必要历史留在 `docs/agents/`。
+- 当前研究先关注 HBM 与 CPU DRAM，GR serving 是待完善的候选场景；
+  不从项目名称自动加入 CXL/RDMA，也不把已有设计当成场景和 motivation 已成立。
+- 普通工程任务按下述约定执行，无需启动完整研究梳理；若结果改变已有研究判断，
+  将研究含义同步到对应条目，详细实现和验证仍留在工程/实验材料中。
 
 ## 目录与职责
 
-- 自有硬件算子放在 `operators/sm90/`、`operators/sm120/`；共享第三方库放在 `3rdparty/`。
+- 自有算子按模型放在 `operators/nosa/`、`operators/deepseek_v32/`，模型内部按
+  `indexer/`、`attention/`、`linear/` 等实际功能组织。attention 分为 `reference/`、
+  `device_only/`、`offload/`；reference 可独立导入，不加载 Triton 或 native 扩展。
+  架构和后端是实现属性，不再作为算子的顶层目录；不为分类复制 kernel。
+  ECHO 融合 indexer/prefetch 仍归 indexer，offload attention 复用 device-only MLA。
+  真正通用的 record 搬运放 `operators/common/`，宽度和 dtype 由调用者提供；
+  共享第三方库放 `3rdparty/`。各功能的单元测试放就近 `tests/`，不新增 `__init__.py`。
+  JIT 路径和指纹必须覆盖实际源码及本地 include 依赖，不能跨模型扫描全部算子源码。
 - `operators/` 的共享适配只封装现有后端调用；`layers/` 保存共享普通层及 indexer /
   main attention 契约。共享层接收显式维度和参数，不反向导入模型配置。
 - 模型结构、权重加载、位置编码、稀疏选择语义、KV 布局适配放在
   `models/deepseek_v32/`、`models/nosa/`。`models/` 只保留模型推理相关代码及其测试；
-  接入另一架构时复用对应模型目录，不按架构复制模型树。此次分层仅接入 NOSA，
-  DeepSeek V3.2 / SM120 保留既有组织。
+  接入另一架构时复用对应模型目录，不按架构复制模型树。共享分层当前接入 NOSA；
+  standalone SM90 ECHO 放在 `models/deepseek_v32/`，不依赖 SGLang 或 SM120 扩展。
 - `executor/` 负责通用模型分块执行和输出选择，不读取 GR 请求；`serving/` 负责 GR
-  请求适配及串行请求生命周期，不包含网络服务或 CXL/RDMA 依赖。
+  请求适配、串行请求生命周期及跨请求固定历史复用，不包含网络服务或 CXL/RDMA 依赖。
 - `cache/` 管理请求级缓存分配、逐层写入、提交、重置和释放。模型提供 KV 布局和
-  兼容信息；所有模型层成功执行后统一推进有效长度。当前后端仅为模型设备上的
-  resident cache，CPU 用于参考测试；local DRAM backing 与 HBM caching 尚未实现。
+  兼容信息；所有模型层成功执行后统一推进有效长度。`CacheManager` 接收模型 allocator，
+  NOSA 默认 resident，显式 offload 使用 `cache/host_backing.py` 与
+  `models/nosa/offload_cache.py`：pinned local DRAM 保存历史 K/V，CIS 和压缩派生记录
+  resident；CPU 用于参考测试。NOSA 共享一层完整逻辑地址范围的 HBM staging，
+  尚无有限 slots 或淘汰策略，不将该实现表述为通用 HBM caching 已完成。
+  独立 `cache/sparse_token_cache.py` 为 DeepSeek SM90 ECHO
+  提供 pinned local DRAM backing、有限 HBM slots、精确 recall 与缓存事务；record
+  宽度和 dtype 由模型提供，不能将其有限 HBM pool 能力归于 NOSA。
   `cache/indexer_cache.py` 管理请求级派生 record 与共享 scratch；压缩和稳定 pool 的
   语义由模型声明。派生缓存随 KV 统一提交、回滚和截短，不占用通用 opaque layer state。
 - main attention 接收逻辑块选择、cache access 与执行上下文，不能把「全部 KV
-  已完成搬入 HBM」作为通用前置条件。未来 fetch/compute overlap 由 SM90 算子实现；
-  resident NOSA block sparse attention 已接入 SM90 CUDA/CuTe 与 Triton；offload 入口仍只预留接口，
-  调用未实现路径须明确失败，不将 resident 验证表述为 offload 验证。
+  已完成搬入 HBM」作为通用前置条件。resident NOSA block sparse attention 已接入
+  SM90 CUDA/CuTe 与 Triton；显式 NOSA offload 通过 `operators/nosa/attention/offload/api.py`
+  实现 BF16 / D128 / GQA16 native attention 与稀疏 fetch。当前融合版本在一个
+  cooperative CUDA 主 kernel 内保留所有 CTA 的 persistent FA3 计算；默认最多
+  96 个 CTA 使用 producer warpgroup 的 warp 1–3（96 线程）读取 host，warp 0
+  保留 TMA，两个 consumer warpgroup 保留 attention。每次层调用按
+  `(KV head, logical block)` 去重并压成唯一页队列，每个 64-token 页拆为 8 个
+  不交叠的 8-token stripe；leader 原子领取 `(page, stripe)`，经 shared slot 和
+  96-thread barrier 广播，每个历史向量只执行一次 `.cv` host load。每 stripe
+  writer 完成 fence/barrier 后，leader 以 acq_rel RMW 累计 ready；跨 CTA 完成链
+  达到 ready=8 后，TMA acquire 并执行 async-proxy fence 再读取 HBM。空尾 stripe
+  不读 host、仍参与完成；最后完成者只累计一次整页字节。
+  仅两 KV heads 且 `ceil(queries / 8) * KV_heads == 256` 时，fetch 与 compute
+  都按 head 1 → head 0；head 内保留 block 0 优先/其余 block 降序的 fetch 顺序
+  和原 compute cost/tie 顺序。其他几何保留 block-major fetch 与原 attention 调度。
+  串行与融合共用新 native initialization，合并全容量 metadata reset、历史
+  page-0 padding 和 strided suffix staging；first-use planning 保留独立依赖
+  launch。初始化、planning、compaction、prepare / repair 与 launch gaps 全部计时。
+  不依赖 host memory 的 L2 复用，不得按八-query group 重复搬运；保留原 selection、
+  CIS、causal mask 与 numerical repair。prepare / repair helper 全部计入算子时间，
+  cooperative launch 与 occupancy 检查须保证全部 CTA 可同时驻留；producer /
+  consumer 的 24 / 240 动态寄存器预算须满足本 CTA 的 64512-register pool，
+  不能只按整个 SM 的寄存器上限检查，避免 `setmaxnreg` 等待死锁。
+  `query_tile_size` 仅分组统计首次读取流量，不再拆分 attention；`fetch_ctas` 控制
+  参与 fetch 的 attention CTA 数上限，不划出专用 fetch CTA。`overlap=False`
+  一次 fetch 完整稀疏并集，再执行原 FA3 整批 attention。
+  事务提交及 staging 复用须等待相关异步操作完成。CUDA Graph capture、有限 HBM
+  slots / eviction 与 CXL/RDMA 尚未支持或验证；不支持路径明确失败，不将 resident
+  检查、算子回放或 CPU reference 表述为完整模型 offload 性能验证。
+  NOSA 完整 checkpoint 数值验收须为 resident/offload 分别从独立空 cache 构建
+  sparse prefix，比较全部 extend hidden；cache 分配统计不等于进程峰值显存。
+  NOSA overlap 性能对照须包括完整 query batch 的稀疏并集一次 fetch 后计算，
+  以此为整体延迟验收门槛；若候选拆分 query tiles，另加相同拆分的串行调度对照。
+  单 kernel 的完整执行窗口不能同时充当 fetch 与 attention 的区间；须使用 kernel
+  内部实际工作区间证明重叠，且执行窗口相交不能替代整体延迟收益判断。
+  stripe 路径同时报告 page envelope 与非空 stripe-copy window 两套指标；envelope
+  须等于本页全部非空 stripe 的 min(start)/max(end)，不能以其空隙充当真实 copy。
+  90% 验收要求每个 profiled sample 的两种 ratio 都 >= 0.9，不能只检查中位数。
+  每轮实现更新须重新验收正确性、唯一读取和内部 overlap，并以新 run ID 发布受
+  影响的性能结果；旧结果按下述实验规则保留至替换完成，不以旧验证冒充新实现结果。
+- DeepSeek SM90 ECHO 使用完整 checkpoint 的 61 层、embedding、dense / grouped MoE、
+  final norm 与 LM head；按 token chunk 依次执行全部层，限制临时 hidden 显存。主 KV
+  使用 BF16 512 latent + 64 RoPE record，indexer FP8 K/scales 仍 resident。融合
+  indexer prefetch 后必须执行精确 top-k / residual recall；工作集超过 HBM pool 时
+  拆分 query 消费，不裁剪每 query 的精确选择。全部层和 GPU 同步成功后统一提交；
+  失败只回滚本次启动的事务。完整 resident/offload 对照从独立空 cache 构建 prefix，
+  每次 extend 恢复相同 prefix HBM residency；权重加载、编译和状态恢复不计入执行时间。
+  layer 0 / layer 3 或单算子正确性检查不替代完整 64K + 1K 的性能测量。
+- 单卡 GR serving 的 DeepSeek 对照另用 `models/deepseek_v32/serving_backend.py`：
+  按用户要求将真实 checkpoint 前三层独立复制成 10 个 dense block，不执行 MoE；
+  每个副本复制对应 source block 的 hidden 与 residual 输入，不串接出未经验证的深层
+  激活轨迹。独立权重、KV 与 indexer 状态不可因输入相同而共享；含 embedding、final
+  norm 与 LM head 共 7,827,793,408 参数，明确称为 checkpoint 工作负载替身，不能
+  表述为经过训练的 DeepSeek 8B 或完整 61 层验证。比较 `hbm`、`echo`、`serial_sparse`
+  与 `dense_prefetch`；后者使用双 layer staging 和独立 stream 逐层预取完整历史主 KV，
+  stage 复用须等待前一个 consumer 完成。DeepSeek serving 计算全部 candidate hidden
+  和最后 token LM head，NOSA serving 当前只计算 hidden，跨模型延迟不能忽略这一区别。
+  此特定工作负载不修改上面的完整 DeepSeek 模型验证要求。
 - NOSA query-aware indexer 已有 resident K 上的 PyTorch FP32 参考实现：64-token block、
   默认 `block_budget=64`，1 sink + 16 causal local（含当前块）+ 47 query-aware top-k；
   支持 `block_budget=32`，保持 1 sink + 16 local，query-aware top-k 改为 15。
@@ -33,7 +127,8 @@
   inclusive local 为当前块加前 16 块，query-aware 阶段含 sink/local 共保留 33 块，
   再按 query-agnostic CIS 补满 64 块。A/delta 从 checkpoint 严格加载；
   `softplus(delta(V)) * A` 同时用于压缩后选块及 attention 加性 bias。
-  K/V/CIS 作为同一 resident cache step 提交，CPU reference 与 SM90 CUDA/Triton 均可运行。
+  K/V/CIS 作为同一 cache step 提交；resident 支持 CPU reference 与 SM90 CUDA/Triton，
+  offload 另遵循上述 native SM90 限制。
   两种 policy 不混用；原 query-aware pattern 实验在 dense 激活上旁路选块，不改变 dense 基线。
   完整 NOSA pattern 对照分别采集同一 dense 激活上的 QA-only/full NOSA 选择，以及真实
   sparse 传播中 attention 实际消费的选择；dense/sparse prefix 从独立空 cache 构建。
@@ -110,10 +205,10 @@
   支持 `--help`，创建分类输出目录并保留子进程失败状态。不同运行用不同 run ID，
   不覆盖仍然有效的旧结果；受性能优化或正确性修正影响的旧结果保留至新结果验收并发布，
   再按上述规则替换和删除。
-- 旧 DeepSeek 及配套 SM120 实验集中保存在 `experiments/legacy/deepseek_v32/`，
-  作为整体归档，不强行套用新目录层级或拆分历史数据；仅修复导入、入口和导航链接。
-  仅保留符合其目的的有效实验；这不豁免上述结果有效性要求。保留报告中的原命令与
-  原测量含义，当前运行方式写在归档 README。
+- 旧 DeepSeek / SM120 的有效报告集中保存在 `experiments/legacy/deepseek_v32/`。
+  已删除依赖 SM120 的模型、算子及测量入口；历史原命令与测量含义保留，复现使用
+  整理前 Git revision，见归档 README。独立 DeepGEMM 基准和 CPU 报告重建工具可保留，
+  不得再导入已删除的模型/测量脚本；这不豁免上述结果有效性要求。
 
 ## 全局测试
 
@@ -134,8 +229,8 @@
   扩展包及导入名称。
 - 实验命令默认从仓库根目录运行。模型直接脚本入口保持可用；实验整理后统一使用上节的新
   模块入口，不在旧目录遗留兼容壳文件。旧命令只在历史运行记录中保留，无需安装仓库。
-- 用 `pyproject.toml` 和 `uv.lock` 管理环境，依赖改动同步维护两者。当前 SM120 扩展
-  放入显式 `sm120` 依赖组，基础环境不默认安装；未接入后端前不虚设 SM90 安装组。
+- 用 `pyproject.toml` 和 `uv.lock` 管理环境，依赖改动同步维护两者。基础环境用于
+  Hopper；独立历史 DeepGEMM 基准使用可选 `legacy` 依赖组，不恢复 SM120 扩展或安装组。
 
 ## 第三方依赖
 
@@ -156,6 +251,18 @@
 
 ## 文档与验证
 
+- `docs/` 中面向人类的文档应讲清研究理解、当前问题、计划及必要的技术分析。
+  `docs/status.md`、`docs/roadmap.md` 由 Research Supervisor 维护，
+  保留研究者直接修正；职责与阅读入口见 [docs/README.md](docs/README.md)。
+- agent 的任务契约、实现计划、详细验收、交接、证据索引和内部状态统一放在 `docs/agents/`。
+  KDA 文档按实现组件放在 `docs/agents/kda/<component>/`，使用 `task.md`、
+  `implementation_plan.md`、`checkpoint.md`、`investigation_log.md` 等明确用途的文件名；
+  当前计划与历史候选分开，保留 run ID、源码身份和验证边界，执行材料可使用英文。
+  系统工程材料放在 `docs/agents/system/`，Supervisor 内部记录放在
+  `docs/agents/research-supervisor/`；不再在 `docs/` 根目录放 `draft.md`、`plan.md` 等执行文档。
+  执行 agent 维护自己的内部材料，将研究含义返回给 Supervisor，由其更新研究状态和下一步任务。
+- 具体实验的报告、数据和源码仍按 `experiments/` 约定维护，模块说明留在模块 README。
+  文档分层不复制或重命名实验运行产物；迁移文档时更新导航链接，保留历史命令和测量含义。
 - 给 agent 的目录维护、实现职责、依赖管理和后续开发约定写在 `AGENTS.md`。
   README 保留项目介绍、实际状态、入口索引和可用命令，避免重复维护约定。
 - 保留有效实验报告的平台、依赖和测量含义；目录迁移或上游源码支持某架构不等于

@@ -9,10 +9,42 @@ from pathlib import Path
 import numpy as np
 
 from experiments.legacy.deepseek_v32.export_gr_kv_hits import export_case, plt
-from experiments.legacy.deepseek_v32.measure_gr_content_matrix import ROOT, case_name
-from experiments.legacy.deepseek_v32.sweep_gr_content_matrix import complete
 from GR.input_generator import DEEPSEEK_ITEM_LENGTHS as NEWS
 from GR.input_generator import DEEPSEEK_USER_LENGTHS as HISTORIES
+
+ROOT = Path("GR/generated/content_matrix")
+
+
+def case_name(h, u, n, i):
+    return f"h{h}_u{u}_n{n}_i{i}"
+
+
+def complete(root, h, u):
+    path = root / f"h{h}_u{u}" / "complete.json"
+    if not path.is_file():
+        return False
+    try:
+        marker = json.loads(path.read_text())
+    except (OSError, json.JSONDecodeError):
+        return False
+    if marker.get("new_lengths") != list(NEWS):
+        return False
+    return all(
+        all(
+            (root / f"layer{layer}" / case_name(h, u, n, i) / filename).is_file()
+            for filename in (
+                "result.json",
+                "selected_indices.pt",
+                "unique_token_ids.json",
+                "input.jsonl",
+                "prompt.txt",
+            )
+        )
+        and (root / f"{case_name(h, u, n, i)}_validation.json").is_file()
+        for n in NEWS
+        for i in range(3)
+        for layer in range(3)
+    )
 
 
 def label(n):
@@ -332,7 +364,7 @@ Top-k=2048，不做 Hadamard。Indexer 每 128 个 query 分批，但每个 quer
     report += """
 ## 输出与复现
 
-仓库保留报告、引用图片、CSV 和交互页。原始输入、top-k/NPY 回放及日志属于可再生成的大型输出，清理后需先运行测量命令重建，再重新生成报告；小型统计与校验 JSON 留在本地 `GR/generated/`。以下路径描述复现时生成的产物。
+仓库保留报告、引用图片、CSV 和交互页。原始输入、top-k/NPY 回放及日志属于可再生成的大型输出，清理后需在整理前 revision `397e645` 中运行测量命令重建，再使用当前报告工具；小型统计与校验 JSON 留在本地 `GR/generated/`。以下路径描述复现时生成的产物。
 
 - `GR/generated/content_matrix/inputs/h{H}_u{U}_n{N}_i{I}/`：315 份精确输入。
 - `GR/generated/content_matrix/layer{L}/h{H}_u{U}_n{N}_i{I}/`：945 份原始 INT32 top-k、历史与 new 并集、统计和输入哈希。
@@ -340,13 +372,12 @@ Top-k=2048，不做 Hadamard。Indexer 每 128 个 query 分批，但每个 quer
 - 每条压缩 MLA KV 为 656 B；CSV 的 `history_mib` 只计历史，`all_mib` 包含历史和 new，均按本批 query 去重。
 
 ```bash
-env PATH="$PWD/.venv/bin:$PATH" .venv/bin/python -m experiments.legacy.deepseek_v32.sweep_gr_content_matrix
 .venv/bin/python -m experiments.legacy.deepseek_v32.report_gr_content_matrix
 # 可选：导出全部精确 NPY 搬运回放数组
 .venv/bin/python -m experiments.legacy.deepseek_v32.report_gr_content_matrix --export-replay
 ```
 
-调度按 15 个 history 内容组保存完成标记，重跑会跳过完整组。旧版单内容实验使用 `GR/generated/cache_union_sweep/`、`GR/generated/multilayer_hits_validated/`，不混入本次内容矩阵。
+原测量调度按 15 个 history 内容组保存完成标记；当前报告工具校验这些标记与对应产物。旧版单内容实验使用 `GR/generated/cache_union_sweep/`、`GR/generated/multilayer_hits_validated/`，不混入本次内容矩阵。
 """
     (args.report_dir / "gr_multilayer_kv_hits.md").write_text(report)
     positions = """# 三层 KV 命中位置：九种内容组合

@@ -33,8 +33,8 @@ from models.nosa.attention import NosaSparseAttention
 from models.nosa.cache import NosaKVCache
 from models.nosa.config import NosaConfig
 from models.nosa.indexer import NosaIndexer, prepare_indexer_inputs
-from operators.sm90._native import build_info
-from operators.sm90.nosa_indexer import select_contiguous_blocks
+from operators.nosa._native import build_info
+from operators.nosa.indexer.api import select_contiguous_blocks
 
 ROOT = Path(__file__).resolve().parents[3]
 EXPERIMENT = Path(__file__).resolve().parents[1]

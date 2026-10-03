@@ -15,8 +15,8 @@ requires_cuda = pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA u
 @requires_cuda
 @torch.inference_mode()
 def test_cuda_indexer_cache_append_abort_truncate_and_finite_prefix_reuse(monkeypatch):
-    import operators.sm90._nosa_prepare_cuda as native_prepare
-    import operators.sm90.nosa_validation as validation
+    import operators.nosa.indexer._prepare_cuda as native_prepare
+    from operators.nosa.indexer import validation
 
     config = tiny_config(hidden_size=256, head_dim=64, max_position_embeddings=4224)
     cache = NosaKVCache(config, 4224, device="cuda", dtype=torch.bfloat16, with_cis=True)
@@ -151,7 +151,7 @@ def test_cuda_indexer_lazily_materializes_a_committed_dense_prefix():
 @pytest.mark.parametrize("bad_input", ["q", "keys", "cis"])
 @torch.inference_mode()
 def test_cuda_native_preparation_rejects_without_writes_and_allows_retry(monkeypatch, bad_input):
-    import operators.sm90.nosa_validation as validation
+    from operators.nosa.indexer import validation
 
     monkeypatch.setenv("CXLDSAGR_SM90_BACKEND", "native")
     config = tiny_config(hidden_size=512, head_dim=128, max_position_embeddings=160)
@@ -210,9 +210,9 @@ def test_cuda_native_preparation_rejects_without_writes_and_allows_retry(monkeyp
 @pytest.mark.parametrize("prefix,rows", [(8192, 128), (65536, 1024)])
 @torch.inference_mode()
 def test_cuda_ranked_preparation_owns_disjoint_scratch_and_retries(monkeypatch, prefix, rows):
-    import operators.sm90._nosa_indexer_checked_cuda as checked
-    import operators.sm90._nosa_prepare_ranked_cuda as ranked
-    import operators.sm90.nosa_indexer as selection
+    import operators.nosa.indexer._indexer_checked_cuda as checked
+    import operators.nosa.indexer._prepare_ranked_cuda as ranked
+    import operators.nosa.indexer.api as selection
 
     monkeypatch.setenv("CXLDSAGR_SM90_BACKEND", "native")
     length = prefix + rows

@@ -3,26 +3,71 @@
 此目录提供 NOSA checkpoint 的单 GPU 文本推理，目标平台为 SM90 / Hopper。
 默认 attention 使用 FlashInfer **Full Attention**，支持分块 prefill、KV cache 和逐 token decode；
 支持 [GR 本地串行执行](../../serving/README.md)，默认推理不启用 sparse selection。
-显式 sparse 模式提供 query-aware / query-agnostic 选块及 resident block sparse attention。
-KV offloading 与批量调度尚未实现。
+显式 sparse 模式提供 query-aware / query-agnostic 选块及 block sparse attention。
+默认 cache 为 resident；新增 `cache_backend="offload"` 支持 pinned local DRAM 历史
+K/V 与 SM90 sparse fetch / attention overlap。当前在同一个 cooperative CUDA
+主 kernel 中融合稀疏 fetch 与整批 attention，每个唯一页拆成 8 个不交叠 token
+stripe，跨 CTA 只读一次 host K/V。完整 32 层 checkpoint 检查 1 passed：resident/offload 分别从独立空 cache
+构建 64K sparse prefix，再执行 1K extend，全部 normalized hidden 逐位相同，max_abs=0。
+单层性能和 stripe / page-envelope overlap 见下文。新增跨请求保留 prefix 的
+串行 serving 适配见下节；原 4K / 16K / 64K 短轨迹数据通过数值与计量检查，
+但实际用户规模与复访压力不足，需重构负载后补测，详见
+[GR serving 实验](../../experiments/gr_serving/README.md)。
 
 - [model.py](model.py)：模型参数树、权重加载与前向；保留原有导入接口。
 - [config.py](config.py)、[rotary.py](rotary.py)：NOSA 配置与 LongRoPE。
 - [layers.py](layers.py)：NOSA projection、attention 与 decoder 组合。
 - [cache.py](cache.py)：NOSA KV 布局及 resident session 适配。
+- [offload_cache.py](offload_cache.py)：pinned 历史 K/V、resident CIS/压缩记录及共享 staging。
+- [serving.py](serving.py)：完整 NOSA 的跨请求 prefix session、四种缓存方案及预算适配。
 - [indexer.py](indexer.py)：64-token block，默认 1 sink + 16 local + 47 query-aware top-k；
   支持 32-block 分析预算，以及显式完整 NOSA 两阶段选块。
 - [scoring.py](scoring.py)：query-agnostic CIS 打分与 32-token / stride-16 压缩。
-- [attention.py](attention.py)：resident sparse adapter，调用
-  [SM90 算子](../../operators/sm90/README.md) 或 CPU 数学参考。
+- [attention.py](attention.py)：resident / offload sparse adapter，调用
+  [SM90 算子](../../operators/nosa/README.md) 或 CPU 数学参考。
 - [infer.py](infer.py)：本地 tokenizer、chat template、采样与命令行入口。
 - 现有 DeepSeek 实验见 [DeepSeek V3.2](../deepseek_v32/README.md)。
 
 普通 RMSNorm / SwiGLU 与 attention 契约见 [共享层](../../layers/README.md)，FlashInfer
 调用见 [算子](../../operators/README.md)。[执行器](../../executor/README.md) 统一分块前向，
 [缓存管理器](../../cache/README.md) 管理逐层写入、有效长度提交及请求释放。
-main attention 接收逻辑块选择与 cache access，为后续 SM90 算子内部 fetch/compute overlap
-保留边界；当前 dense 路径不执行 indexer，也没有异步搬运或 DRAM backing。
+main attention 接收逻辑块选择与 cache access；显式 offload 由 SM90 算子在单个
+cooperative 主 kernel 内调度 fetch/compute。dense 路径不执行 indexer，仍使用 resident cache。
+
+## 跨请求 GR serving
+
+[NosaServingBackend](serving.py) 连接 [PersistentGRRunner](../../serving/persistent.py)，
+支持 `hbm`、`serial_sparse`、`dense_prefetch` 与 `overlap`。四种方案均执行完整
+32 层 NOSA sparse 模型，保留相同的 CIS、selection 和 causal mask；`dense_prefetch`
+表示搬运完整历史 K/V，attention 本身仍为 sparse。
+
+每个用户持有自己的稳定 prefix session。命中时直接复用，candidate 执行后统一截短回
+prefix；全局 LRU 按相同 HBM / CPU DRAM cache 上限准入，淘汰时释放该用户的两级缓存。
+`hbm` 不使用 CPU KV backing。旧 `serving.run_gr` / `GRRunner` 仍逐请求创建、释放 session，
+跨请求复用由新的 persistent 入口提供。
+
+`dense_prefetch` 使用 pinned 历史 K/V、两个完整逻辑层的 HBM staging 及独立 copy stream。
+下一层拷贝与当前层计算流水执行，event 保护 staging 复用与读取。两种 sparse offload
+复用现有原生算子：串行方案先取齐完整 query batch 的稀疏并集，overlap 使用 cooperative
+FA3。NOSA 当前仍没有有限 token slots 或 token 淘汰；新 LRU 的粒度是整个用户 session。
+预算包括 K/V/CIS、派生 indexer records、staging、拥有的 pending append 和 scratch，
+模型权重及临时计算内存单独统计。
+
+2026-10-02，CPU 专项为 10 passed；单卡 SM90 完整 checkpoint 分别通过 8192+128 与
+65536+1024 两组检查。每种方案从独立空 cache 构建 sparse prefix，再处理两次不同候选，
+全部候选 hidden 均与 HBM 逐位相同，max_abs=0。以下为完整 64K+1K 正确性入口，
+不构成 serving 性能结果：
+
+```bash
+CUDA_VISIBLE_DEVICES=1 PATH="$PWD/.venv/bin:/usr/local/cuda/bin:$PATH" \
+  NOSA_SERVING_CHECKPOINT=/mnt/ssd-wlcb/chenkaiqi/NOSA-8B \
+  NOSA_SERVING_PREFIX_TOKENS=65536 NOSA_SERVING_SUFFIX_TOKENS=1024 \
+  .venv/bin/python -m pytest -s -q -p no:cacheprovider \
+  models/nosa/tests/test_serving.py::test_cuda_serving_checkpoint_independent_prefixes_and_revisits
+```
+
+多用户热度工作负载、逐请求及复访延迟、正式运行状态见
+[GR serving 实验](../../experiments/gr_serving/README.md)。
 
 ## 模型与 attention 语义
 
@@ -95,9 +140,9 @@ query-agnostic 使用压缩后的 CIS。相同分数优先较小 block ID。完�
 
 `auto` 在 CPU 使用 reference、CUDA 使用 SM90 dispatcher；历史接口名 `triton` 保留。
 NOSA-8B 的 D128/GQA=16 默认启用迁移后的 CUDA/CuTe QK score 和 block sparse attention；
-QK 在短上下文按[算子阈值](../../operators/sm90/README.md)使用单 kernel Triton。
+QK 在短上下文按[算子阈值](../../operators/nosa/README.md)使用单 kernel Triton。
 其余已支持形状走 Triton。`CXLDSAGR_SM90_BACKEND=triton` 强制对照后端。
-原生构建要求 nvcc、TVM FFI、共享 CUTLASS 和已安装的 FlashInfer 0.6.18，见[算子说明](../../operators/sm90/README.md)。
+原生构建要求 nvcc、TVM FFI、共享 CUTLASS 和已安装的 FlashInfer 0.6.18，见[算子说明](../../operators/nosa/README.md)。
 CUDA 不支持的设备或 shape 明确失败。
 Triton 支持 SM90、FP16/BF16、head_dim 64/128、GQA group 1–32，使用 FP32 在线 softmax
 累积，AV 概率转回输入 dtype；数值不保证与 FP32 reference 逐位相等，indexer 的舍入
@@ -126,7 +171,7 @@ host flag，模型在校验成功后完成派生预约。验证 scratch 与下�
 有限值检查的完整入口不支持捕获。
 上下文上限为 256K tokens。
 `cache.truncate(length)` 同步回退原始和派生记录，失败 append 随模型事务一起回滚。
-offload fetch 与 overlap 尚未实现。原 QA-only pattern 不启用此模式；
+原 QA-only pattern 不启用此模式；
 新增完整 NOSA pattern 对照从独立空 cache 构建 sparse prefix，记录 attention 实际消费的选块。
 完整 sparse 路径的全模型 prefill/extend 测量见
 [64K+1K 端到端 profile](../../experiments/indexer_block_sparse_profile/README.md)。
@@ -140,6 +185,94 @@ python -m models.nosa.infer --attention-mode sparse --sparse-backend triton \
 python -m serving.run_gr --attention-mode sparse --count 1 \
   --user-lengths 4096 --item-lengths 128 --prefill-chunk-size 1024
 ```
+
+## Sparse KV offload
+
+`NosaForCausalLM(..., attention_mode="sparse", cache_backend="offload",
+offload_query_tile_size=128, offload_fetch_ctas=96, offload_overlap=True)`
+以及同参数的 `from_pretrained` 启用新后端。CUDA 路径要求 native SM90/Hopper、
+BF16、D128、GQA16；dense mode、
+CUDA reference attention、强制 Triton attention 与 CUDA Graph capture 不支持该路径，
+调用明确失败。CPU offload adapter 只用于独立数值与事务检查。
+
+历史 K/V 按原始 NHD 布局保存在 pinned local DRAM。本次 append 保留独立 device
+副本，并异步写回 backing；全部层和 GPU 成功后统一提交。CIS、压缩 K/CIS 及稳定
+CIS pool 常驻 GPU，新增压缩窗口只读 device append 和最多 31 个历史边界 token。
+该 indexer 不为选块把整个 K prefix 搬回 HBM。
+
+请求共享一层完整逻辑地址范围的 K/V staging。
+GPU planner 对 `(KV head, block)` 去重，compactor 生成唯一页队列；每个
+64-token 页拆为 8 个不交叠的 8-token stripe，由 fetch leader 原子领取
+`(page, stripe)`，经 shared slot 和 96-thread barrier 广播。每个历史 K/V
+16-byte 向量有唯一线程，以一次 `ld.global.cv.v4.u32` 读取并写入 HBM staging。
+不同 CTA 可并行读取同页的不同 stripe，跨 query group 的复用只读取 HBM。
+
+每个 stripe 的全部 writer 完成 stores / thread fences / 96-thread barrier 后，
+leader 对 page ready 执行 `atom.acq_rel.gpu.global.add.u32`。跨 CTA 的 RMW 链
+累计到 ready=8，TMA warp acquire 观察到 8 后执行 async-proxy fence，再读取完整
+页；仅最后完成者累计一次整页字节。尾页空 stripe 不读取 host、没有 trace/payload，
+但仍参与完成计数，保证尾页也完成同一协议。
+
+所有 CTA 保留 persistent FA3；最多 96 个 CTA 使用 producer warpgroup 的 warp
+1–3 fetch，warp 0 保留 TMA，两个 consumer warpgroup 保留 attention。只有
+`KV_heads == 2 && ceil(queries / 8) * KV_heads == 256` 时，fetch 与 compute
+都优先 head 1、再 head 0。每个 head 内 fetch 为 block 0 优先、其余 block 降序，
+compute 保留原 cost 排序与 logical-batch ties。其他几何回到 block-major fetch
+队列和原 FA3 调度。24 / 240 动态寄存器满足本 CTA 的 64512-register pool，
+cooperative occupancy 检查保证全部 CTA 同时驻留。
+
+native initialization 合并全容量 metadata 清零、历史 page-0 padding 和 strided
+suffix staging；first-use planner 仍在后续有 stream 依赖的独立 launch。强串行
+对照也使用同一初始化，再一次读取完整稀疏并集并运行原整批 FA3。初始化、planning、
+compaction、prepare / sort / main / repair、输出/完成依赖与 launch gaps 全部计入
+完整调用延迟。selection、CIS、causal mask 和每个 query 的算术次序保持原语义。
+下一层等待当前操作完成后复用这份 staging。此分配尚无有限 HBM slots、eviction
+或跨请求块复用，CXL/RDMA 路径未验证。
+
+生成 CLI 与 GR CLI 均提供 `--cache-backend offload`、`--offload-fetch-ctas`
+（参与 fetch 的 attention CTA 数上限，默认 96）、`--offload-query-tile-size`（默认 128，仅控制
+首次读取流量的 query 分组）及 `--no-fetch-overlap`。最后一项一次 fetch 完整稀疏
+并集，再运行原 FA3 整批 attention，不按 query tiles 拆分计算。命令例如：
+
+```bash
+source .venv/bin/activate
+CXLDSAGR_SM90_BACKEND=native python -m models.nosa.infer \
+  --attention-mode sparse --cache-backend offload --offload-fetch-ctas 96 \
+  --dtype bfloat16 --prompt "请解释 KV cache 的作用。" --disable-thinking
+CXLDSAGR_SM90_BACKEND=native python -m serving.run_gr \
+  --attention-mode sparse --cache-backend offload --offload-fetch-ctas 96 \
+  --count 1 --user-lengths 4096 --item-lengths 128 --prefill-chunk-size 1024
+```
+
+全局 CPU 回归为 1339 passed、674 skipped、34 subtests passed；SM90 GPU
+环境专项为 62 passed，另重复通过的 3 个增强 trace 场景不重复计数。
+正式主测来自 `nosa_fused_stripe8_head1_20260930_01`，独立确认来自
+`nosa_fused_stripe8_head1_confirm40_20260930_01`，独立 profile 来自
+`nosa_fused_stripe8_head1_nsys_20260930_01`。
+单层回放的三个路径分别通过 FP32 参考检查；串行/融合输出逐位一致，resident
+对照采用 BF16 容差，与完整 checkpoint 的 resident/offload 逐位一致检查分开验收。
+L0/L15/L31 的 20 次主测中，串行→融合的完整调用中位延迟为
+0.472336→0.359904、0.544144→0.417376、0.542784→0.434944 ms，分别下降 23.80% / 23.30% / 19.87%。
+40 次独立确认中为 0.460464→0.351344、0.542016→0.415440、0.550112→0.431776 ms，
+分别下降 23.70% / 23.35% / 21.51%。两轮基线都使用新的 native initialization，包含
+preparation、repair、launch gaps 和完整 attention，没有按 profiler 内核时间重算总延迟。
+每层独立 profile 3 次，page-envelope 与非空 stripe-copy 两套 ratio 的
+L0/L15/L31 中位数均为 95.0938% / 95.3356% / 94.9440%；全部 9 个样本都通过双 >=90%
+门槛，最小值 92.2007%。每个样本的全局 page-envelope union 相对 stripe union
+的额外窗口长度、对应 softmax 交集差和 ratio 差值均为 0；这是本次全局窗口并集
+的实测结果，不是预设每页 envelope 都没有 stripe 间隙。
+schema 3 分别记录非空 stripe-copy window、每页的 min(start)/max(end)
+envelope 和 softmax update。stripe 起点在任务领取/解码与同步之后、host load
+之前；终点在 stores / fences / barrier 之后、ready RMW 与计数之前。page
+envelope 可能包含 stripe 间隙，因此分别将两类窗口取并集，与同一 softmax union
+求交，再除以各自 union 持续时间。并行区间只计一次，不能用 envelope 间隙充当真实
+copy。90% 验收要求每个 profiled sample 的两种 ratio 都 >= 0.9，中位数不能替代
+全部样本通过。二者都只覆盖 attention 的 softmax 部分，不代表完整 attention
+隐藏率、PCIe 线上占用或整体加速比；逻辑 payload 也不证明物理链路字节数。
+以上为算子级结果，来源与测量边界见
+[offload overlap 实验](../../experiments/nosa_offload_overlap/README.md)；完整模型的串行
+hidden-output 延迟另见 [GR serving 实验](../../experiments/gr_serving/README.md)。本机传输
+没有强制限速到 50 GB/s；此前分析与 resident profile 不属于本实现实测结果。
 
 ## 运行
 
@@ -182,8 +315,8 @@ source .venv/bin/activate  # FlashInfer 首次 JIT 编译需从 PATH 找到 ninj
 遇到配置中的 EOS token（此 checkpoint 为 `2`、`73440`）或达到 `--max-new-tokens` 时停止。
 prompt token 数与请求生成上限之和不得超过 `max_position_embeddings`（此 checkpoint 为 32768）；
 超长输入会报错，不自动截断。prefill 默认每次处理 1024 tokens，可通过 `--prefill-chunk-size` 调整。
-模型与 cache 均驻留指定 CUDA GPU，dtype 支持 `bfloat16` 与 `float16`。
-cache 的 K、V 分别为 `[层数, 容量, KV heads, head_dim]`，每层传入 FlashInfer 的布局为 NHD；
+默认 resident 模式的模型与 cache 均驻留指定 CUDA GPU，dtype 支持 `bfloat16` 与 `float16`。
+resident cache 的 K、V 分别为 `[层数, 容量, KV heads, head_dim]`，每层传入 FlashInfer 的布局为 NHD；
 此 checkpoint 使用 BF16 时，每个 token 的全部层 K/V 共 32 KiB，32768 tokens 约 1 GiB。
 当前仅支持默认 RoPE 或此 NOSA checkpoint 的静态 LongRoPE（short/long factors 相同），
 不支持需要在运行中切换频率的配置。
@@ -224,6 +357,28 @@ NOSA_MODEL_PATH=/mnt/ssd-wlcb/chenkaiqi/NOSA-8B \
 跨模块回归使用 `bash scripts/run_tests.sh [cpu|gpu|all]`，默认 CPU；GPU 模式要求
 CUDA 与 FlashInfer 可用。测试命令和环境准备见[项目 README](../../README.md)。
 
+新增 [完整 checkpoint offload 检查](tests/test_offload_checkpoint.py) 仅在设置
+`NOSA_OFFLOAD_CHECKPOINT` 后运行：严格加载一次全部 32 层 BF16 权重，将运行时上下文
+上限扩至 66560，resident/offload 分别从空 cache 构建 64K prefix，再比较全部 1K
+extend hidden 与缓存长度、内存统计。默认每 chunk 1024，offload 的首次读取流量
+按 128 queries 分组；它是正确性检查，不计时、不生成报告。
+默认读取既有 profile 的 request JSON，
+可用 `NOSA_OFFLOAD_REQUEST` 指定另一个相同长度的 NOSA GR 请求。
+
+完整 32 层 checkpoint 检查 1 passed：resident/offload 分别从独立空 cache
+构建 64K sparse prefix，再执行 1K extend，全部 normalized hidden 逐位相同，max_abs=0。
+提交后的 cache 分配为 resident HBM `2262627840 B`、offload HBM
+`150825168 B`、offload pinned host `2181038080 B`；不包含模型权重，也不是进程峰值显存。
+全局 CPU 回归为 1339 passed、674 skipped、34 subtests passed；SM90 GPU
+环境专项为 62 passed，另重复通过的 3 个增强 trace 场景不重复计数。
+测试只验收正确性；包含加载或编译的测试总耗时不是模型性能或 overlap 测量。
+
+```bash
+NOSA_OFFLOAD_CHECKPOINT=/mnt/ssd-wlcb/chenkaiqi/NOSA-8B \
+  .venv/bin/python -m pytest models/nosa/tests/test_offload_checkpoint.py \
+  -s -q -p no:cacheprovider
+```
+
 ## GR 前向与性能测量
 
 共享 GR 请求生成使用 [request_format.py](request_format.py)：NOSA 聊天模板、tokenizer 与请求预算适配。
@@ -237,6 +392,7 @@ normalized hidden states，跳过 LM head；不与 `logits_to_keep` 同时使用
 生成 CLI 仍默认返回 logits。64K+1K 实验测量完整 prefill 与 prefix 已就绪后的候选 extend，
 不执行自回归生成。
 
-分块执行 `executor.model_executor.run_chunks` 返回最后一个 chunk 的输出；serving 从中
-取末 token hidden，不累积整条请求的全部 hidden。每请求独立创建和释放 cache；同一请求
-的 candidate extend 使用其已完成的 stable prefix，当前没有跨请求的用户前缀缓存。
+分块执行 `executor.model_executor.run_chunks` 返回最后一个 chunk 的输出；旧
+`serving.runner` / `run_gr` 从中取末 token hidden，每请求独立创建和释放 cache。
+`serving.persistent` / `run_multi_user` 则通过 NOSA serving adapter 返回完整 candidate
+hidden，并跨请求保留固定用户历史；两条路径的输出范围和 cache 生命周期不同。

@@ -14,7 +14,6 @@ from safetensors.torch import save_file
 from layers.attention import AttentionContext, BlockSelection, DenseMainAttention
 from models.nosa.indexer import NosaIndexer, NosaSelectionPolicy
 from models.nosa.model import NosaConfig, NosaForCausalLM
-from operators.sm90.sparse_attention import SM90SparseAttention
 
 
 def tiny_config(**kwargs):
@@ -430,8 +429,12 @@ def test_sparse_attention_backends_fail_explicitly_and_cache_step_is_aborted():
         model(tokens, cache)
     assert cache.length == 0
     model.indexer = None
-    model.main_attention = SM90SparseAttention()
-    with pytest.raises(NotImplementedError, match="SM90 sparse attention"):
+
+    def unavailable_attention(q, selection, cache_access, context):
+        raise NotImplementedError("unavailable sparse attention")
+
+    model.main_attention = unavailable_attention
+    with pytest.raises(NotImplementedError, match="unavailable sparse attention"):
         model(tokens, cache)
     assert cache.length == 0
     model.main_attention = DenseMainAttention(dense_attention)
