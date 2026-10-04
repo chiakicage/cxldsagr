@@ -14,6 +14,10 @@ import json
 import math
 import statistics
 from pathlib import Path
+from types import SimpleNamespace
+
+from evaluation.validation import require_receipt
+from experiments.nosa_kernel_mfu.src.phases import offload_config, validation_identity
 
 MODES = ("resident", "serialized", "overlap")
 TRAFFIC_CHECKS = (
@@ -108,6 +112,31 @@ def _load_run(directory, *, profiled):
         capture["metadata"]["kind"] == "actual_sparse_model_operator_inputs",
         "Expected actual sparse model capture",
     )
+    checked_cases = None
+    if "mode" in metadata:
+        _require(
+            metadata["mode"] == ("profile" if profiled else "bench"),
+            "Only bench/profile results can support a performance report",
+        )
+        provenance = metadata["numerical_validation"]
+        _require(provenance["source"] == "independent_check", "Missing independent acceptance")
+        path = directory / provenance["file"]
+        _require(path.resolve().is_relative_to(directory.resolve()), "Bad receipt path")
+        _require(_sha256(path) == provenance["sha256"], "Receipt file hash mismatch")
+        identity = validation_identity(
+            metadata,
+            config=offload_config(SimpleNamespace(**metadata["args"])),
+            inputs={
+                "metadata_sha256": capture["metadata_sha256"],
+                "files": {
+                    entry["file"]: entry["file_sha256"] for entry in capture["metadata"]["layers"]
+                },
+            },
+            cache="cold_history_no_tags_full_logical_staging_gpu_suffix",
+        )
+        _require(identity == metadata["validation_identity"], "Validation identity mismatch")
+        receipt = require_receipt(path, kind="nosa_offload_attention", identity=identity)
+        checked_cases = receipt["checks"]["cases"]
     cases = {case["case"]: case for case in results["results"]}
     _require(len(cases) == len(results["results"]) > 0, "Empty or duplicate cases")
     for label, case in cases.items():
@@ -120,7 +149,28 @@ def _load_run(directory, *, profiled):
             )
         _require(case["input_kind"] == "captured_actual_sparse_model_inputs", "Wrong input kind")
         _require(case["serialized_overlap_exact_equal"] is True, f"Exact check failed: {label}")
-        _require(case["traffic_checks"] == TRAFFIC_CHECKS, f"Missing traffic checks: {label}")
+        if checked_cases is None:
+            _require(case["traffic_checks"] == TRAFFIC_CHECKS, f"Missing traffic checks: {label}")
+        else:
+            checked = checked_cases.get(label)
+            _require(checked is not None, f"Missing independent case acceptance: {label}")
+            for key in (
+                "tensors",
+                "acceptance",
+                "prefix_transfer_bytes",
+                "first_use_tile_bytes",
+                "serialized_overlap_exact_equal",
+            ):
+                _require(case[key] == checked[key], f"Acceptance {key} mismatch: {label}")
+            _require(
+                case["numerical_acceptance_source"] == "independent_check",
+                f"Missing acceptance source: {label}",
+            )
+            _require(
+                case["traffic_checks"]
+                == ("diagnostic_profile" if profiled else "independent_check"),
+                f"Wrong traffic check phase: {label}",
+            )
         tiles = case["first_use_tile_bytes"]
         _require(
             len(tiles) == (case["queries"] + case["tile_size"] - 1) // case["tile_size"]
@@ -139,7 +189,7 @@ def _load_run(directory, *, profiled):
             and set(acceptance["errors"]) == set(MODES),
             f"Incomplete reference acceptance: {label}",
         )
-        if metadata["args"]["reference_all"]:
+        if checked_cases is not None or metadata["args"]["reference_all"]:
             _require(set(rows) == set(range(case["queries"])), f"Reference rows missing: {label}")
         for error in acceptance["errors"].values():
             _require(
@@ -362,7 +412,10 @@ def _fused_report(measurement_dir, profile_dir, measurement, measured, profile, 
                 "measurement": case["acceptance"],
                 "profile": profiled[label]["acceptance"],
                 "serialized_overlap_exact_equal": True,
-                "traffic_checks": TRAFFIC_CHECKS,
+                "traffic_checks": {
+                    "measurement": case["traffic_checks"],
+                    "profile": profiled[label]["traffic_checks"],
+                },
             },
             modes=modes,
         )
@@ -446,12 +499,15 @@ def _fused_report(measurement_dir, profile_dir, measurement, measured, profile, 
         ("profile", profile_dir, profile),
     ):
         filenames = ["metadata.json", "results.json"]
+        if "numerical_validation" in metadata:
+            filenames.append(metadata["numerical_validation"]["file"])
         if name == "profile":
             filenames += ["overlap.json", "timeline.sqlite", "work_intervals.json"]
         sources[name] = {
             "run_id": metadata["run_id"],
             "recorded_at_utc": metadata["recorded_at_utc"],
             "args": metadata["args"],
+            "numerical_validation": metadata.get("numerical_validation"),
             "artifact_sha256": {filename: _sha256(directory / filename) for filename in filenames},
         }
     report = {
@@ -607,7 +663,10 @@ def build_report(measurement_dir, profile_dir):
                     "measurement": case["acceptance"],
                     "profile": profiled[label]["acceptance"],
                     "serialized_overlap_exact_equal": True,
-                    "traffic_checks": TRAFFIC_CHECKS,
+                    "traffic_checks": {
+                        "measurement": case["traffic_checks"],
+                        "profile": profiled[label]["traffic_checks"],
+                    },
                 },
                 "modes": modes,
             }
@@ -640,9 +699,15 @@ def build_report(measurement_dir, profile_dir):
             "run_id": metadata["run_id"],
             "recorded_at_utc": metadata["recorded_at_utc"],
             "args": metadata["args"],
+            "numerical_validation": metadata.get("numerical_validation"),
             "artifact_sha256": {
                 filename: _sha256(directory / filename)
-                for filename in ("metadata.json", "results.json")
+                for filename in ["metadata.json", "results.json"]
+                + (
+                    [metadata["numerical_validation"]["file"]]
+                    if "numerical_validation" in metadata
+                    else []
+                )
             },
         }
     artifacts["profile"]["artifact_sha256"].update(

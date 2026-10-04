@@ -1,5 +1,11 @@
 # DeepSeek ECHO and sparse MLA operator audit
 
+> Historical GR scope (2026-10-05): the `gr_serving` experiment is retired and its
+> experiment outputs have been removed. Its commands, result-retention rules and
+> rerun instructions below are historical and no longer active. See the
+> [retirement scope](experiment_organization.md#retired-gr-serving). Other
+> implementation and experiment findings retain their stated scope.
+
 Updated: 2026-10-03. This is implementation evidence, not a new experiment report.
 The original `20261002_echo_layers3_mfu_01` was replaced after acceptance of
 `20261003_echo_layers3_official_01` and fresh control `20261003_echo_layers3_control_01`.

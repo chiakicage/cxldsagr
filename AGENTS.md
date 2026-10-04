@@ -34,6 +34,34 @@ HBM / DRAM budget 模式，不能将两种模式的容量或命中结果混用�
 观测到的 allocator 差额、规划时人为扣除的额度与实现预分配的 storage 分别描述；
 不能把旧运行差额称为当前实现的固定预留，也不能默认从指定 P/NH 实验中扣除它。
 
+`nosa_motivation` 使用相同 H/A/chunk、用户访问顺序和 P/NH 配置，调用完整 32 层
+NOSA checkpoint。`models/nosa/fixed_serving.py` 提供独立的固定容量入口：HBM-only
+按 P 个 history token 做 session LRU；offload 按 NH 准入，host backing 随 session
+分配，逐层 P 槽以逻辑页偏移和 session tag 直接映射。当前要求 H<=P，history 与
+prefill chunk 按 64 token 对齐，不代表任意容量下的 token LRU。dense 预取下一层
+全部历史 miss，sync/async sparse 只取完整 query batch 的稀疏并集 miss，均复用
+逐层 pool。候选整批在 GPU 执行并 discard，不写入 host history；CIS/indexer 的
+候选尾部仍按实际 session storage 计费。可显式启用纯计算 CUDA Graph，cache、
+indexer、attention 与 IO 留在图外；图的 static allocated 和 private reserved
+分别计入。图模式可在保留原打分分派的前提下，将 finite 检查推迟到事务提交前：
+`count >= 2047` 仍使用原 joint-native 路径；`count < 2047` 时，需要打分的短前缀
+通过 guarded 入口执行原 standalone Triton/native 打分，不扩大 joint-native 范围
+或改换后端。
+逐层 GPU flag 与归约结果计入静态容量；全部检查成功后才提交或返回输出。flag
+为 false 时，guarded 打分不得读取打分数据或写入打分输出，native selection 输出安全的
+空选择，模型回滚整个 step；offload 只允许提前写未提交的派生尾部。
+allocator 校验优先使用私有 C++ adapter；每次调用都获取新的全 pool snapshot，
+保留原有配置、pool 所属关系和 expandable segment 检查，不缓存 snapshot 的检查结果。仅 adapter
+初始化失败时显式退回官方 snapshot API，并记录原因；已选 snapshot provider
+执行失败时直接报错，不以 fallback 隐藏错误。该固定容量入口与原 NOSA budget
+模式分开，完整性能与 MFU 验收状态以实验 README 为准，不以正确性检查代替
+性能结果。
+NOSA 的 Python MemPool 全代检查可通过 `models/nosa/_pool_referrers.py` 加速；
+该 provider 与 allocator snapshot provider 分别记录。私有 GC 遍历须认证实际
+CPython 可执行文件、符号来源及完整 header 依赖，保留原动态 getter、subclass 和
+GC 重试。明确识别的不支持条件回到原检查；其他初始化、审计或执行异常直接传播。
+不修改 GC 阈值、禁用 GC 或用旧原型验收替代当前路径的 CUDA 与完整请求验收。
+
 当前探索的一种 GR serving 方案是固定 history、变化 candidate 的 prefill 负载，
 其代表性及模型、数据适配仍待确定。`GR/` 的固定前缀语义不等于跨请求 KV 复用；
 `serving/runner.py` 保留逐请求创建并释放 cache 的旧入口；
@@ -86,11 +114,14 @@ HBM / DRAM budget 模式，不能将两种模式的容量或命中结果混用�
   NOSA 默认 resident，显式 offload 使用 `cache/host_backing.py` 与
   `models/nosa/offload_cache.py`：pinned local DRAM 保存历史 K/V，CIS 和压缩派生记录
   resident；CPU 用于参考测试。NOSA 共享一层完整逻辑地址范围的 HBM staging，
+  serving 的 `models/nosa/serving_resources.py` 由 backend 持有 sparse workspace、
+  dense 双缓冲和 hbm/dense FA3 scratch，先按 C/A/Q plan/allocate，再创建独立用户
+  session；borrowed cache 的写入/提交/回滚必须在执行 lease 内，释放 session 不释放
+  shared buffers。普通模型 owned 模式仍可独立调用。公共 runner 从构造到关闭绑定
+  唯一准入 owner，构造失败仅回滚本次新资源；无法确认异步完成时保留 owner 并禁用
+  复用。runner 关闭全部 session 后解绑，最外层负责 backend.close()。
+  正确性和分配验收不能替代完整 serving 性能或未运行的容量轨迹。
   尚无有限 slots 或淘汰策略，不将该实现表述为通用 HBM caching 已完成。
-  公共 runner 从构造到关闭绑定唯一准入 owner，构造失败仅回滚本次新资源；
-  无法确认异步完成时保留 owner 并禁用复用。runner 关闭全部 session 后解绑，
-  最外层负责 backend.close()。正确性和分配验收不能替代完整 serving 性能或
-  未运行的容量轨迹。
   `cache/sparse_token_pool.py` 为 DeepSeek SM90 ECHO 提供 backend/model 所有的全局
   pinned local DRAM pages 与逐层有限 HBM pool；session 保留独立 page table 和
   history indexer 状态。GR `echo/serial_sparse` 为每层主 KV storage 增加独立的候选
@@ -207,13 +238,25 @@ HBM / DRAM budget 模式，不能将两种模式的容量或命中结果混用�
 
 ## 实验目录与产物
 
-- `experiments/` 是服务论文的实验交付产物，只有符合明确实验目的、具有正确实现与
+- `experiments/` 按目的区分四类：论文 motivation、baseline 实现性能合理性、服务设计
+  的 sparse pattern 分析、自有设计性能 microbenchmark。每个 README 声明所属类别、
+  回答的问题和实际执行路径；不以是否直接进入论文作为唯一保留标准，也不以算子 MFU
+  代替实际 baseline 或完整 serving 的效率。只有符合明确实验目的、具有正确实现与
   测量语义的结果才能作为有效交付。被判定不合理的实现（如已替换的未融合基线）、错误语义、
   失败运行和已撤回的结果不能作为有效结果或对照。失败运行和已撤回结果须从实验目录删除；
   因优化或正确性修正需要替换的旧报告按下一条先补测再清理，不能以历史记录或 `legacy/`
   归档为由长期保留。
   不能仅因性能较差而删除合理的对照组；有效比较必须由实验目的明确支持。
   正确性检查只负责验证代码，不因使用 GPU、计时或 profiler 就成为论文实验。
+- 数值验收、正式计时与侵入式 profile 使用独立入口。正式计时复用匹配实际源码、
+  native 构建、输入、精度、形状及 cache/graph 路径的数值验收记录，不在每个样本间
+  重跑完整参考、逐元素比较或保存全部输出。实现或未覆盖路径变化后补相关验收，
+  不把验收记录复用变成缓存 allocator snapshot。运行时 finite/repair、事务与必要
+  同步保持各自契约，不能随外部测试移除。旧报告沿用原计时边界；新入口未测则明确标注。
+- `evaluation/` 保存实验间复用的来源记录、独立验收接口和内存审计工具，测试放在
+  `evaluation/tests/`；不实现模型计算、不保存实验报告、不新增 `__init__.py`。
+  GR 请求构造统一归 `GR/workload.py`。独立正确性检查的产物放系统临时目录或显式
+  指定的工程验收目录，不作为 `experiments/output` 中的性能运行发布。
 - 凡涉及性能优化或正确性修正的改动，必须先用改动后的实现补测受影响的实验，完成
   正确性验收与测量完整性检查，生成注明新 run ID、可核验的新报告，再替换和清理旧结果。
   新结果完成验收并发布前，保留原 README 中的报告、`report/` 图表与数据，以及
@@ -315,6 +358,9 @@ HBM / DRAM budget 模式，不能将两种模式的容量或命中结果混用�
 
 ## 文档与验证
 
+- 新写或修改的中文内容在交付前须使用 `humanizer-zh` 润色，包括文档、报告、说明和
+  注释。润色须保留事实、数值、公式、术语、来源与验证边界，不改变结论的确定程度；
+  代码、命令、路径、显式 ID、结构化数据及须原样保留的历史记录不作文字改写。
 - `docs/` 中面向人类的文档应讲清研究理解、当前问题、计划及必要的技术分析。
   `docs/status.md`、`docs/roadmap.md` 由 Research Supervisor 维护，
   保留研究者直接修正；职责与阅读入口见 [docs/README.md](docs/README.md)。

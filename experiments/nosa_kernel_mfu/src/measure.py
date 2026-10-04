@@ -21,8 +21,15 @@ from unittest.mock import patch
 
 import torch
 
-from experiments.indexer_block_sparse_profile.src.mfu import work_counts
-from experiments.nosa_gr_65536_1024.src.sources import source_hashes
+from experiments.nosa_baseline_performance.src.dense.sources import source_hashes
+from experiments.nosa_baseline_performance.src.sparse.mfu import work_counts
+from experiments.nosa_kernel_mfu.src.phases import (
+    add_phase_arguments,
+    check_case_identity,
+    finish_validation,
+    open_validation,
+    validate_phase_arguments,
+)
 from layers.attention import BlockSelection
 from models.nosa.indexer import compressed_scores_reference, prepare_indexer_inputs
 from operators.nosa._native import build_info
@@ -47,11 +54,11 @@ def distribution(values):
     return {"median": statistics.median(values), "min": min(values), "max": max(values)}
 
 
-def measure(function, args):
+def prepare_graph(function, args, *, check=False):
     for _ in range(args.warmup):
         function()
     torch.cuda.synchronize()
-    expected = function().clone()
+    expected = function().clone() if check else None
     graph = torch.cuda.CUDAGraph()
     with torch.cuda.graph(graph):
         for _ in range(args.graph_calls):
@@ -59,7 +66,13 @@ def measure(function, args):
     # A replay also warms graph-specific storage and executable state.
     graph.replay()
     torch.cuda.synchronize()
-    torch.testing.assert_close(output, expected, rtol=0, atol=0)
+    if check:
+        torch.testing.assert_close(output, expected, rtol=0, atol=0)
+    return graph, output
+
+
+def measure(function, args):
+    graph, output = prepare_graph(function, args)
     result = {}
     for label, call, divisor in (
         ("graph", graph.replay, args.graph_calls),
@@ -80,6 +93,26 @@ def measure(function, args):
     # Keep the final graph result alive until the timing has completed.
     del output
     return result
+
+
+def profile_operator(function, args, *, label):
+    for _ in range(args.warmup):
+        function()
+    torch.cuda.synchronize()
+    with torch.profiler.profile(
+        activities=[
+            torch.profiler.ProfilerActivity.CPU,
+            torch.profiler.ProfilerActivity.CUDA,
+        ]
+    ) as profile:
+        function()
+        torch.cuda.synchronize()
+    destination = args.profile_dir / f"{label}.trace.json"
+    profile.export_chrome_trace(str(destination))
+    return {
+        "trace_file": destination.name,
+        "sha256": hashlib.sha256(destination.read_bytes()).hexdigest(),
+    }
 
 
 def numerical_check(
@@ -207,10 +240,11 @@ def benchmark_case(tensor_inputs, prefix, args, *, label):
     selection = BlockSelection(ids, 64, valid)
     counts = work_counts(prefix, args.queries, args.queries)
     # Check the policy assumed by the FLOP formula against the actual selection.
-    qblocks = torch.arange(prefix, len(keys), device=q.device)[:, None, None] // 64
-    assert valid.all() and (ids >= 0).all() and (ids == qblocks).sum(-1).eq(1).all()
-    assert ids.sort(-1).values.diff(dim=-1).gt(0).all()
-    assert (ids <= qblocks).all()
+    if args.mode == "check":
+        qblocks = torch.arange(prefix, len(keys), device=q.device)[:, None, None] // 64
+        assert valid.all() and (ids >= 0).all() and (ids == qblocks).sum(-1).eq(1).all()
+        assert ids.sort(-1).values.diff(dim=-1).gt(0).all()
+        assert (ids <= qblocks).all()
     metadata = {
         "case": label,
         "prefix": prefix,
@@ -231,22 +265,27 @@ def benchmark_case(tensor_inputs, prefix, args, *, label):
             for name, t in tensor_inputs.items()
         },
     }
+    prior = check_case_identity(args, label, metadata["tensors"])
     workspace = torch.empty(
         (args.queries * 2, (len(keys) + 63) // 64), device=q.device, dtype=q.dtype
     )
     results = []
     for backend in ("native", "triton"):
         os.environ["CXLDSAGR_SM90_BACKEND"] = backend
-        checked = numerical_check(
-            q,
-            keys,
-            values,
-            compressed,
-            selection,
-            bias,
-            prefix,
-            workspace,
-            all_rows=args.reference_all,
+        checked = (
+            numerical_check(
+                q,
+                keys,
+                values,
+                compressed,
+                selection,
+                bias,
+                prefix,
+                workspace,
+                all_rows=True,
+            )
+            if args.mode == "check"
+            else prior["backends"][backend]
         )
         for name, flops, call in (
             (
@@ -272,6 +311,31 @@ def benchmark_case(tensor_inputs, prefix, args, *, label):
             with patch.object(owner, entry, wraps=getattr(owner, entry)) as native_call:
                 call()
             actual_backend = "cuda_tvm_ffi" if native_call.called else "triton"
+            if args.mode == "check":
+                graph, output = prepare_graph(call, args, check=True)
+                del graph, output
+                results.append(
+                    {
+                        "case": label,
+                        "backend": backend,
+                        "operator": name,
+                        "actual_backend": actual_backend,
+                        "graph_matches_eager_exactly": True,
+                        "numerical_acceptance": checked,
+                    }
+                )
+                continue
+            if args.mode == "profile":
+                results.append(
+                    {
+                        "case": label,
+                        "backend": backend,
+                        "operator": name,
+                        "actual_backend": actual_backend,
+                        "profile": profile_operator(call, args, label=f"{label}_{backend}_{name}"),
+                    }
+                )
+                continue
             timings = measure(call, args)
             for method in timings.values():
                 method["useful_tflops"] = flops / method["ms"]["median"] / 1e9
@@ -282,7 +346,7 @@ def benchmark_case(tensor_inputs, prefix, args, *, label):
                 "backend": backend,
                 "operator": name,
                 "actual_backend": actual_backend,
-                "graph_matches_eager_exactly": True,
+                "numerical_acceptance_source": "independent_check",
                 "useful_flops": flops,
                 "numerical_acceptance": checked,
                 **timings,
@@ -297,9 +361,6 @@ def benchmark_case(tensor_inputs, prefix, args, *, label):
                         "graph_ms": timings["graph"]["ms"]["median"],
                         "graph_mfu_pct": timings["graph"]["mfu_pct"],
                         "eager_ms": timings["eager"]["ms"]["median"],
-                        "checked_rows": len(checked["sampled_rows"]),
-                        "attention_relative_l2": checked["attention_relative_l2"],
-                        "pooled_scores_relative_l2": checked["pooled_scores_relative_l2"],
                     },
                     allow_nan=False,
                 ),
@@ -319,8 +380,10 @@ def copy_to_device(tensor, device):
 @torch.inference_mode()
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
+    add_phase_arguments(parser)
     parser.add_argument("--run-id", required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
+    parser.add_argument("--profile-dir", type=Path)
     parser.add_argument("--device", default="cuda:0")
     parser.add_argument(
         "--input-dir", type=Path, help="Completed capture_inputs run; replaces synthetic cases"
@@ -338,6 +401,9 @@ def main(argv=None):
     )
     parser.add_argument("--peak-tflops", type=float)
     args = parser.parse_args(argv)
+    validate_phase_arguments(parser, args)
+    if args.mode == "profile" and args.profile_dir is None:
+        parser.error("--mode profile requires --profile-dir")
     if any(n < 1 for n in (args.queries, args.warmup, args.repeats, args.graph_calls)):
         parser.error("queries/warmup/repeats/graph-calls must be positive")
     if any(n < 4096 or n % 64 for n in args.prefixes):
@@ -348,20 +414,23 @@ def main(argv=None):
     props = torch.cuda.get_device_properties(args.device)
     if (props.major, props.minor) != (9, 0):
         parser.error("This experiment requires SM90/Hopper")
-    if args.peak_tflops is None:
+    if args.peak_tflops is None and args.mode != "check":
         if "H200" not in props.name or "NVL" in props.name.upper():
             parser.error("Other hardware requires explicit --peak-tflops")
         args.peak_tflops = 989.0
-    if not 0 < args.peak_tflops < float("inf"):
+    if args.peak_tflops is not None and not 0 < args.peak_tflops < float("inf"):
         parser.error("peak-tflops must be finite and positive")
     args.output_dir.mkdir(parents=True, exist_ok=False)
+    if args.mode == "profile":
+        args.profile_dir.mkdir(parents=True, exist_ok=True)
     sources = source_hashes(
         *sorted((EXPERIMENT / "src").glob("*.py")),
         *sorted((EXPERIMENT / "scripts").glob("*.sh")),
-        ROOT / "experiments/indexer_block_sparse_profile/src/mfu.py",
-        ROOT / "experiments/indexer_block_sparse_profile/src/analyze.py",
+        ROOT / "experiments/nosa_baseline_performance/src/sparse/mfu.py",
+        ROOT / "experiments/nosa_baseline_performance/src/sparse/analyze.py",
         ROOT / "pyproject.toml",
         ROOT / "uv.lock",
+        ROOT / "evaluation/validation.py",
     )
     for name, digest in sources.items():
         content = (ROOT / name).read_bytes()
@@ -415,6 +484,23 @@ def main(argv=None):
             "scope": "Resident operator workload on synthetic or captured model tensors, repeatedly reused inputs; not model forward or offload",
         },
     }
+    identity = open_validation(
+        args,
+        metadata,
+        kind="nosa_resident_operators",
+        config={
+            "prefixes": args.prefixes if args.input_dir is None else None,
+            "queries": args.queries,
+            "seed": args.seed if args.input_dir is None else None,
+            "graph_calls": args.graph_calls,
+            "backends": ["native", "triton"],
+            "q_heads": 32,
+            "kv_heads": 2,
+            "head_dim": 128,
+            "block_budget": 64,
+        },
+        cache="resident_same_input_operator_replay",
+    )
     cases, results = [], []
     if args.input_dir is None:
         for prefix in args.prefixes:
@@ -453,6 +539,25 @@ def main(argv=None):
     if sources != source_hashes(*(ROOT / name for name in sources)):
         raise RuntimeError("Source changed during measurement; rerun from a stable tree")
     metadata["cases"] = cases
+    finish_validation(
+        args,
+        metadata,
+        kind="nosa_resident_operators",
+        identity=identity,
+        cases={
+            case["case"]: {
+                "tensors": case["tensors"],
+                "backends": {
+                    result["backend"]: result["numerical_acceptance"]
+                    for result in results
+                    if result["case"] == case["case"]
+                },
+            }
+            for case in cases
+        }
+        if args.mode == "check"
+        else {},
+    )
     metadata["nvidia_smi_after"] = subprocess.check_output(
         [
             "nvidia-smi",
@@ -463,6 +568,8 @@ def main(argv=None):
     )
     write_json(args.output_dir / "metadata.json", metadata)
     write_json(args.output_dir / "results.json", {"run_id": args.run_id, "results": results})
+    if args.mode != "bench":
+        return
     with (args.output_dir / "summary.csv").open("w") as out:
         writer = csv.DictWriter(
             out,

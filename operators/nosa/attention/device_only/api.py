@@ -13,6 +13,8 @@ def nosa_block_sparse_attention(
     selection: BlockSelection,
     query_start: int = 0,
     cis_bias: torch.Tensor | None = None,
+    *,
+    workspace=None,
 ) -> torch.Tensor:
     """Fused inference-only SM90 implementation of the reference operation.
 
@@ -28,8 +30,25 @@ def nosa_block_sparse_attention(
     nonfinite values requiring separate masking use the per-query kernel.
     Other supported shapes/layouts use Triton. CXLDSAGR_SM90_BACKEND=triton
     selects that implementation explicitly.
+
+    An explicit workspace uses reserved scratch and requires the native
+    BF16/D128/GQA16 route with matching K/V layouts. The caller owns the
+    execution lease and must await work before reusing or releasing storage.
     """
     _validate_inputs(q, keys, values, selection, query_start, cis_bias)
+    if workspace is not None:
+        from operators.nosa.attention.workspace import NosaAttentionWorkspace
+
+        if not isinstance(workspace, NosaAttentionWorkspace):
+            raise TypeError("workspace must be a NosaAttentionWorkspace")
+        scratch = workspace.validate_attention(q, keys, values)
+        from operators.nosa.attention.device_only._fa3 import _launch_validated_workspace
+
+        # The workspace guard checks Hopper, native selection, dtype, layout,
+        # capacity, capture state and scratch aliasing before this import.
+        return _launch_validated_workspace(
+            q, keys, values, selection, query_start, cis_bias, workspace, scratch
+        )
     if not q.is_cuda or torch.cuda.get_device_capability(q.device) != (9, 0):
         raise NotImplementedError("The fused NOSA block attention backend requires SM90/Hopper")
     if (

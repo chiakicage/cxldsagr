@@ -8,6 +8,7 @@ export MKL_NUM_THREADS="${MKL_NUM_THREADS:-8}"
 export CXLDSAGR_SM90_BACKEND="${CXLDSAGR_SM90_BACKEND:-native}"
 python_bin="${MOTIVATION_PYTHON:-$PWD/.venv/bin/python}"
 run_id=""
+mode="bench"
 args=("$@")
 for ((i=0; i<${#args[@]}; i++)); do
   case "${args[i]}" in
@@ -20,6 +21,8 @@ for ((i=0; i<${#args[@]}; i++)); do
     --run-id=*)
       run_id="${args[i]#*=}"
       ;;
+    --mode) mode="${args[i+1]:-}" ;;
+    --mode=*) mode="${args[i]#*=}" ;;
     --output-dir|--output-dir=*)
       echo "run.sh manages output directories; use the Python module for custom output." >&2
       exit 2
@@ -31,6 +34,9 @@ if [[ ! "$run_id" =~ ^[A-Za-z0-9_-]+$ ]]; then
   exit 2
 fi
 output_root="$PWD/experiments/deepseek_v32_motivation/output"
+if [[ "$mode" == "check" ]]; then
+  output_root="${TMPDIR:-/tmp}/cxldsagr-checks/deepseek_v32_motivation"
+fi
 data_dir="$output_root/data/$run_id"
 log_dir="$output_root/log/$run_id"
 if [[ -e "$data_dir" || -e "$log_dir" ]]; then

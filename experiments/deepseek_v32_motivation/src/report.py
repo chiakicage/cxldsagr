@@ -11,6 +11,9 @@ import statistics
 from pathlib import Path
 
 from experiments.deepseek_v32_motivation.src.measure import (
+    BENCH_SCHEMA,
+    CHECK_SCHEMA,
+    RECEIPT_KIND,
     SCHEMA,
     SCHEMES,
     WARMUP_POLICY,
@@ -19,6 +22,7 @@ from experiments.deepseek_v32_motivation.src.measure import (
     validate_warmup_trace,
     write_json,
 )
+from experiments.nosa_motivation.src.validation import audit_receipt
 
 
 def digest(path):
@@ -38,12 +42,17 @@ def audit_run(directory):
     """Recheck every saved request and output; no accepted row is trusted by itself."""
     import torch
 
-    from experiments.gr_serving.src.measure import numerical_comparison
-    from experiments.gr_serving.src.workload import token_sha256
+    from evaluation.provenance import numerical_comparison
+    from GR.workload import token_sha256
 
     directory = Path(directory)
     metadata = json.loads((directory / "metadata.json").read_text())
-    require(metadata.get("schema") == SCHEMA, "unknown measurement schema")
+    require(
+        metadata.get("schema") in (SCHEMA, CHECK_SCHEMA, BENCH_SCHEMA), "unknown measurement schema"
+    )
+    checking = metadata["schema"] == CHECK_SCHEMA
+    benchmark = metadata["schema"] == BENCH_SCHEMA
+    receipt_audit = audit_receipt(metadata, directory, RECEIPT_KIND) if benchmark else None
     require(metadata.get("status") == "accepted", "run is incomplete or failed")
     config = metadata["config"]
     require(config["schemes"] == list(SCHEMES), "all four schemes must be present")
@@ -122,15 +131,23 @@ def audit_run(directory):
             if config.get("enable_compute_graphs", False):
                 graphs = row.get("compute_graphs", {})
                 check_compute_graph_replays(graphs.get("before"), graphs.get("after"), config, row)
-            for name in ("latency_ms", "admission_ms", "prefix_ms", "extend_ms", "cleanup_ms"):
-                require(math.isfinite(row[name]) and row[name] >= 0, f"invalid {name}")
-            require(row["latency_ms"] > 0, "request latency must be positive")
-            stages = sum(
-                row[name] for name in ("admission_ms", "prefix_ms", "extend_ms", "cleanup_ms")
-            )
-            require(
-                math.isclose(stages, row["latency_ms"], abs_tol=1e-5), "timing stages do not sum"
-            )
+            if not checking:
+                for name in ("latency_ms", "admission_ms", "prefix_ms", "extend_ms", "cleanup_ms"):
+                    require(math.isfinite(row[name]) and row[name] >= 0, f"invalid {name}")
+                require(row["latency_ms"] > 0, "request latency must be positive")
+                stages = sum(
+                    row[name] for name in ("admission_ms", "prefix_ms", "extend_ms", "cleanup_ms")
+                )
+                require(
+                    math.isclose(stages, row["latency_ms"], abs_tol=1e-5),
+                    "timing stages do not sum",
+                )
+            if benchmark:
+                require(
+                    not {"numerical", "output_file", "output_sha256"}.intersection(row),
+                    "bench must not contain per-request numerical output evidence",
+                )
+                continue
             relative = row["output_file"]
             require(relative == f"numerical/{scheme}/{index:06d}.pt", "unexpected output path")
             require(digest(directory / relative) == row["output_sha256"], "output bytes changed")
@@ -167,8 +184,9 @@ def audit_run(directory):
         {
             "status": "passed",
             "checked_requests": len(rows),
-            "compared_offload_requests": expected_count * (len(SCHEMES) - 1),
-            "all_candidate_hidden_and_logits_exact": True,
+            "compared_offload_requests": 0 if benchmark else expected_count * (len(SCHEMES) - 1),
+            "all_candidate_hidden_and_logits_exact": not benchmark,
+            **({"independent_correctness_receipt": receipt_audit} if benchmark else {}),
             "source_sha256": source_id,
             "warmup_policy": WARMUP_POLICY,
             "checked_warmup_requests": 3 * len(SCHEMES),
@@ -406,7 +424,10 @@ def markdown(metadata, summary):
             ),
             "",
             (
-                "每条请求的全部 candidate hidden 和末 token logits 均保存到 CPU，在计时外与 "
+                f"数值验收来自独立 check：`{metadata['correctness_receipt']['path']}`。"
+                "本次 bench 未逐请求复制、比较或保存完整输出。"
+                if metadata["schema"] == BENCH_SCHEMA
+                else "每条请求的全部 candidate hidden 和末 token logits 均保存到 CPU，在计时外与 "
                 "HBM-only 相同请求的输出逐位比较；报告生成时再次核验所有保存输出及来源 hash。"
                 "所有对照均通过。"
             ),
@@ -414,7 +435,7 @@ def markdown(metadata, summary):
             (
                 "逐请求数据见 [per_request.csv](per_request.csv)，分组数据见 [summary.csv](summary.csv)，"
                 "完整汇总与边界见 [summary.json](summary.json)，验收与来源见 "
-                "[report_provenance.json](report_provenance.json)。完整源数据与输出 tensor 保留在"
+                "[report_provenance.json](report_provenance.json)。本次运行的完整源数据保留在"
                 f" `output/data/{metadata['run_id']}/`。"
             ),
             "",
@@ -428,6 +449,7 @@ def write_report(directory, output):
     if output.exists():
         raise FileExistsError(output)
     metadata, rows, audit = audit_run(directory)
+    require(metadata["schema"] != CHECK_SCHEMA, "check runs do not publish performance reports")
     summary = summarize(rows)
     output.mkdir(parents=True)
     write_csv(output / "per_request.csv", [flattened(row) for row in rows])

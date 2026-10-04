@@ -15,16 +15,41 @@ import time
 from functools import partial
 from pathlib import Path
 
+from experiments.nosa_motivation.src.validation import (
+    add_mode_arguments,
+    begin_validation,
+    execution_environment,
+    publish_receipt,
+    record_runtime,
+    validate_mode_arguments,
+    without_performance,
+)
+
 ROOT = Path(__file__).resolve().parents[3]
 EXPERIMENT = ROOT / "experiments/deepseek_v32_motivation"
 SCHEMES = ("hbm", "echo", "serial_sparse", "dense_prefetch")
 SCHEMA = "deepseek-v32-motivation-v1"
+CHECK_SCHEMA = "deepseek-v32-motivation-check-v1"
+BENCH_SCHEMA = "deepseek-v32-motivation-bench-v1"
+RECEIPT_KIND = "deepseek-v32-motivation-full-trace-v1"
 WARMUP_POLICY = "two_users_then_first_user_host_recall_v1"
 INDEXER_DISPATCH_POLICY = "echo_fused_only_if_history_residency_unproven_v1"
 
 
 def write_json(path, value):
     Path(path).write_text(json.dumps(value, indent=2, ensure_ascii=False) + "\n")
+
+
+def checkpoint_inventory(path):
+    path = Path(path).resolve()
+    return {
+        "path": str(path),
+        "files": {
+            item.name: {"size": item.stat().st_size, "mtime_ns": item.stat().st_mtime_ns}
+            for item in sorted(path.glob("*.safetensors"))
+        },
+        "identity_boundary": "checkpoint path and shard stat inventory, not weights hashes",
+    }
 
 
 def precision_settings(torch_module=None):
@@ -61,6 +86,7 @@ def configure_precision(torch_module):
 
 def parser():
     command = argparse.ArgumentParser(description=__doc__)
+    add_mode_arguments(command)
     command.add_argument("--run-id", required=True)
     command.add_argument("--output-dir", type=Path)
     command.add_argument("--model-path", type=Path, default=Path("/preset-models"))
@@ -207,14 +233,17 @@ def check_request(request, metrics, config):
 
 
 def snapshot_sources(output):
-    from experiments.gr_serving.src.measure import source_snapshot
+    from evaluation.provenance import source_snapshot
 
     source_snapshot(output, include_official=True)
     manifest = json.loads((output / "source_manifest.json").read_text())
     experiment_helpers = {
-        "experiments/gr_serving/src/measure.py",
-        "experiments/gr_serving/src/report.py",
-        "experiments/gr_serving/src/workload.py",
+        "evaluation/provenance.py",
+        "evaluation/validation.py",
+        "GR/workload.py",
+        "experiments/nosa_motivation/src/validation.py",
+        "experiments/nosa_motivation/src/provenance.py",
+        "experiments/nosa_motivation/src/cpu_environment.py",
         "experiments/deepseek_v32_echo_cache/src/capacity_probe.py",
         "experiments/deepseek_v32_echo_prefill/src/backend_provenance.py",
     }
@@ -364,14 +393,17 @@ def tensor_payload(backend, result, request, config):
 def run_case(backend, workload, config, output, metadata, observe, runner_type):
     import torch
 
-    from experiments.gr_serving.src.measure import numerical_comparison
+    from evaluation.provenance import numerical_comparison
 
     scheme = backend.scheme
+    checking = metadata.get("mode", "check") == "check"
     numerical = output / "numerical" / scheme
-    numerical.mkdir(parents=True)
+    if checking:
+        numerical.mkdir(parents=True)
     torch.cuda.reset_peak_memory_stats(backend.device)
     before_allocation = observe(f"{scheme}/before_cache_allocation")
     rows = []
+    native_before = None
     with runner_type(backend, resource_limits=resource_limits(config)) as runner:
         if len(runner.pool):
             raise AssertionError("each measured scheme must start from an empty user cache")
@@ -384,6 +416,17 @@ def run_case(backend, workload, config, output, metadata, observe, runner_type):
         ):
             raise AssertionError("backend did not apply the requested NH capacity")
         observe(f"{scheme}/after_cache_allocation")
+        if "validation_identity" in metadata:
+            from experiments.nosa_motivation.src.provenance import loaded_native_artifacts
+
+            native_before = loaded_native_artifacts()
+            record_runtime(
+                metadata,
+                scheme,
+                backend,
+                native_before,
+                getattr(runner, "token_validation_identity", None),
+            )
         for request in workload.requests:
             request_id = request["request_id"]
             metadata.update(stage="measuring", active_scheme=scheme, active_request=request_id)
@@ -395,25 +438,6 @@ def run_case(backend, workload, config, output, metadata, observe, runner_type):
             after = observe(f"{scheme}/after_request_{request_id}")
             check_request(request, result.metrics, config)
             check_compute_graph_replays(graphs_before, graphs_after, config, result.metrics)
-            payload = tensor_payload(backend, result, request, config)
-            del result.hidden
-            expected = (
-                payload
-                if scheme == "hbm"
-                else torch.load(
-                    output / "numerical/hbm" / f"{request_id:06d}.pt",
-                    weights_only=True,
-                    map_location="cpu",
-                )
-            )
-            if expected["input_sha256"] != payload["input_sha256"]:
-                raise AssertionError("HBM reference uses different request tokens")
-            comparison = {
-                name: numerical_comparison(payload[name], expected[name], atol=0, rtol=0)
-                for name in ("hidden", "logits")
-            }
-            destination = numerical / f"{request_id:06d}.pt"
-            torch.save(payload, destination)
             row = {
                 **result.metrics,
                 "run_id": metadata["run_id"],
@@ -423,20 +447,50 @@ def run_case(backend, workload, config, output, metadata, observe, runner_type):
                 "memory_before": before,
                 "memory_after": after,
                 "compute_graphs": {"before": graphs_before, "after": graphs_after},
-                "numerical": comparison,
-                "output_file": str(destination.relative_to(output)),
-                "output_sha256": hashlib.sha256(destination.read_bytes()).hexdigest(),
             }
+            if checking:
+                payload = tensor_payload(backend, result, request, config)
+                expected = (
+                    payload
+                    if scheme == "hbm"
+                    else torch.load(
+                        output / "numerical/hbm" / f"{request_id:06d}.pt",
+                        weights_only=True,
+                        map_location="cpu",
+                    )
+                )
+                if expected["input_sha256"] != payload["input_sha256"]:
+                    raise AssertionError("HBM reference uses different request tokens")
+                comparison = {
+                    name: numerical_comparison(payload[name], expected[name], atol=0, rtol=0)
+                    for name in ("hidden", "logits")
+                }
+                destination = numerical / f"{request_id:06d}.pt"
+                torch.save(payload, destination)
+                row.update(
+                    numerical=comparison,
+                    output_file=str(destination.relative_to(output)),
+                    output_sha256=hashlib.sha256(destination.read_bytes()).hexdigest(),
+                )
+                row = without_performance(row)
+                detail = "numerical=passed"
+                del payload, expected
+            else:
+                if result.hidden.shape != (config["candidate_tokens"], backend.cfg.dim):
+                    raise AssertionError("missing candidate hidden states")
+                if backend.last_logits.shape != (1, backend.cfg.vocab_size):
+                    raise AssertionError("missing full-vocabulary last-token logits")
+                detail = f"latency_ms={row['latency_ms']:.3f}"
             with (output / "measurements.jsonl").open("a") as stream:
                 stream.write(json.dumps(row) + "\n")
             rows.append(row)
             print(
                 f"{scheme} {request_id + 1}/{config['requests_per_scheme']}: "
                 f"user={request['user_id']} revisit={row['is_revisit']} "
-                f"hit={row['prefix_cache_hit']} latency_ms={row['latency_ms']:.3f}",
+                f"hit={row['prefix_cache_hit']} {detail}",
                 flush=True,
             )
-            del payload, expected, result
+            del result
         case = {
             "scheme": scheme,
             "requests": len(rows),
@@ -454,20 +508,34 @@ def run_case(backend, workload, config, output, metadata, observe, runner_type):
             "before_cache_allocation": before_allocation,
         }
     backend.close()
+    if native_before is not None:
+        from experiments.nosa_motivation.src.provenance import verify_native_artifacts
+
+        case["native_artifacts_before"] = native_before
+        case["native_artifacts_after"] = verify_native_artifacts(native_before)
     observe(f"{scheme}/after_cleanup")
     return case
 
 
 def main(argv=None):
     args = parser().parse_args(argv)
+    validate_mode_arguments(args)
     config = configuration(args)
-    target = args.output_dir or EXPERIMENT / "output/data" / args.run_id
+    target = args.output_dir or (
+        Path(tempfile.gettempdir()) / "cxldsagr-checks/deepseek_v32_motivation" / args.run_id
+        if args.mode == "check"
+        else EXPERIMENT / "output/data" / args.run_id
+    )
+    if args.mode == "check" and EXPERIMENT.parent.resolve() in target.resolve().parents:
+        raise ValueError("correctness evidence belongs outside experiments; choose --output-dir")
     if target.exists():
         raise FileExistsError(target)
     output = Path(tempfile.mkdtemp(prefix=f"deepseek-motivation-{args.run_id}-"))
     print(f"temporary output: {output}", flush=True)
     metadata = {
-        "schema": SCHEMA,
+        "schema": CHECK_SCHEMA if args.mode == "check" else BENCH_SCHEMA,
+        "mode": args.mode,
+        "execution_environment": execution_environment(),
         "run_id": args.run_id,
         "status": "running",
         "config": config,
@@ -479,8 +547,9 @@ def main(argv=None):
             "on a miss, all candidate hidden, last-token LM head and history cleanup. "
             "Loading, request generation, three warmup requests including host recall, "
             "compute graph preparation, "
-            "output copies, diagnostics, "
-            "numerical comparison and report generation are outside latency."
+            "diagnostics and report generation are outside latency. Bench performs no "
+            "full-output CPU copies, numerical comparison or output saving between requests. "
+            "Check publishes no timings."
         ),
         "diagnostics_boundary": (
             "Cache transfer/selection counters cover the candidate forward only; history "
@@ -504,13 +573,13 @@ def main(argv=None):
     try:
         import torch
 
-        from experiments.deepseek_v32_echo_cache.src.capacity_probe import memory_sample
-        from experiments.gr_serving.src.measure import (
+        from evaluation.provenance import (
             _git,
             backend_provenance,
             verify_source_snapshot,
         )
-        from experiments.gr_serving.src.workload import WorkloadConfig, build_workload
+        from experiments.deepseek_v32_echo_cache.src.capacity_probe import memory_sample
+        from GR.workload import WorkloadConfig, build_workload
         from models.deepseek_v32.serving_backend import DeepSeekServingBackend
         from serving.persistent import PersistentGRRunner
 
@@ -523,6 +592,7 @@ def main(argv=None):
             raise RuntimeError("this experiment requires one SM90/Hopper GPU")
         torch.cuda.set_device(device)
         os.environ.setdefault("CXLDSAGR_SM90_BACKEND", "native")
+        metadata["execution_environment"] = execution_environment()
         metadata.update(
             source_sha256=snapshot_sources(output),
             git_revision=_git("rev-parse", "HEAD"),
@@ -541,14 +611,10 @@ def main(argv=None):
             "total_memory": props.total_memory,
             "sm_count": props.multi_processor_count,
         }
-        metadata["checkpoint"] = {
-            "path": str(args.model_path.resolve()),
-            "files": {
-                path.name: {"size": path.stat().st_size, "mtime_ns": path.stat().st_mtime_ns}
-                for path in sorted(args.model_path.glob("*.safetensors"))
-            },
-            "identity_boundary": "checkpoint path and shard stat inventory, not weights hashes",
-        }
+        from experiments.nosa_motivation.src.cpu_environment import cpu_environment
+
+        metadata["hardware"]["cpu_environment"] = cpu_environment(torch)
+        metadata["checkpoint"] = checkpoint_inventory(args.model_path)
 
         def observe(stage):
             sample = memory_sample(device, stage)
@@ -592,6 +658,7 @@ def main(argv=None):
             "vocabulary": backend.cfg.vocab_size,
         }
         metadata["model_loaded_memory"] = observe("after_model_loading")
+        begin_validation(metadata, output, args.validation_receipt, RECEIPT_KIND)
         for scheme in SCHEMES:
             backend.configure_scheme(scheme)
             metadata.update(stage="warmup", active_scheme=scheme)
@@ -613,10 +680,17 @@ def main(argv=None):
             raise RuntimeError("installed backend identity changed during measurement")
         if precision_settings(torch) != metadata["precision_settings"]:
             raise RuntimeError("precision settings changed during measurement")
+        if checkpoint_inventory(args.model_path) != metadata["checkpoint"]:
+            raise RuntimeError("checkpoint identity changed during the run")
+        if execution_environment() != metadata["execution_environment"]:
+            raise RuntimeError("execution environment changed during the run")
+        from experiments.nosa_motivation.src.cpu_environment import finish_cpu_environment
+
+        finish_cpu_environment(metadata, torch)
         from experiments.deepseek_v32_echo_prefill.src.backend_provenance import (
             collect_flashinfer_runtime_artifacts,
         )
-        from experiments.deepseek_v32_motivation.src.report import write_report
+        from experiments.deepseek_v32_motivation.src.report import audit_run, write_report
 
         metadata.update(
             status="accepted",
@@ -626,7 +700,11 @@ def main(argv=None):
             flashinfer_runtime_artifacts=collect_flashinfer_runtime_artifacts(),
         )
         write_json(output / "metadata.json", metadata)
-        write_report(output, output / "report")
+        if args.mode == "check":
+            _, _, audit = audit_run(output)
+            publish_receipt(metadata, output, RECEIPT_KIND, audit)
+        else:
+            write_report(output, output / "report")
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.move(str(output), str(target))
         print(

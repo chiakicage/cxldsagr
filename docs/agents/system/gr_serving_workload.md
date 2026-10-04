@@ -1,5 +1,11 @@
 # GR serving workload and reporting contract
 
+> Historical GR scope (2026-10-05): the `gr_serving` experiment is retired and its
+> experiment outputs have been removed. Its commands, result-retention rules and
+> rerun instructions below are historical and no longer active. See the
+> [retirement scope](experiment_organization.md#retired-gr-serving). Other
+> implementation and experiment findings retain their stated scope.
+
 This component implements the workload/reporting part of the user-requested single-GPU multi-user
 serving comparison. It does not validate the model, claim performance, or update research status.
 

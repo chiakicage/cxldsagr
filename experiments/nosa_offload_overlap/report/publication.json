@@ -1,0 +1,50 @@
+{
+  "schema": "nosa-offload-current-publication-v1",
+  "status": "published_and_superseded_outputs_removed",
+  "date": "2026-10-04",
+  "accepted_run_ids": [
+    "nosa_cached_fetch_20261004_01",
+    "nosa_cached_fetch_confirm40_20261004_01",
+    "nosa_cached_fetch_profile_20261004_01"
+  ],
+  "replacement_manifest_sha256": "04346cb904094e2f9494ab9f73e787ca8d52e48fd931f2b06317e215c898345b",
+  "published_files": [
+    {
+      "path": "experiments/nosa_offload_overlap/README.md",
+      "sha256": "5a9432b0499ee2bceaf39017a5d12c157bd6aef85a86e75e80f21c7d82dc34d0"
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/report/fused/report.json",
+      "sha256": "d8f4a3b2634eef446da1fed2530fda0087b8b61bd54870656d35efaf28d83186"
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/report/fused/comparison.csv",
+      "sha256": "2da43f763feb73fa618a874d7f68b37f6db06735d7418ecf42c1a5de84921c05"
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/report/fused/kernel_audit.json",
+      "sha256": "5481c198690e5c5abfb625b8bf944ed154feecd62d28f422922ad05d69986416"
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/report/fused_confirmation/report.json",
+      "sha256": "17cfceb5841ef368ad7c88b99b39f2702685f13a9532798fffdf7fd5e0637134"
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/report/fused_confirmation/comparison.csv",
+      "sha256": "72bed22b43e4fb414339c8d5bee4679514bd3bb7420ed3335c0f2f942087ad9b"
+    }
+  ],
+  "root_review": "Raw 20/40 timing samples and all 27 profile ranges independently recomputed; new README, current source/SASS/resource receipt and replacement scope reviewed. No full-model performance or fixed-P/NH hit claim.",
+  "superseded_directories": [
+    "experiments/nosa_offload_overlap/output/data/nosa_fused_stripe8_head1_20260930_01",
+    "experiments/nosa_offload_overlap/output/data/nosa_fused_stripe8_head1_confirm40_20260930_01",
+    "experiments/nosa_offload_overlap/output/data/nosa_fused_stripe8_head1_nsys_20260930_01",
+    "experiments/nosa_offload_overlap/output/log/nosa_fused_stripe8_head1_20260930_01",
+    "experiments/nosa_offload_overlap/output/log/nosa_fused_stripe8_head1_confirm40_20260930_01",
+    "experiments/nosa_offload_overlap/output/log/nosa_fused_stripe8_head1_nsys_20260930_01",
+    "experiments/nosa_offload_overlap/output/profile/nosa_fused_stripe8_head1_20260930_01",
+    "experiments/nosa_offload_overlap/output/profile/nosa_fused_stripe8_head1_confirm40_20260930_01",
+    "experiments/nosa_offload_overlap/output/profile/nosa_fused_stripe8_head1_nsys_20260930_01"
+  ],
+  "superseded_file_count": 294
+}

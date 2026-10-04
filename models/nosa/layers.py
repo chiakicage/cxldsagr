@@ -34,9 +34,7 @@ class NosaAttention(nn.Module):
                 config.num_key_value_heads * config.head_dim, config.num_key_value_heads, **args
             )
 
-    def forward(
-        self, x, positions, cos_sin_cache, main_attention, cache, layer_idx, *, indexer=None
-    ):
+    def project(self, x, positions, cos_sin_cache):
         config = self.config
         q_width = config.num_attention_heads * config.head_dim
         kv_width = config.num_key_value_heads * config.head_dim
@@ -52,6 +50,9 @@ class NosaAttention(nn.Module):
             from models.nosa.scoring import cis_scores
 
             records["cis_scores"] = cis_scores(v, self.delta.weight, self.A, self.delta.bias)
+        return q, records
+
+    def attend(self, q, records, main_attention, cache, layer_idx, *, indexer=None):
         if cache is None:
             cache_access = ResidentLayerView(layer_idx, **records)
             start = 0
@@ -62,11 +63,17 @@ class NosaAttention(nn.Module):
         context = AttentionContext(
             layer_idx=layer_idx,
             query_start=start,
-            query_length=x.shape[0],
+            query_length=q.shape[0],
             auxiliary_state=cache_access.get_layer_state(layer_idx),
         )
         selection = None if indexer is None else indexer(q, cache_access, context)
-        attended = main_attention(q, selection, cache_access, context)
+        return main_attention(q, selection, cache_access, context)
+
+    def forward(
+        self, x, positions, cos_sin_cache, main_attention, cache, layer_idx, *, indexer=None
+    ):
+        q, records = self.project(x, positions, cos_sin_cache)
+        attended = self.attend(q, records, main_attention, cache, layer_idx, indexer=indexer)
         return self.o_proj(attended.reshape(x.shape[0], -1))
 
 

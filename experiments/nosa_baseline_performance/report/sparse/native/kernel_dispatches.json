@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "run_id": "sparse_flags_native_20261004_01",
+  "runs": [
+    {
+      "phase": "full_prefill",
+      "iteration": 0,
+      "layer_call_count": 2080,
+      "score_dispatch_scope_counts": {
+        "cuda_tvm_ffi": 1088,
+        "triton": 864
+      },
+      "attention_dispatch_scope_counts": {
+        "native_fa3_v3": 2080
+      },
+      "indexer_qk_owner_scope_counts": {
+        "pooled_scores": 864,
+        "score_selection": 1088,
+        "unscored": 128
+      },
+      "attention_kernel_count": 8320,
+      "attention_kernel_ns": 367710400,
+      "attention_kernel_ms": 367.7104
+    },
+    {
+      "phase": "extend",
+      "iteration": 0,
+      "layer_call_count": 32,
+      "score_dispatch_scope_counts": {
+        "cuda_tvm_ffi": 32
+      },
+      "attention_dispatch_scope_counts": {
+        "native_fa3_v3": 32
+      },
+      "indexer_qk_owner_scope_counts": {
+        "score_selection": 32
+      },
+      "attention_kernel_count": 128,
+      "attention_kernel_ns": 5788263,
+      "attention_kernel_ms": 5.788263
+    }
+  ],
+  "source_attention_launches_sha256": "f0195d4ef3fb53336992c8ce78ecf2cc9f40d97803d084685f3f1c6b5c65ad2e"
+}

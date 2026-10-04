@@ -435,11 +435,18 @@ def snapshot_sources(output):
 
 
 def load_reference(path):
-    from experiments.gr_serving.src.workload import Workload, token_sha256
+    from GR.workload import Workload, token_sha256
 
     metadata = json.loads((path / "metadata.json").read_text())
-    if metadata.get("status") != "accepted" or metadata.get("schema") != measure.SCHEMA:
-        raise ValueError("reference must be an accepted motivation measurement")
+    if metadata.get("status") != "accepted" or metadata.get("schema") not in (
+        measure.SCHEMA,
+        measure.CHECK_SCHEMA,
+    ):
+        raise ValueError("reference must be an accepted independent check or legacy measurement")
+    if metadata["schema"] == measure.CHECK_SCHEMA:
+        from experiments.deepseek_v32_motivation.src.report import audit_run
+
+        audit_run(path)
     config = metadata["config"]
     if (
         config.get("warmup_policy") != measure.WARMUP_POLICY
@@ -537,7 +544,11 @@ def main(argv=None):
     args = parser().parse_args(argv)
     if not re.fullmatch(r"[A-Za-z0-9_-]+", args.run_id):
         raise ValueError("run ID must contain letters, digits, underscores or hyphens")
-    reference = args.reference_run.resolve(strict=True)
+    from experiments.nosa_motivation.src.validation import reference_directory
+
+    reference = reference_directory(
+        args.reference_run, bench_schema=measure.BENCH_SCHEMA, kind=measure.RECEIPT_KIND
+    ).resolve(strict=True)
     reference_metadata, workload, hbm_rows = load_reference(reference)
     config = reference_metadata["config"]
     graph_enabled = config.get("enable_compute_graphs", False)
@@ -584,7 +595,7 @@ def main(argv=None):
     try:
         import torch
 
-        from experiments.gr_serving.src.measure import (
+        from evaluation.provenance import (
             _git,
             backend_provenance,
             numerical_comparison,

@@ -6,15 +6,21 @@
 页配额准入。模型提供布局、分配、统计与同步释放。
 预算包含 KV、索引派生记录、映射、cache scratch、staging 和待提交 append，模型权重及
 普通计算 activation 另计。DeepSeek GR 的 `echo/serial_sparse` 只为 history 准入，
-候选使用共享 GPU 临时空间，正常结束后 discard，失败直接报错终止；其他后端仍由 serving 在执行后
-truncate 候选 suffix，保留用户历史。
-这一层是有限预算的用户 session 管理，不改变 NOSA 内部仍采用完整逻辑地址 staging、
-没有页级有限 slots / eviction 的事实。运行入口见 [serving](../serving/README.md)。
+候选使用共享 GPU 临时空间，正常结束后 discard，失败直接报错终止；该公共入口的其他后端
+（包括普通 NOSA budget 后端）仍由 serving 在执行后 truncate 候选 suffix，保留用户历史。
+普通 NOSA budget 路径采用完整逻辑地址 staging 和整用户 session LRU，尚无页级
+有限 slots / eviction。独立的 NOSA 固定 P/NH 入口见下文。运行入口见
+[serving](../serving/README.md)。
 
 [staging.py](staging.py) 为模型提供两个固定容量的命名 record buffer 及串行 lease，
 不选择预取内容。槽位身份包含 session、generation 和 layer；写入等待旧 consumer，
 消费等待 copy ready，异常归还也等待未消费的预取。无法确认完成时保留所有权并禁用
-后续复用。DeepSeek dense backend 已接入，模型布局和资源计划由该 backend 提供。
+后续复用。NOSA 与 DeepSeek dense backend 均已接入；两者的模型布局和资源计划分别由
+对应 backend 提供。
+完整生命周期与预算入口的早期集成验收见
+[共享资源 checkpoint](../docs/agents/system/nosa_shared_cache_checkpoint.md)。旧热度短轨迹
+已结束独立实验维护，通用预算实现和回归保留；当前性能对照见
+[固定容量 motivation](../experiments/nosa_motivation/README.md)。
 
 DeepSeek 已将共享 pool、session 私有状态和执行 workspace 分别预留；此前持久 append
 路径的 11 个直接采样配置已通过分配/释放轨迹与 pinned 档位核验。具体配置和未直接采样范围见
@@ -80,6 +86,19 @@ producer warp 动态领取唯一页中的 8-token stripe；每个历史 K/V 向�
 该分配不是有限 slots / eviction cache，CIS 和派生记录仍按层常驻。
 `stats()` 分别计入 host backing、resident
 append、CIS、派生记录与已分配 staging / queue / scratch，不能将它当成进程峰值显存。
+上述为普通模型 owned 模式。普通 NOSA budget serving 注入 backend resources 后，session 只计自身
+历史/派生/append/indexer scratch，共享 staging/queue/FA3 scratch 单列计费；跨用户
+和跨层借用都在同一执行 lease 内，不跨用户共享历史数值。
+
+独立的 [NOSA fixed cache](../models/nosa/fixed_cache.py) 与
+[fixed resources](../models/nosa/fixed_resources.py) 为固定 P/NH 入口保留逐层有限 P 槽，
+以逻辑页偏移和 session tag 直接映射。HBM-only 按 P 个 history token 做 session LRU，
+offload 按 NH 准入并随 session 分配 host backing；当前要求 H<=P，history 与 prefill
+chunk 按 64 token 对齐。候选整批在 GPU 执行后 discard，主 K/V 不写回 host history，
+CIS/indexer 候选尾部仍按实际 session storage 计费。该路径复用已取回的历史块，
+不提供任意容量下的 token LRU。正式测量、匹配 profile 和独立 API 对照已验收发布，
+见[固定容量实验](../experiments/nosa_motivation/README.md)及
+[发布回执](../docs/agents/system/nosa_motivation_publication.md)；cache 账本不等于进程物理峰值。
 
 CUDA offload 当前要求 SM90、BF16、D128、GQA16 和 native attention。融合版本中
 `offload_query_tile_size=128` 仅控制首次读取流量的 query 分组，attention 处理完整
@@ -93,7 +112,7 @@ initialization，合并 metadata reset、page-0 padding 与 strided suffix stagi
 `150825168 B`、offload pinned host `2181038080 B`；不包含模型权重，也不是进程峰值显存。
 单层性能与 stripe / page-envelope overlap 结果见 [NOSA 模型](../models/nosa/README.md)及
 [offload 实验](../experiments/nosa_offload_overlap/README.md)。此实现使用本机 pinned
-DRAM，未验证 CXL/RDMA；offload 算子本身不复用跨请求已取回的 HBM 块。
+DRAM，未验证 CXL/RDMA；上述 owned/普通 budget 路径不复用跨请求已取回的 HBM 块。
 用户固定 history 的跨请求保留由 `serving.persistent` / `prefix_pool` 管理。
 
 ## DeepSeek ECHO token cache

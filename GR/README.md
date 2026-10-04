@@ -226,7 +226,7 @@ DeepSeek tokenizer：/mnt/nfs/share/models/DeepSeek-V3.2/tokenizer.json
 可用 `--data-root`、`--tokenizer`、`--text-catalog-path` 覆盖。`--tokenizer` 接受 JSON 文件或目录，须与 `--model` 匹配。DeepSeek 可用 `--model deepseek_v32 --tokenizer weights/DeepSeek-V3.2`。`TextConfig()` 本身采用 NOSA 默认值；显式配置 DeepSeek 长上下文时应同时设置 `max_input_tokens`。未传 `text_config` 时，工厂和构造函数自动采用所选模型的预算。Python API 为 `GR.input_generator.InputGenerator`、`TextConfig`、`GR.scheduling.ScheduleConfig` 和 `GR.heat.HeatPopulation`。
 
 ```bash
-.venv/bin/python -m unittest discover -s GR/tests -v
+.venv/bin/python -m pytest GR/tests -q
 ```
 
 测试包含默认长度组合、精确编码、复访稳定前缀和候选变化、共同前缀计算、热度载入，以及曲线插值、复现、输入校验、summary 集中度对照和 API/CLI 默认资源加载。已在本地 NOSA tokenizer 上验证默认 12 种长度组合、模板与 checkpoint 一致、精确编码和复访；DeepSeek 适配保留原模板与 35 种长度组合测试，本机缺少该 tokenizer，当前跳过。

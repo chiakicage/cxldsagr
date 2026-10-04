@@ -3,6 +3,7 @@ set -euo pipefail
 usage() {
   echo "Usage: bash experiments/nosa_indexer_pattern_65536_1024/scripts/sparse_compare.sh [RUN_ID] [OPTIONS]"
   echo "Capture 65536+1024: dense QA-only64, dense full NOSA64, and actual sparse full NOSA64."
+  echo "--mode capture|check (default: capture); check replays observers outside experiments."
   echo "Options: --request-file PATH --model-path PATH --device DEVICE"
   echo "         --baseline-data-dir PATH (optional independent QA-only capture) --no-baseline"
   echo "Uses separate empty caches for the dense and sparse prefixes; no performance timing."
@@ -18,9 +19,13 @@ if [[ $# -gt 0 && "$1" != --* ]]; then
 fi
 capture_arguments=()
 analysis_arguments=()
+mode=capture
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --help) usage; exit 0 ;;
+    --mode)
+      if [[ $# -lt 2 ]]; then echo "Missing mode" >&2; exit 2; fi
+      mode="$2"; shift 2 ;;
     --no-baseline) analysis_arguments+=("$1"); shift ;;
     --request-file|--model-path|--device|--baseline-data-dir)
       if [[ $# -lt 2 || "$2" == --* ]]; then
@@ -39,6 +44,15 @@ done
 if [[ ! "$run_id" =~ ^[A-Za-z0-9_-]+$ ]]; then
   echo "RUN_ID must contain only letters, digits, underscores or hyphens" >&2
   exit 2
+fi
+if [[ "$mode" != capture && "$mode" != check ]]; then echo "Invalid mode" >&2; exit 2; fi
+if [[ "$mode" == check ]]; then
+  check_staging="$(mktemp -d "${TMPDIR:-/tmp}/nosa-pattern-check-${run_id}.XXXXXX")"
+  .venv/bin/python -m experiments.nosa_indexer_pattern_65536_1024.src.sparse_capture \
+    --mode check --run-id "$run_id" --output-dir "$check_staging/data" "${capture_arguments[@]}" \
+    > >(tee "$check_staging/check.stdout.log") 2> >(tee "$check_staging/check.stderr.log" >&2)
+  echo "Independent observer check: $check_staging/data/metadata.json"
+  exit 0
 fi
 output="experiments/nosa_indexer_pattern_65536_1024/output"
 for category in log data profile; do

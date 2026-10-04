@@ -1,54 +1,30 @@
 {
-  "schema": "nosa-striped-fetch-kernel-audit-v1",
-  "generated_at_utc": "2026-09-30T14:32:18.913687+00:00",
-  "result": "pass",
-  "scope": {
-    "method": "Read existing files and run cuobjdump only; no CUDA library initialization, GPU execution or compilation",
-    "architecture_inspected": "sm_90a",
-    "numerical_or_performance_result": false
+  "schema_version": 1,
+  "status": "passed",
+  "scope": "Fresh CPU-only current-binary SASS/resource/read-once receipt; independent root timing/profile audits are archived, not recomputed here.",
+  "run_ids": [
+    "nosa_cached_fetch_20261004_01",
+    "nosa_cached_fetch_confirm40_20261004_01",
+    "nosa_cached_fetch_profile_20261004_01"
+  ],
+  "gpu": {
+    "name": "NVIDIA H200",
+    "uuid": "a5cd5bab-33a4-a7e2-4a3c-78c2b08a8872",
+    "sm_count": 132,
+    "capability": [
+      9,
+      0
+    ],
+    "total_memory": 150121545728
   },
-  "build_key": "484e32532ba74fb6",
-  "build_key_derivation": "sha256(json.dumps(final_runtime_audit.json.build_info, sort_keys=True).encode()).hexdigest()[:16]",
-  "shared_object": "/root/.cache/tvm-ffi/cxldsagr_nosa_offload_fused_484e32532ba74fb6_51838aa7303842b9/cxldsagr_nosa_offload_fused_484e32532ba74fb6.so",
-  "shared_object_sha256": "dd1ed23e70f4d5cedfafdbdc3204f38960e8755cdfdc9b42ab1bbb70666574da",
-  "artifacts": {
-    "shared_object": {
-      "path": "/root/.cache/tvm-ffi/cxldsagr_nosa_offload_fused_484e32532ba74fb6_51838aa7303842b9/cxldsagr_nosa_offload_fused_484e32532ba74fb6.so",
-      "sha256": "dd1ed23e70f4d5cedfafdbdc3204f38960e8755cdfdc9b42ab1bbb70666574da",
-      "size_bytes": 6342304
-    },
-    "build_ninja": {
-      "path": "/root/.cache/tvm-ffi/cxldsagr_nosa_offload_fused_484e32532ba74fb6_51838aa7303842b9/build.ninja",
-      "sha256": "4d84ce8a310855c00f420c557cb8e3fd3e97a897bea16158a13e54e8c99c07e4",
-      "size_bytes": 2188
-    },
-    "sass": {
-      "path": "/tmp/nosa_overlap90/final_kernel.sass",
-      "sha256": "902001f6b7c12c5a6af71fafb3b8e03b5faf389753f98d6a2f65be34aae49453",
-      "size_bytes": 13512210
-    },
-    "resources": {
-      "path": "/tmp/nosa_overlap90/final_kernel.resources",
-      "sha256": "ce0fbba7cfdf1062f5f7c230d9ffccda15aa6bbc1241d2120bc101e9ee47dc19",
-      "size_bytes": 10715
-    },
-    "runtime_source_audit": {
-      "path": "/tmp/nosa_overlap90/final_runtime_audit.json",
-      "sha256": "4ec0456303766bf9ca7a4ce19cb7a460494a3ce67858ff3720f22d2d720e28d0",
-      "size_bytes": 6276
-    },
-    "reproducer": {
-      "path": "/tmp/nosa_overlap90/audit_final_kernel.py",
-      "sha256": "019cba20ad4378b25aed0692c61db812acc5734c4788d0de1d6af73aabefcb54",
-      "size_bytes": 9130
-    }
-  },
-  "build_info": {
+  "integrated_source_digest": "02b5d0f9589c5e49257b40b73a5ddce4b2811f0614cc79d4afe242a2aa09f08b",
+  "fused_build_key": "d34d3d8f463d5b26",
+  "native_build": {
     "toolchain": {
       "tvm_ffi": "0.1.13.post3",
       "compiler": {
         "path": "/usr/local/cuda-13.2/bin/nvcc",
-        "version": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2026 NVIDIA Corporation\nBuilt on Fri_May_08_10:53:34_AM_PDT_2026\nCuda compilation tools, release 13.2, V13.2.86\nBuild cuda_13.2.r13.2/compiler.37953736_0"
+        "version": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2026 NVIDIA Corporation\nBuilt on Thu_Mar_19_11:12:51_PM_PDT_2026\nCuda compilation tools, release 13.2, V13.2.78\nBuild cuda_13.2.r13.2/compiler.37668154_0"
       },
       "cutlass": {
         "commit": "f3fde58372d33e9a5650ba7b80fc48b3b49d40c8",
@@ -81,7 +57,7 @@
       "-DFA3_STAGES=2"
     ],
     "source_sha256": {
-      "_nosa_attention_fa3.py": "61e2379aedaad7dddbb7237b22d014d1d37f9f251f3010c51dbe5b46b2ccde10",
+      "_fa3.py": "64f699cf8d11d0551f70808fb733577235fda12f61b9efa8bbc4395a62158653",
       "nosa_attention_fa3.cu": "f98b5ae4ea4bcc5c3dc5a597958627d6c186f22d1db7108162a2a328401c2f80",
       "nosa_attention.cu": "01c0699b507baebe005b2df44e2f78ec149083a6239b96e7d24990edf2bf09f4",
       "nosa_attention_grouped.cuh": "30f35b34a80c2a26c249b92e055c3158a5a2e40e5c818ff9dadc3074dc525927"
@@ -97,8 +73,8 @@
     "native_pv_accumulation": "bf16_power_of_two_scale_finite_output_guard",
     "kv_tile_tokens": 128,
     "stages": 2,
-    "fused_source_sha256": "6b71f1f610e1b3d1f14fdca457d1490b10e57b2ad290ecbc9b4caa371042dd17",
-    "fused_wrapper_sha256": "48ee6684da1a5c749c69e2c3fc7ec17d9d411d31af73ee827579d01712012063",
+    "fused_source_sha256": "a68fe19bfc5fd6d626ff310c3526624b2a1a4bc88f85678afd705b844410bb28",
+    "fused_wrapper_sha256": "5487ba8ad2b99dc1fb541cb330ffce2ea569edd59e17cb81c5bf39c7c1cd5dc9",
     "fused_prefill_header_sha256": "0b20b38b91b295202258203cc484d588fc6251b6eacea9da4c0d5f57ea104ad9",
     "host_load_cache_policy": "ld.global.cv.v4.u32",
     "main_schedule": "cooperative_fa3_spare_producer_warps_striped_fetch_queue",
@@ -141,576 +117,978 @@
     "stripe_trace_window": "post_task_decode_barrier_to_stripe_stores_fence_and_barrier",
     "stripe_trace_layout": "after_page_and_softmax_rows_then_page_slot_times_stripes_plus_stripe"
   },
-  "source_sha256": {
-    "operators/sm90/csrc/nosa_offload_fused.cu": "6b71f1f610e1b3d1f14fdca457d1490b10e57b2ad290ecbc9b4caa371042dd17",
-    "operators/sm90/csrc/nosa_offload.cu": "68db6dd55bb3124e70b25e0e151254d4117cd56f153a4f390d6e9fa3b0e0d681",
-    "operators/sm90/nosa_offload.py": "9ac8f603faa721cf88e67fc9331083148c501c5ce68e19cede24a9325bff1e8f",
-    "operators/sm90/_nosa_offload_fused.py": "48ee6684da1a5c749c69e2c3fc7ec17d9d411d31af73ee827579d01712012063"
+  "source_files": [
+    {
+      "path": "operators/nosa/attention/offload/csrc/nosa_offload_fused.cu",
+      "sha256": "a68fe19bfc5fd6d626ff310c3526624b2a1a4bc88f85678afd705b844410bb28",
+      "bytes": 41145,
+      "captured_sha256": "a68fe19bfc5fd6d626ff310c3526624b2a1a4bc88f85678afd705b844410bb28"
+    },
+    {
+      "path": "operators/nosa/attention/offload/api.py",
+      "sha256": "e4a97d3ae77af1dec4b8c3b179bbfc5caa051a1d6084d41451a6465068e4f717",
+      "bytes": 33239,
+      "captured_sha256": "e4a97d3ae77af1dec4b8c3b179bbfc5caa051a1d6084d41451a6465068e4f717"
+    },
+    {
+      "path": "operators/nosa/attention/offload/_fused.py",
+      "sha256": "5487ba8ad2b99dc1fb541cb330ffce2ea569edd59e17cb81c5bf39c7c1cd5dc9",
+      "bytes": 3236,
+      "captured_sha256": "5487ba8ad2b99dc1fb541cb330ffce2ea569edd59e17cb81c5bf39c7c1cd5dc9"
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/src/measure.py",
+      "sha256": "40bab488903cdd9eaef91329ef86d6d8b65b68f835b46a0b1a278a8548d71326",
+      "bytes": 28212,
+      "captured_sha256": "40bab488903cdd9eaef91329ef86d6d8b65b68f835b46a0b1a278a8548d71326"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/audit/cxldsagr_nosa_offload_fused_d34d3d8f463d5b26.so",
+      "sha256": "43f624f9d25a0fe7f0299e42a4e6d7ba840a2fb356fbd1fa14a66cb6b08ec05d",
+      "bytes": 6346400
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/audit/build.ninja",
+      "sha256": "ba4eaf3579a3655ce72e3a6a5deaaacc588cd04f5902f99d8a3d86f5e5796550",
+      "bytes": 2095
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/audit/current_kernel.sass",
+      "sha256": "fe23ee67920c01d5c325d19f53ae766b9e35db47f5d5c5a7d5df981f48a8e2bb",
+      "bytes": 13544758
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/audit/current_kernel.resources",
+      "sha256": "db406a8e26c3b5138cd583aef168f6bd719c4d669aba656dd05174b92e6665b4",
+      "bytes": 10751
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/audit/audit_current_kernel.py",
+      "sha256": "8cdb1f5bc32542a80ed4637a034340928d6bac72982710f5befaf396039f9a27",
+      "bytes": 10273
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/metadata.json",
+      "sha256": "5a8b07512195d3041d7a977be491721ec5e508ed780226aa4fa219845656911c",
+      "bytes": 50823
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/metadata.json",
+      "sha256": "10f2b70d3b4f51fbb798154706a0877e1f56767f29c496029804cf910efabdee",
+      "bytes": 50844
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/timeline.sqlite",
+      "sha256": "f7c3fc9ccc292439b80db089d9904df5a6cd25d34f09fcfd34fb13a71bc7004c",
+      "bytes": 91025408
+    }
+  ],
+  "extraction_commands": [
+    "/usr/local/cuda/bin/cuobjdump --dump-sass <archived-so>",
+    "/usr/local/cuda/bin/cuobjdump --dump-resource-usage <archived-so>"
+  ],
+  "binary_binding": {
+    "evidence": [
+      {
+        "run_id": "nosa_cached_fetch_20261004_01",
+        "source_digest": "02b5d0f9589c5e49257b40b73a5ddce4b2811f0614cc79d4afe242a2aa09f08b",
+        "selected_cache_binary": {
+          "/root/.cache/tvm-ffi/cxldsagr_nosa_offload_fused_d34d3d8f463d5b26_16df9023b4819458/cxldsagr_nosa_offload_fused_d34d3d8f463d5b26.so": {
+            "sha256": "43f624f9d25a0fe7f0299e42a4e6d7ba840a2fb356fbd1fa14a66cb6b08ec05d",
+            "inode": 1839444,
+            "mtime_ns": 1791082144503836464
+          }
+        },
+        "before_after_protected_identity_equal": true
+      },
+      {
+        "run_id": "nosa_cached_fetch_confirm40_20261004_01",
+        "source_digest": "02b5d0f9589c5e49257b40b73a5ddce4b2811f0614cc79d4afe242a2aa09f08b",
+        "selected_cache_binary": {
+          "/root/.cache/tvm-ffi/cxldsagr_nosa_offload_fused_d34d3d8f463d5b26_16df9023b4819458/cxldsagr_nosa_offload_fused_d34d3d8f463d5b26.so": {
+            "sha256": "43f624f9d25a0fe7f0299e42a4e6d7ba840a2fb356fbd1fa14a66cb6b08ec05d",
+            "inode": 1839444,
+            "mtime_ns": 1791082144503836464
+          }
+        },
+        "before_after_protected_identity_equal": true
+      },
+      {
+        "run_id": "nosa_cached_fetch_profile_20261004_01",
+        "source_digest": "02b5d0f9589c5e49257b40b73a5ddce4b2811f0614cc79d4afe242a2aa09f08b",
+        "selected_cache_binary": {
+          "/root/.cache/tvm-ffi/cxldsagr_nosa_offload_fused_d34d3d8f463d5b26_16df9023b4819458/cxldsagr_nosa_offload_fused_d34d3d8f463d5b26.so": {
+            "sha256": "43f624f9d25a0fe7f0299e42a4e6d7ba840a2fb356fbd1fa14a66cb6b08ec05d",
+            "inode": 1839444,
+            "mtime_ns": 1791082144503836464
+          }
+        },
+        "before_after_protected_identity_equal": true
+      }
+    ],
+    "limitation": "Source-derived JIT key and unchanged before/after cache binary SHA256/inode/mtime identify the selected build; the harness did not capture /proc/maps or a direct mapped-library receipt."
   },
-  "main_symbol": "_ZN18nosa_offload_fused10fused_mainENS_2ML6ParamsEN21nosa_offload_fa3_base2EP6ParamsENS_9Scheduler6ParamsENS_11FetchParamsE",
-  "sm90a_main_section_sha256": "281e7b5a3eb288d91b684ffecb5fe2d35e43b861b784106fd42299bed22d0f43",
-  "section_hash_definition": "SHA256 of cuobjdump UTF-8 text after the exact main Function marker through before the next Function marker in the sm_90a section; includes whitespace and metadata, not a raw machine-code hash.",
+  "sass": {
+    "architecture": "sm_90a",
+    "symbol": "_ZN18nosa_offload_fused10fused_mainENS_2ML6ParamsEN21nosa_offload_fa3_base2EP6ParamsENS_9Scheduler6ParamsENS_11FetchParamsE",
+    "instruction_count": 5144,
+    "static_sites": {
+      "local_load_store": [
+        {
+          "pc": "0x0500",
+          "instruction": "STL [R1+0x14], R2 ;"
+        },
+        {
+          "pc": "0x0610",
+          "instruction": "LDL.LU R14, [R1+0x14] ;"
+        },
+        {
+          "pc": "0xfd70",
+          "instruction": "STL [R1+0x8], R5 ;"
+        },
+        {
+          "pc": "0xfdc0",
+          "instruction": "STL.64 [R1], R4 ;"
+        },
+        {
+          "pc": "0xfe50",
+          "instruction": "STL.64 [R1+0x18], R8 ;"
+        },
+        {
+          "pc": "0xfe60",
+          "instruction": "LDL.64 R8, [R1] ;"
+        },
+        {
+          "pc": "0xfeb0",
+          "instruction": "LDL.LU.64 R8, [R1+0x18] ;"
+        },
+        {
+          "pc": "0x10280",
+          "instruction": "LDL.LU R2, [R1+0x8] ;"
+        },
+        {
+          "pc": "0x10310",
+          "instruction": "LDL.LU.64 R10, [R1] ;"
+        },
+        {
+          "pc": "0x10650",
+          "instruction": "STL [R1+0x10], RZ ;"
+        },
+        {
+          "pc": "0x10690",
+          "instruction": "STL [R1+0xc], R0 ;"
+        },
+        {
+          "pc": "0x106c0",
+          "instruction": "LDL R8, [R1+0xc] ;"
+        },
+        {
+          "pc": "0x112c0",
+          "instruction": "STL [R1+0x18], R8 ;"
+        },
+        {
+          "pc": "0x11860",
+          "instruction": "LDL.LU R8, [R1+0x18] ;"
+        },
+        {
+          "pc": "0x11bd0",
+          "instruction": "LDL.LU R3, [R1+0x10] ;"
+        },
+        {
+          "pc": "0x11c10",
+          "instruction": "STL [R1+0x10], R3 ;"
+        },
+        {
+          "pc": "0x12330",
+          "instruction": "STL [R1+0x18], R0 ;"
+        },
+        {
+          "pc": "0x123b0",
+          "instruction": "LDL.LU R0, [R1+0x18] ;"
+        },
+        {
+          "pc": "0x13770",
+          "instruction": "LDL.LU R0, [R1+0xc] ;"
+        },
+        {
+          "pc": "0x137a0",
+          "instruction": "STL [R1+0xc], R0 ;"
+        },
+        {
+          "pc": "0x13890",
+          "instruction": "LDL.LU R2, [R1+0x14] ;"
+        }
+      ],
+      "dynamic_registers": [
+        {
+          "pc": "0x0540",
+          "instruction": "USETMAXREG.TRY_ALLOC.CTAPOOL UP0, 0xf0 ;"
+        },
+        {
+          "pc": "0xf7a0",
+          "instruction": "USETMAXREG.DEALLOC.CTAPOOL 0x18 ;"
+        }
+      ],
+      "host_vector_load": [
+        {
+          "pc": "0x10150",
+          "instruction": "LDG.E.128.STRONG.SYS R8, desc[UR6][R4.64] ;"
+        },
+        {
+          "pc": "0x10170",
+          "instruction": "LDG.E.128.STRONG.SYS R4, desc[UR6][R2.64] ;"
+        }
+      ],
+      "fetch_barrier": [
+        {
+          "pc": "0xfa60",
+          "instruction": "BAR.SYNC.DEFER_BLOCKING 0xe, 0x60 ;"
+        },
+        {
+          "pc": "0xfde0",
+          "instruction": "BAR.SYNC.DEFER_BLOCKING 0xe, 0x60 ;"
+        },
+        {
+          "pc": "0xfed0",
+          "instruction": "BAR.SYNC.DEFER_BLOCKING 0xe, 0x60 ;"
+        },
+        {
+          "pc": "0x102b0",
+          "instruction": "BAR.SYNC.DEFER_BLOCKING 0xe, 0x60 ;"
+        },
+        {
+          "pc": "0x105b0",
+          "instruction": "BAR.SYNC.DEFER_BLOCKING 0xe, 0x60 ;"
+        }
+      ],
+      "global_fences": [
+        {
+          "pc": "0x10230",
+          "instruction": "MEMBAR.ALL.CTA ;"
+        },
+        {
+          "pc": "0x10240",
+          "instruction": "MEMBAR.SC.GPU ;"
+        },
+        {
+          "pc": "0x103f0",
+          "instruction": "MEMBAR.ALL.CTA ;"
+        },
+        {
+          "pc": "0x10400",
+          "instruction": "MEMBAR.ALL.GPU ;"
+        },
+        {
+          "pc": "0x10d10",
+          "instruction": "FENCE.VIEW.ASYNC.G ;"
+        },
+        {
+          "pc": "0x110d0",
+          "instruction": "FENCE.VIEW.ASYNC.G ;"
+        },
+        {
+          "pc": "0x12060",
+          "instruction": "FENCE.VIEW.ASYNC.G ;"
+        },
+        {
+          "pc": "0x12470",
+          "instruction": "FENCE.VIEW.ASYNC.G ;"
+        },
+        {
+          "pc": "0x12910",
+          "instruction": "FENCE.VIEW.ASYNC.G ;"
+        },
+        {
+          "pc": "0x12d10",
+          "instruction": "FENCE.VIEW.ASYNC.G ;"
+        },
+        {
+          "pc": "0x13220",
+          "instruction": "FENCE.VIEW.ASYNC.G ;"
+        },
+        {
+          "pc": "0x135e0",
+          "instruction": "FENCE.VIEW.ASYNC.G ;"
+        }
+      ],
+      "gpu_atomic_add": [
+        {
+          "pc": "0xf920",
+          "instruction": "ATOMG.E.ADD.STRONG.GPU PT, R0, desc[UR6][R2.64], R11 ;"
+        },
+        {
+          "pc": "0x10430",
+          "instruction": "ATOMG.E.ADD.STRONG.GPU PT, R2, desc[UR6][R2.64], R5 ;"
+        }
+      ],
+      "gpu_ready_load": [
+        {
+          "pc": "0x10c80",
+          "instruction": "LDG.E.STRONG.GPU R10, desc[UR6][R2.64] ;"
+        },
+        {
+          "pc": "0x10cd0",
+          "instruction": "LDG.E.STRONG.GPU R10, desc[UR6][R2.64] ;"
+        },
+        {
+          "pc": "0x11040",
+          "instruction": "LDG.E.STRONG.GPU R10, desc[UR6][R2.64] ;"
+        },
+        {
+          "pc": "0x11090",
+          "instruction": "LDG.E.STRONG.GPU R10, desc[UR6][R2.64] ;"
+        },
+        {
+          "pc": "0x11fd0",
+          "instruction": "LDG.E.STRONG.GPU R4, desc[UR6][R2.64] ;"
+        },
+        {
+          "pc": "0x12020",
+          "instruction": "LDG.E.STRONG.GPU R4, desc[UR6][R2.64] ;"
+        },
+        {
+          "pc": "0x123e0",
+          "instruction": "LDG.E.STRONG.GPU R12, desc[UR6][R2.64] ;"
+        },
+        {
+          "pc": "0x12430",
+          "instruction": "LDG.E.STRONG.GPU R12, desc[UR6][R2.64] ;"
+        },
+        {
+          "pc": "0x12880",
+          "instruction": "LDG.E.STRONG.GPU R4, desc[UR6][R2.64] ;"
+        },
+        {
+          "pc": "0x128d0",
+          "instruction": "LDG.E.STRONG.GPU R4, desc[UR6][R2.64] ;"
+        },
+        {
+          "pc": "0x12c80",
+          "instruction": "LDG.E.STRONG.GPU R6, desc[UR6][R2.64] ;"
+        },
+        {
+          "pc": "0x12cd0",
+          "instruction": "LDG.E.STRONG.GPU R6, desc[UR6][R2.64] ;"
+        },
+        {
+          "pc": "0x13190",
+          "instruction": "LDG.E.STRONG.GPU R6, desc[UR6][R2.64] ;"
+        },
+        {
+          "pc": "0x131e0",
+          "instruction": "LDG.E.STRONG.GPU R6, desc[UR6][R2.64] ;"
+        },
+        {
+          "pc": "0x13550",
+          "instruction": "LDG.E.STRONG.GPU R6, desc[UR6][R2.64] ;"
+        },
+        {
+          "pc": "0x135a0",
+          "instruction": "LDG.E.STRONG.GPU R6, desc[UR6][R2.64] ;"
+        }
+      ]
+    },
+    "local_load_store_count": 21,
+    "local_load_count": 11,
+    "local_store_count": 10
+  },
   "resources": {
-    "REG": 168,
-    "STACK": 32,
-    "SHARED": 1024,
-    "LOCAL": 0
-  },
-  "compiled_cta_register_pool": 64512,
-  "required_registers": 64512,
-  "other_resources": {
-    "compact_fetch_queue": {
-      "REG": 27,
-      "STACK": 0,
-      "SHARED": 1072,
-      "LOCAL": 0
-    },
-    "head_phase_sort": {
-      "REG": 13,
-      "STACK": 0,
-      "SHARED": 2048,
-      "LOCAL": 0
-    },
-    "serialized_fetch": {
-      "REG": 124,
-      "STACK": 0,
+    "cuobjdump_sm90a": {
+      "REG": 168,
+      "STACK": 32,
       "SHARED": 1024,
-      "LOCAL": 0
-    }
+      "LOCAL": 0,
+      "CONSTANT[0]": 1952,
+      "TEXTURE": 0,
+      "SURFACE": 0,
+      "SAMPLER": 0
+    },
+    "cupti_actual_launch": [
+      {
+        "registersPerThread": 168,
+        "staticSharedMemory": 0,
+        "dynamicSharedMemory": 197728,
+        "gridX": 132,
+        "gridY": 1,
+        "gridZ": 1,
+        "blockX": 384,
+        "blockY": 1,
+        "blockZ": 1,
+        "localMemoryPerThread": 0
+      }
+    ],
+    "field_difference": "cuobjdump reports SHARED=1024; CUPTI reports staticSharedMemory=0 and dynamicSharedMemory=197728. These are preserved as different reported fields, not summed or treated as equivalent.",
+    "compiled_cta_register_pool": 64512,
+    "dynamic_register_demand": 64512,
+    "limitation": "LOCAL=0 does not establish no spill: fresh main SASS contains 21 static LDL/STL sites; dynamic spill traffic was not measured here."
   },
-  "resource_notes": [
-    "SHARED is the static resource field; launch additionally supplies sizeof(KT::SharedStorage) dynamic shared memory.",
-    "STACK is 32 bytes, up from the prior queue candidate's 24. LOCAL=0 does not mean there are no stack spill accesses; static LDL/STL sites are recorded below."
-  ],
-  "static_ldl_stl_site_count": 21,
-  "static_ldl_stl_sites": [
-    {
-      "pc": "0x500",
-      "instruction": "STL [R1+0x14], R2"
-    },
-    {
-      "pc": "0x610",
-      "instruction": "LDL.LU R14, [R1+0x14]"
-    },
-    {
-      "pc": "0xfd70",
-      "instruction": "STL [R1+0x8], R5"
-    },
-    {
-      "pc": "0xfdc0",
-      "instruction": "STL.64 [R1], R4"
-    },
-    {
-      "pc": "0xfe50",
-      "instruction": "STL.64 [R1+0x18], R8"
-    },
-    {
-      "pc": "0xfe60",
-      "instruction": "LDL.64 R8, [R1]"
-    },
-    {
-      "pc": "0xfeb0",
-      "instruction": "LDL.LU.64 R8, [R1+0x18]"
-    },
-    {
-      "pc": "0x10280",
-      "instruction": "LDL.LU R2, [R1+0x8]"
-    },
-    {
-      "pc": "0x10310",
-      "instruction": "LDL.LU.64 R10, [R1]"
-    },
-    {
-      "pc": "0x10650",
-      "instruction": "STL [R1+0x10], RZ"
-    },
-    {
-      "pc": "0x10690",
-      "instruction": "STL [R1+0xc], R0"
-    },
-    {
-      "pc": "0x106c0",
-      "instruction": "LDL R8, [R1+0xc]"
-    },
-    {
-      "pc": "0x112c0",
-      "instruction": "STL [R1+0x18], R8"
-    },
-    {
-      "pc": "0x11860",
-      "instruction": "LDL.LU R8, [R1+0x18]"
-    },
-    {
-      "pc": "0x11bd0",
-      "instruction": "LDL.LU R3, [R1+0x10]"
-    },
-    {
-      "pc": "0x11c10",
-      "instruction": "STL [R1+0x10], R3"
-    },
-    {
-      "pc": "0x12330",
-      "instruction": "STL [R1+0x18], R0"
-    },
-    {
-      "pc": "0x123b0",
-      "instruction": "LDL.LU R0, [R1+0x18]"
-    },
-    {
-      "pc": "0x13770",
-      "instruction": "LDL.LU R0, [R1+0xc]"
-    },
-    {
-      "pc": "0x137a0",
-      "instruction": "STL [R1+0xc], R0"
-    },
-    {
-      "pc": "0x13890",
-      "instruction": "LDL.LU R2, [R1+0x14]"
-    }
-  ],
-  "register_instructions": [
-    {
-      "pc": "0x540",
-      "instruction": "USETMAXREG.TRY_ALLOC.CTAPOOL UP0, 0xf0"
-    },
-    {
-      "pc": "0xf7a0",
-      "instruction": "USETMAXREG.DEALLOC.CTAPOOL 0x18"
-    }
-  ],
-  "barriers": [
-    {
-      "pc": "0x510",
-      "instruction": "BAR.SYNC.DEFER_BLOCKING 0x0"
-    },
-    {
-      "pc": "0x2040",
-      "instruction": "BAR.SYNC.DEFER_BLOCKING 0xf, 0x100"
-    },
-    {
-      "pc": "0x3190",
-      "instruction": "BAR.SYNC.DEFER_BLOCKING 0xf, 0x100"
-    },
-    {
-      "pc": "0x3590",
-      "instruction": "BAR.SYNC.DEFER_BLOCKING R8, 0x100"
-    },
-    {
-      "pc": "0x78f0",
-      "instruction": "BAR.SYNC.DEFER_BLOCKING R194, 0x100"
-    },
-    {
-      "pc": "0xfa60",
-      "instruction": "BAR.SYNC.DEFER_BLOCKING 0xe, 0x60"
-    },
-    {
-      "pc": "0xfde0",
-      "instruction": "BAR.SYNC.DEFER_BLOCKING 0xe, 0x60"
-    },
-    {
-      "pc": "0xfed0",
-      "instruction": "BAR.SYNC.DEFER_BLOCKING 0xe, 0x60"
-    },
-    {
-      "pc": "0x102b0",
-      "instruction": "BAR.SYNC.DEFER_BLOCKING 0xe, 0x60"
-    },
-    {
-      "pc": "0x105b0",
-      "instruction": "BAR.SYNC.DEFER_BLOCKING 0xe, 0x60"
-    },
-    {
-      "pc": "0x11260",
-      "instruction": "BAR.SYNC.DEFER_BLOCKING 0x8, 0x120"
-    }
-  ],
-  "compiled_evidence": {
-    "dynamic_task_claim_and_shared_broadcast": [
+  "read_once": {
+    "source_proof": [
+      "Atomic queue cursor assigns each compacted (page,stripe) once; all 96 fetch threads share the claimed task via named barrier 14.",
+      "Disjoint eight-token stripes and lane-strided vector enumeration assign every selected historical K and V uint4 to one thread.",
+      "Each writer fences then joins the 96-thread barrier; leader acq_rel GPU add chains stripe completions. TMA waits with acquire for ready=8 and performs an async-proxy fence.",
+      "Only the last stripe completion accounts one full page; empty tail stripes perform no host vector load."
+    ],
+    "static_ownership_enumeration": [
       {
-        "pc": "0xf8b0",
-        "instruction": "LDC.64 R4, c[0x0][0x768]"
+        "tokens": 1,
+        "unique_vectors_per_K_or_V": 16,
+        "duplicates": 0,
+        "missing": 0,
+        "nonempty_stripes": 1
       },
       {
-        "pc": "0xf8c0",
-        "instruction": "ULDC.64 UR8, c[0x0][0x768]"
+        "tokens": 2,
+        "unique_vectors_per_K_or_V": 32,
+        "duplicates": 0,
+        "missing": 0,
+        "nonempty_stripes": 1
       },
       {
-        "pc": "0xf8d0",
-        "instruction": "IMAD.MOV.U32 R11, RZ, RZ, 0x1"
+        "tokens": 3,
+        "unique_vectors_per_K_or_V": 48,
+        "duplicates": 0,
+        "missing": 0,
+        "nonempty_stripes": 1
       },
       {
-        "pc": "0xf8e0",
-        "instruction": "UIADD3 UR5, UP0, UR8, 0x4, URZ"
+        "tokens": 4,
+        "unique_vectors_per_K_or_V": 64,
+        "duplicates": 0,
+        "missing": 0,
+        "nonempty_stripes": 1
       },
       {
-        "pc": "0xf8f0",
-        "instruction": "UIADD3.X UR8, URZ, UR9, URZ, UP0, !UPT"
+        "tokens": 5,
+        "unique_vectors_per_K_or_V": 80,
+        "duplicates": 0,
+        "missing": 0,
+        "nonempty_stripes": 1
       },
       {
-        "pc": "0xf900",
-        "instruction": "IMAD.U32 R2, RZ, RZ, UR5"
+        "tokens": 6,
+        "unique_vectors_per_K_or_V": 96,
+        "duplicates": 0,
+        "missing": 0,
+        "nonempty_stripes": 1
       },
       {
-        "pc": "0xf910",
-        "instruction": "MOV R3, UR8"
+        "tokens": 7,
+        "unique_vectors_per_K_or_V": 112,
+        "duplicates": 0,
+        "missing": 0,
+        "nonempty_stripes": 1
       },
       {
-        "pc": "0xf920",
-        "instruction": "ATOMG.E.ADD.STRONG.GPU PT, R0, desc[UR6][R2.64], R11"
+        "tokens": 8,
+        "unique_vectors_per_K_or_V": 128,
+        "duplicates": 0,
+        "missing": 0,
+        "nonempty_stripes": 1
       },
       {
-        "pc": "0xf930",
-        "instruction": "LDG.E R4, desc[UR6][R4.64]"
+        "tokens": 9,
+        "unique_vectors_per_K_or_V": 144,
+        "duplicates": 0,
+        "missing": 0,
+        "nonempty_stripes": 2
       },
       {
-        "pc": "0xf940",
-        "instruction": "IMAD.SHL.U32 R7, R4, 0x8, RZ"
+        "tokens": 10,
+        "unique_vectors_per_K_or_V": 160,
+        "duplicates": 0,
+        "missing": 0,
+        "nonempty_stripes": 2
       },
       {
-        "pc": "0xf950",
-        "instruction": "ISETP.GE.AND P0, PT, R0, R7, PT"
+        "tokens": 11,
+        "unique_vectors_per_K_or_V": 176,
+        "duplicates": 0,
+        "missing": 0,
+        "nonempty_stripes": 2
       },
       {
-        "pc": "0xf960",
-        "instruction": "@!P0 LDC.64 R2, c[0x0][0x768]"
+        "tokens": 12,
+        "unique_vectors_per_K_or_V": 192,
+        "duplicates": 0,
+        "missing": 0,
+        "nonempty_stripes": 2
       },
       {
-        "pc": "0xf970",
-        "instruction": "@!P0 SHF.R.S32.HI R7, RZ, 0x1f, R0"
+        "tokens": 13,
+        "unique_vectors_per_K_or_V": 208,
+        "duplicates": 0,
+        "missing": 0,
+        "nonempty_stripes": 2
       },
       {
-        "pc": "0xf980",
-        "instruction": "@!P0 LEA.HI R7, R7, R0, RZ, 0x3"
+        "tokens": 14,
+        "unique_vectors_per_K_or_V": 224,
+        "duplicates": 0,
+        "missing": 0,
+        "nonempty_stripes": 2
       },
       {
-        "pc": "0xf990",
-        "instruction": "@!P0 LEA.HI.SX32 R9, R7, 0x2, 0x1d"
+        "tokens": 15,
+        "unique_vectors_per_K_or_V": 240,
+        "duplicates": 0,
+        "missing": 0,
+        "nonempty_stripes": 2
       },
       {
-        "pc": "0xf9a0",
-        "instruction": "@!P0 IMAD.WIDE R2, R9, 0x4, R2"
+        "tokens": 16,
+        "unique_vectors_per_K_or_V": 256,
+        "duplicates": 0,
+        "missing": 0,
+        "nonempty_stripes": 2
       },
       {
-        "pc": "0xf9b0",
-        "instruction": "@!P0 LDG.E R6, desc[UR6][R2.64]"
+        "tokens": 17,
+        "unique_vectors_per_K_or_V": 272,
+        "duplicates": 0,
+        "missing": 0,
+        "nonempty_stripes": 3
       },
       {
-        "pc": "0xf9c0",
-        "instruction": "S2UR UR8, SR_CgaCtaId"
+        "tokens": 18,
+        "unique_vectors_per_K_or_V": 288,
+        "duplicates": 0,
+        "missing": 0,
+        "nonempty_stripes": 3
       },
       {
-        "pc": "0xf9d0",
-        "instruction": "@!P0 LOP3.LUT R7, R7, 0xfffffff8, RZ, 0xc0, !PT"
+        "tokens": 19,
+        "unique_vectors_per_K_or_V": 304,
+        "duplicates": 0,
+        "missing": 0,
+        "nonempty_stripes": 3
       },
       {
-        "pc": "0xf9e0",
-        "instruction": "UMOV UR5, 0x400"
+        "tokens": 20,
+        "unique_vectors_per_K_or_V": 320,
+        "duplicates": 0,
+        "missing": 0,
+        "nonempty_stripes": 3
       },
       {
-        "pc": "0xf9f0",
-        "instruction": "@!P0 IMAD.IADD R7, R0, 0x1, -R7"
+        "tokens": 21,
+        "unique_vectors_per_K_or_V": 336,
+        "duplicates": 0,
+        "missing": 0,
+        "nonempty_stripes": 3
       },
       {
-        "pc": "0xfa00",
-        "instruction": "MOV R0, 0xffffffff"
+        "tokens": 22,
+        "unique_vectors_per_K_or_V": 352,
+        "duplicates": 0,
+        "missing": 0,
+        "nonempty_stripes": 3
       },
       {
-        "pc": "0xfa10",
-        "instruction": "ULEA UR5, UR8, UR5, 0x18"
+        "tokens": 23,
+        "unique_vectors_per_K_or_V": 368,
+        "duplicates": 0,
+        "missing": 0,
+        "nonempty_stripes": 3
       },
       {
-        "pc": "0xfa20",
-        "instruction": "@!P0 IMAD R0, R6, 0x8, R7"
+        "tokens": 24,
+        "unique_vectors_per_K_or_V": 384,
+        "duplicates": 0,
+        "missing": 0,
+        "nonempty_stripes": 3
       },
       {
-        "pc": "0xfa30",
-        "instruction": "STS [UR5+0x30450], R0"
+        "tokens": 25,
+        "unique_vectors_per_K_or_V": 400,
+        "duplicates": 0,
+        "missing": 0,
+        "nonempty_stripes": 4
       },
       {
-        "pc": "0xfa40",
-        "instruction": "BSYNC B0"
+        "tokens": 26,
+        "unique_vectors_per_K_or_V": 416,
+        "duplicates": 0,
+        "missing": 0,
+        "nonempty_stripes": 4
       },
       {
-        "pc": "0xfa50",
-        "instruction": "S2UR UR8, SR_CgaCtaId"
+        "tokens": 27,
+        "unique_vectors_per_K_or_V": 432,
+        "duplicates": 0,
+        "missing": 0,
+        "nonempty_stripes": 4
       },
       {
-        "pc": "0xfa60",
-        "instruction": "BAR.SYNC.DEFER_BLOCKING 0xe, 0x60"
+        "tokens": 28,
+        "unique_vectors_per_K_or_V": 448,
+        "duplicates": 0,
+        "missing": 0,
+        "nonempty_stripes": 4
       },
       {
-        "pc": "0xfa70",
-        "instruction": "UMOV UR5, 0x400"
+        "tokens": 29,
+        "unique_vectors_per_K_or_V": 464,
+        "duplicates": 0,
+        "missing": 0,
+        "nonempty_stripes": 4
       },
       {
-        "pc": "0xfa80",
-        "instruction": "ULEA UR5, UR8, UR5, 0x18"
+        "tokens": 30,
+        "unique_vectors_per_K_or_V": 480,
+        "duplicates": 0,
+        "missing": 0,
+        "nonempty_stripes": 4
       },
       {
-        "pc": "0xfa90",
-        "instruction": "LDS R10, [UR5+0x30450]"
+        "tokens": 31,
+        "unique_vectors_per_K_or_V": 496,
+        "duplicates": 0,
+        "missing": 0,
+        "nonempty_stripes": 4
       },
       {
-        "pc": "0xfaa0",
-        "instruction": "ISETP.GE.AND P0, PT, R10, RZ, PT"
+        "tokens": 32,
+        "unique_vectors_per_K_or_V": 512,
+        "duplicates": 0,
+        "missing": 0,
+        "nonempty_stripes": 4
+      },
+      {
+        "tokens": 33,
+        "unique_vectors_per_K_or_V": 528,
+        "duplicates": 0,
+        "missing": 0,
+        "nonempty_stripes": 5
+      },
+      {
+        "tokens": 34,
+        "unique_vectors_per_K_or_V": 544,
+        "duplicates": 0,
+        "missing": 0,
+        "nonempty_stripes": 5
+      },
+      {
+        "tokens": 35,
+        "unique_vectors_per_K_or_V": 560,
+        "duplicates": 0,
+        "missing": 0,
+        "nonempty_stripes": 5
+      },
+      {
+        "tokens": 36,
+        "unique_vectors_per_K_or_V": 576,
+        "duplicates": 0,
+        "missing": 0,
+        "nonempty_stripes": 5
+      },
+      {
+        "tokens": 37,
+        "unique_vectors_per_K_or_V": 592,
+        "duplicates": 0,
+        "missing": 0,
+        "nonempty_stripes": 5
+      },
+      {
+        "tokens": 38,
+        "unique_vectors_per_K_or_V": 608,
+        "duplicates": 0,
+        "missing": 0,
+        "nonempty_stripes": 5
+      },
+      {
+        "tokens": 39,
+        "unique_vectors_per_K_or_V": 624,
+        "duplicates": 0,
+        "missing": 0,
+        "nonempty_stripes": 5
+      },
+      {
+        "tokens": 40,
+        "unique_vectors_per_K_or_V": 640,
+        "duplicates": 0,
+        "missing": 0,
+        "nonempty_stripes": 5
+      },
+      {
+        "tokens": 41,
+        "unique_vectors_per_K_or_V": 656,
+        "duplicates": 0,
+        "missing": 0,
+        "nonempty_stripes": 6
+      },
+      {
+        "tokens": 42,
+        "unique_vectors_per_K_or_V": 672,
+        "duplicates": 0,
+        "missing": 0,
+        "nonempty_stripes": 6
+      },
+      {
+        "tokens": 43,
+        "unique_vectors_per_K_or_V": 688,
+        "duplicates": 0,
+        "missing": 0,
+        "nonempty_stripes": 6
+      },
+      {
+        "tokens": 44,
+        "unique_vectors_per_K_or_V": 704,
+        "duplicates": 0,
+        "missing": 0,
+        "nonempty_stripes": 6
+      },
+      {
+        "tokens": 45,
+        "unique_vectors_per_K_or_V": 720,
+        "duplicates": 0,
+        "missing": 0,
+        "nonempty_stripes": 6
+      },
+      {
+        "tokens": 46,
+        "unique_vectors_per_K_or_V": 736,
+        "duplicates": 0,
+        "missing": 0,
+        "nonempty_stripes": 6
+      },
+      {
+        "tokens": 47,
+        "unique_vectors_per_K_or_V": 752,
+        "duplicates": 0,
+        "missing": 0,
+        "nonempty_stripes": 6
+      },
+      {
+        "tokens": 48,
+        "unique_vectors_per_K_or_V": 768,
+        "duplicates": 0,
+        "missing": 0,
+        "nonempty_stripes": 6
+      },
+      {
+        "tokens": 49,
+        "unique_vectors_per_K_or_V": 784,
+        "duplicates": 0,
+        "missing": 0,
+        "nonempty_stripes": 7
+      },
+      {
+        "tokens": 50,
+        "unique_vectors_per_K_or_V": 800,
+        "duplicates": 0,
+        "missing": 0,
+        "nonempty_stripes": 7
+      },
+      {
+        "tokens": 51,
+        "unique_vectors_per_K_or_V": 816,
+        "duplicates": 0,
+        "missing": 0,
+        "nonempty_stripes": 7
+      },
+      {
+        "tokens": 52,
+        "unique_vectors_per_K_or_V": 832,
+        "duplicates": 0,
+        "missing": 0,
+        "nonempty_stripes": 7
+      },
+      {
+        "tokens": 53,
+        "unique_vectors_per_K_or_V": 848,
+        "duplicates": 0,
+        "missing": 0,
+        "nonempty_stripes": 7
+      },
+      {
+        "tokens": 54,
+        "unique_vectors_per_K_or_V": 864,
+        "duplicates": 0,
+        "missing": 0,
+        "nonempty_stripes": 7
+      },
+      {
+        "tokens": 55,
+        "unique_vectors_per_K_or_V": 880,
+        "duplicates": 0,
+        "missing": 0,
+        "nonempty_stripes": 7
+      },
+      {
+        "tokens": 56,
+        "unique_vectors_per_K_or_V": 896,
+        "duplicates": 0,
+        "missing": 0,
+        "nonempty_stripes": 7
+      },
+      {
+        "tokens": 57,
+        "unique_vectors_per_K_or_V": 912,
+        "duplicates": 0,
+        "missing": 0,
+        "nonempty_stripes": 8
+      },
+      {
+        "tokens": 58,
+        "unique_vectors_per_K_or_V": 928,
+        "duplicates": 0,
+        "missing": 0,
+        "nonempty_stripes": 8
+      },
+      {
+        "tokens": 59,
+        "unique_vectors_per_K_or_V": 944,
+        "duplicates": 0,
+        "missing": 0,
+        "nonempty_stripes": 8
+      },
+      {
+        "tokens": 60,
+        "unique_vectors_per_K_or_V": 960,
+        "duplicates": 0,
+        "missing": 0,
+        "nonempty_stripes": 8
+      },
+      {
+        "tokens": 61,
+        "unique_vectors_per_K_or_V": 976,
+        "duplicates": 0,
+        "missing": 0,
+        "nonempty_stripes": 8
+      },
+      {
+        "tokens": 62,
+        "unique_vectors_per_K_or_V": 992,
+        "duplicates": 0,
+        "missing": 0,
+        "nonempty_stripes": 8
+      },
+      {
+        "tokens": 63,
+        "unique_vectors_per_K_or_V": 1008,
+        "duplicates": 0,
+        "missing": 0,
+        "nonempty_stripes": 8
+      },
+      {
+        "tokens": 64,
+        "unique_vectors_per_K_or_V": 1024,
+        "duplicates": 0,
+        "missing": 0,
+        "nonempty_stripes": 8
       }
     ],
-    "host_load_and_hbm_store_loop": [
+    "measurement_calls": [
       {
-        "pc": "0x10120",
-        "instruction": "IADD3 R4, P2, R17, UR8, RZ"
-      },
-      {
-        "pc": "0x10130",
-        "instruction": "IADD3.X R5, R15, UR9, RZ, P2, !PT"
-      },
-      {
-        "pc": "0x10140",
-        "instruction": "IADD3 R2, P2, R17, UR10, RZ"
-      },
-      {
-        "pc": "0x10150",
-        "instruction": "LDG.E.128.STRONG.SYS R8, desc[UR6][R4.64]"
-      },
-      {
-        "pc": "0x10160",
-        "instruction": "IADD3.X R3, R15, UR11, RZ, P2, !PT"
-      },
-      {
-        "pc": "0x10170",
-        "instruction": "LDG.E.128.STRONG.SYS R4, desc[UR6][R2.64]"
-      },
-      {
-        "pc": "0x10180",
-        "instruction": "VIADD R0, R0, 0x60"
-      },
-      {
-        "pc": "0x10190",
-        "instruction": "YIELD"
-      },
-      {
-        "pc": "0x101a0",
-        "instruction": "IADD3 R2, P2, R17, UR12, RZ"
-      },
-      {
-        "pc": "0x101b0",
-        "instruction": "IADD3.X R3, R15, UR13, RZ, P2, !PT"
-      },
-      {
-        "pc": "0x101c0",
-        "instruction": "STG.E.128 desc[UR6][R2.64], R8"
-      },
-      {
-        "pc": "0x101d0",
-        "instruction": "IADD3 R2, P2, R17, UR14, RZ"
-      },
-      {
-        "pc": "0x101e0",
-        "instruction": "IADD3.X R3, R15, UR15, RZ, P2, !PT"
-      },
-      {
-        "pc": "0x101f0",
-        "instruction": "ISETP.GE.AND P2, PT, R0, R14, PT"
-      },
-      {
-        "pc": "0x10200",
-        "instruction": "STG.E.128 desc[UR6][R2.64], R4"
-      },
-      {
-        "pc": "0x10210",
-        "instruction": "@!P2 BRA 0xfff0"
-      },
-      {
-        "pc": "0x10220",
-        "instruction": "BSYNC B0"
-      },
-      {
-        "pc": "0x10230",
-        "instruction": "MEMBAR.ALL.CTA"
-      },
-      {
-        "pc": "0x10240",
-        "instruction": "MEMBAR.SC.GPU"
-      },
-      {
-        "pc": "0x10250",
-        "instruction": "ERRBAR"
-      },
-      {
-        "pc": "0x10260",
-        "instruction": "CGAERRBAR"
-      },
-      {
-        "pc": "0x10270",
-        "instruction": "CCTL.IVALL"
-      },
-      {
-        "pc": "0x10280",
-        "instruction": "LDL.LU R2, [R1+0x8]"
-      },
-      {
-        "pc": "0x10290",
-        "instruction": "WARPSYNC.ALL"
-      },
-      {
-        "pc": "0x102a0",
-        "instruction": "BSSY B0, 0x105b0"
-      },
-      {
-        "pc": "0x102b0",
-        "instruction": "BAR.SYNC.DEFER_BLOCKING 0xe, 0x60"
+        "line": 258,
+        "keyword_arguments": []
       }
     ],
-    "stripe_ready_acq_rel_rmw": [
-      {
-        "pc": "0x103c0",
-        "instruction": "LDC.64 R2, c[0x0][0x760]"
-      },
-      {
-        "pc": "0x103d0",
-        "instruction": "IMAD.MOV.U32 R5, RZ, RZ, 0x1"
-      },
-      {
-        "pc": "0x103e0",
-        "instruction": "IMAD.WIDE R2, R20, 0x4, R2"
-      },
-      {
-        "pc": "0x103f0",
-        "instruction": "MEMBAR.ALL.CTA"
-      },
-      {
-        "pc": "0x10400",
-        "instruction": "MEMBAR.ALL.GPU"
-      },
-      {
-        "pc": "0x10410",
-        "instruction": "ERRBAR"
-      },
-      {
-        "pc": "0x10420",
-        "instruction": "CGAERRBAR"
-      },
-      {
-        "pc": "0x10430",
-        "instruction": "ATOMG.E.ADD.STRONG.GPU PT, R2, desc[UR6][R2.64], R5"
-      },
-      {
-        "pc": "0x10440",
-        "instruction": "CCTL.IVALL"
-      },
-      {
-        "pc": "0x10450",
-        "instruction": "ISETP.NE.AND P0, PT, R2, 0x7, PT"
-      },
-      {
-        "pc": "0x10460",
-        "instruction": "@P0 BRA 0x105a0"
-      }
-    ],
-    "representative_tma_ready_acquire_and_async_fence": [
-      {
-        "pc": "0x10c80",
-        "instruction": "LDG.E.STRONG.GPU R10, desc[UR6][R2.64]"
-      },
-      {
-        "pc": "0x10c90",
-        "instruction": "CCTL.IVALL"
-      },
-      {
-        "pc": "0x10ca0",
-        "instruction": "ISETP.NE.AND P1, PT, R10, 0x8, PT"
-      },
-      {
-        "pc": "0x10cb0",
-        "instruction": "@!P1 BRA 0x10d10"
-      },
-      {
-        "pc": "0x10cc0",
-        "instruction": "NANOSLEEP 0x40"
-      },
-      {
-        "pc": "0x10cd0",
-        "instruction": "LDG.E.STRONG.GPU R10, desc[UR6][R2.64]"
-      },
-      {
-        "pc": "0x10ce0",
-        "instruction": "CCTL.IVALL"
-      },
-      {
-        "pc": "0x10cf0",
-        "instruction": "ISETP.NE.AND P1, PT, R10, 0x8, PT"
-      },
-      {
-        "pc": "0x10d00",
-        "instruction": "@P1 BRA 0x10cc0"
-      },
-      {
-        "pc": "0x10d10",
-        "instruction": "FENCE.VIEW.ASYNC.G"
-      }
-    ],
-    "async_global_fence_sites": [
-      {
-        "pc": "0x10d10",
-        "instruction": "FENCE.VIEW.ASYNC.G"
-      },
-      {
-        "pc": "0x110d0",
-        "instruction": "FENCE.VIEW.ASYNC.G"
-      },
-      {
-        "pc": "0x12060",
-        "instruction": "FENCE.VIEW.ASYNC.G"
-      },
-      {
-        "pc": "0x12470",
-        "instruction": "FENCE.VIEW.ASYNC.G"
-      },
-      {
-        "pc": "0x12910",
-        "instruction": "FENCE.VIEW.ASYNC.G"
-      },
-      {
-        "pc": "0x12d10",
-        "instruction": "FENCE.VIEW.ASYNC.G"
-      },
-      {
-        "pc": "0x13220",
-        "instruction": "FENCE.VIEW.ASYNC.G"
-      },
-      {
-        "pc": "0x135e0",
-        "instruction": "FENCE.VIEW.ASYNC.G"
-      }
+    "measurement_path": "No cache_tags/cache_owner supplied; default prepare resets cold-prefix fetch state and transfers the whole exact sparse union each call.",
+    "dynamic_profile_evidence": {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/audit/provenance/profile_audit.json",
+      "sha256": "2f6055ed6fa89172c144dcd238bed8cf7f3e2af003fb31dd121b3e8fac7fa712",
+      "bytes": 2486
+    },
+    "limits": [
+      "Static SASS sites do not by themselves prove dynamic execution counts; actual profile identities and harness byte gates are separate evidence.",
+      "Logical K/V payload and read-once ownership are not measurements of physical PCIe wire bytes.",
+      "This operator replay does not measure finite P/NH caching, full-model performance, serving performance, or a recaptured current model trajectory."
     ]
   },
-  "interpretation": {
-    "host_load": "Inline PTX ld.global.cv.v4.u32 emits the two LDG.E.128.STRONG.SYS sites in the fetch loop; each source-level stripe vector has one K and one V load. This is logical payload/cache-policy evidence, not a measurement of physical PCIe/CXL bytes or hardware replay.",
-    "ready": "Per-writer GPU fence then barrier14/count96 precedes leader acq_rel add. SASS surrounds the ready atomic with MEMBAR.ALL.GPU and CCTL.IVALL. The last stripe tests old count7. TMA GPU loads plus CCTL poll count8 and execute FENCE.VIEW.ASYNC.G before UTMALDG.",
-    "ownership": "Kernel source and CPU ownership enumeration are pinned in final_runtime_audit.json. The SASS atomic queue claim, shared slot broadcast, and 96-thread barriers match that source protocol.",
-    "register_pool": "Compiled REG168 rounds to 64512 registers per 384-thread CTA; deallocate24/allocate240 instructions exactly match required128*24+256*240. This is the relevant CTA pool rather than remaining SM registers."
-  },
-  "cuobjdump": {
-    "path": "/usr/local/cuda/bin/cuobjdump",
-    "version": "cuobjdump: NVIDIA (R) fat binary listing tool\nCopyright (c) 2005-2026 NVIDIA Corporation\nBuilt on Fri_May_08_10:53:34_AM_PDT_2026\nCuda compilation tools, release 13.2, V13.2.86\nBuild cuda_13.2.r13.2/compiler.37953736_0"
-  },
-  "extraction_commands": [
+  "archived_provenance": [
     {
-      "argv": [
-        "/usr/local/cuda/bin/cuobjdump",
-        "--dump-sass",
-        "/root/.cache/tvm-ffi/cxldsagr_nosa_offload_fused_484e32532ba74fb6_51838aa7303842b9/cxldsagr_nosa_offload_fused_484e32532ba74fb6.so"
-      ],
-      "stdout": "/tmp/nosa_overlap90/final_kernel.sass"
+      "original_path": "/mnt/ssd-wlcb/chenkaiqi/.cxldsagr-tmp/nosa_dependent_rerun_20261004_01/freeze.json",
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/audit/provenance/freeze.json",
+      "sha256": "bdd1fcf523b4398a230dbb4de677d0b3741eb98d68090bacfd8cbeeb1c2ac012",
+      "bytes": 46550
     },
     {
-      "argv": [
-        "/usr/local/cuda/bin/cuobjdump",
-        "--dump-resource-usage",
-        "/root/.cache/tvm-ffi/cxldsagr_nosa_offload_fused_484e32532ba74fb6_51838aa7303842b9/cxldsagr_nosa_offload_fused_484e32532ba74fb6.so"
-      ],
-      "stdout": "/tmp/nosa_overlap90/final_kernel.resources"
+      "original_path": "/mnt/ssd-wlcb/chenkaiqi/.cxldsagr-tmp/nosa_dependent_rerun_20261004_01/native_build_readiness.json",
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/audit/provenance/native_build_readiness.json",
+      "sha256": "e298e6861cac83fb9b8e774155da84599cee1337682f9f0f4b4aab4a9260ba54",
+      "bytes": 7307
+    },
+    {
+      "original_path": "/mnt/ssd-wlcb/chenkaiqi/.cxldsagr-tmp/nosa_dependent_rerun_20261004_01/verify_launch.py",
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/audit/provenance/verify_launch.py",
+      "sha256": "dcb79c5809f0961ab9f5b2e59862117885bb4b6c72882c2a6088f1d4a2962f96",
+      "bytes": 4309
+    },
+    {
+      "original_path": "/mnt/ssd-wlcb/chenkaiqi/.cxldsagr-tmp/nosa_dependent_rerun_20261004_01/run_one.sh",
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/audit/provenance/run_one.sh",
+      "sha256": "9380856136c046af917ab95f37827346e0fbf3bad71b0e50ffe4a612210023b1",
+      "bytes": 2374
+    },
+    {
+      "original_path": "/mnt/ssd-wlcb/chenkaiqi/.cxldsagr-tmp/nosa_dependent_rerun_20261004_01/launch/checkpoint_gpu5_20261004_01.after.json",
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/audit/launch/checkpoint_gpu5_20261004_01.after.json",
+      "sha256": "091232de73a4c0907ba0a6660ff279403c27d9a2c8377266fb77aa04f51ec777",
+      "bytes": 3307
+    },
+    {
+      "original_path": "/mnt/ssd-wlcb/chenkaiqi/.cxldsagr-tmp/nosa_dependent_rerun_20261004_01/launch/checkpoint_gpu5_20261004_01.before.json",
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/audit/launch/checkpoint_gpu5_20261004_01.before.json",
+      "sha256": "29aab138f739235d97fae127165a2b832c18e3ac7573c13b18c0f3f5795305ff",
+      "bytes": 3308
+    },
+    {
+      "original_path": "/mnt/ssd-wlcb/chenkaiqi/.cxldsagr-tmp/nosa_dependent_rerun_20261004_01/launch/nosa_cached_fetch_20261004_01.after.json",
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/audit/launch/nosa_cached_fetch_20261004_01.after.json",
+      "sha256": "b5e99f5a1001e67e5f557526b2aafa2a7d80144f39ddc89906954d5c18d399bf",
+      "bytes": 3309
+    },
+    {
+      "original_path": "/mnt/ssd-wlcb/chenkaiqi/.cxldsagr-tmp/nosa_dependent_rerun_20261004_01/launch/nosa_cached_fetch_20261004_01.before.json",
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/audit/launch/nosa_cached_fetch_20261004_01.before.json",
+      "sha256": "1ec5defa09cd145f723a11b5ef5201c3a1837b34c12139dffd363f4280fb6680",
+      "bytes": 3310
+    },
+    {
+      "original_path": "/mnt/ssd-wlcb/chenkaiqi/.cxldsagr-tmp/nosa_dependent_rerun_20261004_01/launch/nosa_cached_fetch_confirm40_20261004_01.after.json",
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/audit/launch/nosa_cached_fetch_confirm40_20261004_01.after.json",
+      "sha256": "57f66634d3d391bd51c4f8ad8d1bb966c919e96e79b1d0b5e06f00ce96f3b0f6",
+      "bytes": 3319
+    },
+    {
+      "original_path": "/mnt/ssd-wlcb/chenkaiqi/.cxldsagr-tmp/nosa_dependent_rerun_20261004_01/launch/nosa_cached_fetch_confirm40_20261004_01.before.json",
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/audit/launch/nosa_cached_fetch_confirm40_20261004_01.before.json",
+      "sha256": "f8f05e8d7b062d42f24135a93bec39b53521fcfd2bf92983fce95b069967b0b2",
+      "bytes": 3320
+    },
+    {
+      "original_path": "/mnt/ssd-wlcb/chenkaiqi/.cxldsagr-tmp/nosa_dependent_rerun_20261004_01/launch/nosa_cached_fetch_profile_20261004_01.after.json",
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/audit/launch/nosa_cached_fetch_profile_20261004_01.after.json",
+      "sha256": "f420e0cf8e3d535ebeb7dc7d2aa36d58662c7339811eb46f59de01c53618a57a",
+      "bytes": 3317
+    },
+    {
+      "original_path": "/mnt/ssd-wlcb/chenkaiqi/.cxldsagr-tmp/nosa_dependent_rerun_20261004_01/launch/nosa_cached_fetch_profile_20261004_01.before.json",
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/audit/launch/nosa_cached_fetch_profile_20261004_01.before.json",
+      "sha256": "3692d52e473ab580ecd7a54aef71a8f878aa542ecb7af4611268f0e8f3febe59",
+      "bytes": 3318
+    },
+    {
+      "original_path": "/mnt/ssd-wlcb/chenkaiqi/.cxldsagr-tmp/nosa_offload_rerun_root_audit_20261004_01/timing_audit.json",
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/audit/provenance/timing_audit.json",
+      "sha256": "54ab179afaf131e73f2e7b36d1da46d60be92fa12e3873e922f50fc0f3269d47",
+      "bytes": 2400
+    },
+    {
+      "original_path": "/mnt/ssd-wlcb/chenkaiqi/.cxldsagr-tmp/nosa_offload_rerun_root_audit_20261004_01/profile_audit.json",
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/audit/provenance/profile_audit.json",
+      "sha256": "2f6055ed6fa89172c144dcd238bed8cf7f3e2af003fb31dd121b3e8fac7fa712",
+      "bytes": 2486
+    },
+    {
+      "original_path": "/mnt/ssd-wlcb/chenkaiqi/.cxldsagr-tmp/nosa_offload_rerun_root_audit_20261004_01/audit_profile.py",
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/audit/provenance/audit_profile.py",
+      "sha256": "01bafee5c82012b7747ea1bc979566e893926076c33aab4af33a9de499c8d3b8",
+      "bytes": 5832
     }
   ]
 }

@@ -1,5 +1,11 @@
 # DeepSeek GR serving backend
 
+> Historical GR scope (2026-10-05): the `gr_serving` experiment is retired and its
+> experiment outputs have been removed. Its commands, result-retention rules and
+> rerun instructions below are historical and no longer active. See the
+> [retirement scope](experiment_organization.md#retired-gr-serving). Other
+> implementation and experiment findings retain their stated scope.
+
 ## Task and numerical scope
 
 The user requested a single-GPU, no-MoE approximation to 8B using real DeepSeek

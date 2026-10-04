@@ -18,8 +18,8 @@ ROOT = Path(__file__).resolve().parents[3]
 ARMS = ("dense_qa64", "dense_nosa64", "sparse_nosa64")
 LABELS = {
     "dense_qa64": "dense_qa64: dense / QA-only, 16 local, FP32",
-    "dense_nosa64": "dense_nosa64: dense / NOSA+CIS, 17 local, Triton",
-    "sparse_nosa64": "sparse_nosa64: sparse / NOSA+CIS, 17 local, Triton",
+    "dense_nosa64": "dense_nosa64: dense / NOSA+CIS, 17 local, SM90 dispatcher",
+    "sparse_nosa64": "sparse_nosa64: sparse / NOSA+CIS, 17 local, SM90 dispatcher",
 }
 PAIRS = {
     "policy_and_arithmetic": (

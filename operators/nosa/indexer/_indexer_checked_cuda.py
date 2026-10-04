@@ -24,17 +24,24 @@ def select_prepared_out(
     compressed_start,
     pooled_start,
     scratch,
+    defer_check=False,
 ):
-    """Return selected outputs after a successful finite check on this stream.
+    """Return selected outputs with checked or explicitly deferred validation.
 
     This endpoint accepts the owned BF16/D128/GQA16 ranked native joint path.
     Other geometry retains the original preparation and selection calls.
     Native code validates every buffer before launching. Validation scratch
-    may change; invalid Q/new K/new CIS leaves all other output bytes intact.
+    may change; synchronous failure leaves all other output bytes intact.
     A pinned host bool is mandatory, and CUDA Graph capture is rejected before
-    launching any work. Async prepare APIs retain their capture semantics.
+    launching any work. With ``defer_check=True``, the device finite flag guards
+    downstream work and failure writes IDs=-1/mask=false. The owner must observe
+    that flag before publishing any cache state or returning model output.
+    Async prepare APIs retain their capture semantics.
     """
     import tvm_ffi
+
+    if type(defer_check) is not bool:
+        raise TypeError("defer_check must be a bool")
 
     if not isinstance(scratch, PreparationScratch) or (
         scratch.host_finite is None
@@ -50,7 +57,10 @@ def select_prepared_out(
         raise ValueError("Checked ranked indexer bounds must be integers")
     module = load_module("nosa_indexer_checked")
     with torch.cuda.device(query.device), tvm_ffi.use_torch_stream():
-        finite = module.checked_ranked_indexer_out(
+        submit = (
+            module.async_ranked_indexer_out if defer_check else module.checked_ranked_indexer_out
+        )
+        finite = submit(
             query,
             keys,
             cis,
@@ -70,6 +80,6 @@ def select_prepared_out(
             pooled_start,
             query_start,
         )
-    if not finite:
+    if not defer_check and not finite:
         raise ValueError("NOSA indexer requires finite Q, K and CIS scores")
     return block_ids, valid_mask

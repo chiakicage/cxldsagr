@@ -112,7 +112,8 @@ def test_cuda_overlap_preserves_tail_cis_and_exact_fetch_union(hopper, prefix):
 
 
 @pytest.mark.parametrize("fetch_ctas,queries", [(1, 9), (7, 3), (96, 9)])
-def test_cuda_overlap_stripe_tail_trace_and_profile_reuse(hopper, fetch_ctas, queries):
+@pytest.mark.parametrize("bounded", [False, True])
+def test_cuda_overlap_stripe_tail_trace_and_profile_reuse(hopper, fetch_ctas, queries, bounded):
     from operators.nosa.attention.offload._fused import build_info
 
     prefix, tile_size, heads = 145, 8, 2
@@ -136,6 +137,15 @@ def test_cuda_overlap_stripe_tail_trace_and_profile_reuse(hopper, fetch_ctas, qu
         dtype=q.dtype,
         query_tile_size=tile_size,
         fetch_ctas=fetch_ctas,
+        **(
+            {
+                "bounded": True,
+                "max_queries": queries,
+                "trace_capacity": NosaFetchWorkspace.estimate_trace_rows(512, queries, heads),
+            }
+            if bounded
+            else {}
+        ),
     )
     fetch_slots = ((prefix + 63) // 64) * heads
     batches = ((queries + 7) // 8) * heads
@@ -265,7 +275,8 @@ def test_cuda_overlap_initialization_stages_strided_suffix(hopper, prefix, layou
 
 
 @pytest.mark.parametrize("broadcast", ["head", "query", "both"])
-def test_cuda_overlap_broadcast_selection_and_serial_control(hopper, broadcast):
+@pytest.mark.parametrize("bounded", [False, True])
+def test_cuda_overlap_broadcast_selection_and_serial_control(hopper, broadcast, bounded):
     prefix, queries, tile_size = 512, 25, 11
     inputs = _inputs(prefix, queries)
     ids = torch.tensor([1, 5, 8, -1], device="cuda", dtype=torch.int32).reshape(1, 1, 4)
@@ -284,6 +295,7 @@ def test_cuda_overlap_broadcast_selection_and_serial_control(hopper, broadcast):
             dtype=torch.bfloat16,
             query_tile_size=tile_size,
             overlap=overlap,
+            **({"bounded": True, "max_queries": queries} if bounded else {}),
         )
         # Unselected page 0 is used by odd-page FA3 padding and must have safe
         # initialized contents, even if a previous layer left NaN in staging.
@@ -330,9 +342,16 @@ def test_cuda_overlap_late_page_zero_and_masked_nan_preserve_repair(hopper):
     assert workspace.last_tile_transfer_bytes.cpu().tolist() == [131072, 65536, 0]
 
 
-def test_cuda_overlap_workspace_reuse_across_caller_streams_and_empty_step(hopper):
+@pytest.mark.parametrize("bounded", [False, True])
+def test_cuda_overlap_workspace_reuse_across_caller_streams_and_empty_step(hopper, bounded):
     workspace = NosaFetchWorkspace(
-        512, 2, 128, device="cuda", dtype=torch.bfloat16, query_tile_size=8
+        512,
+        2,
+        128,
+        device="cuda",
+        dtype=torch.bfloat16,
+        query_tile_size=8,
+        **({"bounded": True, "max_queries": 32} if bounded else {}),
     )
     inputs = [_inputs(257, 17), _inputs(129, 9)]
     current = torch.cuda.current_stream()
@@ -405,11 +424,20 @@ def test_cuda_overlap_reused_workspace_retains_outputs_with_varying_queries(hopp
         torch.testing.assert_close(output, torch.full_like(output, expected_value), atol=0, rtol=0)
 
 
-def test_cuda_overlap_reused_scratch_crosses_fa3_work_order_boundary(hopper):
+@pytest.mark.parametrize("bounded", [False, True])
+def test_cuda_overlap_reused_scratch_crosses_fa3_work_order_boundary(hopper, bounded):
     prefix, tile_size = 2048, 128
     workspace = NosaFetchWorkspace(
-        4096, 2, 128, device="cuda", dtype=torch.bfloat16, query_tile_size=tile_size
+        4096,
+        2,
+        128,
+        device="cuda",
+        dtype=torch.bfloat16,
+        query_tile_size=tile_size,
+        **({"bounded": True, "max_queries": 1032} if bounded else {}),
     )
+    initial_bytes = workspace.capacity_bytes
+    pointers = [tensor.data_ptr() for tensor in workspace.tensors()]
     # With two KV heads, 1017..1024 queries require 256 work items and the
     # separate counts/order region; adjacent lengths use a different layout.
     for queries in (1016, 1017, 1024, 1025, 1017):
@@ -438,6 +466,9 @@ def test_cuda_overlap_reused_scratch_crosses_fa3_work_order_boundary(hopper):
         expected_bytes = _expected_tile_bytes(selection, prefix, queries, tile_size)
         assert workspace.last_tile_transfer_bytes.cpu().tolist() == expected_bytes
         assert workspace.last_transfer_bytes.item() == sum(expected_bytes)
+        if bounded:
+            assert workspace.capacity_bytes == initial_bytes
+            assert [tensor.data_ptr() for tensor in workspace.tensors()] == pointers
 
 
 def test_cuda_overlap_repair_flags_reset_after_poison_and_empty_rows(hopper):

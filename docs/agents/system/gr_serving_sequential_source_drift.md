@@ -1,5 +1,11 @@
 # Sequential serving run01: source drift and device identity
 
+> Historical GR scope (2026-10-05): the `gr_serving` experiment is retired and its
+> experiment outputs have been removed. Its commands, result-retention rules and
+> rerun instructions below are historical and no longer active. See the
+> [retirement scope](experiment_organization.md#retired-gr-serving). Other
+> implementation and experiment findings retain their stated scope.
+
 2026-10-02 只读核查。结论：run01 确实触发源码冻结检查失败；两个变化文件不在
 serving 的静态调用依赖中。同期 layers3 profiler 使用物理 GPU 1，不能将其中的
 逻辑 `cuda:0` 解释为 serving 使用的物理 GPU 0。run01 不作为验收或性能结果发布，
@@ -37,7 +43,7 @@ Run ID 为 `gr_serving_h200_20261002_sequential_u16_t32_h64k_01`；诊断目录�
 诊断前缀选择、`return_hidden` 返回值及相应 CLI 参数；测试文件增加这些行为的检查。
 改动均在 standalone `DeepSeekEchoModel` 或其测试中。
 
-[measure.py](../../../experiments/gr_serving/src/measure.py) 的 `_backend` 直接构造
+[旧 GR 实验（已结束）](experiment_organization.md#retired-gr-serving) 的 `_backend` 直接构造
 [DeepSeekServingBackend](../../../models/deepseek_v32/serving_backend.py)，后者使用
 `CheckpointBlock`、`EchoAttentionRunner`、`Config`、`CheckpointReader` 和 `rms_norm`，
 由自身的执行代码调用 block、final norm 和 LM head，并未构造 `DeepSeekEchoModel`。

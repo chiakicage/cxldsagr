@@ -1,5 +1,11 @@
 # ECHO cache P6 发布与复现命令记录
 
+> Historical GR scope (2026-10-05): the `gr_serving` experiment is retired and its
+> experiment outputs have been removed. Its commands, result-retention rules and
+> rerun instructions below are historical and no longer active. See the
+> [retirement scope](experiment_organization.md#retired-gr-serving). Other
+> implementation and experiment findings retain their stated scope.
+
 > **2026-10-03 撤回说明：** 本文涉及的旧 DeepSeek 4 GiB / W / chunk 对照已按用户要求撤回，
 > 相关实验源码与运行产物已清理；下文仅保留当时的工程过程，不再证明当前容量或性能。
 > 当前入口为[固定 P/NH 容量实验](../../../experiments/deepseek_v32_echo_cache/README.md)。

@@ -237,7 +237,8 @@ def test_sparse_capture_records_each_actual_indexer_result_once_and_restores_cal
 
 
 @torch.inference_mode()
-def test_run_trajectory_builds_and_releases_a_fresh_prefix_for_each_mode(model):
+@pytest.mark.parametrize("validate_observer", [False, True])
+def test_run_trajectory_builds_and_releases_a_fresh_prefix_for_each_mode(model, validate_observer):
     tokens = tokens_for(model)
     original_indexer, original_attention = model.indexer, model.main_attention
     original_allocate = model.new_cache
@@ -254,12 +255,22 @@ def test_run_trajectory_builds_and_releases_a_fresh_prefix_for_each_mode(model):
         patch.object(model, "attention", dense_attention),
     ):
         dense_recorder, dense_hidden = run_trajectory(
-            model, tokens[:PREFIX], tokens[PREFIX:], mode="dense", backend="reference"
+            model,
+            tokens[:PREFIX],
+            tokens[PREFIX:],
+            mode="dense",
+            backend="reference",
+            validate_observer=validate_observer,
         )
         assert caches[0].released
         assert model.indexer is original_indexer and model.main_attention is original_attention
         sparse_recorder, sparse_hidden = run_trajectory(
-            model, tokens[:PREFIX], tokens[PREFIX:], mode="sparse", backend="reference"
+            model,
+            tokens[:PREFIX],
+            tokens[PREFIX:],
+            mode="sparse",
+            backend="reference",
+            validate_observer=validate_observer,
         )
         assert model.indexer is original_indexer and model.main_attention is original_attention
     assert len(caches) == 2 and caches[0] is not caches[1]

@@ -1,0 +1,283 @@
+{
+  "schema": "nosa-motivation-publication-v2",
+  "measurement_run_id": "nosa_motivation_poolscan_sm90_20261004_01",
+  "profile_run_id": "nosa_motivation_poolscan_profile_sm90_20261004_01",
+  "api_run_id": "nosa_attention_poolscan_sm90_20261004_01",
+  "source_sha256": "93061ceb297bfd27ec0bbf6ac21de13c75cc612ece1cb8b5855ec86d3548bb79",
+  "native_build_sha256": "94f3df279e3e18fffa0a5d5bbf3b8a384689d7869b77987afb3fa54fb784cdcc",
+  "pool_build_fingerprint": "09ba1d834970359cf92e17c028ab5aa7801199d7055212e3ce36635077eaf2ae",
+  "render_provenance": {
+    "run_id": "nosa_motivation_poolscan_sm90_20261004_01",
+    "source_sha256": "93061ceb297bfd27ec0bbf6ac21de13c75cc612ece1cb8b5855ec86d3548bb79",
+    "workload_sha256": "d8569499b36e8a4ee9f1367e760b875494a7f1a545245c47e35535c6970a8040",
+    "generated_by": "external render_latency.py with hash-bound accepted metadata/rows",
+    "latency_scope": "Synchronized runner wall latency includes token validation/transfer, admission, eviction, independent sparse history construction on miss, all candidate hidden states, and candidate discard. Model loading, request generation, warmup, output copies, counters, numerical comparison and reports are outside latency."
+  },
+  "render_provenance_sha256": "f095889388365c3dd410dd5e28421bdc8d16e1cd6cede7de56cacdbf7d5c7846",
+  "inputs": [
+    {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/.cxldsagr-tmp/nosa_pool_scan_fixed_publication_20261004_01/README.fresh.md",
+      "sha256": "a586a05eb2b156b82c9d71ab2f2729b75759652af1096972b0ebcafc4eaa27a7"
+    },
+    {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/.cxldsagr-tmp/nosa_pool_scan_fixed_publication_20261004_01/adapter_origins.json",
+      "sha256": "a55c23050f02eaab34d5049cd45e87d9a48b0dee5f3588cd3b04e83cd3a71708"
+    },
+    {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/.cxldsagr-tmp/nosa_pool_scan_fixed_publication_20261004_01/render_latency.py",
+      "sha256": "166f21c153b6d32d21778e59cf2edcb343830f43e00e68e0591bd717d21047df"
+    },
+    {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/.cxldsagr-tmp/nosa_pool_scan_fixed_publication_20261004_01/stage_publication.py",
+      "sha256": "57138788ce34ccecec8ecd3174d493c29887afbebbe926939f5f13969c1ecc62"
+    },
+    {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/.cxldsagr-tmp/nosa_pool_scan_fixed_review_20261004_01/attention_reference_review.json",
+      "sha256": "94d0ba81a64646c1a9a0bdbb7393d836fd130d5ebcdd1e11a27e42c28e0f2cfe"
+    },
+    {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/.cxldsagr-tmp/nosa_pool_scan_fixed_review_20261004_01/audit_formal.py",
+      "sha256": "e5b9c3d05cbe912eae79b843c397f79b70ce532f320e7faa9fc3be1669ef1e4e"
+    },
+    {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/.cxldsagr-tmp/nosa_pool_scan_fixed_review_20261004_01/audit_profile.py",
+      "sha256": "2b490b10fa88c7e04e2a0adc6f688d4720d898a5e2245a5934dd903a13c10a3d"
+    },
+    {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/.cxldsagr-tmp/nosa_pool_scan_fixed_review_20261004_01/audit_reference.py",
+      "sha256": "1d165730d63e9d1056eb12ea3b9d5ca3ca622f650087573b43a8ebc0f97cb518"
+    },
+    {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/.cxldsagr-tmp/nosa_pool_scan_fixed_review_20261004_01/bind_inputs.py",
+      "sha256": "e857d956cfd4bead07ab78033830abd69142ddc1517285396553579ffa13404f"
+    },
+    {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/.cxldsagr-tmp/nosa_pool_scan_fixed_review_20261004_01/formal_measurement_review.json",
+      "sha256": "4398bc799b545ab10cc9f51531e89a1971598b3823e198dbae16262ff0819c74"
+    },
+    {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/.cxldsagr-tmp/nosa_pool_scan_fixed_review_20261004_01/inputs.json",
+      "sha256": "f9aba51e4ad685e87732c76ac8e16256decb977d4df44af754d47692fc06c952"
+    },
+    {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/.cxldsagr-tmp/nosa_pool_scan_fixed_review_20261004_01/planned_run_ids.json",
+      "sha256": "2319706807b8d04e02cb18d79f18dbc2d981b987070f079979201f834620ce5d"
+    },
+    {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/.cxldsagr-tmp/nosa_pool_scan_fixed_review_20261004_01/profile_review.json",
+      "sha256": "6ac6e3a99da3c552b7cb85e384a4a8f79c407635bee6c8ff54a748f389f59e6f"
+    },
+    {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/.cxldsagr-tmp/nosa_pool_scan_fixed_review_20261004_01/review_common.py",
+      "sha256": "d5d8d5a24534d6aaa5833b77742f901a7a2bd2b8413434dc9f052273c3284cf4"
+    },
+    {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/.cxldsagr-tmp/nosa_pool_scan_fixed_review_20261004_01/run_review.py",
+      "sha256": "7fbe809d5d810192f602c11d38982b1ee94085154777db00cd4cfb2612ddd5e6"
+    },
+    {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_motivation/output/data/nosa_attention_poolscan_sm90_20261004_01/metadata.json",
+      "sha256": "c7b49fe1464038107c6d93779fd02f5545062cf5602f54e52fcc95e3e21ec8c2"
+    },
+    {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_motivation/output/data/nosa_attention_poolscan_sm90_20261004_01/source_manifest.json",
+      "sha256": "29aa2ba3cb3b23f9b1b9b8e94ae5f6f141d1c943d0d9e683e4c830baf8cef3d9"
+    },
+    {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_motivation/output/data/nosa_motivation_poolscan_profile_sm90_20261004_01/metadata.json",
+      "sha256": "54c4d7ebb04eced3a3916729d6dc4591b1b6c691728e5bde3c54f592866c1622"
+    },
+    {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_motivation/output/data/nosa_motivation_poolscan_profile_sm90_20261004_01/source_manifest.json",
+      "sha256": "29aa2ba3cb3b23f9b1b9b8e94ae5f6f141d1c943d0d9e683e4c830baf8cef3d9"
+    },
+    {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_motivation/output/data/nosa_motivation_poolscan_sm90_20261004_01/measurements.jsonl",
+      "sha256": "df82a34ba905d1d98d997e43da17340ef62699ec158d2c5d942e086bed49edb5"
+    },
+    {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_motivation/output/data/nosa_motivation_poolscan_sm90_20261004_01/metadata.json",
+      "sha256": "abd72b53122e00f11889c66758d8c7bdc84e7bfcf0cfc6e7be44a5869447b0de"
+    },
+    {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_motivation/output/data/nosa_motivation_poolscan_sm90_20261004_01/report/audit.json",
+      "sha256": "4b06953979c73ba0bc9f8f3b233afdf6de5fefe44cfe27c4580659184638bebb"
+    },
+    {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_motivation/output/data/nosa_motivation_poolscan_sm90_20261004_01/report/per_request.csv",
+      "sha256": "b18f5f3da67cb09669fafaa8ef9708302e26cb090cbcba99ac5d64edda3186c2"
+    },
+    {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_motivation/output/data/nosa_motivation_poolscan_sm90_20261004_01/report/report_provenance.json",
+      "sha256": "716260a041dd772a0a4602190bf269a2f886ba3d590975e7c7bb1514a067e994"
+    },
+    {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_motivation/output/data/nosa_motivation_poolscan_sm90_20261004_01/report/summary.csv",
+      "sha256": "87e3943928c5e03258ad4d7c69f62ad9908be0c2bdff22766faaa82ceb7da17c"
+    },
+    {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_motivation/output/data/nosa_motivation_poolscan_sm90_20261004_01/report/summary.json",
+      "sha256": "1c1fa068d1060b9f2a82ff1156e2de6972bcc8ef72de0ccf1a4947c5ef615855"
+    },
+    {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_motivation/output/data/nosa_motivation_poolscan_sm90_20261004_01/source_manifest.json",
+      "sha256": "29aa2ba3cb3b23f9b1b9b8e94ae5f6f141d1c943d0d9e683e4c830baf8cef3d9"
+    }
+  ],
+  "copies": [
+    {
+      "source": "/mnt/ssd-wlcb/chenkaiqi/.cxldsagr-tmp/nosa_pool_scan_fixed_review_20261004_01/formal_measurement_review.json",
+      "destination": "measurement_review.json",
+      "sha256": "4398bc799b545ab10cc9f51531e89a1971598b3823e198dbae16262ff0819c74"
+    },
+    {
+      "source": "/mnt/ssd-wlcb/chenkaiqi/.cxldsagr-tmp/nosa_pool_scan_fixed_review_20261004_01/profile_review.json",
+      "destination": "profile_review.json",
+      "sha256": "6ac6e3a99da3c552b7cb85e384a4a8f79c407635bee6c8ff54a748f389f59e6f"
+    },
+    {
+      "source": "/mnt/ssd-wlcb/chenkaiqi/.cxldsagr-tmp/nosa_pool_scan_fixed_review_20261004_01/attention_reference_review.json",
+      "destination": "api_review.json",
+      "sha256": "94d0ba81a64646c1a9a0bdbb7393d836fd130d5ebcdd1e11a27e42c28e0f2cfe"
+    },
+    {
+      "source": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_motivation/output/data/nosa_motivation_poolscan_sm90_20261004_01/report/summary.csv",
+      "destination": "summary.csv",
+      "sha256": "87e3943928c5e03258ad4d7c69f62ad9908be0c2bdff22766faaa82ceb7da17c"
+    },
+    {
+      "source": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_motivation/output/data/nosa_motivation_poolscan_sm90_20261004_01/report/summary.json",
+      "destination": "summary.json",
+      "sha256": "1c1fa068d1060b9f2a82ff1156e2de6972bcc8ef72de0ccf1a4947c5ef615855"
+    },
+    {
+      "source": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_motivation/output/data/nosa_motivation_poolscan_sm90_20261004_01/report/per_request.csv",
+      "destination": "per_request.csv",
+      "sha256": "b18f5f3da67cb09669fafaa8ef9708302e26cb090cbcba99ac5d64edda3186c2"
+    },
+    {
+      "source": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_motivation/output/data/nosa_motivation_poolscan_sm90_20261004_01/report/audit.json",
+      "destination": "audit.json",
+      "sha256": "4b06953979c73ba0bc9f8f3b233afdf6de5fefe44cfe27c4580659184638bebb"
+    },
+    {
+      "source": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_motivation/output/data/nosa_motivation_poolscan_sm90_20261004_01/report/report_provenance.json",
+      "destination": "report_provenance.json",
+      "sha256": "716260a041dd772a0a4602190bf269a2f886ba3d590975e7c7bb1514a067e994"
+    },
+    {
+      "source": "/mnt/ssd-wlcb/chenkaiqi/.cxldsagr-tmp/nosa_pool_scan_fixed_stage_20261004_02/figures/latency_summary.png",
+      "destination": "latency_summary.png",
+      "sha256": "6fa8636a61299aed6f94fc591483e52c74663984d00c3a9551b0c5f784de318d"
+    },
+    {
+      "source": "/mnt/ssd-wlcb/chenkaiqi/.cxldsagr-tmp/nosa_pool_scan_fixed_stage_20261004_02/figures/latency_summary.svg",
+      "destination": "latency_summary.svg",
+      "sha256": "67b5cb330664c8c3a660f91462238e0b9f0e2e1a8bf82849b721303c29513db8"
+    },
+    {
+      "source": "/mnt/ssd-wlcb/chenkaiqi/.cxldsagr-tmp/nosa_pool_scan_fixed_stage_20261004_02/figures/latency_per_request.png",
+      "destination": "latency_per_request.png",
+      "sha256": "ed6bf572a0b0c433147c45adb7fc87f18af50483242fd6cd67c1fd58d29d7a19"
+    },
+    {
+      "source": "/mnt/ssd-wlcb/chenkaiqi/.cxldsagr-tmp/nosa_pool_scan_fixed_stage_20261004_02/figures/latency_per_request.svg",
+      "destination": "latency_per_request.svg",
+      "sha256": "e4a6000a1365585d96aeef43d00b5351f2a1b63315e1ed5acd8330da90cefb71"
+    }
+  ],
+  "assets": [
+    {
+      "path": "acceptance.json",
+      "bytes": 68157,
+      "sha256": "c51e29de2f6cbda976abdde010d945b5b6d7b6992a427263f3036f013209bb2e"
+    },
+    {
+      "path": "api_comparison.json",
+      "bytes": 8899,
+      "sha256": "7d04f52406b27da466323da2fd16375cff89a3deb2f71e450c187f7af191a40a"
+    },
+    {
+      "path": "api_review.json",
+      "bytes": 403943,
+      "sha256": "94d0ba81a64646c1a9a0bdbb7393d836fd130d5ebcdd1e11a27e42c28e0f2cfe"
+    },
+    {
+      "path": "async_overlap.csv",
+      "bytes": 6537,
+      "sha256": "a5b8c67f1e87c7c2d07d532a2aa704f95809dc5a7774be544f6199900c699953"
+    },
+    {
+      "path": "audit.json",
+      "bytes": 14337,
+      "sha256": "4b06953979c73ba0bc9f8f3b233afdf6de5fefe44cfe27c4580659184638bebb"
+    },
+    {
+      "path": "candidate_tails.json",
+      "bytes": 117206,
+      "sha256": "4bcf9caaf5bcf280456564e13a94780f85b26256f06f0031b4b4c0da919dfd8f"
+    },
+    {
+      "path": "latency_per_request.png",
+      "bytes": 98480,
+      "sha256": "ed6bf572a0b0c433147c45adb7fc87f18af50483242fd6cd67c1fd58d29d7a19"
+    },
+    {
+      "path": "latency_per_request.svg",
+      "bytes": 64395,
+      "sha256": "e4a6000a1365585d96aeef43d00b5351f2a1b63315e1ed5acd8330da90cefb71"
+    },
+    {
+      "path": "latency_summary.png",
+      "bytes": 107700,
+      "sha256": "6fa8636a61299aed6f94fc591483e52c74663984d00c3a9551b0c5f784de318d"
+    },
+    {
+      "path": "latency_summary.svg",
+      "bytes": 56706,
+      "sha256": "67b5cb330664c8c3a660f91462238e0b9f0e2e1a8bf82849b721303c29513db8"
+    },
+    {
+      "path": "measurement_review.json",
+      "bytes": 77809,
+      "sha256": "4398bc799b545ab10cc9f51531e89a1971598b3823e198dbae16262ff0819c74"
+    },
+    {
+      "path": "memory.csv",
+      "bytes": 711,
+      "sha256": "3e1fe3083f43d06a42dcb62353bd38127d1fb5dee4d112a30ae01994af0ca3b6"
+    },
+    {
+      "path": "per_request.csv",
+      "bytes": 16091,
+      "sha256": "b18f5f3da67cb09669fafaa8ef9708302e26cb090cbcba99ac5d64edda3186c2"
+    },
+    {
+      "path": "profile_review.json",
+      "bytes": 510425,
+      "sha256": "6ac6e3a99da3c552b7cb85e384a4a8f79c407635bee6c8ff54a748f389f59e6f"
+    },
+    {
+      "path": "profile_summary.json",
+      "bytes": 127074,
+      "sha256": "af6f6579f7c379f664934934b797a65c276263c2c63f35cbee754c9ff7086cdc"
+    },
+    {
+      "path": "report_provenance.json",
+      "bytes": 488,
+      "sha256": "716260a041dd772a0a4602190bf269a2f886ba3d590975e7c7bb1514a067e994"
+    },
+    {
+      "path": "summary.csv",
+      "bytes": 2732,
+      "sha256": "87e3943928c5e03258ad4d7c69f62ad9908be0c2bdff22766faaa82ceb7da17c"
+    },
+    {
+      "path": "summary.json",
+      "bytes": 7395,
+      "sha256": "1c1fa068d1060b9f2a82ff1156e2de6972bcc8ef72de0ccf1a4947c5ef615855"
+    }
+  ],
+  "generation": "Fresh hash-bound independent receipts, audited formal scalar tables, copied CPU latency renderer, and this external adapter. No tensor/GPU audit is repeated.",
+  "boundary": "External report staging only. No installation, old-output cleanup, README narrative, or automatic MFU success claim."
+}

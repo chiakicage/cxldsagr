@@ -406,7 +406,7 @@ def reconcile_official(previous, current, *, allow_new_native):
 def verify_identities(backend, output, metadata, stage):
     import torch
 
-    from experiments.gr_serving.src.measure import backend_provenance, verify_source_snapshot
+    from evaluation.provenance import backend_provenance, verify_source_snapshot
 
     precision = precision_settings(torch)
     if precision != metadata["precision_settings"]:
@@ -496,9 +496,9 @@ def main(argv=None):
 
         metadata["precision_settings"] = configure_precision(torch)
 
+        from evaluation.provenance import _git, backend_provenance
         from experiments.deepseek_v32_echo_cache.src.capacity_probe import memory_sample
-        from experiments.gr_serving.src.measure import _git, backend_provenance
-        from experiments.gr_serving.src.workload import WorkloadConfig, build_workload
+        from GR.workload import WorkloadConfig, build_workload
         from models.deepseek_v32.official_serving import OfficialDeepSeekServingBackend
         from serving.persistent import PersistentGRRunner
 

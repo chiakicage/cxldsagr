@@ -325,6 +325,7 @@ __device__ __forceinline__ void score_tail_tile(const Params& p,Shared& smem,
 template <typename T, typename O, bool Pool, bool Selection, typename Map>
 __global__ __launch_bounds__(kThreads+128,1) void fused_scores_kernel(
     __grid_constant__ const Params p,__grid_constant__ const Map map) {
+  if(reject_nonfinite_selection(p,kQueryRows)) return;
   using Tr=Traits<T>;
   extern __shared__ __align__(128) unsigned char storage[];
   auto& smem=*reinterpret_cast<typename Tr::template Shared<kStages,true>*>(storage);

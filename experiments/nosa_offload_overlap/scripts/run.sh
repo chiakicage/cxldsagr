@@ -6,6 +6,7 @@ export PATH="$PWD/.venv/bin:$PATH"
 export PYTHONDONTWRITEBYTECODE=1
 if [[ "${1:-}" == --help ]]; then
   echo "Usage: bash experiments/nosa_offload_overlap/scripts/run.sh [RUN_ID] [--profile] MEASURE_OPTIONS"
+  echo "Default bench requires --validation-receipt; --mode check runs only correctness."
   echo "--profile captures CUDA/NVTX with nsys and computes actual GPU fetch/attention overlap."
   .venv/bin/python -m experiments.nosa_offload_overlap.src.measure --help
   exit 0
@@ -17,8 +18,13 @@ if [[ ! "$run_id" =~ ^[A-Za-z0-9_-]+$ ]]; then
   exit 2
 fi
 profile=false
+phase=bench
+previous_option=
 forward=()
 for argument in "$@"; do
+  if [[ "$previous_option" == --mode ]]; then phase="$argument"; fi
+  if [[ "$argument" == --mode=* ]]; then phase="${argument#*=}"; fi
+  previous_option="$argument"
   if [[ "$argument" == --profile ]]; then profile=true; continue; fi
   option="${argument%%=*}"
   if [[ "$option" == --* && ( --output-dir == "$option"* || --run-id == "$option"* || --profiled == "$option"* ) ]]; then
@@ -27,7 +33,15 @@ for argument in "$@"; do
   fi
   forward+=("$argument")
 done
-if [[ "$profile" == true ]]; then command -v nsys >/dev/null; fi
+if [[ "$profile" == true && "$phase" == check ]]; then
+  echo "--profile cannot be combined with --mode check" >&2
+  exit 2
+fi
+if [[ "$profile" == true || "$phase" == profile ]]; then
+  profile=true
+  phase=profile
+  command -v nsys >/dev/null
+fi
 output="experiments/nosa_offload_overlap/output"
 for category in data log profile; do
   if [[ -e "$output/$category/$run_id" ]]; then
@@ -49,7 +63,7 @@ finish() {
 trap finish EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
-command=(.venv/bin/python -m experiments.nosa_offload_overlap.src.measure --run-id "$run_id" --output-dir "$staging/data" "${forward[@]}")
+command=(.venv/bin/python -m experiments.nosa_offload_overlap.src.measure --run-id "$run_id" --output-dir "$staging/data" "${forward[@]}" --mode "$phase")
 if [[ "$profile" == true ]]; then
   nsys profile --trace=cuda,nvtx --sample=none --cpuctxsw=none \
     --force-overwrite=false --output "$staging/profile/timeline" \
@@ -65,6 +79,11 @@ if [[ "$profile" == true ]]; then
 else
   "${command[@]}" \
     2> >(tee "$staging/log/measure.stderr.log" >&2) | tee "$staging/log/measure.stdout.log"
+fi
+if [[ "$phase" == check ]]; then
+  published=true
+  echo "Independent check completed outside experiments: $staging/data"
+  exit 0
 fi
 for category in data log profile; do
   mkdir -p "$output/$category"

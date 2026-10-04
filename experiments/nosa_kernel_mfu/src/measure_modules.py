@@ -20,13 +20,21 @@ from pathlib import Path
 
 import torch
 
-from experiments.indexer_block_sparse_profile.src.mfu import work_counts
-from experiments.nosa_gr_65536_1024.src.sources import source_hashes
+from experiments.nosa_baseline_performance.src.dense.sources import source_hashes
+from experiments.nosa_baseline_performance.src.sparse.mfu import work_counts
 from experiments.nosa_kernel_mfu.src.measure import (
     copy_to_device,
     distribution,
+    numerical_check,
     tensor_hash,
     write_json,
+)
+from experiments.nosa_kernel_mfu.src.phases import (
+    add_phase_arguments,
+    check_case_identity,
+    finish_validation,
+    open_validation,
+    validate_phase_arguments,
 )
 from layers.attention import AttentionContext, BlockSelection
 from models.nosa.attention import NosaSparseAttention
@@ -34,6 +42,7 @@ from models.nosa.cache import NosaKVCache
 from models.nosa.config import NosaConfig
 from models.nosa.indexer import NosaIndexer, prepare_indexer_inputs
 from operators.nosa._native import build_info
+from operators.nosa.attention.device_only.api import nosa_block_sparse_attention
 from operators.nosa.indexer.api import select_contiguous_blocks
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -114,32 +123,64 @@ def kernel_activity(trace):
     }
 
 
-def measure_module(fixture, module, args, label):
-    eager, wall = [], []
-    begin, end = (torch.cuda.Event(enable_timing=True) for _ in range(2))
-    begin.record()
-    end.record()
-    end.synchronize()
+def check_module(fixture, module):
     expected = None
-    for iteration in range(args.warmup + args.repeats):
+    for _ in range(3):
         fixture.prepare()
         try:
-            begin.record()
-            started = time.perf_counter_ns()
             output = fixture.call(module)
-            end.record()
-            end.synchronize()
-            elapsed_wall = (time.perf_counter_ns() - started) / 1e6
-            if iteration >= args.warmup:
-                eager.append(begin.elapsed_time(end))
-                wall.append(elapsed_wall)
+            torch.cuda.synchronize(fixture.q.device)
             if expected is None:
                 expected = tuple(tensor.clone() for tensor in output_tensors(output))
             else:
                 assert_same_output(output, expected)
         finally:
             fixture.cleanup()
+    if module == "block_sparse_attention_total":
+        reference = nosa_block_sparse_attention(
+            fixture.q, fixture.k, fixture.v, fixture.selection, fixture.prefix, fixture.cis
+        )
+        assert_same_output(reference, expected)
+    return {
+        "repeated_outputs_match_exactly": True,
+        "output_sha256": [tensor_hash(tensor) for tensor in expected],
+    }
+
+
+def measure_module(fixture, module, args, label):
+    eager, wall = [], []
+    if args.mode == "bench":
+        begin, end = (torch.cuda.Event(enable_timing=True) for _ in range(2))
+        begin.record()
+        end.record()
+        end.synchronize()
+        for iteration in range(args.warmup + args.repeats):
+            fixture.prepare()
+            try:
+                begin.record()
+                started = time.perf_counter_ns()
+                fixture.call(module)
+                end.record()
+                end.synchronize()
+                elapsed_wall = (time.perf_counter_ns() - started) / 1e6
+                if iteration >= args.warmup:
+                    eager.append(begin.elapsed_time(end))
+                    wall.append(elapsed_wall)
+            finally:
+                fixture.cleanup()
+        return {
+            "eager_api": {"ms": distribution(eager), "samples_ms": eager},
+            "wall_api": {"ms": distribution(wall), "samples_ms": wall},
+            "numerical_acceptance_source": "independent_check",
+        }
     profiles = []
+    for _ in range(args.warmup):
+        fixture.prepare()
+        try:
+            fixture.call(module)
+            torch.cuda.synchronize(fixture.q.device)
+        finally:
+            fixture.cleanup()
     for iteration in range(args.profile_repeats):
         fixture.prepare()
         try:
@@ -149,9 +190,8 @@ def measure_module(fixture, module, args, label):
                     torch.profiler.ProfilerActivity.CUDA,
                 ]
             ) as profile:
-                output = fixture.call(module)
+                fixture.call(module)
                 torch.cuda.synchronize(fixture.q.device)
-            assert_same_output(output, expected)
             path = args.profile_dir / f"{label}_{args.kernel_backend}_{module}_{iteration}.json"
             profile.export_chrome_trace(str(path))
             content = path.read_bytes()
@@ -164,15 +204,12 @@ def measure_module(fixture, module, args, label):
         finally:
             fixture.cleanup()
     return {
-        "eager_api": {"ms": distribution(eager), "samples_ms": eager},
-        "wall_api": {"ms": distribution(wall), "samples_ms": wall},
         "profile_kernel_sum": {
             "ms": distribution([sample["kernel_ms"] for sample in profiles]),
             "samples_ms": [sample["kernel_ms"] for sample in profiles],
         },
         "profiles": profiles,
-        "all_repetitions_match_exactly": True,
-        "output_sha256": [tensor_hash(tensor) for tensor in expected],
+        "numerical_acceptance_source": "independent_check",
     }
 
 
@@ -218,11 +255,12 @@ def check_indexer_composition(fixture, tensors):
 
 
 @torch.inference_mode()
-def main():
+def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
+    add_phase_arguments(parser)
     parser.add_argument("--input-dir", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
-    parser.add_argument("--profile-dir", type=Path, required=True)
+    parser.add_argument("--profile-dir", type=Path)
     parser.add_argument("--run-id", required=True)
     parser.add_argument("--kernel-backend", choices=("native", "triton"), default="native")
     parser.add_argument("--device", default="cuda:0")
@@ -230,11 +268,18 @@ def main():
     parser.add_argument("--warmup", type=int, default=10)
     parser.add_argument("--repeats", type=int, default=30)
     parser.add_argument("--profile-repeats", type=int, default=3)
-    parser.add_argument("--peak-tflops", type=float, required=True)
-    args = parser.parse_args()
+    parser.add_argument("--peak-tflops", type=float)
+    args = parser.parse_args(argv)
+    validate_phase_arguments(parser, args)
+    if args.mode == "profile" and args.profile_dir is None:
+        parser.error("--mode profile requires --profile-dir")
     if min(args.warmup, args.repeats, args.profile_repeats) < 1:
         parser.error("warmup, repeats and profile-repeats must be positive")
-    if not math.isfinite(args.peak_tflops) or args.peak_tflops <= 0:
+    if args.mode != "check" and args.peak_tflops is None:
+        parser.error("bench/profile requires --peak-tflops")
+    if args.peak_tflops is not None and (
+        not math.isfinite(args.peak_tflops) or args.peak_tflops <= 0
+    ):
         parser.error("peak-tflops must be finite and positive")
     os.environ["CXLDSAGR_SM90_BACKEND"] = args.kernel_backend
     torch.cuda.set_device(args.device)
@@ -242,14 +287,16 @@ def main():
     if (props.major, props.minor) != (9, 0):
         raise RuntimeError("Complete NOSA module measurement requires Hopper/SM90")
     args.output_dir.mkdir(parents=True, exist_ok=False)
-    args.profile_dir.mkdir(parents=True, exist_ok=True)
+    if args.mode == "profile":
+        args.profile_dir.mkdir(parents=True, exist_ok=True)
     sources = source_hashes(
         *sorted((EXPERIMENT / "src").glob("*.py")),
         *sorted((EXPERIMENT / "scripts").glob("*.sh")),
-        ROOT / "experiments/indexer_block_sparse_profile/src/mfu.py",
-        ROOT / "experiments/indexer_block_sparse_profile/src/analyze.py",
+        ROOT / "experiments/nosa_baseline_performance/src/sparse/mfu.py",
+        ROOT / "experiments/nosa_baseline_performance/src/sparse/analyze.py",
         ROOT / "pyproject.toml",
         ROOT / "uv.lock",
+        ROOT / "evaluation/validation.py",
     )
     for name, digest in sources.items():
         content = (ROOT / name).read_bytes()
@@ -315,10 +362,27 @@ def main():
             "excluded": "Prefix construction, cache allocation, suffix K/V/CIS writes, transaction begin/abort, numerical acceptance, warmup and compilation",
             "attention_selection": "Unchanged captured model selection, identical across backends",
             "flops": "One causal compressed QK for the complete indexer; selected causal QK+AV for attention; no recomputation, padding or masked work",
-            "acceptance": "Checks incremental-cache composition and exact repeated outputs; independent FP32 operator acceptance is performed by the paired measure.py run and numerical regression",
+            "acceptance": "Independent check verifies incremental-cache composition, exact repeated module outputs, module/operator agreement and all-row FP32 operator acceptance; bench/profile reuse its matching receipt",
         },
     }
+    identity = open_validation(
+        args,
+        metadata,
+        kind="nosa_resident_modules",
+        config={
+            "layers": args.layers,
+            "kernel_backend": args.kernel_backend,
+            "prefix": 65536,
+            "queries": 1024,
+            "q_heads": 32,
+            "kv_heads": 2,
+            "head_dim": 128,
+            "block_budget": 64,
+        },
+        cache="owned_resident_cache_prefix_append_abort",
+    )
     results = []
+    checked_cases = {}
     counts = work_counts(65536, 1024, 1024)
     flops = {
         "indexer_total": 2 * 32 * 128 * counts["compressed_key_pairs_per_q_head_layer"],
@@ -336,11 +400,59 @@ def main():
             name: copy_to_device(tensor, args.device)
             for name, tensor in torch.load(path, map_location="cpu", weights_only=True).items()
         }
+        label = f"layer_{layer:02d}"
+        tensor_identity = {
+            name: {
+                "shape": list(tensor.shape),
+                "stride": list(tensor.stride()),
+                "dtype": str(tensor.dtype),
+                "sha256": tensor_hash(tensor),
+            }
+            for name, tensor in tensors.items()
+        }
+        prior = check_case_identity(args, label, tensor_identity)
         fixture = CapturedModules(tensors, 65536)
-        checked = check_indexer_composition(fixture, tensors)
+        if args.mode == "check":
+            checked = check_indexer_composition(fixture, tensors)
+            workspace = torch.empty(
+                (len(fixture.q) * 2, (len(fixture.k) + 63) // 64),
+                device=fixture.q.device,
+                dtype=fixture.q.dtype,
+            )
+            checked["fp32_operators"] = numerical_check(
+                fixture.q,
+                fixture.k,
+                fixture.v,
+                tensors["compressed_k"],
+                fixture.selection,
+                fixture.cis,
+                fixture.prefix,
+                workspace,
+                all_rows=True,
+            )
+            checked_cases[label] = {
+                "tensors": tensor_identity,
+                "composition": checked,
+                "modules": {},
+            }
+        else:
+            checked = prior["composition"]
         for module, useful_flops in flops.items():
-            timings = measure_module(fixture, module, args, f"layer_{layer:02d}")
+            if args.mode == "check":
+                checked_cases[label]["modules"][module] = check_module(fixture, module)
+                results.append(
+                    {
+                        "layer": layer,
+                        "module": module,
+                        "composition_check": checked,
+                        **checked_cases[label]["modules"][module],
+                    }
+                )
+                continue
+            timings = measure_module(fixture, module, args, label)
             for method in ("eager_api", "wall_api", "profile_kernel_sum"):
+                if method not in timings:
+                    continue
                 timings[method]["mfu_pct"] = (
                     useful_flops / timings[method]["ms"]["median"] / (args.peak_tflops * 1e9) * 100
                 )
@@ -360,6 +472,7 @@ def main():
                         **{
                             method: timings[method]
                             for method in ("eager_api", "profile_kernel_sum")
+                            if method in timings
                         },
                     }
                 ),
@@ -368,6 +481,9 @@ def main():
         fixture.cache.release()
     if source_hashes(*(ROOT / name for name in sources)) != sources:
         raise RuntimeError("Source changed during measurement; results cannot be published")
+    finish_validation(
+        args, metadata, kind="nosa_resident_modules", identity=identity, cases=checked_cases
+    )
     metadata["nvidia_smi_after"] = subprocess.check_output(
         [
             "nvidia-smi",

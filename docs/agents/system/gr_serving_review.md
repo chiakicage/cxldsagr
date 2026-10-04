@@ -1,5 +1,11 @@
 # GR serving acceptance review
 
+This is the historical review of the 2026-10-02 runs named below. The whole
+short-trace experiment, including its 2026-10-04 replacements, was retired on
+2026-10-05. Its report/output artifacts have been removed; the run IDs, commands
+and review findings below describe past work and are not current execution or
+retention instructions. See the [retirement record](experiment_organization.md#retired-gr-serving).
+
 **Latest researcher correction (2026-10-02):** ECHO's implementation has unresolved
 MFU and cache-policy problems, and the current DeepSeek implementation's MFU is
 also not yet correct. The old DeepSeek HBM/ECHO/serial-sparse/dense-prefetch
@@ -83,7 +89,7 @@ The 16K and 64K auditors exited successfully and wrote, respectively,
 and `experiments/gr_serving/output/data/gr_serving_h200_20261002_h64k_01/audit.json`.
 Both commands included the expected run ID and independent expected source digest.
 The 4K audit is published in
-[audit.json](../../../experiments/gr_serving/report/h4k/audit.json).
+the original 4K report's audit.json.
 The independently checked numerical coverage is:
 
 | History | Cases | Requests / correctness records | Exact non-HBM comparisons | Saved HBM tensors | Finite HBM elements checked |
@@ -255,7 +261,7 @@ Verified tracked dependency commits:
 | DeepJIT | `e5bdee2bc4ca519eba00cfc5f0c6e950e6a96a16` |
 | CUTLASS | `f3fde58372d33e9a5650ba7b80fc48b3b49d40c8` |
 
-The 4K [provenance record](../../../experiments/gr_serving/report/h4k/provenance.json)
+The 4K provenance record for the original h4k publication
 was independently checked: eight copied artifacts match their original outputs
 and declared hashes, six derived-artifact hashes match, two profile copies match,
 and the separately recorded renderer hash matches. Raw analysis files remain
@@ -263,7 +269,7 @@ unchanged. The readable summary changes categorical spacing and panel scales;
 it is derived from verified summary values. Figure rendering and copying are
 publication work, not additional performance samples.
 
-The 16K [provenance record](../../../experiments/gr_serving/report/h16k/provenance.json)
+The 16K provenance record for the original h16k publication
 and publication passed a separate read-only check. All 17 declared report files
 are present with no undeclared files: eight copied artifacts are byte-identical
 to accepted outputs and match declared hashes; six derived-artifact hashes and
@@ -290,7 +296,7 @@ those records and artifact hashes, not the images themselves. The 16K publicatio
 is accepted; no tensor audit, test suite or GPU execution was repeated for this
 publication check.
 
-The 64K [provenance record](../../../experiments/gr_serving/report/h64k/provenance.json)
+The 64K provenance record for the original h64k publication
 and publication passed the final independent read-only check. Exactly 19 declared
 files are present. Eight copied artifacts match their accepted originals and
 declared hashes, eight derived-artifact hashes match, and both profile copies

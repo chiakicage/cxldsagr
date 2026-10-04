@@ -6,6 +6,7 @@ export PATH="$PWD/.venv/bin:$PATH"
 export PYTHONDONTWRITEBYTECODE=1
 if [[ "${1:-}" == --help ]]; then
   echo "Usage: bash experiments/nosa_kernel_mfu/scripts/run.sh [RUN_ID] [MEASURE_OPTIONS]"
+  echo "Default bench requires --validation-receipt; --mode check and --mode profile are independent."
   echo "Measures native/Triton resident attention and pooled-score useful MFU on identical synthetic inputs."
   .venv/bin/python -m experiments.nosa_kernel_mfu.src.measure --help
   exit 0
@@ -16,10 +17,15 @@ if [[ ! "$run_id" =~ ^[A-Za-z0-9_-]+$ ]]; then
   echo "RUN_ID must contain only letters, digits, underscores or hyphens" >&2
   exit 2
 fi
+phase=bench
+previous_option=
 for argument in "$@"; do
+  if [[ "$previous_option" == --mode ]]; then phase="$argument"; fi
+  if [[ "$argument" == --mode=* ]]; then phase="${argument#*=}"; fi
+  previous_option="$argument"
   option="${argument%%=*}"
-  if [[ "$option" == --* && ( --output-dir == "$option"* || --run-id == "$option"* ) ]]; then
-    echo "The script owns --run-id and --output-dir" >&2
+  if [[ "$option" == --* && ( --output-dir == "$option"* || --profile-dir == "$option"* || --run-id == "$option"* ) ]]; then
+    echo "The script owns --run-id, --output-dir and --profile-dir" >&2
     exit 2
   fi
 done
@@ -45,8 +51,13 @@ trap finish EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
 .venv/bin/python -m experiments.nosa_kernel_mfu.src.measure \
-  --run-id "$run_id" --output-dir "$staging/data" "$@" \
+  --run-id "$run_id" --output-dir "$staging/data" --profile-dir "$staging/profile" "$@" \
   2> >(tee "$staging/log/measure.stderr.log" >&2) | tee "$staging/log/measure.stdout.log"
+if [[ "$phase" == check ]]; then
+  published=true
+  echo "Independent check completed outside experiments: $staging/data"
+  exit 0
+fi
 for category in data log profile; do
   mkdir -p "$output/$category"
   mkdir "$output/$category/$run_id"

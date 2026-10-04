@@ -1,5 +1,11 @@
 # GR serving workload: heat-weighted independent sampling
 
+> Historical GR scope (2026-10-05): the `gr_serving` experiment is retired and its
+> experiment outputs have been removed. Its commands, result-retention rules and
+> rerun instructions below are historical and no longer active. See the
+> [retirement scope](experiment_organization.md#retired-gr-serving). Other
+> implementation and experiment findings retain their stated scope.
+
 2026-10-02；按用户最新明确的规则收敛：以已有用户访问次数构造概率分布，给定总访问次数
 T 后有放回随机抽样。取消每用户最多 8 次的默认限制。此前 4N、最少一次复访、最大余数
 配额和全局打散方案不再作为当前协议；相关代码已撤回，其 CPU 数字不用于当前请求流。

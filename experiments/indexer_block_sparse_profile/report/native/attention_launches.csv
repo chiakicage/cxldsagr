@@ -1,9 +1,0 @@
-run_id,phase,iteration,kernel_family,kernel_symbol,kernel_count,kernel_ns,kernel_ms
-sparse_native_h200_gpu1_20260929_01,full_prefill,0,prepare,nosa_fa3::prepare,2080,6310646,6.310646
-sparse_native_h200_gpu1_20260929_01,full_prefill,0,sort_work_by_union_size,nosa_fa3::sort_work_by_union_size,2080,3591695,3.591695
-sparse_native_h200_gpu1_20260929_01,full_prefill,0,PrefillWithKVCacheKernel,flashinfer::PrefillWithKVCacheKernel,2080,335995863,335.995863
-sparse_native_h200_gpu1_20260929_01,full_prefill,0,attention_kernel,nosa_attention::attention_kernel,2080,7804705,7.804705
-sparse_native_h200_gpu1_20260929_01,extend,0,prepare,nosa_fa3::prepare,32,101632,0.101632
-sparse_native_h200_gpu1_20260929_01,extend,0,sort_work_by_union_size,nosa_fa3::sort_work_by_union_size,32,55072,0.055072
-sparse_native_h200_gpu1_20260929_01,extend,0,PrefillWithKVCacheKernel,flashinfer::PrefillWithKVCacheKernel,32,5515615,5.515615
-sparse_native_h200_gpu1_20260929_01,extend,0,attention_kernel,nosa_attention::attention_kernel,32,95200,0.0952

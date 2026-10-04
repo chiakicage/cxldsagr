@@ -5,9 +5,18 @@ import os
 import pytest
 import torch
 
+from cache.prefix_pool import CacheFootprint
 from models.nosa.serving import NosaDensePrefetchCache, NosaServingBackend
 from models.nosa.tests.test_model import tiny_config
 from models.nosa.tests.test_sparse_model import initialized_sparse_model
+
+
+def allocate(backend, capacity, candidate=None):
+    plan = backend.plan_resources(
+        CacheFootprint(2**40, 2**40),
+        {"max_session_capacity": capacity, "max_candidate_tokens": candidate or capacity},
+    )
+    backend.allocate_shared(plan)
 
 
 @pytest.mark.parametrize("scheme", NosaServingBackend.schemes)
@@ -17,6 +26,8 @@ def test_independent_prefixes_revisits_and_cache_reservations(scheme):
     control = NosaServingBackend(model, "hbm", chunk_size=47)
     backend = NosaServingBackend(model, scheme, chunk_size=47)
     tokens = (torch.arange(160) * 7 + 3) % config.vocab_size
+    allocate(control, 160)
+    allocate(backend, 160)
     expected_cache = control.create_session(160)
     session = backend.create_session(160)
     reservation = backend.estimate_session_bytes(160, 79)
@@ -57,6 +68,8 @@ def test_independent_prefixes_revisits_and_cache_reservations(scheme):
         backend.release_session(session)
         control.release_session(expected_cache)
     assert backend.session_bytes(session) == {"hbm": 0, "dram": 0}
+    backend.close()
+    control.close()
 
 
 def test_dense_prefetch_failure_restores_attention_and_prefix(monkeypatch):
@@ -64,6 +77,7 @@ def test_dense_prefetch_failure_restores_attention_and_prefix(monkeypatch):
     model = initialized_sparse_model(config)
     backend = NosaServingBackend(model, "dense_prefetch", chunk_size=40)
     tokens = torch.arange(128) % config.vocab_size
+    allocate(backend, 192)
     session = backend.create_session(192)
     original = model.main_attention
     try:
@@ -86,6 +100,7 @@ def test_dense_prefetch_failure_restores_attention_and_prefix(monkeypatch):
         torch.testing.assert_close(actual, expected)
     finally:
         backend.release_session(session)
+        backend.close()
 
 
 def test_dense_prefetch_rejects_unordered_layers():
@@ -126,34 +141,46 @@ def test_cuda_serving_checkpoint_independent_prefixes_and_revisits():
         checkpoint, scheme="hbm", device="cuda:0", max_seq_len=capacity
     )
     tokens = (torch.arange(capacity, device="cuda:0") * 19 + 137) % control.config.vocab_size
-    expected = []
+    expected = {}
     for scheme in NosaServingBackend.schemes:
         backend = NosaServingBackend(control.model, scheme, chunk_size=1024)
-        session = backend.create_session(capacity)
+        allocate(backend, capacity, suffix)
+        sessions = [backend.create_session(capacity) for _ in range(2)]
         reservation = backend.estimate_session_bytes(capacity, prefix)
+        shared = backend.shared_bytes()
         try:
-            backend.prefill(session, tokens[:prefix])
+            # Independent sparse histories for two different users in each scheme.
+            for user, session in enumerate(sessions):
+                history = (tokens[:prefix] + user * 37) % control.config.vocab_size
+                backend.prefill(session, history)
             for visit in range(2):
-                candidate = (tokens[prefix:] + visit * 11) % control.config.vocab_size
-                actual = backend.extend(session, candidate)
-                backend.synchronize()
-                assert actual.shape == (suffix, control.config.hidden_size)
-                assert torch.isfinite(actual).all()
-                for name, value in backend.session_bytes(session).items():
-                    assert value <= reservation[name], (scheme, name, value, reservation)
-                if scheme == "hbm":
-                    expected.append(actual.cpu())
-                else:
-                    torch.testing.assert_close(
-                        actual.cpu(), expected[visit], atol=0.016, rtol=0.016
+                for user, session in enumerate(sessions):
+                    candidate = (
+                        tokens[prefix:] + visit * 11 + user * 29
+                    ) % control.config.vocab_size
+                    actual = backend.extend(session, candidate)
+                    backend.synchronize()
+                    assert actual.shape == (suffix, control.config.hidden_size)
+                    assert torch.isfinite(actual).all()
+                    for name, value in backend.session_bytes(session).items():
+                        assert value <= reservation[name], (scheme, name, value, reservation)
+                    assert backend.shared_bytes() == shared
+                    actual_cpu = actual.cpu()
+                    key = (user, visit)
+                    if scheme == "hbm":
+                        expected[key] = actual_cpu
+                    else:
+                        torch.testing.assert_close(actual_cpu, expected[key], atol=0, rtol=0)
+                    print(
+                        f"NOSA shared serving correctness: scheme={scheme}, user={user}, visit={visit}, "
+                        f"equal={torch.equal(actual_cpu, expected[key])}, "
+                        f"max_abs={(actual_cpu.float() - expected[key].float()).abs().max().item()}",
+                        flush=True,
                     )
-                print(
-                    f"NOSA serving correctness: scheme={scheme}, visit={visit}, "
-                    f"equal={torch.equal(actual.cpu(), expected[visit])}, "
-                    f"max_abs={(actual.cpu().float() - expected[visit].float()).abs().max().item()}",
-                    flush=True,
-                )
-                backend.truncate(session, prefix)
-                assert session.length == session.indexer_cache.length == prefix
+                    backend.truncate(session, prefix)
+                    assert session.length == session.indexer_cache.length == prefix
         finally:
-            backend.release_session(session)
+            for session in sessions:
+                backend.release_session(session)
+            backend.close()
+    control.close()

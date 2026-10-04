@@ -1,5 +1,11 @@
 # Sequential 16-user 64K rerun
 
+> Historical GR scope (2026-10-05): the `gr_serving` experiment is retired and its
+> experiment outputs have been removed. Its commands, result-retention rules and
+> rerun instructions below are historical and no longer active. See the
+> [retirement scope](experiment_organization.md#retired-gr-serving). Other
+> implementation and experiment findings retain their stated scope.
+
 2026-10-02. Latest user instruction: first run a smaller case with HBM cache
 4 GiB, CPU DRAM cache 64 GiB, 16 users, and 32 requests; no heat distribution,
 visit each user in order and repeat the traversal twice.

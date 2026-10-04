@@ -99,7 +99,7 @@ __device__ __forceinline__ void fetch_body(FetchParams const& p,int worker,int w
         int ordinal=task/p.heads,head=task%p.heads;
         int block=ordinal==0?0:blocks-ordinal;
         int slot=block*p.heads+head;
-        if(p.first_use[slot]!=INT_MAX){tasks[page]=slot;break;}
+        if(p.first_use[slot]!=INT_MAX && p.ready[slot]!=8){tasks[page]=slot;break;}
       }
     }
     // Instrument the complete batch's host-copy window. All rows in this
@@ -192,7 +192,7 @@ __global__ void compact_fetch_queue(FetchParams p,bool head_phased) {
       int head=head_phased?1-task/blocks:task%p.heads;
       int block=ordinal==0?0:blocks-ordinal;
       slot=block*p.heads+head;
-      selected=p.first_use[slot]!=INT_MAX;
+      selected=p.first_use[slot]!=INT_MAX && p.ready[slot]!=8;
     }
     unsigned votes=__ballot_sync(0xffffffff,selected);
     int rank=__popc(votes&((1u<<lane)-1u));

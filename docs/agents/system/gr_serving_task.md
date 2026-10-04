@@ -1,5 +1,11 @@
 # Persistent GR serving implementation and experiment contract
 
+Status on 2026-10-05: the whole short-trace experiment is retired and its
+report/output artifacts have been removed. The contract, commands and retention
+instructions below record past work; they are no longer an active task. Shared
+tools and generic serving APIs remain, as described in the
+[retirement record](experiment_organization.md#retired-gr-serving).
+
 Latest status, 2026-10-02: the user identified problems with the ECHO implementation's
 MFU and cache strategy, and with the current DeepSeek MFU. The old model-local
 baseline comparison is therefore not established. Numerical and accounting audits
@@ -74,7 +80,7 @@ this exact diagnostic-only difference; no performance source drift is accepted.
 
 Original data remains under `experiments/gr_serving/output/{data,log,profile}/`
 by run ID. Selected evidence is in the experiment's history-specific report
-folders. See [experiment report](../../../experiments/gr_serving/README.md) and
+folders. See [旧 GR 实验（已结束）](experiment_organization.md#retired-gr-serving) and
 [independent acceptance review](gr_serving_review.md) for publication checks.
 
 ## Implementation and interpretation

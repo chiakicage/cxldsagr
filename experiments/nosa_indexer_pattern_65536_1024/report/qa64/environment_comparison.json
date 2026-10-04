@@ -1,8 +1,8 @@
 {
-  "analysis_run_id": "qa64_environment_compare_20260928_01",
-  "analyzed_at_utc": "2026-09-28T07:53:28.219381+00:00",
+  "analysis_run_id": "qa64_environment_compare_flags_20261004_01",
+  "analyzed_at_utc": "2026-10-04T08:17:29.255280+00:00",
   "old_capture_run_id": "query_aware_fp32_65536_1024_20260925_01",
-  "new_capture_run_id": "nosa_sparse_pattern_h200_gpu1_20260928_01",
+  "new_capture_run_id": "nosa_pattern_flags_20261004_01",
   "new_capture_arm": "dense_qa64",
   "request_bytes_equal": true,
   "checkpoint_sha256_equal": true,
@@ -80,8 +80,8 @@
       "tokenizers": "0.23.2"
     },
     "gpu": {
-      "name": "NVIDIA H20Z",
-      "uuid": "a2e4882b-3248-6018-14ab-90e45b5a5b04",
+      "name": "NVIDIA H200",
+      "uuid": "a5cd5bab-33a4-a7e2-4a3c-78c2b08a8872",
       "sm_count": 132,
       "capability": [
         9,
@@ -91,9 +91,9 @@
   },
   "source_metadata_sha256": {
     "old": "05c244ed62897a4f2d3e03642b79f053af3f74a3fa5e33380fcb124e78f17dc8",
-    "new": "a6bafd3d4c17f7328aa07fcefe434845f3896a15b8ffd48146f46b70ec1e89e4"
+    "new": "6e3490fc5ea6a563239795b9ce48d8aa03bee0872ccbf555402a5ee44037a9ad"
   },
-  "analysis_source_sha256": "8a85b3a39b871f3c4c4fe8c62b50480ec9149fc5135ca46aab3f80f29768a118",
+  "analysis_source_sha256": "cee52a7d9175c9d4e9e2d5b7e62d95ebc27e79d616d6a731acc4b780b4f587d9",
   "python": "3.12.13",
   "numpy": "2.5.0",
   "model_executed": false,

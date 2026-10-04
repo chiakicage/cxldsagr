@@ -1,5 +1,11 @@
 # Industrial 10M trace rerun
 
+> Historical GR scope (2026-10-05): the `gr_serving` experiment is retired and its
+> experiment outputs have been removed. Its commands, result-retention rules and
+> rerun instructions below are historical and no longer active. See the
+> [retirement scope](experiment_organization.md#retired-gr-serving). Other
+> implementation and experiment findings retain their stated scope.
+
 **Superseded execution, 2026-10-02:** The user asked to first run a smaller 64K
 case: HBM 4 GiB, DRAM 64 GiB, 16 users, 32 requests, sequential IDs 0..15 twice,
 without heat sampling. The industrial process below was terminated during

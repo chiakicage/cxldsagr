@@ -1,0 +1,411 @@
+{
+  "schema": "nosa-resident-remeasurement-integrity-v1",
+  "status": "passed",
+  "recorded_at_utc": "2026-10-04T07:57:22.985768+00:00",
+  "checks": 5499,
+  "profiled_kernel_events": 162,
+  "sampled_intervals": 2436,
+  "runs": [
+    {
+      "run_id": "kernel_flags_synthetic_20261004_01",
+      "source_files": 105,
+      "result_rows": 16,
+      "metadata_sha256": "cc2dd1c22974ec0b96904e73b4958d16c760b3d367ccc4fd80c52163bdb54796",
+      "results_sha256": "cd29acb41ce0b8d969ffda904fcc925b205029d0d7559db83d302b8cfa8a7659",
+      "rows": [
+        {
+          "case": "synthetic_4096",
+          "backend": "native",
+          "actual_backend": "cuda_tvm_ffi",
+          "operator": "block_sparse_attention",
+          "eager_ms": 0.21302399784326553,
+          "graph_ms": 0.15448480248451232,
+          "attention_relative_l2": 0.0024719373343230276,
+          "scores_relative_l2": 2.1655116142937914e-05
+        },
+        {
+          "case": "synthetic_4096",
+          "backend": "native",
+          "actual_backend": "triton",
+          "operator": "pooled_scores",
+          "eager_ms": 0.04924800060689449,
+          "graph_ms": 0.02736160010099411,
+          "attention_relative_l2": 0.0024719373343230276,
+          "scores_relative_l2": 2.1655116142937914e-05
+        },
+        {
+          "case": "synthetic_4096",
+          "backend": "triton",
+          "actual_backend": "triton",
+          "operator": "block_sparse_attention",
+          "eager_ms": 0.6152960062026978,
+          "graph_ms": 0.5676032066345215,
+          "attention_relative_l2": 0.00247032582223547,
+          "scores_relative_l2": 2.1655116142937914e-05
+        },
+        {
+          "case": "synthetic_4096",
+          "backend": "triton",
+          "actual_backend": "triton",
+          "operator": "pooled_scores",
+          "eager_ms": 0.04839999973773956,
+          "graph_ms": 0.02733439952135086,
+          "attention_relative_l2": 0.00247032582223547,
+          "scores_relative_l2": 2.1655116142937914e-05
+        },
+        {
+          "case": "synthetic_16384",
+          "backend": "native",
+          "actual_backend": "cuda_tvm_ffi",
+          "operator": "block_sparse_attention",
+          "eager_ms": 0.9618400037288666,
+          "graph_ms": 0.9058720111846924,
+          "attention_relative_l2": 0.0024768328416081005,
+          "scores_relative_l2": 1.623424577701371e-05
+        },
+        {
+          "case": "synthetic_16384",
+          "backend": "native",
+          "actual_backend": "triton",
+          "operator": "pooled_scores",
+          "eager_ms": 0.10167999938130379,
+          "graph_ms": 0.080348801612854,
+          "attention_relative_l2": 0.0024768328416081005,
+          "scores_relative_l2": 1.623424577701371e-05
+        },
+        {
+          "case": "synthetic_16384",
+          "backend": "triton",
+          "actual_backend": "triton",
+          "operator": "block_sparse_attention",
+          "eager_ms": 0.6259520053863525,
+          "graph_ms": 0.5778896093368531,
+          "attention_relative_l2": 0.002475901617248532,
+          "scores_relative_l2": 1.623424577701371e-05
+        },
+        {
+          "case": "synthetic_16384",
+          "backend": "triton",
+          "actual_backend": "triton",
+          "operator": "pooled_scores",
+          "eager_ms": 0.10025600343942642,
+          "graph_ms": 0.08017600178718567,
+          "attention_relative_l2": 0.002475901617248532,
+          "scores_relative_l2": 1.623424577701371e-05
+        },
+        {
+          "case": "synthetic_32768",
+          "backend": "native",
+          "actual_backend": "cuda_tvm_ffi",
+          "operator": "block_sparse_attention",
+          "eager_ms": 0.8823519945144653,
+          "graph_ms": 0.8288848400115967,
+          "attention_relative_l2": 0.002433877995213328,
+          "scores_relative_l2": 1.3977343769511208e-05
+        },
+        {
+          "case": "synthetic_32768",
+          "backend": "native",
+          "actual_backend": "cuda_tvm_ffi",
+          "operator": "pooled_scores",
+          "eager_ms": 0.12163200229406357,
+          "graph_ms": 0.09566400051116944,
+          "attention_relative_l2": 0.002433877995213328,
+          "scores_relative_l2": 1.3977343769511208e-05
+        },
+        {
+          "case": "synthetic_32768",
+          "backend": "triton",
+          "actual_backend": "triton",
+          "operator": "block_sparse_attention",
+          "eager_ms": 0.6308479905128479,
+          "graph_ms": 0.5850928068161011,
+          "attention_relative_l2": 0.0024338578747678933,
+          "scores_relative_l2": 1.3977343769511208e-05
+        },
+        {
+          "case": "synthetic_32768",
+          "backend": "triton",
+          "actual_backend": "triton",
+          "operator": "pooled_scores",
+          "eager_ms": 0.17070399969816208,
+          "graph_ms": 0.14884960055351257,
+          "attention_relative_l2": 0.0024338578747678933,
+          "scores_relative_l2": 1.3977343769511208e-05
+        },
+        {
+          "case": "synthetic_65536",
+          "backend": "native",
+          "actual_backend": "cuda_tvm_ffi",
+          "operator": "block_sparse_attention",
+          "eager_ms": 0.8862400054931641,
+          "graph_ms": 0.8300960063934326,
+          "attention_relative_l2": 0.0024724817881484435,
+          "scores_relative_l2": 1.917898771353066e-05
+        },
+        {
+          "case": "synthetic_65536",
+          "backend": "native",
+          "actual_backend": "cuda_tvm_ffi",
+          "operator": "pooled_scores",
+          "eager_ms": 0.19830400496721268,
+          "graph_ms": 0.1697968006134033,
+          "attention_relative_l2": 0.0024724817881484435,
+          "scores_relative_l2": 1.917898771353066e-05
+        },
+        {
+          "case": "synthetic_65536",
+          "backend": "triton",
+          "actual_backend": "triton",
+          "operator": "block_sparse_attention",
+          "eager_ms": 0.6344960033893585,
+          "graph_ms": 0.5862655878067016,
+          "attention_relative_l2": 0.0024725208586150356,
+          "scores_relative_l2": 2.245146424684208e-05
+        },
+        {
+          "case": "synthetic_65536",
+          "backend": "triton",
+          "actual_backend": "triton",
+          "operator": "pooled_scores",
+          "eager_ms": 0.30819201469421387,
+          "graph_ms": 0.28560479879379275,
+          "attention_relative_l2": 0.0024725208586150356,
+          "scores_relative_l2": 2.245146424684208e-05
+        }
+      ]
+    },
+    {
+      "run_id": "kernel_flags_real_20261004_01",
+      "source_files": 105,
+      "result_rows": 12,
+      "metadata_sha256": "db681dc738c9d67fef3f214fc1b63434007f3f1bd80185b9d2ac9f8490954ccc",
+      "results_sha256": "200c34fc3fad1ac794c7cc4f93e1304827ce1ce2ca62283e23e59e4127dd0798",
+      "rows": [
+        {
+          "case": "layer_00",
+          "backend": "native",
+          "actual_backend": "cuda_tvm_ffi",
+          "operator": "block_sparse_attention",
+          "eager_ms": 0.23371200263500214,
+          "graph_ms": 0.16949120163917542,
+          "attention_relative_l2": 0.0007833070848924652,
+          "scores_relative_l2": 2.5020077373483218e-05
+        },
+        {
+          "case": "layer_00",
+          "backend": "native",
+          "actual_backend": "cuda_tvm_ffi",
+          "operator": "pooled_scores",
+          "eager_ms": 0.1982400044798851,
+          "graph_ms": 0.1724031984806061,
+          "attention_relative_l2": 0.0007833070848924652,
+          "scores_relative_l2": 2.5020077373483218e-05
+        },
+        {
+          "case": "layer_00",
+          "backend": "triton",
+          "actual_backend": "triton",
+          "operator": "block_sparse_attention",
+          "eager_ms": 0.6197600066661835,
+          "graph_ms": 0.5732656002044678,
+          "attention_relative_l2": 0.0007440036974857917,
+          "scores_relative_l2": 2.5332912628073245e-05
+        },
+        {
+          "case": "layer_00",
+          "backend": "triton",
+          "actual_backend": "triton",
+          "operator": "pooled_scores",
+          "eager_ms": 0.305759996175766,
+          "graph_ms": 0.282700788974762,
+          "attention_relative_l2": 0.0007440036974857917,
+          "scores_relative_l2": 2.5332912628073245e-05
+        },
+        {
+          "case": "layer_15",
+          "backend": "native",
+          "actual_backend": "cuda_tvm_ffi",
+          "operator": "block_sparse_attention",
+          "eager_ms": 0.22643199563026428,
+          "graph_ms": 0.16795200109481812,
+          "attention_relative_l2": 0.0013297637575991725,
+          "scores_relative_l2": 2.8380829462548718e-05
+        },
+        {
+          "case": "layer_15",
+          "backend": "native",
+          "actual_backend": "cuda_tvm_ffi",
+          "operator": "pooled_scores",
+          "eager_ms": 0.19785600155591965,
+          "graph_ms": 0.17088000178337098,
+          "attention_relative_l2": 0.0013297637575991725,
+          "scores_relative_l2": 2.8380829462548718e-05
+        },
+        {
+          "case": "layer_15",
+          "backend": "triton",
+          "actual_backend": "triton",
+          "operator": "block_sparse_attention",
+          "eager_ms": 0.6211679875850677,
+          "graph_ms": 0.5752336025238037,
+          "attention_relative_l2": 0.0014164563442836304,
+          "scores_relative_l2": 2.7593048798735254e-05
+        },
+        {
+          "case": "layer_15",
+          "backend": "triton",
+          "actual_backend": "triton",
+          "operator": "pooled_scores",
+          "eager_ms": 0.3067519962787628,
+          "graph_ms": 0.284499192237854,
+          "attention_relative_l2": 0.0014164563442836304,
+          "scores_relative_l2": 2.7593048798735254e-05
+        },
+        {
+          "case": "layer_31",
+          "backend": "native",
+          "actual_backend": "cuda_tvm_ffi",
+          "operator": "block_sparse_attention",
+          "eager_ms": 0.22470399737358093,
+          "graph_ms": 0.16490239500999448,
+          "attention_relative_l2": 0.0009914699534119575,
+          "scores_relative_l2": 2.844694972736761e-05
+        },
+        {
+          "case": "layer_31",
+          "backend": "native",
+          "actual_backend": "cuda_tvm_ffi",
+          "operator": "pooled_scores",
+          "eager_ms": 0.1964160054922104,
+          "graph_ms": 0.1694096028804779,
+          "attention_relative_l2": 0.0009914699534119575,
+          "scores_relative_l2": 2.844694972736761e-05
+        },
+        {
+          "case": "layer_31",
+          "backend": "triton",
+          "actual_backend": "triton",
+          "operator": "block_sparse_attention",
+          "eager_ms": 0.6207199990749359,
+          "graph_ms": 0.575163197517395,
+          "attention_relative_l2": 0.0010133271583249888,
+          "scores_relative_l2": 2.8511676646303385e-05
+        },
+        {
+          "case": "layer_31",
+          "backend": "triton",
+          "actual_backend": "triton",
+          "operator": "pooled_scores",
+          "eager_ms": 0.30692800879478455,
+          "graph_ms": 0.2840799927711487,
+          "attention_relative_l2": 0.0010133271583249888,
+          "scores_relative_l2": 2.8511676646303385e-05
+        }
+      ]
+    },
+    {
+      "run_id": "modules_flags_native_20261004_01",
+      "source_files": 105,
+      "result_rows": 6,
+      "metadata_sha256": "efb785bf9dad17d18ba71f79ca97a4d52a50c227f762fcbe858248ec5a4fd249",
+      "results_sha256": "d2ad804fe695352ec8fae86acb32c6e88ce40d3ec9fc78962833aa4b5fb6faeb",
+      "rows": [
+        {
+          "layer": 0,
+          "module": "indexer_total",
+          "eager_ms": 0.28809599578380585,
+          "wall_ms": 0.2937465,
+          "kernel_ms": 0.14182599999999998
+        },
+        {
+          "layer": 0,
+          "module": "block_sparse_attention_total",
+          "eager_ms": 0.2666720002889633,
+          "wall_ms": 0.272183,
+          "kernel_ms": 0.17628699999999997
+        },
+        {
+          "layer": 15,
+          "module": "indexer_total",
+          "eager_ms": 0.30052798986434937,
+          "wall_ms": 0.306058,
+          "kernel_ms": 0.138301
+        },
+        {
+          "layer": 15,
+          "module": "block_sparse_attention_total",
+          "eager_ms": 0.26206399500370026,
+          "wall_ms": 0.26757200000000003,
+          "kernel_ms": 0.17501000000000003
+        },
+        {
+          "layer": 31,
+          "module": "indexer_total",
+          "eager_ms": 0.29619200527668,
+          "wall_ms": 0.301919,
+          "kernel_ms": 0.13657500000000003
+        },
+        {
+          "layer": 31,
+          "module": "block_sparse_attention_total",
+          "eager_ms": 0.2600959986448288,
+          "wall_ms": 0.2654025,
+          "kernel_ms": 0.17135499999999998
+        }
+      ]
+    },
+    {
+      "run_id": "modules_flags_triton_20261004_01",
+      "source_files": 105,
+      "result_rows": 6,
+      "metadata_sha256": "1df0ba646f6f9c92e6d22eaf0776bcd34f11eac57f31471506fe089452156273",
+      "results_sha256": "f382957fd683ba1ecc943546c6ced322edbbabd680bc81bf7ea5c600efc6afb3",
+      "rows": [
+        {
+          "layer": 0,
+          "module": "indexer_total",
+          "eager_ms": 0.7614880204200745,
+          "wall_ms": 0.7673525,
+          "kernel_ms": 0.49698899999999996
+        },
+        {
+          "layer": 0,
+          "module": "block_sparse_attention_total",
+          "eager_ms": 0.6503199934959412,
+          "wall_ms": 0.6562565,
+          "kernel_ms": 0.577511
+        },
+        {
+          "layer": 15,
+          "module": "indexer_total",
+          "eager_ms": 0.7717919945716858,
+          "wall_ms": 0.7767215000000001,
+          "kernel_ms": 0.489667
+        },
+        {
+          "layer": 15,
+          "module": "block_sparse_attention_total",
+          "eager_ms": 0.6508959829807281,
+          "wall_ms": 0.656699,
+          "kernel_ms": 0.57786
+        },
+        {
+          "layer": 31,
+          "module": "indexer_total",
+          "eager_ms": 0.7622080147266388,
+          "wall_ms": 0.768111,
+          "kernel_ms": 0.491427
+        },
+        {
+          "layer": 31,
+          "module": "block_sparse_attention_total",
+          "eager_ms": 0.6526399850845337,
+          "wall_ms": 0.65793,
+          "kernel_ms": 0.580203
+        }
+      ]
+    }
+  ],
+  "boundary": "CPU artifact integrity after four successful independent GPU processes; no new full-model trajectory, offload measurement, report replacement or historical artifact removal."
+}

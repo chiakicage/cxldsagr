@@ -14,7 +14,13 @@ def supports_native_attention(q, keys, values):
     )
 
 
-def launch_nosa_block_attention(q, keys, values, selection, query_start, cis_bias):
+def launch_nosa_block_attention(
+    q, keys, values, selection, query_start, cis_bias, *, workspace=None
+):
     from operators.nosa.attention.device_only._fa3 import launch_nosa_fa3_attention
 
+    if workspace is not None:
+        return launch_nosa_fa3_attention(
+            q, keys, values, selection, query_start, cis_bias, workspace=workspace
+        )
     return launch_nosa_fa3_attention(q, keys, values, selection, query_start, cis_bias)

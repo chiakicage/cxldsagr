@@ -270,7 +270,8 @@ def test_existing_run_audit_rejects_modified_or_missing_evidence(tmp_path, damag
 
 
 def test_model_oom_remains_a_failed_temporary_artifact(monkeypatch, tmp_path):
-    from experiments.gr_serving.src import measure, workload
+    from evaluation import provenance as measure
+    from GR import workload
 
     temporary = tmp_path / "temporary"
     temporary.mkdir()

@@ -1,6 +1,11 @@
 # DeepSeek V3.2 Motivation
 
 本实验在相同 P/NH 容量下比较 HBM-only、ECHO、sparse fetch 和 dense prefetch。
+本目录属于论文 motivation 实验。当前入口分为独立 `check`、`bench` 和 `profile`；
+默认 `bench` 要求匹配的验收收据，不再逐请求复制、比较或保存完整输出。
+**新入口尚未运行 GPU 实验**；下文 run ID、性能数字和报告仍对应原来的测量流程，
+本次整理没有重跑或替换它们。
+
 正式运行 `motivation_c10_20261004_u16_r2_01` 的 128 份完整输出已通过独立验收，
 96 组 offload/HBM 对照逐位一致。首访端到端 MFU 为 42.37%–44.44%；
 ECHO、sparse fetch、dense prefetch 的复访均值分别为 24.95、18.46、31.89 ms。
@@ -55,18 +60,22 @@ CUDA matmul TF32 关闭；具体安装文件、JIT 产物、编译器与源码�
 
 ## 运行方式
 
-从仓库根目录运行。复现时使用新的 run ID，避免覆盖已有结果；`--compute-graphs`
-必须显式传入：
+从仓库根目录运行。先独立验收，再引用收据测量性能；同一实现和输入的收据可复用。
+两个阶段使用不同 run ID；`--compute-graphs` 必须显式传入。下列命令本次未执行：
 
 ```bash
-CUDA_VISIBLE_DEVICES=0 \
-TRITON_PTXAS_PATH="$PWD/.venv/lib/python3.12/site-packages/triton/backends/nvidia/bin/ptxas" \
-TRITON_PTXAS_BLACKWELL_PATH=/usr/local/cuda/bin/ptxas \
+export CUDA_VISIBLE_DEVICES=0
+export TRITON_PTXAS_PATH="$PWD/.venv/lib/python3.12/site-packages/triton/backends/nvidia/bin/ptxas"
+export TRITON_PTXAS_BLACKWELL_PATH=/usr/local/cuda/bin/ptxas
 bash experiments/deepseek_v32_motivation/scripts/run.sh \
-  --run-id motivation_c10_reproduce --compute-graphs
+  --mode check --run-id motivation_c10_check --compute-graphs
+
+bash experiments/deepseek_v32_motivation/scripts/run.sh \
+  --mode bench --run-id motivation_c10_reproduce --compute-graphs \
+  --validation-receipt "${TMPDIR:-/tmp}/cxldsagr-checks/deepseek_v32_motivation/data/motivation_c10_check/receipt.json"
 ```
 
-匹配 profile 使用已验收的正式运行作为显式参考：
+匹配 profile 可使用独立 check 目录、带收据的 bench 或已验收的历史运行作为参考：
 
 ```bash
 CUDA_VISIBLE_DEVICES=0 \
@@ -81,13 +90,18 @@ bash experiments/deepseek_v32_motivation/scripts/profile.sh \
 `models/deepseek_v32/compute_graphs.py`、`serving/persistent.py`、
 `cache/prefix_pool.py`、`cache/sparse_token_pool.py` 和
 `models/deepseek_v32/pool_prefetch.py`。输入与来源采集复用
-`experiments.gr_serving.src.workload/measure`，内存边界采样复用
-`experiments.deepseek_v32_echo_cache.src.capacity_probe`。全部 candidate
-hidden/logits 在计时外与相同请求的 HBM-only 输出逐位比较。
+`GR.workload` 与 `evaluation.provenance`，内存边界采样复用
+`experiments.deepseek_v32_echo_cache.src.capacity_probe`。check 对全部 candidate
+hidden/logits 与独立空 cache 的 HBM-only 相同请求输出逐位比较，并验收完整请求轨迹的
+正常 cache 生命周期。check 默认保存在系统临时目录中的 `cxldsagr-checks/`，不生成性能报告。
+收据匹配源码、输入、P/NH、backend、计算图、native、精度和执行环境；checkpoint 仍以
+路径、大小与 mtime 标识，不声称已 hash 全部权重。运行时 finite、repair、事务、allocator
+检查及必要同步均保留。失败注入和任务质量不属于该数值验收的结论。
 
-正式原始数据、源码快照和输出 tensor 位于 `output/data/<run_id>/`，stdout/stderr
+bench 原始数据和源码快照位于 `output/data/<run_id>/`，不含逐请求输出 tensor；stdout/stderr
 位于 `output/log/<run_id>/`；原始 Nsight 文件位于 `output/profile/<profile_run_id>/`。
-`src.report` 重新核验保存输出和来源，`src.plot` 根据逐请求数据生成图表：
+`src.report` 对新 bench 核验外部收据，对历史运行仍核验保存输出和来源。
+`src.plot` 根据逐请求数据生成图表；以下旧 run ID 保留原始边界：
 
 ```bash
 python -m experiments.deepseek_v32_motivation.src.report \

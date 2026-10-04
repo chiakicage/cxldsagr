@@ -156,7 +156,7 @@ def _attach(model, session, *, user, totals):
 @pytest.mark.parametrize("compute_graphs", [False, True], ids=["eager", "compute_graphs"])
 def test_official_full_checkpoint_selected_records_and_same_order_attention(compute_graphs):
     from cache.prefix_pool import CacheFootprint
-    from experiments.gr_serving.src.workload import WorkloadConfig, build_workload
+    from GR.workload import WorkloadConfig, build_workload
     from models.deepseek_v32.official_serving import OfficialDeepSeekServingBackend
 
     start = time.perf_counter()

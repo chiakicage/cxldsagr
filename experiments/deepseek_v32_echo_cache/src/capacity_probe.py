@@ -414,13 +414,13 @@ def main(argv=None):
         write_json(output / "memory.json", samples)
 
     try:
-        from experiments.gr_serving.src.measure import (
+        from evaluation.provenance import (
             _git,
             backend_provenance,
             source_snapshot,
             verify_source_snapshot,
         )
-        from experiments.gr_serving.src.workload import WorkloadConfig, build_workload
+        from GR.workload import WorkloadConfig, build_workload
         from serving.persistent import PersistentGRRunner
 
         metadata["source_sha256"] = source_snapshot(output, include_official=True)

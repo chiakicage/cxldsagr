@@ -67,7 +67,7 @@ def test_metadata_includes_actual_fused_build(monkeypatch):
 
 
 def test_source_snapshot_covers_cooperative_runtime_and_planner():
-    from experiments.nosa_gr_65536_1024.src.sources import source_hashes
+    from experiments.nosa_baseline_performance.src.dense.sources import source_hashes
 
     hashes = source_hashes()
     assert {
@@ -92,3 +92,79 @@ def test_work_profile_stripe_geometry_comes_from_actual_native_build():
         assert profile["cases"] == {} and profile["records"] == []
     with pytest.raises(ValueError, match="fetch_stripes"):
         new_work_profile("fixture", {"selected_backend": "native"})
+
+
+def test_clean_offload_bench_never_reads_traffic_or_runs_reference(monkeypatch):
+    from experiments.nosa_offload_overlap.src import measure
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("Independent check leaked into clean performance samples")
+
+    class Workspace:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def run(self, q, *args):
+            return q
+
+        def synchronize(self):
+            pass
+
+        @property
+        def last_transfer_bytes(self):
+            forbidden()
+
+    monkeypatch.setitem(
+        sys.modules,
+        "operators.nosa.attention.offload.api",
+        SimpleNamespace(NosaFetchWorkspace=Workspace),
+    )
+    monkeypatch.setattr(measure, "copy_to_device", lambda tensor, device: tensor)
+    monkeypatch.setattr(torch.Tensor, "pin_memory", lambda tensor: tensor)
+    monkeypatch.setattr(
+        measure.torch.cuda,
+        "Event",
+        lambda **kwargs: SimpleNamespace(
+            record=lambda: None, synchronize=lambda: None, elapsed_time=lambda other: 2.0
+        ),
+    )
+    monkeypatch.setattr(measure.torch.cuda, "synchronize", lambda: None)
+    monkeypatch.setattr(measure.torch.cuda.nvtx, "range_push", lambda name: None)
+    monkeypatch.setattr(measure.torch.cuda.nvtx, "range_pop", lambda: None)
+    monkeypatch.setattr(measure, "nosa_block_sparse_attention", lambda q, *args: q)
+    monkeypatch.setattr(measure, "reference_acceptance", forbidden)
+    monkeypatch.setattr(measure, "_validate_case", forbidden)
+    monkeypatch.setattr(measure.torch.testing, "assert_close", forbidden)
+    cpu = {
+        "q": torch.zeros((8, 32, 128), dtype=torch.bfloat16),
+        "k": torch.zeros((72, 2, 128), dtype=torch.bfloat16),
+        "v": torch.zeros((72, 2, 128), dtype=torch.bfloat16),
+        "cis": torch.zeros((72, 2), dtype=torch.bfloat16),
+        "ids": torch.zeros((8, 2, 64), dtype=torch.int32),
+        "valid_mask": torch.zeros((8, 2, 64), dtype=torch.bool),
+    }
+    tensor_identity = {
+        name: measure.tensor_metadata(cpu[name]) for name in measure.required_order()
+    }
+    args = SimpleNamespace(
+        mode="bench",
+        queries=8,
+        device="cpu",
+        tile_size=8,
+        fetch_ctas=2,
+        profiled=False,
+        warmup=2,
+        repeats=3,
+        synthetic=False,
+        validation_cases={
+            "fixture": {
+                "tensors": tensor_identity,
+                "acceptance": {"rows": list(range(8))},
+                "serialized_overlap_exact_equal": True,
+            }
+        },
+    )
+    result = measure.benchmark_case(cpu, args, label="fixture", prefix=64)
+    assert result["traffic_checks"] == "independent_check"
+    assert result["numerical_acceptance_source"] == "independent_check"
+    assert all(len(result["modes"][mode]["cuda_ms"]["samples"]) == 3 for mode in measure.MODES)

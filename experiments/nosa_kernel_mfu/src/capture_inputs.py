@@ -29,13 +29,13 @@ from unittest.mock import patch
 import torch
 
 from executor.model_executor import run_chunks
-from experiments.indexer_block_sparse_profile.src.capture import (
+from experiments.nosa_baseline_performance.src.dense.capture import execution_split
+from experiments.nosa_baseline_performance.src.dense.sources import source_hashes
+from experiments.nosa_baseline_performance.src.sparse.capture import (
     make_request,
     rewind_cache,
     validate_request,
 )
-from experiments.nosa_gr_65536_1024.src.capture import execution_split
-from experiments.nosa_gr_65536_1024.src.sources import source_hashes
 from models.nosa.infer import DEFAULT_MODEL_PATH
 from models.nosa.model import NosaForCausalLM
 from operators.nosa._native import build_info
@@ -98,7 +98,7 @@ def checkpoint_manifest(model_path, *, hash_contents):
 
 
 def snapshot_sources(destination):
-    profile = ROOT / "experiments/indexer_block_sparse_profile/src"
+    profile = ROOT / "experiments/nosa_baseline_performance/src/sparse"
     sources = source_hashes(
         Path(__file__),
         ROOT / "experiments/nosa_kernel_mfu/scripts/capture.sh",

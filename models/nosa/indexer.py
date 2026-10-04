@@ -245,10 +245,9 @@ class NosaIndexer:
             raise ValueError("Offload K does not cover the query positions")
         if self.backend == "triton" and not q.is_cuda:
             raise ValueError("Triton NOSA selection requires CUDA inputs")
-        # Reject a bad query before touching any pending derived records.
-        if not torch.isfinite(q).all():
-            raise ValueError("NOSA indexer requires finite Q, K and CIS scores")
-        records = cache_access.prepare_indexer_inputs(context.layer_idx)
+        # Validate this Q and the unvalidated append together. Graph execution
+        # retains the device flag until the model's pre-commit host decision.
+        records = cache_access.prepare_indexer_inputs(context.layer_idx, query=q)
         count, stable = cache_access._indexer_lengths(length)
         compressed_keys = records["compressed_keys"][:count]
         compressed_cis = records["compressed_cis"][:count]
@@ -459,14 +458,18 @@ def prepare_native_indexer_inputs(
     """Validate and append owned records, returning None for other backends/layouts.
 
     The numerical kernel leaves every derived buffer untouched on nonfinite
-    input. Only this model adapter publishes the reservation after the host
-    observes success. Validation scratch is borrowed from the request's serial
-    workspace and can be overwritten by selection after that synchronization.
+    input. Ordinary calls finish the pending reservation after the host observes
+    success. A deferred model step may finish pending metadata earlier, but
+    checks all device flags before any committed cursor advances. Failed async
+    selection returns safe empty IDs without reading unwritten derived records.
+    Validation scratch is borrowed from the request's serial
+    workspace. Deferred flags occupy separate graph-owned storage until commit.
     A prepared CIS ranking occupies a separate aligned tail of that allocation
     and remains live until selection consumes it. Supported owned appends use a
-    checked native submission and return their final BlockSelection; other
-    layouts retain the preparation tuple and ordinary selection path. Checked
-    validation scratch is disjoint from all output storage even on failure.
+    checked native submission and return their final BlockSelection. Graph-owned
+    short appends guard the ordinary score dispatch with their device flag;
+    other layouts retain the preparation tuple and ordinary selection path.
+    Checked and deferred validation scratch is disjoint from output storage.
     Cache transaction metadata belongs to the model and request, independently
     of this scratch allocation.
     """
@@ -479,6 +482,9 @@ def prepare_native_indexer_inputs(
 
     if not supports(q, keys, cis):
         return None
+    from models.nosa.deferred_validation import finite_flag
+
+    deferred = finite_flag(cache_owner, layer_idx)
     length, heads, _ = keys.shape
     count, stable = max(0, length // 16 - 1), max(0, (length - 16) // 64)
     lengths = {"compressed_keys": count, "compressed_cis": count, "pooled_cis": stable}
@@ -518,7 +524,9 @@ def prepare_native_indexer_inputs(
             ranking = scratch_bytes[ranking_offset:].view(torch.int32).reshape(heads, 64)
             scratch = PreparationScratch(
                 scratch_bytes[validation_offset : validation_offset + 3072],
-                scratch_bytes[validation_offset + 3072 : validation_offset + 3073]
+                deferred
+                if deferred is not None
+                else scratch_bytes[validation_offset + 3072 : validation_offset + 3073]
                 .view(torch.bool)
                 .reshape(()),
                 cache_owner.native_indexer_host_flag(),
@@ -541,6 +549,70 @@ def prepare_native_indexer_inputs(
                 compressed_start=compressed_start,
                 pooled_start=pooled_start,
                 scratch=scratch,
+                defer_check=deferred is not None,
+            )
+            indexer_cache.finish_layer(layer_idx)
+            return BlockSelection(ids, 64, valid_mask=valid)
+        # Only graph-owned validation may defer the short-prefix host decision.
+        # The ordinary score path and the >=2047 joint predicate stay separate.
+        guarded_short = (
+            deferred is not None
+            and cache_owner is not None
+            and q.ndim == 3
+            and q.shape[1:] == (heads * 16, 128)
+            and q.dtype == torch.bfloat16
+            and count < 2047
+            and (blocks <= 64 or ranked)
+            and query_start == validated_start
+            and query_start + len(q) == length
+            and q.stride(-1) == 1
+            and q.data_ptr() % 16 == 0
+            and all(stride > 0 and stride % 8 == 0 for stride in q.stride()[:2])
+        )
+        if guarded_short:
+            from operators.nosa.indexer._indexer_deferred_cuda import select_prepared_out
+
+            rows = len(q)
+            score_bytes = rows * heads * blocks * keys.element_size() if blocks > 64 else 0
+            validation_offset = (score_bytes + 255) // 256 * 256
+            ranking_offset = validation_offset + 3328
+            ranking_bytes = heads * 64 * 4 if blocks > 64 else 0
+            scratch_bytes = indexer_cache.workspace(ranking_offset + ranking_bytes, torch.uint8)
+            workspace = (
+                scratch_bytes[:score_bytes].view(keys.dtype).reshape(rows * heads, blocks)
+                if blocks > 64
+                else None
+            )
+            ranking = (
+                scratch_bytes[ranking_offset:].view(torch.int32).reshape(heads, 64)
+                if blocks > 64
+                else None
+            )
+            scratch = PreparationScratch(
+                scratch_bytes[validation_offset : validation_offset + 3072], deferred
+            )
+            ids = torch.empty((rows, heads, 64), dtype=torch.int64, device=q.device)
+            valid = torch.empty_like(ids, dtype=torch.bool)
+            normalizers = (
+                torch.empty((1, rows, heads, 16, 2), dtype=torch.float32, device=q.device)
+                if blocks > 64 and rows < 1024 and count >= 511
+                else None
+            )
+            select_prepared_out(
+                q.reshape(rows, heads, 16, 128),
+                keys,
+                cis,
+                **reservation.buffers,
+                workspace=workspace,
+                normalizers=normalizers,
+                block_ids=ids,
+                valid_mask=valid,
+                ranking=ranking,
+                query_start=query_start,
+                validated_start=validated_start,
+                compressed_start=compressed_start,
+                pooled_start=pooled_start,
+                scratch=scratch,
             )
             indexer_cache.finish_layer(layer_idx)
             return BlockSelection(ids, 64, valid_mask=valid)
@@ -549,7 +621,10 @@ def prepare_native_indexer_inputs(
         ranking_bytes = heads * 64 * 4 if ranked else 0
         scratch_bytes = indexer_cache.workspace(ranking_offset + ranking_bytes, torch.uint8)
         scratch = PreparationScratch(
-            scratch_bytes[:3072], scratch_bytes[3072:3073].view(torch.bool).reshape(())
+            scratch_bytes[:3072],
+            deferred
+            if deferred is not None
+            else scratch_bytes[3072:3073].view(torch.bool).reshape(()),
         )
         ranking = (
             scratch_bytes[ranking_offset:].view(torch.int32).reshape(heads, 64) if ranked else None

@@ -31,6 +31,7 @@ bool overlaps(TensorView left, TensorView right) {
   return lb>0 && rb>0 && l<r+rb && r<l+lb;
 }
 
+template<bool Checked>
 bool run(TensorView q, TensorView k, TensorView cis,
          TensorView ck, TensorView cc, TensorView pool,
          TensorView workspace, TensorView normalizers, TensorView ids, TensorView valid,
@@ -82,13 +83,20 @@ bool run(TensorView q, TensorView k, TensorView cis,
       <<"checked ranked indexer cannot be CUDA Graph captured";
   nosa_prepare_ranked::prepare_ranked_out(q,k,cis,ck,cc,pool,ranking,partial,finite,
       validated_start,compressed_start,pooled_start,query_start);
-  error=cudaMemcpyAsync(data(host_finite),data(finite),1,cudaMemcpyDeviceToHost,stream);
-  TVM_FFI_ICHECK(error==cudaSuccess)<<cudaGetErrorString(error);
-  error=cudaStreamSynchronize(stream);
-  TVM_FFI_ICHECK(error==cudaSuccess)<<cudaGetErrorString(error);
-  if(!*static_cast<bool*>(data(host_finite))) return false;
-  nosa_indexer::select_impl(q,ck,cc,pool,workspace,normalizers,ids,valid,ranking,query_start,true);
+  if constexpr(Checked) {
+    error=cudaMemcpyAsync(data(host_finite),data(finite),1,cudaMemcpyDeviceToHost,stream);
+    TVM_FFI_ICHECK(error==cudaSuccess)<<cudaGetErrorString(error);
+    error=cudaStreamSynchronize(stream);
+    TVM_FFI_ICHECK(error==cudaSuccess)<<cudaGetErrorString(error);
+    if(!*static_cast<bool*>(data(host_finite))) return false;
+  }
+  // The asynchronous path gates every score/selection kernel on the device
+  // flag. Failed preparation emits only safe empty logical selections. The
+  // model checks all layer flags before it commits or returns an output.
+  nosa_indexer::select_impl(q,ck,cc,pool,workspace,normalizers,ids,valid,ranking,query_start,true,
+      Checked ? nullptr : static_cast<bool const*>(data(finite)));
   return true;
 }
 } // namespace nosa_indexer_checked
-TVM_FFI_DLL_EXPORT_TYPED_FUNC(checked_ranked_indexer_out,nosa_indexer_checked::run);
+TVM_FFI_DLL_EXPORT_TYPED_FUNC(checked_ranked_indexer_out,nosa_indexer_checked::run<true>);
+TVM_FFI_DLL_EXPORT_TYPED_FUNC(async_ranked_indexer_out,nosa_indexer_checked::run<false>);

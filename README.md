@@ -9,19 +9,28 @@ HBM 与 CPU DRAM，希望在有限 HBM 下复用更多历史 KV，并降低 offl
 [研究状态](docs/status.md)按实验室四环节记录当前理解和缺口，
 [下一步任务](docs/roadmap.md)列出待做事项，允许交叉推进和人直接修正。
 `GR/` 支持固定 history 与候选变化；本地 serving 已增加按用户 LRU 保留历史的路径，
-在统一 HBM / DRAM 预算下对比首次访问与复访延迟。NOSA-8B 的旧短轨迹有数值与计量
-记录，见 [GR serving 实验](experiments/gr_serving/README.md)。
+按统一 HBM / DRAM 准入账本管理首次访问与复访。旧热度短轨迹已结束独立实验维护，
+通用 budget 实现和必要回归仍保留。当前系统对照使用完整 32 层、固定 P/NH、16 用户两轮的
+[NOSA motivation 报告](experiments/nosa_motivation/README.md)：指定 token 配额下，
+保留历史避免复访重建；sync sparse 相对 dense 将复访逻辑搬运量减少 86.27%、延迟降低
+59.05%，async 未快于 sync。两个 HBM 完整请求接近独立 API 组合参考，candidate
+效率仍有差距。报告保留物理容量与场景代表性的验证边界，优化进度以研究状态为准。
 DeepSeek 已完成共享 cache 条件下前三层 64K+1K 的非矩阵优化对照与 MFU 复核。
 固定 P/NH、16 用户两轮的 [motivation 四方案对照](experiments/deepseek_v32_motivation/README.md)
 和[官方 ECHO 适配对照](experiments/deepseek_v32_echo_official/README.md)已发布 C10 结果。
 [ECHO 容量分析](experiments/deepseek_v32_echo_cache/README.md)保留原源码对应的静态
 P/NH 规划，当前 metadata 改动后尚未重新规划，也未跑满容量。旧 4 GiB / W / chunk
 对照已撤回；静态规划与固定 16 用户的性能测量分别报告。
+NOSA 共享执行资源、公共唯一准入 owner 与 DeepSeek dense 共享双缓冲已接入，
+数值和缓存预算检查见[工程验收](docs/agents/system/nosa_shared_cache_checkpoint.md)。
+上述工程检查不代表新容量实验已完成，也不提供新实现的性能排名。
 原逐请求分配释放的 NOSA 入口继续保留；当前没有网络服务或到达队列吞吐测量。
 
 NOSA 支持 dense、完整 sparse policy 与显式 pinned-DRAM offload。Offload 主 kernel
-融合唯一页的 stripe fetch 和 persistent FA3 attention；HBM staging 仍覆盖一层完整
-逻辑地址，尚无有限 slots / eviction。已有完整模型数值验证和单层 overlap 性能报告，
+融合唯一页的 stripe fetch 和 persistent FA3 attention。通用 budget 路径的 HBM staging
+覆盖一层完整逻辑地址；固定 P/NH 入口另用逐层有限 pool 与 session 标签，
+尚不提供通用的热点淘汰策略。
+已有完整模型数值验证和单层 overlap 性能报告，
 完整模型的串行 GR serving 延迟另见上述实验；不包含 LM head 或并发服务测量。
 算子结果见 [NOSA 实验](experiments/nosa_offload_overlap/README.md)。
 
@@ -34,6 +43,11 @@ DeepGEMM main 与 FlashMLA 已接入，普通算子复用 FlashInfer，indexer �
 [ECHO 实验](experiments/deepseek_v32_echo_prefill/README.md)；不代表任务质量等价，GR 对照单独报告。
 报告数字保留各自 run ID 与源码快照，目录迁移和回归检查不替代性能复测。
 
+[实验索引](experiments/README.md)按 motivation、baseline 性能合理性、sparse pattern、
+自有设计 microbenchmark 四类组织。数值验收、正式计时和 profile 分开运行，复用
+覆盖相同执行路径的验收记录。本轮仅整理入口和已有产物，没有运行新实验；新入口的
+GPU 验收与性能测量仍未运行。
+
 ```text
 operators/nosa/                  indexer；attention/reference、device_only、offload
 operators/deepseek_v32/          indexer；attention 三类；linear / grouped MoE
@@ -44,6 +58,7 @@ models/deepseek_v32/             完整 ECHO checkpoint 推理及请求适配
 executor/                       通用 prefill / extend 分块执行
 cache/                          请求事务、resident / host backing、有限 token pool
 serving/                        GR 驱动的本地串行执行
+evaluation/                     共享来源记录、独立验收接口与内存审计
 tests/integration/              跨模块正确性测试
 experiments/                    各实验的源码、脚本、报告和原始产物
 experiments/legacy/deepseek_v32/ 有效历史报告、CPU 重建工具与独立 DeepGEMM 基准

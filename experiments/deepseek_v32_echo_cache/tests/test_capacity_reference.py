@@ -15,7 +15,7 @@ from experiments.deepseek_v32_echo_cache.src.capacity_probe import (
     tensor_summary,
     write_json,
 )
-from experiments.gr_serving.src.workload import token_sha256
+from GR.workload import token_sha256
 
 
 def make_run(tmp_path, *, changed_prefix=False):
@@ -265,7 +265,7 @@ def test_saved_echo_corruption_is_detected_and_session_is_released(tmp_path):
 
 @pytest.mark.parametrize("fail_extend", [False, True])
 def test_main_publishes_only_complete_independent_reference(monkeypatch, tmp_path, fail_extend):
-    from experiments.gr_serving.src import measure
+    from evaluation import provenance as measure
 
     run = make_run(tmp_path)
     temporary, target = tmp_path / "temporary", tmp_path / "published"

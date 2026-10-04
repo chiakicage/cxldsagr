@@ -26,7 +26,7 @@ from experiments.deepseek_v32_echo_cache.src.capacity_probe import (
     tensor_summary,
     write_json,
 )
-from experiments.gr_serving.src.workload import token_sha256
+from GR.workload import token_sha256
 
 
 def digest(path):
@@ -34,7 +34,7 @@ def digest(path):
 
 
 def verify_recorded_source(run_dir, state):
-    from experiments.gr_serving.src.measure import verify_source_snapshot
+    from evaluation.provenance import verify_source_snapshot
 
     manifest = json.loads((run_dir / "source_manifest.json").read_text())
     aggregate = hashlib.sha256(json.dumps(manifest, sort_keys=True).encode()).hexdigest()
@@ -256,7 +256,7 @@ def main(argv=None):
     backend = None
     binding = None
     try:
-        from experiments.gr_serving.src.measure import backend_provenance
+        from evaluation.provenance import backend_provenance
 
         state, binding, groups, results = load_run(args.run_dir)
         metadata.update(echo_run_id=state["run_id"], binding=binding, config=state["config"])

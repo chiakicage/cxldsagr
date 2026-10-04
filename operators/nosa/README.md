@@ -18,6 +18,13 @@ device-only 的 BF16 / D128 / GQA16 主路径使用 FA3，其他支持布局保�
 或 Triton。offload 复用同一 FA3 源码和数值 repair，通过 include 依赖共享实现；
 当前 staging 覆盖一层完整逻辑地址范围，尚无有限 HBM slots / eviction。
 
+[attention/workspace.py](attention/workspace.py) 提供可选的有界 FA3 scratch，
+device-only API 可通过 `workspace=` 注入。offload 的 `bounded=True` 配合显式
+`max_queries`、`trace_capacity` 预分配所有执行空间，供 NOSA backend 跨用户串行借用。
+默认 standalone 仍按原方式惰性分配。共享路径不回退到未预留的 Triton/FP16/layout
+分支；CPU 构造仅用于容量与状态测试，attention 需先转数学参考。输出 hidden/attention
+结果独立分配，不与下一次请求复用的 scratch 混同。
+
 [_native.py](_native.py) 保留后端选择与 native JIT 构建入口，按组件实际本地 include
 依赖生成缓存键。FA3 和 offload loader 另外记录 FlashInfer header 与共享源码指纹。
 编译缓存位于源码树外，依赖顶层共享 CUTLASS 和已安装的 FlashInfer 0.6.18。
@@ -33,6 +40,6 @@ CUDA_VISIBLE_DEVICES='' .venv/bin/python -m pytest operators/nosa -q
 第一条只验证 CPU 可运行检查；GPU 检查需要 Hopper 和编译依赖。全局强制 GPU
 环境检查使用 `bash scripts/run_tests.sh gpu`。测试不代表完整模型性能测量。
 
-正式性能结果与测量范围见 [resident profile](../../experiments/indexer_block_sparse_profile/README.md)、
+正式性能结果与测量范围见 [resident profile](../../experiments/nosa_baseline_performance/README.md)、
 [kernel MFU](../../experiments/nosa_kernel_mfu/README.md) 和
 [offload overlap](../../experiments/nosa_offload_overlap/README.md)。目录迁移不产生新的性能结果。

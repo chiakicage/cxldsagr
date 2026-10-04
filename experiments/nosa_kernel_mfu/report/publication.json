@@ -1,0 +1,103 @@
+{
+  "status": "published",
+  "source_runs": {
+    "synthetic": "kernel_flags_synthetic_20261004_01",
+    "captured": "kernel_flags_real_20261004_01",
+    "modules/native": "modules_flags_native_20261004_01",
+    "modules/triton": "modules_flags_triton_20261004_01"
+  },
+  "source_inventory_sha256": "9c03515108129af50633b8b9b21d73b4c2f05ccf7523bb272375e65120963564",
+  "source_inventory_digest_encoding": "SHA256 of JSON source_sha256 map with sort_keys=True and separators=(comma,colon)",
+  "source_artifacts": {
+    "synthetic/metadata.json": {
+      "run_id": "kernel_flags_synthetic_20261004_01",
+      "source": "experiments/nosa_kernel_mfu/output/data/kernel_flags_synthetic_20261004_01/metadata.json",
+      "sha256": "cc2dd1c22974ec0b96904e73b4958d16c760b3d367ccc4fd80c52163bdb54796"
+    },
+    "synthetic/results.json": {
+      "run_id": "kernel_flags_synthetic_20261004_01",
+      "source": "experiments/nosa_kernel_mfu/output/data/kernel_flags_synthetic_20261004_01/results.json",
+      "sha256": "cd29acb41ce0b8d969ffda904fcc925b205029d0d7559db83d302b8cfa8a7659"
+    },
+    "synthetic/launch_environment.json": {
+      "run_id": "kernel_flags_synthetic_20261004_01",
+      "source": "experiments/nosa_kernel_mfu/output/data/kernel_flags_synthetic_20261004_01/launch_environment.json",
+      "sha256": "34b29523bb6e76725016efb34a539fe5f13db7fa246b03a3a34e38276eac8b10"
+    },
+    "synthetic/summary.csv": {
+      "run_id": "kernel_flags_synthetic_20261004_01",
+      "source": "experiments/nosa_kernel_mfu/output/data/kernel_flags_synthetic_20261004_01/summary.csv",
+      "sha256": "303c4434ad7918afb89bb54706ee1109e70be8ef1481e20f550082b9c54bbf72"
+    },
+    "captured/metadata.json": {
+      "run_id": "kernel_flags_real_20261004_01",
+      "source": "experiments/nosa_kernel_mfu/output/data/kernel_flags_real_20261004_01/metadata.json",
+      "sha256": "db681dc738c9d67fef3f214fc1b63434007f3f1bd80185b9d2ac9f8490954ccc"
+    },
+    "captured/results.json": {
+      "run_id": "kernel_flags_real_20261004_01",
+      "source": "experiments/nosa_kernel_mfu/output/data/kernel_flags_real_20261004_01/results.json",
+      "sha256": "200c34fc3fad1ac794c7cc4f93e1304827ce1ce2ca62283e23e59e4127dd0798"
+    },
+    "captured/launch_environment.json": {
+      "run_id": "kernel_flags_real_20261004_01",
+      "source": "experiments/nosa_kernel_mfu/output/data/kernel_flags_real_20261004_01/launch_environment.json",
+      "sha256": "dd2fde333ed2b56f7257fa62e68a59ece311cc445ef6eaf6a54185ea691ab34f"
+    },
+    "captured/summary.csv": {
+      "run_id": "kernel_flags_real_20261004_01",
+      "source": "experiments/nosa_kernel_mfu/output/data/kernel_flags_real_20261004_01/summary.csv",
+      "sha256": "db245da0c09d4155f6bb01e2ba3a74040453888e53fc2f661ac39355f14d581d"
+    },
+    "modules/native/metadata.json": {
+      "run_id": "modules_flags_native_20261004_01",
+      "source": "experiments/nosa_kernel_mfu/output/data/modules_flags_native_20261004_01/metadata.json",
+      "sha256": "efb785bf9dad17d18ba71f79ca97a4d52a50c227f762fcbe858248ec5a4fd249"
+    },
+    "modules/native/results.json": {
+      "run_id": "modules_flags_native_20261004_01",
+      "source": "experiments/nosa_kernel_mfu/output/data/modules_flags_native_20261004_01/results.json",
+      "sha256": "d2ad804fe695352ec8fae86acb32c6e88ce40d3ec9fc78962833aa4b5fb6faeb"
+    },
+    "modules/native/launch_environment.json": {
+      "run_id": "modules_flags_native_20261004_01",
+      "source": "experiments/nosa_kernel_mfu/output/data/modules_flags_native_20261004_01/launch_environment.json",
+      "sha256": "993bee4b1d1998a02925a621e4364d4faa7d1a87fdd8a3f1719bafa511055db1"
+    },
+    "modules/triton/metadata.json": {
+      "run_id": "modules_flags_triton_20261004_01",
+      "source": "experiments/nosa_kernel_mfu/output/data/modules_flags_triton_20261004_01/metadata.json",
+      "sha256": "1df0ba646f6f9c92e6d22eaf0776bcd34f11eac57f31471506fe089452156273"
+    },
+    "modules/triton/results.json": {
+      "run_id": "modules_flags_triton_20261004_01",
+      "source": "experiments/nosa_kernel_mfu/output/data/modules_flags_triton_20261004_01/results.json",
+      "sha256": "f382957fd683ba1ecc943546c6ced322edbbabd680bc81bf7ea5c600efc6afb3"
+    },
+    "modules/triton/launch_environment.json": {
+      "run_id": "modules_flags_triton_20261004_01",
+      "source": "experiments/nosa_kernel_mfu/output/data/modules_flags_triton_20261004_01/launch_environment.json",
+      "sha256": "3b39dc90e4db96e69fd1a59e85541d5997154db9763db354b7d278ed6d93ee63"
+    }
+  },
+  "integrity_audit_sha256": "f60b81b6fd6555599c002fd70d1283f13c83b5d45f4ef713b824d471ad6d5556",
+  "renderer_sha256": "61f3a9e350cfe8b3540332f7799fe4e6c52d8da2f3a231a11b1151a90a0a7d24",
+  "retained_input_capture": "kda_inputs_baseline_20260928_1345",
+  "proposed_superseded_measurement_runs_after_publication": [
+    "kernel_mfu_h200_gpu1_20260928_071840",
+    "kda_real_baseline_20260928_1352",
+    "kda_main_bf16_pair_v3_development"
+  ],
+  "publication_boundary": "Published four independently validated resident runs; replaced previous kernel report assets and removed only the three superseded measurement runs. Required frozen input capture retained.",
+  "published_at_utc": "2026-10-04T08:09:19.030378+00:00",
+  "root_review": {
+    "path": "report/root_report_audit.json",
+    "sha256": "49f379e4a530d7cebc95512a036d195f3cb3e796178b9b56c0d498259f226731"
+  },
+  "renderer_record": "experiments/nosa_kernel_mfu/output/data/kernel_flags_synthetic_20261004_01/report_generation/render.py",
+  "superseded_measurement_runs_removed": [
+    "kernel_mfu_h200_gpu1_20260928_071840",
+    "kda_real_baseline_20260928_1352",
+    "kda_main_bf16_pair_v3_development"
+  ]
+}

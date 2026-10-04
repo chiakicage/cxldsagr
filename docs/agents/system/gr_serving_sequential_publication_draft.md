@@ -1,5 +1,11 @@
 # Sequential 64K engineering documentation draft
 
+> Historical GR scope (2026-10-05): the `gr_serving` experiment is retired and its
+> experiment outputs have been removed. Its commands, result-retention rules and
+> rerun instructions below are historical and no longer active. See the
+> [retirement scope](experiment_organization.md#retired-gr-serving). Other
+> implementation and experiment findings retain their stated scope.
+
 2026-10-02. Prepared while the sequential measurement is running. This file proposes replacements
 for `gr_serving_task.md` and `gr_serving_review.md`; neither original file has been changed.
 It contains no accepted new performance result. Root must complete the evidence ledger below,

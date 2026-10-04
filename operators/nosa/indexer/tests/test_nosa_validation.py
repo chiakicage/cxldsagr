@@ -84,3 +84,21 @@ def test_cuda_nosa_finite_scan_accepts_an_already_validated_key_prefix():
     assert all_finite(q, keys, cis).item()
     q[-1, -1, -1] = torch.inf
     assert not all_finite(q, keys, cis).item()
+
+
+@requires_cuda
+@torch.inference_mode()
+def test_cuda_finite_scan_writes_one_owned_flag_and_preserves_adjacent_flags():
+    q = torch.zeros((128, 32, 128), device="cuda", dtype=torch.bfloat16)
+    keys = torch.zeros((128, 2, 128), device="cuda", dtype=q.dtype)
+    cis = torch.zeros((128, 2), device="cuda", dtype=q.dtype)
+    flags = torch.tensor([True, False, False], device="cuda")
+    result = all_finite(q, keys, cis, out=flags[1])
+    assert result.data_ptr() == flags[1].data_ptr()
+    assert flags.tolist() == [True, True, False]
+    keys[-1, -1, -1] = torch.inf
+    all_finite(q, keys, cis, out=flags[1])
+    assert flags.tolist() == [True, False, False]
+    alias = q.view(torch.bool).flatten()[0]
+    with pytest.raises(ValueError, match="disjoint scalar bool"):
+        all_finite(q, keys, cis, out=alias)

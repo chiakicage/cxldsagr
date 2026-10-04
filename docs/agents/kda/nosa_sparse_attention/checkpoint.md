@@ -31,7 +31,7 @@ QK 缩放和 CIS 加法保持独立 FP32 RN 舍入，先在自然单位中减去
 
 该联合检查点及其来源、测试和实验补测状态见[KDA 索引](../README.md#resident-联合验收与报告状态)。
 模块数据见[实验报告](../../../../experiments/nosa_kernel_mfu/README.md#完整模块检查点)，
-完整模型对照见[端到端与模块报告](../../../../experiments/indexer_block_sparse_profile/README.md)。
+完整模型对照见[端到端与模块报告](../../../../experiments/nosa_baseline_performance/README.md)。
 未通过性能验收或尚未完成 GPU gate 的候选保存在[调查记录](investigation_log.md)，均未升级为当前实现。
 
 入口：[SM90 算子](../../../../operators/nosa/README.md)、

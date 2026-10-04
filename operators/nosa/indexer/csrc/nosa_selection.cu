@@ -19,7 +19,17 @@ struct Params {
   int rows, heads, blocks, count, cached, cis_type, pool_type;
   int64_t query_start, cs, ch, ps, ph;
   bool bf16, contiguous, pos64;
+  bool const* finite = nullptr;
 };
+__device__ __forceinline__ bool reject_nonfinite(Params const& p) {
+  if (!p.finite || *p.finite) return false;
+  for (int i=threadIdx.x; i<64; i+=blockDim.x) {
+    int64_t offset=int64_t(blockIdx.x)*64+i;
+    p.ids[offset]=-1;
+    if(p.valid) p.valid[offset]=false;
+  }
+  return true;
+}
 __device__ __forceinline__ unsigned key16(unsigned bits) {
   if ((bits & 0x7fff) == 0) bits = 0;
   return bits & 0x8000 ? bits ^ 0xffff : bits ^ 0x8000;
@@ -170,6 +180,7 @@ template<int Threads, int Items> __device__ void choose(unsigned const (&keys)[I
   }
 }
 template<int Threads, int Items, bool CachedBf16> __global__ __launch_bounds__(Threads) void selection_kernel(Params p) {
+  if(reject_nonfinite(p)) return;
   constexpr int kThreads = Threads, kWarps = Threads / 32;
   __shared__ unsigned scratch[Items*kWarps+kWarps+1];
   int row=blockIdx.x, head=row%p.heads;
@@ -353,6 +364,7 @@ __device__ unsigned prepare_promotions_packed(Params p, unsigned row, int qblock
 }
 
 __global__ __launch_bounds__(32) void selection_prefix_kernel(Params p, unsigned const* ranking) {
+  if(reject_nonfinite(p)) return;
   constexpr int Items=33;
   __shared__ unsigned promotions[Items];
   __shared__ unsigned promoted_ids[64];
@@ -403,7 +415,7 @@ void prepare_ranking(TensorView pool, TensorView ranking, int64_t prefix) {
 
 int dtype(TensorView t) { return t.dtype().code==kDLBfloat ? 0 : (t.dtype().bits==16 ? 1 : 2); }
 void select_impl(TensorView qa, TensorView cis, TensorView pool, TensorView positions, TensorView ids,
-            TensorView valid, TensorView ranking, int64_t query_start, bool has_pool, bool contiguous, bool write_mask, bool ranking_ready) {
+            TensorView valid, TensorView ranking, int64_t query_start, bool has_pool, bool contiguous, bool write_mask, bool ranking_ready, bool const* finite=nullptr) {
   auto data=[](TensorView t) { return static_cast<char*>(t.data_ptr())+t.byte_offset(); };
   auto same_device=[&](TensorView t) {
     return t.device().device_type==kDLCUDA && t.device().device_id==qa.device().device_id;
@@ -437,7 +449,7 @@ void select_impl(TensorView qa, TensorView cis, TensorView pool, TensorView posi
     reinterpret_cast<int64_t*>(data(ids)),write_mask?reinterpret_cast<bool*>(data(valid)):nullptr,
     rows,heads,blocks,int(cis.size(0)),has_pool?int(pool.size(0)):0,dtype(cis),has_pool?dtype(pool):0,
     query_start,cis.stride(0),cis.stride(1),has_pool?pool.stride(0):0,has_pool?pool.stride(1):0,
-    qa.dtype().code==kDLBfloat,contiguous,positions.dtype().bits==64};
+    qa.dtype().code==kDLBfloat,contiguous,positions.dtype().bits==64,finite};
   if(!rows) return;
   auto stream=static_cast<cudaStream_t>(TVMFFIEnvGetStream(kDLCUDA,qa.device().device_id));
 #define LAUNCH(T,N,C) selection_kernel<T,N,C><<<rows*heads,T,0,stream>>>(p)
@@ -480,3 +492,22 @@ void select_ranked(TensorView qa, TensorView cis, TensorView pool, TensorView po
 }
 TVM_FFI_DLL_EXPORT_TYPED_FUNC(select, nosa_selection::select);
 TVM_FFI_DLL_EXPORT_TYPED_FUNC(select_ranked, nosa_selection::select_ranked);
+
+// A false flag must never enter the unguarded prepare_prefix_ranking helper.
+// This endpoint always consumes a ranking prepared under the same flag.
+#include "nosa_guarded_buffers.cuh"
+namespace nosa_selection {
+void select_ranked_guarded(TensorView qa, TensorView cis, TensorView pool,
+                          TensorView positions, TensorView ids, TensorView valid,
+                          TensorView ranking, TensorView finite, int64_t query_start) {
+  auto flag = nosa_guarded_buffers::finite_pointer(finite, qa);
+  TVM_FFI_ICHECK(valid.dtype().code == kDLBool && valid.dtype().bits == 8 &&
+                valid.dtype().lanes == 1);
+  nosa_guarded_buffers::disjoint({qa, cis, pool, ranking}, {ids, valid, finite});
+  TVM_FFI_ICHECK(!nosa_guarded_buffers::overlaps(qa, ranking))
+      << "prepared ranking must not overlap the score workspace";
+  select_impl(qa, cis, pool, positions, ids, valid, ranking,
+              query_start, true, true, true, true, flag);
+}
+}  // namespace nosa_selection
+TVM_FFI_DLL_EXPORT_TYPED_FUNC(select_ranked_guarded, nosa_selection::select_ranked_guarded);

@@ -1,0 +1,236 @@
+{
+  "created_utc": "2026-10-02T17:17:26.118031+00:00",
+  "status": "NOSA independent implementation; public handoff and formal performance pending",
+  "git_revision": "1a9aa455ef101a64da255cb1828bfa8f6d9a3f0c",
+  "source_sha256": {
+    "cache/staging.py": "5d96ef67d5cd726887f32ac2baa8baa6dfa29be20d9e07325ec2f1688a9b2fd9",
+    "cache/tests/test_staging.py": "c24383ad7689f777895b1509b1b6778257a608d2e6f01722a291c17d740ec5ce",
+    "experiments/gr_serving/src/profile.py": "ba68f2ec1d099950aa60d7e8409047288a1f947da33108954c47ec5a91a47460",
+    "experiments/gr_serving/tests/test_profile_shared.py": "0190aac8bdd98717a42a0a29e36e8b1d1e84f1be8a3f16470942f9ee12cf8334",
+    "models/nosa/attention.py": "62fd14e73b807bbbc5b5c3a509bdde7bb433b6a4416bd957e1e8463f9c74a0b1",
+    "models/nosa/cache.py": "e410289be5f91f6c18f363cddd178b9cfb28eb2239bf7ebe3d1811fa0b66da4c",
+    "models/nosa/offload_cache.py": "863a59226096a1b6beefec3c9d5c0cf9e47c0617d1332d73a1808e53183d328e",
+    "models/nosa/serving.py": "11a35de376ca9968a7e3d6ed65293acef6fac8baa1301c694afff53d1196ecf8",
+    "models/nosa/serving_resources.py": "7e3438035f8e4f20607f94d42ac02345a07792a736d551d779e2079e78623bc6",
+    "models/nosa/tests/test_cache_allocation_audit.py": "0e19f60a8333a1d013d111e35471fa3a884b7d02c165811cbaec3349a86c7634",
+    "models/nosa/tests/test_resource_drain.py": "5038867b4d354dd2f111c415ba1f8255dd298de8f80383f30dae606328eb2e27",
+    "models/nosa/tests/test_serving.py": "af6faa83ba53f172b0a7849c83323f7e79f72f485634b6ca5657ed20af58e793",
+    "models/nosa/tests/test_serving_resources.py": "f73056915e8d6f182d220a3ea18406b1b4a9956781c1cc4d77eb9627b9a0391f",
+    "models/nosa/tests/test_shared_serving_cuda.py": "fd7022fc9f5481fbb72a7db1f2232d6d81987eed8415584015f7d10acad018c0",
+    "operators/nosa/attention/device_only/_cuda.py": "2f9de5fdb75e3a87ee98e46ab93ddcd18b0482b872e5f1e114238510858e5742",
+    "operators/nosa/attention/device_only/_fa3.py": "9ee7135e8778f8f07da35948f2581c56c3aa7d12cc2f990c65d4a0342a731e73",
+    "operators/nosa/attention/device_only/api.py": "a8c483019ae6632767e7c33c5ffd8d78b46f4f06b7d8387eaa59aa1950926d21",
+    "operators/nosa/attention/offload/api.py": "cfa95a8208219a915de450cd062387113bf7cfaedd48432e8044707dcb34d23a",
+    "operators/nosa/attention/offload/tests/test_nosa_offload.py": "f9d200354c2bf45f67f91086db23ec46f00b66dab210716065e9f8ece22f64a7",
+    "operators/nosa/attention/tests/test_workspace.py": "f0d8c841b5637df412974e3ad909b1220a1197ad761f850aec66f419cbaaa2e5",
+    "operators/nosa/attention/tests/test_workspace_cuda.py": "a838053d73c2ee49ff7e8b76fad5d830f2cad9314db539d3e8a13e1f04e170ae",
+    "operators/nosa/attention/workspace.py": "3bfca7f13321a2e90a8f5942ac86956af62b1003d2967463c847908ad06fa301",
+    "tests/integration/test_gr_persistent.py": "c6f8054c61baf1aa85baa5b304b4f3af575428392ddacc37e8f98c60c9cf6bc2"
+  },
+  "patch_file": "nosa_shared_cache.patch",
+  "patch_sha256": "91406bc9e55b76cb0bbcbdee2afe4835ebb5f1cd0d1fc65bb15bf8c09ffc87d8",
+  "observed_unhanded_off_interfaces_sha256": {
+    "executor/serving_backend.py": "dec9f8e93158476d8eac88fa0fff6e5e7dbc13dde7438b414984a11a4fe319c8",
+    "serving/persistent.py": "e732204c18edda915b7e6c7c06ae7ebe644577bc81c567beb9e1baa4b9f47dab",
+    "cache/prefix_pool.py": "dd564291973b2b417d091b7c90c013302c5bc549bad317852ccec7f4d64b2c39",
+    "models/deepseek_v32/serving_backend.py": "987e10dfecdcca2d3ec89ef1c5f864196fd0dbef4517e2d3ff1cf5ce887e181f"
+  },
+  "dependencies": {
+    "python": "3.12.13",
+    "torch": "2.12.1+cu130",
+    "flashinfer-python": "0.6.18",
+    "apache-tvm-ffi": "0.1.13.post3",
+    "triton": "3.7.1",
+    "safetensors": "0.8.0"
+  },
+  "native_build": {
+    "tvm_ffi": "0.1.13.post3",
+    "compiler": {
+      "path": "/usr/local/cuda-13.2/bin/nvcc",
+      "version": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2026 NVIDIA Corporation\nBuilt on Thu_Mar_19_11:12:51_PM_PDT_2026\nCuda compilation tools, release 13.2, V13.2.78\nBuild cuda_13.2.r13.2/compiler.37668154_0"
+    },
+    "cutlass": {
+      "commit": "f3fde58372d33e9a5650ba7b80fc48b3b49d40c8",
+      "version_header_sha256": "471048c340f3a7d8b2bc1618919fd4368c05f357755e2445c34fda652182783d"
+    },
+    "cuda_flags": [
+      "-O3",
+      "-std=c++20",
+      "--expt-relaxed-constexpr",
+      "--expt-extended-lambda",
+      "-gencode=arch=compute_90a,code=sm_90a",
+      "-lineinfo"
+    ],
+    "selected_backend": "native",
+    "source_sha256": {
+      "operators/nosa/_native.py": "4ed3277e55f21abac43259da7f678af74825a3ef37bbd830558bbd127f3e9b92",
+      "operators/nosa/attention/device_only/csrc/nosa_attention.cu": "01c0699b507baebe005b2df44e2f78ec149083a6239b96e7d24990edf2bf09f4",
+      "operators/nosa/attention/device_only/csrc/nosa_attention_grouped.cuh": "30f35b34a80c2a26c249b92e055c3158a5a2e40e5c818ff9dadc3074dc525927",
+      "operators/nosa/indexer/csrc/nosa_indexer.cu": "91e4639259cd02839fa4d2606b118ff40343ac75f0419274ec4f3a868e42ed34",
+      "operators/nosa/indexer/csrc/nosa_indexer_checked.cu": "49a303a3f89886ebd373611fde3faa7b6ee0adae3c8f1ebc78855734b2b1b16d",
+      "operators/nosa/indexer/csrc/nosa_prepare.cu": "340f7455f11f602ac4e0380ff7bd6963e2cdaa32275bbd470ae763ea0a0a1715",
+      "operators/nosa/indexer/csrc/nosa_prepare_ranked.cu": "1c40cdd8edcf6da94cc0ec59e4477035c8db91441b1c3acb76bfcdd163388d09",
+      "operators/nosa/indexer/csrc/nosa_scores.cu": "d5c5b543e08a6e164701b9e5070458079c8c843f35a99de96b4c66427dfb01af",
+      "operators/nosa/indexer/csrc/nosa_scores_fused.cuh": "56e6cbe675525b419db3699ae57dcf984ab64bf9e12f1bbe3b49ffd21bcd197a",
+      "operators/nosa/indexer/csrc/nosa_scores_pruned.cuh": "99e0e6ce9f5685e639016e24732cce249a3b2c043ff0629b021866ad0f051409",
+      "operators/nosa/indexer/csrc/nosa_selection.cu": "f2ce6b685336002d5e137ed1af05d1b2bfdda37f89b57323d053a8daa953e9e9",
+      "operators/nosa/indexer/csrc/nosa_selection_cutoff.cuh": "7eaabb06b7d39d5ea0779ea209b80a3e7d54e3b137748a35f4cb47836a7f00fe",
+      "operators/nosa/indexer/csrc/nosa_selection_prefix.cuh": "e5b447d6427271df99751c93e6d8c14e3cedc7fee9d76c130d8967410a3b6b35"
+    },
+    "attention_fa3": {
+      "toolchain": {
+        "tvm_ffi": "0.1.13.post3",
+        "compiler": {
+          "path": "/usr/local/cuda-13.2/bin/nvcc",
+          "version": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2026 NVIDIA Corporation\nBuilt on Thu_Mar_19_11:12:51_PM_PDT_2026\nCuda compilation tools, release 13.2, V13.2.78\nBuild cuda_13.2.r13.2/compiler.37668154_0"
+        },
+        "cutlass": {
+          "commit": "f3fde58372d33e9a5650ba7b80fc48b3b49d40c8",
+          "version_header_sha256": "471048c340f3a7d8b2bc1618919fd4368c05f357755e2445c34fda652182783d"
+        },
+        "cuda_flags": [
+          "-O3",
+          "-std=c++20",
+          "--expt-relaxed-constexpr",
+          "--expt-extended-lambda",
+          "-gencode=arch=compute_90a,code=sm_90a",
+          "-lineinfo"
+        ]
+      },
+      "torch": "2.12.1+cu130",
+      "flashinfer": "0.6.18",
+      "flashinfer_include": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/lib/python3.12/site-packages/flashinfer/data/include",
+      "flashinfer_headers_sha256": "105e29e4777712c9b029e577ec6aa161ed2884e88c312c38c50d64ddde1696c1",
+      "cuda_flags": [
+        "-O3",
+        "-std=c++20",
+        "--expt-relaxed-constexpr",
+        "--expt-extended-lambda",
+        "-gencode=arch=compute_90a,code=sm_90a",
+        "-lineinfo",
+        "-use_fast_math",
+        "-DFA3_GROUP=8",
+        "-DFA3_KV=128",
+        "-DFA3_TMA=1",
+        "-DFA3_STAGES=2"
+      ],
+      "source_sha256": {
+        "_fa3.py": "9ee7135e8778f8f07da35948f2581c56c3aa7d12cc2f990c65d4a0342a731e73",
+        "nosa_attention_fa3.cu": "f98b5ae4ea4bcc5c3dc5a597958627d6c186f22d1db7108162a2a328401c2f80",
+        "nosa_attention.cu": "01c0699b507baebe005b2df44e2f78ec149083a6239b96e7d24990edf2bf09f4",
+        "nosa_attention_grouped.cuh": "30f35b34a80c2a26c249b92e055c3158a5a2e40e5c818ff9dadc3074dc525927"
+      },
+      "group_queries": 8,
+      "minimum_fa3_queries": 1,
+      "cta_order": "descending_union_tiles",
+      "cta_order_work_items": 256,
+      "cta_order_ties": "ascending_logical_batch",
+      "q_transfer": "direct_strided_tma",
+      "output_store": "direct",
+      "numerical_repair": "nonfinite_output_postcheck",
+      "native_pv_accumulation": "bf16_power_of_two_scale_finite_output_guard",
+      "kv_tile_tokens": 128,
+      "stages": 2
+    }
+  },
+  "fused_build": {
+    "toolchain": {
+      "tvm_ffi": "0.1.13.post3",
+      "compiler": {
+        "path": "/usr/local/cuda-13.2/bin/nvcc",
+        "version": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2026 NVIDIA Corporation\nBuilt on Thu_Mar_19_11:12:51_PM_PDT_2026\nCuda compilation tools, release 13.2, V13.2.78\nBuild cuda_13.2.r13.2/compiler.37668154_0"
+      },
+      "cutlass": {
+        "commit": "f3fde58372d33e9a5650ba7b80fc48b3b49d40c8",
+        "version_header_sha256": "471048c340f3a7d8b2bc1618919fd4368c05f357755e2445c34fda652182783d"
+      },
+      "cuda_flags": [
+        "-O3",
+        "-std=c++20",
+        "--expt-relaxed-constexpr",
+        "--expt-extended-lambda",
+        "-gencode=arch=compute_90a,code=sm_90a",
+        "-lineinfo"
+      ]
+    },
+    "torch": "2.12.1+cu130",
+    "flashinfer": "0.6.18",
+    "flashinfer_include": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/lib/python3.12/site-packages/flashinfer/data/include",
+    "flashinfer_headers_sha256": "105e29e4777712c9b029e577ec6aa161ed2884e88c312c38c50d64ddde1696c1",
+    "cuda_flags": [
+      "-O3",
+      "-std=c++20",
+      "--expt-relaxed-constexpr",
+      "--expt-extended-lambda",
+      "-gencode=arch=compute_90a,code=sm_90a",
+      "-lineinfo",
+      "-use_fast_math",
+      "-DFA3_GROUP=8",
+      "-DFA3_KV=128",
+      "-DFA3_TMA=1",
+      "-DFA3_STAGES=2"
+    ],
+    "source_sha256": {
+      "_fa3.py": "9ee7135e8778f8f07da35948f2581c56c3aa7d12cc2f990c65d4a0342a731e73",
+      "nosa_attention_fa3.cu": "f98b5ae4ea4bcc5c3dc5a597958627d6c186f22d1db7108162a2a328401c2f80",
+      "nosa_attention.cu": "01c0699b507baebe005b2df44e2f78ec149083a6239b96e7d24990edf2bf09f4",
+      "nosa_attention_grouped.cuh": "30f35b34a80c2a26c249b92e055c3158a5a2e40e5c818ff9dadc3074dc525927"
+    },
+    "group_queries": 8,
+    "minimum_fa3_queries": 1,
+    "cta_order": "descending_union_tiles",
+    "cta_order_work_items": 256,
+    "cta_order_ties": "ascending_logical_batch",
+    "q_transfer": "direct_strided_tma",
+    "output_store": "direct",
+    "numerical_repair": "nonfinite_output_postcheck",
+    "native_pv_accumulation": "bf16_power_of_two_scale_finite_output_guard",
+    "kv_tile_tokens": 128,
+    "stages": 2,
+    "fused_source_sha256": "6b71f1f610e1b3d1f14fdca457d1490b10e57b2ad290ecbc9b4caa371042dd17",
+    "fused_wrapper_sha256": "5487ba8ad2b99dc1fb541cb330ffce2ea569edd59e17cb81c5bf39c7c1cd5dc9",
+    "fused_prefill_header_sha256": "0b20b38b91b295202258203cc484d588fc6251b6eacea9da4c0d5f57ea104ad9",
+    "host_load_cache_policy": "ld.global.cv.v4.u32",
+    "main_schedule": "cooperative_fa3_spare_producer_warps_striped_fetch_queue",
+    "compute_order": "head1_then_head0_cost_descending_for_256_batches_and_2_kv_heads",
+    "fetch_queue": "head_phased_for_matching_compute_geometry_otherwise_block_major",
+    "fetch_queue_within_head": "page0_then_descending_blocks",
+    "fetch_queue_layout": "int32[page_count,stripe_cursor,logical_page_slots...]",
+    "fetch_queue_compactor_threads": 256,
+    "fetch_queue_compactor_in_operator_timing": true,
+    "fetch_threads_per_cta": 96,
+    "fetch_stripes": 8,
+    "fetch_completion": "per_page_acq_rel_stripe_count_then_tma_acquire_async_proxy_fence",
+    "fused_cuda_flags": [
+      "-O3",
+      "-std=c++20",
+      "--expt-relaxed-constexpr",
+      "--expt-extended-lambda",
+      "-gencode=arch=compute_90a,code=sm_90a",
+      "-lineinfo",
+      "-use_fast_math",
+      "-DFA3_GROUP=8",
+      "-DFA3_KV=128",
+      "-DFA3_TMA=1",
+      "-DFA3_STAGES=2",
+      "-DNOSA_FETCH_STRIPES=8"
+    ],
+    "warpgroup_register_limits": {
+      "producer": 24,
+      "consumer": 240
+    },
+    "cta_register_pool_guard": "round_up(numRegs * 32, 256) * 12 >= 64512",
+    "launch_configuration_cache": "thread_local_context_id_device_16_entries",
+    "fetch_barrier_hardware_id": 14,
+    "fetch_ctas_semantics": "participating_cta_cap_clamped_to_compute_grid",
+    "fetch_batch_max_pages": {
+      "overlap": 1,
+      "serialized": 1
+    },
+    "fetch_trace_window": "envelope_of_nonempty_stripe_copy_windows",
+    "stripe_trace_window": "post_task_decode_barrier_to_stripe_stores_fence_and_barrier",
+    "stripe_trace_layout": "after_page_and_softmax_rows_then_page_slot_times_stripes_plus_stripe"
+  },
+  "fused_build_key": "cff17752fdd73139",
+  "gpu_inventory": "index, uuid, name, compute_cap, memory.total [MiB]\n0, GPU-1bdee8b4-22ac-536c-208b-bfb4ed38b878, NVIDIA M403, 9.0, 143771 MiB\n1, GPU-a2226185-cb05-a411-80da-f365154128fe, NVIDIA M403, 9.0, 143771 MiB\n2, GPU-72f87cfe-1a24-f69c-8b5d-71f1d8414a34, NVIDIA M403, 9.0, 143771 MiB\n3, GPU-80ff95c3-176e-fd8a-728f-9c5577c4a779, NVIDIA M403, 9.0, 143771 MiB\n4, GPU-f8efa4fd-5a9d-cdde-c13b-0e230e2082af, NVIDIA M403, 9.0, 143771 MiB\n5, GPU-a5cd5bab-33a4-a7e2-4a3c-78c2b08a8872, NVIDIA M403, 9.0, 143771 MiB\n6, GPU-62334366-b9c1-a3c1-6f89-49f5cf38fb00, NVIDIA M403, 9.0, 143771 MiB\n7, GPU-5c6220cc-a8ef-ca97-91bb-cb61a278faf8, NVIDIA M403, 9.0, 143771 MiB"
+}

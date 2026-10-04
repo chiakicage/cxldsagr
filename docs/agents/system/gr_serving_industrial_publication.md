@@ -1,5 +1,11 @@
 # Industrial 64K publication inventory
 
+> Historical GR scope (2026-10-05): the `gr_serving` experiment is retired and its
+> experiment outputs have been removed. Its commands, result-retention rules and
+> rerun instructions below are historical and no longer active. See the
+> [retirement scope](experiment_organization.md#retired-gr-serving). Other
+> implementation and experiment findings retain their stated scope.
+
 2026-10-02. This is a read-only inventory and future acceptance checklist, not a performance
 report. The industrial 1024-user / 4096-request run was stopped before measurement when the
 user changed the immediate request to a 16-user / 32-request sequential group with 4 GiB HBM

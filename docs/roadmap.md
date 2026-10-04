@@ -1,11 +1,29 @@
 # 下一步任务
 
-更新：2026-10-02。优先修正 ECHO MFU/cache 策略与 DeepSeek MFU 问题；现有 baseline 结论暂停使用。旧负载构造问题仍需解决，本轮没有新增 GPU 结果。
+> **2026-10-05 最新安排：**按用户继续推进目标的要求，恢复 H64K NOSA 性能优化。
+> 继续比较相同配置的 HBM-only、dense prefetch、sync sparse 和 async sparse，
+> 验证 candidate 效率、cache 正确性与完整请求收益。已完成的报告整理不再列为待办。
+
+> **当前测量范围：**按研究者要求，后续先只测 64K history，暂停追加 4K、16K。
+> 本轮已完成并验收的两档结果继续保留，可完成报告整理。
+
+> **2026-10-04 实测更新：** [deepseek_v32_motivation](../experiments/deepseek_v32_motivation/README.md)
+> 的固定 P=65,536 / NH=16,777,216、16 用户两轮四方案测量已完成，结果已回写状态表。
+> NOSA 同参数的 `poolscan` 四方案及匹配 profile/API 已验收；通用 budget 三档短轨迹已于 2026-10-05 结束独立实验维护。其他 loop 规模、candidate 效率与 T-007 的归因仍未完成。
+> 后续依据使用本次固定容量结果，不恢复已撤回的 4 GiB / W / chunk 排名。
+
+> **2026-10-03 用户修正：** 原 DeepSeek 4 GiB / W / chunk 结果已撤回。
+> T-006、T-007 中依赖旧控制点与旧排名的任务依据受影响，原任务保留待重新核对；
+> [固定 P/NH 容量分析](../experiments/deepseek_v32_echo_cache/README.md)已按 GPU 临时
+> candidate 更新：NH 只计 history，512 GiB DRAM 对应的静态边界为 455 个 64K 用户。
+> 按用户要求不跑满容量，长跑不列为继续执行的任务。数值检查不等于容量或性能实测，
+> 新估算不能恢复旧性能排名。其他研究者修正与 NOSA 待办保留。
+
+更新：2026-10-05。两模型各有 16 用户两轮固定 P/NH 控制点。NOSA 元数据复用的测量与独立审计已完成，局部改善尚未证明完整 serving 收益，暂不接入。下一步准备 indexer 执行 workspace 复用原型，以完整 candidate 的实测收益决定是否采用；已有四方案正式结果保持原实现边界。
 
 | 任务 | 下一步 | 主研究条目 |
 |---|---|---|
-| T-008 基线实现与计量修正 | 审计 ECHO/DeepSeek 的计算实现和 MFU 口径、ECHO cache 策略；定位并修正后按新 run ID 复测受影响对照，再替换旧报告 | 2.5 |
-| T-006 实际活跃用户与复访压力 | 核对热度 IID 抽样的实际人数和复用距离；16 用户两轮顺序负载尚无有效替换结果，结合基线修正重新安排完整验收，按真实 miss 评价预算压力 | 1.4 |
-| T-002 场景与模型数据 | 比较可用的 sparse attention GR 模型、数据和负载构造方案，列出适配工作与能回答的研究问题 | 1.2 |
-| T-003 ECHO 与 baseline | 结合 T-008 的有效基线，核对 ECHO 与 NOSA 设计的适配条件和可比范围，补全相关方案 | 2.5 |
-| T-007 服务开销归因 | 围绕 NOSA 改变 candidate 长度，分解冷历史、选集、缓存管理与 fetch/attention 开销，解释 overlap 的全请求改善为何未延续为稳定复访改善 | 3.1 |
+| T-006 loop 数据与容量压力 | 在 64K history 范围内，基于两模型已测控制点选择其他有区分力的 U/R、P/NH 范围，保持完整用户覆盖；区分 token 额度与字节预算 | 1.4 |
+| T-003 共享资源接入与可比范围 | 明确五类 baseline 的共同模型适配和实际执行路径；固定 token 额度与物理容量分别解释，保持 allocated、reserved 与设备已用量分开 | 2.1 |
+| T-007 loop motivation 测量与归因 | 在 H64K 验证 indexer 执行 workspace 复用能否降低完整 candidate 延迟，保持 cache 正确性；有效后补齐四方案验收。保留 ECHO 预测/预取与历史保留的归因 | 4.1（关联 2.1、4.2） |
+| T-002 场景与模型数据 | 继续明确 sparse attention GR 的具体任务与模型适配，评估 loop 能解释的系统问题及其真实场景边界，不以热度数据作为本轮 motivation 前置条件 | 1.2 |

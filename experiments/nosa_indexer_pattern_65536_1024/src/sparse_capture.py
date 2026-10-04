@@ -21,9 +21,9 @@ import numpy as np
 import torch
 
 from executor.model_executor import run_chunks
-from experiments.indexer_block_sparse_profile.src.capture import validate_request
-from experiments.nosa_gr_65536_1024.src.capture import execution_split
-from experiments.nosa_gr_65536_1024.src.sources import source_hashes
+from experiments.nosa_baseline_performance.src.dense.capture import execution_split
+from experiments.nosa_baseline_performance.src.dense.sources import source_hashes
+from experiments.nosa_baseline_performance.src.sparse.capture import validate_request
 from experiments.nosa_indexer_pattern_65536_1024.src.analyze import summarize
 from experiments.nosa_indexer_pattern_65536_1024.src.capture import (
     DEFAULT_REQUEST,
@@ -176,8 +176,8 @@ def capture_extend(
 
 
 @torch.inference_mode()
-def run_trajectory(model, prefix_ids, new_ids, *, mode, backend="triton"):
-    """Use a fresh cache and verify that observation does not change the suffix output."""
+def run_trajectory(model, prefix_ids, new_ids, *, mode, backend="triton", validate_observer=False):
+    """Use a fresh cache; observer replay is an explicit independent check."""
     with ExitStack() as stack:
         if mode == "dense":
             stack.enter_context(patch.object(model, "indexer", None))
@@ -193,14 +193,17 @@ def run_trajectory(model, prefix_ids, new_ids, *, mode, backend="triton"):
         recorder, hidden = capture_extend(
             model, new_ids, cache, prefix_ids.numel(), mode=mode, backend=backend, verbose=True
         )
-        if not torch.isfinite(hidden).all().item():
-            raise ValueError(f"{mode} candidate hidden contains nonfinite values")
-        if any(cache.get_layer_state(i) is not None for i in range(model.config.num_hidden_layers)):
-            raise ValueError("Replay cannot rewind opaque model state")
-        cache.truncate(prefix_ids.numel())
-        replay = run_chunks(model, new_ids, cache, NEW, output="hidden")
-        if not torch.equal(hidden, replay):
-            raise ValueError(f"Pattern observation changed {mode} candidate hidden states")
+        if validate_observer:
+            if not torch.isfinite(hidden).all().item():
+                raise ValueError(f"{mode} candidate hidden contains nonfinite values")
+            if any(
+                cache.get_layer_state(i) is not None for i in range(model.config.num_hidden_layers)
+            ):
+                raise ValueError("Replay cannot rewind opaque model state")
+            cache.truncate(prefix_ids.numel())
+            replay = run_chunks(model, new_ids, cache, NEW, output="hidden")
+            if not torch.equal(hidden, replay):
+                raise ValueError(f"Pattern observation changed {mode} candidate hidden states")
         return recorder, hidden.float().cpu().numpy()
 
 
@@ -208,12 +211,17 @@ def main(argv=None):
     import json
 
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--mode", choices=("capture", "check"), default="capture")
     parser.add_argument("--model-path", type=Path, default=DEFAULT_MODEL_PATH)
     parser.add_argument("--request-file", type=Path, default=DEFAULT_REQUEST)
     parser.add_argument("--device", default="cuda:0")
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--run-id", required=True)
     args = parser.parse_args(argv)
+    if args.mode == "check":
+        from experiments.nosa_baseline_performance.src.acceptance import check_directory
+
+        check_directory(args.output_dir)
     request_bytes = args.request_file.read_bytes()
     request = json.loads(request_bytes)
     validate_request(request, PREFIX, NEW)
@@ -250,7 +258,9 @@ def main(argv=None):
     new_ids = torch.tensor(new, device=device)
     recorders, hidden = {}, {}
     for mode in ("dense", "sparse"):
-        recorders[mode], hidden[mode] = run_trajectory(model, prefix_ids, new_ids, mode=mode)
+        recorders[mode], hidden[mode] = run_trajectory(
+            model, prefix_ids, new_ids, mode=mode, validate_observer=args.mode == "check"
+        )
     if not torch.equal(
         recorders["dense"].block_ids["dense_nosa64"][0],
         recorders["sparse"].block_ids["sparse_nosa64"][0],
@@ -315,7 +325,7 @@ def main(argv=None):
     sources = source_hashes(
         *own.glob("*.py"),
         *own.parent.joinpath("scripts").glob("*.sh"),
-        ROOT / "experiments/indexer_block_sparse_profile/src/capture.py",
+        ROOT / "experiments/nosa_baseline_performance/src/sparse/capture.py",
         ROOT / "pyproject.toml",
         ROOT / "uv.lock",
     )
@@ -357,12 +367,12 @@ def main(argv=None):
         "metric": "unique_selected_full_block_kv_payload_excluding_cis",
         "warmup": 0,
         "captures_per_trajectory": 1,
-        "validation_replays_per_trajectory": 1,
+        "validation_replays_per_trajectory": int(args.mode == "check"),
         "performance_measured": False,
         "validation": {
-            "hidden_finite": True,
-            "dense_observer_hidden_max_abs": 0.0,
-            "sparse_observer_hidden_max_abs": 0.0,
+            "hidden_finite": True if args.mode == "check" else None,
+            "dense_observer_hidden_max_abs": 0.0 if args.mode == "check" else None,
+            "sparse_observer_hidden_max_abs": 0.0 if args.mode == "check" else None,
             "full_nosa_layer0_selection_equal": True,
         },
         "gpu": {

@@ -21,7 +21,7 @@ from experiments.deepseek_v32_echo_official.src.measure import (
     write_json,
 )
 from experiments.deepseek_v32_echo_official.src.report import audit_run, write_report
-from experiments.gr_serving.src.workload import token_sha256
+from GR.workload import token_sha256
 
 
 def write_rows(path, rows):

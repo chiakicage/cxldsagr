@@ -21,8 +21,8 @@ import numpy as np
 import torch
 
 from executor.model_executor import run_chunks
-from experiments.nosa_gr_65536_1024.src.capture import execution_split
-from experiments.nosa_gr_65536_1024.src.sources import source_hashes
+from experiments.nosa_baseline_performance.src.dense.capture import execution_split
+from experiments.nosa_baseline_performance.src.dense.sources import source_hashes
 from models.nosa.indexer import NosaIndexer
 from models.nosa.infer import DEFAULT_MODEL_PATH
 from models.nosa.model import NosaForCausalLM

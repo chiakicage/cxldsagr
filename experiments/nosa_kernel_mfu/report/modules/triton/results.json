@@ -1,0 +1,1202 @@
+{
+  "run_id": "modules_flags_triton_20261004_01",
+  "results": [
+    {
+      "layer": 0,
+      "module": "indexer_total",
+      "useful_flops": 34616115200,
+      "composition_check": {
+        "incremental_matches_independent_full_compression": true,
+        "selection_matches_standalone_operator_exactly": true,
+        "selection_differs_from_capture_elements": 0
+      },
+      "eager_api": {
+        "ms": {
+          "median": 0.7614880204200745,
+          "min": 0.7478079795837402,
+          "max": 0.8345919847488403
+        },
+        "samples_ms": [
+          0.7478079795837402,
+          0.7813760042190552,
+          0.7613440155982971,
+          0.7642880082130432,
+          0.7608960270881653,
+          0.7530879974365234,
+          0.7625600099563599,
+          0.7548800110816956,
+          0.7525439858436584,
+          0.7705919742584229,
+          0.7577599883079529,
+          0.7579200267791748,
+          0.7618240118026733,
+          0.7674559950828552,
+          0.7659519910812378,
+          0.7530879974365234,
+          0.8345919847488403,
+          0.7707200050354004,
+          0.7616320252418518,
+          0.7708160281181335,
+          0.7567359805107117,
+          0.7728319764137268,
+          0.7605760097503662,
+          0.753600001335144,
+          0.788096010684967,
+          0.7521920204162598,
+          0.7680000066757202,
+          0.7540159821510315,
+          0.7549120187759399,
+          0.7616320252418518
+        ],
+        "mfu_pct": 4.5964121122130965
+      },
+      "wall_api": {
+        "ms": {
+          "median": 0.7673525,
+          "min": 0.753649,
+          "max": 0.840732
+        },
+        "samples_ms": [
+          0.753649,
+          0.786994,
+          0.767078,
+          0.770323,
+          0.766812,
+          0.758898,
+          0.768598,
+          0.760555,
+          0.758141,
+          0.776471,
+          0.763568,
+          0.763887,
+          0.767657,
+          0.773406,
+          0.771973,
+          0.75886,
+          0.840732,
+          0.776614,
+          0.767824,
+          0.776715,
+          0.762716,
+          0.778574,
+          0.766345,
+          0.759305,
+          0.794105,
+          0.758127,
+          0.773801,
+          0.759852,
+          0.760806,
+          0.767627
+        ],
+        "mfu_pct": 4.5612841039339855
+      },
+      "profile_kernel_sum": {
+        "ms": {
+          "median": 0.49698899999999996,
+          "min": 0.496864,
+          "max": 0.49898200000000004
+        },
+        "samples_ms": [
+          0.49698899999999996,
+          0.49898200000000004,
+          0.496864
+        ],
+        "mfu_pct": 7.042636276384395
+      },
+      "profiles": [
+        {
+          "file": "layer_00_triton_indexer_total_0.json",
+          "sha256": "cae49ed39ea1b92ebbd69d2e7aced49d5a6ffeffc0bdd84363bb11a03cc13fe9",
+          "kernel_ms": 0.49698899999999996,
+          "memcpy_ms": 0.002592,
+          "kernels": [
+            {
+              "name": "_finite_partials",
+              "us": 4.128
+            },
+            {
+              "name": "_finite_reduce",
+              "us": 1.152
+            },
+            {
+              "name": "_append_compressed",
+              "us": 6.112
+            },
+            {
+              "name": "_scores",
+              "us": 285.791
+            },
+            {
+              "name": "void flashinfer::sampling::FilteredTopKUnifiedKernel<__nv_bfloat16, int, 8, true, (flashinfer::sampling::FilteredTopKMode)0, (flashinfer::sampling::TopKTieBreak)1, flashinfer::sampling::DirectPageTableKernelPolicy<int>>(__nv_bfloat16 const*, int*, __nv_bfloat16*, int const*, long, int const*, int const*, int const*, int const*, unsigned int, unsigned int, unsigned int)",
+              "us": 78.687
+            },
+            {
+              "name": "void at::native::unrolled_elementwise_kernel<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#4}::operator()() const::{lambda(long)#1}, std::array<char*, 2ul>, 4, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1> >(int, at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#4}::operator()() const::{lambda(long)#1}, std::array<char*, 2ul>, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1>)",
+              "us": 2.752
+            },
+            {
+              "name": "_prepare_cis",
+              "us": 17.504
+            },
+            {
+              "name": "void flashinfer::sampling::FilteredTopKUnifiedKernel<__nv_bfloat16, int, 8, true, (flashinfer::sampling::FilteredTopKMode)0, (flashinfer::sampling::TopKTieBreak)1, flashinfer::sampling::DirectPageTableKernelPolicy<int>>(__nv_bfloat16 const*, int*, __nv_bfloat16*, int const*, long, int const*, int const*, int const*, int const*, unsigned int, unsigned int, unsigned int)",
+              "us": 94.656
+            },
+            {
+              "name": "void at::native::unrolled_elementwise_kernel<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#4}::operator()() const::{lambda(long)#1}, std::array<char*, 2ul>, 4, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1> >(int, at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#4}::operator()() const::{lambda(long)#1}, std::array<char*, 2ul>, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1>)",
+              "us": 2.592
+            },
+            {
+              "name": "_finish_selection",
+              "us": 3.615
+            }
+          ]
+        },
+        {
+          "file": "layer_00_triton_indexer_total_1.json",
+          "sha256": "5557f71135ca0446cc4419aaf8caa47c304a9709477224b6c5efb0279255aa19",
+          "kernel_ms": 0.49898200000000004,
+          "memcpy_ms": 0.0022400000000000002,
+          "kernels": [
+            {
+              "name": "_finite_partials",
+              "us": 4.064
+            },
+            {
+              "name": "_finite_reduce",
+              "us": 1.184
+            },
+            {
+              "name": "_append_compressed",
+              "us": 6.145
+            },
+            {
+              "name": "_scores",
+              "us": 287.618
+            },
+            {
+              "name": "void flashinfer::sampling::FilteredTopKUnifiedKernel<__nv_bfloat16, int, 8, true, (flashinfer::sampling::FilteredTopKMode)0, (flashinfer::sampling::TopKTieBreak)1, flashinfer::sampling::DirectPageTableKernelPolicy<int>>(__nv_bfloat16 const*, int*, __nv_bfloat16*, int const*, long, int const*, int const*, int const*, int const*, unsigned int, unsigned int, unsigned int)",
+              "us": 78.849
+            },
+            {
+              "name": "void at::native::unrolled_elementwise_kernel<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#4}::operator()() const::{lambda(long)#1}, std::array<char*, 2ul>, 4, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1> >(int, at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#4}::operator()() const::{lambda(long)#1}, std::array<char*, 2ul>, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1>)",
+              "us": 2.721
+            },
+            {
+              "name": "_prepare_cis",
+              "us": 17.473
+            },
+            {
+              "name": "void flashinfer::sampling::FilteredTopKUnifiedKernel<__nv_bfloat16, int, 8, true, (flashinfer::sampling::FilteredTopKMode)0, (flashinfer::sampling::TopKTieBreak)1, flashinfer::sampling::DirectPageTableKernelPolicy<int>>(__nv_bfloat16 const*, int*, __nv_bfloat16*, int const*, long, int const*, int const*, int const*, int const*, unsigned int, unsigned int, unsigned int)",
+              "us": 94.656
+            },
+            {
+              "name": "void at::native::unrolled_elementwise_kernel<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#4}::operator()() const::{lambda(long)#1}, std::array<char*, 2ul>, 4, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1> >(int, at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#4}::operator()() const::{lambda(long)#1}, std::array<char*, 2ul>, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1>)",
+              "us": 2.624
+            },
+            {
+              "name": "_finish_selection",
+              "us": 3.648
+            }
+          ]
+        },
+        {
+          "file": "layer_00_triton_indexer_total_2.json",
+          "sha256": "1f79b55ed0bb7a24f25e7a1d06728c7461595bc5597d54568d9df9a5744b3af4",
+          "kernel_ms": 0.496864,
+          "memcpy_ms": 0.002271,
+          "kernels": [
+            {
+              "name": "_finite_partials",
+              "us": 4.128
+            },
+            {
+              "name": "_finite_reduce",
+              "us": 1.151
+            },
+            {
+              "name": "_append_compressed",
+              "us": 6.08
+            },
+            {
+              "name": "_scores",
+              "us": 285.633
+            },
+            {
+              "name": "void flashinfer::sampling::FilteredTopKUnifiedKernel<__nv_bfloat16, int, 8, true, (flashinfer::sampling::FilteredTopKMode)0, (flashinfer::sampling::TopKTieBreak)1, flashinfer::sampling::DirectPageTableKernelPolicy<int>>(__nv_bfloat16 const*, int*, __nv_bfloat16*, int const*, long, int const*, int const*, int const*, int const*, unsigned int, unsigned int, unsigned int)",
+              "us": 78.752
+            },
+            {
+              "name": "void at::native::unrolled_elementwise_kernel<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#4}::operator()() const::{lambda(long)#1}, std::array<char*, 2ul>, 4, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1> >(int, at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#4}::operator()() const::{lambda(long)#1}, std::array<char*, 2ul>, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1>)",
+              "us": 2.72
+            },
+            {
+              "name": "_prepare_cis",
+              "us": 17.44
+            },
+            {
+              "name": "void flashinfer::sampling::FilteredTopKUnifiedKernel<__nv_bfloat16, int, 8, true, (flashinfer::sampling::FilteredTopKMode)0, (flashinfer::sampling::TopKTieBreak)1, flashinfer::sampling::DirectPageTableKernelPolicy<int>>(__nv_bfloat16 const*, int*, __nv_bfloat16*, int const*, long, int const*, int const*, int const*, int const*, unsigned int, unsigned int, unsigned int)",
+              "us": 94.656
+            },
+            {
+              "name": "void at::native::unrolled_elementwise_kernel<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#4}::operator()() const::{lambda(long)#1}, std::array<char*, 2ul>, 4, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1> >(int, at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#4}::operator()() const::{lambda(long)#1}, std::array<char*, 2ul>, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1>)",
+              "us": 2.624
+            },
+            {
+              "name": "_finish_selection",
+              "us": 3.68
+            }
+          ]
+        }
+      ],
+      "all_repetitions_match_exactly": true,
+      "output_sha256": [
+        "4bfdc29f3dc51107b212d1b2147a53b1f0956a7778b06f89694405cdbca90b7c",
+        "4017b7a27f5d49ed213ab864b83f7d1f706ecc1039001dadcffed8df6bccddd1"
+      ]
+    },
+    {
+      "layer": 0,
+      "module": "block_sparse_attention_total",
+      "useful_flops": 68190994432,
+      "composition_check": {
+        "incremental_matches_independent_full_compression": true,
+        "selection_matches_standalone_operator_exactly": true,
+        "selection_differs_from_capture_elements": 0
+      },
+      "eager_api": {
+        "ms": {
+          "median": 0.6503199934959412,
+          "min": 0.6462720036506653,
+          "max": 0.6775360107421875
+        },
+        "samples_ms": [
+          0.6512320041656494,
+          0.6600000262260437,
+          0.6498240232467651,
+          0.6504960060119629,
+          0.6477760076522827,
+          0.650111973285675,
+          0.6524479985237122,
+          0.6496319770812988,
+          0.6482560038566589,
+          0.6475200057029724,
+          0.6462720036506653,
+          0.6484159827232361,
+          0.6476479768753052,
+          0.6499199867248535,
+          0.6488000154495239,
+          0.6471359729766846,
+          0.654911994934082,
+          0.6534720063209534,
+          0.6513599753379822,
+          0.6501439809799194,
+          0.647711992263794,
+          0.6775360107421875,
+          0.6612160205841064,
+          0.6540160179138184,
+          0.6524479985237122,
+          0.6499519944190979,
+          0.6568639874458313,
+          0.6525440216064453,
+          0.6506879925727844,
+          0.6537600159645081
+        ],
+        "mfu_pct": 10.602386354773962
+      },
+      "wall_api": {
+        "ms": {
+          "median": 0.6562565,
+          "min": 0.651935,
+          "max": 0.682738
+        },
+        "samples_ms": [
+          0.65681,
+          0.665525,
+          0.655566,
+          0.656425,
+          0.653521,
+          0.655456,
+          0.657983,
+          0.655495,
+          0.654116,
+          0.653247,
+          0.651935,
+          0.654061,
+          0.653379,
+          0.655688,
+          0.654619,
+          0.652674,
+          0.66052,
+          0.659246,
+          0.657186,
+          0.656096,
+          0.653954,
+          0.682738,
+          0.666713,
+          0.659823,
+          0.658135,
+          0.655638,
+          0.662347,
+          0.658032,
+          0.656417,
+          0.659567
+        ],
+        "mfu_pct": 10.506477002937203
+      },
+      "profile_kernel_sum": {
+        "ms": {
+          "median": 0.577511,
+          "min": 0.576346,
+          "max": 0.5782759999999999
+        },
+        "samples_ms": [
+          0.5782759999999999,
+          0.576346,
+          0.577511
+        ],
+        "mfu_pct": 11.939069256305176
+      },
+      "profiles": [
+        {
+          "file": "layer_00_triton_block_sparse_attention_total_0.json",
+          "sha256": "9f66d941e8195ef8072ceac82ee346260baf0ef047d7eaea7b67de5b2b940762",
+          "kernel_ms": 0.5782759999999999,
+          "memcpy_ms": 0.0,
+          "kernels": [
+            {
+              "name": "_nosa_block_attention",
+              "us": 578.276
+            }
+          ]
+        },
+        {
+          "file": "layer_00_triton_block_sparse_attention_total_1.json",
+          "sha256": "4a8cfaad9c3d02312ac3e7d8311a5bec62fc32c2cb106ab96ce2bf3db1e0c565",
+          "kernel_ms": 0.576346,
+          "memcpy_ms": 0.0,
+          "kernels": [
+            {
+              "name": "_nosa_block_attention",
+              "us": 576.346
+            }
+          ]
+        },
+        {
+          "file": "layer_00_triton_block_sparse_attention_total_2.json",
+          "sha256": "6e5828d22612c5c9c917422b14ea5122f7e8401cbff9368fc248f4167aa3a94f",
+          "kernel_ms": 0.577511,
+          "memcpy_ms": 0.0,
+          "kernels": [
+            {
+              "name": "_nosa_block_attention",
+              "us": 577.511
+            }
+          ]
+        }
+      ],
+      "all_repetitions_match_exactly": true,
+      "output_sha256": [
+        "5ac788e07edc60ffa38354152ceeaa865d6ac69f17ebf02a08cbdf00fd24e143"
+      ]
+    },
+    {
+      "layer": 15,
+      "module": "indexer_total",
+      "useful_flops": 34616115200,
+      "composition_check": {
+        "incremental_matches_independent_full_compression": true,
+        "selection_matches_standalone_operator_exactly": true,
+        "selection_differs_from_capture_elements": 0
+      },
+      "eager_api": {
+        "ms": {
+          "median": 0.7717919945716858,
+          "min": 0.7571840286254883,
+          "max": 0.790880024433136
+        },
+        "samples_ms": [
+          0.7715200185775757,
+          0.7582079768180847,
+          0.7896320223808289,
+          0.7727360129356384,
+          0.7776640057563782,
+          0.770687997341156,
+          0.781279981136322,
+          0.773855984210968,
+          0.7613760232925415,
+          0.7858240008354187,
+          0.7681599855422974,
+          0.7659199833869934,
+          0.7677119970321655,
+          0.7904000282287598,
+          0.7735999822616577,
+          0.790880024433136,
+          0.7749119997024536,
+          0.7720639705657959,
+          0.7688639760017395,
+          0.7591680288314819,
+          0.7883520126342773,
+          0.7706559896469116,
+          0.7804160118103027,
+          0.7658560276031494,
+          0.7571840286254883,
+          0.7810239791870117,
+          0.7626559734344482,
+          0.7761600017547607,
+          0.7591680288314819,
+          0.7604159712791443
+        ],
+        "mfu_pct": 4.535046728887657
+      },
+      "wall_api": {
+        "ms": {
+          "median": 0.7767215000000001,
+          "min": 0.762535,
+          "max": 0.796474
+        },
+        "samples_ms": [
+          0.777189,
+          0.763817,
+          0.795246,
+          0.778312,
+          0.783195,
+          0.776195,
+          0.786965,
+          0.779444,
+          0.766946,
+          0.79144,
+          0.77364,
+          0.771706,
+          0.773128,
+          0.795826,
+          0.779353,
+          0.796474,
+          0.780459,
+          0.773001,
+          0.774142,
+          0.764714,
+          0.793774,
+          0.776254,
+          0.785892,
+          0.771245,
+          0.762535,
+          0.786502,
+          0.768032,
+          0.781629,
+          0.764412,
+          0.76633
+        ],
+        "mfu_pct": 4.506264807094954
+      },
+      "profile_kernel_sum": {
+        "ms": {
+          "median": 0.489667,
+          "min": 0.488807,
+          "max": 0.490339
+        },
+        "samples_ms": [
+          0.490339,
+          0.488807,
+          0.489667
+        ],
+        "mfu_pct": 7.147944951087176
+      },
+      "profiles": [
+        {
+          "file": "layer_15_triton_indexer_total_0.json",
+          "sha256": "f0b8187ca9d35483211ba94a0913deefa7dfe85babd1f44a017ccb1526bf83db",
+          "kernel_ms": 0.490339,
+          "memcpy_ms": 0.002177,
+          "kernels": [
+            {
+              "name": "_finite_partials",
+              "us": 4.16
+            },
+            {
+              "name": "_finite_reduce",
+              "us": 1.024
+            },
+            {
+              "name": "_append_compressed",
+              "us": 6.144
+            },
+            {
+              "name": "_scores",
+              "us": 289.025
+            },
+            {
+              "name": "void flashinfer::sampling::FilteredTopKUnifiedKernel<__nv_bfloat16, int, 8, true, (flashinfer::sampling::FilteredTopKMode)0, (flashinfer::sampling::TopKTieBreak)1, flashinfer::sampling::DirectPageTableKernelPolicy<int>>(__nv_bfloat16 const*, int*, __nv_bfloat16*, int const*, long, int const*, int const*, int const*, int const*, unsigned int, unsigned int, unsigned int)",
+              "us": 74.816
+            },
+            {
+              "name": "void at::native::unrolled_elementwise_kernel<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#4}::operator()() const::{lambda(long)#1}, std::array<char*, 2ul>, 4, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1> >(int, at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#4}::operator()() const::{lambda(long)#1}, std::array<char*, 2ul>, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1>)",
+              "us": 2.688
+            },
+            {
+              "name": "_prepare_cis",
+              "us": 17.536
+            },
+            {
+              "name": "void flashinfer::sampling::FilteredTopKUnifiedKernel<__nv_bfloat16, int, 8, true, (flashinfer::sampling::FilteredTopKMode)0, (flashinfer::sampling::TopKTieBreak)1, flashinfer::sampling::DirectPageTableKernelPolicy<int>>(__nv_bfloat16 const*, int*, __nv_bfloat16*, int const*, long, int const*, int const*, int const*, int const*, unsigned int, unsigned int, unsigned int)",
+              "us": 88.769
+            },
+            {
+              "name": "void at::native::unrolled_elementwise_kernel<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#4}::operator()() const::{lambda(long)#1}, std::array<char*, 2ul>, 4, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1> >(int, at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#4}::operator()() const::{lambda(long)#1}, std::array<char*, 2ul>, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1>)",
+              "us": 2.593
+            },
+            {
+              "name": "_finish_selection",
+              "us": 3.584
+            }
+          ]
+        },
+        {
+          "file": "layer_15_triton_indexer_total_1.json",
+          "sha256": "e19bfa18210fb4cb3e15d322a9ce39d69ac5e72b51d20412f739c00da9e10018",
+          "kernel_ms": 0.488807,
+          "memcpy_ms": 0.0022080000000000003,
+          "kernels": [
+            {
+              "name": "_finite_partials",
+              "us": 4.192
+            },
+            {
+              "name": "_finite_reduce",
+              "us": 1.024
+            },
+            {
+              "name": "_append_compressed",
+              "us": 6.24
+            },
+            {
+              "name": "_scores",
+              "us": 287.428
+            },
+            {
+              "name": "void flashinfer::sampling::FilteredTopKUnifiedKernel<__nv_bfloat16, int, 8, true, (flashinfer::sampling::FilteredTopKMode)0, (flashinfer::sampling::TopKTieBreak)1, flashinfer::sampling::DirectPageTableKernelPolicy<int>>(__nv_bfloat16 const*, int*, __nv_bfloat16*, int const*, long, int const*, int const*, int const*, int const*, unsigned int, unsigned int, unsigned int)",
+              "us": 74.785
+            },
+            {
+              "name": "void at::native::unrolled_elementwise_kernel<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#4}::operator()() const::{lambda(long)#1}, std::array<char*, 2ul>, 4, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1> >(int, at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#4}::operator()() const::{lambda(long)#1}, std::array<char*, 2ul>, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1>)",
+              "us": 2.752
+            },
+            {
+              "name": "_prepare_cis",
+              "us": 17.568
+            },
+            {
+              "name": "void flashinfer::sampling::FilteredTopKUnifiedKernel<__nv_bfloat16, int, 8, true, (flashinfer::sampling::FilteredTopKMode)0, (flashinfer::sampling::TopKTieBreak)1, flashinfer::sampling::DirectPageTableKernelPolicy<int>>(__nv_bfloat16 const*, int*, __nv_bfloat16*, int const*, long, int const*, int const*, int const*, int const*, unsigned int, unsigned int, unsigned int)",
+              "us": 88.642
+            },
+            {
+              "name": "void at::native::unrolled_elementwise_kernel<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#4}::operator()() const::{lambda(long)#1}, std::array<char*, 2ul>, 4, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1> >(int, at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#4}::operator()() const::{lambda(long)#1}, std::array<char*, 2ul>, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1>)",
+              "us": 2.56
+            },
+            {
+              "name": "_finish_selection",
+              "us": 3.616
+            }
+          ]
+        },
+        {
+          "file": "layer_15_triton_indexer_total_2.json",
+          "sha256": "afd27efdb77f73179bb4a290f2298a4cbfedcf227fefab7985e9b2075778763c",
+          "kernel_ms": 0.489667,
+          "memcpy_ms": 0.002176,
+          "kernels": [
+            {
+              "name": "_finite_partials",
+              "us": 4.224
+            },
+            {
+              "name": "_finite_reduce",
+              "us": 1.024
+            },
+            {
+              "name": "_append_compressed",
+              "us": 6.241
+            },
+            {
+              "name": "_scores",
+              "us": 288.096
+            },
+            {
+              "name": "void flashinfer::sampling::FilteredTopKUnifiedKernel<__nv_bfloat16, int, 8, true, (flashinfer::sampling::FilteredTopKMode)0, (flashinfer::sampling::TopKTieBreak)1, flashinfer::sampling::DirectPageTableKernelPolicy<int>>(__nv_bfloat16 const*, int*, __nv_bfloat16*, int const*, long, int const*, int const*, int const*, int const*, unsigned int, unsigned int, unsigned int)",
+              "us": 74.977
+            },
+            {
+              "name": "void at::native::unrolled_elementwise_kernel<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#4}::operator()() const::{lambda(long)#1}, std::array<char*, 2ul>, 4, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1> >(int, at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#4}::operator()() const::{lambda(long)#1}, std::array<char*, 2ul>, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1>)",
+              "us": 2.688
+            },
+            {
+              "name": "_prepare_cis",
+              "us": 17.504
+            },
+            {
+              "name": "void flashinfer::sampling::FilteredTopKUnifiedKernel<__nv_bfloat16, int, 8, true, (flashinfer::sampling::FilteredTopKMode)0, (flashinfer::sampling::TopKTieBreak)1, flashinfer::sampling::DirectPageTableKernelPolicy<int>>(__nv_bfloat16 const*, int*, __nv_bfloat16*, int const*, long, int const*, int const*, int const*, int const*, unsigned int, unsigned int, unsigned int)",
+              "us": 88.673
+            },
+            {
+              "name": "void at::native::unrolled_elementwise_kernel<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#4}::operator()() const::{lambda(long)#1}, std::array<char*, 2ul>, 4, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1> >(int, at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#4}::operator()() const::{lambda(long)#1}, std::array<char*, 2ul>, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1>)",
+              "us": 2.592
+            },
+            {
+              "name": "_finish_selection",
+              "us": 3.648
+            }
+          ]
+        }
+      ],
+      "all_repetitions_match_exactly": true,
+      "output_sha256": [
+        "8d5bb58765e60e601e5f5c021966c439ef835491bd0a031487d45ed8cbe23699",
+        "4017b7a27f5d49ed213ab864b83f7d1f706ecc1039001dadcffed8df6bccddd1"
+      ]
+    },
+    {
+      "layer": 15,
+      "module": "block_sparse_attention_total",
+      "useful_flops": 68190994432,
+      "composition_check": {
+        "incremental_matches_independent_full_compression": true,
+        "selection_matches_standalone_operator_exactly": true,
+        "selection_differs_from_capture_elements": 0
+      },
+      "eager_api": {
+        "ms": {
+          "median": 0.6508959829807281,
+          "min": 0.6469759941101074,
+          "max": 0.6756479740142822
+        },
+        "samples_ms": [
+          0.653823971748352,
+          0.6509439945220947,
+          0.6487039923667908,
+          0.6519039869308472,
+          0.6547840237617493,
+          0.6541119813919067,
+          0.6496000289916992,
+          0.6508479714393616,
+          0.6474559903144836,
+          0.647711992263794,
+          0.6469759941101074,
+          0.6489599943161011,
+          0.6553919911384583,
+          0.6523200273513794,
+          0.647104024887085,
+          0.6756479740142822,
+          0.654591977596283,
+          0.6581760048866272,
+          0.6496319770812988,
+          0.6487680077552795,
+          0.6520640254020691,
+          0.6536639928817749,
+          0.6498879790306091,
+          0.6504639983177185,
+          0.6483200192451477,
+          0.6516159772872925,
+          0.6487680077552795,
+          0.6540799736976624,
+          0.6526719927787781,
+          0.6481599807739258
+        ],
+        "mfu_pct": 10.593004113657598
+      },
+      "wall_api": {
+        "ms": {
+          "median": 0.656699,
+          "min": 0.652967,
+          "max": 0.681996
+        },
+        "samples_ms": [
+          0.65951,
+          0.65673,
+          0.65486,
+          0.657393,
+          0.66025,
+          0.659952,
+          0.655444,
+          0.656668,
+          0.652967,
+          0.653307,
+          0.652992,
+          0.654661,
+          0.661169,
+          0.657782,
+          0.653087,
+          0.681996,
+          0.660163,
+          0.663935,
+          0.65539,
+          0.654333,
+          0.657528,
+          0.659549,
+          0.655832,
+          0.656261,
+          0.653772,
+          0.657248,
+          0.654882,
+          0.660088,
+          0.658285,
+          0.65378
+        ],
+        "mfu_pct": 10.49939747932928
+      },
+      "profile_kernel_sum": {
+        "ms": {
+          "median": 0.57786,
+          "min": 0.5777279999999999,
+          "max": 0.5780109999999999
+        },
+        "samples_ms": [
+          0.5777279999999999,
+          0.57786,
+          0.5780109999999999
+        ],
+        "mfu_pct": 11.931858625407639
+      },
+      "profiles": [
+        {
+          "file": "layer_15_triton_block_sparse_attention_total_0.json",
+          "sha256": "6975e65189bab1c01cb2a8ebecc7cfff3c0e989926a6c5bdafe78af491349a00",
+          "kernel_ms": 0.5777279999999999,
+          "memcpy_ms": 0.0,
+          "kernels": [
+            {
+              "name": "_nosa_block_attention",
+              "us": 577.728
+            }
+          ]
+        },
+        {
+          "file": "layer_15_triton_block_sparse_attention_total_1.json",
+          "sha256": "3079cc125a9ed9b3a012a6fc36822dde3ad51d0f1b38f556f3398efa604644ec",
+          "kernel_ms": 0.57786,
+          "memcpy_ms": 0.0,
+          "kernels": [
+            {
+              "name": "_nosa_block_attention",
+              "us": 577.86
+            }
+          ]
+        },
+        {
+          "file": "layer_15_triton_block_sparse_attention_total_2.json",
+          "sha256": "5ba8d753e899d1e7c43ddb2864221f513a77094f29988962e70add43ac1dc528",
+          "kernel_ms": 0.5780109999999999,
+          "memcpy_ms": 0.0,
+          "kernels": [
+            {
+              "name": "_nosa_block_attention",
+              "us": 578.011
+            }
+          ]
+        }
+      ],
+      "all_repetitions_match_exactly": true,
+      "output_sha256": [
+        "484b4a4e6fc98c74c6fd422b1e95f36747225b4ac3ff2ae9d934cfd87b6f6427"
+      ]
+    },
+    {
+      "layer": 31,
+      "module": "indexer_total",
+      "useful_flops": 34616115200,
+      "composition_check": {
+        "incremental_matches_independent_full_compression": true,
+        "selection_matches_standalone_operator_exactly": true,
+        "selection_differs_from_capture_elements": 0
+      },
+      "eager_api": {
+        "ms": {
+          "median": 0.7622080147266388,
+          "min": 0.7488960027694702,
+          "max": 0.7804480195045471
+        },
+        "samples_ms": [
+          0.7729920148849487,
+          0.756767988204956,
+          0.7536640167236328,
+          0.7747840285301208,
+          0.7566720247268677,
+          0.7527040243148804,
+          0.7557439804077148,
+          0.7712000012397766,
+          0.7685760259628296,
+          0.7568320035934448,
+          0.7488960027694702,
+          0.7741119861602783,
+          0.7747200131416321,
+          0.7653440237045288,
+          0.7610880136489868,
+          0.7598400115966797,
+          0.7664639949798584,
+          0.7591360211372375,
+          0.7635840177536011,
+          0.7633280158042908,
+          0.7557119727134705,
+          0.7804480195045471,
+          0.7638400197029114,
+          0.7542719841003418,
+          0.770687997341156,
+          0.7570559978485107,
+          0.7515519857406616,
+          0.767520010471344,
+          0.7583039999008179,
+          0.7715839743614197
+        ],
+        "mfu_pct": 4.5920702652533745
+      },
+      "wall_api": {
+        "ms": {
+          "median": 0.768111,
+          "min": 0.754259,
+          "max": 0.786239
+        },
+        "samples_ms": [
+          0.778809,
+          0.762326,
+          0.758801,
+          0.780379,
+          0.762163,
+          0.758164,
+          0.761407,
+          0.776789,
+          0.774712,
+          0.762235,
+          0.754259,
+          0.779679,
+          0.78073,
+          0.771426,
+          0.766928,
+          0.765855,
+          0.772555,
+          0.764837,
+          0.769487,
+          0.769294,
+          0.761625,
+          0.786239,
+          0.769418,
+          0.759993,
+          0.776595,
+          0.76309,
+          0.757316,
+          0.773448,
+          0.764255,
+          0.777474
+        ],
+        "mfu_pct": 4.556779892963393
+      },
+      "profile_kernel_sum": {
+        "ms": {
+          "median": 0.491427,
+          "min": 0.49133200000000005,
+          "max": 0.491485
+        },
+        "samples_ms": [
+          0.491485,
+          0.491427,
+          0.49133200000000005
+        ],
+        "mfu_pct": 7.122345252426106
+      },
+      "profiles": [
+        {
+          "file": "layer_31_triton_indexer_total_0.json",
+          "sha256": "0a56c1dde56c5f0bb480153fa6bc03331022bba4f4ba801775e76c69a905d238",
+          "kernel_ms": 0.491485,
+          "memcpy_ms": 0.0022080000000000003,
+          "kernels": [
+            {
+              "name": "_finite_partials",
+              "us": 4.192
+            },
+            {
+              "name": "_finite_reduce",
+              "us": 1.056
+            },
+            {
+              "name": "_append_compressed",
+              "us": 6.112
+            },
+            {
+              "name": "_scores",
+              "us": 287.134
+            },
+            {
+              "name": "void flashinfer::sampling::FilteredTopKUnifiedKernel<__nv_bfloat16, int, 8, true, (flashinfer::sampling::FilteredTopKMode)0, (flashinfer::sampling::TopKTieBreak)1, flashinfer::sampling::DirectPageTableKernelPolicy<int>>(__nv_bfloat16 const*, int*, __nv_bfloat16*, int const*, long, int const*, int const*, int const*, int const*, unsigned int, unsigned int, unsigned int)",
+              "us": 75.616
+            },
+            {
+              "name": "void at::native::unrolled_elementwise_kernel<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#4}::operator()() const::{lambda(long)#1}, std::array<char*, 2ul>, 4, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1> >(int, at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#4}::operator()() const::{lambda(long)#1}, std::array<char*, 2ul>, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1>)",
+              "us": 2.688
+            },
+            {
+              "name": "_prepare_cis",
+              "us": 17.408
+            },
+            {
+              "name": "void flashinfer::sampling::FilteredTopKUnifiedKernel<__nv_bfloat16, int, 8, true, (flashinfer::sampling::FilteredTopKMode)0, (flashinfer::sampling::TopKTieBreak)1, flashinfer::sampling::DirectPageTableKernelPolicy<int>>(__nv_bfloat16 const*, int*, __nv_bfloat16*, int const*, long, int const*, int const*, int const*, int const*, unsigned int, unsigned int, unsigned int)",
+              "us": 91.04
+            },
+            {
+              "name": "void at::native::unrolled_elementwise_kernel<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#4}::operator()() const::{lambda(long)#1}, std::array<char*, 2ul>, 4, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1> >(int, at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#4}::operator()() const::{lambda(long)#1}, std::array<char*, 2ul>, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1>)",
+              "us": 2.592
+            },
+            {
+              "name": "_finish_selection",
+              "us": 3.647
+            }
+          ]
+        },
+        {
+          "file": "layer_31_triton_indexer_total_1.json",
+          "sha256": "db37f51899773cd737b5e5e94e75f5da8430d0309861b7caa81ceb84f8a11040",
+          "kernel_ms": 0.491427,
+          "memcpy_ms": 0.002368,
+          "kernels": [
+            {
+              "name": "_finite_partials",
+              "us": 4.16
+            },
+            {
+              "name": "_finite_reduce",
+              "us": 1.056
+            },
+            {
+              "name": "_append_compressed",
+              "us": 6.176
+            },
+            {
+              "name": "_scores",
+              "us": 286.785
+            },
+            {
+              "name": "void flashinfer::sampling::FilteredTopKUnifiedKernel<__nv_bfloat16, int, 8, true, (flashinfer::sampling::FilteredTopKMode)0, (flashinfer::sampling::TopKTieBreak)1, flashinfer::sampling::DirectPageTableKernelPolicy<int>>(__nv_bfloat16 const*, int*, __nv_bfloat16*, int const*, long, int const*, int const*, int const*, int const*, unsigned int, unsigned int, unsigned int)",
+              "us": 75.553
+            },
+            {
+              "name": "void at::native::unrolled_elementwise_kernel<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#4}::operator()() const::{lambda(long)#1}, std::array<char*, 2ul>, 4, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1> >(int, at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#4}::operator()() const::{lambda(long)#1}, std::array<char*, 2ul>, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1>)",
+              "us": 2.753
+            },
+            {
+              "name": "_prepare_cis",
+              "us": 17.536
+            },
+            {
+              "name": "void flashinfer::sampling::FilteredTopKUnifiedKernel<__nv_bfloat16, int, 8, true, (flashinfer::sampling::FilteredTopKMode)0, (flashinfer::sampling::TopKTieBreak)1, flashinfer::sampling::DirectPageTableKernelPolicy<int>>(__nv_bfloat16 const*, int*, __nv_bfloat16*, int const*, long, int const*, int const*, int const*, int const*, unsigned int, unsigned int, unsigned int)",
+              "us": 91.168
+            },
+            {
+              "name": "void at::native::unrolled_elementwise_kernel<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#4}::operator()() const::{lambda(long)#1}, std::array<char*, 2ul>, 4, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1> >(int, at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#4}::operator()() const::{lambda(long)#1}, std::array<char*, 2ul>, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1>)",
+              "us": 2.592
+            },
+            {
+              "name": "_finish_selection",
+              "us": 3.648
+            }
+          ]
+        },
+        {
+          "file": "layer_31_triton_indexer_total_2.json",
+          "sha256": "0d5e7c25ecbef5ee8400e5dbbfac0f9470c27129ca389840abc4d43e855b2e9b",
+          "kernel_ms": 0.49133200000000005,
+          "memcpy_ms": 0.0022080000000000003,
+          "kernels": [
+            {
+              "name": "_finite_partials",
+              "us": 4.256
+            },
+            {
+              "name": "_finite_reduce",
+              "us": 1.055
+            },
+            {
+              "name": "_append_compressed",
+              "us": 6.175
+            },
+            {
+              "name": "_scores",
+              "us": 286.564
+            },
+            {
+              "name": "void flashinfer::sampling::FilteredTopKUnifiedKernel<__nv_bfloat16, int, 8, true, (flashinfer::sampling::FilteredTopKMode)0, (flashinfer::sampling::TopKTieBreak)1, flashinfer::sampling::DirectPageTableKernelPolicy<int>>(__nv_bfloat16 const*, int*, __nv_bfloat16*, int const*, long, int const*, int const*, int const*, int const*, unsigned int, unsigned int, unsigned int)",
+              "us": 75.65
+            },
+            {
+              "name": "void at::native::unrolled_elementwise_kernel<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#4}::operator()() const::{lambda(long)#1}, std::array<char*, 2ul>, 4, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1> >(int, at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#4}::operator()() const::{lambda(long)#1}, std::array<char*, 2ul>, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1>)",
+              "us": 2.752
+            },
+            {
+              "name": "_prepare_cis",
+              "us": 17.472
+            },
+            {
+              "name": "void flashinfer::sampling::FilteredTopKUnifiedKernel<__nv_bfloat16, int, 8, true, (flashinfer::sampling::FilteredTopKMode)0, (flashinfer::sampling::TopKTieBreak)1, flashinfer::sampling::DirectPageTableKernelPolicy<int>>(__nv_bfloat16 const*, int*, __nv_bfloat16*, int const*, long, int const*, int const*, int const*, int const*, unsigned int, unsigned int, unsigned int)",
+              "us": 91.137
+            },
+            {
+              "name": "void at::native::unrolled_elementwise_kernel<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#4}::operator()() const::{lambda(long)#1}, std::array<char*, 2ul>, 4, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1> >(int, at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#4}::operator()() const::{lambda(long)#1}, std::array<char*, 2ul>, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1>)",
+              "us": 2.592
+            },
+            {
+              "name": "_finish_selection",
+              "us": 3.679
+            }
+          ]
+        }
+      ],
+      "all_repetitions_match_exactly": true,
+      "output_sha256": [
+        "840c5fb9381f44552aceb64c05b590209fb803e6569982b9f7ad0d9cb7d5caf9",
+        "4017b7a27f5d49ed213ab864b83f7d1f706ecc1039001dadcffed8df6bccddd1"
+      ]
+    },
+    {
+      "layer": 31,
+      "module": "block_sparse_attention_total",
+      "useful_flops": 68190994432,
+      "composition_check": {
+        "incremental_matches_independent_full_compression": true,
+        "selection_matches_standalone_operator_exactly": true,
+        "selection_differs_from_capture_elements": 0
+      },
+      "eager_api": {
+        "ms": {
+          "median": 0.6526399850845337,
+          "min": 0.647167980670929,
+          "max": 0.6649280190467834
+        },
+        "samples_ms": [
+          0.6537280082702637,
+          0.6509119868278503,
+          0.6539520025253296,
+          0.6542720198631287,
+          0.6564159989356995,
+          0.6518399715423584,
+          0.6492480039596558,
+          0.6531839966773987,
+          0.6530879735946655,
+          0.6552960276603699,
+          0.647167980670929,
+          0.6487039923667908,
+          0.6531519889831543,
+          0.6520000100135803,
+          0.6537600159645081,
+          0.6483520269393921,
+          0.6542720198631287,
+          0.6541439890861511,
+          0.6510720252990723,
+          0.6519680023193359,
+          0.6490560173988342,
+          0.6550080180168152,
+          0.6505600214004517,
+          0.6533120274543762,
+          0.6649280190467834,
+          0.6630719900131226,
+          0.6515520215034485,
+          0.6521919965744019,
+          0.6480640172958374,
+          0.6508479714393616
+        ],
+        "mfu_pct": 10.56469720344362
+      },
+      "wall_api": {
+        "ms": {
+          "median": 0.65793,
+          "min": 0.652862,
+          "max": 0.670324
+        },
+        "samples_ms": [
+          0.659409,
+          0.656954,
+          0.659691,
+          0.659803,
+          0.661911,
+          0.657876,
+          0.654954,
+          0.659082,
+          0.658671,
+          0.660939,
+          0.652862,
+          0.654583,
+          0.658992,
+          0.657673,
+          0.655858,
+          0.654096,
+          0.660014,
+          0.66007,
+          0.656669,
+          0.657507,
+          0.65495,
+          0.660899,
+          0.656306,
+          0.658797,
+          0.670324,
+          0.668751,
+          0.657345,
+          0.657984,
+          0.653985,
+          0.65654
+        ],
+        "mfu_pct": 10.479752899667227
+      },
+      "profile_kernel_sum": {
+        "ms": {
+          "median": 0.580203,
+          "min": 0.5796180000000001,
+          "max": 0.582526
+        },
+        "samples_ms": [
+          0.5796180000000001,
+          0.580203,
+          0.582526
+        ],
+        "mfu_pct": 11.883674895300539
+      },
+      "profiles": [
+        {
+          "file": "layer_31_triton_block_sparse_attention_total_0.json",
+          "sha256": "28422db3fce844df014c8d71b6883fe6e6ca447fd6391f7cc545fdc933cefaec",
+          "kernel_ms": 0.5796180000000001,
+          "memcpy_ms": 0.0,
+          "kernels": [
+            {
+              "name": "_nosa_block_attention",
+              "us": 579.618
+            }
+          ]
+        },
+        {
+          "file": "layer_31_triton_block_sparse_attention_total_1.json",
+          "sha256": "c1c75f654b22370c4acbc1dcf9c7aa771a591561abdfc03650867d84a686b4a1",
+          "kernel_ms": 0.580203,
+          "memcpy_ms": 0.0,
+          "kernels": [
+            {
+              "name": "_nosa_block_attention",
+              "us": 580.203
+            }
+          ]
+        },
+        {
+          "file": "layer_31_triton_block_sparse_attention_total_2.json",
+          "sha256": "035daeb6c45c4c1e4c126d120be35283bd9985fb0fbc4580a1d13d4769dca8dc",
+          "kernel_ms": 0.582526,
+          "memcpy_ms": 0.0,
+          "kernels": [
+            {
+              "name": "_nosa_block_attention",
+              "us": 582.526
+            }
+          ]
+        }
+      ],
+      "all_repetitions_match_exactly": true,
+      "output_sha256": [
+        "6f896d7b32154dd26e6cfda86e81ae8f627819bf73ebf135b43990d06a36bd10"
+      ]
+    }
+  ]
+}

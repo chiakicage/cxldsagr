@@ -385,7 +385,7 @@ def summarize_numerical(groups):
 def audit_run(directory):
     import torch
 
-    from experiments.gr_serving.src.workload import token_sha256
+    from GR.workload import token_sha256
 
     directory = Path(directory)
     metadata = json.loads((directory / "metadata.json").read_text())

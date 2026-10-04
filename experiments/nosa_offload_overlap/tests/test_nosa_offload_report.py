@@ -146,6 +146,97 @@ def test_report_separates_latency_from_profile_and_preserves_provenance(runs, tm
         main(argv)
 
 
+@pytest.fixture
+def receipt_runs(runs):
+    from types import SimpleNamespace
+
+    from evaluation.validation import write_receipt
+    from experiments.nosa_kernel_mfu.src.phases import offload_config, validation_identity
+
+    for directory in runs:
+        metadata = json.loads((directory / "metadata.json").read_text())
+        result = json.loads((directory / "results.json").read_text())
+        case = result["results"][0]
+        metadata["mode"] = "profile" if metadata["args"]["profiled"] else "bench"
+        metadata["args"].update(
+            layers=[0],
+            prefix=65536,
+            seed=42,
+            fetch_ctas=96,
+            mode=metadata["mode"],
+            reference_all=False,
+        )
+        metadata["input_capture"]["metadata"]["layers"] = [
+            {"layer": 0, "file": "layer_00.pt", "file_sha256": "input-sha"}
+        ]
+        identity = validation_identity(
+            metadata,
+            config=offload_config(SimpleNamespace(**metadata["args"])),
+            inputs={"metadata_sha256": "capture-sha", "files": {"layer_00.pt": "input-sha"}},
+            cache="cold_history_no_tags_full_logical_staging_gpu_suffix",
+        )
+        path = directory / "validation_receipt.json"
+        write_receipt(
+            path,
+            kind="nosa_offload_attention",
+            identity=identity,
+            checks={"passed": True, "cases": {"layer_00": case}},
+        )
+        metadata["validation_identity"] = identity
+        metadata["numerical_validation"] = {
+            "kind": "nosa_offload_attention",
+            "file": path.name,
+            "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+            "source": "independent_check",
+        }
+        case.update(
+            fetch_ctas=96,
+            numerical_acceptance_source="independent_check",
+            traffic_checks="diagnostic_profile"
+            if metadata["args"]["profiled"]
+            else "independent_check",
+        )
+        _write(directory / "metadata.json", metadata)
+        _write(directory / "results.json", result)
+    return runs
+
+
+def test_report_reuses_independent_acceptance_and_preserves_receipt(receipt_runs):
+    report, rows = build_report(*receipt_runs)
+    assert rows[0]["serialized_over_overlap_speedup"] == 1.5
+    source = report["sources"]["measurement"]
+    assert source["numerical_validation"]["source"] == "independent_check"
+    assert "validation_receipt.json" in source["artifact_sha256"]
+    assert report["cases"][0]["acceptance"]["traffic_checks"] == {
+        "measurement": "independent_check",
+        "profile": "diagnostic_profile",
+    }
+
+
+@pytest.mark.parametrize(
+    "mutation,match",
+    [
+        ("fetch_ctas", "Validation identity mismatch"),
+        ("tensor", "Acceptance tensors mismatch"),
+        ("receipt", "Receipt file hash mismatch"),
+    ],
+)
+def test_report_rejects_reused_acceptance_for_changed_execution(receipt_runs, mutation, match):
+    directory = receipt_runs[0]
+    metadata = json.loads((directory / "metadata.json").read_text())
+    result = json.loads((directory / "results.json").read_text())
+    if mutation == "fetch_ctas":
+        metadata["args"]["fetch_ctas"] = 12
+    elif mutation == "tensor":
+        result["results"][0]["tensors"]["q"]["dtype"] = "torch.float16"
+    else:
+        (directory / "validation_receipt.json").write_text("{}")
+    _write(directory / "metadata.json", metadata)
+    _write(directory / "results.json", result)
+    with pytest.raises(ValueError, match=match):
+        build_report(*receipt_runs)
+
+
 @pytest.mark.parametrize(
     "mutation,match",
     [

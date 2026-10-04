@@ -1,5 +1,11 @@
 # ECHO cache P6 发布执行记录
 
+> Historical GR scope (2026-10-05): the `gr_serving` experiment is retired and its
+> experiment outputs have been removed. Its commands, result-retention rules and
+> rerun instructions below are historical and no longer active. See the
+> [retirement scope](experiment_organization.md#retired-gr-serving). Other
+> implementation and experiment findings retain their stated scope.
+
 > **2026-10-03 撤回说明：** 本文涉及的旧 DeepSeek 4 GiB / W / chunk 对照已按用户要求撤回，
 > 相关实验源码与运行产物已清理；下文仅保留当时的工程过程，不再证明当前容量或性能。
 > 当前入口为[固定 P/NH 容量实验](../../../experiments/deepseek_v32_echo_cache/README.md)。
@@ -161,8 +167,8 @@ summary/results 一并选入报告；对应报告工具源码应随发布复现�
 
 ## 已执行的旧 NOSA 子集提取工具
 
-工具：[retain_nosa_subset.py](../../../experiments/gr_serving/src/retain_nosa_subset.py)。
-测试：[test_retain_nosa_subset.py](../../../experiments/gr_serving/tests/test_retain_nosa_subset.py)。
+工具：[旧 GR 实验（已结束）](experiment_organization.md#retired-gr-serving)。
+测试：[旧 GR 实验（已结束）](experiment_organization.md#retired-gr-serving)。
 默认行为为只读预检；不会请求或运行 GPU，也不改有效实验产物。
 
 ```bash

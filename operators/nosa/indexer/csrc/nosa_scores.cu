@@ -57,7 +57,23 @@ struct Params {
   unsigned const* ranking = nullptr;
   int64_t* ids = nullptr;
   bool* valid = nullptr;
+  bool const* finite = nullptr;
 };
+
+// Failed preparation has not written ranking. The asynchronous owner checks
+// finite before publishing the transaction; selection must not read ranking.
+__device__ __forceinline__ bool reject_nonfinite_selection(Params const& p, int tile_rows) {
+  if (!p.finite || *p.finite) return false;
+  for(int i=threadIdx.x; i<tile_rows*64; i+=blockDim.x) {
+    int row=blockIdx.x*tile_rows+i/64;
+    if(row<p.rows) {
+      int64_t offset=(int64_t(row)*p.heads+blockIdx.y)*64+i%64;
+      p.ids[offset]=-1;
+      if(p.valid) p.valid[offset]=false;
+    }
+  }
+  return true;
+}
 
 template <typename T> struct Traits {
   static constexpr int M = 64, N = kColumns, D = 128;
@@ -185,6 +201,7 @@ __device__ __forceinline__ void load_query(const Params& p, Shared& smem, const 
 
 template <typename T, typename Map>
 __global__ __launch_bounds__(128) void normalizer_kernel(__grid_constant__ const Params p, __grid_constant__ const Map map) {
+  if(p.finite && !*p.finite) return;
   using Tr = Traits<T>;
   extern __shared__ __align__(128) unsigned char storage[];
   auto& smem = *reinterpret_cast<typename Tr::template Shared<>*>(storage);
@@ -299,6 +316,7 @@ __device__ __forceinline__ void write_result(const Params& p, Shared& smem, Acc&
 
 template <typename T, typename O, bool Pool, typename Map>
 __global__ __launch_bounds__(128) void scores_kernel(__grid_constant__ const Params p, __grid_constant__ const Map map) {
+  if(p.finite && !*p.finite) return;
   using Tr = Traits<T>;
   extern __shared__ __align__(128) unsigned char storage[];
   auto& smem = *reinterpret_cast<typename Tr::template Shared<1>*>(storage);
@@ -432,8 +450,8 @@ void launch(const Params& p, cudaStream_t stream) {
 #include "nosa_scores_fused.cuh"
 #include "nosa_scores_pruned.cuh"
 
-void scores_out(TensorView q, TensorView k, TensorView positions, TensorView out, TensorView normalizers,
-                int64_t query_start, int64_t blocks, bool contiguous, bool pool_output) {
+void scores_impl(TensorView q, TensorView k, TensorView positions, TensorView out, TensorView normalizers,
+                int64_t query_start, int64_t blocks, bool contiguous, bool pool_output, bool const* finite) {
   auto same_device = [](TensorView a, TensorView b) {
     return a.device().device_type == b.device().device_type &&
            a.device().device_id == b.device().device_id;
@@ -476,6 +494,7 @@ void scores_out(TensorView q, TensorView k, TensorView positions, TensorView out
   Params p{data(q), data(k), data(positions), data(out), static_cast<float*>(static_cast<void*>(data(normalizers))), int(normalizers.size(0)),
     int(q.size(0)), int(q.size(1)), int(k.size(0)), int(blocks), query_start,
     q.stride(0), q.stride(1), q.stride(2), k.stride(0), k.stride(1), contiguous, positions.dtype().bits == 64, q.device().device_id};
+  p.finite=finite;
   if (!p.rows) return;
   auto stream = static_cast<cudaStream_t>(TVMFFIEnvGetStream(kDLCUDA, q.device().device_id));
   // A sufficiently large grid amortizes the shared K schedule.
@@ -500,15 +519,19 @@ void scores_out(TensorView q, TensorView k, TensorView positions, TensorView out
     else launch<cutlass::half_t, cutlass::half_t, true>(p, stream);
   }
 }
+void scores_out(TensorView q, TensorView k, TensorView positions, TensorView out, TensorView normalizers,
+                int64_t query_start, int64_t blocks, bool contiguous, bool pool_output) {
+  scores_impl(q,k,positions,out,normalizers,query_start,blocks,contiguous,pool_output,nullptr);
+}
 }  // namespace nosa_scores
 
 TVM_FFI_DLL_EXPORT_TYPED_FUNC(scores_out, nosa_scores::scores_out);
 
 
 // Ranking must be prepared from the guarded BF16 CIS prefix before this call.
-bool fused_select_out(tvm::ffi::TensorView q, tvm::ffi::TensorView k,
+bool fused_select_impl(tvm::ffi::TensorView q, tvm::ffi::TensorView k,
                       tvm::ffi::TensorView ranking, tvm::ffi::TensorView ids,
-                      tvm::ffi::TensorView valid, int64_t query_start, int64_t blocks) {
+                      tvm::ffi::TensorView valid, int64_t query_start, int64_t blocks, bool const* finite) {
   auto data=[](tvm::ffi::TensorView t) { return static_cast<char*>(t.data_ptr())+t.byte_offset(); };
   auto same_device=[&](tvm::ffi::TensorView t) {
     return t.device().device_type==kDLCUDA && t.device().device_id==q.device().device_id;
@@ -533,7 +556,7 @@ bool fused_select_out(tvm::ffi::TensorView q, tvm::ffi::TensorView k,
   nosa_scores::Params p{data(q),data(k),nullptr,nullptr,nullptr,1,
     int(q.size(0)),int(q.size(1)),int(k.size(0)),int(blocks),query_start,
     q.stride(0),q.stride(1),q.stride(2),k.stride(0),k.stride(1),true,true,q.device().device_id,
-    reinterpret_cast<unsigned const*>(data(ranking)),reinterpret_cast<int64_t*>(data(ids)),reinterpret_cast<bool*>(data(valid))};
+    reinterpret_cast<unsigned const*>(data(ranking)),reinterpret_cast<int64_t*>(data(ids)),reinterpret_cast<bool*>(data(valid)),finite};
   auto stream=static_cast<cudaStream_t>(TVMFFIEnvGetStream(kDLCUDA,q.device().device_id));
   // Enable pruning only for the measured 64K-prefix + 1K-query geometry.
   // Shorter prefixes can retain too many tiles; they keep the fused schedule.
@@ -543,4 +566,27 @@ bool fused_select_out(tvm::ffi::TensorView q, tvm::ffi::TensorView k,
     return true;
   return nosa_scores::fused_scores::launch<cutlass::bfloat16_t,cutlass::bfloat16_t,true,true>(p,stream);
 }
+bool fused_select_out(tvm::ffi::TensorView q, tvm::ffi::TensorView k,
+                      tvm::ffi::TensorView ranking, tvm::ffi::TensorView ids,
+                      tvm::ffi::TensorView valid, int64_t query_start, int64_t blocks) {
+  return fused_select_impl(q,k,ranking,ids,valid,query_start,blocks,nullptr);
+}
 TVM_FFI_DLL_EXPORT_TYPED_FUNC(fused_select_out,fused_select_out);
+
+// Standalone guarded scoring keeps scores_impl's ordinary shape dispatch.
+#include "nosa_guarded_buffers.cuh"
+namespace nosa_scores {
+void scores_guarded_out(TensorView q, TensorView k, TensorView positions,
+                        TensorView out, TensorView normalizers, TensorView finite,
+                        int64_t query_start, int64_t blocks, bool contiguous, bool pool_output) {
+  auto flag = nosa_guarded_buffers::finite_pointer(finite, q);
+  if (contiguous) {
+    nosa_guarded_buffers::disjoint({q, k}, {out, normalizers, finite});
+  } else {
+    nosa_guarded_buffers::disjoint({q, k, positions}, {out, normalizers, finite});
+  }
+  scores_impl(q, k, positions, out, normalizers, query_start, blocks,
+              contiguous, pool_output, flag);
+}
+}  // namespace nosa_scores
+TVM_FFI_DLL_EXPORT_TYPED_FUNC(scores_guarded_out, nosa_scores::scores_guarded_out);

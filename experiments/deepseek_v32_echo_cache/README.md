@@ -185,8 +185,8 @@ P=5,173,835 是再假设扣除 14.5 GiB 后的条件结果。这两项都没有�
 通过 `--sparse-pool-tokens` 与 `--host-arena-tokens` 指定 P/NH；16-user 基础配置应
 使用 NH=1,048,576。该入口调用 `src.capacity_probe`、
 `models/deepseek_v32/serving_backend.py`、`serving/persistent.py` 和
-`cache/sparse_token_pool.py`；请求构造及来源记录复用 `experiments.gr_serving.src`
-工具。运行结果在 `output/data/<run_id>/`，stdout/stderr 分别在 `output/log/<run_id>/`。
+`cache/sparse_token_pool.py`；请求构造复用 `GR.workload`，来源记录复用
+`evaluation.provenance`。运行结果在 `output/data/<run_id>/`，stdout/stderr 分别在 `output/log/<run_id>/`。
 独立空 cache 数值参考由 `src.capacity_reference` 生成，再通过
 `src.capacity_probe --audit-existing ... --reference-dir ...` 核对全部输出。
 本轮未执行完整容量轨迹；这些入口的计时含首次 JIT，不用于性能结论。

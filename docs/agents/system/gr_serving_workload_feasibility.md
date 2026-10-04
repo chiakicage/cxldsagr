@@ -1,5 +1,11 @@
 # GR workload feasibility and cache-pressure redesign
 
+> Historical GR scope (2026-10-05): the `gr_serving` experiment is retired and its
+> experiment outputs have been removed. Its commands, result-retention rules and
+> rerun instructions below are historical and no longer active. See the
+> [retirement scope](experiment_organization.md#retired-gr-serving). Other
+> implementation and experiment findings retain their stated scope.
+
 2026-10-02. Independent CPU-only planning calculation after the researcher rejected
 configured-population scaling and traces without revisit misses as answers to the
 intended capacity question. No GPU execution, numerical-source change or new

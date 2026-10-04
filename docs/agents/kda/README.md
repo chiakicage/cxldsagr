@@ -9,6 +9,7 @@
 | Resident indexer | [任务](nosa_indexer/task.md)、[计划](nosa_indexer/implementation_plan.md) | [2026-09-29 检查点](nosa_indexer/checkpoint.md) | [调查记录](nosa_indexer/investigation_log.md) |
 | Resident block sparse attention | [任务](nosa_sparse_attention/task.md)、[计划](nosa_sparse_attention/implementation_plan.md) | [2026-09-29 检查点](nosa_sparse_attention/checkpoint.md) | [调查记录](nosa_sparse_attention/investigation_log.md) |
 | Offload fetch / attention | [任务](nosa_offload_attention/task.md)、[计划](nosa_offload_attention/implementation_plan.md) | [2026-09-30 检查点](nosa_offload_attention/checkpoint.md) | 失败诊断原保存在 `/tmp`，未迁为实验结果 |
+| NOSA Q128 offload | [任务](nosa_q128_overlap/task.md)、[执行索引](nosa_q128_overlap/implementation_plan.md) | [检查点](nosa_q128_overlap/checkpoint.md)：候选均未通过提升门槛，未合入；对齐已减少 sector，但首个重叠样本仍未达标 | [当前 64-CTA NCU 诊断](nosa_q128_overlap/independent_warps_ncu_findings.md)、[对齐对照](nosa_q128_overlap/aligned_host_diagnostic_findings.md)、[调查记录](nosa_q128_overlap/investigation_log.md) |
 | DeepSeek indexer quantization | [任务](deepseek_quantization/task.md)、[计划](deepseek_quantization/implementation_plan.md) | [2026-10-03 算子检查点](deepseek_quantization/checkpoint.md) | [调查记录](deepseek_quantization/investigation_log.md) |
 | DeepSeek cache metadata | [任务](deepseek_cache_metadata/task.md)、[计划](deepseek_cache_metadata/implementation_plan.md) | [C3b 算子检查点](deepseek_cache_metadata/checkpoint.md) | 端到端验收见 [C3 集成记录](../system/deepseek_motivation_c3_integration.md) |
 | DeepSeek indexer causal tail | [任务](deepseek_indexer_tail/task.md)、[计划](deepseek_indexer_tail/implementation_plan.md) | [C4a 算子检查点](deepseek_indexer_tail/checkpoint.md) | [候选草案](deepseek_indexer_tail/draft.md) |
@@ -43,7 +44,8 @@ setup；不属于 offloading 测量。完整 kernel 时间总和、CUDA-event AP
 
 以下是原 run `kda_main_bf16_pair_v3_development` 的完整模块 kernel 时间总和，使用实际
 sparse-model L0/L15/L31 captures、GPU0、10 次 warmup、30 次 eager samples 和 3 次 profiler
-repeats。完整数据见[模块检查点报告](../../../experiments/nosa_kernel_mfu/README.md#完整模块检查点)。
+repeats。这条历史记录已由 2026-10-04 的配对测量替换；原调查语义保留，
+当前数据见[完整模块报告](../../../experiments/nosa_kernel_mfu/README.md#完整模块检查点)。
 
 | Layer | Indexer µs | Indexer MFU | Attention µs | Attention MFU |
 | --- | ---: | ---: | ---: | ---: |
@@ -66,15 +68,22 @@ repeats。完整数据见[模块检查点报告](../../../experiments/nosa_kerne
 `git_commit` 指测量时未提交工作树的基线，实际实现身份由源码哈希、快照及已登记的
 AST 等价格式化变体确定。
 
-| 实验 | 原 run / 实现 | 状态与边界 |
-| --- | --- | --- |
-| [完整模型 native / Triton](../../../experiments/indexer_block_sparse_profile/README.md) | `sparse_native_h200_gpu1_20260929_01`、`sparse_triton_h200_gpu1_20260929_01`，`94bf521` | 2026-09-29 已按独立 sparse 轨迹补测 64K+1K full-prefill / extend；同源、设备、请求、完整归因及输出验收通过，旧 sparse 报告和运行产物已替换。该次报告记录 553 项实验 CPU 测试、361 项全局 GPU 测试通过。 |
-| [Synthetic operator 对照](../../../experiments/nosa_kernel_mfu/README.md) | `kernel_mfu_h200_gpu1_20260928_071840`，`020961b` | 补测未完成；原 468.68 / 216.17 µs attention / score 数字只描述旧实现。完整模块检查点另列，不把两类结果混用。 |
-| [Full-NOSA pattern](../../../experiments/nosa_indexer_pattern_65536_1024/README.md) | 以原实验 README 中的 run ID 和实现记录为准 | 受影响的 sparse / full-NOSA 部分待补测；旧结果保留原边界，未受影响的 dense-only 部分不因此重跑。 |
+当前报告导航更新于 2026-10-05；下表以已发布的 run 和各自源码快照为准。
+上面的 2026-09-29 数值与验收过程仅记录当时组件任务，不作为当前报告或配对基线。
+Dense/sparse 目录已合并，check/bench/profile 入口已拆分；本次整理没有新增测量。
 
-上述状态描述原 resident 检查点。2026-09-30 新增 offload 分支后，模型/cache 源码图
-已扩展，当前分支的完整模型实验尚未补测；2026-10-01 算子目录迁移后的性能也未重新
-测量。当前研究进度统一见[研究状态](../../status.md)，原 run 不作为这些改动后的实测结果。
+| 实验 | 已发布 run | 状态与边界 |
+| --- | --- | --- |
+| [完整模型 native / Triton](../../../experiments/nosa_baseline_performance/README.md) | `sparse_flags_native_20261004_01`、`sparse_flags_triton_20261004_01` | 64K+1K、完整 32 层 resident 前向；独立墙钟和独立 nsys/module 采集，同请求、109 份源码及完整归因通过。原始 SQLite 重算和 364 项独立报告检查通过，两个旧 run 已清理。 |
+| [Synthetic / captured operator](../../../experiments/nosa_kernel_mfu/README.md) | `kernel_flags_synthetic_20261004_01`、`kernel_flags_real_20261004_01` | 全部 28 行检查 1024-query FP32 reference。Synthetic 与固定真实输入分别报告；真实输入保留 `kda_inputs_baseline_20260928_1345`，不声称它是新模型轨迹。 |
+| [完整模块 native / Triton](../../../experiments/nosa_kernel_mfu/README.md#完整模块检查点) | `modules_flags_native_20261004_01`、`modules_flags_triton_20261004_01` | L0/L15/L31 的完整 indexer/attention，12 行及 36 份 trace 通过复核。Kernel 总时间、event 与 wall 分开报告；只有 L31 attention 超过 40%，两个完整模块的共同目标仍未完成。四个 kernel/module run 共 477 项独立报告检查通过，三个旧测量 run 已清理。 |
+| [Dense 全模型](../../../experiments/nosa_baseline_performance/README.md) | `dense_wrapper_20261004_01` | 完整 32 层 dense 前向，SQLite/MFU 重算和 80 项独立报告检查通过。基准在 nsys 进程内关闭 capture 时计时，没有独立无 profiler 进程。旧 dense 仅在下游分析替换后清理。 |
+| [Full-NOSA pattern](../../../experiments/nosa_indexer_pattern_65536_1024/README.md) | `nosa_pattern_flags_20261004_01` | 三组实际选择、QA32/QA64、分解与分布保留；假定 dense MFU/带宽的时间、overlap 和阈值分析已退出。历史复核数量包含已退出支线，不作为当前范围的验收数量。 |
+| [A1024 offload 算子](../../../experiments/nosa_offload_overlap/README.md) | `nosa_cached_fetch_20261004_01`、`nosa_cached_fetch_confirm40_20261004_01`、`nosa_cached_fetch_profile_20261004_01` | 冻结真实输入，默认调用每次重取完整稀疏并集。20/40 次完整 API 配对均支持融合收益，9 个内部样本双比率均过 90%；普通 owned-cache 完整 32 层数值另行通过。657 项 timing 与 27 个 profile range 复核后发布，三个旧 run 已清理；不证明固定 P/NH 命中或 serving 性能。 |
+
+Resident 各项保持 A1024 测量边界，offload 行单独报告冷稀疏并集的算子回放。
+它们不能替代固定 P/NH、A128 或 budget-serving 的验收。当前研究进度仍见
+[研究状态](../../status.md)；本表只维护实验入口。
 
 正确性测试用于代码验收，不能替代模型质量或论文实验结论。保留待替换的报告和运行产物，
 直到新实现的正确性、来源稳定性与测量完整性通过；发布新 run 后，再同步替换和清理受影响的
@@ -82,17 +91,14 @@ AST 等价格式化变体确定。
 
 ## 复验入口
 
-以下是原 resident 任务使用的入口；先选择空闲 GPU，并为新运行使用新的 run ID。
-本次文档整理没有执行这些命令。
+当前入口的参数与独立验收要求见各脚本帮助。本次整理只运行 CPU 回归和帮助检查。
 
 ```bash
 bash scripts/run_tests.sh cpu
-bash scripts/run_tests.sh gpu
-bash experiments/nosa_kernel_mfu/scripts/capture.sh <new-input-run> --kernel-backend native
-bash experiments/nosa_kernel_mfu/scripts/run.sh <new-run> --peak-tflops 989 --reference-all
-bash experiments/nosa_kernel_mfu/scripts/run.sh <new-real-run> --input-dir <captured-input-dir> --peak-tflops 989 --reference-all
-bash experiments/indexer_block_sparse_profile/scripts/run.sh <new-native-run> --kernel-backend native --peak-tflops 989
-bash experiments/indexer_block_sparse_profile/scripts/run.sh <new-triton-run> --kernel-backend triton --peak-tflops 989
+bash experiments/nosa_kernel_mfu/scripts/run.sh --help
+bash experiments/nosa_kernel_mfu/scripts/modules.sh --help
+bash experiments/nosa_baseline_performance/scripts/dense.sh --help
+bash experiments/nosa_baseline_performance/scripts/sparse.sh --help
 ```
 
 NCU full / PM sampling / source counters 使用隔离的公开算子 harness、现有 `-lineinfo` 构建及

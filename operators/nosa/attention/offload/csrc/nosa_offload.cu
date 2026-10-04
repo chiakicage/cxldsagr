@@ -25,6 +25,8 @@ struct Initialize {
   int64_t key_row, key_head, value_row, value_head;
   int64_t prefix, heads, page_zero_vectors, suffix_vectors;
   int64_t page_capacity, tile_capacity, work_items;
+  const int64_t* cache_tags;
+  int64_t cache_owner, tag_count;
   bool vector_keys, vector_values;
 };
 
@@ -46,8 +48,11 @@ __global__ void nosa_initialize_stage_kernel(Initialize p) {
     if (item < p.page_zero_vectors) {
       // Only the historical part of page 0 is cleared. The suffix begins at
       // prefix, so page-zero clearing and suffix copies have disjoint writers.
-      reinterpret_cast<uint4*>(p.keys)[item] = make_uint4(0, 0, 0, 0);
-      reinterpret_cast<uint4*>(p.values)[item] = make_uint4(0, 0, 0, 0);
+      const int head = (item / 16) % p.heads;
+      if (!p.cache_tags || p.prefix < 64 || p.cache_tags[head] != p.cache_owner) {
+        reinterpret_cast<uint4*>(p.keys)[item] = make_uint4(0, 0, 0, 0);
+        reinterpret_cast<uint4*>(p.values)[item] = make_uint4(0, 0, 0, 0);
+      }
     }
     if (item < p.suffix_vectors) {
       int64_t query = item / (p.heads * 16);
@@ -63,7 +68,9 @@ __global__ void nosa_initialize_stage_kernel(Initialize p) {
     }
     if (item < p.page_capacity) {
       p.first_use[item] = INT_MAX;
-      p.ready[item] = 0;
+      p.ready[item] = p.cache_tags && item < p.tag_count &&
+                             item / p.heads < p.prefix / 64 &&
+                             p.cache_tags[item] == p.cache_owner ? 8 : 0;
     }
     if (item < p.tile_capacity) p.tile_bytes[item] = 0;
     if (item < 2) p.queue[item] = 0;
@@ -127,11 +134,12 @@ void plan(TensorView ids, TensorView mask, TensorView first_use,
   check_cuda(cudaGetLastError());
 }
 
-void prepare(TensorView keys, TensorView values,
+void prepare_impl(TensorView keys, TensorView values,
              TensorView suffix_keys, TensorView suffix_values,
              TensorView first_use, TensorView ready, TensorView queue,
              TensorView tile_bytes, TensorView total_bytes,
-             TensorView ids, TensorView mask, int64_t prefix, int64_t tile_size) {
+             TensorView ids, TensorView mask, int64_t prefix, int64_t tile_size,
+             const int64_t* cache_tags, int64_t cache_owner, int64_t tag_count) {
   Initialize p{};
   p.keys = static_cast<uint16_t*>(keys.data_ptr());
   p.values = static_cast<uint16_t*>(values.data_ptr());
@@ -142,6 +150,9 @@ void prepare(TensorView keys, TensorView values,
   p.queue = static_cast<int*>(queue.data_ptr());
   p.tile_bytes = static_cast<int64_t*>(tile_bytes.data_ptr());
   p.total_bytes = static_cast<int64_t*>(total_bytes.data_ptr());
+  p.cache_tags = cache_tags;
+  p.cache_owner = cache_owner;
+  p.tag_count = tag_count;
   p.key_row = suffix_keys.stride(0);
   p.key_head = suffix_keys.stride(1);
   p.value_row = suffix_values.stride(0);
@@ -168,7 +179,97 @@ void prepare(TensorView keys, TensorView values,
   plan(ids, mask, first_use, suffix_keys.size(0), prefix, tile_size);
 }
 
+void prepare(TensorView keys, TensorView values,
+             TensorView suffix_keys, TensorView suffix_values,
+             TensorView first_use, TensorView ready, TensorView queue,
+             TensorView tile_bytes, TensorView total_bytes,
+             TensorView ids, TensorView mask, int64_t prefix, int64_t tile_size) {
+  prepare_impl(keys, values, suffix_keys, suffix_values, first_use, ready, queue,
+               tile_bytes, total_bytes, ids, mask, prefix, tile_size, nullptr, 0, 0);
+}
+
+void prepare_cached(TensorView keys, TensorView values,
+             TensorView suffix_keys, TensorView suffix_values,
+             TensorView first_use, TensorView ready, TensorView queue,
+             TensorView tile_bytes, TensorView total_bytes,
+             TensorView ids, TensorView mask, int64_t prefix, int64_t tile_size,
+             TensorView tags, int64_t owner) {
+  prepare_impl(keys, values, suffix_keys, suffix_values, first_use, ready, queue,
+               tile_bytes, total_bytes, ids, mask, prefix, tile_size,
+               static_cast<const int64_t*>(tags.data_ptr()), owner, tags.numel());
+}
+
+__global__ void publish_cache_kernel(int64_t* tags, const int* first_use,
+                                    int64_t count, int heads, int64_t owner,
+                                    int64_t prefix, int64_t end) {
+  const int64_t slot = int64_t(blockIdx.x) * blockDim.x + threadIdx.x;
+  if (slot >= count) return;
+  const int64_t block = slot / heads;
+  // Suffix writes invalidate previous owners, including a partial prefix page.
+  if (block >= prefix / 64 && block < (end + 63) / 64) tags[slot] = 0;
+  else if (block < prefix / 64 && first_use[slot] != INT_MAX) tags[slot] = owner;
+  else if (block == 0 && prefix && tags[slot] != owner) tags[slot] = 0;
+}
+
+void publish_cache(TensorView tags, TensorView first_use, int64_t owner,
+                   int64_t prefix, int64_t end) {
+  auto stream = static_cast<cudaStream_t>(
+      TVMFFIEnvGetStream(kDLCUDA, tags.device().device_id));
+  publish_cache_kernel<<<(tags.numel() + 255) / 256, 256, 0, stream>>>(
+      static_cast<int64_t*>(tags.data_ptr()), static_cast<const int*>(first_use.data_ptr()),
+      tags.numel(), tags.size(1), owner, prefix, end);
+  check_cuda(cudaGetLastError());
+}
+
+__device__ __forceinline__ uint4 host_load(const uint4* address) {
+  uint4 value;
+  asm volatile("ld.global.cv.v4.u32 {%0,%1,%2,%3}, [%4];"
+      : "=r"(value.x), "=r"(value.y), "=r"(value.z), "=r"(value.w)
+      : "l"(address) : "memory");
+  return value;
+}
+
+__global__ void prefetch_cached_kernel(uint4* keys, uint4* values,
+    const uint4* host_keys, const uint4* host_values, int64_t* tags,
+    int64_t owner, int64_t prefix, int heads, unsigned long long* bytes) {
+  const int block = blockIdx.x / heads, head = blockIdx.x % heads;
+  const int tokens = min(int64_t(64), prefix - int64_t(block) * 64);
+  if (tokens == 64 && tags[blockIdx.x] == owner) return;
+  for (int item = threadIdx.x; item < tokens * 16; item += blockDim.x) {
+    const int64_t offset = ((int64_t(block) * 64 + item / 16) * heads + head) * 16 + item % 16;
+    keys[offset] = host_load(host_keys + offset);
+    values[offset] = host_load(host_values + offset);
+  }
+  __threadfence();
+  __syncthreads();
+  if (!threadIdx.x) {
+    tags[blockIdx.x] = tokens == 64 ? owner : 0;
+    atomicAdd(bytes, static_cast<unsigned long long>(tokens) * 128 * 2 * sizeof(uint16_t));
+  }
+}
+
+void prefetch_cached(TensorView keys, TensorView values,
+    TensorView host_keys, TensorView host_values, TensorView tags,
+    TensorView bytes, int64_t owner, int64_t prefix) {
+  auto stream = static_cast<cudaStream_t>(
+      TVMFFIEnvGetStream(kDLCUDA, keys.device().device_id));
+  check_cuda(cudaMemsetAsync(bytes.data_ptr(), 0, sizeof(int64_t), stream));
+  if (!prefix) return;
+  void *mapped_keys = nullptr, *mapped_values = nullptr;
+  check_cuda(cudaHostGetDevicePointer(&mapped_keys, host_keys.data_ptr(), 0));
+  check_cuda(cudaHostGetDevicePointer(&mapped_values, host_values.data_ptr(), 0));
+  prefetch_cached_kernel<<<((prefix + 63) / 64) * tags.size(1), 128, 0, stream>>>(
+      static_cast<uint4*>(keys.data_ptr()), static_cast<uint4*>(values.data_ptr()),
+      static_cast<const uint4*>(mapped_keys), static_cast<const uint4*>(mapped_values),
+      static_cast<int64_t*>(tags.data_ptr()), owner, prefix, tags.size(1),
+      static_cast<unsigned long long*>(bytes.data_ptr()));
+  check_cuda(cudaGetLastError());
+}
+
 }  // namespace nosa_offload
 
 TVM_FFI_DLL_EXPORT_TYPED_FUNC(plan, nosa_offload::plan);
 TVM_FFI_DLL_EXPORT_TYPED_FUNC(prepare, nosa_offload::prepare);
+TVM_FFI_DLL_EXPORT_TYPED_FUNC(prepare_cached, nosa_offload::prepare_cached);
+TVM_FFI_DLL_EXPORT_TYPED_FUNC(publish_cache, nosa_offload::publish_cache);
+TVM_FFI_DLL_EXPORT_TYPED_FUNC(prefetch_cached, nosa_offload::prefetch_cached);

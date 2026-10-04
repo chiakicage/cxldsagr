@@ -1,0 +1,943 @@
+diff --git a/operators/nosa/attention/device_only/_cuda.py b/operators/nosa/attention/device_only/_cuda.py
+index 620a78e..114689b 100644
+--- a/operators/nosa/attention/device_only/_cuda.py
++++ b/operators/nosa/attention/device_only/_cuda.py
+@@ -14,7 +14,13 @@ def supports_native_attention(q, keys, values):
+     )
+ 
+ 
+-def launch_nosa_block_attention(q, keys, values, selection, query_start, cis_bias):
++def launch_nosa_block_attention(
++    q, keys, values, selection, query_start, cis_bias, *, workspace=None
++):
+     from operators.nosa.attention.device_only._fa3 import launch_nosa_fa3_attention
+ 
++    if workspace is not None:
++        return launch_nosa_fa3_attention(
++            q, keys, values, selection, query_start, cis_bias, workspace=workspace
++        )
+     return launch_nosa_fa3_attention(q, keys, values, selection, query_start, cis_bias)
+diff --git a/operators/nosa/attention/device_only/_fa3.py b/operators/nosa/attention/device_only/_fa3.py
+index 9c74b88..6e3b717 100644
+--- a/operators/nosa/attention/device_only/_fa3.py
++++ b/operators/nosa/attention/device_only/_fa3.py
+@@ -89,8 +89,10 @@ def _module():
+     )
+ 
+ 
+-def launch_nosa_fa3_attention(q, keys, values, selection, query_start, cis_bias):
++def launch_nosa_fa3_attention(q, keys, values, selection, query_start, cis_bias, *, workspace=None):
+     """Run the complete operator, including metadata and native numerical repair."""
++    if workspace is not None:
++        return _launch_with_workspace(q, keys, values, selection, query_start, cis_bias, workspace)
+     output = torch.empty(q.shape, dtype=q.dtype, device=q.device)
+     if not len(q):
+         return output
+@@ -140,3 +142,34 @@ def launch_nosa_fa3_attention(q, keys, values, selection, query_start, cis_bias)
+             query_start,
+         )
+     return output
++
++
++def _launch_with_workspace(q, keys, values, selection, query_start, cis_bias, workspace):
++    """Use reserved storage without changing the default allocation path."""
++    workspace.validate_attention(q, keys, values)
++    scratch = workspace.slices(len(q), keys.shape[1], device=q.device, dtype=q.dtype)
++    output = torch.empty(q.shape, dtype=q.dtype, device=q.device)
++    if not len(q):
++        return output
++    mask = selection.valid_mask if selection.valid_mask is not None else workspace.empty_mask
++    bias = cis_bias if cis_bias is not None else workspace.empty_mask
++    module = _module()
++    with torch.cuda.device(q.device), tvm_ffi.use_torch_stream():
++        current = torch.cuda.current_stream(q.device)
++        for tensor in workspace.tensors():
++            tensor.record_stream(current)
++        module.fa3_forward(
++            q,
++            keys,
++            values,
++            selection.block_ids,
++            mask,
++            bias,
++            output,
++            scratch["fallback"],
++            scratch["pages"],
++            scratch["members"],
++            scratch["counts"],
++            query_start,
++        )
++    return output
+diff --git a/operators/nosa/attention/device_only/api.py b/operators/nosa/attention/device_only/api.py
+index 94c1c01..d11d363 100644
+--- a/operators/nosa/attention/device_only/api.py
++++ b/operators/nosa/attention/device_only/api.py
+@@ -13,6 +13,8 @@ def nosa_block_sparse_attention(
+     selection: BlockSelection,
+     query_start: int = 0,
+     cis_bias: torch.Tensor | None = None,
++    *,
++    workspace=None,
+ ) -> torch.Tensor:
+     """Fused inference-only SM90 implementation of the reference operation.
+ 
+@@ -28,8 +30,18 @@ def nosa_block_sparse_attention(
+     nonfinite values requiring separate masking use the per-query kernel.
+     Other supported shapes/layouts use Triton. CXLDSAGR_SM90_BACKEND=triton
+     selects that implementation explicitly.
++
++    An explicit workspace uses reserved scratch and requires the native
++    BF16/D128/GQA16 route with matching K/V layouts. The caller owns the
++    execution lease and must await work before reusing or releasing storage.
+     """
+     _validate_inputs(q, keys, values, selection, query_start, cis_bias)
++    if workspace is not None:
++        from operators.nosa.attention.workspace import NosaAttentionWorkspace
++
++        if not isinstance(workspace, NosaAttentionWorkspace):
++            raise TypeError("workspace must be a NosaAttentionWorkspace")
++        workspace.validate_attention(q, keys, values)
+     if not q.is_cuda or torch.cuda.get_device_capability(q.device) != (9, 0):
+         raise NotImplementedError("The fused NOSA block attention backend requires SM90/Hopper")
+     if (
+@@ -46,9 +58,15 @@ def nosa_block_sparse_attention(
+         from operators.nosa.attention.device_only import _cuda as native_attention
+ 
+         if native_attention.supports_native_attention(q, keys, values):
++            if workspace is not None:
++                return native_attention.launch_nosa_block_attention(
++                    q, keys, values, selection, query_start, cis_bias, workspace=workspace
++                )
+             return native_attention.launch_nosa_block_attention(
+                 q, keys, values, selection, query_start, cis_bias
+             )
++    if workspace is not None:
++        raise NotImplementedError("Shared NOSA attention requires the native FA3 backend")
+     # CPU-only users of the mathematical reference do not import Triton.
+     from operators.nosa.attention.device_only._triton import launch_nosa_block_attention
+ 
+diff --git a/operators/nosa/attention/offload/api.py b/operators/nosa/attention/offload/api.py
+index b9290ee..c5baf75 100644
+--- a/operators/nosa/attention/offload/api.py
++++ b/operators/nosa/attention/offload/api.py
+@@ -9,12 +9,14 @@ slot cache policy.
+ """
+ 
+ import hashlib
++from contextlib import nullcontext
+ from functools import cache
+ from pathlib import Path
+ 
+ import torch
+ 
+ from layers.attention import BlockSelection
++from operators.nosa.attention.workspace import NosaAttentionWorkspace
+ 
+ 
+ @cache
+@@ -40,6 +42,19 @@ def _positive_integer(name, value):
+         raise ValueError(f"{name} must be a positive int32 integer")
+ 
+ 
++def estimate_trace_rows(max_seq_len, max_queries, kv_heads):
++    """Pure upper bound: page envelopes, math rows and eight copy stripes/page."""
++    for name, value in (
++        ("max_seq_len", max_seq_len),
++        ("max_queries", max_queries),
++        ("kv_heads", kv_heads),
++    ):
++        _positive_integer(name, value)
++    if max_queries > max_seq_len:
++        raise ValueError("max_queries exceeds sequence capacity")
++    return ((max_seq_len + 63) // 64) * kv_heads * 9 + ((max_queries + 7) // 8) * kv_heads * 64
++
++
+ class NosaFetchWorkspace:
+     """Request-shared staging and exact sparse fetch scheduling for NOSA-8B.
+ 
+@@ -57,6 +72,12 @@ class NosaFetchWorkspace:
+     CTAs contribute spare producer warps to unique host reads from a compact
+     selected-page queue. All CTAs retain their attention consumers; the cap is
+     clamped to the cooperative grid size.
++
++    ``bounded=True`` requires ``max_queries`` and reserves all scratch at
++    construction. ``trace_capacity`` is an explicit number of four-int64 rows;
++    neither queries nor tracing can grow that reservation. CPU construction is
++    allowed only in bounded mode for allocation tests, and cannot execute fetch.
++    The default retains lazy standalone scratch and diagnostic allocation.
+     """
+ 
+     def __init__(
+@@ -70,28 +91,53 @@ class NosaFetchWorkspace:
+         query_tile_size: int = 128,
+         overlap: bool = True,
+         fetch_ctas: int = 96,
++        max_queries: int | None = None,
++        bounded: bool = False,
++        trace_capacity: int = 0,
+     ):
+         _positive_integer("max_seq_len", max_seq_len)
+         _positive_integer("kv_heads", kv_heads)
+         _positive_integer("query_tile_size", query_tile_size)
+         _positive_integer("fetch_ctas", fetch_ctas)
+-        if head_dim != 128 or isinstance(head_dim, bool) or dtype != torch.bfloat16:
++        if not isinstance(bounded, bool):
++            raise TypeError("bounded must be boolean")
++        self.device = torch.device(device)
++        allocation_only = bounded and self.device.type == "cpu"
++        if not allocation_only and (
++            head_dim != 128 or isinstance(head_dim, bool) or dtype != torch.bfloat16
++        ):
+             raise ValueError("NOSA offload currently requires BF16 and head_dim=128")
++        # The pure layout contract also validates allocation-only CPU shapes.
++        self.estimate_capacity_bytes(
++            max_seq_len,
++            kv_heads,
++            head_dim,
++            dtype=dtype,
++            query_tile_size=query_tile_size,
++            max_queries=max_queries,
++            trace_capacity=trace_capacity,
++        )
++        if bounded and max_queries is None:
++            raise ValueError("Bounded NOSA fetch workspace requires max_queries")
+         if kv_heads > 65535:
+             raise ValueError("kv_heads exceeds the CUDA grid limit")
+         page_capacity = ((max_seq_len + 63) // 64) * kv_heads
+         _positive_integer("logical page capacity", page_capacity)
+         if not isinstance(overlap, bool):
+             raise TypeError("overlap must be boolean")
+-        self.device = torch.device(device)
+-        if self.device.type != "cuda":
++        if self.device.type != "cuda" and not allocation_only:
+             raise NotImplementedError("NOSA fetch/attention overlap requires SM90/Hopper")
+-        if self.device.index is None:
++        if self.device.type == "cuda" and self.device.index is None:
+             self.device = torch.device("cuda", torch.cuda.current_device())
+-        if torch.cuda.get_device_capability(self.device) != (9, 0):
++        if not allocation_only and torch.cuda.get_device_capability(self.device) != (9, 0):
+             raise NotImplementedError("NOSA fetch/attention overlap requires SM90/Hopper")
+-        with torch.cuda.device(self.device):
+-            if torch.cuda.is_current_stream_capturing():
++        if bounded and not allocation_only:
++            from operators.nosa._native import native_enabled
++
++            if not native_enabled():
++                raise NotImplementedError("Shared NOSA offload requires the native FA3 backend")
++        with nullcontext() if allocation_only else torch.cuda.device(self.device):
++            if not allocation_only and torch.cuda.is_current_stream_capturing():
+                 raise NotImplementedError("NOSA offload does not support CUDA Graph capture")
+             self.max_seq_len = max_seq_len
+             self.kv_heads = kv_heads
+@@ -100,6 +146,9 @@ class NosaFetchWorkspace:
+             self.query_tile_size = query_tile_size
+             self.overlap = overlap
+             self.fetch_ctas = fetch_ctas
++            self.bounded = False
++            self.max_queries = max_queries
++            self._attention_scratch = None
+             shape = (max_seq_len, kv_heads, head_dim)
+             self.keys = torch.empty(shape, dtype=dtype, device=self.device)
+             self.values = torch.empty_like(self.keys)
+@@ -125,8 +174,89 @@ class NosaFetchWorkspace:
+             self.profile_work_intervals = False
+             self._trace_storage = torch.empty((0, 4), dtype=torch.int64, device=self.device)
+             self.last_work_intervals = self._trace_storage
+-            self._last_done = torch.cuda.Event()
+-            self._last_done.record(torch.cuda.current_stream(self.device))
++            self._last_done = None if allocation_only else torch.cuda.Event()
++            if self._last_done is not None:
++                self._last_done.record(torch.cuda.current_stream(self.device))
++            if bounded:
++                self._attention_scratch = NosaAttentionWorkspace(
++                    max_queries, kv_heads, head_dim, device=self.device, dtype=dtype
++                )
++                self._scratch = self._attention_scratch._storage
++                self._scratch_capacity = max_queries
++            elif max_queries is not None:
++                self._ensure_scratch(max_queries)
++            if trace_capacity:
++                self._trace_storage = torch.empty(
++                    (trace_capacity, 4), dtype=torch.int64, device=self.device
++                )
++                self.last_work_intervals = self._trace_storage[:0]
++            self.bounded = bounded
++
++    @staticmethod
++    def estimate_capacity_bytes(
++        max_seq_len,
++        kv_heads,
++        head_dim,
++        *,
++        dtype,
++        query_tile_size=128,
++        max_queries=None,
++        trace_capacity=0,
++    ):
++        """Pure byte contract for staging, metadata, explicit scratch and trace."""
++        for name, value in (
++            ("max_seq_len", max_seq_len),
++            ("kv_heads", kv_heads),
++            ("head_dim", head_dim),
++            ("query_tile_size", query_tile_size),
++        ):
++            _positive_integer(name, value)
++        if kv_heads > 65535:
++            raise ValueError("kv_heads exceeds the CUDA grid limit")
++        sizes = {torch.float16: 2, torch.bfloat16: 2, torch.float32: 4}
++        if dtype not in sizes:
++            raise ValueError("NOSA workspace requires a floating point dtype")
++        if (
++            isinstance(trace_capacity, bool)
++            or not isinstance(trace_capacity, int)
++            or trace_capacity < 0
++        ):
++            raise ValueError("trace_capacity must be a nonnegative row count")
++        pages = ((max_seq_len + 63) // 64) * kv_heads
++        _positive_integer("logical page capacity", pages)
++        total = 2 * max_seq_len * kv_heads * head_dim * sizes[dtype]
++        total += pages * 8 + (pages + 2) * 4
++        total += ((max_seq_len + query_tile_size - 1) // query_tile_size) * 8 + 8
++        total += trace_capacity * 4 * 8
++        if max_queries is not None:
++            _positive_integer("max_queries", max_queries)
++            if max_queries > max_seq_len:
++                raise ValueError("max_queries exceeds sequence capacity")
++            total += NosaAttentionWorkspace.estimate_capacity_bytes(
++                max_queries, kv_heads, head_dim, dtype=dtype
++            )
++        return total
++
++    estimate_trace_rows = staticmethod(estimate_trace_rows)
++
++    def reserve(self, queries, *, trace_rows=0):
++        """Reserve explicit standalone capacity; bounded instances never grow."""
++        _positive_integer("queries", queries)
++        if queries > self.max_seq_len:
++            raise ValueError("queries exceeds sequence capacity")
++        if isinstance(trace_rows, bool) or not isinstance(trace_rows, int) or trace_rows < 0:
++            raise ValueError("trace_rows must be a nonnegative row count")
++        if self.bounded and (
++            queries > self._scratch_capacity or trace_rows > len(self._trace_storage)
++        ):
++            raise ValueError("Bounded NOSA workspace cannot grow beyond its reservation")
++        self.synchronize()
++        self._ensure_scratch(queries)
++        if trace_rows > len(self._trace_storage):
++            self._trace_storage = torch.empty(
++                (trace_rows, 4), dtype=torch.int64, device=self.device
++            )
++            self.last_work_intervals = self._trace_storage[:0]
+ 
+     def _validate(
+         self,
+@@ -139,6 +269,8 @@ class NosaFetchWorkspace:
+         cis_bias,
+         query_start,
+     ):
++        if self.device.type != "cuda":
++            raise NotImplementedError("CPU NOSA fetch workspace is allocation-only")
+         from operators.nosa._native import native_enabled
+ 
+         if not native_enabled():
+@@ -148,6 +280,14 @@ class NosaFetchWorkspace:
+         if q.ndim != 3 or q.shape[1:] != (self.kv_heads * 16, self.head_dim):
+             raise ValueError("NOSA offload Q must be [queries,KV heads * 16,128]")
+         queries = q.shape[0]
++        if self.bounded:
++            if queries > self.max_queries:
++                raise ValueError("NOSA offload query exceeds the reserved query capacity")
++            if self.profile_work_intervals:
++                rows = ((query_start + 63) // 64) * self.kv_heads * 9
++                rows += ((queries + 7) // 8) * self.kv_heads * 64
++                if rows > len(self._trace_storage):
++                    raise ValueError("NOSA offload trace exceeds its explicit reservation")
+         end = query_start + queries
+         if end > self.max_seq_len:
+             raise ValueError("Query end exceeds the workspace capacity")
+@@ -270,6 +410,11 @@ class NosaFetchWorkspace:
+                 tiles = (queries + self.query_tile_size - 1) // self.query_tile_size
+                 self.last_tile_transfer_bytes = self._tile_bytes[:tiles]
+                 self._ensure_scratch(queries)
++                scratch = (
++                    self._attention_scratch.slices(queries)
++                    if self._attention_scratch is not None
++                    else self._scratch
++                )
+                 trace_rows = ((query_start + 63) // 64) * self.kv_heads
+                 trace_rows += ((queries + 7) // 8) * self.kv_heads * 64
+                 if self.profile_work_intervals:
+@@ -279,6 +424,8 @@ class NosaFetchWorkspace:
+                         ((query_start + 63) // 64) * self.kv_heads * build_info()["fetch_stripes"]
+                     )
+                     if len(self._trace_storage) < trace_rows:
++                        if self.bounded:
++                            raise ValueError("NOSA offload trace exceeds its explicit reservation")
+                         self._trace_storage = torch.empty(
+                             (trace_rows, 4), dtype=torch.int64, device=self.device
+                         )
+@@ -341,10 +488,10 @@ class NosaFetchWorkspace:
+                         mask,
+                         cis_bias if cis_bias is not None else self._empty_mask,
+                         output,
+-                        self._scratch["fallback"],
+-                        self._scratch["pages"],
+-                        self._scratch["members"],
+-                        self._scratch["counts"],
++                        scratch["fallback"],
++                        scratch["pages"],
++                        scratch["members"],
++                        scratch["counts"],
+                         host_keys,
+                         host_values,
+                         self._first_use,
+@@ -369,6 +516,8 @@ class NosaFetchWorkspace:
+     def _ensure_scratch(self, queries):
+         if queries <= self._scratch_capacity:
+             return
++        if self.bounded:
++            raise ValueError("NOSA offload query exceeds the reserved query capacity")
+         batches = ((queries + 7) // 8) * self.kv_heads
+         options = {"device": self.device, "dtype": torch.int32}
+         self._scratch = {
+@@ -404,21 +553,24 @@ class NosaFetchWorkspace:
+     @property
+     def capacity_bytes(self) -> int:
+         """Allocated HBM tensor bytes, counting statistics views only once."""
+-        return sum(
+-            tensor.numel() * tensor.element_size()
+-            for tensor in (
+-                self.keys,
+-                self.values,
+-                self._first_use,
+-                self._ready_blocks,
+-                self._fetch_queue,
+-                self._tile_bytes,
+-                self.last_transfer_bytes,
+-                self._trace_storage,
+-                *self._scratch.values(),
+-            )
++        return sum(tensor.untyped_storage().nbytes() for tensor in self.tensors())
++
++    def tensors(self):
++        """Enumerate every complete tensor storage, never statistics views."""
++        return (
++            self.keys,
++            self.values,
++            self._first_use,
++            self._ready_blocks,
++            self._fetch_queue,
++            self._tile_bytes,
++            self.last_transfer_bytes,
++            self._trace_storage,
++            *self._scratch.values(),
++            self._empty_mask,
+         )
+ 
+     def synchronize(self):
+         """Wait on the host before cache abort, backing mutation or release."""
+-        self._last_done.synchronize()
++        if self._last_done is not None:
++            self._last_done.synchronize()
+diff --git a/operators/nosa/attention/offload/tests/test_nosa_offload.py b/operators/nosa/attention/offload/tests/test_nosa_offload.py
+index 07172e0..c42c5b5 100644
+--- a/operators/nosa/attention/offload/tests/test_nosa_offload.py
++++ b/operators/nosa/attention/offload/tests/test_nosa_offload.py
+@@ -112,7 +112,8 @@ def test_cuda_overlap_preserves_tail_cis_and_exact_fetch_union(hopper, prefix):
+ 
+ 
+ @pytest.mark.parametrize("fetch_ctas,queries", [(1, 9), (7, 3), (96, 9)])
+-def test_cuda_overlap_stripe_tail_trace_and_profile_reuse(hopper, fetch_ctas, queries):
++@pytest.mark.parametrize("bounded", [False, True])
++def test_cuda_overlap_stripe_tail_trace_and_profile_reuse(hopper, fetch_ctas, queries, bounded):
+     from operators.nosa.attention.offload._fused import build_info
+ 
+     prefix, tile_size, heads = 145, 8, 2
+@@ -136,6 +137,15 @@ def test_cuda_overlap_stripe_tail_trace_and_profile_reuse(hopper, fetch_ctas, qu
+         dtype=q.dtype,
+         query_tile_size=tile_size,
+         fetch_ctas=fetch_ctas,
++        **(
++            {
++                "bounded": True,
++                "max_queries": queries,
++                "trace_capacity": NosaFetchWorkspace.estimate_trace_rows(512, queries, heads),
++            }
++            if bounded
++            else {}
++        ),
+     )
+     fetch_slots = ((prefix + 63) // 64) * heads
+     batches = ((queries + 7) // 8) * heads
+@@ -265,7 +275,8 @@ def test_cuda_overlap_initialization_stages_strided_suffix(hopper, prefix, layou
+ 
+ 
+ @pytest.mark.parametrize("broadcast", ["head", "query", "both"])
+-def test_cuda_overlap_broadcast_selection_and_serial_control(hopper, broadcast):
++@pytest.mark.parametrize("bounded", [False, True])
++def test_cuda_overlap_broadcast_selection_and_serial_control(hopper, broadcast, bounded):
+     prefix, queries, tile_size = 512, 25, 11
+     inputs = _inputs(prefix, queries)
+     ids = torch.tensor([1, 5, 8, -1], device="cuda", dtype=torch.int32).reshape(1, 1, 4)
+@@ -284,6 +295,7 @@ def test_cuda_overlap_broadcast_selection_and_serial_control(hopper, broadcast):
+             dtype=torch.bfloat16,
+             query_tile_size=tile_size,
+             overlap=overlap,
++            **({"bounded": True, "max_queries": queries} if bounded else {}),
+         )
+         # Unselected page 0 is used by odd-page FA3 padding and must have safe
+         # initialized contents, even if a previous layer left NaN in staging.
+@@ -330,9 +342,16 @@ def test_cuda_overlap_late_page_zero_and_masked_nan_preserve_repair(hopper):
+     assert workspace.last_tile_transfer_bytes.cpu().tolist() == [131072, 65536, 0]
+ 
+ 
+-def test_cuda_overlap_workspace_reuse_across_caller_streams_and_empty_step(hopper):
++@pytest.mark.parametrize("bounded", [False, True])
++def test_cuda_overlap_workspace_reuse_across_caller_streams_and_empty_step(hopper, bounded):
+     workspace = NosaFetchWorkspace(
+-        512, 2, 128, device="cuda", dtype=torch.bfloat16, query_tile_size=8
++        512,
++        2,
++        128,
++        device="cuda",
++        dtype=torch.bfloat16,
++        query_tile_size=8,
++        **({"bounded": True, "max_queries": 32} if bounded else {}),
+     )
+     inputs = [_inputs(257, 17), _inputs(129, 9)]
+     current = torch.cuda.current_stream()
+@@ -405,11 +424,20 @@ def test_cuda_overlap_reused_workspace_retains_outputs_with_varying_queries(hopp
+         torch.testing.assert_close(output, torch.full_like(output, expected_value), atol=0, rtol=0)
+ 
+ 
+-def test_cuda_overlap_reused_scratch_crosses_fa3_work_order_boundary(hopper):
++@pytest.mark.parametrize("bounded", [False, True])
++def test_cuda_overlap_reused_scratch_crosses_fa3_work_order_boundary(hopper, bounded):
+     prefix, tile_size = 2048, 128
+     workspace = NosaFetchWorkspace(
+-        4096, 2, 128, device="cuda", dtype=torch.bfloat16, query_tile_size=tile_size
++        4096,
++        2,
++        128,
++        device="cuda",
++        dtype=torch.bfloat16,
++        query_tile_size=tile_size,
++        **({"bounded": True, "max_queries": 1032} if bounded else {}),
+     )
++    initial_bytes = workspace.capacity_bytes
++    pointers = [tensor.data_ptr() for tensor in workspace.tensors()]
+     # With two KV heads, 1017..1024 queries require 256 work items and the
+     # separate counts/order region; adjacent lengths use a different layout.
+     for queries in (1016, 1017, 1024, 1025, 1017):
+@@ -438,6 +466,9 @@ def test_cuda_overlap_reused_scratch_crosses_fa3_work_order_boundary(hopper):
+         expected_bytes = _expected_tile_bytes(selection, prefix, queries, tile_size)
+         assert workspace.last_tile_transfer_bytes.cpu().tolist() == expected_bytes
+         assert workspace.last_transfer_bytes.item() == sum(expected_bytes)
++        if bounded:
++            assert workspace.capacity_bytes == initial_bytes
++            assert [tensor.data_ptr() for tensor in workspace.tensors()] == pointers
+ 
+ 
+ def test_cuda_overlap_repair_flags_reset_after_poison_and_empty_rows(hopper):
+--- /dev/null
++++ b/operators/nosa/attention/workspace.py
+@@ -0,0 +1,147 @@
++"""Bounded FA3 scratch storage; importing this module needs only PyTorch.
++
++The CPU allocation path exists for storage and lifecycle tests. Attention still
++requires the native SM90/BF16/D128/GQA16 specialization. This object owns no
++model state; its caller must serialize users and await work before releasing it.
++"""
++
++import torch
++
++
++def _integer(name, value, *, allow_zero=False):
++    minimum = 0 if allow_zero else 1
++    if isinstance(value, bool) or not isinstance(value, int) or not minimum <= value < 2**31:
++        raise ValueError(f"{name} must be {'a nonnegative' if allow_zero else 'a positive'} int32")
++
++
++def _layout(max_queries, kv_heads, head_dim, dtype):
++    _integer("max_queries", max_queries)
++    _integer("kv_heads", kv_heads)
++    _integer("head_dim", head_dim)
++    if kv_heads > 65535:
++        raise ValueError("kv_heads exceeds the CUDA grid limit")
++    if dtype not in (torch.float16, torch.bfloat16, torch.float32):
++        raise ValueError("NOSA workspace requires a floating point dtype")
++    batches = ((max_queries + 7) // 8) * kv_heads
++    _integer("query batch capacity", batches)
++    return {
++        "fallback": ((max_queries + 3) // 4, kv_heads),
++        "pages": (batches, 8 * 64),
++        "members": (batches, 8 * 64),
++        # Even when the largest batch is not 256, a smaller call may need the
++        # second counts region used by native work ordering at 256 batches.
++        "counts": (2 * batches,),
++    }
++
++
++class NosaAttentionWorkspace:
++    """One explicitly bounded set of fallback/pages/members/counts tensors."""
++
++    def __init__(self, max_queries, kv_heads, head_dim=128, *, device, dtype):
++        layout = _layout(max_queries, kv_heads, head_dim, dtype)
++        self.device = torch.device(device)
++        if self.device.type not in ("cpu", "cuda"):
++            raise NotImplementedError("NOSA workspace storage supports CPU or CUDA")
++        if self.device.type == "cuda":
++            from operators.nosa._native import native_enabled
++
++            if self.device.index is None:
++                self.device = torch.device("cuda", torch.cuda.current_device())
++            if torch.cuda.get_device_capability(self.device) != (9, 0):
++                raise NotImplementedError("Shared NOSA attention requires SM90/Hopper")
++            if not native_enabled():
++                raise NotImplementedError("Shared NOSA attention requires the native FA3 backend")
++            if dtype != torch.bfloat16 or head_dim != 128:
++                raise ValueError("Shared NOSA attention requires BF16 and head_dim=128")
++            with torch.cuda.device(self.device):
++                if torch.cuda.is_current_stream_capturing():
++                    raise NotImplementedError("Shared NOSA attention does not support CUDA Graph")
++        self.max_queries = max_queries
++        self.kv_heads = kv_heads
++        self.head_dim = head_dim
++        self.dtype = dtype
++        self._storage = {
++            name: torch.empty(shape, dtype=torch.int32, device=self.device)
++            for name, shape in layout.items()
++        }
++        self.empty_mask = torch.empty(0, dtype=torch.bool, device=self.device)
++
++    @staticmethod
++    def estimate_capacity_bytes(max_queries, kv_heads, head_dim=128, *, dtype):
++        """Pure storage estimate, including counts capacity for every smaller q."""
++        from math import prod
++
++        return sum(
++            prod(shape) * 4 for shape in _layout(max_queries, kv_heads, head_dim, dtype).values()
++        )
++
++    def slices(self, queries, kv_heads=None, *, device=None, dtype=None):
++        """Return contiguous views shaped for the actual query/head geometry."""
++        _integer("queries", queries, allow_zero=True)
++        heads = self.kv_heads if kv_heads is None else kv_heads
++        _integer("kv_heads", heads)
++        if queries > self.max_queries or heads > self.kv_heads:
++            raise ValueError("NOSA attention request exceeds reserved query/head capacity")
++        if device is not None:
++            actual_device = torch.device(device)
++            if actual_device.type == "cuda" and actual_device.index is None:
++                actual_device = torch.device("cuda", torch.cuda.current_device())
++            if actual_device != self.device:
++                raise ValueError("NOSA attention workspace device mismatch")
++        if dtype is not None and dtype != self.dtype:
++            raise ValueError("NOSA attention workspace dtype mismatch")
++        batches = ((queries + 7) // 8) * heads
++        fallback_elements = ((queries + 3) // 4) * heads
++        counts = batches * (2 if batches == 256 else 1)
++        return {
++            "fallback": self._storage["fallback"].view(-1)[:fallback_elements].view(-1, heads),
++            "pages": self._storage["pages"][:batches],
++            "members": self._storage["members"][:batches],
++            "counts": self._storage["counts"][:counts],
++        }
++
++    def validate_attention(self, q, keys, values):
++        """Reject any route that would allocate an unreserved native fallback."""
++        if not q.is_cuda or self.device.type != "cuda":
++            raise NotImplementedError(
++                "CPU NOSA workspace is allocation-only; use reference attention"
++            )
++        from operators.nosa._native import native_enabled
++        from operators.nosa.attention.device_only._cuda import supports_native_attention
++
++        if not native_enabled():
++            raise NotImplementedError("Shared NOSA attention requires the native FA3 backend")
++        if torch.cuda.get_device_capability(q.device) != (9, 0):
++            raise NotImplementedError("Shared NOSA attention requires SM90/Hopper")
++        if (
++            q.ndim != 3
++            or keys.ndim != 3
++            or values.shape != keys.shape
++            or any(t.device != self.device or t.dtype != self.dtype for t in (q, keys, values))
++            or any(t.stride(-1) != 1 for t in (q, keys, values))
++            or q.dtype != torch.bfloat16
++            or q.shape[-1] != 128
++            or q.shape[-1] != self.head_dim
++            or not supports_native_attention(q, keys, values)
++            or keys.stride() != values.stride()
++        ):
++            raise ValueError(
++                "Shared NOSA attention requires native BF16/D128/GQA16 matching K/V layouts"
++            )
++        self.slices(len(q), keys.shape[1], device=q.device, dtype=q.dtype)
++        storages = {
++            tensor.untyped_storage().data_ptr() for tensor in self.tensors() if tensor.numel()
++        }
++        if any(t.untyped_storage().data_ptr() in storages for t in (q, keys, values)):
++            raise ValueError("NOSA attention inputs must not alias writable scratch storage")
++        with torch.cuda.device(self.device):
++            if torch.cuda.is_current_stream_capturing():
++                raise NotImplementedError("Shared NOSA attention does not support CUDA Graph")
++
++    def tensors(self):
++        """Enumerate full storage tensors, excluding transient slices."""
++        return (*self._storage.values(), self.empty_mask)
++
++    @property
++    def capacity_bytes(self):
++        return sum(t.untyped_storage().nbytes() for t in self.tensors())
+--- /dev/null
++++ b/operators/nosa/attention/tests/test_workspace.py
+@@ -0,0 +1,151 @@
++"""Storage bounds and actual-shape views for shared native attention scratch."""
++
++import subprocess
++import sys
++
++import pytest
++import torch
++
++from operators.nosa.attention.offload.api import NosaFetchWorkspace, estimate_trace_rows
++from operators.nosa.attention.workspace import NosaAttentionWorkspace
++
++
++def _storage_bytes(workspace):
++    # Inspect actual storage rather than deriving another copy of the formula.
++    storages = {
++        (tensor.device, tensor.untyped_storage().data_ptr()): tensor.untyped_storage().nbytes()
++        for tensor in workspace.tensors()
++        if tensor.numel()
++    }
++    return sum(storages.values())
++
++
++def test_workspace_import_does_not_load_gpu_backends():
++    subprocess.run(
++        [
++            sys.executable,
++            "-c",
++            (
++                "import sys, torch; before = set(sys.modules); "
++                "from operators.nosa.attention.workspace import NosaAttentionWorkspace; "
++                "from operators.nosa.attention.offload.api import NosaFetchWorkspace; "
++                "added = set(sys.modules) - before; "
++                "assert not any(x == 'tvm_ffi' or x.startswith('tvm_ffi.') or "
++                "x == 'triton' or x.startswith('triton.') or x.endswith('._fa3') for x in added)"
++            ),
++        ],
++        check=True,
++    )
++
++
++def test_workspace_estimates_do_not_allocate_or_inspect_cuda(monkeypatch):
++    def forbidden(*args, **kwargs):
++        raise AssertionError("pure estimate attempted allocation or CUDA inspection")
++
++    monkeypatch.setattr(torch, "empty", forbidden)
++    monkeypatch.setattr(torch, "zeros", forbidden)
++    monkeypatch.setattr(torch.cuda, "current_device", forbidden)
++    monkeypatch.setattr(torch.cuda, "get_device_capability", forbidden)
++    assert NosaAttentionWorkspace.estimate_capacity_bytes(1032, 2, dtype=torch.bfloat16) > 0
++    rows = estimate_trace_rows(2048, 1032, 2)
++    assert rows >= estimate_trace_rows(2048, 1024, 2)
++    assert (
++        NosaFetchWorkspace.estimate_capacity_bytes(
++            2048, 2, 128, dtype=torch.bfloat16, max_queries=1032, trace_capacity=rows
++        )
++        > rows * 32
++    )
++
++
++@pytest.mark.parametrize("head_dim,dtype", [(128, torch.bfloat16), (4, torch.float32)])
++def test_cpu_actual_storage_equals_reservation(head_dim, dtype):
++    queries, heads, capacity = 1032, 2, 2048
++    scratch = NosaAttentionWorkspace(queries, heads, head_dim, device="cpu", dtype=dtype)
++    assert _storage_bytes(scratch) == scratch.capacity_bytes
++    assert scratch.capacity_bytes == scratch.estimate_capacity_bytes(
++        queries, heads, head_dim, dtype=dtype
++    )
++    rows = estimate_trace_rows(capacity, queries, heads)
++    fetch = NosaFetchWorkspace(
++        capacity,
++        heads,
++        head_dim,
++        device="cpu",
++        dtype=dtype,
++        max_queries=queries,
++        bounded=True,
++        trace_capacity=rows,
++    )
++    assert _storage_bytes(fetch) == fetch.capacity_bytes
++    assert fetch.capacity_bytes == fetch.estimate_capacity_bytes(
++        capacity, heads, head_dim, dtype=dtype, max_queries=queries, trace_capacity=rows
++    )
++    # CPU tensors prove accounting only; the CUDA kernel remains unavailable.
++    with pytest.raises(NotImplementedError, match="allocation-only"):
++        fetch.run(None, None, None, None, None, None, None, 0)
++
++
++@pytest.mark.parametrize("queries,heads", [(0, 2), (1, 1), (9, 2), (1024, 2), (1032, 2)])
++def test_slices_have_actual_shapes_without_allocation(monkeypatch, queries, heads):
++    workspace = NosaAttentionWorkspace(1032, 2, device="cpu", dtype=torch.bfloat16)
++    pointers = {t.untyped_storage().data_ptr() for t in workspace.tensors()}
++
++    def forbidden(*args, **kwargs):
++        raise AssertionError("slicing allocated a new tensor")
++
++    monkeypatch.setattr(torch, "empty", forbidden)
++    views = workspace.slices(queries, heads, device="cpu", dtype=torch.bfloat16)
++    batches = ((queries + 7) // 8) * heads
++    assert views["fallback"].shape == ((queries + 3) // 4, heads)
++    assert views["pages"].shape == views["members"].shape == (batches, 512)
++    assert views["counts"].shape == (batches * (2 if batches == 256 else 1),)
++    assert all(t.is_contiguous() for t in views.values())
++    assert all(t.untyped_storage().data_ptr() in pointers for t in views.values())
++    # Max q=1032 has 258 batches, but q=1024 needs 512 counts, not 258.
++    assert workspace._storage["counts"].numel() == 516
++
++
++def test_bounded_workspace_rejects_growth_without_storage_mutation():
++    workspace = NosaFetchWorkspace(
++        2048,
++        2,
++        128,
++        device="cpu",
++        dtype=torch.bfloat16,
++        max_queries=1032,
++        bounded=True,
++        trace_capacity=512,
++    )
++    before = [(t.data_ptr(), t.shape) for t in workspace.tensors()]
++    workspace.reserve(1024, trace_rows=512)
++    with pytest.raises(ValueError, match="cannot grow"):
++        workspace.reserve(1033)
++    with pytest.raises(ValueError, match="cannot grow"):
++        workspace.reserve(1024, trace_rows=513)
++    with pytest.raises(ValueError, match="reserved query/head"):
++        workspace._attention_scratch.slices(1033)
++    with pytest.raises(ValueError, match="reserved query/head"):
++        workspace._attention_scratch.slices(1, 3)
++    with pytest.raises(ValueError, match="dtype mismatch"):
++        workspace._attention_scratch.slices(1, dtype=torch.float32)
++    assert [(t.data_ptr(), t.shape) for t in workspace.tensors()] == before
++
++
++@pytest.mark.parametrize(
++    "kwargs",
++    [
++        {"max_queries": 0},
++        {"max_queries": True},
++        {"max_queries": 2049},
++        {"trace_capacity": -1},
++        {"trace_capacity": True},
++        {"bounded": True},
++    ],
++)
++def test_fetch_invalid_reservation_fails_before_allocation(monkeypatch, kwargs):
++    def forbidden(*args, **kw):
++        raise AssertionError("invalid reservation reached allocation")
++
++    monkeypatch.setattr(torch, "empty", forbidden)
++    with pytest.raises(ValueError):
++        NosaFetchWorkspace(2048, 2, 128, device="cpu", dtype=torch.bfloat16, **kwargs)
+--- /dev/null
++++ b/operators/nosa/attention/tests/test_workspace_cuda.py
+@@ -0,0 +1,95 @@
++"""GPU verification of shared FA3 storage; these checks are not experiments."""
++
++import pytest
++import torch
++
++from layers.attention import BlockSelection
++from operators.nosa.attention.device_only.api import nosa_block_sparse_attention
++from operators.nosa.attention.offload.api import NosaFetchWorkspace
++from operators.nosa.attention.workspace import NosaAttentionWorkspace
++
++
++@pytest.fixture
++def hopper(monkeypatch):
++    if not torch.cuda.is_available():
++        pytest.skip("CUDA unavailable; use scripts/run_tests.sh gpu to require CUDA")
++    if torch.cuda.get_device_capability() != (9, 0):
++        pytest.fail("Shared NOSA workspace checks require SM90/Hopper")
++    monkeypatch.setenv("CXLDSAGR_SM90_BACKEND", "native")
++    torch.manual_seed(1337)
++
++
++def _inputs(queries, heads=2):
++    q = torch.randn(queries, heads * 16, 128, device="cuda", dtype=torch.bfloat16)
++    keys = torch.randn(64 + queries, heads, 128, device="cuda", dtype=q.dtype)
++    values = torch.randn_like(keys)
++    selection = BlockSelection(
++        torch.zeros((queries, heads, 1), device="cuda", dtype=torch.int32), 64
++    )
++    return q, keys, values, selection
++
++
++def test_cuda_workspace_matches_owned_for_varying_query_and_head_shapes(hopper, monkeypatch):
++    workspace = NosaAttentionWorkspace(1032, 2, device="cuda", dtype=torch.bfloat16)
++    pointers = [t.data_ptr() for t in workspace.tensors()]
++    retained = []
++    for queries, heads in ((1032, 2), (1024, 2), (1, 1), (0, 2), (9, 2), (1024, 2)):
++        q, keys, values, selection = _inputs(queries, heads)
++        expected = nosa_block_sparse_attention(q, keys, values, selection, 64)
++        original_empty = torch.empty
++        allocations = []
++
++        def record(*args, _empty=original_empty, _allocations=allocations, **kwargs):
++            result = _empty(*args, **kwargs)
++            _allocations.append((tuple(result.shape), result.dtype))
++            return result
++
++        with monkeypatch.context() as context:
++            context.setattr(torch, "empty", record)
++            actual = nosa_block_sparse_attention(
++                q, keys, values, selection, 64, workspace=workspace
++            )
++        torch.cuda.synchronize()
++        assert allocations == [(tuple(q.shape), q.dtype)]
++        assert torch.equal(actual.view(torch.int16), expected.view(torch.int16))
++        assert [t.data_ptr() for t in workspace.tensors()] == pointers
++        retained.append((actual, expected))
++    assert all(torch.equal(actual, expected) for actual, expected in retained)
++
++
++def test_cuda_workspace_rejects_unbudgeted_dispatch_before_launch(hopper, monkeypatch):
++    workspace = NosaAttentionWorkspace(8, 2, device="cuda", dtype=torch.bfloat16)
++    q, keys, values, selection = _inputs(9)
++    with pytest.raises(ValueError, match="reserved query/head"):
++        nosa_block_sparse_attention(q, keys, values, selection, 64, workspace=workspace)
++    q, keys, values, selection = _inputs(8)
++    with pytest.raises(ValueError, match="BF16/D128/GQA16"):
++        nosa_block_sparse_attention(
++            q.half(), keys.half(), values.half(), selection, 64, workspace=workspace
++        )
++    distinct_stride = torch.empty((len(values), 2, 256), device="cuda", dtype=values.dtype)[
++        ..., :128
++    ]
++    distinct_stride.copy_(values)
++    with pytest.raises(ValueError, match="matching K/V layouts"):
++        nosa_block_sparse_attention(q, keys, distinct_stride, selection, 64, workspace=workspace)
++    monkeypatch.setenv("CXLDSAGR_SM90_BACKEND", "triton")
++    with pytest.raises(NotImplementedError, match="native FA3"):
++        nosa_block_sparse_attention(q, keys, values, selection, 64, workspace=workspace)
++
++
++def test_cuda_bounded_fetch_rejects_queries_and_trace_before_mutation(hopper):
++    workspace = NosaFetchWorkspace(
++        128, 2, 128, device="cuda", dtype=torch.bfloat16, bounded=True, max_queries=8
++    )
++    workspace.keys.fill_(73)
++    initial_bytes = workspace.capacity_bytes
++    for queries, profile, message in ((9, False, "reserved query"), (8, True, "trace")):
++        q, keys, values, selection = _inputs(queries)
++        host_keys = keys.cpu().pin_memory()
++        host_values = values.cpu().pin_memory()
++        workspace.profile_work_intervals = profile
++        with pytest.raises(ValueError, match=message):
++            workspace.run(q, selection, host_keys, host_values, keys[64:], values[64:], None, 64)
++        assert workspace.capacity_bytes == initial_bytes
++        assert torch.all(workspace.keys == 73).item()

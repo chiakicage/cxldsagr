@@ -150,6 +150,7 @@ class NosaForCausalLM(nn.Module):
         *,
         logits_to_keep=0,
         return_hidden=False,
+        compute_graphs=None,
     ):
         """Return LM logits, or normalized backbone features for GR forward work.
 
@@ -167,6 +168,8 @@ class NosaForCausalLM(nn.Module):
             raise ValueError("logits_to_keep must be a nonnegative integer")
         if return_hidden and logits_to_keep:
             raise ValueError("return_hidden returns all input features; do not set logits_to_keep")
+        if compute_graphs is not None and compute_graphs.model is not self:
+            raise ValueError("Compute graphs must belong to this model")
         start = 0
         if cache is not None:
             if (
@@ -188,7 +191,13 @@ class NosaForCausalLM(nn.Module):
             raise ValueError("Sequence exceeds config.max_position_embeddings")
         if cache is not None:
             cache.begin_step(input_ids.numel())
+        started_validation = False
         try:
+            if compute_graphs is not None:
+                if cache is None:
+                    raise ValueError("NOSA computation graphs require a transactional cache")
+                compute_graphs.validation.begin(cache)
+                started_validation = True
             positions, cos_sin_cache = self.model.rotary(
                 self.config, start, end, device=weight.device
             )
@@ -198,27 +207,41 @@ class NosaForCausalLM(nn.Module):
             self._dense_main_attention.attention = self.attention
             residual = None
             for idx, layer in enumerate(self.model.layers):
-                x, residual = layer(
-                    x,
-                    positions,
-                    cos_sin_cache,
-                    self.main_attention,
-                    cache,
-                    idx,
-                    indexer=self.indexer,
-                    residual=residual,
-                )
+                if compute_graphs is not None:
+                    x, residual = compute_graphs.forward_layer(
+                        idx, x, residual, positions, self.main_attention, cache, self.indexer
+                    )
+                else:
+                    x, residual = layer(
+                        x,
+                        positions,
+                        cos_sin_cache,
+                        self.main_attention,
+                        cache,
+                        idx,
+                        indexer=self.indexer,
+                        residual=residual,
+                    )
             if logits_to_keep:
                 x = x[-logits_to_keep:]
                 residual = residual[-logits_to_keep:]
             hidden, _ = self.model.norm(x, residual)
             output = hidden if return_hidden else self.lm_head(hidden).float()
+            if compute_graphs is not None and return_hidden:
+                # Graph outputs are reusable storage; the public model result
+                # must remain unchanged after subsequent requests replay it.
+                output = output.clone()
             if cache is not None:
+                if compute_graphs is not None:
+                    compute_graphs.validation.check(cache)
                 cache.commit_step()
         except BaseException:
             if cache is not None:
                 cache.abort_step()
             raise
+        finally:
+            if started_validation:
+                compute_graphs.validation.clear()
         return output
 
     @classmethod

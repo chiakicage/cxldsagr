@@ -1,5 +1,11 @@
 # Independent GR serving acceptance audit
 
+> Historical GR scope (2026-10-05): the `gr_serving` experiment is retired and its
+> experiment outputs have been removed. Its commands, result-retention rules and
+> rerun instructions below are historical and no longer active. See the
+> [retirement scope](experiment_organization.md#retired-gr-serving). Other
+> implementation and experiment findings retain their stated scope.
+
 The maintained entry is `experiments/gr_serving/src/audit.py`, with focused CPU
 checks in `experiments/gr_serving/tests/test_gr_serving_audit.py`. It supersedes
 the former `/tmp` draft. This document describes an acceptance procedure; no

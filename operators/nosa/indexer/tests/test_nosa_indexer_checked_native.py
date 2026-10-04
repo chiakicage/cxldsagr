@@ -12,9 +12,9 @@ from operators.nosa.indexer.compression import update_compressed_cache
 pytestmark = pytest.mark.skipif(not torch.cuda.is_available(), reason="Hopper CUDA required")
 
 
-def buffers(rows=1024, heads=2):
+def buffers(rows=1024, heads=2, prefix=32768):
     torch.manual_seed(681)
-    prefix, length = 32768, 32768 + rows
+    length = prefix + rows
     # Preserve a QKV-style gap between token rows.
     q_storage = torch.randn((rows, heads * 16 + 4, 128), device="cuda", dtype=torch.bfloat16)
     q = q_storage[:, : heads * 16].view(rows, heads, 16, 128)
@@ -188,6 +188,42 @@ def test_cuda_checked_rejects_graph_capture_before_any_write_but_async_prepare_r
     torch.cuda.synchronize()
     assert bool(finite)
     assert_bytes((ck, cc, pool, ranking), byte_snapshots((*expected[:3], expected[-1])))
+
+
+@pytest.mark.parametrize("prefix,rows", [(32768, 128), (32768, 1024), (65536, 1024)])
+@torch.inference_mode()
+def test_async_ranked_exact_selection_and_stream_order(prefix, rows):
+    args, options = buffers(rows, prefix=prefix)
+    expected = separate_reference(args, options)
+    stream = torch.cuda.Stream()
+    stream.wait_stream(torch.cuda.current_stream())
+    with torch.cuda.stream(stream):
+        select_prepared_out(*args, **options, defer_check=True)
+        # Consume on the same stream before observing the finite flag on CPU.
+        selected = args[8].clone()
+    stream.synchronize()
+    assert options["scratch"].finite.item()
+    torch.testing.assert_close(selected, expected[5], rtol=0, atol=0)
+    assert_bytes(args[3:], byte_snapshots(expected))
+
+
+@pytest.mark.parametrize("prefix,rows", [(32768, 128), (32768, 1024), (65536, 1024)])
+@pytest.mark.parametrize("field", [0, 1, 2])
+@torch.inference_mode()
+def test_async_nonfinite_guards_derived_and_uninitialized_ranking(prefix, rows, field):
+    args, options = buffers(rows, prefix=prefix)
+    # Packed zero encodes block 4095, outside the prefix selector's scratch.
+    # Failed preparation must never allow a selector to consume this ranking.
+    args[-1].zero_()
+    args[field][(-1,) * args[field].ndim] = float("nan")
+    protected = (*args[3:8], args[-1])
+    before = byte_snapshots(protected)
+    select_prepared_out(*args, **options, defer_check=True)
+    torch.cuda.synchronize()
+    assert not options["scratch"].finite.item()
+    assert_bytes(protected, before)
+    assert (args[8] == -1).all()
+    assert not args[9].any()
 
 
 @pytest.mark.parametrize(

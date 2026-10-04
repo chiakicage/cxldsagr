@@ -1,5 +1,6 @@
 import hashlib
 import json
+import shutil
 
 import pytest
 import torch
@@ -17,7 +18,7 @@ from experiments.deepseek_v32_motivation.src.report import (
     summarize,
     write_report,
 )
-from experiments.gr_serving.src.workload import token_sha256
+from GR.workload import token_sha256
 
 
 @pytest.fixture
@@ -194,6 +195,83 @@ def saved_run(tmp_path):
 
 def replace_rows(path, rows):
     path.write_text("".join(json.dumps(row) + "\n" for row in rows))
+
+
+def test_independent_check_omits_request_timings(saved_run):
+    from experiments.deepseek_v32_motivation.src.measure import CHECK_SCHEMA
+    from experiments.nosa_motivation.src.validation import without_performance
+
+    metadata = json.loads((saved_run / "metadata.json").read_text())
+    metadata.update(schema=CHECK_SCHEMA, mode="check")
+    write_json(saved_run / "metadata.json", metadata)
+    rows = [
+        without_performance(json.loads(line))
+        for line in (saved_run / "measurements.jsonl").read_text().splitlines()
+    ]
+    replace_rows(saved_run / "measurements.jsonl", rows)
+    _, rows, audit = audit_run(saved_run)
+    assert audit["all_candidate_hidden_and_logits_exact"]
+    assert all("latency_ms" not in row for row in rows)
+    with pytest.raises(ValueError, match="check runs do not publish"):
+        write_report(saved_run, saved_run / "check_report")
+
+
+def test_clean_bench_uses_external_check_without_loading_outputs(
+    saved_run, tmp_path_factory, monkeypatch
+):
+    from evaluation.validation import write_receipt
+    from experiments.deepseek_v32_motivation.src.measure import BENCH_SCHEMA, RECEIPT_KIND
+    from experiments.nosa_motivation.src.validation import base_identity
+
+    check_dir = tmp_path_factory.mktemp("deepseek_check")
+    shutil.copytree(saved_run, check_dir, dirs_exist_ok=True)
+    metadata = json.loads((saved_run / "metadata.json").read_text())
+    metadata.update(
+        schema=BENCH_SCHEMA,
+        mode="bench",
+        execution_environment={},
+        checkpoint={"identity_boundary": "CPU fixture"},
+        precision_settings={},
+    )
+    identity = {
+        "base": base_identity(metadata, saved_run),
+        "methods": {name: {"cpu_fixture_only": True} for name in SCHEMES},
+    }
+    receipt = check_dir / "receipt.json"
+    write_receipt(
+        receipt,
+        kind=RECEIPT_KIND,
+        identity=identity,
+        checks={"passed": True},
+        artifacts={"checked_rows": check_dir / "measurements.jsonl"},
+    )
+    metadata["validation_identity"] = identity
+    metadata["correctness_receipt"] = {
+        "path": str(receipt),
+        "sha256": digest(receipt),
+        "kind": RECEIPT_KIND,
+        "identity": identity,
+    }
+    write_json(saved_run / "metadata.json", metadata)
+    rows = [
+        {
+            key: value
+            for key, value in json.loads(line).items()
+            if key not in {"numerical", "output_file", "output_sha256"}
+        }
+        for line in (saved_run / "measurements.jsonl").read_text().splitlines()
+    ]
+    replace_rows(saved_run / "measurements.jsonl", rows)
+    shutil.rmtree(saved_run / "numerical")
+    monkeypatch.setattr(torch, "load", lambda *args, **kwargs: pytest.fail("bench loaded tensors"))
+    _, _, audit = audit_run(saved_run)
+    assert not audit["all_candidate_hidden_and_logits_exact"]
+    assert audit["independent_correctness_receipt"]["checks"]["passed"]
+    write_report(saved_run, saved_run / "bench_report")
+    metadata["config"]["candidate_tokens"] += 1
+    write_json(saved_run / "metadata.json", metadata)
+    with pytest.raises(ValueError, match="identity differs"):
+        audit_run(saved_run)
 
 
 def test_report_rechecks_all_outputs_and_uses_weighted_hit_ratio(saved_run):

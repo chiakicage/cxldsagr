@@ -22,9 +22,17 @@ from pathlib import Path
 
 import torch
 
-from experiments.nosa_gr_65536_1024.src.sources import source_hashes
+from experiments.nosa_baseline_performance.src.dense.sources import source_hashes
 from experiments.nosa_kernel_mfu.src.capture_inputs import sha256_file, tensor_metadata
 from experiments.nosa_kernel_mfu.src.measure import copy_to_device
+from experiments.nosa_kernel_mfu.src.phases import (
+    add_phase_arguments,
+    check_case_identity,
+    finish_validation,
+    offload_config,
+    open_validation,
+    validate_phase_arguments,
+)
 from experiments.nosa_offload_overlap.src.analyze import (
     PAGE_ENVELOPE_DEFINITION,
     STRIPE_COPY_DEFINITION,
@@ -225,7 +233,10 @@ def reference_acceptance(q, keys, values, selection, bias, prefix, outputs, *, a
 def benchmark_case(cpu, args, *, label, prefix, work_profile=None):
     from operators.nosa.attention.offload.api import NosaFetchWorkspace
 
-    _validate_case(cpu, prefix, args.queries)
+    tensor_identity = {name: tensor_metadata(cpu[name]) for name in required_order()}
+    prior = check_case_identity(args, label, tensor_identity)
+    if args.mode == "check":
+        _validate_case(cpu, prefix, args.queries)
     tensors = {name: copy_to_device(cpu[name], args.device) for name in required_order()}
     q, keys, values, bias, ids, valid = (tensors[name] for name in required_order())
     selection = BlockSelection(ids, 64, valid)
@@ -285,23 +296,44 @@ def benchmark_case(cpu, args, *, label, prefix, work_profile=None):
                     f"{mode} per-tile first-use traffic differs from CPU accounting"
                 )
 
-    outputs = {mode: call().clone() for mode, call in calls.items()}
-    torch.cuda.synchronize()
-    check_traffic()
-    for mode, output in outputs.items():
-        if not torch.isfinite(output).all():
-            raise AssertionError(f"{mode} output contains NaN/Inf")
-        torch.testing.assert_close(output, outputs["resident"], rtol=0.016, atol=0.016)
-    # Identical tiles differ only in fetch-stream ordering, so this must be exact.
-    torch.testing.assert_close(outputs["overlap"], outputs["serialized"], rtol=0, atol=0)
-    acceptance = reference_acceptance(
-        q, keys, values, selection, bias, prefix, outputs, all_rows=args.reference_all
-    )
+    if args.mode in ("check", "profile"):
+        outputs = {mode: call().clone() for mode, call in calls.items()}
+        torch.cuda.synchronize()
+        check_traffic()
+        for mode, output in outputs.items():
+            if not torch.isfinite(output).all():
+                raise AssertionError(f"{mode} output contains NaN/Inf")
+            torch.testing.assert_close(output, outputs["resident"], rtol=0.016, atol=0.016)
+        torch.testing.assert_close(outputs["overlap"], outputs["serialized"], rtol=0, atol=0)
+    if args.mode == "check":
+        acceptance = reference_acceptance(
+            q, keys, values, selection, bias, prefix, outputs, all_rows=True
+        )
+        # Exercise cold reset and reuse separately from performance samples.
+        for _ in range(3):
+            for mode, call in calls.items():
+                actual = call()
+                torch.cuda.synchronize()
+                torch.testing.assert_close(actual, outputs[mode], rtol=0, atol=0)
+            check_traffic()
+        for workspace in workspaces.values():
+            workspace.synchronize()
+        return {
+            "case": label,
+            "tensors": tensor_identity,
+            "acceptance": acceptance,
+            "serialized_overlap_exact_equal": True,
+            "prefix_transfer_bytes": expected_bytes,
+            "first_use_tile_bytes": tile_bytes,
+            "traffic_checks": "Independent check: CPU sparse union equals GPU total and per-tile counts across cold resets",
+        }
+    acceptance = prior["acceptance"]
     for _ in range(args.warmup):
         for call in calls.values():
             call()
         torch.cuda.synchronize()
-        check_traffic()
+        if args.mode == "profile":
+            check_traffic()
     samples = {mode: {"cuda_ms": [], "wall_ms": [], "submit_ms": []} for mode in MODES}
     begin, end = (torch.cuda.Event(enable_timing=True) for _ in range(2))
     begin.record()
@@ -337,7 +369,8 @@ def benchmark_case(cpu, args, *, label, prefix, work_profile=None):
                         "stripe_intervals": workspace.stripe_work_intervals(),
                     }
                 )
-        check_traffic()
+        if args.mode == "profile":
+            check_traffic()
     del output
     for workspace in workspaces.values():
         workspace.synchronize()
@@ -356,10 +389,11 @@ def benchmark_case(cpu, args, *, label, prefix, work_profile=None):
         "first_use_tile_bytes": tile_bytes,
         "dense_prefix_bytes": prefix * 2 * 128 * 2 * 2,
         "suffix_gpu_bytes": len(q) * 2 * 128 * 2 * 2,
-        "tensors": {name: tensor_metadata(cpu[name]) for name in required_order()},
+        "tensors": tensor_identity,
         "acceptance": acceptance,
-        "serialized_overlap_exact_equal": True,
-        "traffic_checks": "CPU per-head first-use union equals GPU total and per-tile counts after validation, warmup and every measured iteration",
+        "numerical_acceptance_source": "independent_check",
+        "serialized_overlap_exact_equal": prior["serialized_overlap_exact_equal"],
+        "traffic_checks": "diagnostic_profile" if args.mode == "profile" else "independent_check",
         "modes": {
             mode: {
                 key: {**distribution(values), "samples": values} for key, values in timing.items()
@@ -387,6 +421,7 @@ def benchmark_case(cpu, args, *, label, prefix, work_profile=None):
 
 def parser():
     result = argparse.ArgumentParser(description=__doc__)
+    add_phase_arguments(result)
     result.add_argument("--run-id", required=True)
     result.add_argument("--output-dir", type=Path, required=True)
     inputs = result.add_mutually_exclusive_group(required=True)
@@ -434,6 +469,11 @@ def parser():
 def main(argv=None):
     cli = parser()
     args = cli.parse_args(argv)
+    validate_phase_arguments(cli, args)
+    if args.profiled and args.mode != "profile":
+        cli.error("--profiled requires --mode profile")
+    if args.mode == "profile" and not args.profiled:
+        cli.error("Use scripts/run.sh --profile for the nsys diagnostic phase")
     if not re.fullmatch(r"[A-Za-z0-9_-]+", args.run_id):
         cli.error("run-id must contain only letters, digits, underscores and hyphens")
     if min(args.queries, args.tile_size, args.fetch_ctas, args.warmup, args.repeats) <= 0:
@@ -454,6 +494,8 @@ def main(argv=None):
         *sorted((EXPERIMENT / "scripts").glob("*.sh")),
         ROOT / "experiments/nosa_kernel_mfu/src/capture_inputs.py",
         ROOT / "experiments/nosa_kernel_mfu/src/measure.py",
+        ROOT / "experiments/nosa_kernel_mfu/src/phases.py",
+        ROOT / "evaluation/validation.py",
         ROOT / "pyproject.toml",
         ROOT / "uv.lock",
     )
@@ -510,11 +552,18 @@ def main(argv=None):
             "submit_ms": "Host clock through operator return, without completion wait",
             "bandwidth": "Actual mapped-host hardware transfer, no enforced 50 GB/s bandwidth limit",
             "capacity": "Workspace capacity is full logical NHD length; counts unique sparse K+V payload, not a bounded HBM replacement cache",
-            "byte_accounting": "GPU counters and CPU sparse union validate logical unique K+V payload bytes; they do not establish physical PCIe/CXL host-read bytes or exclude hardware rereads",
+            "byte_accounting": "Independent check compares GPU counters with the CPU sparse union; profile retains diagnostics, bench reuses the receipt without reading counters between samples. Counts cover logical unique K+V payload bytes, not physical PCIe/CXL host-read bytes or hardware rereads",
             "profiled": args.profiled,
             "work_instrumentation": "Profile runs only: device globaltimer records nonempty stripe copy windows, their exact per-page min/max envelopes and consumer softmax updates. Stripe and page unions are independently intersected with softmax; page envelopes alone cannot establish an overlap threshold. Stripe identity and bytes must partition every selected historical page exactly. Queue compaction is timed preparation work and performs no host KV fetch. Softmax coverage excludes QK/PV MMA. These windows do not establish wire occupancy or physical host-read traffic",
         },
     }
+    identity = open_validation(
+        args,
+        metadata,
+        kind="nosa_offload_attention",
+        config=offload_config(args),
+        cache="cold_history_no_tags_full_logical_staging_gpu_suffix",
+    )
     work_profile = (
         new_work_profile(args.run_id, metadata["native_build"]) if args.profiled else None
     )
@@ -567,10 +616,19 @@ def main(argv=None):
             )
     if sources != source_hashes(*(ROOT / name for name in sources)):
         raise RuntimeError("Source changed during measurement; rerun from a stable tree")
+    finish_validation(
+        args,
+        metadata,
+        kind="nosa_offload_attention",
+        identity=identity,
+        cases={result["case"]: result for result in results},
+    )
     write_json(args.output_dir / "metadata.json", metadata)
     write_json(args.output_dir / "results.json", {"run_id": args.run_id, "results": results})
     if work_profile is not None:
         write_json(args.output_dir / "work_intervals.json", work_profile)
+    if args.mode == "check":
+        return
     with (args.output_dir / "summary.csv").open("x") as destination:
         writer = csv.DictWriter(
             destination,

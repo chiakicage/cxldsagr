@@ -12,7 +12,7 @@ SwiGLU 用 `gate_up_proj` 一次 GEMM 生成 `[gate | up]`，直接交给融合�
 `down_proj` 执行输出投影。合并权重是实际参数，不在 forward 拼接 activation 或维护权重副本。
 原 checkpoint 的 gate/up 权重由模型加载器合并；共享层仅接收显式维度与 bias 配置。
 融合减少中间低精度舍入，与逐算子路径不保证逐位一致；dense 性能测量入口见
-[64K+1K 实验](../experiments/nosa_gr_65536_1024/README.md)，已于 2026-09-28 在 H200 上补测。
+[64K+1K baseline 实验](../experiments/nosa_baseline_performance/README.md)，具体 run ID 与测量边界见报告。
 
 NOSA 的 LongRoPE 由模型复用 FP32 cos/sin cache，并通过 FlashInfer
 `apply_rope_with_cos_sin_cache_inplace` 在一次调用中旋转 Q/K；位置编码及其缓存属于

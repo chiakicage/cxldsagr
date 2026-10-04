@@ -141,6 +141,8 @@ __device__ __forceinline__ void write_result(const Params& p, Shared& smem, Acc&
 
 template <typename T, typename O, bool Pool, bool Selection, typename Map>
 __global__ __launch_bounds__(kThreads + 128, 1) void fused_scores_kernel(__grid_constant__ const Params p, __grid_constant__ const Map map) {
+  if constexpr(Selection) if(reject_nonfinite_selection(p,kQueryRows)) return;
+  if constexpr(!Selection) if(p.finite && !*p.finite) return;
   using Tr = Traits<T>;
   extern __shared__ __align__(128) unsigned char storage[];
   auto& smem = *reinterpret_cast<typename Tr::template Shared<kStages, Selection>*>(storage);

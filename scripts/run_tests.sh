@@ -25,15 +25,16 @@ if [[ "$mode" == cpu || "$mode" == all ]]; then
     models/nosa/tests operators/nosa operators/deepseek_v32 operators/common \
     cache/tests executor/tests serving/tests GR/tests \
     models/deepseek_v32/tests \
-    tests/integration experiments/nosa_gr_65536_1024/tests \
+    tests/integration evaluation/tests experiments/nosa_baseline_performance/tests \
     experiments/nosa_indexer_pattern_65536_1024/tests \
-    experiments/indexer_block_sparse_profile/tests \
     experiments/nosa_kernel_mfu/tests \
     experiments/nosa_offload_overlap/tests \
+    experiments/nosa_motivation/tests \
+    experiments/deepseek_v32_motivation/tests \
+    experiments/deepseek_v32_echo_official/tests \
     experiments/deepseek_v32_echo_prefill/tests \
     experiments/deepseek_v32_echo_cache/tests \
-    experiments/gr_serving/tests \
-    -q -rs -p no:cacheprovider
+    --import-mode=importlib -q -rs -p no:cacheprovider
 fi
 if [[ "$mode" == gpu || "$mode" == all ]]; then
   .venv/bin/python - <<'PY'

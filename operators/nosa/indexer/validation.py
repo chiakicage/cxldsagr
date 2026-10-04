@@ -74,7 +74,7 @@ def _finite_reduce(PARTIAL, OUT, COUNT, B: tl.constexpr):
     tl.store(OUT, tl.min(values, 0))
 
 
-def all_finite(q, keys, cis):
+def all_finite(q, keys, cis, *, out=None):
     """Return a CUDA scalar bool after scanning Q, resident K, and resident CIS.
 
     This leaves host synchronization to the caller. Two kernels avoid
@@ -95,7 +95,14 @@ def all_finite(q, keys, cis):
     counts = [min(1024, triton.cdiv(t.numel(), block)) for t in (q, keys, cis)]
     count = sum(counts)
     partial = torch.empty((count,), dtype=torch.uint8, device=q.device)
-    result = torch.empty((), dtype=torch.bool, device=q.device)
+    if out is not None and (
+        out.shape != ()
+        or out.dtype != torch.bool
+        or out.device != q.device
+        or any(torch._C._overlaps(out, value) for value in (q, keys, cis))
+    ):
+        raise ValueError("Finite output must be a disjoint scalar bool on the input CUDA device")
+    result = torch.empty((), dtype=torch.bool, device=q.device) if out is None else out
     with torch.cuda.device(q.device):
         _finite_partials[(count,)](
             q,

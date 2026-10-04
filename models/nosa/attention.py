@@ -9,10 +9,11 @@ class NosaSparseAttention:
     access delegates fused sparse fetching and attention to the SM90 operator.
     """
 
-    def __init__(self, *, backend="auto"):
+    def __init__(self, *, backend="auto", workspace=None):
         if backend not in ("auto", "reference", "triton"):
             raise ValueError("backend must be auto, reference or triton")
         self.backend = backend
+        self.workspace = workspace
 
     def __call__(self, q, selection, cache_access, context):
         from operators.nosa.attention.device_only.api import nosa_block_sparse_attention
@@ -48,7 +49,8 @@ class NosaSparseAttention:
                 )
             if self.backend == "reference":
                 raise ValueError("CUDA offloaded NOSA attention requires the native backend")
-            return cache_access.attention_workspace.run(
+            workspace = cache_access.attention_workspace
+            output = workspace.run(
                 q,
                 selection,
                 records["host_keys"],
@@ -58,6 +60,9 @@ class NosaSparseAttention:
                 records["cis_scores"],
                 context.query_start,
             )
+            if cache_access._transfer_metrics is not None:
+                cache_access._transfer_metrics.add_sparse_fetch(workspace.last_transfer_bytes)
+            return output
         layer_view = getattr(cache_access, "layer_view", None)
         if not callable(layer_view):
             raise NotImplementedError("NOSA sparse attention requires resident cache layer views")
@@ -76,6 +81,18 @@ class NosaSparseAttention:
             if backend == "triton"
             else reference_nosa_block_sparse_attention
         )
+        options = {}
+        resources = getattr(cache_access, "_execution_resources", None)
+        if q.is_cuda and resources is not None:
+            resources.check_execution(cache_access, len(q))
+            if self.workspace is not resources.attention_workspace or self.workspace is None:
+                raise RuntimeError(
+                    "Borrowed resident cache requires its reserved attention workspace"
+                )
+        if q.is_cuda and self.workspace is not None:
+            if backend == "reference":
+                raise NotImplementedError("Reserved CUDA workspace requires native NOSA attention")
+            options["workspace"] = self.workspace
         return attention(
             q,
             records["keys"],
@@ -83,4 +100,5 @@ class NosaSparseAttention:
             selection,
             query_start=context.query_start,
             cis_bias=cis,
+            **options,
         )

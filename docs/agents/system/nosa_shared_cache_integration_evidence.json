@@ -1,0 +1,121 @@
+{
+  "schema": "shared-serving-correctness-acceptance-v1",
+  "status": "accepted",
+  "generated_utc": "2026-10-03T13:30:39.238569+00:00",
+  "user_scope": "Correctness only; performance tests explicitly canceled before any formal run.",
+  "freeze_id": "7c12bfb334dee401bfdb66d904787962e49ef59e70811a3701249b26db06ed21",
+  "project_sha256": "d31697e4ebd55e3dff8c3b076fe0d95d19992e517be5013a43bb04d28bb6cd3e",
+  "results": {
+    "cpu": {
+      "passed": 2672,
+      "skipped": 836,
+      "subtests_passed": 58
+    },
+    "gpu": {
+      "passed": 1639,
+      "skipped": 6,
+      "opt_ins_run_separately": true
+    },
+    "nosa_allocation": {
+      "cases": 8,
+      "phases": 48,
+      "bitwise_candidate_comparisons": 32
+    },
+    "deepseek_allocation": {
+      "cases": 10,
+      "requests": 320,
+      "sampled_phases": 150,
+      "independently_reconstructed_phases": 150
+    },
+    "delivered_execution_files_unchanged": 352
+  },
+  "files": {
+    "cpu_command": {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/freeze03-evidence/validation/cpu.command.json",
+      "bytes": 369,
+      "sha256": "a3d162cf7396e101954c0560036a9ffa31adc88c845008e49b2341cac8aef806"
+    },
+    "cpu_result": {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/freeze03-evidence/validation/cpu.result.json",
+      "bytes": 303,
+      "sha256": "6a641c55a9da3ea386d751a4c60fbe08cecdee4ede66d6955a7783d4f3c39a28"
+    },
+    "cpu_stdout": {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/freeze03-evidence/validation/cpu.stdout.log",
+      "bytes": 19627,
+      "sha256": "cead2ccdd0858d55b589c5b61ea1ccdb50e070ebf3107c4f12eebdf9e0927360"
+    },
+    "gpu_result": {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/freeze03-evidence/validation/nosa-global-gpu-repeat/result.json",
+      "bytes": 2475,
+      "sha256": "b2cd18d8f7fb17739a4d60b5856c9df652c9257a03ce3355b0b3b0a647a3169f"
+    },
+    "gpu_ledger": {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/freeze03-evidence/validation/nosa-global-gpu-repeat/exit_ledger.json",
+      "bytes": 778,
+      "sha256": "e9c233119ba5a5ce24100db74413465b9873bea488a4de7e8b178632f9da3a73"
+    },
+    "gpu_driver_snapshot": {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/freeze03-evidence/validation/nosa-global-gpu-repeat/driver.py",
+      "bytes": 2340,
+      "sha256": "b5c84811ec097c1907358027c739a084ed528e3d28f82321af420c746c7457d8"
+    },
+    "gpu_stdout": {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/freeze03-evidence/validation/nosa-global-gpu-repeat/job.stdout.log",
+      "bytes": 3862,
+      "sha256": "8ea2208b4018c93dff8fec843cd80f3349c33d9d57db85ded84d896ccdb1cf57"
+    },
+    "nosa_allocation_review": {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/freeze03-evidence/validation/nosa-allocation-review.json",
+      "bytes": 100607,
+      "sha256": "886b4d0c57fc27787db4977bed21cc810b2e0046545c2f946b1fdf5d3819801d"
+    },
+    "nosa_evidence_index": {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/freeze03-evidence/validation/nosa-engineering-evidence-index.json",
+      "bytes": 10891,
+      "sha256": "041b66a48a73863e4f424f76aa6fdb1456200bbdc9015698fcdfb787985bd70c"
+    },
+    "nosa_checkpoint_128": {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/freeze03-evidence/validation/nosa-checkpoint-128/result.json",
+      "bytes": 1203,
+      "sha256": "7233f56d0bad58acaac74f526bff6468129035edcb001a171e32469d7bac5c86"
+    },
+    "deepseek_driver": {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/deepseek-freeze03-validation/exit_ledger.json",
+      "bytes": 7475,
+      "sha256": "14de83aac189d5df8cef1b206ef14304b945562ca128ce099784cc4ecfe37943"
+    },
+    "deepseek_checkpoint_log": {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/deepseek-freeze03-validation/log/checkpoints.stdout.log",
+      "bytes": 6403,
+      "sha256": "88620d727a1736fd4b2bf85d38372f4ec776568aebacee76ec0063d99cbbdf8f"
+    },
+    "deepseek_memory_summary": {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/freeze03-evidence/memory-publication-tools/memory_acceptance_summary.json",
+      "bytes": 891142,
+      "sha256": "eb4fa4ce25fd1c795d5bd3fa6dd7c9d208fc9b7464454bff043e65235535a123"
+    },
+    "delivery_consistency": {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/freeze03-evidence/validation/main-freeze03-consistency.json",
+      "bytes": 410035,
+      "sha256": "4b083624c79ef5b14ca0e4718d33bd749374aedff0a6f819a675ab17db92317c"
+    },
+    "delivery_recheck": {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/freeze03-evidence/validation/delivery-runtime-recheck.json",
+      "bytes": 44119,
+      "sha256": "0c4fdcf1a8a96a5b3d5ed0727fb82f29020bbef40344d9f5349e317ae660c57d"
+    },
+    "echo_reference_supplement": {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/freeze03-evidence/echo-test-dependency/supplement.json",
+      "bytes": 1141857,
+      "sha256": "72eba4b08276d3fea3360263a7eb97e36e94e1fe8522ad4eba6700bcf43f0e80"
+    }
+  },
+  "boundaries": [
+    "All numerical comparisons are executed checks, not a proof for untested hardware or geometries.",
+    "DeepSeek allocation capture compares every candidate hidden/logit, but nonresident outputs were not preserved for independent reopening.",
+    "Allocation traces cover actual sampled phases; cache and ordinary/process memory are separate.",
+    "No new formal latency, chunk timing screen, performance profile, default choice or performance publication.",
+    "Original performance reports and the existing memory summary used by them were not replaced by this work."
+  ]
+}

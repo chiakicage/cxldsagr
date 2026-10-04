@@ -1,5 +1,11 @@
 # 从行为数据采样 GR 复访
 
+> Historical GR scope (2026-10-05): the `gr_serving` experiment is retired and its
+> experiment outputs have been removed. Its commands, result-retention rules and
+> rerun instructions below are historical and no longer active. See the
+> [retirement scope](experiment_organization.md#retired-gr-serving). Other
+> implementation and experiment findings retain their stated scope.
+
 2026-10-02；对应研究条目 1.3、1.4、2.2、4.3。用户询问复访能否从已有数据集采样。
 本次核对数据来源和构造协议，未运行新 GPU 实验，未实现新的生产调度器。
 

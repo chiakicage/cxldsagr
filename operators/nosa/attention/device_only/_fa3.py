@@ -89,8 +89,10 @@ def _module():
     )
 
 
-def launch_nosa_fa3_attention(q, keys, values, selection, query_start, cis_bias):
+def launch_nosa_fa3_attention(q, keys, values, selection, query_start, cis_bias, *, workspace=None):
     """Run the complete operator, including metadata and native numerical repair."""
+    if workspace is not None:
+        return _launch_with_workspace(q, keys, values, selection, query_start, cis_bias, workspace)
     output = torch.empty(q.shape, dtype=q.dtype, device=q.device)
     if not len(q):
         return output
@@ -139,4 +141,44 @@ def launch_nosa_fa3_attention(q, keys, values, selection, query_start, cis_bias)
             counts,
             query_start,
         )
+    return output
+
+
+def _launch_with_workspace(q, keys, values, selection, query_start, cis_bias, workspace):
+    """Use reserved storage without changing the default allocation path."""
+    scratch = workspace.validate_attention(q, keys, values)
+    return _launch_validated_workspace(
+        q, keys, values, selection, query_start, cis_bias, workspace, scratch
+    )
+
+
+def _launch_validated_workspace(
+    q, keys, values, selection, query_start, cis_bias, workspace, scratch
+):
+    """Consume the views returned by the same invocation's workspace guard."""
+    output = torch.empty(q.shape, dtype=q.dtype, device=q.device)
+    if not len(q):
+        return output
+    mask = selection.valid_mask if selection.valid_mask is not None else workspace.empty_mask
+    bias = cis_bias if cis_bias is not None else workspace.empty_mask
+    module = _module()
+    with torch.cuda.device(q.device):
+        current = torch.cuda.current_stream(q.device.index)
+        with tvm_ffi.use_raw_stream(tvm_ffi.device("cuda", q.device.index), current.cuda_stream):
+            for tensor in workspace.tensors():
+                tensor.record_stream(current)
+            module.fa3_forward(
+                q,
+                keys,
+                values,
+                selection.block_ids,
+                mask,
+                bias,
+                output,
+                scratch["fallback"],
+                scratch["pages"],
+                scratch["members"],
+                scratch["counts"],
+                query_start,
+            )
     return output

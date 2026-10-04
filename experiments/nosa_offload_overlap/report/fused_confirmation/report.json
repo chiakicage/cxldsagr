@@ -2,11 +2,11 @@
   "schema_version": 3,
   "sources": {
     "measurement": {
-      "run_id": "nosa_fused_stripe8_head1_confirm40_20260930_01",
-      "recorded_at_utc": "2026-09-30T14:37:05.359642+00:00",
+      "run_id": "nosa_cached_fetch_confirm40_20261004_01",
+      "recorded_at_utc": "2026-10-04T08:54:51.828604+00:00",
       "args": {
-        "run_id": "nosa_fused_stripe8_head1_confirm40_20260930_01",
-        "output_dir": "/tmp/nosa-offload-overlap-nosa_fused_stripe8_head1_confirm40_20260930_01.5wTV8E/data",
+        "run_id": "nosa_cached_fetch_confirm40_20261004_01",
+        "output_dir": "/mnt/ssd-wlcb/chenkaiqi/.cxldsagr-tmp/nosa_dependent_rerun_20261004_01/staging/nosa-offload-overlap-nosa_cached_fetch_confirm40_20261004_01.aIxkm9/data",
         "input_dir": "experiments/nosa_kernel_mfu/output/data/kda_inputs_baseline_20260928_1345",
         "synthetic": false,
         "layers": [
@@ -26,16 +26,16 @@
         "profiled": false
       },
       "artifact_sha256": {
-        "metadata.json": "8b26f990f949044ac08b44e0d454af6875ae9ef490a392d57353a0cb56e43b40",
-        "results.json": "bda37881fd1d472fe0520cd1c4e95a210b46682971e5298cae4a601d5a3888e3"
+        "metadata.json": "4aa3bb8cf1ceb48273138b4fffa6b729664eaa9bd282cceead946833e1694144",
+        "results.json": "ee869b14c2b651dd74a777a8037ffe2c081cdbbc9e5bab173604497603427497"
       }
     },
     "profile": {
-      "run_id": "nosa_fused_stripe8_head1_nsys_20260930_01",
-      "recorded_at_utc": "2026-09-30T14:38:14.628090+00:00",
+      "run_id": "nosa_cached_fetch_profile_20261004_01",
+      "recorded_at_utc": "2026-10-04T08:55:43.214731+00:00",
       "args": {
-        "run_id": "nosa_fused_stripe8_head1_nsys_20260930_01",
-        "output_dir": "/tmp/nosa-offload-overlap-nosa_fused_stripe8_head1_nsys_20260930_01.Plx3f9/data",
+        "run_id": "nosa_cached_fetch_profile_20261004_01",
+        "output_dir": "/mnt/ssd-wlcb/chenkaiqi/.cxldsagr-tmp/nosa_dependent_rerun_20261004_01/staging/nosa-offload-overlap-nosa_cached_fetch_profile_20261004_01.SajGjd/data",
         "input_dir": "experiments/nosa_kernel_mfu/output/data/kda_inputs_baseline_20260928_1345",
         "synthetic": false,
         "layers": [
@@ -55,17 +55,17 @@
         "profiled": true
       },
       "artifact_sha256": {
-        "metadata.json": "d5174042bdfa062f6c34473d9fe8c7a79f00a67b4afa19ae74d037a4be388319",
-        "results.json": "87722c9c8d22b35510d3392104b622275fd78a1e6c6e96e3e50e636414ea82ad",
-        "overlap.json": "355e004ba98a1dfcbea7e819e468c17dc79cba172809691845816e1b9dea255d",
-        "timeline.sqlite": "2e7351c0dc0a4ba4276ca67637ed9ea519144b9f894681f8294d1ac206fcd4ac",
-        "work_intervals.json": "78b67bf237d9cca351f3c5f271bf0628cf07881cebd808a22852d3ed6bf1925d"
+        "metadata.json": "10f2b70d3b4f51fbb798154706a0877e1f56767f29c496029804cf910efabdee",
+        "results.json": "26098bd1b7ff296f1652d1dc80579c80d72c962ebab0fc50d8846099a7229efb",
+        "overlap.json": "1c9d6f87a108cdf4403a1a0fbea5852b631aebc61995a0a42360e455016de169",
+        "timeline.sqlite": "f7c3fc9ccc292439b80db089d9904df5a6cd25d34f09fcfd34fb13a71bc7004c",
+        "work_intervals.json": "af6ef8584db7c85c572cc98edd14862e41ce35bd483c9d7eb93d32b56a2de118"
       }
     }
   },
   "gpu": {
-    "name": "NVIDIA H20Z",
-    "uuid": "a2e4882b-3248-6018-14ab-90e45b5a5b04",
+    "name": "NVIDIA H200",
+    "uuid": "a5cd5bab-33a4-a7e2-4a3c-78c2b08a8872",
     "sm_count": 132,
     "capability": [
       9,
@@ -84,7 +84,7 @@
     "tvm_ffi": "0.1.13.post3",
     "compiler": {
       "path": "/usr/local/cuda-13.2/bin/nvcc",
-      "version": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2026 NVIDIA Corporation\nBuilt on Fri_May_08_10:53:34_AM_PDT_2026\nCuda compilation tools, release 13.2, V13.2.86\nBuild cuda_13.2.r13.2/compiler.37953736_0"
+      "version": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2026 NVIDIA Corporation\nBuilt on Thu_Mar_19_11:12:51_PM_PDT_2026\nCuda compilation tools, release 13.2, V13.2.78\nBuild cuda_13.2.r13.2/compiler.37668154_0"
     },
     "cutlass": {
       "commit": "f3fde58372d33e9a5650ba7b80fc48b3b49d40c8",
@@ -100,34 +100,27 @@
     ],
     "selected_backend": "native",
     "source_sha256": {
-      "operators/sm90/_native.py": "e7fc70b219647303b3295c38f536e1014ab52f4b0a0dcb7f8108b8c0ca2a8f26",
-      "operators/sm90/csrc/echo_helpers.cuh": "08c8f8db1ce344f2532c0913f18f9326769e4f2715bca48eed6bae1b1883ab21",
-      "operators/sm90/csrc/echo_indexer.cu": "4da70fd21fada2f33cb5e1a3b68e68a8ac96b566153dfc53cf87e4e83f2a075e",
-      "operators/sm90/csrc/echo_logits.cuh": "77066168ebc948482a6d5bb869eb24cf57460d0b33f16c8ea72e546fa782d486",
-      "operators/sm90/csrc/kv_transfer.cu": "b776b40a1ceb83be864cc210ef26e73cf4bacec45c3f4f2b3f0e8af355a39742",
-      "operators/sm90/csrc/nosa_attention.cu": "01c0699b507baebe005b2df44e2f78ec149083a6239b96e7d24990edf2bf09f4",
-      "operators/sm90/csrc/nosa_attention_fa3.cu": "f98b5ae4ea4bcc5c3dc5a597958627d6c186f22d1db7108162a2a328401c2f80",
-      "operators/sm90/csrc/nosa_attention_grouped.cuh": "30f35b34a80c2a26c249b92e055c3158a5a2e40e5c818ff9dadc3074dc525927",
-      "operators/sm90/csrc/nosa_indexer.cu": "91e4639259cd02839fa4d2606b118ff40343ac75f0419274ec4f3a868e42ed34",
-      "operators/sm90/csrc/nosa_indexer_checked.cu": "49a303a3f89886ebd373611fde3faa7b6ee0adae3c8f1ebc78855734b2b1b16d",
-      "operators/sm90/csrc/nosa_offload.cu": "68db6dd55bb3124e70b25e0e151254d4117cd56f153a4f390d6e9fa3b0e0d681",
-      "operators/sm90/csrc/nosa_offload_compression.cu": "13638f0812d0211be1ae28a9e43e2cd796ad352afd630b8992f1f8019873e524",
-      "operators/sm90/csrc/nosa_offload_fused.cu": "6b71f1f610e1b3d1f14fdca457d1490b10e57b2ad290ecbc9b4caa371042dd17",
-      "operators/sm90/csrc/nosa_prepare.cu": "340f7455f11f602ac4e0380ff7bd6963e2cdaa32275bbd470ae763ea0a0a1715",
-      "operators/sm90/csrc/nosa_prepare_ranked.cu": "1c40cdd8edcf6da94cc0ec59e4477035c8db91441b1c3acb76bfcdd163388d09",
-      "operators/sm90/csrc/nosa_scores.cu": "d5c5b543e08a6e164701b9e5070458079c8c843f35a99de96b4c66427dfb01af",
-      "operators/sm90/csrc/nosa_scores_fused.cuh": "56e6cbe675525b419db3699ae57dcf984ab64bf9e12f1bbe3b49ffd21bcd197a",
-      "operators/sm90/csrc/nosa_scores_pruned.cuh": "99e0e6ce9f5685e639016e24732cce249a3b2c043ff0629b021866ad0f051409",
-      "operators/sm90/csrc/nosa_selection.cu": "f2ce6b685336002d5e137ed1af05d1b2bfdda37f89b57323d053a8daa953e9e9",
-      "operators/sm90/csrc/nosa_selection_cutoff.cuh": "7eaabb06b7d39d5ea0779ea209b80a3e7d54e3b137748a35f4cb47836a7f00fe",
-      "operators/sm90/csrc/nosa_selection_prefix.cuh": "e5b447d6427271df99751c93e6d8c14e3cedc7fee9d76c130d8967410a3b6b35"
+      "operators/nosa/_native.py": "4ed3277e55f21abac43259da7f678af74825a3ef37bbd830558bbd127f3e9b92",
+      "operators/nosa/attention/device_only/csrc/nosa_attention.cu": "01c0699b507baebe005b2df44e2f78ec149083a6239b96e7d24990edf2bf09f4",
+      "operators/nosa/attention/device_only/csrc/nosa_attention_grouped.cuh": "30f35b34a80c2a26c249b92e055c3158a5a2e40e5c818ff9dadc3074dc525927",
+      "operators/nosa/indexer/csrc/nosa_guarded_buffers.cuh": "7dadbef4c820e04e695505193ab698fc38230ac079ffc0305365a5d4d50e83fd",
+      "operators/nosa/indexer/csrc/nosa_indexer.cu": "2af14714c82f10fc5bb2d6606333dbd3f6c335d982fbcf728e176307a0b9d882",
+      "operators/nosa/indexer/csrc/nosa_indexer_checked.cu": "6f05e2861f724edae925581aa8971023fbf75df631fa2126fa53d5d78df8d951",
+      "operators/nosa/indexer/csrc/nosa_prepare.cu": "340f7455f11f602ac4e0380ff7bd6963e2cdaa32275bbd470ae763ea0a0a1715",
+      "operators/nosa/indexer/csrc/nosa_prepare_ranked.cu": "1c40cdd8edcf6da94cc0ec59e4477035c8db91441b1c3acb76bfcdd163388d09",
+      "operators/nosa/indexer/csrc/nosa_scores.cu": "6b7dfa2e03f72b0e5ee43aed0cff3ff73ddd3ae85f420a57db79b0c2cdfc4bb6",
+      "operators/nosa/indexer/csrc/nosa_scores_fused.cuh": "5fb278d701bef0a4cb40be56e89316e500b4c707cc4c4f36567f0986a6e97891",
+      "operators/nosa/indexer/csrc/nosa_scores_pruned.cuh": "1eb136d93f04de8b252d8ddc9237f5db231faada54afa0049f223d1fec2838b8",
+      "operators/nosa/indexer/csrc/nosa_selection.cu": "cc44ef81004e86e8e4da5087433195286e9924b77376e51959c8b797eb374c20",
+      "operators/nosa/indexer/csrc/nosa_selection_cutoff.cuh": "7eaabb06b7d39d5ea0779ea209b80a3e7d54e3b137748a35f4cb47836a7f00fe",
+      "operators/nosa/indexer/csrc/nosa_selection_prefix.cuh": "e5b447d6427271df99751c93e6d8c14e3cedc7fee9d76c130d8967410a3b6b35"
     },
     "attention_fa3": {
       "toolchain": {
         "tvm_ffi": "0.1.13.post3",
         "compiler": {
           "path": "/usr/local/cuda-13.2/bin/nvcc",
-          "version": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2026 NVIDIA Corporation\nBuilt on Fri_May_08_10:53:34_AM_PDT_2026\nCuda compilation tools, release 13.2, V13.2.86\nBuild cuda_13.2.r13.2/compiler.37953736_0"
+          "version": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2026 NVIDIA Corporation\nBuilt on Thu_Mar_19_11:12:51_PM_PDT_2026\nCuda compilation tools, release 13.2, V13.2.78\nBuild cuda_13.2.r13.2/compiler.37668154_0"
         },
         "cutlass": {
           "commit": "f3fde58372d33e9a5650ba7b80fc48b3b49d40c8",
@@ -160,7 +153,7 @@
         "-DFA3_STAGES=2"
       ],
       "source_sha256": {
-        "_nosa_attention_fa3.py": "61e2379aedaad7dddbb7237b22d014d1d37f9f251f3010c51dbe5b46b2ccde10",
+        "_fa3.py": "64f699cf8d11d0551f70808fb733577235fda12f61b9efa8bbc4395a62158653",
         "nosa_attention_fa3.cu": "f98b5ae4ea4bcc5c3dc5a597958627d6c186f22d1db7108162a2a328401c2f80",
         "nosa_attention.cu": "01c0699b507baebe005b2df44e2f78ec149083a6239b96e7d24990edf2bf09f4",
         "nosa_attention_grouped.cuh": "30f35b34a80c2a26c249b92e055c3158a5a2e40e5c818ff9dadc3074dc525927"
@@ -182,7 +175,7 @@
         "tvm_ffi": "0.1.13.post3",
         "compiler": {
           "path": "/usr/local/cuda-13.2/bin/nvcc",
-          "version": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2026 NVIDIA Corporation\nBuilt on Fri_May_08_10:53:34_AM_PDT_2026\nCuda compilation tools, release 13.2, V13.2.86\nBuild cuda_13.2.r13.2/compiler.37953736_0"
+          "version": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2026 NVIDIA Corporation\nBuilt on Thu_Mar_19_11:12:51_PM_PDT_2026\nCuda compilation tools, release 13.2, V13.2.78\nBuild cuda_13.2.r13.2/compiler.37668154_0"
         },
         "cutlass": {
           "commit": "f3fde58372d33e9a5650ba7b80fc48b3b49d40c8",
@@ -215,7 +208,7 @@
         "-DFA3_STAGES=2"
       ],
       "source_sha256": {
-        "_nosa_attention_fa3.py": "61e2379aedaad7dddbb7237b22d014d1d37f9f251f3010c51dbe5b46b2ccde10",
+        "_fa3.py": "64f699cf8d11d0551f70808fb733577235fda12f61b9efa8bbc4395a62158653",
         "nosa_attention_fa3.cu": "f98b5ae4ea4bcc5c3dc5a597958627d6c186f22d1db7108162a2a328401c2f80",
         "nosa_attention.cu": "01c0699b507baebe005b2df44e2f78ec149083a6239b96e7d24990edf2bf09f4",
         "nosa_attention_grouped.cuh": "30f35b34a80c2a26c249b92e055c3158a5a2e40e5c818ff9dadc3074dc525927"
@@ -231,8 +224,8 @@
       "native_pv_accumulation": "bf16_power_of_two_scale_finite_output_guard",
       "kv_tile_tokens": 128,
       "stages": 2,
-      "fused_source_sha256": "6b71f1f610e1b3d1f14fdca457d1490b10e57b2ad290ecbc9b4caa371042dd17",
-      "fused_wrapper_sha256": "48ee6684da1a5c749c69e2c3fc7ec17d9d411d31af73ee827579d01712012063",
+      "fused_source_sha256": "a68fe19bfc5fd6d626ff310c3526624b2a1a4bc88f85678afd705b844410bb28",
+      "fused_wrapper_sha256": "5487ba8ad2b99dc1fb541cb330ffce2ea569edd59e17cb81c5bf39c7c1cd5dc9",
       "fused_prefill_header_sha256": "0b20b38b91b295202258203cc484d588fc6251b6eacea9da4c0d5f57ea104ad9",
       "host_load_cache_policy": "ld.global.cv.v4.u32",
       "main_schedule": "cooperative_fa3_spare_producer_warps_striped_fetch_queue",
@@ -282,86 +275,104 @@
     "GR/analyze_heat.py": "4dbed207151eda02a4fae1d475f4b88e5ae7dd06df8a7f6f48d07021d2636bc7",
     "GR/dataset.py": "0ec95750722fefe387c0c62a2064e101622d060ac69d4c933044b1a950c24ce4",
     "GR/heat.py": "c6ebe2ebc73db10c4f2706701d3e7a1c7aee2dc40162e00f6b5ce4550a587f4f",
-    "GR/input_generator.py": "1e6024a227a53c6152caaa6988be256d37077d75c0cae0eeee460d18575fa309",
-    "GR/scheduling.py": "e7e24cc2fcaf90796494e0c139d8c1e300a5e4ea42e294d6293939746f1bb8c6",
+    "GR/input_generator.py": "0b3574c190d11ddb64c6fe05ebb2fde6f618cc3f800b728846cfd4a0141bd3fa",
+    "GR/reconstruct_histogram.py": "b18bbeb6f3e9ed1c6e354c43ad0e8baa7127abf7e2aea52333fe87c529ef0746",
+    "GR/sample_distribution.py": "834de2b70f13da6b41d9e91ff980592da9f551bb23191923f3ae94c9b8e8d832",
+    "GR/scheduling.py": "1573fbab8ae1cab6cb287f3a6606124aa845217864e5d68ea55f8f7d6f7369cb",
     "cache/contracts.py": "58575f1c9aee3f2843b7f2bce07f1589ea8cb9a712b050991199a95639f97f73",
+    "cache/host_allocation.py": "6c6c65e166fc6a2289547482a9bc51c1da136190b9105423edd23f9732567150",
     "cache/host_backing.py": "33ca59c06810f4fa83f1009554a8d0709838db1223f6c393162f53739fb29135",
     "cache/indexer_cache.py": "da80484c5d2ad016b3119f80576e72d2956f8d9d1a5cc2804a0e6d668b80b2eb",
     "cache/manager.py": "3f8a3129900f8e5e1af6005fcc187f5d430c5ce5156ca80c169384694dd39f91",
-    "cache/sparse_token_cache.py": "127c583e5b269e3b73b26b7e5365ec07fbf78dc4a73c18fb32f8d456920a6cd5",
+    "cache/prefix_pool.py": "92080f5fd8eac4081be6bd4128501bf6ba07b74945c550b338016f304664e7e0",
+    "cache/sparse_token_cache.py": "011e6990e9a496b1f6af5ea1ae0afc1d466731ca370978d98daa6f8218d5abfb",
+    "cache/sparse_token_pool.py": "202ba4352118055f2ad3c2e33236487d7f6edd04eb49e5c2cdf2e751deeb2974",
+    "cache/staging.py": "5d96ef67d5cd726887f32ac2baa8baa6dfa29be20d9e07325ec2f1688a9b2fd9",
     "executor/model_executor.py": "f585f9940d5fb506e7f8aaeafe8602f9877ac773f2183603744f2b3a2a48c919",
+    "executor/serving_backend.py": "793c1fca9b19278f8903190b8d9c9bdf1e4b62dd9b70f63df51ae84abbfa74bc",
     "experiments/nosa_gr_65536_1024/src/analyze.py": "0126cc5c4ed401a77c87b5bba57ce3b759d92c1715dc60018611b09ae1f5aa09",
     "experiments/nosa_gr_65536_1024/src/capture.py": "ba9e591cae497bfd516d04ed8c789c674e7ccfe92be6ec20b8ece0bfbd6fac1b",
     "experiments/nosa_gr_65536_1024/src/instrumentation.py": "fdcc857f5d3128d0ab36c57ee99f34f3e844259ad5fe88318315258465598853",
     "experiments/nosa_gr_65536_1024/src/mfu.py": "e30ee5ad7ca52e1de1f6f5f03f2b7b776f8ae707a0ae7468adfb00de2755ec98",
-    "experiments/nosa_gr_65536_1024/src/sources.py": "b33e15ef4c1ae86349e703f394348efd36246acf6bbeaaeee9969cdbdf7c8b57",
-    "experiments/nosa_kernel_mfu/src/capture_inputs.py": "ae3d40a926890602f63d40b25c9b729d5c317905a69692679ded739825f92b01",
-    "experiments/nosa_kernel_mfu/src/measure.py": "14e4fdc0dc299a5ac2789a0a01d0ac078cdb72a5d53e0bec1cea9102cc7b31e8",
+    "experiments/nosa_gr_65536_1024/src/sources.py": "75a901512f13ff667811a041b62bb5b437356c98a57f216beda9b579e156636f",
+    "experiments/nosa_kernel_mfu/src/capture_inputs.py": "53aaac4f9c2082593ac4056be1b758614fa465e27331c7b4e6a402286bcc4996",
+    "experiments/nosa_kernel_mfu/src/measure.py": "09ce07b5855d9013989649c30ea6e4e66d228404b673d1516b0355ffff288c64",
     "experiments/nosa_offload_overlap/scripts/run.sh": "8b325bf82d5f8ef14c556073f7a74736daadfbf16e4b24da9c395f44dbcfa9f0",
     "experiments/nosa_offload_overlap/src/analyze.py": "1c5b3443cac84af910838b6148b5a307f6b2e3cca2d6f21bdf82bdd6701eafdc",
-    "experiments/nosa_offload_overlap/src/measure.py": "71164220dd1d8438e19a71d107f589a5e29fc8d21a4f54f7549eaf25e5ad3078",
+    "experiments/nosa_offload_overlap/src/measure.py": "40bab488903cdd9eaef91329ef86d6d8b65b68f835b46a0b1a278a8548d71326",
     "experiments/nosa_offload_overlap/src/report.py": "2530ffdea40a325d0261bf86bb27b1f4cc899b01881a0b12952d22b069388953",
     "layers/attention.py": "91eccef789f099017c229b99d1d0ccc9d66ce980ab6dbc772a25fe031f6f34d3",
     "layers/feed_forward.py": "95dcebaa67b4f2069f580ac0831ef8335fc15b022e802708e24f58c02408de4a",
     "layers/normalization.py": "426b2cd0e1da6c944ff661a93d55eee2b064585d5c5f6c6e6a0b80ca3bc98af0",
-    "models/nosa/attention.py": "af1723d7292b57452db8daf39d75cee57bd2b4de78dd12fdaa7d9e1d9217f361",
-    "models/nosa/cache.py": "4fa806fae9e4882086d6409c06f34706d5519a428fa4943cbf6ea2cd6cf10ed7",
+    "models/nosa/_allocator_snapshot.py": "c292b2d265f081258f2223d2cbda8d6ec65d87d5f9948a44c6b6a1a39de5c4aa",
+    "models/nosa/allocation_budget.py": "ad4887285952c62da254473e18c5575ffc2beabf753674774374e0d4f4248274",
+    "models/nosa/attention.py": "62fd14e73b807bbbc5b5c3a509bdde7bb433b6a4416bd957e1e8463f9c74a0b1",
+    "models/nosa/cache.py": "bc8d6898fb1d2eee7a80a689ce846656742fc6fffce2cad73ae33ebba8f62892",
+    "models/nosa/compute_graphs.py": "3dfe3f89950cabd54aed8462b1917dd9b54fc05fce2a45c0829981e3ccd3a68d",
     "models/nosa/config.py": "eaa168a439fada20f13b6d0a44c801de30e3b1c04d3e5ac43d4273a3454db165",
-    "models/nosa/indexer.py": "87575b569358109d13c85453c202fca47b74a9b9b41bf1f7939ee8b7e4f52d2e",
+    "models/nosa/deferred_validation.py": "ca9eef34492e5c7ae7c3bf23169fecc21ca9abde3ae8c8d1670cf14fa0329ede",
+    "models/nosa/fixed_cache.py": "83a518990a2a6d533aab778464d99d785a325aa0e334c4beb2739cdabf183b19",
+    "models/nosa/fixed_resources.py": "7a1c2759965f06161391fc710c7ca7898cf11f6824d13d85547bdb4033f35229",
+    "models/nosa/fixed_serving.py": "76e783d821b6ee6a40435716a172ad458ea380449ddd9516d549c3d9bc51ab13",
+    "models/nosa/indexer.py": "9202660bbcd5aba81406de0ea50ba4cbfdb2da92e7a4f65b32aab77f4fde937a",
     "models/nosa/infer.py": "5e9e8b78024d3f2073cfb858db60b95c9add264c501ecd983905cae906ea5115",
-    "models/nosa/layers.py": "cf54c7c1e96483175da788491450bd264fae322a6c1452f830b5ce721f308b43",
-    "models/nosa/model.py": "9765838f1fa7e923a70b45ff58b9cbd9cfc92494a7dbe4af2c4da934acc56377",
-    "models/nosa/offload_cache.py": "cb3ca4c33af5bb2c510e9da413f39c49e2739ec8beb647a295b5d994e7f60df6",
+    "models/nosa/layers.py": "6f9e2a28de209df132266cdb5072f5a8581b543b1b049463338b75a2ff8ec5a9",
+    "models/nosa/model.py": "febb4cafa84e36d5362c1d9b6b959860e10d1fe4fde30cd5a8c80d3b74f05335",
+    "models/nosa/offload_cache.py": "5eb077c8afd4c181150bd26991a64c9a8f336e6f31237c9ece144e30ef16c713",
     "models/nosa/request_format.py": "25c775ba0b76cab91663b827fc8b38fc20511895a5e6eff3054273cbfe418825",
     "models/nosa/rotary.py": "f14c898cd77a72bd4e6908ef59b0b5fe5d42b2ebadb34aa5db092577d154dbde",
     "models/nosa/scoring.py": "c4c7e75a15a5ffb95e935b02ec482586a288c64ad079a175b293db6baa3f92d8",
-    "operators/flashinfer.py": "0573d16ce4dd3e13b3792c6b1a4b8c9bab1477ee0f7bfce2abfad87c4c305fd9",
-    "operators/sm90/_native.py": "e7fc70b219647303b3295c38f536e1014ab52f4b0a0dcb7f8108b8c0ca2a8f26",
-    "operators/sm90/_nosa_attention_cuda.py": "5a2c61297c343ce51f9227b48906fb4f77a1b730b1e3116815f9890255f84afa",
-    "operators/sm90/_nosa_attention_fa3.py": "61e2379aedaad7dddbb7237b22d014d1d37f9f251f3010c51dbe5b46b2ccde10",
-    "operators/sm90/_nosa_attention_triton.py": "c9b2060928cff8cbf594a876061546521064da78f52b3297922bcc5dd0f96985",
-    "operators/sm90/_nosa_indexer_checked_cuda.py": "a59f41bdf0468a21d9e96ae180d9b8217dcbebbb07d6c7c8770700570739cdba",
-    "operators/sm90/_nosa_indexer_cuda.py": "a6a518524bce510c034b8e153f7fefa05d2a3f5c0e892923328f9a85389bc35b",
-    "operators/sm90/_nosa_offload_fused.py": "48ee6684da1a5c749c69e2c3fc7ec17d9d411d31af73ee827579d01712012063",
-    "operators/sm90/_nosa_prepare_cuda.py": "bc9c2276dabdf2c9786dd29b8b48a484df10df0ba9be8e14bc5b85f527c2bbe2",
-    "operators/sm90/_nosa_prepare_ranked_cuda.py": "a2a704f1c7338400347619ca9129bc2919ba20552ffa676ca351d23762b3f237",
-    "operators/sm90/_nosa_scores_cuda.py": "70a5cc50c3916675d7a23b9dca49e531a7bed9026e0f5f0bc254bd0a24bd170c",
-    "operators/sm90/_nosa_selection_cuda.py": "71df015af61a1d3f554eae950e3ab57f2a641324a1fe58ae353c6e5422028a24",
-    "operators/sm90/csrc/echo_helpers.cuh": "08c8f8db1ce344f2532c0913f18f9326769e4f2715bca48eed6bae1b1883ab21",
-    "operators/sm90/csrc/echo_indexer.cu": "4da70fd21fada2f33cb5e1a3b68e68a8ac96b566153dfc53cf87e4e83f2a075e",
-    "operators/sm90/csrc/echo_logits.cuh": "77066168ebc948482a6d5bb869eb24cf57460d0b33f16c8ea72e546fa782d486",
-    "operators/sm90/csrc/kv_transfer.cu": "b776b40a1ceb83be864cc210ef26e73cf4bacec45c3f4f2b3f0e8af355a39742",
-    "operators/sm90/csrc/nosa_attention.cu": "01c0699b507baebe005b2df44e2f78ec149083a6239b96e7d24990edf2bf09f4",
-    "operators/sm90/csrc/nosa_attention_fa3.cu": "f98b5ae4ea4bcc5c3dc5a597958627d6c186f22d1db7108162a2a328401c2f80",
-    "operators/sm90/csrc/nosa_attention_grouped.cuh": "30f35b34a80c2a26c249b92e055c3158a5a2e40e5c818ff9dadc3074dc525927",
-    "operators/sm90/csrc/nosa_indexer.cu": "91e4639259cd02839fa4d2606b118ff40343ac75f0419274ec4f3a868e42ed34",
-    "operators/sm90/csrc/nosa_indexer_checked.cu": "49a303a3f89886ebd373611fde3faa7b6ee0adae3c8f1ebc78855734b2b1b16d",
-    "operators/sm90/csrc/nosa_offload.cu": "68db6dd55bb3124e70b25e0e151254d4117cd56f153a4f390d6e9fa3b0e0d681",
-    "operators/sm90/csrc/nosa_offload_compression.cu": "13638f0812d0211be1ae28a9e43e2cd796ad352afd630b8992f1f8019873e524",
-    "operators/sm90/csrc/nosa_offload_fused.cu": "6b71f1f610e1b3d1f14fdca457d1490b10e57b2ad290ecbc9b4caa371042dd17",
-    "operators/sm90/csrc/nosa_prepare.cu": "340f7455f11f602ac4e0380ff7bd6963e2cdaa32275bbd470ae763ea0a0a1715",
-    "operators/sm90/csrc/nosa_prepare_ranked.cu": "1c40cdd8edcf6da94cc0ec59e4477035c8db91441b1c3acb76bfcdd163388d09",
-    "operators/sm90/csrc/nosa_scores.cu": "d5c5b543e08a6e164701b9e5070458079c8c843f35a99de96b4c66427dfb01af",
-    "operators/sm90/csrc/nosa_scores_fused.cuh": "56e6cbe675525b419db3699ae57dcf984ab64bf9e12f1bbe3b49ffd21bcd197a",
-    "operators/sm90/csrc/nosa_scores_pruned.cuh": "99e0e6ce9f5685e639016e24732cce249a3b2c043ff0629b021866ad0f051409",
-    "operators/sm90/csrc/nosa_selection.cu": "f2ce6b685336002d5e137ed1af05d1b2bfdda37f89b57323d053a8daa953e9e9",
-    "operators/sm90/csrc/nosa_selection_cutoff.cuh": "7eaabb06b7d39d5ea0779ea209b80a3e7d54e3b137748a35f4cb47836a7f00fe",
-    "operators/sm90/csrc/nosa_selection_prefix.cuh": "e5b447d6427271df99751c93e6d8c14e3cedc7fee9d76c130d8967410a3b6b35",
-    "operators/sm90/deepseek_linear.py": "2ad05824f2cc3110524b8b34e2cf25174180ea614dee5dca96037427efb6e61b",
-    "operators/sm90/deepseek_mla.py": "f7203f115810d25c0460c6c292d8c819c41e9bdf1892f2f256e50378e3bee979",
-    "operators/sm90/echo_indexer.py": "b40d9123955b6ce6c258498aa31ef24431123f74e4b183442798b68eb1589676",
-    "operators/sm90/kv_transfer.py": "909af4d59a397f402f847ae49c794bb250f473ba82c74b05b111d302ecbd9b26",
-    "operators/sm90/nosa_attention.py": "0c1b422a5fe5c485927f017f4c2578271eaf6258d01cc3c1aa6d33d488d1d6f9",
-    "operators/sm90/nosa_compression.py": "9655a9b4caeea836c846eef654f781318fc930e5ee95192fbeb6ee64dc8201f3",
-    "operators/sm90/nosa_indexer.py": "9686ae49a9c63279f3f505c709bacb9b1c3c6f496880bb2508cae0377bb823da",
-    "operators/sm90/nosa_offload.py": "9ac8f603faa721cf88e67fc9331083148c501c5ce68e19cede24a9325bff1e8f",
-    "operators/sm90/nosa_offload_compression.py": "30509159874f32ea78a9cc7b945415fc125cecda8828d793e0a03f8f7565a9ed",
-    "operators/sm90/nosa_validation.py": "aded63a061790919d0596c18f4129d4c77782b53c4e762ae87f7bd3aa2bb9700",
-    "operators/sm90/sparse_attention.py": "5cad42677974731057cbed607d138cf8cf296dc2094c44a09b68a61f0c43a786",
-    "pyproject.toml": "5c0c8ec55158fadefd8da5b5a1e7288d9cca5cf04db42998ee5d4e85aa93b428",
+    "models/nosa/serving.py": "5251aa847ec6473781f3008a5da8e7d5094387d0f503ba61e74e7f1493f0b857",
+    "models/nosa/serving_resources.py": "7d9b029f51192ca6fd6d016b47944e4470b1ddbe67f6e05ccae089378fe36cda",
+    "models/nosa/session_budget.py": "9dd85469461ff3013d3562c7f3d1d95020edf52674f31dedde4d4855d0d35bca",
+    "operators/common/csrc/kv_transfer.cu": "e082e3b2ef47bad7224f14213c4fe57a6d0bda7399a556230a814d145466bf1b",
+    "operators/common/kv_transfer.py": "bc65f850a908dfc4642b7f90170513881a0a564561d9902c736d8e7d7f16b919",
+    "operators/flashinfer.py": "55c368b9ffa69301b8407de7f9aa69bfce03db3b6bfc4c59646b7d3fe9d36a8d",
+    "operators/nosa/_native.py": "4ed3277e55f21abac43259da7f678af74825a3ef37bbd830558bbd127f3e9b92",
+    "operators/nosa/attention/common.py": "e376225202c4daf5899b870c7b30f61e571a570be6937a40456a8cf3c5d4ee69",
+    "operators/nosa/attention/device_only/_cuda.py": "2f9de5fdb75e3a87ee98e46ab93ddcd18b0482b872e5f1e114238510858e5742",
+    "operators/nosa/attention/device_only/_fa3.py": "64f699cf8d11d0551f70808fb733577235fda12f61b9efa8bbc4395a62158653",
+    "operators/nosa/attention/device_only/_triton.py": "c9b2060928cff8cbf594a876061546521064da78f52b3297922bcc5dd0f96985",
+    "operators/nosa/attention/device_only/api.py": "abbe52687cfc3d9835ea88efb31067f503f0cf07caafe95632e849f15f826f34",
+    "operators/nosa/attention/device_only/csrc/nosa_attention.cu": "01c0699b507baebe005b2df44e2f78ec149083a6239b96e7d24990edf2bf09f4",
+    "operators/nosa/attention/device_only/csrc/nosa_attention_fa3.cu": "f98b5ae4ea4bcc5c3dc5a597958627d6c186f22d1db7108162a2a328401c2f80",
+    "operators/nosa/attention/device_only/csrc/nosa_attention_grouped.cuh": "30f35b34a80c2a26c249b92e055c3158a5a2e40e5c818ff9dadc3074dc525927",
+    "operators/nosa/attention/offload/_fused.py": "5487ba8ad2b99dc1fb541cb330ffce2ea569edd59e17cb81c5bf39c7c1cd5dc9",
+    "operators/nosa/attention/offload/api.py": "e4a97d3ae77af1dec4b8c3b179bbfc5caa051a1d6084d41451a6465068e4f717",
+    "operators/nosa/attention/offload/csrc/nosa_offload.cu": "eb1049aa74bb9a15eaa82c61c20050d1f7ed7c99b42045643accd4b2fae1f666",
+    "operators/nosa/attention/offload/csrc/nosa_offload_fused.cu": "a68fe19bfc5fd6d626ff310c3526624b2a1a4bc88f85678afd705b844410bb28",
+    "operators/nosa/attention/reference/torch.py": "04a5bf00bf6d0e94678bc6673d42994c5f94ce144c56b02e0e4ceef8607b4ebc",
+    "operators/nosa/attention/workspace.py": "1831a2031b73d63a29359445fe2a9441712567fc82c61fdb4e1c3f0371ff5a88",
+    "operators/nosa/indexer/_indexer_checked_cuda.py": "1f34a239ace16035e029123daa968e1c538d84985b8a440380dba65603337652",
+    "operators/nosa/indexer/_indexer_cuda.py": "a1c80b34aef8f505468d85ceabbb48719b2a99e9beb7723091f8d1e0886629d8",
+    "operators/nosa/indexer/_indexer_deferred_cuda.py": "52890966153c4ae29409564839dd19e733db01771f0e44f4d7a561a6dfe3980a",
+    "operators/nosa/indexer/_prepare_cuda.py": "7079fc4cbaba13d03148ba8f73b131d4ea0dca57dd81516e3c51a67b2695a5dd",
+    "operators/nosa/indexer/_prepare_ranked_cuda.py": "d231b2030de13f14863eb0be1f6c5999dcd3847e7bcd771fa7399d1da18be0e1",
+    "operators/nosa/indexer/_scores_cuda.py": "d5330191a95845cd702586c5596653f861074cc1dcc7e1024ead1971163fdf0a",
+    "operators/nosa/indexer/_selection_cuda.py": "db6946ccc24796656cabdaf0652deb98514bc27e225ecee87046150b763245da",
+    "operators/nosa/indexer/api.py": "7352cef62a22c9f980c7fb227ce8eb05458aaccfd8c6c9b1a73b0af19d0ec163",
+    "operators/nosa/indexer/compression.py": "9655a9b4caeea836c846eef654f781318fc930e5ee95192fbeb6ee64dc8201f3",
+    "operators/nosa/indexer/csrc/nosa_guarded_buffers.cuh": "7dadbef4c820e04e695505193ab698fc38230ac079ffc0305365a5d4d50e83fd",
+    "operators/nosa/indexer/csrc/nosa_indexer.cu": "2af14714c82f10fc5bb2d6606333dbd3f6c335d982fbcf728e176307a0b9d882",
+    "operators/nosa/indexer/csrc/nosa_indexer_checked.cu": "6f05e2861f724edae925581aa8971023fbf75df631fa2126fa53d5d78df8d951",
+    "operators/nosa/indexer/csrc/nosa_offload_compression.cu": "13638f0812d0211be1ae28a9e43e2cd796ad352afd630b8992f1f8019873e524",
+    "operators/nosa/indexer/csrc/nosa_prepare.cu": "340f7455f11f602ac4e0380ff7bd6963e2cdaa32275bbd470ae763ea0a0a1715",
+    "operators/nosa/indexer/csrc/nosa_prepare_ranked.cu": "1c40cdd8edcf6da94cc0ec59e4477035c8db91441b1c3acb76bfcdd163388d09",
+    "operators/nosa/indexer/csrc/nosa_scores.cu": "6b7dfa2e03f72b0e5ee43aed0cff3ff73ddd3ae85f420a57db79b0c2cdfc4bb6",
+    "operators/nosa/indexer/csrc/nosa_scores_fused.cuh": "5fb278d701bef0a4cb40be56e89316e500b4c707cc4c4f36567f0986a6e97891",
+    "operators/nosa/indexer/csrc/nosa_scores_pruned.cuh": "1eb136d93f04de8b252d8ddc9237f5db231faada54afa0049f223d1fec2838b8",
+    "operators/nosa/indexer/csrc/nosa_selection.cu": "cc44ef81004e86e8e4da5087433195286e9924b77376e51959c8b797eb374c20",
+    "operators/nosa/indexer/csrc/nosa_selection_cutoff.cuh": "7eaabb06b7d39d5ea0779ea209b80a3e7d54e3b137748a35f4cb47836a7f00fe",
+    "operators/nosa/indexer/csrc/nosa_selection_prefix.cuh": "e5b447d6427271df99751c93e6d8c14e3cedc7fee9d76c130d8967410a3b6b35",
+    "operators/nosa/indexer/offload_compression.py": "30509159874f32ea78a9cc7b945415fc125cecda8828d793e0a03f8f7565a9ed",
+    "operators/nosa/indexer/validation.py": "c00e303f7f7c31dd6081f52da8b8225170e77f7c6f83f59a2a6995019f07ca6e",
+    "pyproject.toml": "cac6e9271538d74e99b1bdc83c2a12648bb3c76a310af21c98aff3ec2d3761d1",
+    "serving/persistent.py": "c4bfb300e4ef98d0d7bb94825d26770c4d2b600eb430549b726a1941b78ae572",
     "serving/run_gr.py": "9c5657fcd311fc0ef0866fe9d97183e0ef8b92153007f0610bd6e7b4fe88792b",
+    "serving/run_multi_user.py": "c2525cf93d3d4be1795c82da09e66da4aaf8cd028392e9bb2d59adfb32b2c037",
     "serving/runner.py": "bd36c4b8725bbe99f934a1ebee604a7e7b471c6c06859b3d0a1bc91c7686a421",
-    "uv.lock": "94ff0ab9a8e01a924575c9e2a8381fba8d4249eeb33a60eca3b35246e150bd8e"
+    "serving/token_validation.py": "34227128afb5ec52bf57d47c7b7bf8b250cd6da3ba676d20dd3096a7f36a0fde",
+    "uv.lock": "53339af1728da3661b614d554e928408186b4fac6106a92999bd8fd69b3d2d8f"
   },
   "input_capture": {
     "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_kernel_mfu/output/data/kda_inputs_baseline_20260928_1345",
@@ -1095,7 +1106,7 @@
       }
     }
   },
-  "git_commit": "639cc9684af170300b1e2160c7dba48a56ec4a7d",
+  "git_commit": "4a02aef12dcf60d78625242856c2196e518b7315",
   "measurement_boundary": {
     "scope": "Isolated one-layer replay, all three paths receive identical Q/K/V/CIS/selection; not a 32-layer forward, indexer offload, or serving benchmark",
     "resident": "Original full-query native FA3 attention with complete K/V in HBM",
@@ -1231,8 +1242,8 @@
       "suffix_gpu_bytes": 1048576,
       "fetch_ctas": 96,
       "execution_geometry": "whole-query attention in both offload modes; tile_size is histogram width",
-      "serialized_over_overlap_speedup": 1.3105787920136895,
-      "latency_reduction_fraction": 0.23697834415318797,
+      "serialized_over_overlap_speedup": 1.409884175972185,
+      "latency_reduction_fraction": 0.2907218784050467,
       "acceptance": {
         "measurement": {
           "reference": "Independent FP32 QK + CIS, causal softmax and AV over original logical selections",
@@ -3331,27 +3342,27 @@
         "resident": {
           "timing_ms": {
             "cuda_ms": {
-              "median": 0.26177600026130676,
-              "min": 0.2510719895362854,
-              "max": 0.29446399211883545
+              "median": 0.23995200544595718,
+              "min": 0.23574399948120117,
+              "max": 0.24844799935817719
             },
             "wall_ms": {
-              "median": 0.27701258659362793,
-              "min": 0.2650078386068344,
-              "max": 0.30962005257606506
+              "median": 0.25211897445842624,
+              "min": 0.24792004842311144,
+              "max": 0.2614640397951007
             },
             "submit_ms": {
-              "median": 0.10919198393821716,
-              "min": 0.09727105498313904,
-              "max": 0.1423116773366928
+              "median": 0.07953803287819028,
+              "min": 0.07566309068351984,
+              "max": 0.08832896128296852
             }
           },
           "profile": {
             "method": "nsys_separate_kernel_intervals",
             "gpu_span_us": {
-              "median": 198.56,
-              "min": 192.992,
-              "max": 199.233
+              "median": 190.497,
+              "min": 184.96,
+              "max": 191.008
             },
             "kernel_intervals": {
               "fetch_union_us": {
@@ -3360,9 +3371,9 @@
                 "max": 0.0
               },
               "attention_union_us": {
-                "median": 175.681,
-                "min": 175.2,
-                "max": 176.256
+                "median": 175.552,
+                "min": 175.328,
+                "max": 175.617
               },
               "overlap_us": {
                 "median": 0.0,
@@ -3383,38 +3394,38 @@
         "serialized": {
           "timing_ms": {
             "cuda_ms": {
-              "median": 0.4604640007019043,
-              "min": 0.45187199115753174,
-              "max": 0.5239359736442566
+              "median": 0.47699199616909027,
+              "min": 0.4726719856262207,
+              "max": 0.48848000168800354
             },
             "wall_ms": {
-              "median": 0.47564785927534103,
-              "min": 0.4662889987230301,
-              "max": 0.5382373929023743
+              "median": 0.4894024459645152,
+              "min": 0.4847099771723151,
+              "max": 0.5075259832665324
             },
             "submit_ms": {
-              "median": 0.13564899563789368,
-              "min": 0.12404099106788635,
-              "max": 0.2069622278213501
+              "median": 0.10135804768651724,
+              "min": 0.09803799912333488,
+              "max": 0.11625408660620451
             }
           },
           "profile": {
             "method": "nsys_separate_kernel_intervals",
             "gpu_span_us": {
               "median": 451.329,
-              "min": 437.281,
-              "max": 501.121
+              "min": 447.489,
+              "max": 472.034
             },
             "kernel_intervals": {
               "fetch_union_us": {
-                "median": 174.144,
-                "min": 174.113,
-                "max": 175.04
+                "median": 213.184,
+                "min": 210.816,
+                "max": 215.584
               },
               "attention_union_us": {
-                "median": 175.681,
-                "min": 175.328,
-                "max": 175.84
+                "median": 174.625,
+                "min": 174.561,
+                "max": 174.945
               },
               "overlap_us": {
                 "median": 0.0,
@@ -3422,9 +3433,9 @@
                 "max": 0.0
               },
               "fetch_without_attention_us": {
-                "median": 174.144,
-                "min": 174.113,
-                "max": 175.04
+                "median": 213.184,
+                "min": 210.816,
+                "max": 215.584
               },
               "fetch_hidden_fraction": {
                 "median": 0.0,
@@ -3439,86 +3450,86 @@
         "overlap": {
           "timing_ms": {
             "cuda_ms": {
-              "median": 0.3513440042734146,
-              "min": 0.3362559974193573,
-              "max": 0.3980480134487152
+              "median": 0.3383199870586395,
+              "min": 0.3318080008029938,
+              "max": 0.3476159870624542
             },
             "wall_ms": {
-              "median": 0.3671906888484955,
-              "min": 0.34905970096588135,
-              "max": 0.4138946533203125
+              "median": 0.3504464402794838,
+              "min": 0.3441300941631198,
+              "max": 0.3616840112954378
             },
             "submit_ms": {
-              "median": 0.13652723282575607,
-              "min": 0.11800229549407959,
-              "max": 0.1867339015007019
+              "median": 0.10034104343503714,
+              "min": 0.09471399243921041,
+              "max": 0.10856892913579941
             }
           },
           "profile": {
             "method": "globaltimer_fetch_softmax",
             "gpu_span_us": {
-              "median": 397.857,
-              "min": 351.073,
-              "max": 427.713
+              "median": 343.617,
+              "min": 321.217,
+              "max": 357.313
             },
             "kernel_intervals": null,
             "intra_kernel_softmax": {
               "fetch_work_union_us": {
-                "median": 191.104,
-                "min": 186.496,
-                "max": 197.984
+                "median": 215.2,
+                "min": 212.768,
+                "max": 216.32
               },
               "softmax_union_us": {
-                "median": 213.088,
-                "min": 212.48,
-                "max": 213.632
+                "median": 218.176,
+                "min": 218.048,
+                "max": 223.52
               },
               "fetch_math_overlap_us": {
-                "median": 181.728,
-                "min": 178.464,
-                "max": 184.448
+                "median": 199.872,
+                "min": 199.36,
+                "max": 205.984
               },
               "fetch_without_softmax_us": {
-                "median": 9.376,
-                "min": 8.032,
-                "max": 13.536
+                "median": 13.408,
+                "min": 10.336,
+                "max": 15.328
               },
               "fetch_math_overlap_fraction": {
-                "median": 0.9509377093101139,
-                "min": 0.9316308388556651,
-                "max": 0.9569320521619766
+                "median": 0.9369830049631523,
+                "min": 0.9287732342007435,
+                "max": 0.9522189349112427
               },
               "instrumented_span_us": {
-                "median": 221.856,
-                "min": 221.664,
-                "max": 226.624
+                "median": 233.504,
+                "min": 231.456,
+                "max": 233.856
               },
               "effective_fetch_work_GB_s": {
-                "median": 45.43871399866042,
-                "min": 43.85970583481493,
-                "max": 46.56142759094029
+                "median": 40.35092936802974,
+                "min": 40.142011834319526,
+                "max": 40.81215220333885
               }
             },
             "intra_kernel_stripes": {
               "fetch_stripe_union_us": {
-                "median": 191.104,
-                "min": 186.496,
-                "max": 197.984
+                "median": 215.2,
+                "min": 212.768,
+                "max": 216.32
               },
               "fetch_stripe_math_overlap_us": {
-                "median": 181.728,
-                "min": 178.464,
-                "max": 184.448
+                "median": 199.872,
+                "min": 199.36,
+                "max": 205.984
               },
               "fetch_stripe_without_softmax_us": {
-                "median": 9.376,
-                "min": 8.032,
-                "max": 13.536
+                "median": 13.408,
+                "min": 10.336,
+                "max": 15.328
               },
               "fetch_stripe_math_overlap_fraction": {
-                "median": 0.9509377093101139,
-                "min": 0.9316308388556651,
-                "max": 0.9569320521619766
+                "median": 0.9369830049631523,
+                "min": 0.9287732342007435,
+                "max": 0.9522189349112427
               },
               "page_envelope_only_union_us": {
                 "median": 0.0,
@@ -3553,20 +3564,20 @@
         "samples": [
           {
             "sample": 0,
-            "page_fraction": 0.9569320521619766,
-            "stripe_fraction": 0.9569320521619766,
+            "page_fraction": 0.9369830049631523,
+            "stripe_fraction": 0.9369830049631523,
             "meets_threshold": true
           },
           {
             "sample": 1,
-            "page_fraction": 0.9509377093101139,
-            "stripe_fraction": 0.9509377093101139,
+            "page_fraction": 0.9287732342007435,
+            "stripe_fraction": 0.9287732342007435,
             "meets_threshold": true
           },
           {
             "sample": 2,
-            "page_fraction": 0.9316308388556651,
-            "stripe_fraction": 0.9316308388556651,
+            "page_fraction": 0.9522189349112427,
+            "stripe_fraction": 0.9522189349112427,
             "meets_threshold": true
           }
         ]
@@ -3677,8 +3688,8 @@
       "suffix_gpu_bytes": 1048576,
       "fetch_ctas": 96,
       "execution_geometry": "whole-query attention in both offload modes; tile_size is histogram width",
-      "serialized_over_overlap_speedup": 1.3046793497506985,
-      "latency_reduction_fraction": 0.23352814606049943,
+      "serialized_over_overlap_speedup": 1.315507407919903,
+      "latency_reduction_fraction": 0.23983704388163596,
       "acceptance": {
         "measurement": {
           "reference": "Independent FP32 QK + CIS, causal softmax and AV over original logical selections",
@@ -5777,27 +5788,27 @@
         "resident": {
           "timing_ms": {
             "cuda_ms": {
-              "median": 0.257423996925354,
-              "min": 0.2504960000514984,
-              "max": 0.28115200996398926
+              "median": 0.2383200004696846,
+              "min": 0.23587200045585632,
+              "max": 0.26159998774528503
             },
             "wall_ms": {
-              "median": 0.2736309543251991,
-              "min": 0.26396848261356354,
-              "max": 0.2948995679616928
+              "median": 0.25063648354262114,
+              "min": 0.24753506295382977,
+              "max": 0.27397600933909416
             },
             "submit_ms": {
-              "median": 0.10740011930465698,
-              "min": 0.0950247049331665,
-              "max": 0.12817606329917908
+              "median": 0.07879943586885929,
+              "min": 0.07563899271190166,
+              "max": 0.10322104208171368
             }
           },
           "profile": {
             "method": "nsys_separate_kernel_intervals",
             "gpu_span_us": {
-              "median": 198.721,
-              "min": 193.409,
-              "max": 199.328
+              "median": 188.608,
+              "min": 181.505,
+              "max": 189.985
             },
             "kernel_intervals": {
               "fetch_union_us": {
@@ -5806,9 +5817,9 @@
                 "max": 0.0
               },
               "attention_union_us": {
-                "median": 175.36,
-                "min": 175.201,
-                "max": 176.321
+                "median": 174.432,
+                "min": 173.729,
+                "max": 174.528
               },
               "overlap_us": {
                 "median": 0.0,
@@ -5829,38 +5840,38 @@
         "serialized": {
           "timing_ms": {
             "cuda_ms": {
-              "median": 0.5420159995555878,
-              "min": 0.5335680246353149,
-              "max": 0.5643839836120605
+              "median": 0.5734559893608093,
+              "min": 0.5697280168533325,
+              "max": 0.5833600163459778
             },
             "wall_ms": {
-              "median": 0.5569467321038246,
-              "min": 0.5471222102642059,
-              "max": 0.5809571593999863
+              "median": 0.585518020670861,
+              "min": 0.5819060606881976,
+              "max": 0.5958209512755275
             },
             "submit_ms": {
-              "median": 0.13384968042373657,
-              "min": 0.12224167585372925,
-              "max": 0.15954673290252686
+              "median": 0.101188023108989,
+              "min": 0.09792903438210487,
+              "max": 0.11321203783154488
             }
           },
           "profile": {
             "method": "nsys_separate_kernel_intervals",
             "gpu_span_us": {
-              "median": 558.785,
-              "min": 512.961,
-              "max": 566.849
+              "median": 547.842,
+              "min": 539.938,
+              "max": 569.857
             },
             "kernel_intervals": {
               "fetch_union_us": {
-                "median": 260.449,
-                "min": 259.809,
-                "max": 263.969
+                "median": 312.833,
+                "min": 308.768,
+                "max": 315.073
               },
               "attention_union_us": {
-                "median": 174.88,
-                "min": 173.856,
-                "max": 175.616
+                "median": 173.025,
+                "min": 171.841,
+                "max": 174.272
               },
               "overlap_us": {
                 "median": 0.0,
@@ -5868,9 +5879,9 @@
                 "max": 0.0
               },
               "fetch_without_attention_us": {
-                "median": 260.449,
-                "min": 259.809,
-                "max": 263.969
+                "median": 312.833,
+                "min": 308.768,
+                "max": 315.073
               },
               "fetch_hidden_fraction": {
                 "median": 0.0,
@@ -5885,86 +5896,86 @@
         "overlap": {
           "timing_ms": {
             "cuda_ms": {
-              "median": 0.41544000804424286,
-              "min": 0.40143999457359314,
-              "max": 0.4490880072116852
+              "median": 0.43592000007629395,
+              "min": 0.4314559996128082,
+              "max": 0.4516800045967102
             },
             "wall_ms": {
-              "median": 0.43052155524492264,
-              "min": 0.4152953624725342,
-              "max": 0.48312731087207794
+              "median": 0.44797349255532026,
+              "min": 0.4429980181157589,
+              "max": 0.46544091310352087
             },
             "submit_ms": {
-              "median": 0.13547297567129135,
-              "min": 0.1194104552268982,
-              "max": 0.18860027194023132
+              "median": 0.09947898797690868,
+              "min": 0.09450607467442751,
+              "max": 0.1211289782077074
             }
           },
           "profile": {
             "method": "globaltimer_fetch_softmax",
             "gpu_span_us": {
-              "median": 462.785,
-              "min": 445.473,
-              "max": 475.072
+              "median": 435.169,
+              "min": 423.969,
+              "max": 448.257
             },
             "kernel_intervals": null,
             "intra_kernel_softmax": {
               "fetch_work_union_us": {
-                "median": 268.928,
-                "min": 264.0,
-                "max": 280.64
+                "median": 314.112,
+                "min": 313.792,
+                "max": 314.624
               },
               "softmax_union_us": {
-                "median": 275.04,
-                "min": 271.872,
-                "max": 277.984
+                "median": 302.944,
+                "min": 301.696,
+                "max": 305.6
               },
               "fetch_math_overlap_us": {
-                "median": 256.384,
-                "min": 254.272,
-                "max": 258.752
+                "median": 286.72,
+                "min": 285.696,
+                "max": 289.408
               },
               "fetch_without_softmax_us": {
-                "median": 12.544,
-                "min": 9.728,
-                "max": 21.888
+                "median": 27.392,
+                "min": 24.384,
+                "max": 28.928
               },
               "fetch_math_overlap_fraction": {
-                "median": 0.9533555449785817,
-                "min": 0.9220068415051311,
-                "max": 0.9631515151515152
+                "median": 0.9127954360228199,
+                "min": 0.9080553295362083,
+                "max": 0.922292473995513
               },
               "instrumented_span_us": {
-                "median": 290.112,
-                "min": 283.488,
-                "max": 303.072
+                "median": 333.216,
+                "min": 332.864,
+                "max": 333.952
               },
               "effective_fetch_work_GB_s": {
-                "median": 48.495002379819134,
-                "min": 46.47115165336374,
-                "max": 49.40024242424242
+                "median": 41.51915240423798,
+                "min": 41.451586655817735,
+                "max": 41.56149296349174
               }
             },
             "intra_kernel_stripes": {
               "fetch_stripe_union_us": {
-                "median": 268.928,
-                "min": 264.0,
-                "max": 280.64
+                "median": 314.112,
+                "min": 313.792,
+                "max": 314.624
               },
               "fetch_stripe_math_overlap_us": {
-                "median": 256.384,
-                "min": 254.272,
-                "max": 258.752
+                "median": 286.72,
+                "min": 285.696,
+                "max": 289.408
               },
               "fetch_stripe_without_softmax_us": {
-                "median": 12.544,
-                "min": 9.728,
-                "max": 21.888
+                "median": 27.392,
+                "min": 24.384,
+                "max": 28.928
               },
               "fetch_stripe_math_overlap_fraction": {
-                "median": 0.9533555449785817,
-                "min": 0.9220068415051311,
-                "max": 0.9631515151515152
+                "median": 0.9127954360228199,
+                "min": 0.9080553295362083,
+                "max": 0.922292473995513
               },
               "page_envelope_only_union_us": {
                 "median": 0.0,
@@ -5999,20 +6010,20 @@
         "samples": [
           {
             "sample": 0,
-            "page_fraction": 0.9533555449785817,
-            "stripe_fraction": 0.9533555449785817,
+            "page_fraction": 0.9127954360228199,
+            "stripe_fraction": 0.9127954360228199,
             "meets_threshold": true
           },
           {
             "sample": 1,
-            "page_fraction": 0.9220068415051311,
-            "stripe_fraction": 0.9220068415051311,
+            "page_fraction": 0.922292473995513,
+            "stripe_fraction": 0.922292473995513,
             "meets_threshold": true
           },
           {
             "sample": 2,
-            "page_fraction": 0.9631515151515152,
-            "stripe_fraction": 0.9631515151515152,
+            "page_fraction": 0.9080553295362083,
+            "stripe_fraction": 0.9080553295362083,
             "meets_threshold": true
           }
         ]
@@ -6123,8 +6134,8 @@
       "suffix_gpu_bytes": 1048576,
       "fetch_ctas": 96,
       "execution_geometry": "whole-query attention in both offload modes; tile_size is histogram width",
-      "serialized_over_overlap_speedup": 1.2740680501865043,
-      "latency_reduction_fraction": 0.2151125680817323,
+      "serialized_over_overlap_speedup": 1.2959739097259602,
+      "latency_reduction_fraction": 0.22837952794014593,
       "acceptance": {
         "measurement": {
           "reference": "Independent FP32 QK + CIS, causal softmax and AV over original logical selections",
@@ -8223,27 +8234,27 @@
         "resident": {
           "timing_ms": {
             "cuda_ms": {
-              "median": 0.2605919986963272,
-              "min": 0.24793599545955658,
-              "max": 0.2850880026817322
+              "median": 0.23468799889087677,
+              "min": 0.23136000335216522,
+              "max": 0.25148800015449524
             },
             "wall_ms": {
-              "median": 0.2755783498287201,
-              "min": 0.2610832452774048,
-              "max": 0.30063651502132416
+              "median": 0.24699047207832336,
+              "min": 0.2431650646030903,
+              "max": 0.2665140200406313
             },
             "submit_ms": {
-              "median": 0.11351983994245529,
-              "min": 0.09646080434322357,
-              "max": 0.1375284045934677
+              "median": 0.07784756598994136,
+              "min": 0.07452606223523617,
+              "max": 0.09971996769309044
             }
           },
           "profile": {
             "method": "nsys_separate_kernel_intervals",
             "gpu_span_us": {
-              "median": 205.888,
-              "min": 184.832,
-              "max": 211.104
+              "median": 185.761,
+              "min": 179.329,
+              "max": 186.304
             },
             "kernel_intervals": {
               "fetch_union_us": {
@@ -8252,9 +8263,9 @@
                 "max": 0.0
               },
               "attention_union_us": {
-                "median": 171.52,
-                "min": 171.36,
-                "max": 171.872
+                "median": 171.328,
+                "min": 170.945,
+                "max": 171.361
               },
               "overlap_us": {
                 "median": 0.0,
@@ -8275,38 +8286,38 @@
         "serialized": {
           "timing_ms": {
             "cuda_ms": {
-              "median": 0.5501120090484619,
-              "min": 0.5374400019645691,
-              "max": 0.5923519730567932
+              "median": 0.5716800093650818,
+              "min": 0.5685759782791138,
+              "max": 0.5798079967498779
             },
             "wall_ms": {
-              "median": 0.5659256130456924,
-              "min": 0.5518198013305664,
-              "max": 0.6130784749984741
+              "median": 0.5842124810442328,
+              "min": 0.5804119864478707,
+              "max": 0.591802061535418
             },
             "submit_ms": {
-              "median": 0.144151970744133,
-              "min": 0.12687966227531433,
-              "max": 0.19302032887935638
+              "median": 0.0993675203062594,
+              "min": 0.09707990102469921,
+              "max": 0.10531395673751831
             }
           },
           "profile": {
             "method": "nsys_separate_kernel_intervals",
             "gpu_span_us": {
-              "median": 553.889,
-              "min": 501.345,
-              "max": 560.033
+              "median": 545.218,
+              "min": 537.346,
+              "max": 580.45
             },
             "kernel_intervals": {
               "fetch_union_us": {
-                "median": 261.409,
-                "min": 260.961,
-                "max": 261.888
+                "median": 311.777,
+                "min": 309.217,
+                "max": 312.609
               },
               "attention_union_us": {
-                "median": 171.36,
-                "min": 171.073,
-                "max": 171.392
+                "median": 170.593,
+                "min": 169.888,
+                "max": 171.393
               },
               "overlap_us": {
                 "median": 0.0,
@@ -8314,9 +8325,9 @@
                 "max": 0.0
               },
               "fetch_without_attention_us": {
-                "median": 261.409,
-                "min": 260.961,
-                "max": 261.888
+                "median": 311.777,
+                "min": 309.217,
+                "max": 312.609
               },
               "fetch_hidden_fraction": {
                 "median": 0.0,
@@ -8331,86 +8342,86 @@
         "overlap": {
           "timing_ms": {
             "cuda_ms": {
-              "median": 0.4317760020494461,
-              "min": 0.4151360094547272,
-              "max": 0.4909439980983734
+              "median": 0.4411199986934662,
+              "min": 0.43699198961257935,
+              "max": 0.45500800013542175
             },
             "wall_ms": {
-              "median": 0.4477687180042267,
-              "min": 0.428907573223114,
-              "max": 0.5128271877765656
+              "median": 0.4533759783953428,
+              "min": 0.44886302202939987,
+              "max": 0.46818098053336143
             },
             "submit_ms": {
-              "median": 0.14465395361185074,
-              "min": 0.1218114048242569,
-              "max": 0.21274015307426453
+              "median": 0.09777850937098265,
+              "min": 0.09353598579764366,
+              "max": 0.11951301712542772
             }
           },
           "profile": {
             "method": "globaltimer_fetch_softmax",
             "gpu_span_us": {
-              "median": 472.384,
-              "min": 458.401,
-              "max": 503.905
+              "median": 449.345,
+              "min": 425.249,
+              "max": 451.586
             },
             "kernel_intervals": null,
             "intra_kernel_softmax": {
               "fetch_work_union_us": {
-                "median": 274.048,
-                "min": 273.184,
-                "max": 275.168
+                "median": 314.72,
+                "min": 314.56,
+                "max": 316.352
               },
               "softmax_union_us": {
-                "median": 283.68,
-                "min": 281.664,
-                "max": 286.72
+                "median": 309.088,
+                "min": 307.008,
+                "max": 315.648
               },
               "fetch_math_overlap_us": {
-                "median": 260.192,
-                "min": 259.136,
-                "max": 262.24
+                "median": 287.264,
+                "min": 285.056,
+                "max": 295.328
               },
               "fetch_without_softmax_us": {
-                "median": 13.856,
-                "min": 10.944,
-                "max": 16.032
+                "median": 27.456,
+                "min": 21.024,
+                "max": 29.504
               },
               "fetch_math_overlap_fraction": {
-                "median": 0.9494395142456796,
-                "min": 0.9417374113268985,
-                "max": 0.9599390886728358
+                "median": 0.9127605490594815,
+                "min": 0.906205493387589,
+                "max": 0.9335423831681166
               },
               "instrumented_span_us": {
-                "median": 297.664,
-                "min": 297.536,
-                "max": 297.92
+                "median": 336.544,
+                "min": 336.512,
+                "max": 336.672
               },
               "effective_fetch_work_GB_s": {
-                "median": 47.708547407753386,
-                "min": 47.51436213513199,
-                "max": 47.85943539885206
+                "median": 41.54306049822064,
+                "min": 41.32874772405422,
+                "max": 41.564191251271616
               }
             },
             "intra_kernel_stripes": {
               "fetch_stripe_union_us": {
-                "median": 274.048,
-                "min": 273.184,
-                "max": 275.168
+                "median": 314.72,
+                "min": 314.56,
+                "max": 316.352
               },
               "fetch_stripe_math_overlap_us": {
-                "median": 260.192,
-                "min": 259.136,
-                "max": 262.24
+                "median": 287.264,
+                "min": 285.056,
+                "max": 295.328
               },
               "fetch_stripe_without_softmax_us": {
-                "median": 13.856,
-                "min": 10.944,
-                "max": 16.032
+                "median": 27.456,
+                "min": 21.024,
+                "max": 29.504
               },
               "fetch_stripe_math_overlap_fraction": {
-                "median": 0.9494395142456796,
-                "min": 0.9417374113268985,
-                "max": 0.9599390886728358
+                "median": 0.9127605490594815,
+                "min": 0.906205493387589,
+                "max": 0.9335423831681166
               },
               "page_envelope_only_union_us": {
                 "median": 0.0,
@@ -8445,20 +8456,20 @@
         "samples": [
           {
             "sample": 0,
-            "page_fraction": 0.9417374113268985,
-            "stripe_fraction": 0.9417374113268985,
+            "page_fraction": 0.906205493387589,
+            "stripe_fraction": 0.906205493387589,
             "meets_threshold": true
           },
           {
             "sample": 1,
-            "page_fraction": 0.9599390886728358,
-            "stripe_fraction": 0.9599390886728358,
+            "page_fraction": 0.9335423831681166,
+            "stripe_fraction": 0.9335423831681166,
             "meets_threshold": true
           },
           {
             "sample": 2,
-            "page_fraction": 0.9494395142456796,
-            "stripe_fraction": 0.9494395142456796,
+            "page_fraction": 0.9127605490594815,
+            "stripe_fraction": 0.9127605490594815,
             "meets_threshold": true
           }
         ]

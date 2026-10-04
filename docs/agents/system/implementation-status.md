@@ -1,5 +1,11 @@
 # 系统实现状态与实验边界
 
+> Historical GR scope (2026-10-05): the `gr_serving` experiment is retired and its
+> experiment outputs have been removed. Its commands, result-retention rules and
+> rerun instructions below are historical and no longer active. See the
+> [retirement scope](experiment_organization.md#retired-gr-serving). Other
+> implementation and experiment findings retain their stated scope.
+
 供系统编码与实验执行者维护。内容合并自 `1971047` 的工程材料，整理于 2026-10-02；
 原实验日期、run ID 和测量边界保留，本次未运行新实验。固定 history、变化 candidate、
 prefill-only 是候选方案，其代表性与模型、数据适配仍待确定。研究判断与任务取舍以
@@ -148,12 +154,12 @@ HBM 为 150,825,168 B，host 为 2,181,038,080 B。这些是 cache 分配量，�
 
 | 实验 | 可以支持的结论 | 当前状态 |
 | --- | --- | --- |
-| [NOSA dense 64K+1K](../../../experiments/nosa_gr_65536_1024/README.md) | Full Attention 的单请求计算成本 | 已有报告，不包含 sparse offload；计时在 nsys 进程内，不能与 sparse 的独立进程计时直接拼成严格加速比 |
-| [Resident sparse 完整模型](../../../experiments/indexer_block_sparse_profile/README.md) | `94bf521` 下 native/Triton 的完整模型前向及模块分解 | 9/29 两组 sparse run 已发布；9/30 扩展模型/cache 源码图后的当前分支尚未补测 |
+| [NOSA dense 64K+1K](../../../experiments/nosa_baseline_performance/README.md) | Full Attention 的单请求计算成本 | 已有报告，不包含 sparse offload；计时在 nsys 进程内，不能与 sparse 的独立进程计时直接拼成严格加速比 |
+| [Resident sparse 完整模型](../../../experiments/nosa_baseline_performance/README.md) | `94bf521` 下 native/Triton 的完整模型前向及模块分解 | 9/29 两组 sparse run 已发布；9/30 扩展模型/cache 源码图后的当前分支尚未补测 |
 | [Kernel MFU](../../../experiments/nosa_kernel_mfu/README.md) | `kda_main_bf16_pair_v3_development` 的完整模块检查点 | 三层 indexer 约 24.7–25.5% useful MFU；attention 仅 L31 达 40%，目标未全部完成；synthetic 对照待补测 |
 | [选块 pattern](../../../experiments/nosa_indexer_pattern_65536_1024/README.md) | QA-only 分析与旧 full-NOSA 轨迹的选择统计 | full-NOSA 受数值修复影响，待补测；不能据旧轨迹推断当前模型选择 |
 | [DeepSeek ECHO](../../../experiments/deepseek_v32_echo_prefill/README.md) | 原完整 61 层 logits 一致性、前三层 hidden/logits 对照及原 profile 记录 | MFU/cache 策略与性能归因待审计修正；KV gather 修复后完整模型性能也待补测，前三层诊断不替代完整验证 |
-| [GR serving](../../../experiments/gr_serving/README.md) | 旧 4K/16K/64K 短轨迹的请求记录、数值对照及 NOSA 内部区间 | 用户规模解释已撤回；ECHO/DeepSeek baseline 比较不成立；16 用户两轮顺序负载 run 01 因源码身份失败，无已验收替换结果 |
+| [旧 GR 实验（已结束）](experiment_organization.md#retired-gr-serving) | 旧 4K/16K/64K 短轨迹的请求记录、数值对照及 NOSA 内部区间 | 用户规模解释已撤回；ECHO/DeepSeek baseline 比较不成立；16 用户两轮顺序负载 run 01 因源码身份失败，无已验收替换结果 |
 | [CPU DRAM](../../../experiments/cpu_dram_bandwidth/README.md) | 本机 CPU 内存访问的带宽背景 | 不能替代 GPU-host 稀疏加载、CXL 或 serving 测量 |
 
 详细 run ID 与限制以各实验 README 为准。NOSA 的 64K 实验扩大了运行时上下文上限，

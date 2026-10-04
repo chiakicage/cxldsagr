@@ -138,7 +138,7 @@ host records、映射和 indexer 状态。一次完整 prefill/extend 借用双�
 等待前一个 consumer，归还前等待包括未消费预取在内的全部异步操作。
 runner 从构造到 close 绑定唯一准入 owner；其关闭只释放 session，最外层再关闭
 backend。新实现已通过 GPU 回归、真实前三层及十 block serving 的完整 hidden/logits
-检查，分配验收见[DeepSeek cache 检查点](../../docs/agents/system/echo_cache_implementation_checkpoint.md)。
+检查，分配验收见[工程 checkpoint](../../docs/agents/system/nosa_shared_cache_checkpoint.md)。
 这些工程检查不替代固定 P/NH 容量实验，也不提供新实现的性能排名。
 
 `sparse_pool_tokens` 配置 backend 每层共享容量，`host_arena_tokens` 配置全局 host
