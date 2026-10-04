@@ -131,12 +131,16 @@ def kernel_category(name):
         return "indexer_fused_prefetch"
     if "sm90_fp8_mqa_logits" in name:
         return "indexer"
-    if "sparse_mla" in name:
+    if "sparse_attn_fwd_kernel" in name or "sparse_mla" in name:
         return "sparse_mla"
+    if "sm90_fp8_gemm_1d2d_impl" in name:
+        return "deepgemm_fp8_gemm"
     if "grouped_fp8_linear" in name:
         return "grouped_expert_fp8"
     if "fp8_linear" in name:
         return "fp8_linear"
+    if "reduce_fp8_split" in name:
+        return "fp8_split_reduction"
     if "quantize_activation" in name:
         return "activation_quantization"
     if "gather_records" in name:
@@ -262,6 +266,8 @@ def _read_capture(path, *, scope_pattern=None):
                         "correlation": row.get("correlationId"),
                         "name": name,
                         "bytes": row.get("bytes"),
+                        "graph_id": row.get("graphId", 0),
+                        "graph_node_id": row.get("graphNodeId", 0),
                     }
                 )
     return scopes, apis, activities, used_tables

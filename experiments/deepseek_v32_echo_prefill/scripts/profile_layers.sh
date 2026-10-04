@@ -4,6 +4,7 @@ script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 cd -- "$script_dir/../../.."
 export PATH="$PWD/.venv/bin:$PATH"
 export PYTHONDONTWRITEBYTECODE=1
+export DG_JIT_WITH_LINEINFO=1
 if [[ "${1:-}" == --help || "${1:-}" == -h ]]; then
   python -m experiments.deepseek_v32_echo_prefill.src.profile_layers --help
   exit 0

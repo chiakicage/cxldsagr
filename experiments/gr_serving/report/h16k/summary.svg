@@ -1,359 +1,908 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1240" height="820" viewBox="0 0 1240 820">
-<rect width="100%" height="100%" fill="white"/>
-<style>text{font-family:Arial,sans-serif;font-size:13px;fill:#222}</style>
-<text x="70" y="23">Serving latency versus user population; mean = solid, p95 = dashed; all requests retain cache misses</text>
-<text x="70" y="57" font-weight="bold">deepseek_v32 · gr_serving_h200_20261002_h16k_01 · prefix 16384, candidate 128 · seed 42</text>
-<text x="70" y="85">All requests</text>
-<text x="35" y="99">ms</text>
-<path d="M 70 338.0 H 575" stroke="#ddd"/>
-<text x="62" y="342.0" text-anchor="end">0</text>
-<path d="M 70 279.25 H 575" stroke="#ddd"/>
-<text x="62" y="283.25" text-anchor="end">698</text>
-<path d="M 70 220.5 H 575" stroke="#ddd"/>
-<text x="62" y="224.5" text-anchor="end">1.4e+03</text>
-<path d="M 70 161.75 H 575" stroke="#ddd"/>
-<text x="62" y="165.75" text-anchor="end">2.09e+03</text>
-<path d="M 70 103.0 H 575" stroke="#ddd"/>
-<text x="62" y="107.0" text-anchor="end">2.79e+03</text>
-<text x="70.0" y="358" text-anchor="middle">1</text>
-<text x="76.91780821917808" y="358" text-anchor="middle">8</text>
-<text x="100.63600782778865" y="358" text-anchor="middle">32</text>
-<text x="132.26027397260273" y="358" text-anchor="middle">64</text>
-<text x="195.5088062622309" y="358" text-anchor="middle">128</text>
-<text x="322.0058708414873" y="358" text-anchor="middle">256</text>
-<text x="575.0" y="358" text-anchor="middle">512</text>
-<text x="322.5" y="378" text-anchor="middle">configured users</text>
-<polyline points="70.00,315.75 76.92,291.66 100.64,221.32 132.26,221.34 195.51,183.43 322.01,172.56 575.00,178.00" fill="none" stroke="#0072b2" stroke-width="2"/>
-<circle cx="70.00" cy="315.75" r="3.5" fill="#0072b2" stroke="#0072b2"><title>dense_prefetch, 1 users, all, n=9, mean_ms=264.465</title></circle>
-<circle cx="76.92" cy="291.66" r="3.5" fill="#0072b2" stroke="#0072b2"><title>dense_prefetch, 8 users, all, n=32, mean_ms=550.732</title></circle>
-<circle cx="100.64" cy="221.32" r="3.5" fill="#0072b2" stroke="#0072b2"><title>dense_prefetch, 32 users, all, n=32, mean_ms=1386.750</title></circle>
-<circle cx="132.26" cy="221.34" r="3.5" fill="#0072b2" stroke="#0072b2"><title>dense_prefetch, 64 users, all, n=32, mean_ms=1386.448</title></circle>
-<circle cx="195.51" cy="183.43" r="3.5" fill="#0072b2" stroke="#0072b2"><title>dense_prefetch, 128 users, all, n=32, mean_ms=1837.076</title></circle>
-<circle cx="322.01" cy="172.56" r="3.5" fill="#0072b2" stroke="#0072b2"><title>dense_prefetch, 256 users, all, n=32, mean_ms=1966.161</title></circle>
-<circle cx="575.00" cy="178.00" r="3.5" fill="#0072b2" stroke="#0072b2"><title>dense_prefetch, 512 users, all, n=32, mean_ms=1901.517</title></circle>
-<polyline points="70.00,231.23 76.92,161.95 100.64,161.69 132.26,161.75 195.51,161.55 322.01,161.51 575.00,161.58" fill="none" stroke="#0072b2" stroke-width="2" stroke-dasharray="6 4"/>
-<circle cx="70.00" cy="231.23" r="3.5" fill="white" stroke="#0072b2"><title>dense_prefetch, 1 users, all, n=9, p95_ms=1268.942</title></circle>
-<circle cx="76.92" cy="161.95" r="3.5" fill="white" stroke="#0072b2"><title>dense_prefetch, 8 users, all, n=32, p95_ms=2092.319</title></circle>
-<circle cx="100.64" cy="161.69" r="3.5" fill="white" stroke="#0072b2"><title>dense_prefetch, 32 users, all, n=32, p95_ms=2095.421</title></circle>
-<circle cx="132.26" cy="161.75" r="3.5" fill="white" stroke="#0072b2"><title>dense_prefetch, 64 users, all, n=32, p95_ms=2094.741</title></circle>
-<circle cx="195.51" cy="161.55" r="3.5" fill="white" stroke="#0072b2"><title>dense_prefetch, 128 users, all, n=32, p95_ms=2097.037</title></circle>
-<circle cx="322.01" cy="161.51" r="3.5" fill="white" stroke="#0072b2"><title>dense_prefetch, 256 users, all, n=32, p95_ms=2097.484</title></circle>
-<circle cx="575.00" cy="161.58" r="3.5" fill="white" stroke="#0072b2"><title>dense_prefetch, 512 users, all, n=32, p95_ms=2096.690</title></circle>
-<polyline points="70.00,308.71 76.92,275.94 100.64,184.69 132.26,188.82 195.51,138.77 322.01,126.01 575.00,133.88" fill="none" stroke="#d55e00" stroke-width="2"/>
-<circle cx="70.00" cy="308.71" r="3.5" fill="#d55e00" stroke="#d55e00"><title>echo, 1 users, all, n=9, mean_ms=348.151</title></circle>
-<circle cx="76.92" cy="275.94" r="3.5" fill="#d55e00" stroke="#d55e00"><title>echo, 8 users, all, n=32, mean_ms=737.541</title></circle>
-<circle cx="100.64" cy="184.69" r="3.5" fill="#d55e00" stroke="#d55e00"><title>echo, 32 users, all, n=32, mean_ms=1822.005</title></circle>
-<circle cx="132.26" cy="188.82" r="3.5" fill="#d55e00" stroke="#d55e00"><title>echo, 64 users, all, n=32, mean_ms=1772.968</title></circle>
-<circle cx="195.51" cy="138.77" r="3.5" fill="#d55e00" stroke="#d55e00"><title>echo, 128 users, all, n=32, mean_ms=2367.842</title></circle>
-<circle cx="322.01" cy="126.01" r="3.5" fill="#d55e00" stroke="#d55e00"><title>echo, 256 users, all, n=32, mean_ms=2519.476</title></circle>
-<circle cx="575.00" cy="133.88" r="3.5" fill="#d55e00" stroke="#d55e00"><title>echo, 512 users, all, n=32, mean_ms=2425.901</title></circle>
-<polyline points="70.00,201.48 76.92,103.54 100.64,103.00 132.26,112.93 195.51,103.64 322.01,108.69 575.00,112.46" fill="none" stroke="#d55e00" stroke-width="2" stroke-dasharray="6 4"/>
-<circle cx="70.00" cy="201.48" r="3.5" fill="white" stroke="#d55e00"><title>echo, 1 users, all, n=9, p95_ms=1622.500</title></circle>
-<circle cx="76.92" cy="103.54" r="3.5" fill="white" stroke="#d55e00"><title>echo, 8 users, all, n=32, p95_ms=2786.545</title></circle>
-<circle cx="100.64" cy="103.00" r="3.5" fill="white" stroke="#d55e00"><title>echo, 32 users, all, n=32, p95_ms=2792.912</title></circle>
-<circle cx="132.26" cy="112.93" r="3.5" fill="white" stroke="#d55e00"><title>echo, 64 users, all, n=32, p95_ms=2674.916</title></circle>
-<circle cx="195.51" cy="103.64" r="3.5" fill="white" stroke="#d55e00"><title>echo, 128 users, all, n=32, p95_ms=2785.336</title></circle>
-<circle cx="322.01" cy="108.69" r="3.5" fill="white" stroke="#d55e00"><title>echo, 256 users, all, n=32, p95_ms=2725.237</title></circle>
-<circle cx="575.00" cy="112.46" r="3.5" fill="white" stroke="#d55e00"><title>echo, 512 users, all, n=32, p95_ms=2680.455</title></circle>
-<polyline points="70.00,315.74 76.92,291.92 100.64,221.98 132.26,221.70 195.51,183.68 322.01,173.16 575.00,179.03" fill="none" stroke="#009e73" stroke-width="2"/>
-<circle cx="70.00" cy="315.74" r="3.5" fill="#009e73" stroke="#009e73"><title>hbm, 1 users, all, n=9, mean_ms=264.516</title></circle>
-<circle cx="76.92" cy="291.92" r="3.5" fill="#009e73" stroke="#009e73"><title>hbm, 8 users, all, n=32, mean_ms=547.633</title></circle>
-<circle cx="100.64" cy="221.98" r="3.5" fill="#009e73" stroke="#009e73"><title>hbm, 32 users, all, n=32, mean_ms=1378.887</title></circle>
-<circle cx="132.26" cy="221.70" r="3.5" fill="#009e73" stroke="#009e73"><title>hbm, 64 users, all, n=32, mean_ms=1382.217</title></circle>
-<circle cx="195.51" cy="183.68" r="3.5" fill="#009e73" stroke="#009e73"><title>hbm, 128 users, all, n=32, mean_ms=1834.090</title></circle>
-<circle cx="322.01" cy="173.16" r="3.5" fill="#009e73" stroke="#009e73"><title>hbm, 256 users, all, n=32, mean_ms=1959.133</title></circle>
-<circle cx="575.00" cy="179.03" r="3.5" fill="#009e73" stroke="#009e73"><title>hbm, 512 users, all, n=32, mean_ms=1889.357</title></circle>
-<polyline points="70.00,231.30 76.92,162.86 100.64,162.74 132.26,162.02 195.51,161.92 322.01,162.05 575.00,162.78" fill="none" stroke="#009e73" stroke-width="2" stroke-dasharray="6 4"/>
-<circle cx="70.00" cy="231.30" r="3.5" fill="white" stroke="#009e73"><title>hbm, 1 users, all, n=9, p95_ms=1268.057</title></circle>
-<circle cx="76.92" cy="162.86" r="3.5" fill="white" stroke="#009e73"><title>hbm, 8 users, all, n=32, p95_ms=2081.461</title></circle>
-<circle cx="100.64" cy="162.74" r="3.5" fill="white" stroke="#009e73"><title>hbm, 32 users, all, n=32, p95_ms=2082.909</title></circle>
-<circle cx="132.26" cy="162.02" r="3.5" fill="white" stroke="#009e73"><title>hbm, 64 users, all, n=32, p95_ms=2091.498</title></circle>
-<circle cx="195.51" cy="161.92" r="3.5" fill="white" stroke="#009e73"><title>hbm, 128 users, all, n=32, p95_ms=2092.612</title></circle>
-<circle cx="322.01" cy="162.05" r="3.5" fill="white" stroke="#009e73"><title>hbm, 256 users, all, n=32, p95_ms=2091.092</title></circle>
-<circle cx="575.00" cy="162.78" r="3.5" fill="white" stroke="#009e73"><title>hbm, 512 users, all, n=32, p95_ms=2082.440</title></circle>
-<polyline points="70.00,312.34 76.92,284.74 100.64,204.30 132.26,204.32 195.51,160.70 322.01,147.97 575.00,154.13" fill="none" stroke="#cc79a7" stroke-width="2"/>
-<circle cx="70.00" cy="312.34" r="3.5" fill="#cc79a7" stroke="#cc79a7"><title>serial_sparse, 1 users, all, n=9, mean_ms=304.998</title></circle>
-<circle cx="76.92" cy="284.74" r="3.5" fill="#cc79a7" stroke="#cc79a7"><title>serial_sparse, 8 users, all, n=32, mean_ms=633.027</title></circle>
-<circle cx="100.64" cy="204.30" r="3.5" fill="#cc79a7" stroke="#cc79a7"><title>serial_sparse, 32 users, all, n=32, mean_ms=1588.985</title></circle>
-<circle cx="132.26" cy="204.32" r="3.5" fill="#cc79a7" stroke="#cc79a7"><title>serial_sparse, 64 users, all, n=32, mean_ms=1588.715</title></circle>
-<circle cx="195.51" cy="160.70" r="3.5" fill="#cc79a7" stroke="#cc79a7"><title>serial_sparse, 128 users, all, n=32, mean_ms=2107.167</title></circle>
-<circle cx="322.01" cy="147.97" r="3.5" fill="#cc79a7" stroke="#cc79a7"><title>serial_sparse, 256 users, all, n=32, mean_ms=2258.485</title></circle>
-<circle cx="575.00" cy="154.13" r="3.5" fill="#cc79a7" stroke="#cc79a7"><title>serial_sparse, 512 users, all, n=32, mean_ms=2185.189</title></circle>
-<polyline points="70.00,216.02 76.92,136.28 100.64,135.92 132.26,135.96 195.51,134.99 322.01,135.18 575.00,135.17" fill="none" stroke="#cc79a7" stroke-width="2" stroke-dasharray="6 4"/>
-<circle cx="70.00" cy="216.02" r="3.5" fill="white" stroke="#cc79a7"><title>serial_sparse, 1 users, all, n=9, p95_ms=1449.741</title></circle>
-<circle cx="76.92" cy="136.28" r="3.5" fill="white" stroke="#cc79a7"><title>serial_sparse, 8 users, all, n=32, p95_ms=2397.405</title></circle>
-<circle cx="100.64" cy="135.92" r="3.5" fill="white" stroke="#cc79a7"><title>serial_sparse, 32 users, all, n=32, p95_ms=2401.713</title></circle>
-<circle cx="132.26" cy="135.96" r="3.5" fill="white" stroke="#cc79a7"><title>serial_sparse, 64 users, all, n=32, p95_ms=2401.231</title></circle>
-<circle cx="195.51" cy="134.99" r="3.5" fill="white" stroke="#cc79a7"><title>serial_sparse, 128 users, all, n=32, p95_ms=2412.756</title></circle>
-<circle cx="322.01" cy="135.18" r="3.5" fill="white" stroke="#cc79a7"><title>serial_sparse, 256 users, all, n=32, p95_ms=2410.494</title></circle>
-<circle cx="575.00" cy="135.17" r="3.5" fill="white" stroke="#cc79a7"><title>serial_sparse, 512 users, all, n=32, p95_ms=2410.560</title></circle>
-<text x="685" y="85">Revisits only (exclude first visit)</text>
-<text x="650" y="99">ms</text>
-<path d="M 685 338.0 H 1190" stroke="#ddd"/>
-<text x="677" y="342.0" text-anchor="end">0</text>
-<path d="M 685 279.25 H 1190" stroke="#ddd"/>
-<text x="677" y="283.25" text-anchor="end">698</text>
-<path d="M 685 220.5 H 1190" stroke="#ddd"/>
-<text x="677" y="224.5" text-anchor="end">1.4e+03</text>
-<path d="M 685 161.75 H 1190" stroke="#ddd"/>
-<text x="677" y="165.75" text-anchor="end">2.09e+03</text>
-<path d="M 685 103.0 H 1190" stroke="#ddd"/>
-<text x="677" y="107.0" text-anchor="end">2.79e+03</text>
-<text x="685.0" y="358" text-anchor="middle">1</text>
-<text x="691.917808219178" y="358" text-anchor="middle">8</text>
-<text x="715.6360078277886" y="358" text-anchor="middle">32</text>
-<text x="747.2602739726027" y="358" text-anchor="middle">64</text>
-<text x="810.5088062622309" y="358" text-anchor="middle">128</text>
-<text x="937.0058708414873" y="358" text-anchor="middle">256</text>
-<text x="1190.0" y="358" text-anchor="middle">512</text>
-<text x="937.5" y="378" text-anchor="middle">configured users</text>
-<polyline points="685.00,334.95 691.92,334.88 715.64,334.79 747.26,334.82 810.51,334.75 937.01,334.65 1190.00,334.70" fill="none" stroke="#0072b2" stroke-width="2"/>
-<circle cx="685.00" cy="334.95" r="3.5" fill="#0072b2" stroke="#0072b2"><title>dense_prefetch, 1 users, revisit, n=8, mean_ms=36.194</title></circle>
-<circle cx="691.92" cy="334.88" r="3.5" fill="#0072b2" stroke="#0072b2"><title>dense_prefetch, 8 users, revisit, n=24, mean_ms=37.044</title></circle>
-<circle cx="715.64" cy="334.79" r="3.5" fill="#0072b2" stroke="#0072b2"><title>dense_prefetch, 32 users, revisit, n=11, mean_ms=38.157</title></circle>
-<circle cx="747.26" cy="334.82" r="3.5" fill="#0072b2" stroke="#0072b2"><title>dense_prefetch, 64 users, revisit, n=11, mean_ms=37.741</title></circle>
-<circle cx="810.51" cy="334.75" r="3.5" fill="#0072b2" stroke="#0072b2"><title>dense_prefetch, 128 users, revisit, n=4, mean_ms=38.684</title></circle>
-<circle cx="937.01" cy="334.65" r="3.5" fill="#0072b2" stroke="#0072b2"><title>dense_prefetch, 256 users, revisit, n=2, mean_ms=39.798</title></circle>
-<circle cx="1190.00" cy="334.70" r="3.5" fill="#0072b2" stroke="#0072b2"><title>dense_prefetch, 512 users, revisit, n=3, mean_ms=39.224</title></circle>
-<polyline points="685.00,334.94 691.92,334.85 715.64,334.69 747.26,334.74 810.51,334.59 937.01,334.61 1190.00,334.62" fill="none" stroke="#0072b2" stroke-width="2" stroke-dasharray="6 4"/>
-<circle cx="685.00" cy="334.94" r="3.5" fill="white" stroke="#0072b2"><title>dense_prefetch, 1 users, revisit, n=8, p95_ms=36.361</title></circle>
-<circle cx="691.92" cy="334.85" r="3.5" fill="white" stroke="#0072b2"><title>dense_prefetch, 8 users, revisit, n=24, p95_ms=37.410</title></circle>
-<circle cx="715.64" cy="334.69" r="3.5" fill="white" stroke="#0072b2"><title>dense_prefetch, 32 users, revisit, n=11, p95_ms=39.345</title></circle>
-<circle cx="747.26" cy="334.74" r="3.5" fill="white" stroke="#0072b2"><title>dense_prefetch, 64 users, revisit, n=11, p95_ms=38.778</title></circle>
-<circle cx="810.51" cy="334.59" r="3.5" fill="white" stroke="#0072b2"><title>dense_prefetch, 128 users, revisit, n=4, p95_ms=40.498</title></circle>
-<circle cx="937.01" cy="334.61" r="3.5" fill="white" stroke="#0072b2"><title>dense_prefetch, 256 users, revisit, n=2, p95_ms=40.262</title></circle>
-<circle cx="1190.00" cy="334.62" r="3.5" fill="white" stroke="#0072b2"><title>dense_prefetch, 512 users, revisit, n=3, p95_ms=40.125</title></circle>
-<polyline points="685.00,333.07 691.92,333.00 715.64,332.82 747.26,332.88 810.51,332.83 937.01,332.80 1190.00,332.82" fill="none" stroke="#d55e00" stroke-width="2"/>
-<circle cx="685.00" cy="333.07" r="3.5" fill="#d55e00" stroke="#d55e00"><title>echo, 1 users, revisit, n=8, mean_ms=58.616</title></circle>
-<circle cx="691.92" cy="333.00" r="3.5" fill="#d55e00" stroke="#d55e00"><title>echo, 8 users, revisit, n=24, mean_ms=59.463</title></circle>
-<circle cx="715.64" cy="332.82" r="3.5" fill="#d55e00" stroke="#d55e00"><title>echo, 32 users, revisit, n=11, mean_ms=61.543</title></circle>
-<circle cx="747.26" cy="332.88" r="3.5" fill="#d55e00" stroke="#d55e00"><title>echo, 64 users, revisit, n=11, mean_ms=60.825</title></circle>
-<circle cx="810.51" cy="332.83" r="3.5" fill="#d55e00" stroke="#d55e00"><title>echo, 128 users, revisit, n=4, mean_ms=61.420</title></circle>
-<circle cx="937.01" cy="332.80" r="3.5" fill="#d55e00" stroke="#d55e00"><title>echo, 256 users, revisit, n=2, mean_ms=61.838</title></circle>
-<circle cx="1190.00" cy="332.82" r="3.5" fill="#d55e00" stroke="#d55e00"><title>echo, 512 users, revisit, n=3, mean_ms=61.531</title></circle>
-<polyline points="685.00,333.01 691.92,332.96 715.64,332.33 747.26,332.77 810.51,332.71 937.01,332.72 1190.00,332.73" fill="none" stroke="#d55e00" stroke-width="2" stroke-dasharray="6 4"/>
-<circle cx="685.00" cy="333.01" r="3.5" fill="white" stroke="#d55e00"><title>echo, 1 users, revisit, n=8, p95_ms=59.302</title></circle>
-<circle cx="691.92" cy="332.96" r="3.5" fill="white" stroke="#d55e00"><title>echo, 8 users, revisit, n=24, p95_ms=59.958</title></circle>
-<circle cx="715.64" cy="332.33" r="3.5" fill="white" stroke="#d55e00"><title>echo, 32 users, revisit, n=11, p95_ms=67.446</title></circle>
-<circle cx="747.26" cy="332.77" r="3.5" fill="white" stroke="#d55e00"><title>echo, 64 users, revisit, n=11, p95_ms=62.114</title></circle>
-<circle cx="810.51" cy="332.71" r="3.5" fill="white" stroke="#d55e00"><title>echo, 128 users, revisit, n=4, p95_ms=62.827</title></circle>
-<circle cx="937.01" cy="332.72" r="3.5" fill="white" stroke="#d55e00"><title>echo, 256 users, revisit, n=2, p95_ms=62.751</title></circle>
-<circle cx="1190.00" cy="332.73" r="3.5" fill="white" stroke="#d55e00"><title>echo, 512 users, revisit, n=3, p95_ms=62.620</title></circle>
-<polyline points="685.00,334.93 691.92,334.92 715.64,334.86 747.26,334.85 810.51,334.84 937.01,334.83 1190.00,334.87" fill="none" stroke="#009e73" stroke-width="2"/>
-<circle cx="685.00" cy="334.93" r="3.5" fill="#009e73" stroke="#009e73"><title>hbm, 1 users, revisit, n=8, mean_ms=36.509</title></circle>
-<circle cx="691.92" cy="334.92" r="3.5" fill="#009e73" stroke="#009e73"><title>hbm, 8 users, revisit, n=24, mean_ms=36.614</title></circle>
-<circle cx="715.64" cy="334.86" r="3.5" fill="#009e73" stroke="#009e73"><title>hbm, 32 users, revisit, n=11, mean_ms=37.338</title></circle>
-<circle cx="747.26" cy="334.85" r="3.5" fill="#009e73" stroke="#009e73"><title>hbm, 64 users, revisit, n=11, mean_ms=37.401</title></circle>
-<circle cx="810.51" cy="334.84" r="3.5" fill="#009e73" stroke="#009e73"><title>hbm, 128 users, revisit, n=4, mean_ms=37.519</title></circle>
-<circle cx="937.01" cy="334.83" r="3.5" fill="#009e73" stroke="#009e73"><title>hbm, 256 users, revisit, n=2, mean_ms=37.650</title></circle>
-<circle cx="1190.00" cy="334.87" r="3.5" fill="#009e73" stroke="#009e73"><title>hbm, 512 users, revisit, n=3, mean_ms=37.168</title></circle>
-<polyline points="685.00,334.89 691.92,334.89 715.64,334.80 747.26,334.78 810.51,334.80 937.01,334.83 1190.00,334.84" fill="none" stroke="#009e73" stroke-width="2" stroke-dasharray="6 4"/>
-<circle cx="685.00" cy="334.89" r="3.5" fill="white" stroke="#009e73"><title>hbm, 1 users, revisit, n=8, p95_ms=37.007</title></circle>
-<circle cx="691.92" cy="334.89" r="3.5" fill="white" stroke="#009e73"><title>hbm, 8 users, revisit, n=24, p95_ms=36.907</title></circle>
-<circle cx="715.64" cy="334.80" r="3.5" fill="white" stroke="#009e73"><title>hbm, 32 users, revisit, n=11, p95_ms=37.985</title></circle>
-<circle cx="747.26" cy="334.78" r="3.5" fill="white" stroke="#009e73"><title>hbm, 64 users, revisit, n=11, p95_ms=38.272</title></circle>
-<circle cx="810.51" cy="334.80" r="3.5" fill="white" stroke="#009e73"><title>hbm, 128 users, revisit, n=4, p95_ms=38.062</title></circle>
-<circle cx="937.01" cy="334.83" r="3.5" fill="white" stroke="#009e73"><title>hbm, 256 users, revisit, n=2, p95_ms=37.701</title></circle>
-<circle cx="1190.00" cy="334.84" r="3.5" fill="white" stroke="#009e73"><title>hbm, 512 users, revisit, n=3, p95_ms=37.511</title></circle>
-<polyline points="685.00,334.23 691.92,334.16 715.64,334.09 747.26,334.13 810.51,334.09 937.01,334.05 1190.00,334.09" fill="none" stroke="#cc79a7" stroke-width="2"/>
-<circle cx="685.00" cy="334.23" r="3.5" fill="#cc79a7" stroke="#cc79a7"><title>serial_sparse, 1 users, revisit, n=8, mean_ms=44.844</title></circle>
-<circle cx="691.92" cy="334.16" r="3.5" fill="#cc79a7" stroke="#cc79a7"><title>serial_sparse, 8 users, revisit, n=24, mean_ms=45.628</title></circle>
-<circle cx="715.64" cy="334.09" r="3.5" fill="#cc79a7" stroke="#cc79a7"><title>serial_sparse, 32 users, revisit, n=11, mean_ms=46.428</title></circle>
-<circle cx="747.26" cy="334.13" r="3.5" fill="#cc79a7" stroke="#cc79a7"><title>serial_sparse, 64 users, revisit, n=11, mean_ms=45.983</title></circle>
-<circle cx="810.51" cy="334.09" r="3.5" fill="#cc79a7" stroke="#cc79a7"><title>serial_sparse, 128 users, revisit, n=4, mean_ms=46.431</title></circle>
-<circle cx="937.01" cy="334.05" r="3.5" fill="#cc79a7" stroke="#cc79a7"><title>serial_sparse, 256 users, revisit, n=2, mean_ms=46.913</title></circle>
-<circle cx="1190.00" cy="334.09" r="3.5" fill="#cc79a7" stroke="#cc79a7"><title>serial_sparse, 512 users, revisit, n=3, mean_ms=46.437</title></circle>
-<polyline points="685.00,334.22 691.92,334.14 715.64,333.99 747.26,334.08 810.51,334.01 937.01,334.00 1190.00,334.00" fill="none" stroke="#cc79a7" stroke-width="2" stroke-dasharray="6 4"/>
-<circle cx="685.00" cy="334.22" r="3.5" fill="white" stroke="#cc79a7"><title>serial_sparse, 1 users, revisit, n=8, p95_ms=44.970</title></circle>
-<circle cx="691.92" cy="334.14" r="3.5" fill="white" stroke="#cc79a7"><title>serial_sparse, 8 users, revisit, n=24, p95_ms=45.845</title></circle>
-<circle cx="715.64" cy="333.99" r="3.5" fill="white" stroke="#cc79a7"><title>serial_sparse, 32 users, revisit, n=11, p95_ms=47.671</title></circle>
-<circle cx="747.26" cy="334.08" r="3.5" fill="white" stroke="#cc79a7"><title>serial_sparse, 64 users, revisit, n=11, p95_ms=46.586</title></circle>
-<circle cx="810.51" cy="334.01" r="3.5" fill="white" stroke="#cc79a7"><title>serial_sparse, 128 users, revisit, n=4, p95_ms=47.408</title></circle>
-<circle cx="937.01" cy="334.00" r="3.5" fill="white" stroke="#cc79a7"><title>serial_sparse, 256 users, revisit, n=2, p95_ms=47.564</title></circle>
-<circle cx="1190.00" cy="334.00" r="3.5" fill="white" stroke="#cc79a7"><title>serial_sparse, 512 users, revisit, n=3, p95_ms=47.496</title></circle>
-<path d="M 70 406 h 20" stroke="#0072b2" stroke-width="3"/>
-<text x="96" y="410">dense_prefetch</text>
-<path d="M 350 406 h 20" stroke="#d55e00" stroke-width="3"/>
-<text x="376" y="410">echo</text>
-<path d="M 630 406 h 20" stroke="#009e73" stroke-width="3"/>
-<text x="656" y="410">hbm</text>
-<path d="M 910 406 h 20" stroke="#cc79a7" stroke-width="3"/>
-<text x="936" y="410">serial_sparse</text>
-<text x="70" y="447" font-weight="bold">nosa · gr_serving_h200_20261002_h16k_01 · prefix 16384, candidate 128 · seed 42</text>
-<text x="70" y="475">All requests</text>
-<text x="35" y="489">ms</text>
-<path d="M 70 728.0 H 575" stroke="#ddd"/>
-<text x="62" y="732.0" text-anchor="end">0</text>
-<path d="M 70 669.25 H 575" stroke="#ddd"/>
-<text x="62" y="673.25" text-anchor="end">302</text>
-<path d="M 70 610.5 H 575" stroke="#ddd"/>
-<text x="62" y="614.5" text-anchor="end">604</text>
-<path d="M 70 551.75 H 575" stroke="#ddd"/>
-<text x="62" y="555.75" text-anchor="end">906</text>
-<path d="M 70 493.0 H 575" stroke="#ddd"/>
-<text x="62" y="497.0" text-anchor="end">1.21e+03</text>
-<text x="70.0" y="748" text-anchor="middle">1</text>
-<text x="76.91780821917808" y="748" text-anchor="middle">8</text>
-<text x="100.63600782778865" y="748" text-anchor="middle">32</text>
-<text x="132.26027397260273" y="748" text-anchor="middle">64</text>
-<text x="195.5088062622309" y="748" text-anchor="middle">128</text>
-<text x="322.0058708414873" y="748" text-anchor="middle">256</text>
-<text x="575.0" y="748" text-anchor="middle">512</text>
-<text x="322.5" y="768" text-anchor="middle">configured users</text>
-<polyline points="70.00,703.95 76.92,683.75 100.64,624.98 132.26,624.96 195.51,593.15 322.01,584.34 575.00,588.88" fill="none" stroke="#0072b2" stroke-width="2"/>
-<circle cx="70.00" cy="703.95" r="3.5" fill="#0072b2" stroke="#0072b2"><title>dense_prefetch, 1 users, all, n=9, mean_ms=123.564</title></circle>
-<circle cx="76.92" cy="683.75" r="3.5" fill="#0072b2" stroke="#0072b2"><title>dense_prefetch, 8 users, all, n=32, mean_ms=227.346</title></circle>
-<circle cx="100.64" cy="624.98" r="3.5" fill="#0072b2" stroke="#0072b2"><title>dense_prefetch, 32 users, all, n=32, mean_ms=529.337</title></circle>
-<circle cx="132.26" cy="624.96" r="3.5" fill="#0072b2" stroke="#0072b2"><title>dense_prefetch, 64 users, all, n=32, mean_ms=529.423</title></circle>
-<circle cx="195.51" cy="593.15" r="3.5" fill="#0072b2" stroke="#0072b2"><title>dense_prefetch, 128 users, all, n=32, mean_ms=692.861</title></circle>
-<circle cx="322.01" cy="584.34" r="3.5" fill="#0072b2" stroke="#0072b2"><title>dense_prefetch, 256 users, all, n=32, mean_ms=738.163</title></circle>
-<circle cx="575.00" cy="588.88" r="3.5" fill="#0072b2" stroke="#0072b2"><title>dense_prefetch, 512 users, all, n=32, mean_ms=714.823</title></circle>
-<polyline points="70.00,633.59 76.92,575.44 100.64,574.94 132.26,574.99 195.51,573.85 322.01,574.20 575.00,574.71" fill="none" stroke="#0072b2" stroke-width="2" stroke-dasharray="6 4"/>
-<circle cx="70.00" cy="633.59" r="3.5" fill="white" stroke="#0072b2"><title>dense_prefetch, 1 users, all, n=9, p95_ms=485.110</title></circle>
-<circle cx="76.92" cy="575.44" r="3.5" fill="white" stroke="#0072b2"><title>dense_prefetch, 8 users, all, n=32, p95_ms=783.869</title></circle>
-<circle cx="100.64" cy="574.94" r="3.5" fill="white" stroke="#0072b2"><title>dense_prefetch, 32 users, all, n=32, p95_ms=786.444</title></circle>
-<circle cx="132.26" cy="574.99" r="3.5" fill="white" stroke="#0072b2"><title>dense_prefetch, 64 users, all, n=32, p95_ms=786.176</title></circle>
-<circle cx="195.51" cy="573.85" r="3.5" fill="white" stroke="#0072b2"><title>dense_prefetch, 128 users, all, n=32, p95_ms=792.049</title></circle>
-<circle cx="322.01" cy="574.20" r="3.5" fill="white" stroke="#0072b2"><title>dense_prefetch, 256 users, all, n=32, p95_ms=790.256</title></circle>
-<circle cx="575.00" cy="574.71" r="3.5" fill="white" stroke="#0072b2"><title>dense_prefetch, 512 users, all, n=32, p95_ms=787.625</title></circle>
-<polyline points="70.00,709.69 76.92,690.46 100.64,637.70 132.26,637.56 195.51,612.94 322.01,609.11 575.00,616.11" fill="none" stroke="#d55e00" stroke-width="2"/>
-<circle cx="70.00" cy="709.69" r="3.5" fill="#d55e00" stroke="#d55e00"><title>hbm, 1 users, all, n=9, mean_ms=94.077</title></circle>
-<circle cx="76.92" cy="690.46" r="3.5" fill="#d55e00" stroke="#d55e00"><title>hbm, 8 users, all, n=32, mean_ms=192.877</title></circle>
-<circle cx="100.64" cy="637.70" r="3.5" fill="#d55e00" stroke="#d55e00"><title>hbm, 32 users, all, n=32, mean_ms=463.983</title></circle>
-<circle cx="132.26" cy="637.56" r="3.5" fill="#d55e00" stroke="#d55e00"><title>hbm, 64 users, all, n=32, mean_ms=464.690</title></circle>
-<circle cx="195.51" cy="612.94" r="3.5" fill="#d55e00" stroke="#d55e00"><title>hbm, 128 users, all, n=32, mean_ms=591.169</title></circle>
-<circle cx="322.01" cy="609.11" r="3.5" fill="#d55e00" stroke="#d55e00"><title>hbm, 256 users, all, n=32, mean_ms=610.885</title></circle>
-<circle cx="575.00" cy="616.11" r="3.5" fill="#d55e00" stroke="#d55e00"><title>hbm, 512 users, all, n=32, mean_ms=574.891</title></circle>
-<polyline points="70.00,654.69 76.92,608.72 100.64,609.01 132.26,609.01 195.51,609.12 322.01,608.54 575.00,608.80" fill="none" stroke="#d55e00" stroke-width="2" stroke-dasharray="6 4"/>
-<circle cx="70.00" cy="654.69" r="3.5" fill="white" stroke="#d55e00"><title>hbm, 1 users, all, n=9, p95_ms=376.650</title></circle>
-<circle cx="76.92" cy="608.72" r="3.5" fill="white" stroke="#d55e00"><title>hbm, 8 users, all, n=32, p95_ms=612.900</title></circle>
-<circle cx="100.64" cy="609.01" r="3.5" fill="white" stroke="#d55e00"><title>hbm, 32 users, all, n=32, p95_ms=611.360</title></circle>
-<circle cx="132.26" cy="609.01" r="3.5" fill="white" stroke="#d55e00"><title>hbm, 64 users, all, n=32, p95_ms=611.396</title></circle>
-<circle cx="195.51" cy="609.12" r="3.5" fill="white" stroke="#d55e00"><title>hbm, 128 users, all, n=32, p95_ms=610.835</title></circle>
-<circle cx="322.01" cy="608.54" r="3.5" fill="white" stroke="#d55e00"><title>hbm, 256 users, all, n=32, p95_ms=613.794</title></circle>
-<circle cx="575.00" cy="608.80" r="3.5" fill="white" stroke="#d55e00"><title>hbm, 512 users, all, n=32, p95_ms=612.482</title></circle>
-<polyline points="70.00,703.28 76.92,681.98 100.64,620.12 132.26,620.12 195.51,586.98 322.01,577.41 575.00,582.18" fill="none" stroke="#009e73" stroke-width="2"/>
-<circle cx="70.00" cy="703.28" r="3.5" fill="#009e73" stroke="#009e73"><title>overlap, 1 users, all, n=9, mean_ms=127.007</title></circle>
-<circle cx="76.92" cy="681.98" r="3.5" fill="#009e73" stroke="#009e73"><title>overlap, 8 users, all, n=32, mean_ms=236.452</title></circle>
-<circle cx="100.64" cy="620.12" r="3.5" fill="#009e73" stroke="#009e73"><title>overlap, 32 users, all, n=32, mean_ms=554.316</title></circle>
-<circle cx="132.26" cy="620.12" r="3.5" fill="#009e73" stroke="#009e73"><title>overlap, 64 users, all, n=32, mean_ms=554.314</title></circle>
-<circle cx="195.51" cy="586.98" r="3.5" fill="#009e73" stroke="#009e73"><title>overlap, 128 users, all, n=32, mean_ms=724.602</title></circle>
-<circle cx="322.01" cy="577.41" r="3.5" fill="#009e73" stroke="#009e73"><title>overlap, 256 users, all, n=32, mean_ms=773.725</title></circle>
-<circle cx="575.00" cy="582.18" r="3.5" fill="#009e73" stroke="#009e73"><title>overlap, 512 users, all, n=32, mean_ms=749.242</title></circle>
-<polyline points="70.00,628.87 76.92,567.76 100.64,567.17 132.26,567.43 195.51,567.02 322.01,566.70 575.00,567.17" fill="none" stroke="#009e73" stroke-width="2" stroke-dasharray="6 4"/>
-<circle cx="70.00" cy="628.87" r="3.5" fill="white" stroke="#009e73"><title>overlap, 1 users, all, n=9, p95_ms=509.320</title></circle>
-<circle cx="76.92" cy="567.76" r="3.5" fill="white" stroke="#009e73"><title>overlap, 8 users, all, n=32, p95_ms=823.321</title></circle>
-<circle cx="100.64" cy="567.17" r="3.5" fill="white" stroke="#009e73"><title>overlap, 32 users, all, n=32, p95_ms=826.342</title></circle>
-<circle cx="132.26" cy="567.43" r="3.5" fill="white" stroke="#009e73"><title>overlap, 64 users, all, n=32, p95_ms=825.035</title></circle>
-<circle cx="195.51" cy="567.02" r="3.5" fill="white" stroke="#009e73"><title>overlap, 128 users, all, n=32, p95_ms=827.154</title></circle>
-<circle cx="322.01" cy="566.70" r="3.5" fill="white" stroke="#009e73"><title>overlap, 256 users, all, n=32, p95_ms=828.767</title></circle>
-<circle cx="575.00" cy="567.17" r="3.5" fill="white" stroke="#009e73"><title>overlap, 512 users, all, n=32, p95_ms=826.386</title></circle>
-<polyline points="70.00,702.56 76.92,665.91 100.64,588.54 132.26,614.89 195.51,565.66 322.01,565.90 575.00,575.10" fill="none" stroke="#cc79a7" stroke-width="2"/>
-<circle cx="70.00" cy="702.56" r="3.5" fill="#cc79a7" stroke="#cc79a7"><title>serial_sparse, 1 users, all, n=9, mean_ms=130.707</title></circle>
-<circle cx="76.92" cy="665.91" r="3.5" fill="#cc79a7" stroke="#cc79a7"><title>serial_sparse, 8 users, all, n=32, mean_ms=319.022</title></circle>
-<circle cx="100.64" cy="588.54" r="3.5" fill="#cc79a7" stroke="#cc79a7"><title>serial_sparse, 32 users, all, n=32, mean_ms=716.559</title></circle>
-<circle cx="132.26" cy="614.89" r="3.5" fill="#cc79a7" stroke="#cc79a7"><title>serial_sparse, 64 users, all, n=32, mean_ms=581.173</title></circle>
-<circle cx="195.51" cy="565.66" r="3.5" fill="#cc79a7" stroke="#cc79a7"><title>serial_sparse, 128 users, all, n=32, mean_ms=834.136</title></circle>
-<circle cx="322.01" cy="565.90" r="3.5" fill="#cc79a7" stroke="#cc79a7"><title>serial_sparse, 256 users, all, n=32, mean_ms=832.871</title></circle>
-<circle cx="575.00" cy="575.10" r="3.5" fill="#cc79a7" stroke="#cc79a7"><title>serial_sparse, 512 users, all, n=32, mean_ms=785.620</title></circle>
-<polyline points="70.00,624.87 76.92,494.34 100.64,494.22 132.26,557.01 195.51,493.00 322.01,529.06 575.00,559.39" fill="none" stroke="#cc79a7" stroke-width="2" stroke-dasharray="6 4"/>
-<circle cx="70.00" cy="624.87" r="3.5" fill="white" stroke="#cc79a7"><title>serial_sparse, 1 users, all, n=9, p95_ms=529.888</title></circle>
-<circle cx="76.92" cy="494.34" r="3.5" fill="white" stroke="#cc79a7"><title>serial_sparse, 8 users, all, n=32, p95_ms=1200.574</title></circle>
-<circle cx="100.64" cy="494.22" r="3.5" fill="white" stroke="#cc79a7"><title>serial_sparse, 32 users, all, n=32, p95_ms=1201.186</title></circle>
-<circle cx="132.26" cy="557.01" r="3.5" fill="white" stroke="#cc79a7"><title>serial_sparse, 64 users, all, n=32, p95_ms=878.569</title></circle>
-<circle cx="195.51" cy="493.00" r="3.5" fill="white" stroke="#cc79a7"><title>serial_sparse, 128 users, all, n=32, p95_ms=1207.458</title></circle>
-<circle cx="322.01" cy="529.06" r="3.5" fill="white" stroke="#cc79a7"><title>serial_sparse, 256 users, all, n=32, p95_ms=1022.202</title></circle>
-<circle cx="575.00" cy="559.39" r="3.5" fill="white" stroke="#cc79a7"><title>serial_sparse, 512 users, all, n=32, p95_ms=866.313</title></circle>
-<text x="685" y="475">Revisits only (exclude first visit)</text>
-<text x="650" y="489">ms</text>
-<path d="M 685 728.0 H 1190" stroke="#ddd"/>
-<text x="677" y="732.0" text-anchor="end">0</text>
-<path d="M 685 669.25 H 1190" stroke="#ddd"/>
-<text x="677" y="673.25" text-anchor="end">302</text>
-<path d="M 685 610.5 H 1190" stroke="#ddd"/>
-<text x="677" y="614.5" text-anchor="end">604</text>
-<path d="M 685 551.75 H 1190" stroke="#ddd"/>
-<text x="677" y="555.75" text-anchor="end">906</text>
-<path d="M 685 493.0 H 1190" stroke="#ddd"/>
-<text x="677" y="497.0" text-anchor="end">1.21e+03</text>
-<text x="685.0" y="748" text-anchor="middle">1</text>
-<text x="691.917808219178" y="748" text-anchor="middle">8</text>
-<text x="715.6360078277886" y="748" text-anchor="middle">32</text>
-<text x="747.2602739726027" y="748" text-anchor="middle">64</text>
-<text x="810.5088062622309" y="748" text-anchor="middle">128</text>
-<text x="937.0058708414873" y="748" text-anchor="middle">256</text>
-<text x="1190.0" y="748" text-anchor="middle">512</text>
-<text x="937.5" y="768" text-anchor="middle">configured users</text>
-<polyline points="685.00,719.94 691.92,719.78 715.64,719.68 747.26,719.63 810.51,719.59 937.01,719.63 1190.00,719.60" fill="none" stroke="#0072b2" stroke-width="2"/>
-<circle cx="685.00" cy="719.94" r="3.5" fill="#0072b2" stroke="#0072b2"><title>dense_prefetch, 1 users, revisit, n=8, mean_ms=41.408</title></circle>
-<circle cx="691.92" cy="719.78" r="3.5" fill="#0072b2" stroke="#0072b2"><title>dense_prefetch, 8 users, revisit, n=24, mean_ms=42.236</title></circle>
-<circle cx="715.64" cy="719.68" r="3.5" fill="#0072b2" stroke="#0072b2"><title>dense_prefetch, 32 users, revisit, n=11, mean_ms=42.740</title></circle>
-<circle cx="747.26" cy="719.63" r="3.5" fill="#0072b2" stroke="#0072b2"><title>dense_prefetch, 64 users, revisit, n=11, mean_ms=42.983</title></circle>
-<circle cx="810.51" cy="719.59" r="3.5" fill="#0072b2" stroke="#0072b2"><title>dense_prefetch, 128 users, revisit, n=4, mean_ms=43.189</title></circle>
-<circle cx="937.01" cy="719.63" r="3.5" fill="#0072b2" stroke="#0072b2"><title>dense_prefetch, 256 users, revisit, n=2, mean_ms=43.020</title></circle>
-<circle cx="1190.00" cy="719.60" r="3.5" fill="#0072b2" stroke="#0072b2"><title>dense_prefetch, 512 users, revisit, n=3, mean_ms=43.143</title></circle>
-<polyline points="685.00,719.91 691.92,719.54 715.64,719.61 747.26,719.34 810.51,719.51 937.01,719.59 1190.00,719.48" fill="none" stroke="#0072b2" stroke-width="2" stroke-dasharray="6 4"/>
-<circle cx="685.00" cy="719.91" r="3.5" fill="white" stroke="#0072b2"><title>dense_prefetch, 1 users, revisit, n=8, p95_ms=41.549</title></circle>
-<circle cx="691.92" cy="719.54" r="3.5" fill="white" stroke="#0072b2"><title>dense_prefetch, 8 users, revisit, n=24, p95_ms=43.467</title></circle>
-<circle cx="715.64" cy="719.61" r="3.5" fill="white" stroke="#0072b2"><title>dense_prefetch, 32 users, revisit, n=11, p95_ms=43.129</title></circle>
-<circle cx="747.26" cy="719.34" r="3.5" fill="white" stroke="#0072b2"><title>dense_prefetch, 64 users, revisit, n=11, p95_ms=44.471</title></circle>
-<circle cx="810.51" cy="719.51" r="3.5" fill="white" stroke="#0072b2"><title>dense_prefetch, 128 users, revisit, n=4, p95_ms=43.612</title></circle>
-<circle cx="937.01" cy="719.59" r="3.5" fill="white" stroke="#0072b2"><title>dense_prefetch, 256 users, revisit, n=2, p95_ms=43.217</title></circle>
-<circle cx="1190.00" cy="719.48" r="3.5" fill="white" stroke="#0072b2"><title>dense_prefetch, 512 users, revisit, n=3, p95_ms=43.770</title></circle>
-<polyline points="685.00,722.17 691.92,717.58 715.64,691.55 747.26,691.43 810.51,637.44 937.01,608.93 1190.00,684.55" fill="none" stroke="#d55e00" stroke-width="2"/>
-<circle cx="685.00" cy="722.17" r="3.5" fill="#d55e00" stroke="#d55e00"><title>hbm, 1 users, revisit, n=8, mean_ms=29.962</title></circle>
-<circle cx="691.92" cy="717.58" r="3.5" fill="#d55e00" stroke="#d55e00"><title>hbm, 8 users, revisit, n=24, mean_ms=53.533</title></circle>
-<circle cx="715.64" cy="691.55" r="3.5" fill="#d55e00" stroke="#d55e00"><title>hbm, 32 users, revisit, n=11, mean_ms=187.272</title></circle>
-<circle cx="747.26" cy="691.43" r="3.5" fill="#d55e00" stroke="#d55e00"><title>hbm, 64 users, revisit, n=11, mean_ms=187.884</title></circle>
-<circle cx="810.51" cy="637.44" r="3.5" fill="#d55e00" stroke="#d55e00"><title>hbm, 128 users, revisit, n=4, mean_ms=465.307</title></circle>
-<circle cx="937.01" cy="608.93" r="3.5" fill="#d55e00" stroke="#d55e00"><title>hbm, 256 users, revisit, n=2, mean_ms=611.776</title></circle>
-<circle cx="1190.00" cy="684.55" r="3.5" fill="#d55e00" stroke="#d55e00"><title>hbm, 512 users, revisit, n=3, mean_ms=223.266</title></circle>
-<polyline points="685.00,721.95 691.92,722.13 715.64,609.39 747.26,609.29 810.51,609.00 937.01,608.82 1190.00,620.46" fill="none" stroke="#d55e00" stroke-width="2" stroke-dasharray="6 4"/>
-<circle cx="685.00" cy="721.95" r="3.5" fill="white" stroke="#d55e00"><title>hbm, 1 users, revisit, n=8, p95_ms=31.065</title></circle>
-<circle cx="691.92" cy="722.13" r="3.5" fill="white" stroke="#d55e00"><title>hbm, 8 users, revisit, n=24, p95_ms=30.180</title></circle>
-<circle cx="715.64" cy="609.39" r="3.5" fill="white" stroke="#d55e00"><title>hbm, 32 users, revisit, n=11, p95_ms=609.434</title></circle>
-<circle cx="747.26" cy="609.29" r="3.5" fill="white" stroke="#d55e00"><title>hbm, 64 users, revisit, n=11, p95_ms=609.928</title></circle>
-<circle cx="810.51" cy="609.00" r="3.5" fill="white" stroke="#d55e00"><title>hbm, 128 users, revisit, n=4, p95_ms=611.458</title></circle>
-<circle cx="937.01" cy="608.82" r="3.5" fill="white" stroke="#d55e00"><title>hbm, 256 users, revisit, n=2, p95_ms=612.374</title></circle>
-<circle cx="1190.00" cy="620.46" r="3.5" fill="white" stroke="#d55e00"><title>hbm, 512 users, revisit, n=3, p95_ms=552.540</title></circle>
-<polyline points="685.00,720.19 691.92,720.02 715.64,719.89 747.26,719.88 810.51,719.74 937.01,719.75 1190.00,719.80" fill="none" stroke="#009e73" stroke-width="2"/>
-<circle cx="685.00" cy="720.19" r="3.5" fill="#009e73" stroke="#009e73"><title>overlap, 1 users, revisit, n=8, mean_ms=40.150</title></circle>
-<circle cx="691.92" cy="720.02" r="3.5" fill="#009e73" stroke="#009e73"><title>overlap, 8 users, revisit, n=24, mean_ms=41.002</title></circle>
-<circle cx="715.64" cy="719.89" r="3.5" fill="#009e73" stroke="#009e73"><title>overlap, 32 users, revisit, n=11, mean_ms=41.691</title></circle>
-<circle cx="747.26" cy="719.88" r="3.5" fill="#009e73" stroke="#009e73"><title>overlap, 64 users, revisit, n=11, mean_ms=41.730</title></circle>
-<circle cx="810.51" cy="719.74" r="3.5" fill="#009e73" stroke="#009e73"><title>overlap, 128 users, revisit, n=4, mean_ms=42.444</title></circle>
-<circle cx="937.01" cy="719.75" r="3.5" fill="#009e73" stroke="#009e73"><title>overlap, 256 users, revisit, n=2, mean_ms=42.384</title></circle>
-<circle cx="1190.00" cy="719.80" r="3.5" fill="#009e73" stroke="#009e73"><title>overlap, 512 users, revisit, n=3, mean_ms=42.126</title></circle>
-<polyline points="685.00,720.13 691.92,719.89 715.64,719.67 747.26,719.82 810.51,719.58 937.01,719.75 1190.00,719.72" fill="none" stroke="#009e73" stroke-width="2" stroke-dasharray="6 4"/>
-<circle cx="685.00" cy="720.13" r="3.5" fill="white" stroke="#009e73"><title>overlap, 1 users, revisit, n=8, p95_ms=40.416</title></circle>
-<circle cx="691.92" cy="719.89" r="3.5" fill="white" stroke="#009e73"><title>overlap, 8 users, revisit, n=24, p95_ms=41.653</title></circle>
-<circle cx="715.64" cy="719.67" r="3.5" fill="white" stroke="#009e73"><title>overlap, 32 users, revisit, n=11, p95_ms=42.808</title></circle>
-<circle cx="747.26" cy="719.82" r="3.5" fill="white" stroke="#009e73"><title>overlap, 64 users, revisit, n=11, p95_ms=42.045</title></circle>
-<circle cx="810.51" cy="719.58" r="3.5" fill="white" stroke="#009e73"><title>overlap, 128 users, revisit, n=4, p95_ms=43.243</title></circle>
-<circle cx="937.01" cy="719.75" r="3.5" fill="white" stroke="#009e73"><title>overlap, 256 users, revisit, n=2, p95_ms=42.395</title></circle>
-<circle cx="1190.00" cy="719.72" r="3.5" fill="white" stroke="#009e73"><title>overlap, 512 users, revisit, n=3, p95_ms=42.560</title></circle>
-<polyline points="685.00,720.22 691.92,720.20 715.64,720.12 747.26,719.99 810.51,719.94 937.01,719.71 1190.00,719.88" fill="none" stroke="#cc79a7" stroke-width="2"/>
-<circle cx="685.00" cy="720.22" r="3.5" fill="#cc79a7" stroke="#cc79a7"><title>serial_sparse, 1 users, revisit, n=8, mean_ms=39.997</title></circle>
-<circle cx="691.92" cy="720.20" r="3.5" fill="#cc79a7" stroke="#cc79a7"><title>serial_sparse, 8 users, revisit, n=24, mean_ms=40.054</title></circle>
-<circle cx="715.64" cy="720.12" r="3.5" fill="#cc79a7" stroke="#cc79a7"><title>serial_sparse, 32 users, revisit, n=11, mean_ms=40.488</title></circle>
-<circle cx="747.26" cy="719.99" r="3.5" fill="#cc79a7" stroke="#cc79a7"><title>serial_sparse, 64 users, revisit, n=11, mean_ms=41.148</title></circle>
-<circle cx="810.51" cy="719.94" r="3.5" fill="#cc79a7" stroke="#cc79a7"><title>serial_sparse, 128 users, revisit, n=4, mean_ms=41.408</title></circle>
-<circle cx="937.01" cy="719.71" r="3.5" fill="#cc79a7" stroke="#cc79a7"><title>serial_sparse, 256 users, revisit, n=2, mean_ms=42.607</title></circle>
-<circle cx="1190.00" cy="719.88" r="3.5" fill="#cc79a7" stroke="#cc79a7"><title>serial_sparse, 512 users, revisit, n=3, mean_ms=41.721</title></circle>
-<polyline points="685.00,720.19 691.92,720.12 715.64,720.04 747.26,719.89 810.51,719.76 937.01,719.69 1190.00,719.75" fill="none" stroke="#cc79a7" stroke-width="2" stroke-dasharray="6 4"/>
-<circle cx="685.00" cy="720.19" r="3.5" fill="white" stroke="#cc79a7"><title>serial_sparse, 1 users, revisit, n=8, p95_ms=40.128</title></circle>
-<circle cx="691.92" cy="720.12" r="3.5" fill="white" stroke="#cc79a7"><title>serial_sparse, 8 users, revisit, n=24, p95_ms=40.498</title></circle>
-<circle cx="715.64" cy="720.04" r="3.5" fill="white" stroke="#cc79a7"><title>serial_sparse, 32 users, revisit, n=11, p95_ms=40.875</title></circle>
-<circle cx="747.26" cy="719.89" r="3.5" fill="white" stroke="#cc79a7"><title>serial_sparse, 64 users, revisit, n=11, p95_ms=41.691</title></circle>
-<circle cx="810.51" cy="719.76" r="3.5" fill="white" stroke="#cc79a7"><title>serial_sparse, 128 users, revisit, n=4, p95_ms=42.336</title></circle>
-<circle cx="937.01" cy="719.69" r="3.5" fill="white" stroke="#cc79a7"><title>serial_sparse, 256 users, revisit, n=2, p95_ms=42.715</title></circle>
-<circle cx="1190.00" cy="719.75" r="3.5" fill="white" stroke="#cc79a7"><title>serial_sparse, 512 users, revisit, n=3, p95_ms=42.399</title></circle>
-<path d="M 70 796 h 20" stroke="#0072b2" stroke-width="3"/>
-<text x="96" y="800">dense_prefetch</text>
-<path d="M 350 796 h 20" stroke="#d55e00" stroke-width="3"/>
-<text x="376" y="800">hbm</text>
-<path d="M 630 796 h 20" stroke="#009e73" stroke-width="3"/>
-<text x="656" y="800">overlap</text>
-<path d="M 910 796 h 20" stroke="#cc79a7" stroke-width="3"/>
-<text x="936" y="800">serial_sparse</text>
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="864pt" height="288pt" viewBox="0 0 864 288" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.11.1, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 288 
+L 864 288 
+L 864 0 
+L 0 0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 49.451021 253.998979 
+L 430.86125 253.998979 
+L 430.86125 50.524861 
+L 49.451021 50.524861 
+z
+" style="fill: #ffffff"/>
+   </g>
+   <g id="matplotlib.axis_1">
+    <g id="xtick_1">
+     <g id="line2d_1">
+      <defs>
+       <path id="m4de23e7244" d="M 0 0 
+L 0 3.5 
+" style="stroke: #000000; stroke-width: 0.8"/>
+      </defs>
+      <g>
+       <use xlink:href="#m4de23e7244" x="66.78785" y="253.998979" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_1">
+      <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle" x="66.78785" y="268.596635" transform="rotate(-0 66.78785 268.596635)">1</text>
+     </g>
+    </g>
+    <g id="xtick_2">
+     <g id="line2d_2">
+      <g>
+       <use xlink:href="#m4de23e7244" x="124.577278" y="253.998979" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_2">
+      <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle" x="124.577278" y="268.596635" transform="rotate(-0 124.577278 268.596635)">8</text>
+     </g>
+    </g>
+    <g id="xtick_3">
+     <g id="line2d_3">
+      <g>
+       <use xlink:href="#m4de23e7244" x="182.366707" y="253.998979" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_3">
+      <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle" x="182.366707" y="268.596635" transform="rotate(-0 182.366707 268.596635)">32</text>
+     </g>
+    </g>
+    <g id="xtick_4">
+     <g id="line2d_4">
+      <g>
+       <use xlink:href="#m4de23e7244" x="240.156136" y="253.998979" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_4">
+      <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle" x="240.156136" y="268.596635" transform="rotate(-0 240.156136 268.596635)">64</text>
+     </g>
+    </g>
+    <g id="xtick_5">
+     <g id="line2d_5">
+      <g>
+       <use xlink:href="#m4de23e7244" x="297.945564" y="253.998979" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_5">
+      <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle" x="297.945564" y="268.596635" transform="rotate(-0 297.945564 268.596635)">128</text>
+     </g>
+    </g>
+    <g id="xtick_6">
+     <g id="line2d_6">
+      <g>
+       <use xlink:href="#m4de23e7244" x="355.734993" y="253.998979" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_6">
+      <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle" x="355.734993" y="268.596635" transform="rotate(-0 355.734993 268.596635)">256</text>
+     </g>
+    </g>
+    <g id="xtick_7">
+     <g id="line2d_7">
+      <g>
+       <use xlink:href="#m4de23e7244" x="413.524421" y="253.998979" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_7">
+      <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle" x="413.524421" y="268.596635" transform="rotate(-0 413.524421 268.596635)">512</text>
+     </g>
+    </g>
+    <g id="text_8">
+     <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle" x="240.156136" y="282.597416" transform="rotate(-0 240.156136 282.597416)">Configured population (categorical)</text>
+    </g>
+   </g>
+   <g id="matplotlib.axis_2">
+    <g id="ytick_1">
+     <g id="line2d_8">
+      <path d="M 49.451021 253.998979 
+L 430.86125 253.998979 
+" clip-path="url(#pde584e4dc3)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.2; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_9">
+      <defs>
+       <path id="ma6687b7819" d="M 0 0 
+L -3.5 0 
+" style="stroke: #000000; stroke-width: 0.8"/>
+      </defs>
+      <g>
+       <use xlink:href="#ma6687b7819" x="49.451021" y="253.998979" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_9">
+      <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end" x="42.451021" y="257.797807" transform="rotate(-0 42.451021 257.797807)">0</text>
+     </g>
+    </g>
+    <g id="ytick_2">
+     <g id="line2d_10">
+      <path d="M 49.451021 221.781446 
+L 430.86125 221.781446 
+" clip-path="url(#pde584e4dc3)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.2; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_11">
+      <g>
+       <use xlink:href="#ma6687b7819" x="49.451021" y="221.781446" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_10">
+      <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end" x="42.451021" y="225.580274" transform="rotate(-0 42.451021 225.580274)">200</text>
+     </g>
+    </g>
+    <g id="ytick_3">
+     <g id="line2d_12">
+      <path d="M 49.451021 189.563913 
+L 430.86125 189.563913 
+" clip-path="url(#pde584e4dc3)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.2; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_13">
+      <g>
+       <use xlink:href="#ma6687b7819" x="49.451021" y="189.563913" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_11">
+      <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end" x="42.451021" y="193.362741" transform="rotate(-0 42.451021 193.362741)">400</text>
+     </g>
+    </g>
+    <g id="ytick_4">
+     <g id="line2d_14">
+      <path d="M 49.451021 157.346379 
+L 430.86125 157.346379 
+" clip-path="url(#pde584e4dc3)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.2; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_15">
+      <g>
+       <use xlink:href="#ma6687b7819" x="49.451021" y="157.346379" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_12">
+      <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end" x="42.451021" y="161.145208" transform="rotate(-0 42.451021 161.145208)">600</text>
+     </g>
+    </g>
+    <g id="ytick_5">
+     <g id="line2d_16">
+      <path d="M 49.451021 125.128846 
+L 430.86125 125.128846 
+" clip-path="url(#pde584e4dc3)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.2; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_17">
+      <g>
+       <use xlink:href="#ma6687b7819" x="49.451021" y="125.128846" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_13">
+      <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end" x="42.451021" y="128.927674" transform="rotate(-0 42.451021 128.927674)">800</text>
+     </g>
+    </g>
+    <g id="ytick_6">
+     <g id="line2d_18">
+      <path d="M 49.451021 92.911313 
+L 430.86125 92.911313 
+" clip-path="url(#pde584e4dc3)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.2; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_19">
+      <g>
+       <use xlink:href="#ma6687b7819" x="49.451021" y="92.911313" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_14">
+      <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end" x="42.451021" y="96.710141" transform="rotate(-0 42.451021 96.710141)">1000</text>
+     </g>
+    </g>
+    <g id="ytick_7">
+     <g id="line2d_20">
+      <path d="M 49.451021 60.69378 
+L 430.86125 60.69378 
+" clip-path="url(#pde584e4dc3)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.2; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_21">
+      <g>
+       <use xlink:href="#ma6687b7819" x="49.451021" y="60.69378" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_15">
+      <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end" x="42.451021" y="64.492608" transform="rotate(-0 42.451021 64.492608)">1200</text>
+     </g>
+    </g>
+    <g id="text_16">
+     <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle" x="10.598678" y="152.26192" transform="rotate(-90 10.598678 152.26192)">Request latency (ms)</text>
+    </g>
+   </g>
+   <g id="line2d_22">
+    <path d="M 66.78785 238.844279 
+L 124.577278 222.928859 
+L 182.366707 179.257031 
+L 240.156136 179.143179 
+L 297.945564 158.768872 
+L 355.734993 155.592967 
+L 413.524421 161.39112 
+" clip-path="url(#pde584e4dc3)" style="fill: none; stroke: #0072b2; stroke-width: 1.5; stroke-linecap: square"/>
+    <defs>
+     <path id="m97325bc3a3" d="M 0 3 
+C 0.795609 3 1.55874 2.683901 2.12132 2.12132 
+C 2.683901 1.55874 3 0.795609 3 0 
+C 3 -0.795609 2.683901 -1.55874 2.12132 -2.12132 
+C 1.55874 -2.683901 0.795609 -3 0 -3 
+C -0.795609 -3 -1.55874 -2.683901 -2.12132 -2.12132 
+C -2.683901 -1.55874 -3 -0.795609 -3 0 
+C -3 0.795609 -2.683901 1.55874 -2.12132 2.12132 
+C -1.55874 2.683901 -0.795609 3 0 3 
+z
+" style="stroke: #0072b2"/>
+    </defs>
+    <g clip-path="url(#pde584e4dc3)">
+     <use xlink:href="#m97325bc3a3" x="66.78785" y="238.844279" style="fill: #0072b2; stroke: #0072b2"/>
+     <use xlink:href="#m97325bc3a3" x="124.577278" y="222.928859" style="fill: #0072b2; stroke: #0072b2"/>
+     <use xlink:href="#m97325bc3a3" x="182.366707" y="179.257031" style="fill: #0072b2; stroke: #0072b2"/>
+     <use xlink:href="#m97325bc3a3" x="240.156136" y="179.143179" style="fill: #0072b2; stroke: #0072b2"/>
+     <use xlink:href="#m97325bc3a3" x="297.945564" y="158.768872" style="fill: #0072b2; stroke: #0072b2"/>
+     <use xlink:href="#m97325bc3a3" x="355.734993" y="155.592967" style="fill: #0072b2; stroke: #0072b2"/>
+     <use xlink:href="#m97325bc3a3" x="413.524421" y="161.39112" style="fill: #0072b2; stroke: #0072b2"/>
+    </g>
+   </g>
+   <g id="line2d_23">
+    <path d="M 66.78785 193.325318 
+L 124.577278 155.268404 
+L 182.366707 155.516481 
+L 240.156136 155.510624 
+L 297.945564 155.600916 
+L 355.734993 155.124335 
+L 413.524421 155.335651 
+" clip-path="url(#pde584e4dc3)" style="fill: none; stroke-dasharray: 5.55,2.4; stroke-dashoffset: 0; stroke: #0072b2; stroke-width: 1.5"/>
+    <g clip-path="url(#pde584e4dc3)">
+     <use xlink:href="#m97325bc3a3" x="66.78785" y="193.325318" style="fill: #0072b2; stroke: #0072b2"/>
+     <use xlink:href="#m97325bc3a3" x="124.577278" y="155.268404" style="fill: #0072b2; stroke: #0072b2"/>
+     <use xlink:href="#m97325bc3a3" x="182.366707" y="155.516481" style="fill: #0072b2; stroke: #0072b2"/>
+     <use xlink:href="#m97325bc3a3" x="240.156136" y="155.510624" style="fill: #0072b2; stroke: #0072b2"/>
+     <use xlink:href="#m97325bc3a3" x="297.945564" y="155.600916" style="fill: #0072b2; stroke: #0072b2"/>
+     <use xlink:href="#m97325bc3a3" x="355.734993" y="155.124335" style="fill: #0072b2; stroke: #0072b2"/>
+     <use xlink:href="#m97325bc3a3" x="413.524421" y="155.335651" style="fill: #0072b2; stroke: #0072b2"/>
+    </g>
+   </g>
+   <g id="line2d_24">
+    <path d="M 66.78785 232.943615 
+L 124.577278 202.608441 
+L 182.366707 138.570159 
+L 240.156136 160.37922 
+L 297.945564 119.62999 
+L 355.734993 119.833758 
+L 413.524421 127.445338 
+" clip-path="url(#pde584e4dc3)" style="fill: none; stroke: #d55e00; stroke-width: 1.5; stroke-linecap: square"/>
+    <defs>
+     <path id="m79827c98a5" d="M 0 3 
+C 0.795609 3 1.55874 2.683901 2.12132 2.12132 
+C 2.683901 1.55874 3 0.795609 3 0 
+C 3 -0.795609 2.683901 -1.55874 2.12132 -2.12132 
+C 1.55874 -2.683901 0.795609 -3 0 -3 
+C -0.795609 -3 -1.55874 -2.683901 -2.12132 -2.12132 
+C -2.683901 -1.55874 -3 -0.795609 -3 0 
+C -3 0.795609 -2.683901 1.55874 -2.12132 2.12132 
+C -1.55874 2.683901 -0.795609 3 0 3 
+z
+" style="stroke: #d55e00"/>
+    </defs>
+    <g clip-path="url(#pde584e4dc3)">
+     <use xlink:href="#m79827c98a5" x="66.78785" y="232.943615" style="fill: #d55e00; stroke: #d55e00"/>
+     <use xlink:href="#m79827c98a5" x="124.577278" y="202.608441" style="fill: #d55e00; stroke: #d55e00"/>
+     <use xlink:href="#m79827c98a5" x="182.366707" y="138.570159" style="fill: #d55e00; stroke: #d55e00"/>
+     <use xlink:href="#m79827c98a5" x="240.156136" y="160.37922" style="fill: #d55e00; stroke: #d55e00"/>
+     <use xlink:href="#m79827c98a5" x="297.945564" y="119.62999" style="fill: #d55e00; stroke: #d55e00"/>
+     <use xlink:href="#m79827c98a5" x="355.734993" y="119.833758" style="fill: #d55e00; stroke: #d55e00"/>
+     <use xlink:href="#m79827c98a5" x="413.524421" y="127.445338" style="fill: #d55e00; stroke: #d55e00"/>
+    </g>
+   </g>
+   <g id="line2d_25">
+    <path d="M 66.78785 168.640556 
+L 124.577278 60.601281 
+L 182.366707 60.502732 
+L 240.156136 112.472373 
+L 297.945564 59.492452 
+L 355.734993 89.334857 
+L 413.524421 114.446713 
+" clip-path="url(#pde584e4dc3)" style="fill: none; stroke-dasharray: 5.55,2.4; stroke-dashoffset: 0; stroke: #d55e00; stroke-width: 1.5"/>
+    <g clip-path="url(#pde584e4dc3)">
+     <use xlink:href="#m79827c98a5" x="66.78785" y="168.640556" style="fill: #d55e00; stroke: #d55e00"/>
+     <use xlink:href="#m79827c98a5" x="124.577278" y="60.601281" style="fill: #d55e00; stroke: #d55e00"/>
+     <use xlink:href="#m79827c98a5" x="182.366707" y="60.502732" style="fill: #d55e00; stroke: #d55e00"/>
+     <use xlink:href="#m79827c98a5" x="240.156136" y="112.472373" style="fill: #d55e00; stroke: #d55e00"/>
+     <use xlink:href="#m79827c98a5" x="297.945564" y="59.492452" style="fill: #d55e00; stroke: #d55e00"/>
+     <use xlink:href="#m79827c98a5" x="355.734993" y="89.334857" style="fill: #d55e00; stroke: #d55e00"/>
+     <use xlink:href="#m79827c98a5" x="413.524421" y="114.446713" style="fill: #d55e00; stroke: #d55e00"/>
+    </g>
+   </g>
+   <g id="line2d_26">
+    <path d="M 66.78785 234.094387 
+L 124.577278 217.376276 
+L 182.366707 168.729265 
+L 240.156136 168.715532 
+L 297.945564 142.387602 
+L 355.734993 135.090034 
+L 413.524421 138.849889 
+" clip-path="url(#pde584e4dc3)" style="fill: none; stroke: #cc79a7; stroke-width: 1.5; stroke-linecap: square"/>
+    <defs>
+     <path id="m7cb61fdc6a" d="M 0 3 
+C 0.795609 3 1.55874 2.683901 2.12132 2.12132 
+C 2.683901 1.55874 3 0.795609 3 0 
+C 3 -0.795609 2.683901 -1.55874 2.12132 -2.12132 
+C 1.55874 -2.683901 0.795609 -3 0 -3 
+C -0.795609 -3 -1.55874 -2.683901 -2.12132 -2.12132 
+C -2.683901 -1.55874 -3 -0.795609 -3 0 
+C -3 0.795609 -2.683901 1.55874 -2.12132 2.12132 
+C -1.55874 2.683901 -0.795609 3 0 3 
+z
+" style="stroke: #cc79a7"/>
+    </defs>
+    <g clip-path="url(#pde584e4dc3)">
+     <use xlink:href="#m7cb61fdc6a" x="66.78785" y="234.094387" style="fill: #cc79a7; stroke: #cc79a7"/>
+     <use xlink:href="#m7cb61fdc6a" x="124.577278" y="217.376276" style="fill: #cc79a7; stroke: #cc79a7"/>
+     <use xlink:href="#m7cb61fdc6a" x="182.366707" y="168.729265" style="fill: #cc79a7; stroke: #cc79a7"/>
+     <use xlink:href="#m7cb61fdc6a" x="240.156136" y="168.715532" style="fill: #cc79a7; stroke: #cc79a7"/>
+     <use xlink:href="#m7cb61fdc6a" x="297.945564" y="142.387602" style="fill: #cc79a7; stroke: #cc79a7"/>
+     <use xlink:href="#m7cb61fdc6a" x="355.734993" y="135.090034" style="fill: #cc79a7; stroke: #cc79a7"/>
+     <use xlink:href="#m7cb61fdc6a" x="413.524421" y="138.849889" style="fill: #cc79a7; stroke: #cc79a7"/>
+    </g>
+   </g>
+   <g id="line2d_27">
+    <path d="M 66.78785 175.853764 
+L 124.577278 127.727407 
+L 182.366707 127.312488 
+L 240.156136 127.355788 
+L 297.945564 126.409582 
+L 355.734993 126.698447 
+L 413.524421 127.12234 
+" clip-path="url(#pde584e4dc3)" style="fill: none; stroke-dasharray: 5.55,2.4; stroke-dashoffset: 0; stroke: #cc79a7; stroke-width: 1.5"/>
+    <g clip-path="url(#pde584e4dc3)">
+     <use xlink:href="#m7cb61fdc6a" x="66.78785" y="175.853764" style="fill: #cc79a7; stroke: #cc79a7"/>
+     <use xlink:href="#m7cb61fdc6a" x="124.577278" y="127.727407" style="fill: #cc79a7; stroke: #cc79a7"/>
+     <use xlink:href="#m7cb61fdc6a" x="182.366707" y="127.312488" style="fill: #cc79a7; stroke: #cc79a7"/>
+     <use xlink:href="#m7cb61fdc6a" x="240.156136" y="127.355788" style="fill: #cc79a7; stroke: #cc79a7"/>
+     <use xlink:href="#m7cb61fdc6a" x="297.945564" y="126.409582" style="fill: #cc79a7; stroke: #cc79a7"/>
+     <use xlink:href="#m7cb61fdc6a" x="355.734993" y="126.698447" style="fill: #cc79a7; stroke: #cc79a7"/>
+     <use xlink:href="#m7cb61fdc6a" x="413.524421" y="127.12234" style="fill: #cc79a7; stroke: #cc79a7"/>
+    </g>
+   </g>
+   <g id="line2d_28">
+    <path d="M 66.78785 233.539769 
+L 124.577278 215.90944 
+L 182.366707 164.705568 
+L 240.156136 164.705871 
+L 297.945564 137.274578 
+L 355.734993 129.361467 
+L 413.524421 133.305277 
+" clip-path="url(#pde584e4dc3)" style="fill: none; stroke: #009e73; stroke-width: 1.5; stroke-linecap: square"/>
+    <defs>
+     <path id="me05190fc2c" d="M 0 3 
+C 0.795609 3 1.55874 2.683901 2.12132 2.12132 
+C 2.683901 1.55874 3 0.795609 3 0 
+C 3 -0.795609 2.683901 -1.55874 2.12132 -2.12132 
+C 1.55874 -2.683901 0.795609 -3 0 -3 
+C -0.795609 -3 -1.55874 -2.683901 -2.12132 -2.12132 
+C -2.683901 -1.55874 -3 -0.795609 -3 0 
+C -3 0.795609 -2.683901 1.55874 -2.12132 2.12132 
+C -1.55874 2.683901 -0.795609 3 0 3 
+z
+" style="stroke: #009e73"/>
+    </defs>
+    <g clip-path="url(#pde584e4dc3)">
+     <use xlink:href="#me05190fc2c" x="66.78785" y="233.539769" style="fill: #009e73; stroke: #009e73"/>
+     <use xlink:href="#me05190fc2c" x="124.577278" y="215.90944" style="fill: #009e73; stroke: #009e73"/>
+     <use xlink:href="#me05190fc2c" x="182.366707" y="164.705568" style="fill: #009e73; stroke: #009e73"/>
+     <use xlink:href="#me05190fc2c" x="240.156136" y="164.705871" style="fill: #009e73; stroke: #009e73"/>
+     <use xlink:href="#me05190fc2c" x="297.945564" y="137.274578" style="fill: #009e73; stroke: #009e73"/>
+     <use xlink:href="#me05190fc2c" x="355.734993" y="129.361467" style="fill: #009e73; stroke: #009e73"/>
+     <use xlink:href="#me05190fc2c" x="413.524421" y="133.305277" style="fill: #009e73; stroke: #009e73"/>
+    </g>
+   </g>
+   <g id="line2d_29">
+    <path d="M 66.78785 171.953839 
+L 124.577278 121.372146 
+L 182.366707 120.885428 
+L 240.156136 121.096038 
+L 297.945564 120.754645 
+L 355.734993 120.49488 
+L 413.524421 120.878396 
+" clip-path="url(#pde584e4dc3)" style="fill: none; stroke-dasharray: 5.55,2.4; stroke-dashoffset: 0; stroke: #009e73; stroke-width: 1.5"/>
+    <g clip-path="url(#pde584e4dc3)">
+     <use xlink:href="#me05190fc2c" x="66.78785" y="171.953839" style="fill: #009e73; stroke: #009e73"/>
+     <use xlink:href="#me05190fc2c" x="124.577278" y="121.372146" style="fill: #009e73; stroke: #009e73"/>
+     <use xlink:href="#me05190fc2c" x="182.366707" y="120.885428" style="fill: #009e73; stroke: #009e73"/>
+     <use xlink:href="#me05190fc2c" x="240.156136" y="121.096038" style="fill: #009e73; stroke: #009e73"/>
+     <use xlink:href="#me05190fc2c" x="297.945564" y="120.754645" style="fill: #009e73; stroke: #009e73"/>
+     <use xlink:href="#me05190fc2c" x="355.734993" y="120.49488" style="fill: #009e73; stroke: #009e73"/>
+     <use xlink:href="#me05190fc2c" x="413.524421" y="120.878396" style="fill: #009e73; stroke: #009e73"/>
+    </g>
+   </g>
+   <g id="patch_3">
+    <path d="M 49.451021 253.998979 
+L 49.451021 50.524861 
+" style="fill: none; stroke: #000000; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 430.86125 253.998979 
+L 430.86125 50.524861 
+" style="fill: none; stroke: #000000; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 49.451021 253.998979 
+L 430.86125 253.998979 
+" style="fill: none; stroke: #000000; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 49.451021 50.524861 
+L 430.86125 50.524861 
+" style="fill: none; stroke: #000000; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="text_17">
+    <text style="font-size: 12px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle" x="240.156136" y="44.524861" transform="rotate(-0 240.156136 44.524861)">All requests</text>
+   </g>
+   <g id="legend_1">
+    <g id="patch_7">
+     <path d="M 338.0425 249.998979 
+L 425.26125 249.998979 
+Q 426.86125 249.998979 426.86125 248.398979 
+L 426.86125 201.196479 
+Q 426.86125 199.596479 425.26125 199.596479 
+L 338.0425 199.596479 
+Q 336.4425 199.596479 336.4425 201.196479 
+L 336.4425 248.398979 
+Q 336.4425 249.998979 338.0425 249.998979 
+z
+" style="fill: #ffffff; opacity: 0.8; stroke: #cccccc; stroke-linejoin: miter"/>
+    </g>
+    <g id="line2d_30">
+     <path d="M 339.6425 206.075229 
+L 347.6425 206.075229 
+L 355.6425 206.075229 
+" style="fill: none; stroke: #0072b2; stroke-width: 1.5; stroke-linecap: square"/>
+     <g>
+      <use xlink:href="#m97325bc3a3" x="347.6425" y="206.075229" style="fill: #0072b2; stroke: #0072b2"/>
+     </g>
+    </g>
+    <g id="text_18">
+     <text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start" x="362.0425" y="208.875229" transform="rotate(-0 362.0425 208.875229)">hbm</text>
+    </g>
+    <g id="line2d_31">
+     <path d="M 339.6425 218.075854 
+L 347.6425 218.075854 
+L 355.6425 218.075854 
+" style="fill: none; stroke: #d55e00; stroke-width: 1.5; stroke-linecap: square"/>
+     <g>
+      <use xlink:href="#m79827c98a5" x="347.6425" y="218.075854" style="fill: #d55e00; stroke: #d55e00"/>
+     </g>
+    </g>
+    <g id="text_19">
+     <text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start" x="362.0425" y="220.875854" transform="rotate(-0 362.0425 220.875854)">serial_sparse</text>
+    </g>
+    <g id="line2d_32">
+     <path d="M 339.6425 230.076479 
+L 347.6425 230.076479 
+L 355.6425 230.076479 
+" style="fill: none; stroke: #cc79a7; stroke-width: 1.5; stroke-linecap: square"/>
+     <g>
+      <use xlink:href="#m7cb61fdc6a" x="347.6425" y="230.076479" style="fill: #cc79a7; stroke: #cc79a7"/>
+     </g>
+    </g>
+    <g id="text_20">
+     <text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start" x="362.0425" y="232.876479" transform="rotate(-0 362.0425 232.876479)">dense_prefetch</text>
+    </g>
+    <g id="line2d_33">
+     <path d="M 339.6425 242.077104 
+L 347.6425 242.077104 
+L 355.6425 242.077104 
+" style="fill: none; stroke: #009e73; stroke-width: 1.5; stroke-linecap: square"/>
+     <g>
+      <use xlink:href="#me05190fc2c" x="347.6425" y="242.077104" style="fill: #009e73; stroke: #009e73"/>
+     </g>
+    </g>
+    <g id="text_21">
+     <text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start" x="362.0425" y="244.877104" transform="rotate(-0 362.0425 244.877104)">overlap</text>
+    </g>
+   </g>
+  </g>
+  <g id="axes_2">
+   <g id="patch_8">
+    <path d="M 479.589531 253.998979 
+L 860.99976 253.998979 
+L 860.99976 50.524861 
+L 479.589531 50.524861 
+z
+" style="fill: #ffffff"/>
+   </g>
+   <g id="matplotlib.axis_3">
+    <g id="xtick_8">
+     <g id="line2d_34">
+      <g>
+       <use xlink:href="#m4de23e7244" x="496.92636" y="253.998979" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_22">
+      <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle" x="496.92636" y="268.596635" transform="rotate(-0 496.92636 268.596635)">1</text>
+     </g>
+    </g>
+    <g id="xtick_9">
+     <g id="line2d_35">
+      <g>
+       <use xlink:href="#m4de23e7244" x="554.715788" y="253.998979" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_23">
+      <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle" x="554.715788" y="268.596635" transform="rotate(-0 554.715788 268.596635)">8</text>
+     </g>
+    </g>
+    <g id="xtick_10">
+     <g id="line2d_36">
+      <g>
+       <use xlink:href="#m4de23e7244" x="612.505217" y="253.998979" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_24">
+      <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle" x="612.505217" y="268.596635" transform="rotate(-0 612.505217 268.596635)">32</text>
+     </g>
+    </g>
+    <g id="xtick_11">
+     <g id="line2d_37">
+      <g>
+       <use xlink:href="#m4de23e7244" x="670.294646" y="253.998979" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_25">
+      <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle" x="670.294646" y="268.596635" transform="rotate(-0 670.294646 268.596635)">64</text>
+     </g>
+    </g>
+    <g id="xtick_12">
+     <g id="line2d_38">
+      <g>
+       <use xlink:href="#m4de23e7244" x="728.084074" y="253.998979" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_26">
+      <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle" x="728.084074" y="268.596635" transform="rotate(-0 728.084074 268.596635)">128</text>
+     </g>
+    </g>
+    <g id="xtick_13">
+     <g id="line2d_39">
+      <g>
+       <use xlink:href="#m4de23e7244" x="785.873503" y="253.998979" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_27">
+      <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle" x="785.873503" y="268.596635" transform="rotate(-0 785.873503 268.596635)">256</text>
+     </g>
+    </g>
+    <g id="xtick_14">
+     <g id="line2d_40">
+      <g>
+       <use xlink:href="#m4de23e7244" x="843.662931" y="253.998979" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_28">
+      <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle" x="843.662931" y="268.596635" transform="rotate(-0 843.662931 268.596635)">512</text>
+     </g>
+    </g>
+    <g id="text_29">
+     <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle" x="670.294646" y="282.597416" transform="rotate(-0 670.294646 282.597416)">Configured population (categorical)</text>
+    </g>
+   </g>
+   <g id="matplotlib.axis_4">
+    <g id="ytick_8">
+     <g id="line2d_41">
+      <path d="M 479.589531 253.998979 
+L 860.99976 253.998979 
+" clip-path="url(#pf5f03bd855)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.2; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_42">
+      <g>
+       <use xlink:href="#ma6687b7819" x="479.589531" y="253.998979" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_30">
+      <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end" x="472.589531" y="257.797807" transform="rotate(-0 472.589531 257.797807)">0</text>
+     </g>
+    </g>
+    <g id="ytick_9">
+     <g id="line2d_43">
+      <path d="M 479.589531 222.280226 
+L 860.99976 222.280226 
+" clip-path="url(#pf5f03bd855)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.2; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_44">
+      <g>
+       <use xlink:href="#ma6687b7819" x="479.589531" y="222.280226" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_31">
+      <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end" x="472.589531" y="226.079054" transform="rotate(-0 472.589531 226.079054)">100</text>
+     </g>
+    </g>
+    <g id="ytick_10">
+     <g id="line2d_45">
+      <path d="M 479.589531 190.561473 
+L 860.99976 190.561473 
+" clip-path="url(#pf5f03bd855)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.2; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_46">
+      <g>
+       <use xlink:href="#ma6687b7819" x="479.589531" y="190.561473" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_32">
+      <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end" x="472.589531" y="194.360301" transform="rotate(-0 472.589531 194.360301)">200</text>
+     </g>
+    </g>
+    <g id="ytick_11">
+     <g id="line2d_47">
+      <path d="M 479.589531 158.842721 
+L 860.99976 158.842721 
+" clip-path="url(#pf5f03bd855)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.2; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_48">
+      <g>
+       <use xlink:href="#ma6687b7819" x="479.589531" y="158.842721" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_33">
+      <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end" x="472.589531" y="162.641549" transform="rotate(-0 472.589531 162.641549)">300</text>
+     </g>
+    </g>
+    <g id="ytick_12">
+     <g id="line2d_49">
+      <path d="M 479.589531 127.123968 
+L 860.99976 127.123968 
+" clip-path="url(#pf5f03bd855)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.2; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_50">
+      <g>
+       <use xlink:href="#ma6687b7819" x="479.589531" y="127.123968" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_34">
+      <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end" x="472.589531" y="130.922796" transform="rotate(-0 472.589531 130.922796)">400</text>
+     </g>
+    </g>
+    <g id="ytick_13">
+     <g id="line2d_51">
+      <path d="M 479.589531 95.405215 
+L 860.99976 95.405215 
+" clip-path="url(#pf5f03bd855)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.2; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_52">
+      <g>
+       <use xlink:href="#ma6687b7819" x="479.589531" y="95.405215" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_35">
+      <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end" x="472.589531" y="99.204043" transform="rotate(-0 472.589531 99.204043)">500</text>
+     </g>
+    </g>
+    <g id="ytick_14">
+     <g id="line2d_53">
+      <path d="M 479.589531 63.686463 
+L 860.99976 63.686463 
+" clip-path="url(#pf5f03bd855)" style="fill: none; stroke: #b0b0b0; stroke-opacity: 0.2; stroke-width: 0.8; stroke-linecap: square"/>
+     </g>
+     <g id="line2d_54">
+      <g>
+       <use xlink:href="#ma6687b7819" x="479.589531" y="63.686463" style="stroke: #000000; stroke-width: 0.8"/>
+      </g>
+     </g>
+     <g id="text_36">
+      <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end" x="472.589531" y="67.485291" transform="rotate(-0 472.589531 67.485291)">600</text>
+     </g>
+    </g>
+    <g id="text_37">
+     <text style="font-size: 10px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle" x="447.099687" y="152.26192" transform="rotate(-90 447.099687 152.26192)">Request latency (ms)</text>
+    </g>
+   </g>
+   <g id="line2d_55">
+    <path d="M 496.92636 244.495482 
+L 554.715788 237.019019 
+L 612.505217 194.598549 
+L 670.294646 194.40448 
+L 728.084074 106.409272 
+L 785.873503 59.951289 
+L 843.662931 183.181847 
+" clip-path="url(#pf5f03bd855)" style="fill: none; stroke: #0072b2; stroke-width: 1.5; stroke-linecap: square"/>
+    <g clip-path="url(#pf5f03bd855)">
+     <use xlink:href="#m97325bc3a3" x="496.92636" y="244.495482" style="fill: #0072b2; stroke: #0072b2"/>
+     <use xlink:href="#m97325bc3a3" x="554.715788" y="237.019019" style="fill: #0072b2; stroke: #0072b2"/>
+     <use xlink:href="#m97325bc3a3" x="612.505217" y="194.598549" style="fill: #0072b2; stroke: #0072b2"/>
+     <use xlink:href="#m97325bc3a3" x="670.294646" y="194.40448" style="fill: #0072b2; stroke: #0072b2"/>
+     <use xlink:href="#m97325bc3a3" x="728.084074" y="106.409272" style="fill: #0072b2; stroke: #0072b2"/>
+     <use xlink:href="#m97325bc3a3" x="785.873503" y="59.951289" style="fill: #0072b2; stroke: #0072b2"/>
+     <use xlink:href="#m97325bc3a3" x="843.662931" y="183.181847" style="fill: #0072b2; stroke: #0072b2"/>
+    </g>
+   </g>
+   <g id="line2d_56">
+    <path d="M 496.92636 244.14539 
+L 554.715788 244.426198 
+L 612.505217 60.694146 
+L 670.294646 60.537291 
+L 728.084074 60.052144 
+L 785.873503 59.761557 
+L 843.662931 78.740123 
+" clip-path="url(#pf5f03bd855)" style="fill: none; stroke-dasharray: 5.55,2.4; stroke-dashoffset: 0; stroke: #0072b2; stroke-width: 1.5"/>
+    <g clip-path="url(#pf5f03bd855)">
+     <use xlink:href="#m97325bc3a3" x="496.92636" y="244.14539" style="fill: #0072b2; stroke: #0072b2"/>
+     <use xlink:href="#m97325bc3a3" x="554.715788" y="244.426198" style="fill: #0072b2; stroke: #0072b2"/>
+     <use xlink:href="#m97325bc3a3" x="612.505217" y="60.694146" style="fill: #0072b2; stroke: #0072b2"/>
+     <use xlink:href="#m97325bc3a3" x="670.294646" y="60.537291" style="fill: #0072b2; stroke: #0072b2"/>
+     <use xlink:href="#m97325bc3a3" x="728.084074" y="60.052144" style="fill: #0072b2; stroke: #0072b2"/>
+     <use xlink:href="#m97325bc3a3" x="785.873503" y="59.761557" style="fill: #0072b2; stroke: #0072b2"/>
+     <use xlink:href="#m97325bc3a3" x="843.662931" y="78.740123" style="fill: #0072b2; stroke: #0072b2"/>
+    </g>
+   </g>
+   <g id="line2d_57">
+    <path d="M 496.92636 241.312498 
+L 554.715788 241.294221 
+L 612.505217 241.156555 
+L 670.294646 240.947245 
+L 728.084074 240.864801 
+L 785.873503 240.484498 
+L 843.662931 240.765591 
+" clip-path="url(#pf5f03bd855)" style="fill: none; stroke: #d55e00; stroke-width: 1.5; stroke-linecap: square"/>
+    <g clip-path="url(#pf5f03bd855)">
+     <use xlink:href="#m79827c98a5" x="496.92636" y="241.312498" style="fill: #d55e00; stroke: #d55e00"/>
+     <use xlink:href="#m79827c98a5" x="554.715788" y="241.294221" style="fill: #d55e00; stroke: #d55e00"/>
+     <use xlink:href="#m79827c98a5" x="612.505217" y="241.156555" style="fill: #d55e00; stroke: #d55e00"/>
+     <use xlink:href="#m79827c98a5" x="670.294646" y="240.947245" style="fill: #d55e00; stroke: #d55e00"/>
+     <use xlink:href="#m79827c98a5" x="728.084074" y="240.864801" style="fill: #d55e00; stroke: #d55e00"/>
+     <use xlink:href="#m79827c98a5" x="785.873503" y="240.484498" style="fill: #d55e00; stroke: #d55e00"/>
+     <use xlink:href="#m79827c98a5" x="843.662931" y="240.765591" style="fill: #d55e00; stroke: #d55e00"/>
+    </g>
+   </g>
+   <g id="line2d_58">
+    <path d="M 496.92636 241.270983 
+L 554.715788 241.15346 
+L 612.505217 241.034061 
+L 670.294646 240.774988 
+L 728.084074 240.570625 
+L 785.873503 240.450449 
+L 843.662931 240.550459 
+" clip-path="url(#pf5f03bd855)" style="fill: none; stroke-dasharray: 5.55,2.4; stroke-dashoffset: 0; stroke: #d55e00; stroke-width: 1.5"/>
+    <g clip-path="url(#pf5f03bd855)">
+     <use xlink:href="#m79827c98a5" x="496.92636" y="241.270983" style="fill: #d55e00; stroke: #d55e00"/>
+     <use xlink:href="#m79827c98a5" x="554.715788" y="241.15346" style="fill: #d55e00; stroke: #d55e00"/>
+     <use xlink:href="#m79827c98a5" x="612.505217" y="241.034061" style="fill: #d55e00; stroke: #d55e00"/>
+     <use xlink:href="#m79827c98a5" x="670.294646" y="240.774988" style="fill: #d55e00; stroke: #d55e00"/>
+     <use xlink:href="#m79827c98a5" x="728.084074" y="240.570625" style="fill: #d55e00; stroke: #d55e00"/>
+     <use xlink:href="#m79827c98a5" x="785.873503" y="240.450449" style="fill: #d55e00; stroke: #d55e00"/>
+     <use xlink:href="#m79827c98a5" x="843.662931" y="240.550459" style="fill: #d55e00; stroke: #d55e00"/>
+    </g>
+   </g>
+   <g id="line2d_59">
+    <path d="M 496.92636 240.864964 
+L 554.715788 240.602098 
+L 612.505217 240.442429 
+L 670.294646 240.365422 
+L 728.084074 240.299888 
+L 785.873503 240.353627 
+L 843.662931 240.31469 
+" clip-path="url(#pf5f03bd855)" style="fill: none; stroke: #cc79a7; stroke-width: 1.5; stroke-linecap: square"/>
+    <g clip-path="url(#pf5f03bd855)">
+     <use xlink:href="#m7cb61fdc6a" x="496.92636" y="240.864964" style="fill: #cc79a7; stroke: #cc79a7"/>
+     <use xlink:href="#m7cb61fdc6a" x="554.715788" y="240.602098" style="fill: #cc79a7; stroke: #cc79a7"/>
+     <use xlink:href="#m7cb61fdc6a" x="612.505217" y="240.442429" style="fill: #cc79a7; stroke: #cc79a7"/>
+     <use xlink:href="#m7cb61fdc6a" x="670.294646" y="240.365422" style="fill: #cc79a7; stroke: #cc79a7"/>
+     <use xlink:href="#m7cb61fdc6a" x="728.084074" y="240.299888" style="fill: #cc79a7; stroke: #cc79a7"/>
+     <use xlink:href="#m7cb61fdc6a" x="785.873503" y="240.353627" style="fill: #cc79a7; stroke: #cc79a7"/>
+     <use xlink:href="#m7cb61fdc6a" x="843.662931" y="240.31469" style="fill: #cc79a7; stroke: #cc79a7"/>
+    </g>
+   </g>
+   <g id="line2d_60">
+    <path d="M 496.92636 240.820061 
+L 554.715788 240.211947 
+L 612.505217 240.318992 
+L 670.294646 239.893296 
+L 728.084074 240.165745 
+L 785.873503 240.291186 
+L 843.662931 240.115689 
+" clip-path="url(#pf5f03bd855)" style="fill: none; stroke-dasharray: 5.55,2.4; stroke-dashoffset: 0; stroke: #cc79a7; stroke-width: 1.5"/>
+    <g clip-path="url(#pf5f03bd855)">
+     <use xlink:href="#m7cb61fdc6a" x="496.92636" y="240.820061" style="fill: #cc79a7; stroke: #cc79a7"/>
+     <use xlink:href="#m7cb61fdc6a" x="554.715788" y="240.211947" style="fill: #cc79a7; stroke: #cc79a7"/>
+     <use xlink:href="#m7cb61fdc6a" x="612.505217" y="240.318992" style="fill: #cc79a7; stroke: #cc79a7"/>
+     <use xlink:href="#m7cb61fdc6a" x="670.294646" y="239.893296" style="fill: #cc79a7; stroke: #cc79a7"/>
+     <use xlink:href="#m7cb61fdc6a" x="728.084074" y="240.165745" style="fill: #cc79a7; stroke: #cc79a7"/>
+     <use xlink:href="#m7cb61fdc6a" x="785.873503" y="240.291186" style="fill: #cc79a7; stroke: #cc79a7"/>
+     <use xlink:href="#m7cb61fdc6a" x="843.662931" y="240.115689" style="fill: #cc79a7; stroke: #cc79a7"/>
+    </g>
+   </g>
+   <g id="line2d_61">
+    <path d="M 496.92636 241.264014 
+L 554.715788 240.993577 
+L 612.505217 240.775242 
+L 670.294646 240.762774 
+L 728.084074 240.536427 
+L 785.873503 240.555256 
+L 843.662931 240.637172 
+" clip-path="url(#pf5f03bd855)" style="fill: none; stroke: #009e73; stroke-width: 1.5; stroke-linecap: square"/>
+    <g clip-path="url(#pf5f03bd855)">
+     <use xlink:href="#me05190fc2c" x="496.92636" y="241.264014" style="fill: #009e73; stroke: #009e73"/>
+     <use xlink:href="#me05190fc2c" x="554.715788" y="240.993577" style="fill: #009e73; stroke: #009e73"/>
+     <use xlink:href="#me05190fc2c" x="612.505217" y="240.775242" style="fill: #009e73; stroke: #009e73"/>
+     <use xlink:href="#me05190fc2c" x="670.294646" y="240.762774" style="fill: #009e73; stroke: #009e73"/>
+     <use xlink:href="#me05190fc2c" x="728.084074" y="240.536427" style="fill: #009e73; stroke: #009e73"/>
+     <use xlink:href="#me05190fc2c" x="785.873503" y="240.555256" style="fill: #009e73; stroke: #009e73"/>
+     <use xlink:href="#me05190fc2c" x="843.662931" y="240.637172" style="fill: #009e73; stroke: #009e73"/>
+    </g>
+   </g>
+   <g id="line2d_62">
+    <path d="M 496.92636 241.179446 
+L 554.715788 240.787293 
+L 612.505217 240.420669 
+L 670.294646 240.662923 
+L 728.084074 240.282912 
+L 785.873503 240.551728 
+L 843.662931 240.499576 
+" clip-path="url(#pf5f03bd855)" style="fill: none; stroke-dasharray: 5.55,2.4; stroke-dashoffset: 0; stroke: #009e73; stroke-width: 1.5"/>
+    <g clip-path="url(#pf5f03bd855)">
+     <use xlink:href="#me05190fc2c" x="496.92636" y="241.179446" style="fill: #009e73; stroke: #009e73"/>
+     <use xlink:href="#me05190fc2c" x="554.715788" y="240.787293" style="fill: #009e73; stroke: #009e73"/>
+     <use xlink:href="#me05190fc2c" x="612.505217" y="240.420669" style="fill: #009e73; stroke: #009e73"/>
+     <use xlink:href="#me05190fc2c" x="670.294646" y="240.662923" style="fill: #009e73; stroke: #009e73"/>
+     <use xlink:href="#me05190fc2c" x="728.084074" y="240.282912" style="fill: #009e73; stroke: #009e73"/>
+     <use xlink:href="#me05190fc2c" x="785.873503" y="240.551728" style="fill: #009e73; stroke: #009e73"/>
+     <use xlink:href="#me05190fc2c" x="843.662931" y="240.499576" style="fill: #009e73; stroke: #009e73"/>
+    </g>
+   </g>
+   <g id="patch_9">
+    <path d="M 479.589531 253.998979 
+L 479.589531 50.524861 
+" style="fill: none; stroke: #000000; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="patch_10">
+    <path d="M 860.99976 253.998979 
+L 860.99976 50.524861 
+" style="fill: none; stroke: #000000; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="patch_11">
+    <path d="M 479.589531 253.998979 
+L 860.99976 253.998979 
+" style="fill: none; stroke: #000000; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="patch_12">
+    <path d="M 479.589531 50.524861 
+L 860.99976 50.524861 
+" style="fill: none; stroke: #000000; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+   </g>
+   <g id="text_38">
+    <text style="font-size: 12px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle" x="670.294646" y="44.524861" transform="rotate(-0 670.294646 44.524861)">Revisits (including rebuilds)</text>
+   </g>
+  </g>
+  <g id="text_39">
+   <text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif" transform="translate(297.217344 12.459595)">NOSA · h16k + 128 · retained original run subset</text>
+   <text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif" transform="translate(288.383828 25.662603)">Solid: mean; dashed: p95. Not a new measurement.</text>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="pde584e4dc3">
+   <rect x="49.451021" y="50.524861" width="381.410229" height="203.474118"/>
+  </clipPath>
+  <clipPath id="pf5f03bd855">
+   <rect x="479.589531" y="50.524861" width="381.410229" height="203.474118"/>
+  </clipPath>
+ </defs>
 </svg>

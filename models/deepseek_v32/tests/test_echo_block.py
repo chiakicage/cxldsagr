@@ -235,6 +235,7 @@ def test_checkpoint_grouped_moe_matches_per_expert_oracle(block_checkpoint):
     path, raw = block_checkpoint
     cfg = Config.from_checkpoint(path)
     moe = CheckpointMoE(CheckpointReader(path), "model.layers.1.mlp", cfg, device="cpu")
+    assert not moe.shared.pack_gate_up
     hidden = raw["model.embed_tokens.weight"][[0, 5, 9, 13]]
     expected = moe_reference(hidden, raw, cfg, "model.layers.1.mlp")
     torch.testing.assert_close(moe(hidden), expected, rtol=0, atol=0)
@@ -250,7 +251,7 @@ def test_checkpoint_grouped_moe_matches_per_expert_oracle(block_checkpoint):
 
 
 @pytest.mark.parametrize("layer", [0, 1])
-@pytest.mark.parametrize("chunk_size", [1, 3])
+@pytest.mark.parametrize("chunk_size", [1, 3, 5, 8])
 @pytest.mark.parametrize("with_residual", [False, True])
 def test_full_block_cpu_oracle_and_bounded_mlp_chunks(
     block_checkpoint, monkeypatch, layer, chunk_size, with_residual
@@ -258,8 +259,13 @@ def test_full_block_cpu_oracle_and_bounded_mlp_chunks(
     path, raw = block_checkpoint
     monkeypatch.setattr(block_module, "EchoAttentionRunner", CPUAttentionOracle)
     block = CheckpointBlock(path, layer, "cpu", capacity=128, chunk_size=chunk_size)
+    if not block.is_moe:
+        assert block.mlp.pack_gate_up
+        assert not block.mlp._can_pack_gate_up(torch.empty(1, 8).bfloat16())
     hidden = raw["model.embed_tokens.weight"][[1, 3, 8, 12, 15]]
     residual = raw["model.embed_tokens.weight"][[2, 4, 9, 13, 14]] if with_residual else None
+    original_hidden = hidden.clone()
+    original_residual = None if residual is None else residual.clone()
     expected = block_reference(block, hidden, residual, raw)
     lengths = []
     original = block.mlp
@@ -270,6 +276,9 @@ def test_full_block_cpu_oracle_and_bounded_mlp_chunks(
 
     block.mlp = recording_mlp
     torch.testing.assert_close(block.forward(hidden, residual), expected, rtol=0, atol=0)
+    torch.testing.assert_close(hidden, original_hidden, rtol=0, atol=0)
+    if residual is not None:
+        torch.testing.assert_close(residual, original_residual, rtol=0, atol=0)
     assert sum(lengths) == len(hidden) and max(lengths) <= chunk_size
     assert block.cache is block.attention.cache
 

@@ -1,7 +1,7 @@
 """Sparse MLA after ECHO prefetch and exact recall into an HBM token pool.
 
-ECHO fuses prefetch with indexer scoring. Attention itself reuses the device-only
-MLA kernel once all selected records for this query batch have been recalled.
+ECHO fuses prefetch with indexer scoring. Attention reuses the official FlashMLA
+device-only adapter after exact recall for this query batch.
 The model/cache layer owns exact selection, recall, physical remapping, batch
 splitting, allocation, and transaction lifetime; none of those are implicit here.
 """

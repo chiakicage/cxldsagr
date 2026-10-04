@@ -1,0 +1,36 @@
+{
+  "schema": "echo-gr-default-review-v1",
+  "status": "reviewed",
+  "selected_chunk": 1024,
+  "basis": {
+    "formal_source_sha256": "47585a615f0bb017f531118e8c8c180cb33cb14d63de447cd83c84966210a211",
+    "formal_run_ids": [
+      "20261003_echo_gr_chunks_01_deployment_c1024",
+      "20261003_echo_gr_chunks_01_deployment_c256",
+      "20261003_echo_gr_chunks_01_fixed_c1024",
+      "20261003_echo_gr_chunks_01_fixed_c2048",
+      "20261003_echo_gr_chunks_01_fixed_c256",
+      "20261003_echo_gr_chunks_repeat_01_deployment_c1024",
+      "20261003_echo_gr_chunks_repeat_01_deployment_c2048"
+    ],
+    "screen_run_id": "20261003_echo_shared_chunks_02",
+    "screen_result_sha256": "0933f9ea9b5368c9e79060a29b57f9e0b0217f5d612c0eb92919ada2b11603a2",
+    "measured_facts_sha256": "af7bf5692482462a17262c9ce34cdc621e588511819d85652bb70efeabadfcd1"
+  },
+  "memory_evidence": {
+    "summary_path": "docs/agents/system/memory_acceptance_summary.json",
+    "summary_sha256": "5d5de6784c0999fdbdb6bbe74ed61c9199f4a0882278182dee6728dc4f4b4698"
+  },
+  "assessments": {
+    "trace_variability": "选择 ECHO C=1024、W=1024。两次独立完整32请求轨迹为76.981564和78.436863秒，C2048/W2048为128.348683和129.513493秒；各自极差/均值为1.8727%和0.9034%。C1024最慢一次仍比C2048最快一次少49.911820秒（38.8877%），选值差距超过本次观察到的波动，无需为当前选择追加重复。C256/W256为227.801669秒且同样保留16用户，不是领先者或拟选值。两个重复只支持本控制点的工程选择，不构成统计最优或总体置信区间。",
+    "cold_prefix_and_revisit": "保留冷构建与复访的取舍：C1024两次首轮prefix均值4666.693–4754.378毫秒，C2048为3897.102–3926.136毫秒；完整首访均值分别4738.080–4827.458和3970.366–4002.318毫秒。每条轨迹的整体p95分别4744.087–4833.571和4059.999–4116.703毫秒，C2048更低。C1024的16次复访均命中，复访均值73.268–74.846毫秒；C2048的16次复访均重建，均值4051.427–4092.275毫秒。按预先固定的16用户两轮完整轨迹选择C1024，不以自选首访比例消除这项取舍。",
+    "workspace_and_capacity": "固定NH=1050624、每层可用P=32768、HBM cache预算4GiB与CPU DRAM cache预算64GiB。C1024共享HBM预留1709604446字节，C2048为2922020446字节，每session HBM预留均为86682744字节；实际保留16与15个用户，两次重复均复现全复访命中与全复访重建。小workspace在这里跨过session容量边界；这不改变pool容量，也不把host/session hit解释为历史token仍在HBM。独立内存证据接受11个直接观测配置，并明确其他配置的解析覆盖边界、完整pinned allocator档位和40字节CPU临时预留。固定W=2048矩阵与部署W=C矩阵分别报告。",
+    "scope_and_limitations": "仅适用于本次H200/SM90、GPU0默认时钟、seed42、64K history+128 candidate、16用户顺序两遍、固定NH/P/双预算及保存的正式运行时身份。GR使用10个独立dense block的checkpoint source-input replay替身，不是训练得到的DeepSeek8B，也不是完整61层验证。真实三层64K+1K数值门禁与64K+128 chunk筛选另行完成。C1024两次平均完整ECHO轨迹比同C HBM少15.4995%，但比serial_sparse慢15.0766%，不宣称融合预取加速或ECHO为最快方案。机制诊断只观察请求0/15/16/31，不能外推全trace流量；实际copy与cache归属按诊断边界解读。未验证真实推荐质量、工业访问分布或其他GPU/预算/用户规模。"
+  },
+  "decision_scope": "This 16-user two-pass 64K+128 workload, fixed NH/P and budgets, saved runtime identity and hardware; no global optimum claim.",
+  "independent_assessment": {
+    "path": "docs/agents/system/echo_default_independent_assessment.json",
+    "sha256": "44d3c8f32c8a2374f97911cd7f4cc75845fea258ad00f85fec5d9d7468b44b15",
+    "status": "reviewed_recommendation"
+  }
+}

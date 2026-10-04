@@ -28,6 +28,14 @@ def test_indexer_odd_query_tail_and_key_tile_boundary():
     assert indexer_work(query_tokens=3, query_start=127, prefetch=True).name == "indexer_prefetch"
 
 
+def test_indexer_official_resident_and_fused_prefetch_have_distinct_kv_padding():
+    resident = indexer_work(query_tokens=1, query_start=0)
+    fused = indexer_work(query_tokens=1, query_start=0, prefetch=True)
+    assert resident.useful_flops == fused.useful_flops == 2 * 64 * 128
+    assert resident.executed_matmul_flops == 2 * 64 * 128 * 2 * 256
+    assert fused.executed_matmul_flops == 2 * 64 * 128 * 2 * 128
+
+
 def test_indexer_chunked_prefix_preserves_useful_pairs():
     whole = indexer_work(query_tokens=1024, query_start=0)
     chunks = [indexer_work(query_tokens=256, query_start=start) for start in range(0, 1024, 256)]
@@ -51,14 +59,14 @@ def test_sparse_mla_full_extend_and_early_causal_padding():
     assert extend.dimensions["qk_flops"] + extend.dimensions["pv_flops"] == expected
     early = sparse_mla_work(
         query_tokens=2,
-        heads=17,
-        qk_dim=33,
-        value_dim=24,
+        heads=64,
+        qk_dim=576,
+        value_dim=512,
         selected_slots=5,
         valid_selected_pairs=3,
     )
-    assert early.useful_flops == 2 * 3 * 17 * (33 + 24)
-    assert early.executed_matmul_flops == 2 * 2 * 32 * 64 * (32 * 2 + 16)
+    assert early.useful_flops == 2 * 3 * 64 * (576 + 512)
+    assert early.executed_matmul_flops == 2 * 2 * 64 * 128 * (576 + 512)
 
 
 def test_split_offload_mla_conserves_work():
@@ -78,7 +86,40 @@ def test_split_offload_mla_conserves_work():
     assert sum(leaf.executed_matmul_flops for leaf in leaves) == whole.executed_matmul_flops
 
 
-def test_fp8_partial_projection_and_small_m_tiles():
+@pytest.mark.parametrize(
+    "heads,slots,padded_slots",
+    [(64, 65, 128), (128, 129, 256), (128, 2048, 2048)],
+)
+def test_mla_padding_follows_official_flashmla_selection_alignment(heads, slots, padded_slots):
+    queries = 63
+    work = sparse_mla_work(
+        query_tokens=queries,
+        heads=heads,
+        qk_dim=576,
+        value_dim=512,
+        selected_slots=slots,
+        valid_selected_pairs=queries * slots,
+    )
+    assert work.useful_flops == 2 * queries * slots * heads * (576 + 512)
+    assert work.executed_matmul_flops == 2 * queries * heads * padded_slots * (576 + 512)
+    assert work.dimensions["slots_padded"] == padded_slots
+    assert work.dimensions["threads"] == 384
+
+
+@pytest.mark.parametrize("heads,qk_dim,value_dim", [(65, 576, 512), (64, 160, 128)])
+def test_mla_rejects_shapes_unsupported_by_official_sm90_kernel(heads, qk_dim, value_dim):
+    with pytest.raises(ValueError, match="FlashMLA SM90"):
+        sparse_mla_work(
+            query_tokens=2,
+            heads=heads,
+            qk_dim=qk_dim,
+            value_dim=value_dim,
+            selected_slots=1,
+            valid_selected_pairs=2,
+        )
+
+
+def test_official_fp8_projection_preserves_useful_work_without_inventing_runtime_padding():
     work = linear_work(
         "kv_a_proj",
         rows=33,
@@ -88,11 +129,26 @@ def test_fp8_partial_projection_and_small_m_tiles():
         local_fp8_kernel=True,
     )
     assert work.useful_flops == 2 * 33 * 129 * 576
-    assert work.executed_matmul_flops == 2 * 64 * 256 * 640
-    assert work.dimensions["N_padded"] == 640
+    assert work.executed_matmul_flops is None
+    assert work.executed_formula is None
+    assert "Official DeepGEMM" in work.notes
     cublas = linear_work("bf16", rows=33, in_features=129, out_features=576, precision="bf16")
     assert cublas.useful_flops == work.useful_flops
     assert cublas.executed_matmul_flops is None
+
+
+def test_official_fp8_narrow_projection_does_not_assume_local_split_k():
+    work = linear_work(
+        "index_k_proj",
+        rows=1024,
+        in_features=1025,
+        out_features=65,
+        precision="fp8",
+        local_fp8_kernel=True,
+    )
+    assert work.dimensions == {"M": 1024, "N": 65, "K": 1025}
+    assert work.useful_flops == 2 * 1024 * 1025 * 65
+    assert work.executed_matmul_flops is None
 
 
 def test_mfu_uses_precision_peak_and_never_invents_nonmatmul_or_fp32_zero():

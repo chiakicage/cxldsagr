@@ -1,0 +1,31 @@
+{
+  "passed": true,
+  "mismatches": [],
+  "matrix_calls": 45933,
+  "matrix_calls_by_precision": {
+    "FP8": 32800,
+    "BF16": 9853,
+    "FP32": 3280
+  },
+  "graph_matrix_calls": 36080,
+  "verified_planned_chunk_layer_operator_groups": 45933,
+  "schema": "deepseek-v32-motivation-profile-flops-verification-v2",
+  "profile_run_id": "motivation_c10_profile_20261004_01",
+  "reference_run_id": "motivation_c10_20261004_u16_r2_01",
+  "input_sha256": {
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/motivation_c10_profile_20261004_01/metadata.json": "8e932a52b895f20512eb39a1d89de4354d1968ed116295f696cd7a881a2d7a0e",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/motivation_c10_profile_20261004_01/result.json": "c5673e64b98f247054c74f7a9191d36534a166b2265a3f9b8c5002d7fa405d16",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/motivation_c10_profile_20261004_01/source_manifest.json": "3ca224dff33e43480445c20734eb49a1e85069ea7e131806405d00cd5e369701",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/motivation_c10_profile_20261004_01/operator_calls.json": "d6348a1b8caba356f3b625589dc428347459472b51532b877f141a6806ff37ba",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/motivation_c10_flops_20261004_01/flops.json": "ee955382fc54dc38f823c5402d124b0d51237555a3ba30c991746a3adb41135a"
+  },
+  "analysis_source_sha256": {
+    "/tmp/deepseek-motivation-c10_host_rope_v2-frozen-6mdyfgj0/experiments/deepseek_v32_motivation/src/verify_profile_flops.py": "64e7af768299a98fd4406ffcd24ed09d3d5751f40170d2ff97b78349d395d1ac"
+  },
+  "boundaries": [
+    "Useful work and API counts are checked by chunk, independent layer, operator and precision against an expanded workload.",
+    "Graph templates and eager calls share one ledger. Physical nodes and GPU timing require the separate Nsight clone-lineage audit.",
+    "Sparse MLA can split under exact-union pressure. Its useful FLOPs must be conserved while API count can increase.",
+    "This is a shape/formula cross-check, not a hardware instruction counter or a numerical rerun."
+  ]
+}

@@ -228,8 +228,8 @@ def test_checkpoint_project_against_independent_reference(checkpoint):
     ).bfloat16()
     qi = torch.cat((reference_rope(qi[..., :4], angles, False), qi[..., 4:]), -1)
     ki = torch.cat((reference_rope(ki[..., :4], angles, False), ki[..., 4:]), -1)
-    qi, qs = reference_quantize(reference_hadamard(qi))
-    ki, ks = reference_quantize(reference_hadamard(ki))
+    qi, qs = reference_quantize(qi)
+    ki, ks = reference_quantize(ki)
     weights = (x.float() @ raw[attn + "indexer.weights_proj.weight"].float().T) / math.sqrt(2)
     weights = weights * qs[..., 0] / math.sqrt(8)
     torch.testing.assert_close(actual.index_q.float(), qi.float(), rtol=0, atol=0)
@@ -262,6 +262,24 @@ def test_project_chunk_positions_and_failures(checkpoint):
         model.embedding(torch.tensor([-1]))
     with pytest.raises(KeyError, match="Required tensor"):
         CheckpointAttention(path, layer_idx=1, device="cpu")
+
+
+def test_explicit_projection_positions_match_checked_entry(checkpoint):
+    path, _, _ = checkpoint
+    model = CheckpointAttention(path, device="cpu")
+    hidden = model.embedding(torch.tensor([0, 7, 15]))
+    for start in (0, 64, 125):
+        positions = torch.arange(start, start + len(hidden)).float()
+        expected = model.project(hidden, start)
+        actual = model.project_positions(hidden, positions)
+        for name in vars(expected):
+            torch.testing.assert_close(
+                getattr(actual, name).float(), getattr(expected, name).float(), rtol=0, atol=0
+            )
+    with pytest.raises(ValueError, match="positions"):
+        model.project_positions(hidden, torch.arange(len(hidden)))
+    with pytest.raises(ValueError, match="positions"):
+        model.project_positions(hidden, torch.zeros(len(hidden), 1))
 
 
 def test_pre_normalized_attention_does_not_apply_input_norm_twice(checkpoint):

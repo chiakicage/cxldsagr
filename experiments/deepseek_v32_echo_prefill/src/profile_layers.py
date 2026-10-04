@@ -7,6 +7,7 @@ import json
 import shutil
 import statistics
 import time
+from dataclasses import fields, is_dataclass
 from pathlib import Path
 from unittest.mock import patch
 
@@ -39,10 +40,32 @@ def sources():
     ):
         path = Path(__file__).with_name(name)
         result[str(path.relative_to(ROOT))] = hashlib.sha256(path.read_bytes()).hexdigest()
-    for name in ("scripts/profile_layers.sh",):
+    for name in ("scripts/profile_layers.sh", "scripts/run.sh"):
         path = Path(__file__).parents[1] / name
         result[str(path.relative_to(ROOT))] = hashlib.sha256(path.read_bytes()).hexdigest()
     return result
+
+
+def tensor_storage_bytes(value):
+    """Count diagnostic snapshot storage by identity, including nested pool state."""
+    seen = {}
+
+    def visit(item):
+        if isinstance(item, torch.Tensor):
+            storage = item.untyped_storage()
+            seen[(str(item.device), storage.data_ptr())] = storage.nbytes()
+        elif is_dataclass(item) and not isinstance(item, type):
+            for field in fields(item):
+                visit(getattr(item, field.name))
+        elif isinstance(item, dict):
+            for child in item.values():
+                visit(child)
+        elif isinstance(item, (list, tuple)):
+            for child in item:
+                visit(child)
+
+    visit(value)
+    return sum(seen.values())
 
 
 def comparison(actual, expected):
@@ -67,6 +90,7 @@ def timed(model, ids):
     return output, (time.perf_counter() - begin) * 1000
 
 
+@torch.inference_mode()
 def annotate(model, ids, mode, phase, nsys):
     scopes = OperatorScopes(mode, phase)
     block_outputs = []
@@ -108,7 +132,23 @@ def main():
     parser.add_argument("--request", type=Path)
     parser.add_argument("--prefix", type=int, default=65536)
     parser.add_argument("--extend", type=int, default=1024)
-    parser.add_argument("--slots", type=int, default=16384)
+    parser.add_argument(
+        "--sparse-pool-tokens",
+        "--slots",
+        dest="slots",
+        type=int,
+        default=16384,
+        help="usable tokens per shared model layer pool; excludes sentinel row",
+    )
+    parser.add_argument("--host-arena-tokens", type=int)
+    parser.add_argument("--workspace-query-tokens", type=int)
+    parser.add_argument("--hbm-cache-budget-gib", type=float, default=5)
+    parser.add_argument("--dram-cache-budget-gib", type=float, default=64)
+    parser.add_argument(
+        "--extend-chunk-size",
+        type=int,
+        help="explicit extend chunk; default is the complete extend batch",
+    )
     parser.add_argument("--chunk-size", type=int, default=1024)
     parser.add_argument("--warmups", type=int, default=1)
     parser.add_argument("--repeats", type=int, default=5)
@@ -121,6 +161,20 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--nsys", action="store_true")
     args = parser.parse_args()
+    if args.hbm_cache_budget_gib <= 0 or args.dram_cache_budget_gib <= 0:
+        parser.error("cache budgets must be positive")
+    required_queries = max(args.chunk_size, args.extend_chunk_size or args.extend)
+    if args.workspace_query_tokens is None:
+        args.workspace_query_tokens = required_queries
+    if args.workspace_query_tokens < required_queries:
+        parser.error("workspace-query-tokens must cover prefill and extend query batches")
+    if args.extend_chunk_size is not None and args.extend_chunk_size < 1:
+        parser.error("extend-chunk-size must be positive")
+    if args.host_arena_tokens is not None and (
+        args.host_arena_tokens % 64
+        or args.host_arena_tokens < (args.prefix + args.extend + 63) // 64 * 64
+    ):
+        parser.error("host-arena-tokens must contain whole pages covering prefix plus extend")
     if (
         min(
             args.prefix,
@@ -176,9 +230,20 @@ def main():
         capacity=args.prefix + args.extend,
         slots=args.slots,
         chunk_size=args.chunk_size,
+        extend_chunk_size=args.extend_chunk_size,
+        host_arena_tokens=args.host_arena_tokens,
+        workspace_query_tokens=args.workspace_query_tokens,
+        hbm_cache_budget_bytes=int(args.hbm_cache_budget_gib * 2**30),
+        dram_cache_budget_bytes=int(args.dram_cache_budget_gib * 2**30),
     )
     if any(block.is_moe for block in model.blocks):
         raise ValueError("This diagnostic requires the first three dense checkpoint blocks")
+    from experiments.deepseek_v32_echo_prefill.src.backend_provenance import (
+        collect_backend_provenance,
+        collect_flashinfer_runtime_artifacts,
+    )
+
+    backend_identity = collect_backend_provenance()
     ids = request["input_ids"]
     result = {
         "schema_version": 1,
@@ -192,6 +257,18 @@ def main():
         "extend_tokens": args.extend,
         "chunk_size": args.chunk_size,
         "slots": args.slots,
+        "cache_policy_revision": "echo-global-pages-fifo-v1",
+        "pool_scope": "model_device_per_layer",
+        "sparse_pool_tokens": args.slots,
+        "host_arena_tokens": args.host_arena_tokens or (args.prefix + args.extend + 63) // 64 * 64,
+        "workspace_query_tokens": args.workspace_query_tokens,
+        "hbm_cache_budget_bytes": int(args.hbm_cache_budget_gib * 2**30),
+        "dram_cache_budget_bytes": int(args.dram_cache_budget_gib * 2**30),
+        "extend_chunk_size": args.extend_chunk_size,
+        "snapshot_schema": "echo-shared-prefix-v1",
+        "snapshot_scope": "shared pools once plus session metadata; diagnostic CPU storage excluded from serving capacity",
+        "prefetch_cap": "min(8192, sparse_pool_tokens - actual query batch)",
+        "prefetch_flags": {"fused_extend_equivalent": True, "early_evict": False},
         "warmups": args.warmups,
         "repeats": args.repeats,
         "prefill_repeats": args.prefill_repeats,
@@ -204,6 +281,8 @@ def main():
         ],
         "timing": "synchronized wall; no wrappers in formal timings; separate NVTX captures",
         "source_sha256": manifest,
+        "backend_provenance": backend_identity,
+        "compute_precision": dict(model.blocks[0].attention.attention.precision),
         "indexer_build": build_info(),
         "request_sha256": hashlib.sha256((args.output / "request.json").read_bytes()).hexdigest(),
         "checkpoint_metadata_sha256": {
@@ -243,6 +322,7 @@ def main():
         )
         prefix_metrics = [block.cache.metrics() for block in model.blocks]
         snapshot = model.snapshot_prefix()
+        snapshot_bytes = tensor_storage_bytes(snapshot)
         for _ in range(args.warmups):
             model.restore_prefix(snapshot)
             timed(model, ids[args.prefix :])
@@ -276,6 +356,8 @@ def main():
             {"hidden": hidden, "logits": annotated}, args.output / f"{mode}_profile_output.pt"
         )
         result["measurements"][mode] = {
+            "snapshot_cpu_tensor_bytes": snapshot_bytes,
+            "cache_resource_plan": getattr(model, "_cache_resource_plan", None),
             "prefix_samples_ms": prefix_times,
             "extend_samples_ms": extend_times,
             "prefix_median_ms": statistics.median(prefix_times),
@@ -305,7 +387,7 @@ def main():
                             "index_keys": keys.cpu(),
                             "index_scales": scales.cpu(),
                             "indices": indices.cpu(),
-                            "kv": cache.host[: cache.written].clone(),
+                            "kv": cache.host_records(),
                             "source_run_id": args.run_id,
                         },
                         args.output / f"kernel_inputs_layer_{layer}.pt",
@@ -321,6 +403,9 @@ def main():
         )
     if sources() != manifest:
         raise RuntimeError("Implementation changed during measurement")
+    if collect_backend_provenance() != backend_identity:
+        raise RuntimeError("Official backend libraries changed during measurement")
+    result["flashinfer_runtime_artifacts"] = collect_flashinfer_runtime_artifacts()
     result["accepted"] = True
     write_json(args.output / "result.json", result)
     print(

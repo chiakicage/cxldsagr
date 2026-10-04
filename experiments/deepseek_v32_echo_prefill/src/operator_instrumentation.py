@@ -212,10 +212,10 @@ class InstrumentOperators:
         original_project = echo_model.CheckpointAttention.project
         original_logits, original_mla = echo.logits, echo_attention.sparse_mla
 
-        def linear(instance, x):
+        def linear(instance, x, *args, **kwargs):
             label = self.linears.get(id(instance))
             if label is None:
-                return original_linear(instance, x)
+                return original_linear(instance, x, *args, **kwargs)
             n, k = instance.weight.shape
             m = x.numel() // k
             work = linear_work(
@@ -227,7 +227,7 @@ class InstrumentOperators:
                 local_fp8_kernel=instance.scales is not None,
             )
             with self.scopes(label, shape=[m, n, k], **_work_details(work)):
-                return original_linear(instance, x)
+                return original_linear(instance, x, *args, **kwargs)
 
         def bmm(a, b, *args, **kwargs):
             label = self.bmms.get(b.data_ptr())
@@ -304,10 +304,24 @@ class InstrumentOperators:
             (echo_attention, "sparse_mla", mla),
             (offload_mla, "sparse_mla", mla),
         ]
-        for name in ("apply_rope", "normalized_hadamard", "quantize_index"):
-            targets.append((echo_model, name, wrap(getattr(echo_model, name), name)))
+        for name in (
+            "apply_rope",
+            "apply_rope_pair",
+            "prepare_rotary_cache",
+            "normalized_hadamard",
+            "quantize_index",
+        ):
+            if hasattr(echo_model, name):
+                targets.append((echo_model, name, wrap(getattr(echo_model, name), name)))
         for module in (echo_model, echo_block, echo_infer):
-            targets.append((module, "rms_norm", wrap(module.rms_norm, "rms_norm")))
+            if hasattr(module, "rms_norm"):
+                targets.append((module, "rms_norm", wrap(module.rms_norm, "rms_norm")))
+        # Wrap the model adapters, so packing, FP32 copies and output casts
+        # remain inside the nonmatrix operator's measured range.
+        for name in ("residual_rms_norm", "silu_mul", "silu_mul_packed"):
+            if hasattr(echo_block, name):
+                label = "silu_mul" if name == "silu_mul_packed" else name
+                targets.append((echo_block, name, wrap(getattr(echo_block, name), label)))
         targets.append((F, "layer_norm", wrap(F.layer_norm, "index_layer_norm")))
         for target, attribute, replacement in targets:
             self.stack.enter_context(patch.object(target, attribute, replacement))

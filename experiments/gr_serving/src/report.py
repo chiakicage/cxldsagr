@@ -130,6 +130,22 @@ def validate_rows(rows: Iterable[Mapping[str, Any]]) -> list[dict[str, Any]]:
         samples.sort(key=lambda row: row["request_id"])
         if [row["request_id"] for row in samples] != list(range(len(samples))):
             raise ValueError(f"{key}: request IDs must form a complete 0-based trace")
+        if any("sequential_loops_schema" in row for row in samples):
+            users = samples[0]["num_users"]
+            rounds = _integer("rounds", samples[0].get("rounds"), 2)
+            if len(samples) != users * rounds:
+                raise ValueError(f"{key}: sequential trace must cover every complete round")
+            for row in samples:
+                expected = {
+                    "sequential_loops_schema": 1,
+                    "rounds": rounds,
+                    "round_index": row["request_id"] // users,
+                    "round_user_index": row["request_id"] % users,
+                    "user_id": row["request_id"] % users,
+                    "visit_index": row["request_id"] // users,
+                }
+                if any(row.get(name) != value for name, value in expected.items()):
+                    raise ValueError(f"{key}: inconsistent sequential round coverage")
         visits: Counter[int] = Counter()
         for row in samples:
             if row["visit_index"] != visits[row["user_id"]]:
@@ -213,8 +229,21 @@ def summarize(rows: Iterable[Mapping[str, Any]]) -> dict[str, Any]:
             if selected and all(row.get("transfer_bytes") is not None for row in selected):
                 result["transfer_bytes"] = sum(row["transfer_bytes"] for row in selected)
             summaries.append(result)
+    round_summaries = []
+    for key, group in sorted(groups.items()):
+        if "sequential_loops_schema" in group[0]:
+            for index in range(group[0]["rounds"]):
+                selected = [row for row in group if row["round_index"] == index]
+                round_summaries.append(
+                    {
+                        **dict(zip(GROUP_FIELDS, key, strict=True)),
+                        "round_index": index,
+                        "prefix_hits": sum(row["prefix_hit"] for row in selected),
+                        **_stats([float(row["latency_ms"]) for row in selected]),
+                    }
+                )
     return {
-        "schema_version": 1,
+        "schema_version": 2 if round_summaries else 1,
         "definitions": {
             "latency_ms": "synchronized wall time per request, including prefix miss, suffix execution, and cleanup",
             "revisit": "visit_index > 0; a revisited user may have been evicted and miss again",
@@ -222,8 +251,10 @@ def summarize(rows: Iterable[Mapping[str, Any]]) -> dict[str, Any]:
             "empty_scope": "count is zero and latency statistics are null",
             "budgets": "equal allowed HBM/DRAM cache caps; actual allocated bytes may differ",
             "phase_times": "reported separately when measured; total latency is authoritative",
+            "rounds": "sequential complete passes over users 0..U-1; round zero contains first visits",
         },
         "groups": summaries,
+        "rounds": round_summaries,
     }
 
 
@@ -409,6 +440,8 @@ def write_report(rows: Iterable[Mapping[str, Any]], output_dir: str | Path) -> d
     output.mkdir(parents=True, exist_ok=True)
     (output / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
     _write_csv(output / "summary.csv", summary["groups"])
+    if summary["rounds"]:
+        _write_csv(output / "rounds.csv", summary["rounds"])
     _write_csv(output / "per_request.csv", samples)
     (output / "per_request.svg").write_text(_latency_svg(samples))
     (output / "summary.svg").write_text(_comparison_svg(summary["groups"]))

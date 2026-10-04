@@ -1,155 +1,28 @@
-"""Independent Hopper FP8 block-scaled linear and grouped expert operators.
+"""Checkpoint FP8 linears using upstream DeepGEMM on Hopper.
 
-Checkpoint weights are E4M3 with one FP32 multiplier per 128x128 block.
-Activations are quantized per row and 128 input channels, rounding the scale
-up to a power of two (UE8M0). Outputs are BF16. CUDA uses Triton tensor cores;
-CPU dispatches to explicit FP32 reference arithmetic for small model tests.
+GPU activation quantization uses the local handwritten Triton kernel. Matrix
+multiplication uses DeepGEMM's dense and grouped public APIs; local code adapts
+padding and route layout. CPU arithmetic remains an independent small oracle.
 """
 
 from dataclasses import dataclass
+from functools import lru_cache
 
 import torch
 import torch.nn.functional as F
-import triton
-import triton.language as tl
+
+from . import quantization
 
 
-@triton.jit
-def _quantize_activation(X, Y, S, M, K: tl.constexpr, ROW: tl.constexpr, COL: tl.constexpr):
-    groups: tl.constexpr = tl.cdiv(K, 128)
-    block = tl.program_id(0) * 4 + tl.arange(0, 4)
-    row, group = block // groups, block % groups
-    channel = group[:, None] * 128 + tl.arange(0, 128)[None, :]
-    value = tl.load(
-        X + row[:, None] * ROW + channel * COL,
-        (row[:, None] < M) & (channel < K),
-        other=0,
-    ).to(tl.float32)
-    scale = tl.div_rn(tl.maximum(tl.max(tl.abs(value), 1), 1e-4), 448.0)
-    # Exact upward rounding to a power of two, without approximate log2.
-    bits = scale.to(tl.int32, bitcast=True)
-    exponent = ((bits >> 23) & 255) + ((bits & 0x7FFFFF) != 0).to(tl.int32)
-    scale = (tl.minimum(tl.maximum(exponent, 1), 254) << 23).to(tl.float32, bitcast=True)
-    quantized = (value / scale[:, None]).to(tl.float8e4nv)
-    tl.store(Y + row[:, None] * K + channel, quantized, (row[:, None] < M) & (channel < K))
-    tl.store(S + block, scale, row < M)
+def _cdiv(value, divisor):
+    return (value + divisor - 1) // divisor
 
 
-@triton.jit
-def _fp8_linear(
-    X,
-    XS,
-    W,
-    WS,
-    Y,
-    M,
-    N: tl.constexpr,
-    K: tl.constexpr,
-    W_ROW: tl.constexpr,
-    W_COL: tl.constexpr,
-    WS_ROW: tl.constexpr,
-    WS_COL: tl.constexpr,
-    BLOCK_M: tl.constexpr,
-    BLOCK_N: tl.constexpr,
-):
-    rows = tl.program_id(0) * BLOCK_M + tl.arange(0, BLOCK_M)
-    columns = tl.program_id(1) * BLOCK_N + tl.arange(0, BLOCK_N)
-    channel = tl.arange(0, 128)
-    groups: tl.constexpr = tl.cdiv(K, 128)
-    accumulator = tl.zeros((BLOCK_M, BLOCK_N), tl.float32)
-    for block in range(groups):
-        kk = block * 128 + channel
-        a = tl.load(X + rows[:, None] * K + kk[None, :], (rows[:, None] < M) & (kk < K), 0.0)
-        b = tl.load(
-            W + columns[None, :] * W_ROW + kk[:, None] * W_COL,
-            (columns[None, :] < N) & (kk[:, None] < K),
-            0.0,
-        )
-        a_scale = tl.load(XS + rows * groups + block, rows < M, 0)
-        b_scale = tl.load(WS + (columns // 128) * WS_ROW + block * WS_COL, columns < N, 0)
-        partial = tl.dot(a, b)
-        accumulator += partial * a_scale[:, None] * b_scale[None, :]
-    tl.store(
-        Y + rows[:, None] * N + columns[None, :], accumulator, (rows[:, None] < M) & (columns < N)
-    )
+@lru_cache(maxsize=1)
+def _deep_gemm():
+    import deep_gemm
 
-
-@triton.jit
-def _grouped_fp8_linear(
-    X,
-    XS,
-    W,
-    WS,
-    SORTED_ROUTES,
-    ROW_OFFSETS,
-    TILE_OFFSETS,
-    Y,
-    EXPERTS: tl.constexpr,
-    TOPK: tl.constexpr,
-    N: tl.constexpr,
-    K: tl.constexpr,
-    W_EXPERT: tl.constexpr,
-    W_ROW: tl.constexpr,
-    W_COL: tl.constexpr,
-    WS_EXPERT: tl.constexpr,
-    WS_ROW: tl.constexpr,
-    WS_COL: tl.constexpr,
-    ROUTE_INPUT: tl.constexpr,
-    BLOCK_M: tl.constexpr,
-    BLOCK_N: tl.constexpr,
-):
-    tile = tl.program_id(0)
-    total_tiles = tl.load(TILE_OFFSETS + EXPERTS)
-    if tile < total_tiles:
-        # Device-side binary search avoids reading expert counts back to CPU.
-        low, high = 0, EXPERTS
-        while low < high:
-            middle = (low + high) // 2
-            boundary = tl.load(TILE_OFFSETS + middle + 1)
-            right = tile >= boundary
-            low = tl.where(right, middle + 1, low)
-            high = tl.where(right, high, middle)
-        expert = low
-        row_begin = tl.load(ROW_OFFSETS + expert)
-        row_end = tl.load(ROW_OFFSETS + expert + 1)
-        tile_begin = tl.load(TILE_OFFSETS + expert)
-        sorted_row = row_begin + (tile - tile_begin) * BLOCK_M + tl.arange(0, BLOCK_M)
-        route = tl.load(SORTED_ROUTES + sorted_row, sorted_row < row_end, 0)
-        if ROUTE_INPUT:
-            input_row = route
-        else:
-            input_row = route // TOPK
-        columns = tl.program_id(1) * BLOCK_N + tl.arange(0, BLOCK_N)
-        channel = tl.arange(0, 128)
-        groups: tl.constexpr = tl.cdiv(K, 128)
-        accumulator = tl.zeros((BLOCK_M, BLOCK_N), tl.float32)
-        weight = W + expert.to(tl.int64) * W_EXPERT
-        weight_scale = WS + expert.to(tl.int64) * WS_EXPERT
-        for block in range(groups):
-            kk = block * 128 + channel
-            a = tl.load(
-                X + input_row[:, None] * K + kk[None, :],
-                (sorted_row[:, None] < row_end) & (kk < K),
-                0.0,
-            )
-            b = tl.load(
-                weight + columns[None, :] * W_ROW + kk[:, None] * W_COL,
-                (columns[None, :] < N) & (kk[:, None] < K),
-                0.0,
-            )
-            a_scale = tl.load(XS + input_row * groups + block, sorted_row < row_end, 0)
-            b_scale = tl.load(
-                weight_scale + (columns // 128) * WS_ROW + block * WS_COL,
-                columns < N,
-                0,
-            )
-            partial = tl.dot(a, b)
-            accumulator += partial * a_scale[:, None] * b_scale[None, :]
-        tl.store(
-            Y + route[:, None] * N + columns[None, :],
-            accumulator,
-            (sorted_row[:, None] < row_end) & (columns < N),
-        )
+    return deep_gemm
 
 
 def _require_sm90(device):
@@ -167,8 +40,8 @@ def _validate_weight(x, weight, scales, *, grouped=False):
         raise ValueError("Output dimension must be positive")
     expected_scales = (
         *weight.shape[:-2],
-        triton.cdiv(weight.shape[-2], 128),
-        triton.cdiv(weight.shape[-1], 128),
+        _cdiv(weight.shape[-2], 128),
+        _cdiv(weight.shape[-1], 128),
     )
     if scales.shape != expected_scales:
         raise ValueError(f"Expected 128x128 block scales with shape {expected_scales}")
@@ -185,7 +58,7 @@ def reference_quantize_fp8_activation(x):
     if x.ndim != 2 or not x.shape[1]:
         raise ValueError("Expected [rows, positive input channels] activation")
     rows, columns = x.shape
-    groups = triton.cdiv(columns, 128)
+    groups = _cdiv(columns, 128)
     blocks = F.pad(x.float(), (0, groups * 128 - columns)).reshape(rows, groups, 128)
     scale = torch.exp2(torch.ceil(torch.log2(blocks.abs().amax(-1).clamp_min(1e-4) / 448.0)))
     data = (blocks / scale[..., None]).clamp(-448, 448).to(torch.float8_e4m3fn)
@@ -193,24 +66,14 @@ def reference_quantize_fp8_activation(x):
 
 
 def quantize_fp8_activation(x):
-    """Quantize a 2D activation to FP8 data and row-by-K-block FP32 scales."""
-    if x.ndim != 2 or not x.shape[1]:
-        raise ValueError("Expected [rows, positive input channels] activation")
-    if x.dtype not in (torch.bfloat16, torch.float16, torch.float32):
-        raise ValueError("Activations must be BF16, FP16, or FP32")
+    """Return owned FP8 data and FP32 scales, preserving the CPU reference."""
     if x.device.type == "cpu":
+        if x.ndim != 2 or not x.shape[1]:
+            raise ValueError("Expected [rows, positive input channels] activation")
+        if x.dtype not in (torch.bfloat16, torch.float16, torch.float32):
+            raise ValueError("Activations must be BF16, FP16, or FP32")
         return reference_quantize_fp8_activation(x)
-    _require_sm90(x.device)
-    rows, columns = x.shape
-    groups = triton.cdiv(columns, 128)
-    data = torch.empty((rows, columns), device=x.device, dtype=torch.float8_e4m3fn)
-    scales = torch.empty((rows, groups), device=x.device, dtype=torch.float32)
-    if rows:
-        with torch.cuda.device(x.device):
-            _quantize_activation[(triton.cdiv(rows * groups, 4),)](
-                x, data, scales, rows, columns, *x.stride(), num_warps=4
-            )
-    return data, scales
+    return quantization.quantize(x)
 
 
 def _dequantize_weight(weight, scales):
@@ -233,50 +96,143 @@ def reference_fp8_linear(x, weight, scales):
     return result.reshape(*x.shape[:-1], weight.shape[0]).to(torch.bfloat16)
 
 
-def fp8_linear(x, weight, scales):
-    """``[..., K] @ [N, K].T -> [..., N]`` with checkpoint FP8 block scales.
+def _pad_weight(weight):
+    """Satisfy TMA alignment for small test shapes; real checkpoint weights fit."""
+    n, k = weight.shape[-2:]
+    padded_n, padded_k = _cdiv(n, 64) * 64, _cdiv(k, 128) * 128
+    if (n, k) != (padded_n, padded_k):
+        weight = F.pad(weight.view(torch.uint8), (0, padded_k - k, 0, padded_n - n)).view(
+            torch.float8_e4m3fn
+        )
+    return weight.contiguous()
 
-    CPU uses the reference for small correctness tests. GPU never falls back
-    to dequantized dense weights or a CPU implementation.
+
+@dataclass(slots=True)
+class _PreparedFP8Activation:
+    """One adjacent linear may consume this unchanged, call-local activation."""
+
+    source: torch.Tensor
+    data: torch.Tensor
+    scales: torch.Tensor
+    shape: tuple
+    stride: tuple
+    pointer: int
+    version: int | None
+    consumed: bool = False
+
+    @classmethod
+    def capture(cls, source, data, scales):
+        return cls(
+            source,
+            data,
+            scales,
+            tuple(source.shape),
+            source.stride(),
+            source.data_ptr(),
+            None if torch.is_inference(source) else source._version,
+        )
+
+    def consume(self, source):
+        if self.consumed:
+            raise ValueError("Prepared FP8 activation has already been consumed")
+        if (
+            source is not self.source
+            or tuple(source.shape) != self.shape
+            or source.stride() != self.stride
+            or source.data_ptr() != self.pointer
+            or (self.version is not None and source._version != self.version)
+        ):
+            raise ValueError("Prepared FP8 activation requires its unchanged source tensor")
+        self.consumed = True
+        return self.data, self.scales
+
+
+def _validate_linear_options(x, weight, scales, out, quantized, return_quantized):
+    if (
+        x.device.type != "cuda"
+        or x.dtype != torch.bfloat16
+        or x.ndim != 2
+        or not x.numel()
+        or x.stride(-1) != 1
+        or weight.shape[0] % 64
+        or weight.shape[1] % 128
+        or torch.is_grad_enabled()
+    ):
+        raise ValueError("FP8 linear options require nonempty aligned BF16 CUDA inference [Q,K]")
+    if quantized is not None and (
+        not isinstance(quantized, _PreparedFP8Activation) or return_quantized
+    ):
+        raise ValueError("Expected a prepared FP8 activation for one consuming linear")
+    if out is None:
+        return
+    if (
+        out.shape != (len(x), weight.shape[0])
+        or out.device != x.device
+        or out.dtype != torch.bfloat16
+        or out.stride(-1) != 1
+        or out.stride(0) < out.shape[1]
+        or out.data_ptr() % 16
+        or out.stride(0) * out.element_size() % 16
+    ):
+        raise ValueError("FP8 output must have aligned, disjoint BF16 row-major [Q,N] storage")
+    sources = [x, weight, scales]
+    if quantized is not None:
+        sources.extend((quantized.data, quantized.scales))
+    if out.untyped_storage().data_ptr() in {t.untyped_storage().data_ptr() for t in sources}:
+        raise ValueError("FP8 output storage must not alias activation, weight or scale storage")
+
+
+def fp8_linear(x, weight, scales, *, out=None, quantized=None, return_quantized=False):
+    """Official FP8 1D2D, optionally storing directly and sharing one quantization.
+
+    Optional arguments are restricted to aligned BF16 SM90 inference. A returned
+    prepared activation has one-call lifetime; keep its source unchanged until
+    the adjacent consuming linear. Inference tensors have no version counter.
     """
     _validate_weight(x, weight, scales)
+    options = out is not None or quantized is not None or return_quantized
+    if options:
+        _validate_linear_options(x, weight, scales, out, quantized, return_quantized)
     if x.device.type == "cpu":
         return reference_fp8_linear(x, weight, scales)
     _require_sm90(x.device)
     activation = x.reshape(-1, x.shape[-1])
-    data, activation_scales = quantize_fp8_activation(activation)
     rows, columns = activation.shape[0], weight.shape[0]
-    output = torch.empty((rows, columns), device=x.device, dtype=torch.bfloat16)
-    if rows:
-        block_m = 32 if rows < 64 else 64
-        with torch.cuda.device(x.device):
-            _fp8_linear[(triton.cdiv(rows, block_m), triton.cdiv(columns, 128))](
-                data,
-                activation_scales,
-                weight,
-                scales,
-                output,
-                rows,
-                columns,
-                x.shape[-1],
-                *weight.stride(),
-                *scales.stride(),
-                block_m,
-                128,
-                num_warps=4,
-                num_stages=2,
-            )
-    return output.reshape(*x.shape[:-1], columns)
+    if not rows:
+        return torch.empty((*x.shape[:-1], columns), device=x.device, dtype=torch.bfloat16)
+    with torch.cuda.device(x.device):
+        padded_weight = _pad_weight(weight)
+        padded_k = padded_weight.shape[-1]
+        if activation.shape[-1] != padded_k:
+            activation = F.pad(activation, (0, padded_k - activation.shape[-1]))
+        if quantized is None:
+            data, activation_scales = quantize_fp8_activation(activation)
+        else:
+            data, activation_scales = quantized.consume(x)
+        output = (
+            torch.empty((rows, padded_weight.shape[0]), device=x.device, dtype=torch.bfloat16)
+            if out is None
+            else out
+        )
+        _deep_gemm().fp8_gemm_nt(
+            (data, activation_scales),
+            (padded_weight, scales.contiguous()),
+            output,
+            recipe=(1, 128, 128),
+        )
+    result = (
+        output
+        if out is not None
+        else output[:, :columns].contiguous().reshape(*x.shape[:-1], columns)
+    )
+    if return_quantized:
+        return result, _PreparedFP8Activation.capture(x, data, activation_scales)
+    return result
 
 
 @dataclass(frozen=True)
 class ExpertRouting:
-    """GPU route ordering reusable by the gate, up, and down expert GEMMs.
-
-    ``expert_ids`` must remain unchanged while the plan is reused. Invalid
-    expert IDs are padding; they are sorted after valid routes and yield zero.
-    No counts or offsets are copied to CPU to construct this plan.
-    """
+    """Reusable route order and padded DeepGEMM layout, built without CPU counts."""
 
     expert_ids: torch.Tensor
     num_experts: int
@@ -284,17 +240,26 @@ class ExpertRouting:
     row_offsets: torch.Tensor
     tile_offsets: torch.Tensor
     block_m: int = 32
+    packed_routes: torch.Tensor | None = None
+    grouped_layout: torch.Tensor | None = None
+    output_slots: torch.Tensor | None = None
+    valid_routes: torch.Tensor | None = None
 
 
 def prepare_expert_routing(expert_ids, num_experts):
-    """Prepare ``[tokens, topk]`` routing entirely on its current device."""
+    """Sort and pad expert routes on-device for the upstream grouped GEMM API."""
     if expert_ids.ndim != 2 or expert_ids.dtype not in (torch.int32, torch.int64):
         raise ValueError("expert_ids must be an int32/int64 [tokens, topk] tensor")
     if num_experts <= 0:
         raise ValueError("num_experts must be positive")
     block_m = 32
+    if expert_ids.device.type == "cuda":
+        _require_sm90(expert_ids.device)
+        with torch.cuda.device(expert_ids.device):
+            block_m = _deep_gemm().get_mk_alignment_for_contiguous_layout()
     flat = expert_ids.reshape(-1).long()
-    keys = torch.where((flat >= 0) & (flat < num_experts), flat, num_experts)
+    valid_routes = (flat >= 0) & (flat < num_experts)
+    keys = torch.where(valid_routes, flat, num_experts)
     sorted_routes = torch.argsort(keys)
     counts = torch.zeros(num_experts + 1, device=keys.device, dtype=torch.int32)
     counts.scatter_add_(0, keys, torch.ones_like(keys, dtype=torch.int32))
@@ -302,7 +267,26 @@ def prepare_expert_routing(expert_ids, num_experts):
     row_offsets = torch.cat((zero, counts[:-1].cumsum(0, dtype=torch.int32)))
     tiles = torch.div(counts[:-1] + block_m - 1, block_m, rounding_mode="floor")
     tile_offsets = torch.cat((zero, tiles.cumsum(0, dtype=torch.int32)))
-    return ExpertRouting(expert_ids, num_experts, sorted_routes, row_offsets, tile_offsets, block_m)
+    common = (expert_ids, num_experts, sorted_routes, row_offsets, tile_offsets, block_m)
+    if expert_ids.device.type == "cpu" or not flat.numel():
+        return ExpertRouting(*common)
+    # A static upper bound avoids .item()/nonzero()/CPU synchronization for
+    # per-expert counts. Extra slots carry group -1 and never produce routes.
+    capacity = (_cdiv(flat.numel(), block_m) + num_experts) * block_m
+    positions = torch.arange(capacity, device=keys.device, dtype=torch.int32)
+    experts = torch.searchsorted(tile_offsets[1:] * block_m, positions, right=True, out_int32=True)
+    safe_experts = experts.clamp_max(num_experts - 1).long()
+    local = positions - tile_offsets[safe_experts] * block_m
+    valid = (experts < num_experts) & (local < counts[safe_experts])
+    sorted_positions = (row_offsets[safe_experts] + local).clamp(0, flat.numel() - 1).long()
+    packed_routes = sorted_routes[sorted_positions]
+    grouped_layout = torch.where(valid, experts, -1).contiguous()
+    rank = torch.empty_like(sorted_routes)
+    rank.scatter_(0, sorted_routes, torch.arange(flat.numel(), device=keys.device))
+    safe_keys = keys.clamp_max(num_experts - 1)
+    slots = tile_offsets[safe_keys] * block_m + rank - row_offsets[safe_keys]
+    output_slots = torch.where(valid_routes, slots, 0).long()
+    return ExpertRouting(*common, packed_routes, grouped_layout, output_slots, valid_routes)
 
 
 def _validate_grouped(x, expert_ids, weights, scales):
@@ -338,11 +322,10 @@ def reference_grouped_fp8_linear(x, expert_ids, weights, scales):
 
 
 def grouped_fp8_linear(x, expert_ids, weights, scales, *, routing=None):
-    """Apply selected experts, returning BF16 ``[tokens, topk, out_channels]``.
+    """Upstream grouped GEMM plus route packing and inverse mapping.
 
-    ``x`` may be ``[tokens, in_channels]`` for gate/up projections, or
-    ``[tokens, topk, in_channels]`` for down projections. ``routing`` can be
-    shared across all three calls. Invalid expert IDs produce zero routes.
+    Invalid expert IDs return zero. GPU packing, quantization, scale-layout
+    conversion, GEMM and inverse mapping are all part of this operator call.
     """
     _validate_grouped(x, expert_ids, weights, scales)
     if x.device.type == "cpu":
@@ -353,33 +336,32 @@ def grouped_fp8_linear(x, expert_ids, weights, scales, *, routing=None):
     if routing.expert_ids is not expert_ids or routing.num_experts != weights.shape[0]:
         raise ValueError("Routing plan must reference the same expert_ids tensor and expert count")
     tokens, topk = expert_ids.shape
-    routes, columns = expert_ids.numel(), weights.shape[1]
-    # Zero initialization also covers invalid expert IDs, whose routes are not launched.
-    output = torch.zeros((tokens, topk, columns), device=x.device, dtype=torch.bfloat16)
-    if not routes:
-        return output
-    data, activation_scales = quantize_fp8_activation(x.reshape(-1, x.shape[-1]))
-    max_tiles = triton.cdiv(routes, routing.block_m) + weights.shape[0]
+    columns = weights.shape[1]
+    if not expert_ids.numel():
+        return torch.empty((tokens, topk, columns), device=x.device, dtype=torch.bfloat16)
     with torch.cuda.device(x.device):
-        _grouped_fp8_linear[(max_tiles, triton.cdiv(columns, 128))](
-            data,
-            activation_scales,
-            weights,
-            scales,
-            routing.sorted_routes,
-            routing.row_offsets,
-            routing.tile_offsets,
-            output,
-            weights.shape[0],
-            topk,
-            columns,
-            x.shape[-1],
-            *weights.stride(),
-            *scales.stride(),
-            x.ndim == 3,
-            routing.block_m,
-            128,
-            num_warps=4,
-            num_stages=2,
+        padded_weight = _pad_weight(weights)
+        activation = x.reshape(-1, x.shape[-1])
+        padded_k = padded_weight.shape[-1]
+        if activation.shape[-1] != padded_k:
+            activation = F.pad(activation, (0, padded_k - activation.shape[-1]))
+        data, activation_scales = quantize_fp8_activation(activation)
+        input_rows = routing.packed_routes if x.ndim == 3 else routing.packed_routes // topk
+        valid = routing.grouped_layout >= 0
+        packed_data = data.view(torch.uint8).index_select(0, input_rows)
+        packed_data = torch.where(valid[:, None], packed_data, 0).view(torch.float8_e4m3fn)
+        packed_scales = activation_scales.index_select(0, input_rows)
+        packed_scales = torch.where(valid[:, None], packed_scales, 1.0)
+        packed_output = torch.empty(
+            (packed_data.shape[0], padded_weight.shape[1]), device=x.device, dtype=torch.bfloat16
         )
-    return output
+        _deep_gemm().m_grouped_fp8_gemm_nt_contiguous(
+            (packed_data, packed_scales),
+            (padded_weight, scales.contiguous()),
+            packed_output,
+            routing.grouped_layout,
+            recipe=(1, 128, 128),
+        )
+        output = packed_output.index_select(0, routing.output_slots)[:, :columns]
+        output = torch.where(routing.valid_routes[:, None], output, 0)
+    return output.reshape(tokens, topk, columns)

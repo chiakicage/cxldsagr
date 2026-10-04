@@ -1,0 +1,208 @@
+{
+  "analysis_run_id": "operator_mfu",
+  "profile_run_id": "motivation_c10_profile_20261004_01",
+  "formal_run_id": "motivation_c10_20261004_u16_r2_01",
+  "matrix_calls": 45933,
+  "operator_groups": 195,
+  "captures": [
+    {
+      "capture_index": 2,
+      "scheme": "hbm",
+      "phase": "cold",
+      "sqlite": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/motivation_c10_profile_20261004_01/capture_2.sqlite",
+      "sqlite_sha256": "e64fdf0058831b28f69f189edccb0bb2a10d944f17e9d3d4a308be5fac4fca3a",
+      "matrix_calls": 9102,
+      "bound_matrix_calls": 9102,
+      "matrix_scope_gpu_activity_count": 25334,
+      "call_activity_count_conserved": true,
+      "graph_attribution": {
+        "replays": 1300,
+        "matrix_api_invocations": 7150,
+        "gpu_node_activities": 35740,
+        "clone_edges": 4360,
+        "copy_nodes_without_graph_id": 640,
+        "every_replay_gpu_node_verified": true
+      }
+    },
+    {
+      "capture_index": 3,
+      "scheme": "hbm",
+      "phase": "revisit",
+      "sqlite": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/motivation_c10_profile_20261004_01/capture_3.sqlite",
+      "sqlite_sha256": "cf073d582d1f531ded73d52f3a4045f08ee40faee12150839c98bb6147d22de3",
+      "matrix_calls": 9102,
+      "bound_matrix_calls": 9102,
+      "matrix_scope_gpu_activity_count": 25334,
+      "call_activity_count_conserved": true,
+      "graph_attribution": {
+        "replays": 1300,
+        "matrix_api_invocations": 7150,
+        "gpu_node_activities": 35740,
+        "clone_edges": 4360,
+        "copy_nodes_without_graph_id": 640,
+        "every_replay_gpu_node_verified": true
+      }
+    },
+    {
+      "capture_index": 5,
+      "scheme": "echo",
+      "phase": "cold",
+      "sqlite": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/motivation_c10_profile_20261004_01/capture_5.sqlite",
+      "sqlite_sha256": "4383608664212d616809635c9a196cd86231602c7e6d5a6ef8e3a82ef04cd721",
+      "matrix_calls": 9102,
+      "bound_matrix_calls": 9102,
+      "matrix_scope_gpu_activity_count": 25334,
+      "call_activity_count_conserved": true,
+      "graph_attribution": {
+        "replays": 1300,
+        "matrix_api_invocations": 7150,
+        "gpu_node_activities": 35740,
+        "clone_edges": 4360,
+        "copy_nodes_without_graph_id": 640,
+        "every_replay_gpu_node_verified": true
+      }
+    },
+    {
+      "capture_index": 6,
+      "scheme": "echo",
+      "phase": "revisit",
+      "sqlite": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/motivation_c10_profile_20261004_01/capture_6.sqlite",
+      "sqlite_sha256": "4d25f552d3a9e7520390e8b9a26d4119f58993632ce6813faff9a9531e9dc561",
+      "matrix_calls": 141,
+      "bound_matrix_calls": 141,
+      "matrix_scope_gpu_activity_count": 402,
+      "call_activity_count_conserved": true,
+      "graph_attribution": {
+        "replays": 20,
+        "matrix_api_invocations": 110,
+        "gpu_node_activities": 540,
+        "clone_edges": 4360,
+        "copy_nodes_without_graph_id": 0,
+        "every_replay_gpu_node_verified": true
+      }
+    },
+    {
+      "capture_index": 8,
+      "scheme": "serial_sparse",
+      "phase": "cold",
+      "sqlite": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/motivation_c10_profile_20261004_01/capture_8.sqlite",
+      "sqlite_sha256": "6e4e637109707536928fbc9c7ade5cc01ccab8d83d893bf47e0c1db54f6a3c9c",
+      "matrix_calls": 9102,
+      "bound_matrix_calls": 9102,
+      "matrix_scope_gpu_activity_count": 25334,
+      "call_activity_count_conserved": true,
+      "graph_attribution": {
+        "replays": 1300,
+        "matrix_api_invocations": 7150,
+        "gpu_node_activities": 35740,
+        "clone_edges": 4360,
+        "copy_nodes_without_graph_id": 640,
+        "every_replay_gpu_node_verified": true
+      }
+    },
+    {
+      "capture_index": 9,
+      "scheme": "serial_sparse",
+      "phase": "revisit",
+      "sqlite": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/motivation_c10_profile_20261004_01/capture_9.sqlite",
+      "sqlite_sha256": "6d35ff456cc26712905b4a12075491971662eaa0102c3e9f8043348e7dd1c0a4",
+      "matrix_calls": 141,
+      "bound_matrix_calls": 141,
+      "matrix_scope_gpu_activity_count": 372,
+      "call_activity_count_conserved": true,
+      "graph_attribution": {
+        "replays": 20,
+        "matrix_api_invocations": 110,
+        "gpu_node_activities": 540,
+        "clone_edges": 4360,
+        "copy_nodes_without_graph_id": 0,
+        "every_replay_gpu_node_verified": true
+      }
+    },
+    {
+      "capture_index": 11,
+      "scheme": "dense_prefetch",
+      "phase": "cold",
+      "sqlite": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/motivation_c10_profile_20261004_01/capture_11.sqlite",
+      "sqlite_sha256": "06677b1c703593cefa02ff297e62c0ebc26d79c4b6290b21808e568177a99c07",
+      "matrix_calls": 9102,
+      "bound_matrix_calls": 9102,
+      "matrix_scope_gpu_activity_count": 25334,
+      "call_activity_count_conserved": true,
+      "graph_attribution": {
+        "replays": 1300,
+        "matrix_api_invocations": 7150,
+        "gpu_node_activities": 35740,
+        "clone_edges": 4360,
+        "copy_nodes_without_graph_id": 640,
+        "every_replay_gpu_node_verified": true
+      }
+    },
+    {
+      "capture_index": 12,
+      "scheme": "dense_prefetch",
+      "phase": "revisit",
+      "sqlite": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/motivation_c10_profile_20261004_01/capture_12.sqlite",
+      "sqlite_sha256": "a399e3e240e3a9efc462ac04b3fcb79b8b2e350efa1d8a1f9b36b2e878605606",
+      "matrix_calls": 141,
+      "bound_matrix_calls": 141,
+      "matrix_scope_gpu_activity_count": 372,
+      "call_activity_count_conserved": true,
+      "graph_attribution": {
+        "replays": 20,
+        "matrix_api_invocations": 110,
+        "gpu_node_activities": 540,
+        "clone_edges": 4360,
+        "copy_nodes_without_graph_id": 0,
+        "every_replay_gpu_node_verified": true
+      }
+    }
+  ],
+  "dense_peaks_tflops": {
+    "fp8": 1979.0,
+    "bf16": 989.5,
+    "fp32": 67.0
+  },
+  "precision_settings": {
+    "float32_matmul_precision": "highest",
+    "cuda_matmul_allow_tf32": false,
+    "cuda_matmul_fp32_precision": "ieee",
+    "backends_fp32_precision": "none",
+    "cudnn_allow_tf32": true,
+    "cudnn_fp32_precision": "none",
+    "bf16_reduced_precision_reduction": true,
+    "fp16_reduced_precision_reduction": true
+  },
+  "peak_reference": "https://www.nvidia.com/en-us/data-center/h200/",
+  "input_sha256": {
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/motivation_c10_profile_20261004_01/operator_calls.json": "d6348a1b8caba356f3b625589dc428347459472b51532b877f141a6806ff37ba",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/motivation_c10_profile_20261004_01/metadata.json": "8e932a52b895f20512eb39a1d89de4354d1968ed116295f696cd7a881a2d7a0e",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/motivation_c10_profile_20261004_01/result.json": "c5673e64b98f247054c74f7a9191d36534a166b2265a3f9b8c5002d7fa405d16",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/motivation_c10_profile_20261004_01/analysis/flops_verification.json": "1abf8a9b1e1e6703805f466e7414c5336cba7160d1b589713051d60322a04eaf",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/motivation_c10_flops_20261004_01/flops.json": "ee955382fc54dc38f823c5402d124b0d51237555a3ba30c991746a3adb41135a",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/motivation_c10_profile_20261004_01/capture_1.sqlite": "590dd21874c443872f648e96e55a97f8a11f91e7b563dea364d72dcb7b14e9f3",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/motivation_c10_profile_20261004_01/capture_4.sqlite": "f267d815a0018da2fc8ccebe78c47df5e43b5a566ebc2b28f199c8010ed9cd5c",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/motivation_c10_profile_20261004_01/capture_7.sqlite": "287467ccd5314acd137bdc98bd5bc924ce0d0316a5ebaa81cdb7e1118b886376",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/motivation_c10_profile_20261004_01/capture_10.sqlite": "63f4b767a41aba2e4a9bb8e1a2219d4035d3372f397f1091e9b00fd38a4c0e5e"
+  },
+  "analysis_source_sha256": {
+    "/tmp/deepseek-motivation-c10_host_rope_v2-frozen-6mdyfgj0/experiments/deepseek_v32_motivation/src/operator_mfu.py": "f2643e050a47669d45e3e8423413dba974eacb05fd08adb5a0813882f0afe4af",
+    "/tmp/deepseek-motivation-c10_host_rope_v2-frozen-6mdyfgj0/experiments/deepseek_v32_motivation/src/analyze_pipeline.py": "c3f037ccb99b019c868c29ae9168ac21e196ccbeebd22a2d575a1c3a15e4b1fb",
+    "/tmp/deepseek-motivation-c10_host_rope_v2-frozen-6mdyfgj0/experiments/deepseek_v32_motivation/src/graph_attribution.py": "b92aa753f38984d59bef0c9c8cf7b1329e53bda125d707dbeca0bf73e54063de",
+    "/tmp/deepseek-motivation-c10_host_rope_v2-frozen-6mdyfgj0/experiments/deepseek_v32_echo_prefill/src/analyze_nsys.py": "fd1277d1be4e164ff99027ffe4f7a37dbec272d987ff39c0074b71b908f45089"
+  },
+  "definitions": {
+    "mfu": "100 * sum(useful FLOPs / precision dense peak) / sum(per-call duration); never mean individual percentages",
+    "primary_kernel": "Actual matrix kernels only; split-K reductions are helpers. Fused ECHO includes inseparable fetch/reduction work.",
+    "operator_gpu_active": "Per-call union of all attributed GPU kernel/memcpy/memset activities, including helpers; summed across calls.",
+    "operator_gpu_span": "Per-call first GPU activity start to last GPU activity end, including internal gaps; summed across calls.",
+    "attribution": "CPU launch correlation to innermost NVTX, inheriting eager matrix ownership into descendants. Graph APIs use capture-time node sets and recorded executable clone lineage; no CPU/GPU timestamp clipping."
+  },
+  "boundaries": [
+    "Existing instrumented Nsight captures, one cold and one revisit per scheme. No new GPU measurements.",
+    "Operator GPU-active MFU excludes host overhead and gaps. It is not formal request MFU or a Tensor Core hardware counter.",
+    "ECHO fused duration includes internal host loads; no pure-QK throughput or internal overlap is inferred.",
+    "All ten independent blocks count; useful FLOPs exclude known padding, scalar math and copies. Unknown executed GEMM FLOPs remain null.",
+    "Top-k, norms, cache metadata and standalone fetch have no matrix MFU; their times remain in the prior stage report."
+  ]
+}

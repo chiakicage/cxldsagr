@@ -7,6 +7,7 @@ export PYTHONDONTWRITEBYTECODE=1
 if [[ "${1:-}" == --help ]]; then
   echo "Usage: bash experiments/gr_serving/scripts/run.sh [RUN_ID] MEASURE_OPTIONS"
   echo "Measures DeepSeek V3.2 before NOSA by default; forwards options to the measurement CLI."
+  echo "GR_OUTPUT_ROOT overrides the output root (default: experiments/gr_serving/output)."
   .venv/bin/python -m experiments.gr_serving.src.measure --help
   exit 0
 fi
@@ -23,7 +24,7 @@ for argument in "$@"; do
     exit 2
   fi
 done
-output="experiments/gr_serving/output"
+output="${GR_OUTPUT_ROOT:-experiments/gr_serving/output}"
 for category in data log profile; do
   if [[ -e "$output/$category/$run_id" ]]; then
     echo "Run already exists: $run_id" >&2
@@ -47,6 +48,11 @@ trap 'exit 143' TERM
 .venv/bin/python -m experiments.gr_serving.src.measure \
   --run-id "$run_id" --output-dir "$staging/data" "$@" \
   2> >(tee "$staging/log/measure.stderr.log" >&2) | tee "$staging/log/measure.stdout.log"
+if [[ "${GR_AUDIT_BEFORE_PUBLISH:-0}" == 1 ]]; then
+  .venv/bin/python -m experiments.gr_serving.src.audit "$staging/data" \
+    --expected-run-id "$run_id" --json "$staging/data/independent_audit.json" \
+    >"$staging/log/audit.stdout.log" 2>"$staging/log/audit.stderr.log"
+fi
 for category in data log profile; do
   mkdir -p "$output/$category"
   mkdir "$output/$category/$run_id"

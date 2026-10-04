@@ -7,10 +7,39 @@ import sys
 
 import pytest
 
-from experiments.deepseek_v32_echo_prefill.src.analyze_nsys import analyze_sqlite
+from experiments.deepseek_v32_echo_prefill.src.analyze_nsys import analyze_sqlite, kernel_category
 
 PID = 12 << 24
 TID = PID + 7
+
+
+def test_capture_preserves_graph_ids_for_explicit_clone_attribution(tmp_path):
+    from experiments.deepseek_v32_echo_prefill.src.analyze_nsys import _read_capture
+
+    path = make_capture(tmp_path / "graph.sqlite")
+    with sqlite3.connect(path) as db:
+        db.execute("ALTER TABLE CUPTI_ACTIVITY_KIND_KERNEL ADD COLUMN graphId INTEGER")
+        db.execute("ALTER TABLE CUPTI_ACTIVITY_KIND_KERNEL ADD COLUMN graphNodeId INTEGER")
+        db.execute(
+            "UPDATE CUPTI_ACTIVITY_KIND_KERNEL SET graphId=9, graphNodeId=987 WHERE correlationId=1"
+        )
+    _, _, activities, _ = _read_capture(path)
+    graph = [row for row in activities if row.get("graph_id")]
+    assert len(graph) == 1
+    assert graph[0]["graph_node_id"] == 987
+
+
+@pytest.mark.parametrize(
+    "name,category",
+    [
+        ("deep_gemm::sm90_fp8_mqa_logits<64,128>", "indexer"),
+        ("echo_native::sm90_fp8_mqa_logits_fuse_prefetch<64,128>", "indexer_fused_prefetch"),
+        ("sm90::prefill::sparse_fwd::sparse_attn_fwd_kernel<576>", "sparse_mla"),
+        ("deep_gemm::sm90_fp8_gemm_1d2d_impl<...>", "deepgemm_fp8_gemm"),
+    ],
+)
+def test_official_and_fused_kernel_families(name, category):
+    assert kernel_category(name) == category
 
 
 def make_capture(path, mode="resident"):
@@ -34,7 +63,7 @@ def make_capture(path, mode="resident"):
         4: "cudaMemcpyAsync",
         5: "cudaEventRecord",
         11: "_fp8_linear",
-        12: "_sparse_mla_kernel",
+        12: "sm90::prefill::sparse_fwd::sparse_attn_fwd_kernel<576>",
         13: "gather_records",
         14: "unmatched_kernel",
         20: f"echo/{mode}/extend_annotated/layer_0/linear",

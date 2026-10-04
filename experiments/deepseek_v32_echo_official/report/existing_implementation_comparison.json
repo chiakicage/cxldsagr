@@ -1,0 +1,392 @@
+{
+  "schema": "deepseek-v32-echo-existing-comparison-v1",
+  "analysis_only": true,
+  "new_gpu_measurements": false,
+  "original_numerical_audits_reused_without_rerun": true,
+  "comparison_scope": "independent accepted runs; not a sole-cache-implementation speedup",
+  "inputs": {
+    "motivation": {
+      "summary_path": "experiments/deepseek_v32_motivation/output/data/motivation_c10_20261004_u16_r2_01/report/summary.json",
+      "summary_sha256": "a00fb1dba99cb33ca0bed7ff34e192206829689974224e65ebc6892c6899a4db",
+      "provenance_path": "experiments/deepseek_v32_motivation/output/data/motivation_c10_20261004_u16_r2_01/report/report_provenance.json",
+      "provenance_sha256": "2240a6c5f8a75305602c42339f1e851f8bea9923e83fcb731a42f6854f449c99",
+      "run_id": "motivation_c10_20261004_u16_r2_01",
+      "source_sha256": "11fc11b18b2e70baf450a82ab4fad66f2f8d4e22cda2e9f36bf74453a400df8f",
+      "git_revision": "1a9aa455ef101a64da255cb1828bfa8f6d9a3f0c",
+      "workload_sha256": "7e4c737a86464c12238191933e707344426231bf671a29658837e676ff5284ae",
+      "status": "accepted",
+      "audit_status": "passed",
+      "original_input_sha256": {
+        "metadata.json": "bd7661384311bd3e204c28ac719ab25ae362cb38b62bcf1be0a4d4d9095466b2",
+        "measurements.jsonl": "60491aa18476c284718c85fe8f41a17686cdc12c171480333ca8d5caf8012272",
+        "source_manifest.json": "2c46ff8168fc28eb3937d491d2ac8ff92692cd4c117c685aab6c9acfe186ee8e",
+        "memory.json": "19811296c1964bdb77480ec7a43761e712449dfed5f925ac1f2e4f73cdf5eb30",
+        "workload/requests.jsonl": "167a0af2fba4428c0b3f4bd2886a644675ee46b017c9fc08d25bb0ff50f71355",
+        "workload/workload.json": "f13739cdabb79729a64c0e4d8bd4242bf9c64518bee657ab305c598ae6cf01f0"
+      },
+      "original_report_generator_sha256": "3d225a4b3f2ce129f722f34023f3ae5e385892c7c654646e59c991250b900851",
+      "hardware": {
+        "hostname": "de-08853-0930153814-6thub-0930153823-6886f69c68-5dr58-rc",
+        "python": "3.12.13",
+        "torch": "2.12.1+cu130",
+        "cuda": "13.0",
+        "device": "cuda:0",
+        "name": "NVIDIA H200",
+        "uuid": "1bdee8b4-22ac-536c-208b-bfb4ed38b878",
+        "total_memory": 150121545728,
+        "sm_count": 132
+      },
+      "measurement_boundary": "Synchronized runner wall latency includes admission/eviction, history construction on a miss, all candidate hidden, last-token LM head and history cleanup. Loading, request generation, three warmup requests including host recall, compute graph preparation, output copies, diagnostics, numerical comparison and report generation are outside latency.",
+      "memory_boundary": "Each scheme resets CUDA allocator peaks after warmup resources are released, before fresh shared allocation. Peaks include loaded weights, shared allocation and the complete measured request trace. Per-request peak fields are cumulative within that scheme. Device free-memory samples are boundaries, not process peaks.",
+      "precision_policy": "cuda_matmul_fp32_tf32_disabled_v1",
+      "precision_settings": {
+        "float32_matmul_precision": "highest",
+        "cuda_matmul_allow_tf32": false,
+        "cuda_matmul_fp32_precision": "ieee",
+        "backends_fp32_precision": "none",
+        "cudnn_allow_tf32": true,
+        "cudnn_fp32_precision": "none",
+        "bf16_reduced_precision_reduction": true,
+        "fp16_reduced_precision_reduction": true
+      },
+      "numerical_policy": null,
+      "numerical_audit": {
+        "status": "passed",
+        "checked_requests": 128,
+        "compared_offload_requests": 96,
+        "all_candidate_hidden_and_logits_exact": true,
+        "source_sha256": "11fc11b18b2e70baf450a82ab4fad66f2f8d4e22cda2e9f36bf74453a400df8f",
+        "warmup_policy": "two_users_then_first_user_host_recall_v1",
+        "checked_warmup_requests": 12,
+        "host_recall_warmed_schemes": [
+          "echo",
+          "serial_sparse",
+          "dense_prefetch"
+        ]
+      }
+    },
+    "official": {
+      "summary_path": "experiments/deepseek_v32_echo_official/output/data/echo_official_c10_20261004_u16_r2_01/report/summary.json",
+      "summary_sha256": "a7dd7655b97c6bc8ed3fd579f8ff64fdfe75f1eae494a63461b519872c1c7b16",
+      "provenance_path": "experiments/deepseek_v32_echo_official/output/data/echo_official_c10_20261004_u16_r2_01/report/report_provenance.json",
+      "provenance_sha256": "f4e5012a78133d245ee699a7409fa7dcdc78d7454cb052431ce1e875c031b00d",
+      "run_id": "echo_official_c10_20261004_u16_r2_01",
+      "source_sha256": "fef9fef45d923343967198552709f7a7549da9145ce0927b535539d86f8cc60d",
+      "git_revision": "1a9aa455ef101a64da255cb1828bfa8f6d9a3f0c",
+      "workload_sha256": "7e4c737a86464c12238191933e707344426231bf671a29658837e676ff5284ae",
+      "status": "accepted",
+      "audit_status": "passed",
+      "original_input_sha256": {
+        "metadata.json": "15d5298eefb7161dfca086400029d2cd891d97cc6b1999256c3f4556b19efa4c",
+        "measurements.jsonl": "930729f81b0f2a03b972bdcea59889bc0ff6f67ced0cccbf3f398308bdc8868b",
+        "validation.jsonl": "de5ea548f104a083a14ee13cd554f36f4bf74b3ac04d07542015b3190e1dff64",
+        "source_manifest.json": "835f255c687e2c8ad130f65e5f2d391f4c46d098df03edfa30072a3bc7dd9fed",
+        "memory.json": "1fcea740726d66005adb434a3221ef678cd55da0a00d14678b0a91b01bb99e5c",
+        "official_artifact_manifest.json": "49b5a31d097e4956745f667f23b81b230f81ce99f4e9af2199109c96f320fc41",
+        "workload/requests.jsonl": "167a0af2fba4428c0b3f4bd2886a644675ee46b017c9fc08d25bb0ff50f71355",
+        "workload/workload.json": "f13739cdabb79729a64c0e4d8bd4242bf9c64518bee657ab305c598ae6cf01f0"
+      },
+      "original_report_generator_sha256": "8b28662ff1d55fa3628322edca457626eb30a222d74675aafb851c2f74143c3b",
+      "hardware": {
+        "hostname": "de-08853-0930153814-6thub-0930153823-6886f69c68-5dr58-rc",
+        "python": "3.12.13",
+        "torch": "2.12.1+cu130",
+        "cuda": "13.0",
+        "device": "cuda:0",
+        "name": "NVIDIA H200",
+        "uuid": "1bdee8b4-22ac-536c-208b-bfb4ed38b878",
+        "total_memory": 150121545728,
+        "sm_count": 132
+      },
+      "measurement_boundary": "Synchronized runner wall latency includes input transfer, admission/eviction, history construction on a miss, all candidate hidden, last-token LM head and history cleanup. GPU counter accumulation and reductions inside forward are included. Loading, generation, compute-graph preparation, three warmup requests, host counter readout, output copies, numerical comparison and reporting are outside latency. Each request is measured once. The HBM reference is executed afresh in this same run. A separate full resident validation repeat publishes outputs and errors, without latency.",
+      "memory_boundary": "Each scheme resets CUDA allocated/reserved peaks after releasing warmup caches and before fresh shared allocation. Peaks include loaded weights and the complete formal trace. Device free memory is sampled only at request boundaries. P/NH are token capacities; no cache byte subbudget or empirical headroom is subtracted.",
+      "precision_policy": "fp32_highest_cuda_matmul_tf32_disabled_v1",
+      "precision_settings": {
+        "float32_matmul_precision": "highest",
+        "cuda_matmul_allow_tf32": false,
+        "bf16_reduced_precision_reduction": true,
+        "fp16_reduced_precision_reduction": true,
+        "cudnn_allow_tf32": true
+      },
+      "numerical_policy": {
+        "policy_id": "official-resident-calibrated-fp64-v1",
+        "atol": 0.03125,
+        "rtol": 0.015625,
+        "relative_l2_limits": {
+          "hidden": 0.005,
+          "logits": 0.01
+        },
+        "minimum_elementwise_pass_fraction": 0.999,
+        "metrics_dtype": "torch.float64",
+        "reference": "primary_hbm_same_run"
+      },
+      "numerical_audit": {
+        "status": "passed",
+        "checked_requests": 64,
+        "compared_offload_requests": 32,
+        "compared_resident_repeat_requests": 32,
+        "all_candidate_hidden_and_logits_numerical_pass": true,
+        "all_offload_candidate_hidden_and_logits_bitwise_equal": false,
+        "numerical_summary": {
+          "hbm_repeat": {
+            "requests": 32,
+            "hidden": {
+              "max_abs": 0.046875,
+              "max_relative_l2": 0.0011402752546738498,
+              "minimum_elementwise_pass_fraction": 0.9999989100864956,
+              "maximum_elementwise_outliers": 1,
+              "bitwise_equal_requests": 0,
+              "allclose_requests": 31,
+              "numerical_pass_requests": 32
+            },
+            "logits": {
+              "max_abs": 0.0625,
+              "max_relative_l2": 0.003396576922263866,
+              "minimum_elementwise_pass_fraction": 1.0,
+              "maximum_elementwise_outliers": 0,
+              "bitwise_equal_requests": 0,
+              "allclose_requests": 32,
+              "numerical_pass_requests": 32
+            }
+          },
+          "echo": {
+            "requests": 32,
+            "hidden": {
+              "max_abs": 0.1796875,
+              "max_relative_l2": 0.0024774240057116566,
+              "minimum_elementwise_pass_fraction": 0.9999291556222099,
+              "maximum_elementwise_outliers": 65,
+              "bitwise_equal_requests": 0,
+              "allclose_requests": 29,
+              "numerical_pass_requests": 32
+            },
+            "logits": {
+              "max_abs": 0.0625,
+              "max_relative_l2": 0.003394203616620914,
+              "minimum_elementwise_pass_fraction": 1.0,
+              "maximum_elementwise_outliers": 0,
+              "bitwise_equal_requests": 0,
+              "allclose_requests": 32,
+              "numerical_pass_requests": 32
+            }
+          }
+        },
+        "reference_policy": "fresh_hbm_same_run",
+        "source_sha256": "fef9fef45d923343967198552709f7a7549da9145ce0927b535539d86f8cc60d",
+        "official_artifacts": {
+          "source": 885,
+          "native": 8
+        },
+        "checked_warmup_requests": 6,
+        "host_recall_warmed_schemes": [
+          "echo"
+        ],
+        "compute_graphs": {
+          "enabled": true,
+          "measured_replays": {
+            "hbm": 41600,
+            "echo": 21120
+          },
+          "resident_repeat_replays": 41600,
+          "warmup_replay_evidence": "not_saved"
+        }
+      }
+    }
+  },
+  "generator": {
+    "path": "experiments/deepseek_v32_echo_official/src/compare_existing.py",
+    "sha256": "a7517e7c3522d2a900050837d4115eda9b798f539844151b183cf4b5e552ff5d"
+  },
+  "output_directory": "/tmp/deepseek_official_c10_publication_20261004/comparison_final",
+  "identity_check": {
+    "status": "passed_for_recorded_fields",
+    "config": {
+      "num_users": 16,
+      "rounds": 2,
+      "history_tokens": 65536,
+      "candidate_tokens": 128,
+      "chunk_size": 1024,
+      "sparse_pool_tokens": 65536,
+      "host_arena_tokens": 16777216,
+      "seed": 42,
+      "requests_per_scheme": 32,
+      "layers": 10,
+      "warmup_requests_per_scheme": 3,
+      "warmup_request_indices": [
+        0,
+        1,
+        16
+      ],
+      "warmup_policy": "two_users_then_first_user_host_recall_v1",
+      "sampling": "sequential",
+      "workspace_query_tokens": 1024,
+      "padded_history_tokens": 65536,
+      "byte_subbudgets": null,
+      "noncache_headroom_bytes": null,
+      "enable_compute_graphs": true
+    },
+    "model": {
+      "model": "DeepSeek-V3.2-dense-layer-input-replay",
+      "checkpoint": "/preset-models",
+      "physical_layers": 10,
+      "source_layers": [
+        0,
+        1,
+        2,
+        0,
+        1,
+        2,
+        0,
+        1,
+        2,
+        0
+      ],
+      "input_semantics": "copy_source_layer_hidden_and_residual_for_each_physical_copy",
+      "model_scope": "checkpoint-backed workload surrogate; not a trained 8B model",
+      "linear_backend": "fp8",
+      "chunk_size": 1024,
+      "sparse_pool_tokens": 65536,
+      "output": "all_candidate_normalized_hidden_and_last_token_lm_head",
+      "source_layer_parameters": [
+        597442816,
+        597442816,
+        597442816
+      ],
+      "backbone_parameters": 5974428160,
+      "endpoint_parameters": 1853365248,
+      "total_parameters": 7827793408
+    },
+    "model_dimensions": {
+      "hidden": 7168,
+      "vocabulary": 129280
+    },
+    "hardware_and_runtime": {
+      "name": "NVIDIA H200",
+      "total_memory": 150121545728,
+      "sm_count": 132,
+      "python": "3.12.13",
+      "torch": "2.12.1+cu130",
+      "cuda": "13.0"
+    },
+    "installed_dependency_versions": {
+      "deep_gemm": "2.8.1+057ca59",
+      "flash_mla": "1.0.0+ba89a34",
+      "flashinfer": "0.6.18"
+    },
+    "workload_sha256": "7e4c737a86464c12238191933e707344426231bf671a29658837e676ff5284ae",
+    "checkpoint_metadata_matches": true,
+    "checkpoint_identity_boundary": "checkpoint path and shard stat inventory, not weights hashes",
+    "same_physical_gpu": true,
+    "same_source_snapshot": false,
+    "recorded_common_precision_settings": {
+      "bf16_reduced_precision_reduction": true,
+      "cuda_matmul_allow_tf32": false,
+      "cudnn_allow_tf32": true,
+      "float32_matmul_precision": "highest",
+      "fp16_reduced_precision_reduction": true
+    },
+    "recorded_common_precision_settings_equality_verified": true,
+    "full_precision_policy_equality_verified": false,
+    "precision_comparison_boundary": "Common recorded effective precision flags match. Fields recorded by only one run and experiment-specific policy labels do not establish full policy equality."
+  },
+  "rows": [
+    {
+      "group": "motivation",
+      "scheme": "hbm",
+      "implementation": "HBM-only（本地对照）",
+      "run_id": "motivation_c10_20261004_u16_r2_01",
+      "source_sha256": "11fc11b18b2e70baf450a82ab4fad66f2f8d4e22cda2e9f36bf74453a400df8f",
+      "requests": 32,
+      "first_requests": 16,
+      "revisit_requests": 16,
+      "first_mean_ms": 2176.886415130866,
+      "first_p95_ms": 2187.2591977444245,
+      "revisit_mean_ms": 2170.2444976835977,
+      "revisit_p95_ms": 2178.394367234432,
+      "total_seconds": 69.55409460503142,
+      "torch_peak_allocated_bytes": 15587798528,
+      "torch_peak_reserved_bytes": 25377636352,
+      "torch_peak_allocated_gib": 14.517268657684326,
+      "torch_peak_reserved_gib": 23.634765625,
+      "gpu_uuid": "1bdee8b4-22ac-536c-208b-bfb4ed38b878"
+    },
+    {
+      "group": "motivation",
+      "scheme": "echo",
+      "implementation": "我们的 ECHO（已有验收版本）",
+      "run_id": "motivation_c10_20261004_u16_r2_01",
+      "source_sha256": "11fc11b18b2e70baf450a82ab4fad66f2f8d4e22cda2e9f36bf74453a400df8f",
+      "requests": 32,
+      "first_requests": 16,
+      "revisit_requests": 16,
+      "first_mean_ms": 2283.432713811635,
+      "first_p95_ms": 2293.0948997382075,
+      "revisit_mean_ms": 24.947221187176183,
+      "revisit_p95_ms": 25.50915272149723,
+      "total_seconds": 36.93407895998098,
+      "torch_peak_allocated_bytes": 17563303936,
+      "torch_peak_reserved_bytes": 26088570880,
+      "torch_peak_allocated_gib": 16.357101440429688,
+      "torch_peak_reserved_gib": 24.296875,
+      "gpu_uuid": "1bdee8b4-22ac-536c-208b-bfb4ed38b878"
+    },
+    {
+      "group": "official",
+      "scheme": "hbm",
+      "implementation": "HBM-only（官方对照）",
+      "run_id": "echo_official_c10_20261004_u16_r2_01",
+      "source_sha256": "fef9fef45d923343967198552709f7a7549da9145ce0927b535539d86f8cc60d",
+      "requests": 32,
+      "first_requests": 16,
+      "revisit_requests": 16,
+      "first_mean_ms": 2114.286078442092,
+      "first_p95_ms": 2121.2854145123856,
+      "revisit_mean_ms": 2106.514502062055,
+      "revisit_p95_ms": 2117.7207645087037,
+      "total_seconds": 67.53280928806635,
+      "torch_peak_allocated_bytes": 15621877248,
+      "torch_peak_reserved_bytes": 25635586048,
+      "torch_peak_allocated_gib": 14.549006938934326,
+      "torch_peak_reserved_gib": 23.875,
+      "gpu_uuid": "1bdee8b4-22ac-536c-208b-bfb4ed38b878"
+    },
+    {
+      "group": "official",
+      "scheme": "echo",
+      "implementation": "官方 ECHO 适配路径",
+      "run_id": "echo_official_c10_20261004_u16_r2_01",
+      "source_sha256": "fef9fef45d923343967198552709f7a7549da9145ce0927b535539d86f8cc60d",
+      "requests": 32,
+      "first_requests": 16,
+      "revisit_requests": 16,
+      "first_mean_ms": 4637.565678258397,
+      "first_p95_ms": 4651.22213253926,
+      "revisit_mean_ms": 45.56106955715222,
+      "revisit_p95_ms": 46.13808424619492,
+      "total_seconds": 74.9300279650488,
+      "torch_peak_allocated_bytes": 17619694080,
+      "torch_peak_reserved_bytes": 26329743360,
+      "torch_peak_allocated_gib": 16.409618854522705,
+      "torch_peak_reserved_gib": 24.521484375,
+      "gpu_uuid": "1bdee8b4-22ac-536c-208b-bfb4ed38b878"
+    }
+  ],
+  "official_upstream_revision": "bc1b75c1000010d0ac6f032ebaac283255c050b1",
+  "difference_definition": "our_echo - official_echo; relative percent uses official_echo denominator",
+  "observed_our_echo_vs_official_echo": {
+    "first_mean_ms": {
+      "difference": -2354.1329644467623,
+      "relative_percent": -50.762256057812614
+    },
+    "revisit_mean_ms": {
+      "difference": -20.61384836997604,
+      "relative_percent": -45.24443471222255
+    },
+    "total_seconds": {
+      "difference": -37.995949005067814,
+      "relative_percent": -50.70857443532661
+    }
+  },
+  "cross_run_numerical_comparison_performed": false,
+  "statistical_stability_established": false
+}

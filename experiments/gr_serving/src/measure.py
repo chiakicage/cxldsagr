@@ -38,7 +38,7 @@ def _git(*args):
     return subprocess.check_output(["git", *args], cwd=ROOT, text=True).strip()
 
 
-def source_snapshot(output):
+def source_snapshot(output, *, include_official=False):
     """Save actual source bytes, including uncommitted and untracked implementation."""
     extensions = {".py", ".sh", ".cu", ".cuh", ".cpp", ".h", ".hpp"}
     manifest = {}
@@ -53,16 +53,59 @@ def source_snapshot(output):
             destination.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(path, destination)
             manifest[str(relative)] = hashlib.sha256(path.read_bytes()).hexdigest()
-    for path in sorted((ROOT / "experiments/gr_serving").rglob("*")):
-        if not path.is_file() or path.suffix not in (".py", ".sh") or "output" in path.parts:
-            continue
-        relative = path.relative_to(ROOT)
-        destination = output / "source" / relative
-        destination.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(path, destination)
-        manifest[str(relative)] = hashlib.sha256(path.read_bytes()).hexdigest()
+    for experiment in ("gr_serving", "deepseek_v32_echo_cache"):
+        for path in sorted((ROOT / "experiments" / experiment).rglob("*")):
+            if not path.is_file() or path.suffix not in (".py", ".sh") or "output" in path.parts:
+                continue
+            relative = path.relative_to(ROOT)
+            destination = output / "source" / relative
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(path, destination)
+            manifest[str(relative)] = hashlib.sha256(path.read_bytes()).hexdigest()
+    if include_official:
+        from experiments.deepseek_v32_echo_prefill.src.backend_provenance import source_files
+
+        for path in sorted(source_files()):
+            relative = path.relative_to(ROOT)
+            destination = output / "source" / relative
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(path, destination)
+            manifest[str(relative)] = hashlib.sha256(path.read_bytes()).hexdigest()
     _write(output / "source_manifest.json", manifest)
     return hashlib.sha256(json.dumps(manifest, sort_keys=True).encode()).hexdigest()
+
+
+def backend_provenance():
+    from experiments.deepseek_v32_echo_prefill.src.backend_provenance import (
+        collect_backend_provenance,
+        digest,
+    )
+
+    result = collect_backend_provenance()
+    if "flashinfer" in result["installed"]:
+        return result
+    distribution = importlib.metadata.distribution("flashinfer-python")
+    files = {}
+    for relative in distribution.files or ():
+        path = Path(distribution.locate_file(relative)).resolve()
+        if path.is_file() and path.suffix in {".py", ".so", ".cuh", ".h", ".hpp", ".cu", ".cpp"}:
+            files[str(path)] = digest(path)
+    if not files:
+        raise RuntimeError("FlashInfer installed source provenance is unavailable")
+    result["flashinfer"] = {"version": distribution.version, "files_sha256": files}
+    return result
+
+
+def save_numerical_evidence(output, *, model, scheme, users, request_id, hidden, logits):
+    relative = Path("numerical") / model / scheme / str(users) / f"{request_id:06d}.pt"
+    destination = output / relative
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    if destination.exists():
+        raise FileExistsError(destination)
+    torch.save({"hidden": hidden, "logits": logits}, destination)
+    with destination.open("rb") as source:
+        digest = hashlib.file_digest(source, "sha256").hexdigest()
+    return {"path": str(relative), "sha256": digest}
 
 
 def numerical_comparison(actual, expected, *, atol, rtol):
@@ -127,7 +170,10 @@ def _backend(model, args):
             device=args.device,
             num_layers=args.deepseek_layers,
             chunk_size=args.chunk_size,
-            slots=args.deepseek_slots,
+            sparse_pool_tokens=args.sparse_pool_tokens,
+            host_arena_tokens=args.host_arena_tokens,
+            workspace_query_tokens=args.workspace_query_tokens,
+            extend_chunk_size=args.extend_chunk_size,
         )
     from models.nosa.serving import NosaServingBackend
 
@@ -142,22 +188,51 @@ def _backend(model, args):
 
 def _select_scheme(backend, model, scheme, args):
     if model == "deepseek_v32":
-        backend.scheme = scheme
+        backend.configure_scheme(scheme)
         return backend
     from models.nosa.serving import NosaServingBackend
 
     return NosaServingBackend(backend.model, scheme, chunk_size=args.chunk_size)
 
 
+def _resource_limits(args):
+    return {
+        "max_session_capacity": args.history_tokens + args.candidate_tokens,
+        "max_history_tokens": args.history_tokens,
+        "max_candidate_tokens": args.candidate_tokens,
+    }
+
+
+def _sequential_rounds(args):
+    if args.sampling != "sequential":
+        return None
+    if len(args.users) != 1:
+        raise ValueError("sequential complete loops require one user population per run")
+    users = args.users[0]
+    if users < 1 or args.requests < 2 * users or args.requests % users:
+        raise ValueError("sequential requests must be a multiple of users and cover >= 2 rounds")
+    return args.requests // users
+
+
 def _warmup(backend, request, args):
     # Distinct cache ownership; none of these sessions survive into measurement.
     with PersistentGRRunner(
-        backend, hbm_budget_bytes=args.hbm_budget_bytes, dram_budget_bytes=args.dram_budget_bytes
+        backend,
+        hbm_budget_bytes=args.hbm_budget_bytes,
+        dram_budget_bytes=args.dram_budget_bytes,
+        resource_limits=_resource_limits(args),
     ) as runner:
         for _ in range(args.warmup):
             result = runner.execute(request)
             del result
     backend.synchronize()
+
+
+class RemovedSessionSlots(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string=None):
+        parser.error(
+            "--deepseek-slots was per-session and has been removed; use --sparse-pool-tokens for the shared backend pool"
+        )
 
 
 def parser():
@@ -187,7 +262,28 @@ def parser():
     result.add_argument("--hbm-budget-gib", type=float, default=4.0)
     result.add_argument("--dram-budget-gib", type=float, default=16.0)
     result.add_argument("--chunk-size", type=int, default=1024)
-    result.add_argument("--deepseek-slots", type=int, default=4096)
+    result.add_argument("--deepseek-slots", action=RemovedSessionSlots, help=argparse.SUPPRESS)
+    result.add_argument(
+        "--sparse-pool-tokens",
+        type=int,
+        default=32768,
+        help="usable tokens in each backend-owned shared DeepSeek layer pool",
+    )
+    result.add_argument(
+        "--host-arena-tokens",
+        type=int,
+        help="global host token capacity, multiple of 64; default selected under both budgets",
+    )
+    result.add_argument(
+        "--workspace-query-tokens",
+        type=int,
+        help="reserve scratch for this maximum query batch; fixed across a chunk sweep",
+    )
+    result.add_argument(
+        "--extend-chunk-size",
+        type=int,
+        help="explicit candidate chunk; default executes the complete candidate batch",
+    )
     result.add_argument("--deepseek-layers", type=int, default=10)
     result.add_argument("--deepseek-path", type=Path, default=Path("/preset-models"))
     result.add_argument("--nosa-path", type=Path, default=Path("/mnt/ssd-wlcb/chenkaiqi/NOSA-8B"))
@@ -209,6 +305,20 @@ def parser():
 
 def main(argv=None):
     args = parser().parse_args(argv)
+    del args.deepseek_slots
+    if args.chunk_size < 1 or args.sparse_pool_tokens < 1:
+        raise ValueError("chunk size and sparse pool tokens must be positive")
+    if args.extend_chunk_size is not None and args.extend_chunk_size < 1:
+        raise ValueError("extend chunk size must be positive")
+    if args.host_arena_tokens is not None and (
+        args.host_arena_tokens < 64 or args.host_arena_tokens % 64
+    ):
+        raise ValueError("host arena tokens must be a positive multiple of 64")
+    needed_queries = max(args.chunk_size, args.extend_chunk_size or args.candidate_tokens)
+    if args.workspace_query_tokens is None:
+        args.workspace_query_tokens = needed_queries
+    elif args.workspace_query_tokens < needed_queries:
+        raise ValueError("workspace query tokens must cover both prefill and extend query batches")
     if args.sampling == "sequential":
         if args.max_revisits is not None:
             raise ValueError("sequential traces do not support a revisit cap")
@@ -216,6 +326,7 @@ def main(argv=None):
             raise ValueError("sequential traces do not use an external heat trace")
         args.heat_dataset = None
         args.heat_field = None
+    rounds = _sequential_rounds(args)
     if not re.fullmatch(r"[A-Za-z0-9_-]+", args.run_id):
         raise ValueError("run ID must contain only letters, digits, underscores or hyphens")
     if args.warmup < 2 or min(args.users) < 1 or len(set(args.users)) != len(args.users):
@@ -239,10 +350,11 @@ def main(argv=None):
     models = [name for name in SCHEMES if name in args.models]
     output = args.output_dir
     output.mkdir(parents=True, exist_ok=False)
-    source_id = source_snapshot(output)
+    source_id = source_snapshot(output, include_official="deepseek_v32" in models)
+    provenance = backend_provenance() if "deepseek_v32" in models else None
     props = torch.cuda.get_device_properties(device)
     metadata = {
-        "schema_version": 1,
+        "schema_version": 2,
         "run_id": args.run_id,
         "status": "running",
         "started_unix": time.time(),
@@ -283,8 +395,13 @@ def main(argv=None):
             },
         },
         "measurement": "synchronized serial wall latency; includes cache admission, cold prefix, all candidate tokens, and cleanup; excludes token generation, loading, JIT warmup and numerical comparison",
-        "cache_policy": "whole-user LRU; prefix identity checked; candidate suffix truncated; equal HBM/DRAM caps include derived records, cache scratch and staging",
+        "cache_policy": "whole-user LRU under byte and host-page quotas; DeepSeek per-layer token pools shared by backend; prefix identity checked; candidate suffix truncated; equal HBM/DRAM caps include shared maps, indexer/logits/topk workspace, pending copies and staging",
         "numerical_gate": "every request's complete candidate hidden compared to HBM on identical trace; each scheme begins with empty caches",
+        "numerical_evidence_schema": 1,
+        "sequential_loops": None
+        if rounds is None
+        else {"schema_version": 1, "rounds": rounds, "users_per_round": args.users[0]},
+        "backend_provenance": provenance,
         "models": {},
         "cases": [],
     }
@@ -352,106 +469,177 @@ def main(argv=None):
                     raise ValueError("sampled trace has no revisits; increase request count")
             print(json.dumps({"event": "load_model", "model": model}), flush=True)
             backend = _backend(model, args)
-            metadata["models"][model] = backend.describe()
-            _write(output / "metadata.json", metadata)
-            for scheme in SCHEMES[model]:
-                backend = _select_scheme(backend, model, scheme, args)
-                print(json.dumps({"event": "warmup", "model": model, "scheme": scheme}), flush=True)
-                _warmup(backend, workloads[args.users[0]].requests[0], args)
-                for users, workload in workloads.items():
-                    reference = output / "reference" / model / str(users)
-                    reference.mkdir(parents=True, exist_ok=True)
-                    torch.cuda.reset_peak_memory_stats(device)
-                    start = time.time()
-                    max_error = 0.0
-                    exact = True
-                    with PersistentGRRunner(
-                        backend,
-                        hbm_budget_bytes=args.hbm_budget_bytes,
-                        dram_budget_bytes=args.dram_budget_bytes,
-                    ) as runner:
-                        for request in workload.requests:
-                            result = runner.execute(request)
-                            actual = result.hidden.detach().cpu()
-                            del result.hidden
-                            request_id = request["request_id"]
-                            reference_file = reference / f"{request_id:06d}.pt"
-                            if scheme == "hbm":
-                                torch.save(actual, reference_file)
-                                expected = actual
-                            else:
-                                expected = torch.load(
-                                    reference_file, weights_only=True, map_location="cpu"
+            try:
+                metadata["models"][model] = backend.describe()
+                _write(output / "metadata.json", metadata)
+                for scheme in SCHEMES[model]:
+                    backend = _select_scheme(backend, model, scheme, args)
+                    print(
+                        json.dumps({"event": "warmup", "model": model, "scheme": scheme}),
+                        flush=True,
+                    )
+                    _warmup(backend, workloads[args.users[0]].requests[0], args)
+                    for users, workload in workloads.items():
+                        reference = output / "reference" / model / str(users)
+                        reference.mkdir(parents=True, exist_ok=True)
+                        torch.cuda.reset_peak_memory_stats(device)
+                        start = time.time()
+                        max_error = 0.0
+                        exact = True
+                        with PersistentGRRunner(
+                            backend,
+                            hbm_budget_bytes=args.hbm_budget_bytes,
+                            dram_budget_bytes=args.dram_budget_bytes,
+                            resource_limits=_resource_limits(args),
+                        ) as runner:
+                            for request in workload.requests:
+                                result = runner.execute(request)
+                                actual = result.hidden.detach().cpu()
+                                del result.hidden
+                                request_id = request["request_id"]
+                                reference_file = reference / f"{request_id:06d}.pt"
+                                if scheme == "hbm":
+                                    torch.save(actual, reference_file)
+                                    expected = actual
+                                else:
+                                    expected = torch.load(
+                                        reference_file, weights_only=True, map_location="cpu"
+                                    )
+                                comparison = numerical_comparison(
+                                    actual, expected, atol=args.atol, rtol=args.rtol
                                 )
-                            comparison = numerical_comparison(
-                                actual, expected, atol=args.atol, rtol=args.rtol
-                            )
-                            max_error = max(max_error, comparison["max_abs"])
-                            exact &= comparison["exact"]
-                            correctness.write(
-                                json.dumps(
-                                    {
-                                        "model": model,
-                                        "scheme": scheme,
-                                        "num_users": users,
-                                        "request_id": request_id,
-                                        **comparison,
-                                    }
+                                actual_logits = (
+                                    backend.last_logits.detach().cpu()
+                                    if model == "deepseek_v32"
+                                    else None
                                 )
-                                + "\n"
-                            )
-                            correctness.flush()
-                            row = {
-                                **result.metrics,
-                                "run_id": args.run_id,
-                                "model": model,
-                                "num_users": users,
-                                "workload_sha256": workload.manifest["workload_sha256"],
-                                "history_tokens": args.history_tokens,
-                                "candidate_tokens": args.candidate_tokens,
-                                "seed": args.seed,
-                                "correctness_max_abs": comparison["max_abs"],
-                                "correctness_exact": comparison["exact"],
-                            }
-                            measurements.write(json.dumps(row) + "\n")
-                            measurements.flush()
-                            rows.append(row)
-                            if request_id % 8 == 0 or request_id + 1 == len(workload.requests):
-                                print(
+                                evidence = save_numerical_evidence(
+                                    output,
+                                    model=model,
+                                    scheme=scheme,
+                                    users=users,
+                                    request_id=request_id,
+                                    hidden=actual,
+                                    logits=actual_logits,
+                                )
+                                logits_comparison = None
+                                if actual_logits is not None:
+                                    reference_logits = (
+                                        actual_logits
+                                        if scheme == "hbm"
+                                        else torch.load(
+                                            output
+                                            / "numerical"
+                                            / model
+                                            / "hbm"
+                                            / str(users)
+                                            / f"{request_id:06d}.pt",
+                                            weights_only=True,
+                                            map_location="cpu",
+                                        )["logits"]
+                                    )
+                                    logits_comparison = numerical_comparison(
+                                        actual_logits,
+                                        reference_logits,
+                                        atol=args.atol,
+                                        rtol=args.rtol,
+                                    )
+                                    del reference_logits
+                                max_error = max(max_error, comparison["max_abs"])
+                                exact &= comparison["exact"]
+                                correctness.write(
                                     json.dumps(
                                         {
-                                            "event": "request",
                                             "model": model,
                                             "scheme": scheme,
-                                            "users": users,
-                                            "request": request_id,
-                                            "latency_ms": row["latency_ms"],
-                                            "hit": row["prefix_cache_hit"],
-                                            "cache_users": row["cached_users"],
+                                            "num_users": users,
+                                            "request_id": request_id,
+                                            **comparison,
+                                            "logits": logits_comparison,
+                                            "tensor_evidence": evidence,
                                         }
-                                    ),
-                                    flush=True,
+                                    )
+                                    + "\n"
                                 )
-                            del result, actual, expected
-                    case = {
-                        "model": model,
-                        "scheme": scheme,
-                        "num_users": users,
-                        "requests": len(workload.requests),
-                        "observed_users": workload.manifest["observed"]["unique_users"],
-                        "revisits": workload.manifest["observed"]["revisits"],
-                        "max_revisits_observed": workload.manifest["observed"]["max_revisits"],
-                        "duration_seconds": time.time() - start,
-                        "all_hidden_exact": exact,
-                        "max_abs": max_error,
-                        "gpu_peak_allocated_bytes": torch.cuda.max_memory_allocated(device),
-                        "gpu_peak_reserved_bytes": torch.cuda.max_memory_reserved(device),
-                        "session_reservation": backend.estimate_session_bytes(
-                            args.history_tokens + args.candidate_tokens, args.history_tokens
-                        ),
-                    }
-                    metadata["cases"].append(case)
-                    _write(output / "metadata.json", metadata)
+                                correctness.flush()
+                                row = {
+                                    **result.metrics,
+                                    "run_id": args.run_id,
+                                    "model": model,
+                                    "num_users": users,
+                                    "workload_sha256": workload.manifest["workload_sha256"],
+                                    "history_tokens": args.history_tokens,
+                                    "candidate_tokens": args.candidate_tokens,
+                                    "seed": args.seed,
+                                    "correctness_max_abs": comparison["max_abs"],
+                                    "correctness_exact": comparison["exact"],
+                                }
+                                if rounds is not None:
+                                    row.update(
+                                        sequential_loops_schema=1,
+                                        round_index=request_id // users,
+                                        round_user_index=request_id % users,
+                                        rounds=rounds,
+                                    )
+                                measurements.write(json.dumps(row) + "\n")
+                                measurements.flush()
+                                rows.append(row)
+                                if request_id % 8 == 0 or request_id + 1 == len(workload.requests):
+                                    print(
+                                        json.dumps(
+                                            {
+                                                "event": "request",
+                                                "model": model,
+                                                "scheme": scheme,
+                                                "users": users,
+                                                "request": request_id,
+                                                "latency_ms": row["latency_ms"],
+                                                "hit": row["prefix_cache_hit"],
+                                                "cache_users": row["cached_users"],
+                                            }
+                                        ),
+                                        flush=True,
+                                    )
+                                del result, actual, expected, actual_logits
+                        resource_plan = runner.resource_plan
+                        retained_capacity = getattr(
+                            backend, "retained_session_capacity", lambda capacity, prefix: capacity
+                        )(args.history_tokens + args.candidate_tokens, args.history_tokens)
+                        case = {
+                            "shared_reservation": {
+                                "hbm": resource_plan.shared.hbm,
+                                "dram": resource_plan.shared.dram,
+                            },
+                            "host_page_capacity": resource_plan.host_pages,
+                            "session_host_pages": backend.estimate_session_host_pages(
+                                retained_capacity
+                            )
+                            if hasattr(backend, "estimate_session_host_pages")
+                            else 0,
+                            "cache_resource_plan": dict(resource_plan.metadata),
+                            "backend": backend.describe(),
+                            "model": model,
+                            "scheme": scheme,
+                            "num_users": users,
+                            "requests": len(workload.requests),
+                            "observed_users": workload.manifest["observed"]["unique_users"],
+                            "revisits": workload.manifest["observed"]["revisits"],
+                            "max_revisits_observed": workload.manifest["observed"]["max_revisits"],
+                            "duration_seconds": time.time() - start,
+                            "all_hidden_exact": exact,
+                            "max_abs": max_error,
+                            "gpu_peak_allocated_bytes": torch.cuda.max_memory_allocated(device),
+                            "gpu_peak_reserved_bytes": torch.cuda.max_memory_reserved(device),
+                            "session_reservation": backend.estimate_session_bytes(
+                                retained_capacity, args.history_tokens
+                            ),
+                        }
+                        if rounds is not None:
+                            case["sequential_loops"] = metadata["sequential_loops"]
+                        metadata["cases"].append(case)
+                        _write(output / "metadata.json", metadata)
+            finally:
+                getattr(backend, "close", lambda: None)()
             del backend, workloads
             gc.collect()
             torch.cuda.empty_cache()
@@ -460,6 +648,14 @@ def main(argv=None):
     if len(metadata["cases"]) != expected_cases:
         raise RuntimeError("incomplete comparison matrix")
     verify_source_snapshot(output)
+    if provenance is not None and backend_provenance() != provenance:
+        raise RuntimeError("installed backend identity changed while measuring")
+    if provenance is not None:
+        from experiments.deepseek_v32_echo_prefill.src.backend_provenance import (
+            collect_flashinfer_runtime_artifacts,
+        )
+
+        metadata["flashinfer_runtime_artifacts"] = collect_flashinfer_runtime_artifacts()
     write_report(rows, output / "analysis")
     metadata.update(status="accepted", completed_unix=time.time(), measured_requests=len(rows))
     _write(output / "metadata.json", metadata)

@@ -253,7 +253,9 @@ class RunContract:
 
 def audit_metadata(meta, expected_run, expected_source):
     equal(meta["status"], "accepted", "run is not complete and accepted")
-    equal(meta["schema_version"], 1, "metadata schema")
+    require(
+        type(meta["schema_version"]) is int and meta["schema_version"] in (1, 2), "metadata schema"
+    )
     if expected_run is not None:
         equal(meta["run_id"], expected_run, "run ID")
     require(bool(re.fullmatch(r"[A-Za-z0-9_-]+", meta["run_id"])), "invalid run ID")
@@ -269,6 +271,25 @@ def audit_metadata(meta, expected_run, expected_source):
     require(meta["completed_unix"] > meta["started_unix"], "completion must follow start")
     params = meta["parameters"]
     contract = RunContract.from_parameters(params)
+    loops = meta.get("sequential_loops")
+    if meta["schema_version"] == 2 and contract.sampling == "sequential":
+        require(len(contract.populations) == 1, "complete loops require one user population")
+        users = contract.populations[0]
+        require(
+            contract.request_cap >= 2 * users and contract.request_cap % users == 0,
+            "sequential requests must contain >= 2 complete rounds",
+        )
+        equal(
+            loops,
+            {
+                "schema_version": 1,
+                "rounds": contract.request_cap // users,
+                "users_per_round": users,
+            },
+            "complete sequential loops",
+        )
+    else:
+        equal(loops, None, "unexpected complete-loop declaration")
     equal(
         integer(meta["measured_requests"], "metadata measured requests"),
         contract.measured_requests,
@@ -292,11 +313,33 @@ def audit_metadata(meta, expected_run, expected_source):
         equal(params["deepseek_layers"], 10, "DeepSeek surrogate scope")
         equal(deepseek["physical_layers"], 10, "DeepSeek replay physical blocks")
         equal(deepseek["chunk_size"], params["chunk_size"], "DeepSeek chunk size")
-        equal(
-            deepseek["sparse_slots"],
-            integer(params["deepseek_slots"], "DeepSeek slots", 1),
-            "DeepSeek sparse slots",
-        )
+        if "cache_policy_revision" in deepseek:
+            require(
+                "deepseek_slots" not in params,
+                "shared-pool metadata cannot reinterpret legacy per-session slots",
+            )
+            equal(
+                deepseek["sparse_pool_tokens"],
+                integer(params["sparse_pool_tokens"], "shared DeepSeek pool tokens", 1),
+                "DeepSeek shared pool tokens",
+            )
+            equal(
+                deepseek["extend_chunk_size"], params["extend_chunk_size"], "DeepSeek extend chunk"
+            )
+            workspace = integer(params["workspace_query_tokens"], "workspace query tokens", 1)
+            require(
+                workspace
+                >= max(
+                    params["chunk_size"], params["extend_chunk_size"] or contract.candidate_tokens
+                ),
+                "workspace does not cover actual query batches",
+            )
+        else:
+            equal(
+                deepseek["sparse_slots"],
+                integer(params["deepseek_slots"], "legacy per-session DeepSeek slots", 1),
+                "legacy DeepSeek sparse slots",
+            )
         equal(deepseek["source_layers"], [0, 1, 2, 0, 1, 2, 0, 1, 2, 0], "source blocks")
         equal(deepseek["total_parameters"], 7827793408, "DeepSeek replay parameters")
         equal(
@@ -355,10 +398,57 @@ def audit_metadata(meta, expected_run, expected_source):
             size = integer(reservation[tier], f"{case_key} reserved {tier}")
             require(size <= cap, f"{case_key} session exceeds {tier} cap")
         require(reservation["hbm"] > 0, f"{case_key} zero HBM session reservation")
+        shared = case.get("shared_reservation", {"hbm": 0, "dram": 0})
+        equal(set(shared), set(TIERS), f"{case_key} shared reservation tiers")
+        for tier, cap in contract.caps.items():
+            size = integer(shared[tier], f"{case_key} shared {tier}")
+            require(
+                size + reservation[tier] <= cap,
+                f"{case_key} shared plus one session exceeds {tier} cap",
+            )
+        cpu_workspace = _cpu_execution_workspace(case_key, case, shared)
         require(
-            (reservation["dram"] == 0) == (scheme == "hbm"),
+            (reservation["dram"] + shared["dram"] - cpu_workspace == 0) == (scheme == "hbm"),
             f"{case_key} inconsistent host backing reservation",
         )
+        equal(case.get("sequential_loops"), loops, f"{case_key} complete-loop declaration")
+        if model == "deepseek_v32" and "cache_policy_revision" in meta["models"][model]:
+            plan = case["cache_resource_plan"]
+            equal(
+                plan["cache_policy_revision"],
+                meta["models"][model]["cache_policy_revision"],
+                f"{case_key} cache implementation identity",
+            )
+            if scheme in ("echo", "serial_sparse"):
+                equal(plan["pool_scope"], "backend_per_layer", f"{case_key} pool ownership")
+                equal(
+                    plan["sparse_pool_tokens"],
+                    params["sparse_pool_tokens"],
+                    f"{case_key} shared tokens",
+                )
+                equal(
+                    plan["workspace_query_tokens"],
+                    params["workspace_query_tokens"],
+                    f"{case_key} fixed scratch bound",
+                )
+                equal(
+                    integer(case["host_page_capacity"], "host pages", 1) * 64,
+                    plan["host_arena_tokens"],
+                    f"{case_key} arena page quota",
+                )
+                retained_tokens = contract.history_tokens + contract.candidate_tokens
+                if plan.get("candidate_persistence") == "gpu_transient":
+                    retained_tokens = contract.history_tokens
+                equal(
+                    case["session_host_pages"],
+                    (retained_tokens + 63) // 64,
+                    f"{case_key} session page charge",
+                )
+                equal(
+                    reservation["dram"],
+                    case["session_host_pages"] * 4,
+                    f"{case_key} only session page-table storage is charged per session",
+                )
         prior = reservations.setdefault((model, scheme), reservation)
         equal(reservation, prior, f"{case_key} population changed per-session reservation")
     return contract, cases
@@ -392,9 +482,35 @@ def audit_sources(data, repo, meta):
                 and not ({"__pycache__", "output", "generated", "build"} & set(path.parts))
             ):
                 current.add(str(path.relative_to(repo)))
-    for path in (repo / "experiments/gr_serving").rglob("*"):
-        if path.is_file() and path.suffix in {".py", ".sh"} and "output" not in path.parts:
-            current.add(str(path.relative_to(repo)))
+    for experiment in ("gr_serving", "deepseek_v32_echo_cache"):
+        for path in (repo / "experiments" / experiment).rglob("*"):
+            if path.is_file() and path.suffix in {".py", ".sh"} and "output" not in path.parts:
+                current.add(str(path.relative_to(repo)))
+    provenance = meta.get("backend_provenance")
+    if provenance is not None:
+        current.update(
+            (
+                ".gitmodules",
+                "pyproject.toml",
+                "uv.lock",
+                "scripts/prepare_3rdparty.py",
+                "experiments/deepseek_v32_echo_prefill/src/backend_provenance.py",
+            )
+        )
+        for name, prefixes in {
+            "DeepGEMM": ("csrc", "deep_gemm", "setup.py", "scripts", ".gitmodules"),
+            "DeepJIT": ("include",),
+            "FlashMLA": ("csrc", "flash_mla", "setup.py", ".gitmodules"),
+            "cutlass": ("include", "tools/util/include"),
+        }.items():
+            listed = subprocess.check_output(
+                ["git", "-C", str(repo / "3rdparty" / name), "ls-files", "-z", "--", *prefixes]
+            )
+            current.update(
+                str(Path("3rdparty") / name / entry.decode())
+                for entry in listed.split(b"\0")
+                if entry and (repo / "3rdparty" / name / entry.decode()).is_file()
+            )
     equal(current, set(manifest), "current source manifest coverage")
     snapshot = {
         str(path.relative_to(data / "source"))
@@ -412,21 +528,48 @@ def audit_sources(data, repo, meta):
         "models/deepseek_v32/serving_backend.py",
     ):
         require(required in manifest, f"source coverage omitted {required}")
-    modules = {}
-    for line in meta["submodules"].splitlines():
-        match = re.fullmatch(r"\s*([0-9a-f]{40})\s+(\S+)(?:\s+.*)?", line)
-        require(match is not None, f"unclean or malformed recorded submodule: {line!r}")
-        digest, name = match.groups()
-        require(name not in modules, f"duplicate submodule {name}")
-        modules[name] = digest
-    equal(
-        set(modules),
-        {"3rdparty/DeepGEMM", "3rdparty/DeepJIT", "3rdparty/cutlass"},
-        "dependency set",
-    )
+    if provenance is not None:
+        pins = {
+            "DeepGEMM": "057ca5964aae0879ff2e0eb71ee05a3cb0ba3df7",
+            "DeepJIT": "2efdab421e1cfb17fe8bc20e11ca72aa6d0e6c43",
+            "FlashMLA": "ba89a3466e9470ad08ab39738d4e7bb66989e1e7",
+            "cutlass": "f3fde58372d33e9a5650ba7b80fc48b3b49d40c8",
+        }
+        equal(provenance["git_revisions"], pins, "official backend source pins")
+        modules = {f"3rdparty/{name}": digest for name, digest in pins.items()}
+        audit_installed_provenance(provenance)
+        if "flashinfer_runtime_artifacts" in meta:
+            audit_runtime_artifacts(meta["flashinfer_runtime_artifacts"])
+    else:
+        modules = {}
+        for line in meta["submodules"].splitlines():
+            match = re.fullmatch(r"\s*([0-9a-f]{40})\s+(\S+)(?:\s+.*)?", line)
+            require(match is not None, f"unclean or malformed recorded submodule: {line!r}")
+            digest, name = match.groups()
+            require(name not in modules, f"duplicate submodule {name}")
+            modules[name] = digest
+        legacy_modules = {"3rdparty/DeepGEMM", "3rdparty/DeepJIT", "3rdparty/cutlass"}
+        current_modules = legacy_modules | {"3rdparty/FlashMLA"}
+        require(set(modules) in (legacy_modules, current_modules), "dependency set")
+        if set(modules) == current_modules:
+            # New NOSA-only runs do not load the DeepSeek backend provenance,
+            # but still record the current four pinned dependency checkouts.
+            # Their working-tree gitlinks may intentionally differ from HEAD;
+            # do not reinterpret the captured sources as that historical tree.
+            equal(
+                modules,
+                {
+                    "3rdparty/DeepGEMM": "057ca5964aae0879ff2e0eb71ee05a3cb0ba3df7",
+                    "3rdparty/DeepJIT": "2efdab421e1cfb17fe8bc20e11ca72aa6d0e6c43",
+                    "3rdparty/FlashMLA": "ba89a3466e9470ad08ab39738d4e7bb66989e1e7",
+                    "3rdparty/cutlass": "f3fde58372d33e9a5650ba7b80fc48b3b49d40c8",
+                },
+                "current four-dependency source pins",
+            )
     for name, digest in modules.items():
-        tree = git(repo, "ls-tree", meta["git_revision"], "--", name).split()
-        equal(tree, ["160000", "commit", digest, name], f"recorded gitlink {name}")
+        if provenance is None and "3rdparty/FlashMLA" not in modules:
+            tree = git(repo, "ls-tree", meta["git_revision"], "--", name).split()
+            equal(tree, ["160000", "commit", digest, name], f"recorded gitlink {name}")
         equal(git(repo / name, "rev-parse", "HEAD"), digest, f"current dependency {name}")
         equal(
             git(repo / name, "status", "--porcelain=v1", "--untracked-files=no"),
@@ -439,6 +582,55 @@ def audit_sources(data, repo, meta):
         "recorded_git_revision": meta["git_revision"],
         "submodules": modules,
     }
+
+
+def audit_installed_provenance(provenance):
+    """Check the recorded loaded artifacts without importing a CUDA package."""
+    require({"deep_gemm", "flash_mla"} <= set(provenance["installed"]), "missing loaded backends")
+    for name, package in provenance["installed"].items():
+        if name == "flashinfer":
+            equal(package["distribution_version"], "0.6.18", "FlashInfer version")
+            base = Path(package["package_path"])
+            actual = {
+                str(path.relative_to(base)): sha256(path)
+                for path in base.rglob("*.py")
+                if "data" not in path.relative_to(base).parts
+            }
+            equal(actual, package["python_sha256"], "installed FlashInfer Python sources")
+            for field in ("source_sha256", "include_sha256"):
+                require(package[field], f"missing FlashInfer {field}")
+                for relative, digest in package[field].items():
+                    equal(sha256(base / relative), digest, f"FlashInfer {relative}")
+            for artifact in package["installed_native_files"]:
+                equal(sha256(Path(artifact["path"])), artifact["sha256"], "FlashInfer native")
+            continue
+        require(name in ("deep_gemm", "flash_mla"), f"unknown backend provenance {name}")
+        for artifact in package["files"].values():
+            equal(sha256(Path(artifact["path"])), artifact["sha256"], "loaded backend artifact")
+        base = Path(package["files"]["python"]["path"]).parent
+        actual = {str(path.relative_to(base)): sha256(path) for path in base.rglob("*.py")}
+        equal(actual, package["python_sha256"], "loaded backend Python sources")
+        if "jit_headers" in package:
+            headers = package["jit_headers"]
+            require(headers["matches_pinned_sources"] is True, "unmatched installed JIT headers")
+            for name, digest in headers["sha256"].items():
+                equal(sha256(Path(headers["path"]) / name), digest, "installed JIT header")
+    if "flashinfer" not in provenance["installed"]:
+        require(provenance["flashinfer"]["files_sha256"], "missing FlashInfer artifacts")
+        for name, digest in provenance["flashinfer"]["files_sha256"].items():
+            equal(sha256(Path(name)), digest, "installed FlashInfer artifact")
+
+
+def audit_runtime_artifacts(value):
+    """Recheck exposed artifact files; an in-memory IR digest is identity only."""
+    if isinstance(value, dict):
+        if "path" in value and "sha256" in value:
+            equal(sha256(Path(value["path"])), value["sha256"], "FlashInfer runtime artifact")
+        for child in value.values():
+            audit_runtime_artifacts(child)
+    elif isinstance(value, list):
+        for child in value:
+            audit_runtime_artifacts(child)
 
 
 def scheduler_replay(weights, request_cap, max_revisits, seed):
@@ -786,7 +978,7 @@ def audit_access_trace_snapshot(data, meta, expected_traces):
     return digest
 
 
-def lru_oracle(requests, reservation, caps):
+def lru_oracle(requests, reservation, caps, *, shared=None, host_pages=0, session_pages=0):
     """Derive retention from reuse distance, without calling/copying the pool.
 
     All requests have the same capacity and immutable per-user prefix.  Therefore
@@ -794,7 +986,11 @@ def lru_oracle(requests, reservation, caps):
     users have been accessed since its prior visit.  Last-visit ranks independently
     determine the retained set and exact evicted identity.
     """
-    capacity = min(caps[tier] // size for tier, size in reservation.items() if size)
+    shared = shared or {"hbm": 0, "dram": 0}
+    capacities = [(caps[tier] - shared[tier]) // size for tier, size in reservation.items() if size]
+    if session_pages:
+        capacities.append(host_pages // session_pages)
+    capacity = min(capacities)
     require(capacity >= 1, "no whole session fits")
     previous = {}
     for index, request in enumerate(requests):
@@ -812,6 +1008,26 @@ def lru_oracle(requests, reservation, caps):
         }
 
 
+def _cpu_execution_workspace(case_key, case, shared):
+    """Validate the shared transient allowance; it is not retained host storage."""
+    plan = case.get("cache_resource_plan", {})
+    cpu_terms = {
+        "workspace_cpu_indexer_bytes": 8,
+        "workspace_cpu_scalar_bytes": 8,
+        "workspace_cpu_metrics_bytes": 24,
+    }
+    if case_key[0] != "deepseek_v32" or not any(
+        name in plan for name in (*cpu_terms, "workspace_cpu_bytes")
+    ):
+        return 0
+    for name, expected in cpu_terms.items():
+        equal(integer(plan.get(name), f"{case_key} {name}"), expected, f"{case_key} {name}")
+    workspace = integer(plan.get("workspace_cpu_bytes"), f"{case_key} CPU workspace")
+    equal(workspace, sum(cpu_terms.values()), f"{case_key} CPU workspace sum")
+    require(shared["dram"] >= workspace, f"{case_key} unreserved CPU workspace")
+    return workspace
+
+
 def audit_case_rows(case_key, rows, case, requests, manifest, run_id, caps):
     model, scheme, users = case_key
     equal(
@@ -820,6 +1036,13 @@ def audit_case_rows(case_key, rows, case, requests, manifest, run_id, caps):
         f"{case_key} measured request order",
     )
     reservation = case["session_reservation"]
+    shared = case.get("shared_reservation", {"hbm": 0, "dram": 0})
+    cpu_workspace = _cpu_execution_workspace(case_key, case, shared)
+    resource_args = {
+        "shared": shared,
+        "host_pages": case.get("host_page_capacity", 0),
+        "session_pages": case.get("session_host_pages", 0),
+    }
     for case_field, manifest_field in (
         ("observed_users", "unique_users"),
         ("revisits", "revisits"),
@@ -834,11 +1057,24 @@ def audit_case_rows(case_key, rows, case, requests, manifest, run_id, caps):
     counts = Counter()
     peaks = Counter()
     for row, request, expected in zip(
-        rows, requests, lru_oracle(requests, reservation, caps), strict=True
+        rows, requests, lru_oracle(requests, reservation, caps, **resource_args), strict=True
     ):
         label = f"{case_key}/{row['request_id']}"
         equal(key(row), case_key, f"{label} coordinates")
         equal(row["run_id"], run_id, f"{label} run ID")
+        loops = case.get("sequential_loops")
+        if loops is not None:
+            equal(manifest["config"].get("sampling"), "sequential", f"{label} loop sampling")
+            equal(row.get("sequential_loops_schema"), 1, f"{label} loop schema")
+            equal(row.get("rounds"), loops["rounds"], f"{label} round count")
+            equal(row.get("round_index"), row["request_id"] // users, f"{label} round index")
+            equal(
+                row.get("round_user_index"), row["request_id"] % users, f"{label} round user index"
+            )
+            equal(row["user_id"], row["round_user_index"], f"{label} complete user order")
+            equal(row["visit_index"], row["round_index"], f"{label} complete round visits")
+        else:
+            require("sequential_loops_schema" not in row, f"{label} unexpected loop schema")
         equal(row["workload_sha256"], manifest["workload_sha256"], f"{label} workload")
         for name, value in request.items():
             equal(row[name], value, f"{label} request field {name}")
@@ -871,21 +1107,58 @@ def audit_case_rows(case_key, rows, case, requests, manifest, run_id, caps):
             boundary = integer(row[f"request_cache_{memory}_bytes"], label)
             equal(
                 reserve,
-                reservation[memory] * expected["cached_users"],
+                shared[memory] + reservation[memory] * expected["cached_users"],
                 f"{label} reserved capacity",
             )
+            if "shared_reservation" in case:
+                equal(
+                    row[f"shared_reserved_{memory}_bytes"],
+                    shared[memory],
+                    f"{label} shared reservation",
+                )
+                equal(
+                    row[f"session_reserved_{memory}_bytes"],
+                    reservation[memory] * expected["cached_users"],
+                    f"{label} session reservation",
+                )
+                require(
+                    row[f"shared_cache_{memory}_bytes"] <= shared[memory],
+                    f"{label} actual shared storage exceeds reservation",
+                )
+                if memory == "dram":
+                    equal(
+                        row["shared_cache_dram_bytes"],
+                        shared["dram"] - cpu_workspace,
+                        f"{label} fixed shared host storage",
+                    )
             require(0 <= actual <= boundary <= reserve <= cap, f"{label} {memory} allocation bound")
             if memory == "hbm":
                 require(actual > 0, f"{label} missing resident storage")
             else:
-                # Host backing capacity is allocated once per whole session and never truncated.
-                equal(actual, reserve, f"{label} fixed host backing capacity")
+                # Both synchronized boundaries retain full host backing/metadata.
+                # Discount only an independently validated execution allowance.
+                fixed_host = reserve - cpu_workspace
+                equal(actual, fixed_host, f"{label} fixed host backing capacity")
+                equal(boundary, fixed_host, f"{label} pre-cleanup fixed host backing capacity")
             for name in (
                 f"cache_{memory}_bytes",
                 f"request_cache_{memory}_bytes",
                 f"reserved_{memory}_bytes",
             ):
                 peaks[name] = max(peaks[name], row[name])
+        if "shared_reservation" in case:
+            equal(
+                row["cache_host_pages"],
+                case["session_host_pages"] * expected["cached_users"],
+                f"{label} retained host pages",
+            )
+            equal(
+                row["host_page_capacity"], case["host_page_capacity"], f"{label} host page capacity"
+            )
+            require(
+                row["cache_host_pages"] <= row["host_page_capacity"],
+                f"{label} host pages overcommitted",
+            )
         counts["hits"] += expected["hit"]
         counts["evictions"] += len(expected["evicted"])
         counts["revisits"] += row["is_revisit"]
@@ -894,7 +1167,7 @@ def audit_case_rows(case_key, rows, case, requests, manifest, run_id, caps):
         case["duration_seconds"] * 1000 + 1e-5 >= math.fsum(row["latency_ms"] for row in rows),
         f"{case_key} case duration excludes measured request time",
     )
-    capacity = next(lru_oracle(requests[:1], reservation, caps))["capacity"]
+    capacity = next(lru_oracle(requests[:1], reservation, caps, **resource_args))["capacity"]
     return {
         "model": model,
         "scheme": scheme,
@@ -936,6 +1209,89 @@ def audit_correctness(records, measurements, candidate_tokens):
     return len(indexed_records)
 
 
+def audit_numerical_tensors(data, contract):
+    """Recompute all saved scheme comparisons; reject missing/extra/tampered evidence."""
+    import torch
+
+    records = indexed(read_jsonl(data / "correctness.jsonl"), request=True)
+    expected_files = {
+        f"numerical/{model}/{scheme}/{users}/{rid:06d}.pt"
+        for model, scheme, users in contract.cases
+        for rid in range(contract.request_counts[users])
+    }
+    found = {
+        str(path.relative_to(data)) for path in (data / "numerical").rglob("*") if path.is_file()
+    }
+    equal(found, expected_files, "complete numerical tensor file set")
+
+    hashes = {}
+
+    def load(model, scheme, users, rid):
+        name = f"numerical/{model}/{scheme}/{users}/{rid:06d}.pt"
+        record = records[(model, scheme, users, rid)]
+        equal(record["tensor_evidence"]["path"], name, "numerical tensor identity")
+        hashes[name] = sha256(data / name)
+        equal(hashes[name], record["tensor_evidence"]["sha256"], "numerical tensor digest")
+        tensors = torch.load(data / name, map_location="cpu", weights_only=True)
+        equal(set(tensors), {"hidden", "logits"}, "numerical tensor fields")
+        hidden = tensors["hidden"]
+        require(isinstance(hidden, torch.Tensor), f"{name}: hidden must be tensor")
+        equal(list(hidden.shape), [contract.candidate_tokens, WIDTHS[model]], "complete hidden")
+        equal(hidden.dtype, torch.bfloat16, "hidden dtype")
+        require(bool(torch.isfinite(hidden).all()), f"{name}: nonfinite hidden")
+        logits = tensors["logits"]
+        if model == "deepseek_v32":
+            require(isinstance(logits, torch.Tensor), f"{name}: missing last-token logits")
+            equal(list(logits.shape), [1, 129280], "complete DeepSeek last-token LM head")
+            equal(logits.dtype, torch.float32, "logits dtype")
+            require(bool(torch.isfinite(logits).all()), f"{name}: nonfinite logits")
+            comparison = record["logits"]
+            equal(comparison["shape"], list(logits.shape), "logit record shape")
+            equal(comparison["dtype"], str(logits.dtype), "logit record dtype")
+            require(comparison["exact"] is True, "nonexact logit record")
+            for field in ("max_abs", "relative_l2", "atol", "rtol"):
+                equal(number(comparison[field], field), 0, "nonexact logit record")
+        else:
+            require(logits is None and record["logits"] is None, "NOSA hidden-only output boundary")
+        return tensors
+
+    threads = torch.get_num_threads()
+    torch.set_num_threads(1)
+    compared = 0
+    try:
+        for model in contract.models:
+            for users in contract.populations:
+                for rid in range(contract.request_counts[users]):
+                    reference = load(model, "hbm", users, rid)
+                    saved = torch.load(
+                        data / "reference" / model / str(users) / f"{rid:06d}.pt",
+                        map_location="cpu",
+                        weights_only=True,
+                    )
+                    reference_name = f"reference/{model}/{users}/{rid:06d}.pt"
+                    hashes[reference_name] = sha256(data / reference_name)
+                    require(torch.equal(saved, reference["hidden"]), "HBM reference files disagree")
+                    for scheme in SCHEMES[model]:
+                        actual = load(model, scheme, users, rid)
+                        for field in ("hidden", "logits"):
+                            if reference[field] is not None:
+                                require(
+                                    torch.equal(actual[field], reference[field]),
+                                    f"{model}/{scheme}/{users}/{rid}: recomputed {field} differs",
+                                )
+                        compared += 1
+    finally:
+        torch.set_num_threads(threads)
+    for name, expected in hashes.items():
+        equal(sha256(data / name), expected, "numerical tensor changed during audit")
+    return {
+        "status": "accepted",
+        "complete_hidden_comparisons": compared,
+        "files": len(found),
+        "files_sha256": hashes,
+    }
+
+
 def latency_stats(values):
     ordered = sorted(values)
     result = {name: None for name in STATS}
@@ -962,6 +1318,43 @@ def latency_stats(values):
 
 def audit_analysis(data, groups, measurement_index):
     summary = read_json(data / "analysis/summary.json")
+    new_schema = any("sequential_loops_schema" in row for row in measurement_index.values())
+    if new_schema:
+        equal(summary.get("schema_version"), 2, "new cache/round report schema")
+    expected_rounds = {}
+    for case_key, rows in groups.items():
+        if "sequential_loops_schema" in rows[0]:
+            for index in range(rows[0]["rounds"]):
+                expected_rounds[(*case_key, index)] = [
+                    row for row in rows if row["round_index"] == index
+                ]
+    actual_rounds = {}
+    for item in summary.get("rounds", []):
+        item_key = (*key(item), item["round_index"])
+        require(item_key not in actual_rounds, f"duplicate round summary {item_key}")
+        actual_rounds[item_key] = item
+    equal(set(actual_rounds), set(expected_rounds), "complete per-round report")
+    for item_key, rows in expected_rounds.items():
+        item = actual_rounds[item_key]
+        for name in ("run_id", "workload_sha256"):
+            equal(item[name], rows[0][name], f"{item_key} round {name}")
+        equal(
+            item["prefix_hits"],
+            sum(row["prefix_cache_hit"] for row in rows),
+            f"{item_key} round hits",
+        )
+        for name, expected in latency_stats([row["latency_ms"] for row in rows]).items():
+            if name == "count":
+                equal(item[name], expected, f"{item_key} round {name}")
+            else:
+                close(item[name], expected, f"{item_key} round {name}")
+    if expected_rounds:
+        with (data / "analysis/rounds.csv").open(newline="") as handle:
+            csv_rounds = list(csv.DictReader(handle))
+        expected_csv = [
+            {name: str(value) for name, value in item.items()} for item in summary["rounds"]
+        ]
+        equal(csv_rounds, expected_csv, "per-round CSV values")
     actual = {}
     for group in summary["groups"]:
         group_key = (*key(group), group["scope"])
@@ -1209,6 +1602,9 @@ def audit(
         flush=True,
     )
     references = audit_references(data, reference_check, contract)
+    tensors = None
+    if meta.get("numerical_evidence_schema") == 1 and reference_check == "cpu":
+        tensors = audit_numerical_tensors(data, contract)
     # Freeze the audited evidence against changes during this audit as well.
     equal(read_json(data / "metadata.json"), meta, "metadata changed during final audit")
     audit_sources(data, repo, meta)
@@ -1233,6 +1629,10 @@ def audit(
             "analysis/per_request.svg",
         )
     }
+    if tensors is not None:
+        evidence.update(tensors["files_sha256"])
+    if meta.get("sequential_loops") is not None:
+        evidence["analysis/rounds.csv"] = sha256(data / "analysis/rounds.csv")
     if access_csv_digest is not None:
         equal(sha256(data / "access_trace.csv"), access_csv_digest, "saved access CSV changed")
         evidence["access_trace.csv"] = access_csv_digest
@@ -1263,11 +1663,14 @@ def audit(
         "workloads": workload_hashes,
         "expected_access_traces": expected_traces,
         "references": references,
+        "numerical_tensors": tensors,
         "analysis": analysis,
         "case_audit": case_results,
         "evidence_sha256": evidence,
         "limits": [
-            "Numerical records are audited; non-HBM outputs are not persisted, so this is not a fresh numerical rerun.",
+            "Saved complete hidden/logits comparisons were independently recomputed on CPU; no GPU execution was repeated."
+            if tensors is not None
+            else "Numerical records are audited; non-HBM outputs are not persisted, so this is not a fresh numerical rerun.",
             "Cache allocations are sampled request boundaries and reservations, not a continuous process peak.",
             "GPU allocator peaks are checked separately; whole-user LRU is not a token/page cache hit metric.",
             "Rendered figures, publication files, profile overlap and Supervisor updates require separate completion.",

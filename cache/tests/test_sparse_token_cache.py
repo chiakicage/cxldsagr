@@ -37,17 +37,22 @@ def test_cuda_exact_recall_eviction_and_step_rollback():
 
 
 @cuda
-def test_cuda_prefetch_slots_never_evict_current_chunk():
+def test_cuda_prefetch_prepare_keeps_history_and_runs_before_current_append():
     cache = SparseTokenCache(16, 16, slots=8)
     cache.begin_step(12)
     source = torch.randn(12, 16, device="cuda", dtype=torch.bfloat16)
-    cache.append(source)
-    cache.ensure(torch.arange(8, device="cuda"))
+    cache.append(source[:10])
+    cache.declare_indexer_visible(12)
+    before = cache.host_to_device.clone()
     prefetch = cache.prepare_prefetch(10, 2, torch.zeros(16, device="cuda"), limit=4)
-    protected = cache.host_to_device[10:12].long()
-    assert not torch.isin(protected, prefetch["free_slots"].long()).any()
-    assert (cache.device_to_host[prefetch["free_slots"].long()] == MISSING).all()
-    torch.testing.assert_close(cache.records[protected], source[10:12], rtol=0, atol=0)
+    torch.testing.assert_close(cache.host_to_device, before)
+    assert (cache.host_to_device[10:12] == MISSING).all()
+    assert prefetch["free_slots"].numel() == cache.slots
+    assert not (prefetch["free_slots"] == 0).any()
+    cache.finalize_prefetch()
+    cache.append(source[10:])
+    physical = cache.ensure(torch.arange(10, 12, device="cuda"))
+    torch.testing.assert_close(cache.records[physical.long()], source[10:12], rtol=0, atol=0)
     cache.commit()
     cache.truncate(5)
     assert (cache.host_to_device[5:] == MISSING).all()

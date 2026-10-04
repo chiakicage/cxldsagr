@@ -3,12 +3,46 @@
 本项目研究通用 sparse attention offloading，选取 DeepSeek V3.2 和 NOSA 验证方案。
 后续开发优先 NOSA，主要平台为 SM90 / Hopper；SM120 可执行代码已移除，保留有效历史报告。
 
+当前 DeepSeek ECHO 容量实验按用户指定的 `P`（每层 HBM token pool）与 `NH`
+（全局 host token arena）运行，检查给定容量是否能完成完整请求，并估算二者的联合
+可行边界。该模式不以 4 GiB 等 cache 字节子预算或独立 `W` 预留决定准入；实际
+chunk/candidate、权重、indexer、映射、执行临时空间和 pinned DRAM 仍须满足物理容量。
+DeepSeek GR 的 `echo/serial_sparse` 通过 `retained_session_capacity` 按固定 history
+长度 H 创建 session，并通过 `extend_candidate` 在共享 GPU 临时空间执行候选。
+NH 只为按 64 token 对齐的 H 分配 host pages；候选主 KV 不写回 DRAM。candidate
+一次整批执行，history prefill 仍按 chunk 执行。候选 indexer 与 history 直接拼入
+backend 共享的一层 `[H+A,d]` K 及对应 scales workspace，不另存逐层候选 indexer，
+不按用户数重复计费。请求仍须满足 H+A 的上下文上限和 A 的执行上限；在这些上限内
+改变 A 不得因候选容量变化重建相同 history。
+另提供离线或模型加载后的容量规划：本轮可用于 cache 与执行 workspace 的 HBM
+预算为 `总 HBM × 0.9 − 模型加载占用`，不能改成 `加载后剩余 HBM × 0.9`；
+CPU DRAM 规划预算为 512 GiB。规划须计入填满 NH 所需的全部 session indexer、
+映射、allocator 实际容量及活跃执行 workspace；离线估算与实际完整请求验收分别报告。
+HBM 额度评估须区分 PyTorch allocated、reserved 和设备已用量；allocator 缓存仍占用
+HBM，不能只因 allocated 未超额就声称满足实际预算。旧轨迹的占用差额是观测值；
+若将其用于未来规划，只能标为人为选择的额外扣减假设，不能称为实际预分配或当前
+实现的必需开销。无需把每个离线容量候选都跑满才交付分析。
+旧 4 GiB / W / chunk 对照已按用户要求撤回并清理。其他任务可继续使用下述通用
+HBM / DRAM budget 模式，不能将两种模式的容量或命中结果混用。
+
+`deepseek_v32_motivation` 单独测量固定 P/NH 的四方案端到端对照。HBM-only 通过
+独立 HBM history token 配额按 session LRU 准入；三个 offload 方案均复用逐层 P 槽的
+历史 cache，NH 只负责 DRAM 历史容量。固定模式 dense prefetch 要求 H<=P，提前在
+独立 stream 将下一层全部历史中的 miss 搬入该层 P 槽；命中不重搬，不额外分配两层
+完整 staging。消费、回滚或释放前等待对应拷贝完成。四方案 candidate 均整批 GPU
+临时执行，结束后 discard。通用 budget 模式的原 dense 双 staging 路径另行保留。
+观测到的 allocator 差额、规划时人为扣除的额度与实现预分配的 storage 分别描述；
+不能把旧运行差额称为当前实现的固定预留，也不能默认从指定 P/NH 实验中扣除它。
+
 当前探索的一种 GR serving 方案是固定 history、变化 candidate 的 prefill 负载，
 其代表性及模型、数据适配仍待确定。`GR/` 的固定前缀语义不等于跨请求 KV 复用；
 `serving/runner.py` 保留逐请求创建并释放 cache 的旧入口；
 `serving/persistent.py` 使用 `cache/prefix_pool.py` 保留跨请求用户历史。
-该路径在相同 HBM / CPU DRAM 硬预算下按用户 session 做 LRU；候选执行成功后 truncate
-到固定历史，历史 token 身份变化或容量不足时重建。首次访问与复访由用户访问次数区分，
+通用预算模式在相同 HBM / CPU DRAM 硬预算下按用户 session 做 LRU；固定 P/NH 模式
+按 host 页配额准入。DeepSeek `echo/serial_sparse` 的候选成功后 discard 临时状态，
+保留 history；候选失败直接报错终止并释放 session，不恢复请求或自动重试。
+其他后端仍在候选执行后 truncate 到固定历史；
+历史 token 身份变化或保留容量不足时重建。首次访问与复访由用户访问次数区分，
 不能将缓存 miss 的复访计成首次访问。模型权重与普通 activation 单独报告，cache 预算
 包含索引、映射、staging、cache scratch 与待提交 append，分配前预留并核验实际容量。
 
@@ -53,9 +87,19 @@
   `models/nosa/offload_cache.py`：pinned local DRAM 保存历史 K/V，CIS 和压缩派生记录
   resident；CPU 用于参考测试。NOSA 共享一层完整逻辑地址范围的 HBM staging，
   尚无有限 slots 或淘汰策略，不将该实现表述为通用 HBM caching 已完成。
-  独立 `cache/sparse_token_cache.py` 为 DeepSeek SM90 ECHO
-  提供 pinned local DRAM backing、有限 HBM slots、精确 recall 与缓存事务；record
-  宽度和 dtype 由模型提供，不能将其有限 HBM pool 能力归于 NOSA。
+  公共 runner 从构造到关闭绑定唯一准入 owner，构造失败仅回滚本次新资源；
+  无法确认异步完成时保留 owner 并禁用复用。runner 关闭全部 session 后解绑，
+  最外层负责 backend.close()。正确性和分配验收不能替代完整 serving 性能或
+  未运行的容量轨迹。
+  `cache/sparse_token_pool.py` 为 DeepSeek SM90 ECHO 提供 backend/model 所有的全局
+  pinned local DRAM pages 与逐层有限 HBM pool；session 保留独立 page table 和
+  history indexer 状态。GR `echo/serial_sparse` 为每层主 KV storage 增加独立的候选
+  尾部，P 个历史槽位及一个 sentinel 仍使用原映射，候选没有 host ID、page table
+  项或淘汰元数据。`cache/sparse_token_cache.py` 管理 session/layer view、精确 recall
+  与事务；普通 `begin_step/commit` 保留持久 append，显式 transient step 只允许
+  discard/rollback，候选始终从 GPU 尾部读取。record 宽度和 dtype 由模型提供。
+  host page 释放遵守 session LRU，token eviction 只失效 HBM 映射；不能将其有限
+  HBM pool 能力或候选临时存储策略归于 NOSA。
   `cache/indexer_cache.py` 管理请求级派生 record 与共享 scratch；压缩和稳定 pool 的
   语义由模型声明。派生缓存随 KV 统一提交、回滚和截短，不占用通用 opaque layer state。
 - main attention 接收逻辑块选择、cache access 与执行上下文，不能把「全部 KV
@@ -99,24 +143,38 @@
   90% 验收要求每个 profiled sample 的两种 ratio 都 >= 0.9，不能只检查中位数。
   每轮实现更新须重新验收正确性、唯一读取和内部 overlap，并以新 run ID 发布受
   影响的性能结果；旧结果按下述实验规则保留至替换完成，不以旧验证冒充新实现结果。
-- DeepSeek SM90 ECHO 使用完整 checkpoint 的 61 层、embedding、dense / grouped MoE、
-  final norm 与 LM head；按 token chunk 依次执行全部层，限制临时 hidden 显存。主 KV
+- DeepSeek V3.2 的非 GR benchmark 仅使用真实 checkpoint 第 0–2 层依次传播
+  hidden/residual，包含 embedding、三个 dense MLP、final norm 与末 token LM head；
+  不复制 block，不称为独立训练的三层模型，也不外推为完整模型性能。
+  `deepseek_v32_echo_prefill` 的 `measure` / `run.sh` 与 `profile_layers` 共用这一范围。
+  模型实现保留完整 61 层及 grouped MoE 能力，但当前 benchmark 不要求运行完整 61 层。
+  按 token chunk 依次执行选定的全部层，限制临时 hidden 显存。主 KV
   使用 BF16 512 latent + 64 RoPE record，indexer FP8 K/scales 仍 resident。融合
   indexer prefetch 后必须执行精确 top-k / residual recall；工作集超过 HBM pool 时
   拆分 query 消费，不裁剪每 query 的精确选择。全部层和 GPU 同步成功后统一提交；
-  失败只回滚本次启动的事务。完整 resident/offload 对照从独立空 cache 构建 prefix，
+  失败只回滚本次启动的事务。前三层 resident/offload 对照从独立空 cache 构建 prefix，
   每次 extend 恢复相同 prefix HBM residency；权重加载、编译和状态恢复不计入执行时间。
-  layer 0 / layer 3 或单算子正确性检查不替代完整 64K + 1K 的性能测量。
+  比较全部 extend hidden；单层或单算子正确性检查不能替代前三层完整 64K + 1K 测量。
+  非矩阵操作优先复用 FlashInfer；norm 保留 checkpoint FP32 权重和舍入前 FP32
+  residual sum。Indexer RoPE 后直接量化，不执行 Hadamard。量化 kernel 优化遵循
+  KDA，和已编译官方 DeepGEMM helper 比较完整 API 成本，逐位验收 FP8 数据与 scale；
+  移除 Hadamard 引起的选择/输出变化另行报告，不据此声称任务质量等价。
 - 单卡 GR serving 的 DeepSeek 对照另用 `models/deepseek_v32/serving_backend.py`：
   按用户要求将真实 checkpoint 前三层独立复制成 10 个 dense block，不执行 MoE；
   每个副本复制对应 source block 的 hidden 与 residual 输入，不串接出未经验证的深层
   激活轨迹。独立权重、KV 与 indexer 状态不可因输入相同而共享；含 embedding、final
   norm 与 LM head 共 7,827,793,408 参数，明确称为 checkpoint 工作负载替身，不能
   表述为经过训练的 DeepSeek 8B 或完整 61 层验证。比较 `hbm`、`echo`、`serial_sparse`
-  与 `dense_prefetch`；后者使用双 layer staging 和独立 stream 逐层预取完整历史主 KV，
-  stage 复用须等待前一个 consumer 完成。DeepSeek serving 计算全部 candidate hidden
+  与 `dense_prefetch`；后者由 backend 持有一份双 layer staging 和独立 stream，逐层
+  预取完整历史主 KV。session 独立持有 host records、映射和 indexer，只在执行 lease
+  内借用当前层 view；stage 复用须等待前一个 consumer，归还前等待未消费的预取。
+  DeepSeek serving 计算全部 candidate hidden
   和最后 token LM head，NOSA serving 当前只计算 hidden，跨模型延迟不能忽略这一区别。
-  此特定工作负载不修改上面的完整 DeepSeek 模型验证要求。
+  GR `echo/serial_sparse` 的 history-only session 与共享 GPU candidate 路径通过
+  `retained_session_capacity/extend_candidate` 接入；直接 `backend.extend` 和非 GR
+  模型继续持久提交新增 token，`hbm/dense_prefetch` 对照仍使用原 session/截短接口。
+  候选路径的正确性验收与旧 ECHO 容量结果分别标记，不能以旧运行宣称新实现已验收。
+  此特定 GR 工作负载与上述非 GR 前三层 benchmark 分别报告。
 - NOSA query-aware indexer 已有 resident K 上的 PyTorch FP32 参考实现：64-token block、
   默认 `block_budget=64`，1 sink + 16 causal local（含当前块）+ 47 query-aware top-k；
   支持 `block_budget=32`，保持 1 sink + 16 local，query-aware top-k 改为 15。
@@ -230,17 +288,23 @@
 - 实验命令默认从仓库根目录运行。模型直接脚本入口保持可用；实验整理后统一使用上节的新
   模块入口，不在旧目录遗留兼容壳文件。旧命令只在历史运行记录中保留，无需安装仓库。
 - 用 `pyproject.toml` 和 `uv.lock` 管理环境，依赖改动同步维护两者。基础环境用于
-  Hopper；独立历史 DeepGEMM 基准使用可选 `legacy` 依赖组，不恢复 SM120 扩展或安装组。
+  Hopper；官方 DeepGEMM / FlashMLA 进入基础环境，`legacy` 组名保留给历史命令，
+  不恢复 SM120 扩展或安装组。
 
 ## 第三方依赖
 
-- `3rdparty/DeepGEMM` 使用上游 `nv_dev` 分支的 Git 子模块，固定提交由父仓库记录。
-  当前为 `b64107f`（2.8.0）；不再把整个 DeepGEMM 源码复制进架构算子目录。
-- 共享依赖为 `3rdparty/cutlass/`（`f3fde583`）与 `3rdparty/DeepJIT/`（`e5bdee2`），
-  与 DeepGEMM 一起作为顶层三个子模块维护；不要新增嵌套的重复源码副本。
+- `3rdparty/DeepGEMM` 使用上游 `main` 分支的 Git 子模块，固定提交由父仓库记录。
+  当前为 `057ca596`（2.8.1）；不使用 `nv_dev`，不把源码复制进自有算子目录。
+  resident indexer 与可匹配的 FP8 GEMM 优先调用官方 DeepGEMM。
+- `3rdparty/FlashMLA` 固定 `ba89a346`，这是上游为 Hopper / V3.2 明确保留的提交；
+  最新主线已移除这些支持。DeepSeek MLA 调用其官方 sparse prefill API，offload 复用
+  相同计算路径，不保留自研 Triton MLA 作为替代 baseline。
+- 共享依赖为 `3rdparty/cutlass/`（`f3fde583`）与 `3rdparty/DeepJIT/`（`2efdab4`），
+  与 DeepGEMM、FlashMLA 一起作为顶层四个子模块维护；不要新增嵌套的重复源码副本。
 - 使用 `python3 scripts/prepare_3rdparty.py --init` 准备依赖，再执行 `uv sync`。
   该脚本只初始化顶层子模块，在 DeepGEMM 的 `third-party/cutlass/` 和
-  `third-party/deep_jit/` 下将 `include` 链接到顶层共享源码，并关闭嵌套子模块初始化，
+  `third-party/deep_jit/` 下将 `include` 链接到顶层共享源码；FlashMLA 的
+  `csrc/cutlass/{include,tools/util/include}` 同样链接到共享源码。关闭嵌套子模块初始化，
   不修改上游版本化源码。避免 `git clone --recursive` 或递归更新子模块；已递归初始化
   的 checkout 会被准备脚本拒绝，需先按诊断处理，不能与共享链接布局混用。
 - `3rdparty/EzKernelKit/` 仅保留为本地未跟踪参考，不纳入当前依赖。其 CUTLASS

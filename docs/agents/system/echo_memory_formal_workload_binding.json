@@ -1,0 +1,178 @@
+{
+  "schema": "echo-memory-formal-workload-binding-engineering-v1",
+  "status": "verified",
+  "formal_workload_path": "experiments/gr_serving/output/data/20261003_echo_gr_chunks_01_deployment_c1024/workloads/deepseek_v32/16/workload.json",
+  "formal_workload_sha256": "4885ab864bed148f9f4a54230c3dced1c9a3749ac29ca92e13faf1edb019b9d1",
+  "formal_workload_aggregate_recomputed_valid": true,
+  "formal_requests_sha256": "167a0af2fba4428c0b3f4bd2886a644675ee46b017c9fc08d25bb0ff50f71355",
+  "formal_request_file_verification": "Complete-file equality and SHA supplied by root; original reported size 22879680 bytes.",
+  "cause": "Workload hash signs config plus tokenizer/heat and 32 request identity rows. Memory explicitly sets generator context_limit=163840; formal leaves it unset, using format default1052672. Both exceed actual65664 tokens, and complete request files are byte-identical. No measured request/token difference.",
+  "coverage_effect": "No reduction in the previously accepted same-request memory coverage. Context is a generation/admission bound, not an allocated length; existing resource-plan/session-capacity and runtime/budget checks must remain. Do not claim equality for arbitrary context changes or different requests.",
+  "request_identity_fields": [
+    "request_id",
+    "user_id",
+    "visit_index",
+    "visit_number",
+    "is_revisit",
+    "timestamp",
+    "stable_prefix_tokens",
+    "candidate_suffix_tokens",
+    "prefix_sha256",
+    "candidate_sha256",
+    "input_sha256"
+  ],
+  "runs": [
+    {
+      "run_id": "20261003_echo_memory_c1024_03",
+      "memory_workload_path": "experiments/gr_serving/output/data/20261003_echo_memory_c1024_03/workload/workload.json",
+      "memory_original_manifest_path": "experiments/gr_serving/output/data/20261003_echo_memory_c1024_03/manifest.json",
+      "memory_workload_sha256": "f9490f154bdc74556b38cbcb33a73651dd1943b6e5e174e3bcaa29bb1421ba0a",
+      "original_manifest_workload_binding_valid": true,
+      "recomputed_workload_aggregate_valid": true,
+      "request_count": 32,
+      "all_request_identity_rows_equal": true,
+      "tokenizer_identity_equal": true,
+      "access_trace_identity_equal": true,
+      "config_differences": {
+        "context_limit": {
+          "memory": 163840,
+          "formal": null
+        }
+      },
+      "memory_context": {
+        "format_default_tokens": 1052672,
+        "effective_limit_tokens": 163840,
+        "override_explicit": true,
+        "interpretation": "generation boundary only; does not validate model quality"
+      },
+      "formal_context": {
+        "format_default_tokens": 1052672,
+        "effective_limit_tokens": 1052672,
+        "override_explicit": false,
+        "interpretation": "generation boundary only; does not validate model quality"
+      },
+      "requests_path": "experiments/gr_serving/output/data/20261003_echo_memory_c1024_03/workload/requests.jsonl",
+      "requests_bytes": 22879680,
+      "requests_sha256": "167a0af2fba4428c0b3f4bd2886a644675ee46b017c9fc08d25bb0ff50f71355",
+      "request_file_verification": "root independently compared complete memory/formal requests.jsonl; reused confirmed result without duplicate hashing",
+      "actual_tokens_per_request": 65664,
+      "both_context_limits_admit_actual_length": true
+    },
+    {
+      "run_id": "20261003_echo_memory_c2048_fixed_03",
+      "memory_workload_path": "experiments/gr_serving/output/data/20261003_echo_memory_c2048_fixed_03/workload/workload.json",
+      "memory_original_manifest_path": "experiments/gr_serving/output/data/20261003_echo_memory_c2048_fixed_03/manifest.json",
+      "memory_workload_sha256": "f9490f154bdc74556b38cbcb33a73651dd1943b6e5e174e3bcaa29bb1421ba0a",
+      "original_manifest_workload_binding_valid": true,
+      "recomputed_workload_aggregate_valid": true,
+      "request_count": 32,
+      "all_request_identity_rows_equal": true,
+      "tokenizer_identity_equal": true,
+      "access_trace_identity_equal": true,
+      "config_differences": {
+        "context_limit": {
+          "memory": 163840,
+          "formal": null
+        }
+      },
+      "memory_context": {
+        "format_default_tokens": 1052672,
+        "effective_limit_tokens": 163840,
+        "override_explicit": true,
+        "interpretation": "generation boundary only; does not validate model quality"
+      },
+      "formal_context": {
+        "format_default_tokens": 1052672,
+        "effective_limit_tokens": 1052672,
+        "override_explicit": false,
+        "interpretation": "generation boundary only; does not validate model quality"
+      },
+      "requests_path": "experiments/gr_serving/output/data/20261003_echo_memory_c2048_fixed_03/workload/requests.jsonl",
+      "requests_bytes": 22879680,
+      "requests_sha256": "167a0af2fba4428c0b3f4bd2886a644675ee46b017c9fc08d25bb0ff50f71355",
+      "request_file_verification": "independently hashed complete saved requests.jsonl in this check",
+      "actual_tokens_per_request": 65664,
+      "both_context_limits_admit_actual_length": true
+    },
+    {
+      "run_id": "20261003_echo_memory_c512_hbm_03",
+      "memory_workload_path": "experiments/gr_serving/output/data/20261003_echo_memory_c512_hbm_03/workload/workload.json",
+      "memory_original_manifest_path": "experiments/gr_serving/output/data/20261003_echo_memory_c512_hbm_03/manifest.json",
+      "memory_workload_sha256": "f9490f154bdc74556b38cbcb33a73651dd1943b6e5e174e3bcaa29bb1421ba0a",
+      "original_manifest_workload_binding_valid": true,
+      "recomputed_workload_aggregate_valid": true,
+      "request_count": 32,
+      "all_request_identity_rows_equal": true,
+      "tokenizer_identity_equal": true,
+      "access_trace_identity_equal": true,
+      "config_differences": {
+        "context_limit": {
+          "memory": 163840,
+          "formal": null
+        }
+      },
+      "memory_context": {
+        "format_default_tokens": 1052672,
+        "effective_limit_tokens": 163840,
+        "override_explicit": true,
+        "interpretation": "generation boundary only; does not validate model quality"
+      },
+      "formal_context": {
+        "format_default_tokens": 1052672,
+        "effective_limit_tokens": 1052672,
+        "override_explicit": false,
+        "interpretation": "generation boundary only; does not validate model quality"
+      },
+      "requests_path": "experiments/gr_serving/output/data/20261003_echo_memory_c512_hbm_03/workload/requests.jsonl",
+      "requests_bytes": 22879680,
+      "requests_sha256": "167a0af2fba4428c0b3f4bd2886a644675ee46b017c9fc08d25bb0ff50f71355",
+      "request_file_verification": "independently hashed complete saved requests.jsonl in this check",
+      "actual_tokens_per_request": 65664,
+      "both_context_limits_admit_actual_length": true
+    },
+    {
+      "run_id": "20261003_echo_memory_c256_dense_05",
+      "memory_workload_path": "experiments/gr_serving/output/data/20261003_echo_memory_c256_dense_05/workload/workload.json",
+      "memory_original_manifest_path": "experiments/gr_serving/output/data/20261003_echo_memory_c256_dense_05/manifest.json",
+      "memory_workload_sha256": "f9490f154bdc74556b38cbcb33a73651dd1943b6e5e174e3bcaa29bb1421ba0a",
+      "original_manifest_workload_binding_valid": true,
+      "recomputed_workload_aggregate_valid": true,
+      "request_count": 32,
+      "all_request_identity_rows_equal": true,
+      "tokenizer_identity_equal": true,
+      "access_trace_identity_equal": true,
+      "config_differences": {
+        "context_limit": {
+          "memory": 163840,
+          "formal": null
+        }
+      },
+      "memory_context": {
+        "format_default_tokens": 1052672,
+        "effective_limit_tokens": 163840,
+        "override_explicit": true,
+        "interpretation": "generation boundary only; does not validate model quality"
+      },
+      "formal_context": {
+        "format_default_tokens": 1052672,
+        "effective_limit_tokens": 1052672,
+        "override_explicit": false,
+        "interpretation": "generation boundary only; does not validate model quality"
+      },
+      "requests_path": "experiments/gr_serving/output/data/20261003_echo_memory_c256_dense_05/workload/requests.jsonl",
+      "requests_bytes": 22879680,
+      "requests_sha256": "167a0af2fba4428c0b3f4bd2886a644675ee46b017c9fc08d25bb0ff50f71355",
+      "request_file_verification": "independently hashed complete saved requests.jsonl in this check",
+      "actual_tokens_per_request": 65664,
+      "both_context_limits_admit_actual_length": true
+    }
+  ],
+  "report_bridge_requirements": [
+    "Preserve and independently recompute each original workload aggregate against its own manifest/audit; never rewrite or equate the distinct aggregate hashes.",
+    "Require complete ordered32-request identity rows, tokenizer hash, heat identity, access trace, and all non-context configuration fields to match.",
+    "Allow only the disclosed context_limit configuration difference; validate each effective_limit/default/override metadata and require both bounds to admit every actual request length.",
+    "Bind the complete memory requests.jsonl file SHA to the authenticated formal request file SHA; retain both original aggregate hashes, request file hashes/paths, exact difference and comparison result in report provenance.",
+    "Keep runtime/backend identity, per-configuration resource reservations, fixed session length65664, hard budgets, accepted memory phase coverage and analytical-bound checks unchanged."
+  ],
+  "boundary": "Read saved small manifest/request indexes and hash only three not-yet-compared22.9MB request files. No GPU, raw allocation replay, numerical tensor reopen or original manifest/data modification."
+}

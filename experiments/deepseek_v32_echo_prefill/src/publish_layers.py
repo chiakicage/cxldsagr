@@ -11,6 +11,9 @@ import tempfile
 from collections import defaultdict
 from pathlib import Path
 
+from experiments.deepseek_v32_echo_prefill.src.execution_utilization import (
+    precision_normalized_utilization,
+)
 from experiments.deepseek_v32_echo_prefill.src.profile_summary import (
     EXPERIMENT,
     collect_ncu,
@@ -54,6 +57,55 @@ NCU_METRICS = (
     "derived__local_spilling_requests",
     "smsp__average_warps_issue_stalled_long_scoreboard_per_issue_active.ratio",
 )
+
+
+def _end_to_end_utilization(result, ledger, peaks):
+    """Bind complete dense-layer work to the matching formal wall samples."""
+    scope = "checkpoint_layers_0_1_2_embedding_final_norm_last_token_lm_head"
+    require(
+        result["num_layers"] == 3 and result["scope"] == scope,
+        "End-to-end utilization requires the measured three-layer single-device workload",
+    )
+    required = set(STAGES) - {"indexer_qk", "indexer_fused", "lm_head"}
+    output = {}
+    work_by_mode = {}
+    for phase, annotated_phase in zip(("prefix", "extend"), PHASES):
+        for mode in MODES:
+            calls = [
+                r for r in ledger["calls"] if (r["mode"], r["phase"]) == (mode, annotated_phase)
+            ]
+            matrix = [r for r in calls if r["useful_flops"] is not None]
+            for layer in range(3):
+                stages = {r["stage"] for r in matrix if r["layer"] == f"layer_{layer}"}
+                indexer = "indexer_qk" if mode == "resident" else "indexer_fused"
+                require(stages == required | {indexer}, "Incomplete or unsupported matrix ledger")
+            head = [r for r in matrix if r["layer"] == "shared"]
+            require(
+                len(head) == 1 and head[0]["stage"] == "lm_head",
+                "Expected one shared last-token LM-head call",
+            )
+            require(
+                all(r["layer"] in {"layer_0", "layer_1", "layer_2", "shared"} for r in matrix),
+                "Matrix work lies outside the measured three layers",
+            )
+            work = defaultdict(int)
+            for call in matrix:
+                stage = (
+                    "indexer" if call["stage"] in {"indexer_qk", "indexer_fused"} else call["stage"]
+                )
+                work[(call["layer"], stage, call["precision"])] += call["useful_flops"]
+            work_by_mode[mode, phase] = dict(work)
+            output.setdefault(mode, {})[phase] = precision_normalized_utilization(
+                calls,
+                result["measurements"][mode][phase + "_samples_ms"],
+                peaks_tflops=peaks,
+                scope=scope,
+            )
+        require(
+            work_by_mode["resident", phase] == work_by_mode["offload", phase],
+            "Resident/offload useful matrix work differs; inspect semantic equivalence",
+        )
+    return output
 
 
 def _identity(row):
@@ -331,7 +383,34 @@ def _markdown(summary, matrix, nonmatrix):
         "",
         "![前三层无插桩延迟](report/layers3/latency.svg)",
         "",
-        "MFU = useful matrix FLOPs /（同算子实际 GPU kernel duration 之和 × 对应精度 dense peak）。"
+        (
+            "端到端精度归一化利用率 = 100 × Σ精度（useful matrix FLOPs / 对应精度 dense peak）/ "
+            "无插桩同步 wall time。分子使用同一 run、同一阶段完整 annotated 调用账本中的"
+            "逻辑矩阵工作量，按 FP8/BF16/FP32 分别换算理想计算时间；分母包含整个请求阶段的"
+            "CPU 调度、非矩阵计算、搬运、等待和 launch gap。它是当前 absorbed-MLA 实现的"
+            "三层工作负载指标，不外推完整 61 层，也不等于单一峰值 MFU 或 Tensor pipe active。"
+        ),
+        "",
+        "| 阶段 | 理想矩阵计算时间 (ms) | Resident 端到端利用率 (%) | Offload 端到端利用率 (%) |",
+        "| --- | ---: | ---: | ---: |",
+    ]
+    for phase in ("prefix", "extend"):
+        left = summary["end_to_end_utilization"]["resident"][phase]
+        right = summary["end_to_end_utilization"]["offload"][phase]
+        lines.append(
+            f"| {phase} | {_format(left['ideal_compute_ms'])} | "
+            f"{_format(left['utilization_at_median_wall_percent'], 2)} | "
+            f"{_format(right['utilization_at_median_wall_percent'], 2)} |"
+        )
+    lines += [
+        "",
+        (
+            "表中利用率由中位 wall time 计算；每次重复的比率、分精度 FLOPs 与理想计算时间见 "
+            "[summary.json](report/layers3/summary.json) 的 `end_to_end_utilization`。"
+        ),
+        "",
+        "下面保留 `operator_mfu` 数据字段名；其含义是算子 kernel 利用率 = useful matrix FLOPs /"
+        "（同算子实际 GPU kernel duration 之和 × 对应精度 dense peak）。"
         "FMA 计 2 FLOPs；FP8/BF16/FP32 分母分别为 "
         + "/".join(str(summary["dense_peaks_tflops"][key]) for key in ("FP8", "BF16", "FP32"))
         + " TFLOPS；TF32 关闭。"
@@ -466,6 +545,9 @@ def generate(run_id, ncu_run_ids, *, publish=False):
         peak_reference=analysis["peak_reference"],
         coverage=coverage,
         query_coverage=intervals,
+        end_to_end_utilization=_end_to_end_utilization(
+            result, ledger, analysis["dense_peaks_tflops"]
+        ),
         ncu=[_compact_ncu(run) for run in ncu],
         measurement_definitions=analysis["notes"],
         provenance={
@@ -473,6 +555,9 @@ def generate(run_id, ncu_run_ids, *, publish=False):
             "analysis_sha256": digest(directory / "analysis" / "analysis.json", hashes),
             "calls_sha256": digest(directory / "operator_calls.json", hashes),
             "publisher_sha256": digest(__file__, hashes),
+            "execution_utilization_sha256": digest(
+                Path(__file__).with_name("execution_utilization.py"), hashes
+            ),
             "nsys_analyzer_sha256": analysis["analyzer_sha256"],
             "attribution_source_sha256": analysis["attribution_source_sha256"],
             "source_snapshots_verified": True,

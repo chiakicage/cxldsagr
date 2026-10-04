@@ -1,10 +1,13 @@
 [submodule "DeepGEMM"]
 	path = 3rdparty/DeepGEMM
 	url = https://github.com/deepseek-ai/DeepGEMM.git
-	branch = nv_dev
+	branch = main
 [submodule "cutlass"]
 	path = 3rdparty/cutlass
 	url = https://github.com/NVIDIA/cutlass.git
 [submodule "DeepJIT"]
 	path = 3rdparty/DeepJIT
 	url = https://github.com/deepseek-ai/DeepJIT.git
+[submodule "3rdparty/FlashMLA"]
+	path = 3rdparty/FlashMLA
+	url = https://github.com/deepseek-ai/FlashMLA.git

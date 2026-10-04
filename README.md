@@ -9,11 +9,14 @@ HBM 与 CPU DRAM，希望在有限 HBM 下复用更多历史 KV，并降低 offl
 [研究状态](docs/status.md)按实验室四环节记录当前理解和缺口，
 [下一步任务](docs/roadmap.md)列出待做事项，允许交叉推进和人直接修正。
 `GR/` 支持固定 history 与候选变化；本地 serving 已增加按用户 LRU 保留历史的路径，
-在统一 HBM / DRAM 预算下对比首次访问与复访延迟。单卡 DeepSeek dense 层替身和 NOSA-8B
-的旧短轨迹有数值与计量记录，见 [GR serving 实验](experiments/gr_serving/README.md)。
-ECHO 实现的 MFU/cache 策略及 DeepSeek MFU 存在问题，相关 baseline 比较当前不成立，
-需审计、修正和复测。旧负载也没有建立有意义的实际用户规模与复访容量压力；
-新的负载尚无验收通过的替换结果。
+在统一 HBM / DRAM 预算下对比首次访问与复访延迟。NOSA-8B 的旧短轨迹有数值与计量
+记录，见 [GR serving 实验](experiments/gr_serving/README.md)。
+DeepSeek 已完成共享 cache 条件下前三层 64K+1K 的非矩阵优化对照与 MFU 复核。
+固定 P/NH、16 用户两轮的 [motivation 四方案对照](experiments/deepseek_v32_motivation/README.md)
+和[官方 ECHO 适配对照](experiments/deepseek_v32_echo_official/README.md)已发布 C10 结果。
+[ECHO 容量分析](experiments/deepseek_v32_echo_cache/README.md)保留原源码对应的静态
+P/NH 规划，当前 metadata 改动后尚未重新规划，也未跑满容量。旧 4 GiB / W / chunk
+对照已撤回；静态规划与固定 16 用户的性能测量分别报告。
 原逐请求分配释放的 NOSA 入口继续保留；当前没有网络服务或到达队列吞吐测量。
 
 NOSA 支持 dense、完整 sparse policy 与显式 pinned-DRAM offload。Offload 主 kernel
@@ -22,11 +25,13 @@ NOSA 支持 dense、完整 sparse policy 与显式 pinned-DRAM offload。Offload
 完整模型的串行 GR serving 延迟另见上述实验；不包含 LM head 或并发服务测量。
 算子结果见 [NOSA 实验](experiments/nosa_offload_overlap/README.md)。
 
-DeepSeek V3.2 支持独立完整 61 层 ECHO prefill/extend，不依赖 SGLang。Indexer 融合
-KV prefetch，主 KV 使用 resident 存储或有限 HBM pool 与 pinned DRAM backing。
-保留的完整 64K + 1K 报告显示 resident/offload 末 token logits 逐位一致；KV gather
-对齐修复后的完整模型性能待补测，见 [ECHO 实验](experiments/deepseek_v32_echo_prefill/README.md)。
-前三层算子诊断不能替代完整模型验证，其 MFU 与性能归因也待上述基线问题修正后复核。
+DeepSeek V3.2 当前非 GR benchmark 使用真实 checkpoint 第 0–2 层依次传播，包含
+embedding、final norm 和末 token LM head；这不是独立训练的三层模型。
+Indexer 融合 KV prefetch，主 KV 使用 resident 存储或有限 HBM pool 与 pinned DRAM
+backing。模型仍支持完整 61 层，当前数值验收为前三层 64K + 1K。
+DeepGEMM main 与 FlashMLA 已接入，普通算子复用 FlashInfer，indexer 量化经 KDA 优化，
+运行路径已移除 Hadamard。同 GPU、相同共享 cache 的固定负载对照及跨版本数值差异见
+[ECHO 实验](experiments/deepseek_v32_echo_prefill/README.md)；不代表任务质量等价，GR 对照单独报告。
 报告数字保留各自 run ID 与源码快照，目录迁移和回归检查不替代性能复测。
 
 ```text
@@ -42,7 +47,7 @@ serving/                        GR 驱动的本地串行执行
 tests/integration/              跨模块正确性测试
 experiments/                    各实验的源码、脚本、报告和原始产物
 experiments/legacy/deepseek_v32/ 有效历史报告、CPU 重建工具与独立 DeepGEMM 基准
-3rdparty/                       共享 CUTLASS、DeepGEMM、DeepJIT 子模块
+3rdparty/                       CUTLASS、DeepGEMM、DeepJIT、FlashMLA 子模块
 GR/                             请求内容、热度和调度工具
 docs/                           给人的研究状态与下一步任务；agents/ 保存内部执行文档
 skills/research-supervisor/      项目内持续维护的 Research Supervisor
@@ -70,6 +75,7 @@ python -m serving.run_gr --help
 python -m serving.run_multi_user --help
 python -m models.deepseek_v32.echo_infer --model /preset-models --help
 bash experiments/deepseek_v32_echo_prefill/scripts/run.sh --help
+bash experiments/deepseek_v32_echo_cache/scripts/run.sh --help
 ```
 
 本机 NOSA checkpoint 位于 `/mnt/ssd-wlcb/chenkaiqi/NOSA-3B`、

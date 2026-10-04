@@ -1,0 +1,434 @@
+{
+  "schema_version": 1,
+  "run_id": "20261003_echo_layers3_nonmatrix_control_01",
+  "accepted": true,
+  "auditor_sha256": "0c8298ff7652858c0aa39feb10e9718734026570b36bc6cbd891d7a81f5cb6b6",
+  "input_sha256": {
+    "result.json": "91ff58159c936f6d5383a9ec97058add542d62c977edc0186718b889c98d2903",
+    "operator_calls.json": "84425082299b4d0a3fe3b61b096a15bae5e7fcfc1ad105d16bcc632a20c6daff",
+    "analysis": "855e7b7d6e059ea1f7015a349b6b44133229e1be5e2924df26f2ffc258f2d6c4"
+  },
+  "summary_conservation": {
+    "captures": [
+      {
+        "mode": "resident",
+        "phase": "prefill_annotated",
+        "activity_totals": {
+          "kernel": {
+            "count": 49614,
+            "total_ns": 1089623279
+          },
+          "memcpy": {
+            "count": 2247,
+            "total_ns": 18452093
+          },
+          "memset": {
+            "count": 967,
+            "total_ns": 955940
+          }
+        },
+        "busy_gap_arithmetic_matches": true
+      },
+      {
+        "mode": "resident",
+        "phase": "extend_annotated",
+        "activity_totals": {
+          "kernel": {
+            "count": 789,
+            "total_ns": 21308076
+          },
+          "memcpy": {
+            "count": 42,
+            "total_ns": 485827
+          },
+          "memset": {
+            "count": 19,
+            "total_ns": 17088
+          }
+        },
+        "busy_gap_arithmetic_matches": true
+      },
+      {
+        "mode": "offload",
+        "phase": "prefill_annotated",
+        "activity_totals": {
+          "kernel": {
+            "count": 88710,
+            "total_ns": 1396865043
+          },
+          "memcpy": {
+            "count": 9330,
+            "total_ns": 33770997
+          },
+          "memset": {
+            "count": 9150,
+            "total_ns": 10346399
+          }
+        },
+        "busy_gap_arithmetic_matches": true
+      },
+      {
+        "mode": "offload",
+        "phase": "extend_annotated",
+        "activity_totals": {
+          "kernel": {
+            "count": 1515,
+            "total_ns": 29077874
+          },
+          "memcpy": {
+            "count": 173,
+            "total_ns": 745956
+          },
+          "memset": {
+            "count": 173,
+            "total_ns": 193856
+          }
+        },
+        "busy_gap_arithmetic_matches": true
+      }
+    ],
+    "operator_rows": 420,
+    "kernel_count": 140628,
+    "end_to_end_precision_normalized_utilization": [
+      {
+        "mode": "resident",
+        "phase": "prefix",
+        "metric": "end_to_end_precision_normalized_useful_compute_utilization",
+        "scope": "checkpoint_layers_0_1_2_embedding_final_norm_last_token_lm_head",
+        "device_count": 1,
+        "formula": "100 * sum_precision(useful_flops / (dense_peak_tflops * 1e9)) / wall_ms",
+        "work_basis": "useful matrix work of the measured implementation, including absorbed MLA",
+        "timing_basis": "uninstrumented synchronized end-to-end wall; one semantic ledger per sample",
+        "matrix_call_count": 2689,
+        "explicit_nonmatrix_call_count": 5251,
+        "useful_flops_by_precision": {
+          "BF16": 116997618139136,
+          "FP32": 180388626432,
+          "FP8": 333694799708160
+        },
+        "dense_peaks_tflops": {
+          "BF16": 989.5,
+          "FP32": 67.0,
+          "FP8": 1979.0
+        },
+        "ideal_compute_ms_by_precision": {
+          "BF16": 118.23912899356847,
+          "FP32": 2.692367558686567,
+          "FP8": 168.61788767466396
+        },
+        "ideal_compute_ms": 289.549384226919,
+        "wall_samples_ms": [
+          1176.2024540221319,
+          1170.4746300238185,
+          1182.5486739980988
+        ],
+        "wall_median_ms": 1176.2024540221319,
+        "utilization_samples_percent": [
+          24.617308290488463,
+          24.737775326324403,
+          24.485197995950273
+        ],
+        "utilization_at_median_wall_percent": 24.617308290488463,
+        "limitations": "Single-device workload only; no extrapolation to other layers or devices. Reference peak normalization is not achieved-clock normalization or Tensor Core activity. No arithmetic mean of operator utilization is used. Nonmatrix work, padding and transfers add no useful matrix FLOPs; all remain in wall time."
+      },
+      {
+        "mode": "resident",
+        "phase": "extend",
+        "metric": "end_to_end_precision_normalized_useful_compute_utilization",
+        "scope": "checkpoint_layers_0_1_2_embedding_final_norm_last_token_lm_head",
+        "device_count": 1,
+        "formula": "100 * sum_precision(useful_flops / (dense_peak_tflops * 1e9)) / wall_ms",
+        "work_basis": "useful matrix work of the measured implementation, including absorbed MLA",
+        "timing_basis": "uninstrumented synchronized end-to-end wall; one semantic ledger per sample",
+        "matrix_call_count": 43,
+        "explicit_nonmatrix_call_count": 85,
+        "useful_flops_by_precision": {
+          "BF16": 1857279229952,
+          "FP32": 2818572288,
+          "FP8": 6889018490880
+        },
+        "dense_peaks_tflops": {
+          "BF16": 989.5,
+          "FP32": 67.0,
+          "FP8": 1979.0
+        },
+        "ideal_compute_ms_by_precision": {
+          "BF16": 1.8769875997493684,
+          "FP32": 0.04206824310447761,
+          "FP8": 3.4810603794239516
+        },
+        "ideal_compute_ms": 5.400116222277798,
+        "wall_samples_ms": [
+          24.299734039232135,
+          24.266849970445037,
+          24.311429006047547,
+          24.262126011308283,
+          24.32742004748434
+        ],
+        "wall_median_ms": 24.299734039232135,
+        "utilization_samples_percent": [
+          22.222943730821342,
+          22.25305809717652,
+          22.21225342588665,
+          22.257390880588407,
+          22.19765273809302
+        ],
+        "utilization_at_median_wall_percent": 22.222943730821342,
+        "limitations": "Single-device workload only; no extrapolation to other layers or devices. Reference peak normalization is not achieved-clock normalization or Tensor Core activity. No arithmetic mean of operator utilization is used. Nonmatrix work, padding and transfers add no useful matrix FLOPs; all remain in wall time."
+      },
+      {
+        "mode": "offload",
+        "phase": "prefix",
+        "metric": "end_to_end_precision_normalized_useful_compute_utilization",
+        "scope": "checkpoint_layers_0_1_2_embedding_final_norm_last_token_lm_head",
+        "device_count": 1,
+        "formula": "100 * sum_precision(useful_flops / (dense_peak_tflops * 1e9)) / wall_ms",
+        "work_basis": "useful matrix work of the measured implementation, including absorbed MLA",
+        "timing_basis": "uninstrumented synchronized end-to-end wall; one semantic ledger per sample",
+        "matrix_call_count": 2720,
+        "explicit_nonmatrix_call_count": 5728,
+        "useful_flops_by_precision": {
+          "BF16": 116997618139136,
+          "FP32": 180388626432,
+          "FP8": 333694799708160
+        },
+        "dense_peaks_tflops": {
+          "BF16": 989.5,
+          "FP32": 67.0,
+          "FP8": 1979.0
+        },
+        "ideal_compute_ms_by_precision": {
+          "BF16": 118.23912899356847,
+          "FP32": 2.692367558686567,
+          "FP8": 168.61788767466396
+        },
+        "ideal_compute_ms": 289.549384226919,
+        "wall_samples_ms": [
+          2025.6879219668917,
+          2025.1422859728336,
+          2028.9114249753766
+        ],
+        "wall_median_ms": 2025.6879219668917,
+        "utilization_samples_percent": [
+          14.293879184794363,
+          14.297730398129824,
+          14.271169291209107
+        ],
+        "utilization_at_median_wall_percent": 14.293879184794363,
+        "limitations": "Single-device workload only; no extrapolation to other layers or devices. Reference peak normalization is not achieved-clock normalization or Tensor Core activity. No arithmetic mean of operator utilization is used. Nonmatrix work, padding and transfers add no useful matrix FLOPs; all remain in wall time."
+      },
+      {
+        "mode": "offload",
+        "phase": "extend",
+        "metric": "end_to_end_precision_normalized_useful_compute_utilization",
+        "scope": "checkpoint_layers_0_1_2_embedding_final_norm_last_token_lm_head",
+        "device_count": 1,
+        "formula": "100 * sum_precision(useful_flops / (dense_peak_tflops * 1e9)) / wall_ms",
+        "work_basis": "useful matrix work of the measured implementation, including absorbed MLA",
+        "timing_basis": "uninstrumented synchronized end-to-end wall; one semantic ledger per sample",
+        "matrix_call_count": 44,
+        "explicit_nonmatrix_call_count": 94,
+        "useful_flops_by_precision": {
+          "BF16": 1857279229952,
+          "FP32": 2818572288,
+          "FP8": 6889018490880
+        },
+        "dense_peaks_tflops": {
+          "BF16": 989.5,
+          "FP32": 67.0,
+          "FP8": 1979.0
+        },
+        "ideal_compute_ms_by_precision": {
+          "BF16": 1.8769875997493684,
+          "FP32": 0.04206824310447761,
+          "FP8": 3.4810603794239516
+        },
+        "ideal_compute_ms": 5.400116222277798,
+        "wall_samples_ms": [
+          51.51120701339096,
+          51.71551200328395,
+          52.28679999709129,
+          43.99485397152603,
+          41.42975201830268
+        ],
+        "wall_median_ms": 51.51120701339096,
+        "utilization_samples_percent": [
+          10.48338125890541,
+          10.441966081540272,
+          10.327876677437144,
+          12.274426972238196,
+          13.03439185417319
+        ],
+        "utilization_at_median_wall_percent": 10.48338125890541,
+        "limitations": "Single-device workload only; no extrapolation to other layers or devices. Reference peak normalization is not achieved-clock normalization or Tensor Core activity. No arithmetic mean of operator utilization is used. Nonmatrix work, padding and transfers add no useful matrix FLOPs; all remain in wall time."
+      }
+    ]
+  },
+  "saved_output_checks": {
+    "tensor_checks": [
+      {
+        "file": "resident_control.pt",
+        "field": "hidden",
+        "shape": [
+          1024,
+          7168
+        ],
+        "dtype": "torch.bfloat16",
+        "elements_compared": 7340032,
+        "bitwise_equal": true,
+        "max_abs": 0.0,
+        "mean_abs": 0.0,
+        "relative_l2": 0.0,
+        "allclose_at_original_tolerance": true,
+        "elements_outside_original_tolerance": 0,
+        "rows_outside_original_tolerance": 0,
+        "rtol": 0.01,
+        "atol": 0.02
+      },
+      {
+        "file": "resident_control.pt",
+        "field": "logits",
+        "shape": [
+          1,
+          129280
+        ],
+        "dtype": "torch.float32",
+        "elements_compared": 129280,
+        "bitwise_equal": true,
+        "max_abs": 0.0,
+        "mean_abs": 0.0,
+        "relative_l2": 0.0,
+        "allclose_at_original_tolerance": true,
+        "elements_outside_original_tolerance": 0,
+        "rows_outside_original_tolerance": 0,
+        "rtol": 0.01,
+        "atol": 0.02
+      },
+      {
+        "file": "offload_control.pt",
+        "field": "hidden",
+        "shape": [
+          1024,
+          7168
+        ],
+        "dtype": "torch.bfloat16",
+        "elements_compared": 7340032,
+        "bitwise_equal": true,
+        "max_abs": 0.0,
+        "mean_abs": 0.0,
+        "relative_l2": 0.0,
+        "allclose_at_original_tolerance": true,
+        "elements_outside_original_tolerance": 0,
+        "rows_outside_original_tolerance": 0,
+        "rtol": 0.01,
+        "atol": 0.02
+      },
+      {
+        "file": "offload_control.pt",
+        "field": "logits",
+        "shape": [
+          1,
+          129280
+        ],
+        "dtype": "torch.float32",
+        "elements_compared": 129280,
+        "bitwise_equal": true,
+        "max_abs": 0.0,
+        "mean_abs": 0.0,
+        "relative_l2": 0.0,
+        "allclose_at_original_tolerance": true,
+        "elements_outside_original_tolerance": 0,
+        "rows_outside_original_tolerance": 0,
+        "rtol": 0.01,
+        "atol": 0.02
+      },
+      {
+        "file": "resident_profile_output.pt",
+        "field": "hidden",
+        "shape": [
+          1024,
+          7168
+        ],
+        "dtype": "torch.bfloat16",
+        "elements_compared": 7340032,
+        "bitwise_equal": true,
+        "max_abs": 0.0,
+        "mean_abs": 0.0,
+        "relative_l2": 0.0,
+        "allclose_at_original_tolerance": true,
+        "elements_outside_original_tolerance": 0,
+        "rows_outside_original_tolerance": 0,
+        "rtol": 0.01,
+        "atol": 0.02
+      },
+      {
+        "file": "resident_profile_output.pt",
+        "field": "logits",
+        "shape": [
+          1,
+          129280
+        ],
+        "dtype": "torch.float32",
+        "elements_compared": 129280,
+        "bitwise_equal": true,
+        "max_abs": 0.0,
+        "mean_abs": 0.0,
+        "relative_l2": 0.0,
+        "allclose_at_original_tolerance": true,
+        "elements_outside_original_tolerance": 0,
+        "rows_outside_original_tolerance": 0,
+        "rtol": 0.01,
+        "atol": 0.02
+      },
+      {
+        "file": "offload_profile_output.pt",
+        "field": "hidden",
+        "shape": [
+          1024,
+          7168
+        ],
+        "dtype": "torch.bfloat16",
+        "elements_compared": 7340032,
+        "bitwise_equal": true,
+        "max_abs": 0.0,
+        "mean_abs": 0.0,
+        "relative_l2": 0.0,
+        "allclose_at_original_tolerance": true,
+        "elements_outside_original_tolerance": 0,
+        "rows_outside_original_tolerance": 0,
+        "rtol": 0.01,
+        "atol": 0.02
+      },
+      {
+        "file": "offload_profile_output.pt",
+        "field": "logits",
+        "shape": [
+          1,
+          129280
+        ],
+        "dtype": "torch.float32",
+        "elements_compared": 129280,
+        "bitwise_equal": true,
+        "max_abs": 0.0,
+        "mean_abs": 0.0,
+        "relative_l2": 0.0,
+        "allclose_at_original_tolerance": true,
+        "elements_outside_original_tolerance": 0,
+        "rows_outside_original_tolerance": 0,
+        "rtol": 0.01,
+        "atol": 0.02
+      }
+    ],
+    "file_sha256": {
+      "resident_control.pt": "5cae3d8d237f911b83352dfc1a1ec535d932274bb39aa9c9d09150dafd279839",
+      "offload_control.pt": "feb26679a49163c3aa52d005f7ce9d73d01a3395c7431582b2d406b7c2e6381b",
+      "resident_profile_output.pt": "6410ab14345b8cafcdfd264a6312aa2ebae91d21fa79a4680a1791ed08109edc",
+      "offload_profile_output.pt": "19181b7e939654559a1b97799dee49f8240fa4b27e51ddd45dc6b0c68f7c2f82"
+    },
+    "runtime_only_prefix_checks": [
+      "resident_profile_prefix_logits",
+      "offload_profile_prefix_logits"
+    ]
+  },
+  "boundary": "Checks result/ledger/analysis consistency, reported activity count/time and busy/gap arithmetic, and all saved extend hidden/logit tensors on CPU. Does not independently parse native traces, inspect native kernels, or verify source/native-library hashes. Prefix numerical checks are runtime-only because prefix control tensors are not saved. Annotated kernel sums and unannotated wall time remain separate metrics."
+}

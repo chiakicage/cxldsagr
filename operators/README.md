@@ -15,7 +15,7 @@ operators/
     indexer/                  ECHO FP8 logits + fused prefetch
     attention/
       reference/              PyTorch MLA 参考
-      device_only/            Triton sparse MLA
+      device_only/            official FlashMLA sparse prefill adapter
       offload/                精确 recall 后消费 pool，复用同一 MLA kernel
     linear/                   FP8 linear / grouped MoE
   common/                     模型无关的 pinned-host record 搬运

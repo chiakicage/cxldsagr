@@ -18,6 +18,8 @@ import math
 from collections.abc import Mapping
 from dataclasses import asdict, dataclass, field
 
+from operators.deepseek_v32.attention._config import padded_selection_count
+
 
 def _integer(value: int, name: str, *, positive: bool = False) -> int:
     if isinstance(value, bool) or not isinstance(value, int) or value < int(positive):
@@ -28,10 +30,6 @@ def _integer(value: int, name: str, *, positive: bool = False) -> int:
 
 def _round_up(value: int, multiple: int) -> int:
     return (value + multiple - 1) // multiple * multiple
-
-
-def _next_power_of_two(value: int) -> int:
-    return 1 << (value - 1).bit_length() if value else 1
 
 
 @dataclass(frozen=True)
@@ -105,8 +103,8 @@ def linear_work(
 ) -> OperatorWork:
     """Count ``[M,K] @ [N,K].T`` using actual checkpoint weight precision.
 
-    Set ``local_fp8_kernel`` only for ``linear.fp8.fp8_linear``; precision
-    alone does not establish an arbitrary implementation's tile sizes.
+    ``local_fp8_kernel`` identifies the model adapter, which now dispatches
+    official DeepGEMM. Its runtime-selected padding is not inferred here.
     Activation quantization/scaling are scalar work, excluded from FLOPs.
     """
     m = _integer(rows, "rows")
@@ -114,28 +112,20 @@ def linear_work(
     k = _integer(in_features, "in_features", positive=True)
     if not precision:
         raise ValueError("The observed matrix arithmetic precision is required")
-    padded = None
-    padded_formula = None
     dimensions = {"M": m, "N": n, "K": k}
-    if local_fp8_kernel:
-        if precision != "fp8":
-            raise ValueError("The local block-FP8 kernel requires precision='fp8'")
-        tile_m = 32 if m < 64 else 64
-        padded_m, padded_n, padded_k = _round_up(m, tile_m), _round_up(n, 128), _round_up(k, 128)
-        dimensions.update(M_padded=padded_m, N_padded=padded_n, K_padded=padded_k)
-        padded = 2 * padded_m * padded_n * padded_k
-        padded_formula = "2 * round_up(M, 32 if M < 64 else 64) * round_up(N,128) * round_up(K,128)"
+    if local_fp8_kernel and precision != "fp8":
+        raise ValueError("The block-FP8 adapter requires precision='fp8'")
     return OperatorWork(
         name,
         precision,
         2 * m * n * k,
-        padded,
+        None,
         "2 * M * N * K",
-        padded_formula,
+        None,
         dimensions,
-        "Scalar activation quantization, block scaling, and conversion are excluded from FLOPs. "
+        "Scalar activation quantization, block scaling and conversion are excluded from FLOPs. "
         + (
-            "Padding follows local linear/fp8.py."
+            "Official DeepGEMM selects TMA/GEMM geometry at runtime; executed padding is unknown."
             if local_fp8_kernel
             else "cuBLAS padding is unknown."
         ),
@@ -196,15 +186,25 @@ def indexer_work(
     useful_pairs = causal_pairs(q, p)
     # load_schedule uses the largest endpoint of the two rows; the final
     # partial group still executes two WGMMA rows (second row is zero padded).
-    padded_pairs = sum(2 * _round_up(p + min(row + 2, q), 128) for row in range(0, q, 2))
+    # Official DeepGEMM's resident SM90 kernel tiles 256 KV rows; the fused
+    # ECHO prefetch implementation retains its 128-row tile.
+    block_kv = 128 if prefetch else 256
+    padded_pairs = sum(2 * _round_up(p + min(row + 2, q), block_kv) for row in range(0, q, 2))
     return OperatorWork(
         "indexer_prefetch" if prefetch else "indexer",
         "fp8",
         2 * 64 * 128 * useful_pairs,
         2 * 64 * 128 * padded_pairs,
         "2 * 64 * 128 * (Q * P + Q * (Q + 1) / 2)",
-        "2 * 64 * 128 * sum_groups(2 * round_up(P + min(group_start + 2, Q),128))",
-        {"Q": q, "P": p, "KV": visible, "valid_pairs": useful_pairs, "padded_pairs": padded_pairs},
+        "2 * 64 * 128 * sum_groups(2 * round_up(P + min(group_start + 2, Q),BLOCK_KV))",
+        {
+            "Q": q,
+            "P": p,
+            "KV": visible,
+            "valid_pairs": useful_pairs,
+            "padded_pairs": padded_pairs,
+            "BLOCK_KV": block_kv,
+        },
         "Only QK dot products count; ReLU, head weighting/reduction, cleanup, histogram, "
         "and fused host prefetch are excluded from FLOPs but included when their kernels "
         "are inside the measured duration. Causal invalid positions within a tile are padding.",
@@ -233,23 +233,20 @@ def sparse_mla_work(
     v = _integer(value_dim, "value_dim", positive=True)
     slots = _integer(selected_slots, "selected_slots")
     pairs = _integer(valid_selected_pairs, "valid_selected_pairs")
-    if d < v:
-        raise ValueError("The latent value dimension must fit inside the QK record")
+    if h not in (64, 128) or d != 576 or v != 512 or precision != "bf16":
+        raise ValueError("FlashMLA SM90 sparse prefill requires BF16 H64/H128, D576 and V512")
     if pairs > q * slots:
         raise ValueError("valid_selected_pairs exceeds the selection tensor capacity")
-    padded_h = _round_up(h, 16)
-    padded_slots = _round_up(slots, 64)
-    padded_v = max(16, _next_power_of_two(v))
-    padded_rope = max(16, _next_power_of_two(d - v)) if d > v else 0
+    padded_slots = padded_selection_count(slots)
     useful_qk, useful_pv = 2 * pairs * h * d, 2 * pairs * h * v
-    executed = 2 * q * padded_h * padded_slots * (2 * padded_v + padded_rope)
+    executed = 2 * q * h * padded_slots * (d + v)
     return OperatorWork(
         "sparse_mla",
         precision,
         useful_qk + useful_pv,
         executed,
         "QK: 2 * valid_pairs * H * D; PV: 2 * valid_pairs * H * V",
-        "2 * Q * round_up(H,16) * round_up(selected_slots,64) * (2 * padded_V + padded_RoPE)",
+        "2 * Q * H * round_up(selected_slots,128) * (D + V)",
         {
             "Q": q,
             "H": h,
@@ -259,14 +256,17 @@ def sparse_mla_work(
             "valid_pairs": pairs,
             "qk_flops": useful_qk,
             "pv_flops": useful_pv,
-            "H_padded": padded_h,
             "slots_padded": padded_slots,
-            "V_padded": padded_v,
-            "RoPE_padded": padded_rope,
+            "BLOCK_H": 64,
+            "BLOCK_K": 64,
+            "selection_alignment": 128,
+            "threads": 384,
         },
-        "Useful FLOPs exclude invalid selection slots; local Triton dots execute them as zeros. "
+        "Useful FLOPs exclude invalid selection slots; official FlashMLA executes padded slots. "
         "Softmax, address lookup, and KV loads add time but no counted matrix FLOPs. "
-        "Offload query splitting preserves per-query work; sum only successful MLA invocations.",
+        "Offload query splitting preserves per-query work; sum only successful MLA invocations. "
+        "FlashMLA SM90 sparse prefill uses two alternating 64-token KV tiles with "
+        "topk_length=None; the adapter pads capacity to 128 without removing duplicate IDs.",
     )
 
 

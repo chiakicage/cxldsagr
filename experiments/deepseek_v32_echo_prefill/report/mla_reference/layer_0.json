@@ -1,0 +1,54 @@
+{
+  "layer": 0,
+  "capture_file": "kernel_inputs_layer_0.pt",
+  "capture_sha256": "e0425d4970af8dd14533f6f821330f18cc2cf9acf1ae54e4a9aa33edf17e2438",
+  "source_run_id": "20261003_echo_layers3_nonmatrix_candidate_02",
+  "q_shape": [
+    1024,
+    128,
+    576
+  ],
+  "kv_shape": [
+    66560,
+    576
+  ],
+  "indices_shape": [
+    1024,
+    2048
+  ],
+  "scale": 0.1352337788608801,
+  "comparison": {
+    "all_elements_checked": 67108864,
+    "output_shape": [
+      1024,
+      128,
+      512
+    ],
+    "queries_checked": 1024,
+    "heads_per_query": 128,
+    "all_finite": true,
+    "atol": 0.004,
+    "rtol": 0.02,
+    "failed_element_count": 0,
+    "failed_element_fraction": 0.0,
+    "max_abs": 0.0003194063901901245,
+    "mean_abs": 7.769298235871247e-07,
+    "rms_error": 5.705952074074841e-06,
+    "reference_rms": 0.003928371302146959,
+    "relative_l2": 0.0014524981564131645,
+    "cosine": 0.9999989516454956,
+    "max_error_over_allowed_tolerance": 0.05958409979939461,
+    "worst_absolute_error": {
+      "query_head_dimension": [
+        551,
+        118,
+        218
+      ],
+      "official_bf16_output": -0.07470703125,
+      "reference_fp32_output": -0.07438762485980988,
+      "absolute_error": 0.0003194063901901245,
+      "allowed_error": 0.005487752612680197
+    },
+    "passed": true
+  }
+}

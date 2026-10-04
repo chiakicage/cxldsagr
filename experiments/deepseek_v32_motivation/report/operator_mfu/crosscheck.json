@@ -1,0 +1,2224 @@
+{
+  "schema": "deepseek-v32-motivation-independent-sql-attribution-v2",
+  "passed": true,
+  "profile_run_id": "motivation_c10_profile_20261004_01",
+  "matrix_calls": 45933,
+  "primary_kernels": 45933,
+  "matrix_scope_gpu_activities": 127816,
+  "total_gpu_activities": 267562,
+  "graph_replays": 6560,
+  "graph_gpu_activities": 180320,
+  "clone_edges": 4360,
+  "template_weight_checks": [
+    {
+      "scheme": "hbm",
+      "templates": 40,
+      "independent_weight_names": 12,
+      "layers": 10,
+      "passed": true
+    },
+    {
+      "scheme": "echo",
+      "templates": 40,
+      "independent_weight_names": 12,
+      "layers": 10,
+      "passed": true
+    },
+    {
+      "scheme": "serial_sparse",
+      "templates": 40,
+      "independent_weight_names": 12,
+      "layers": 10,
+      "passed": true
+    },
+    {
+      "scheme": "dense_prefetch",
+      "templates": 40,
+      "independent_weight_names": 12,
+      "layers": 10,
+      "passed": true
+    }
+  ],
+  "captures": [
+    {
+      "capture_index": 2,
+      "scheme": "hbm",
+      "phase": "cold",
+      "total_gpu_activities": 51612,
+      "total_gpu_duration_sum_ns": 2124416571,
+      "gpu_busy_union_ns": 2123884538,
+      "gpu_span_ns": 2172468177,
+      "matrix_calls": 9102,
+      "matrix_scope_gpu_activities": 25334,
+      "graph_replays": 1300,
+      "graph_gpu_activities": 35740,
+      "complete_replay_nodes_verified": true,
+      "all_per_call_intervals_exact": true
+    },
+    {
+      "capture_index": 3,
+      "scheme": "hbm",
+      "phase": "revisit",
+      "total_gpu_activities": 51612,
+      "total_gpu_duration_sum_ns": 2148711566,
+      "gpu_busy_union_ns": 2148174668,
+      "gpu_span_ns": 2190196758,
+      "matrix_calls": 9102,
+      "matrix_scope_gpu_activities": 25334,
+      "graph_replays": 1300,
+      "graph_gpu_activities": 35740,
+      "complete_replay_nodes_verified": true,
+      "all_per_call_intervals_exact": true
+    },
+    {
+      "capture_index": 5,
+      "scheme": "echo",
+      "phase": "cold",
+      "total_gpu_activities": 56124,
+      "total_gpu_duration_sum_ns": 2108626548,
+      "gpu_busy_union_ns": 2098677241,
+      "gpu_span_ns": 2469114021,
+      "matrix_calls": 9102,
+      "matrix_scope_gpu_activities": 25334,
+      "graph_replays": 1300,
+      "graph_gpu_activities": 35740,
+      "complete_replay_nodes_verified": true,
+      "all_per_call_intervals_exact": true
+    },
+    {
+      "capture_index": 6,
+      "scheme": "echo",
+      "phase": "revisit",
+      "total_gpu_activities": 1522,
+      "total_gpu_duration_sum_ns": 16616340,
+      "gpu_busy_union_ns": 16616340,
+      "gpu_span_ns": 37331013,
+      "matrix_calls": 141,
+      "matrix_scope_gpu_activities": 402,
+      "graph_replays": 20,
+      "graph_gpu_activities": 540,
+      "complete_replay_nodes_verified": true,
+      "all_per_call_intervals_exact": true
+    },
+    {
+      "capture_index": 8,
+      "scheme": "serial_sparse",
+      "phase": "cold",
+      "total_gpu_activities": 51884,
+      "total_gpu_duration_sum_ns": 2186336665,
+      "gpu_busy_union_ns": 2170544962,
+      "gpu_span_ns": 2237513574,
+      "matrix_calls": 9102,
+      "matrix_scope_gpu_activities": 25334,
+      "graph_replays": 1300,
+      "graph_gpu_activities": 35740,
+      "complete_replay_nodes_verified": true,
+      "all_per_call_intervals_exact": true
+    },
+    {
+      "capture_index": 9,
+      "scheme": "serial_sparse",
+      "phase": "revisit",
+      "total_gpu_activities": 1142,
+      "total_gpu_duration_sum_ns": 11784384,
+      "gpu_busy_union_ns": 11784384,
+      "gpu_span_ns": 33224370,
+      "matrix_calls": 141,
+      "matrix_scope_gpu_activities": 372,
+      "graph_replays": 20,
+      "graph_gpu_activities": 540,
+      "complete_replay_nodes_verified": true,
+      "all_per_call_intervals_exact": true
+    },
+    {
+      "capture_index": 11,
+      "scheme": "dense_prefetch",
+      "phase": "cold",
+      "total_gpu_activities": 52534,
+      "total_gpu_duration_sum_ns": 2187475869,
+      "gpu_busy_union_ns": 2171787018,
+      "gpu_span_ns": 2246137009,
+      "matrix_calls": 9102,
+      "matrix_scope_gpu_activities": 25334,
+      "graph_replays": 1300,
+      "graph_gpu_activities": 35740,
+      "complete_replay_nodes_verified": true,
+      "all_per_call_intervals_exact": true
+    },
+    {
+      "capture_index": 12,
+      "scheme": "dense_prefetch",
+      "phase": "revisit",
+      "total_gpu_activities": 1132,
+      "total_gpu_duration_sum_ns": 25245574,
+      "gpu_busy_union_ns": 24785796,
+      "gpu_span_ns": 37047371,
+      "matrix_calls": 141,
+      "matrix_scope_gpu_activities": 372,
+      "graph_replays": 20,
+      "graph_gpu_activities": 540,
+      "complete_replay_nodes_verified": true,
+      "all_per_call_intervals_exact": true
+    }
+  ],
+  "independent_spot_checks": [
+    {
+      "capture_index": "2",
+      "scheme": "hbm",
+      "phase": "cold",
+      "segment": "candidate",
+      "stage": "index_k_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 1.1550681983705122,
+      "gpu_active_mfu_pct": 0.7644138897186439
+    },
+    {
+      "capture_index": "2",
+      "scheme": "hbm",
+      "phase": "cold",
+      "segment": "candidate",
+      "stage": "index_q_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 19.333233847070407,
+      "gpu_active_mfu_pct": 12.725979047195958
+    },
+    {
+      "capture_index": "2",
+      "scheme": "hbm",
+      "phase": "cold",
+      "segment": "candidate",
+      "stage": "index_weights_proj",
+      "precision": "FP32",
+      "primary_mfu_pct": 13.538293410105327,
+      "gpu_active_mfu_pct": 10.56840207339194
+    },
+    {
+      "capture_index": "2",
+      "scheme": "hbm",
+      "phase": "cold",
+      "segment": "candidate",
+      "stage": "indexer_qk",
+      "precision": "FP8",
+      "primary_mfu_pct": 22.422493245984835,
+      "gpu_active_mfu_pct": 21.81478321901983
+    },
+    {
+      "capture_index": "2",
+      "scheme": "hbm",
+      "phase": "cold",
+      "segment": "candidate",
+      "stage": "kv_a_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 5.146568104785726,
+      "gpu_active_mfu_pct": 3.388252563866291
+    },
+    {
+      "capture_index": "2",
+      "scheme": "hbm",
+      "phase": "cold",
+      "segment": "candidate",
+      "stage": "lm_head",
+      "precision": "BF16",
+      "primary_mfu_pct": 0.443188368134564,
+      "gpu_active_mfu_pct": 0.4423510281227375
+    },
+    {
+      "capture_index": "2",
+      "scheme": "hbm",
+      "phase": "cold",
+      "segment": "candidate",
+      "stage": "mla_qk_pv",
+      "precision": "BF16",
+      "primary_mfu_pct": 53.91537627687688,
+      "gpu_active_mfu_pct": 53.91537627687688
+    },
+    {
+      "capture_index": "2",
+      "scheme": "hbm",
+      "phase": "cold",
+      "segment": "candidate",
+      "stage": "mlp_down",
+      "precision": "FP8",
+      "primary_mfu_pct": 30.634870767627653,
+      "gpu_active_mfu_pct": 27.2341313298167
+    },
+    {
+      "capture_index": "2",
+      "scheme": "hbm",
+      "phase": "cold",
+      "segment": "candidate",
+      "stage": "mlp_gate",
+      "precision": "FP8",
+      "primary_mfu_pct": 42.57395389734902,
+      "gpu_active_mfu_pct": 38.451422004481174
+    },
+    {
+      "capture_index": "2",
+      "scheme": "hbm",
+      "phase": "cold",
+      "segment": "candidate",
+      "stage": "mlp_up",
+      "precision": "FP8",
+      "primary_mfu_pct": 42.247186475056644,
+      "gpu_active_mfu_pct": 39.72426436658731
+    },
+    {
+      "capture_index": "2",
+      "scheme": "hbm",
+      "phase": "cold",
+      "segment": "candidate",
+      "stage": "o_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 30.28301909476692,
+      "gpu_active_mfu_pct": 26.606898523155355
+    },
+    {
+      "capture_index": "2",
+      "scheme": "hbm",
+      "phase": "cold",
+      "segment": "candidate",
+      "stage": "q_a_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 11.948327777231398,
+      "gpu_active_mfu_pct": 8.77514214711888
+    },
+    {
+      "capture_index": "2",
+      "scheme": "hbm",
+      "phase": "cold",
+      "segment": "candidate",
+      "stage": "q_absorb",
+      "precision": "BF16",
+      "primary_mfu_pct": 18.756289473910723,
+      "gpu_active_mfu_pct": 18.756289473910723
+    },
+    {
+      "capture_index": "2",
+      "scheme": "hbm",
+      "phase": "cold",
+      "segment": "candidate",
+      "stage": "q_b_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 27.46530143177227,
+      "gpu_active_mfu_pct": 22.81656919182517
+    },
+    {
+      "capture_index": "2",
+      "scheme": "hbm",
+      "phase": "cold",
+      "segment": "candidate",
+      "stage": "v_expand",
+      "precision": "BF16",
+      "primary_mfu_pct": 20.287461661837572,
+      "gpu_active_mfu_pct": 20.287461661837572
+    },
+    {
+      "capture_index": "2",
+      "scheme": "hbm",
+      "phase": "cold",
+      "segment": "history",
+      "stage": "index_k_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 9.477063177346071,
+      "gpu_active_mfu_pct": 4.924829321195959
+    },
+    {
+      "capture_index": "2",
+      "scheme": "hbm",
+      "phase": "cold",
+      "segment": "history",
+      "stage": "index_q_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 53.60050235919386,
+      "gpu_active_mfu_pct": 43.89465880896206
+    },
+    {
+      "capture_index": "2",
+      "scheme": "hbm",
+      "phase": "cold",
+      "segment": "history",
+      "stage": "index_weights_proj",
+      "precision": "FP32",
+      "primary_mfu_pct": 40.6794215911029,
+      "gpu_active_mfu_pct": 33.87777448634322
+    },
+    {
+      "capture_index": "2",
+      "scheme": "hbm",
+      "phase": "cold",
+      "segment": "history",
+      "stage": "indexer_qk",
+      "precision": "FP8",
+      "primary_mfu_pct": 47.26517836266401,
+      "gpu_active_mfu_pct": 46.201053801627396
+    },
+    {
+      "capture_index": "2",
+      "scheme": "hbm",
+      "phase": "cold",
+      "segment": "history",
+      "stage": "kv_a_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 24.229218689130278,
+      "gpu_active_mfu_pct": 15.105640569885074
+    },
+    {
+      "capture_index": "2",
+      "scheme": "hbm",
+      "phase": "cold",
+      "segment": "history",
+      "stage": "lm_head",
+      "precision": "BF16",
+      "primary_mfu_pct": 0.439329647867462,
+      "gpu_active_mfu_pct": 0.4385068118258782
+    },
+    {
+      "capture_index": "2",
+      "scheme": "hbm",
+      "phase": "cold",
+      "segment": "history",
+      "stage": "mla_qk_pv",
+      "precision": "BF16",
+      "primary_mfu_pct": 60.047397520626696,
+      "gpu_active_mfu_pct": 60.047397520626696
+    },
+    {
+      "capture_index": "2",
+      "scheme": "hbm",
+      "phase": "cold",
+      "segment": "history",
+      "stage": "mlp_down",
+      "precision": "FP8",
+      "primary_mfu_pct": 60.72474421130263,
+      "gpu_active_mfu_pct": 56.010672709013775
+    },
+    {
+      "capture_index": "2",
+      "scheme": "hbm",
+      "phase": "cold",
+      "segment": "history",
+      "stage": "mlp_gate",
+      "precision": "FP8",
+      "primary_mfu_pct": 60.36280896769125,
+      "gpu_active_mfu_pct": 58.51017851017633
+    },
+    {
+      "capture_index": "2",
+      "scheme": "hbm",
+      "phase": "cold",
+      "segment": "history",
+      "stage": "mlp_up",
+      "precision": "FP8",
+      "primary_mfu_pct": 60.74681938090081,
+      "gpu_active_mfu_pct": 60.0815062112415
+    },
+    {
+      "capture_index": "2",
+      "scheme": "hbm",
+      "phase": "cold",
+      "segment": "history",
+      "stage": "o_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 60.11888676855846,
+      "gpu_active_mfu_pct": 55.670428013882756
+    },
+    {
+      "capture_index": "2",
+      "scheme": "hbm",
+      "phase": "cold",
+      "segment": "history",
+      "stage": "q_a_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 53.858861051487466,
+      "gpu_active_mfu_pct": 40.73322153518329
+    },
+    {
+      "capture_index": "2",
+      "scheme": "hbm",
+      "phase": "cold",
+      "segment": "history",
+      "stage": "q_absorb",
+      "precision": "BF16",
+      "primary_mfu_pct": 30.067630916895222,
+      "gpu_active_mfu_pct": 29.62851684908979
+    },
+    {
+      "capture_index": "2",
+      "scheme": "hbm",
+      "phase": "cold",
+      "segment": "history",
+      "stage": "q_b_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 61.471816477436086,
+      "gpu_active_mfu_pct": 57.9781586094292
+    },
+    {
+      "capture_index": "2",
+      "scheme": "hbm",
+      "phase": "cold",
+      "segment": "history",
+      "stage": "v_expand",
+      "precision": "BF16",
+      "primary_mfu_pct": 33.62237281226412,
+      "gpu_active_mfu_pct": 32.937266700422924
+    },
+    {
+      "capture_index": "3",
+      "scheme": "hbm",
+      "phase": "revisit",
+      "segment": "candidate",
+      "stage": "index_k_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 1.201063799987505,
+      "gpu_active_mfu_pct": 0.7931801768793539
+    },
+    {
+      "capture_index": "3",
+      "scheme": "hbm",
+      "phase": "revisit",
+      "segment": "candidate",
+      "stage": "index_q_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 20.041662037684098,
+      "gpu_active_mfu_pct": 13.140206213289135
+    },
+    {
+      "capture_index": "3",
+      "scheme": "hbm",
+      "phase": "revisit",
+      "segment": "candidate",
+      "stage": "index_weights_proj",
+      "precision": "FP32",
+      "primary_mfu_pct": 14.113980471258753,
+      "gpu_active_mfu_pct": 10.994853112997836
+    },
+    {
+      "capture_index": "3",
+      "scheme": "hbm",
+      "phase": "revisit",
+      "segment": "candidate",
+      "stage": "indexer_qk",
+      "precision": "FP8",
+      "primary_mfu_pct": 23.20116210845576,
+      "gpu_active_mfu_pct": 22.579953654344123
+    },
+    {
+      "capture_index": "3",
+      "scheme": "hbm",
+      "phase": "revisit",
+      "segment": "candidate",
+      "stage": "kv_a_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 5.345981198561068,
+      "gpu_active_mfu_pct": 3.513821007271482
+    },
+    {
+      "capture_index": "3",
+      "scheme": "hbm",
+      "phase": "revisit",
+      "segment": "candidate",
+      "stage": "lm_head",
+      "precision": "BF16",
+      "primary_mfu_pct": 0.444331196909579,
+      "gpu_active_mfu_pct": 0.44348953701270105
+    },
+    {
+      "capture_index": "3",
+      "scheme": "hbm",
+      "phase": "revisit",
+      "segment": "candidate",
+      "stage": "mla_qk_pv",
+      "precision": "BF16",
+      "primary_mfu_pct": 55.95222208012573,
+      "gpu_active_mfu_pct": 55.95222208012573
+    },
+    {
+      "capture_index": "3",
+      "scheme": "hbm",
+      "phase": "revisit",
+      "segment": "candidate",
+      "stage": "mlp_down",
+      "precision": "FP8",
+      "primary_mfu_pct": 31.675837267219325,
+      "gpu_active_mfu_pct": 28.166067424564993
+    },
+    {
+      "capture_index": "3",
+      "scheme": "hbm",
+      "phase": "revisit",
+      "segment": "candidate",
+      "stage": "mlp_gate",
+      "precision": "FP8",
+      "primary_mfu_pct": 43.69204982156417,
+      "gpu_active_mfu_pct": 39.497965238400916
+    },
+    {
+      "capture_index": "3",
+      "scheme": "hbm",
+      "phase": "revisit",
+      "segment": "candidate",
+      "stage": "mlp_up",
+      "precision": "FP8",
+      "primary_mfu_pct": 43.97614258067052,
+      "gpu_active_mfu_pct": 41.444311469830865
+    },
+    {
+      "capture_index": "3",
+      "scheme": "hbm",
+      "phase": "revisit",
+      "segment": "candidate",
+      "stage": "o_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 31.17579077106237,
+      "gpu_active_mfu_pct": 27.449801499263973
+    },
+    {
+      "capture_index": "3",
+      "scheme": "hbm",
+      "phase": "revisit",
+      "segment": "candidate",
+      "stage": "q_a_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 12.257542804179105,
+      "gpu_active_mfu_pct": 9.011386791729038
+    },
+    {
+      "capture_index": "3",
+      "scheme": "hbm",
+      "phase": "revisit",
+      "segment": "candidate",
+      "stage": "q_absorb",
+      "precision": "BF16",
+      "primary_mfu_pct": 19.008789359359,
+      "gpu_active_mfu_pct": 19.008789359359
+    },
+    {
+      "capture_index": "3",
+      "scheme": "hbm",
+      "phase": "revisit",
+      "segment": "candidate",
+      "stage": "q_b_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 27.689097968062462,
+      "gpu_active_mfu_pct": 23.06803509095041
+    },
+    {
+      "capture_index": "3",
+      "scheme": "hbm",
+      "phase": "revisit",
+      "segment": "candidate",
+      "stage": "v_expand",
+      "precision": "BF16",
+      "primary_mfu_pct": 20.67712937058628,
+      "gpu_active_mfu_pct": 20.67712937058628
+    },
+    {
+      "capture_index": "3",
+      "scheme": "hbm",
+      "phase": "revisit",
+      "segment": "history",
+      "stage": "index_k_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 9.36111770404462,
+      "gpu_active_mfu_pct": 4.887768872252119
+    },
+    {
+      "capture_index": "3",
+      "scheme": "hbm",
+      "phase": "revisit",
+      "segment": "history",
+      "stage": "index_q_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 53.049584762661105,
+      "gpu_active_mfu_pct": 43.47626685264885
+    },
+    {
+      "capture_index": "3",
+      "scheme": "hbm",
+      "phase": "revisit",
+      "segment": "history",
+      "stage": "index_weights_proj",
+      "precision": "FP32",
+      "primary_mfu_pct": 40.47154272688448,
+      "gpu_active_mfu_pct": 33.69333044209147
+    },
+    {
+      "capture_index": "3",
+      "scheme": "hbm",
+      "phase": "revisit",
+      "segment": "history",
+      "stage": "indexer_qk",
+      "precision": "FP8",
+      "primary_mfu_pct": 46.62853929846962,
+      "gpu_active_mfu_pct": 45.586114553176316
+    },
+    {
+      "capture_index": "3",
+      "scheme": "hbm",
+      "phase": "revisit",
+      "segment": "history",
+      "stage": "kv_a_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 23.921657566530723,
+      "gpu_active_mfu_pct": 14.977399993001818
+    },
+    {
+      "capture_index": "3",
+      "scheme": "hbm",
+      "phase": "revisit",
+      "segment": "history",
+      "stage": "lm_head",
+      "precision": "BF16",
+      "primary_mfu_pct": 0.44061841982373173,
+      "gpu_active_mfu_pct": 0.43979075367552684
+    },
+    {
+      "capture_index": "3",
+      "scheme": "hbm",
+      "phase": "revisit",
+      "segment": "history",
+      "stage": "mla_qk_pv",
+      "precision": "BF16",
+      "primary_mfu_pct": 59.160698232950494,
+      "gpu_active_mfu_pct": 59.160698232950494
+    },
+    {
+      "capture_index": "3",
+      "scheme": "hbm",
+      "phase": "revisit",
+      "segment": "history",
+      "stage": "mlp_down",
+      "precision": "FP8",
+      "primary_mfu_pct": 59.94957009745873,
+      "gpu_active_mfu_pct": 55.351806686477545
+    },
+    {
+      "capture_index": "3",
+      "scheme": "hbm",
+      "phase": "revisit",
+      "segment": "history",
+      "stage": "mlp_gate",
+      "precision": "FP8",
+      "primary_mfu_pct": 59.6032382191199,
+      "gpu_active_mfu_pct": 57.780225474552466
+    },
+    {
+      "capture_index": "3",
+      "scheme": "hbm",
+      "phase": "revisit",
+      "segment": "history",
+      "stage": "mlp_up",
+      "precision": "FP8",
+      "primary_mfu_pct": 59.87595338354429,
+      "gpu_active_mfu_pct": 59.22587070335722
+    },
+    {
+      "capture_index": "3",
+      "scheme": "hbm",
+      "phase": "revisit",
+      "segment": "history",
+      "stage": "o_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 59.3782302387538,
+      "gpu_active_mfu_pct": 55.016969555049855
+    },
+    {
+      "capture_index": "3",
+      "scheme": "hbm",
+      "phase": "revisit",
+      "segment": "history",
+      "stage": "q_a_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 53.487075029324515,
+      "gpu_active_mfu_pct": 40.477421033777155
+    },
+    {
+      "capture_index": "3",
+      "scheme": "hbm",
+      "phase": "revisit",
+      "segment": "history",
+      "stage": "q_absorb",
+      "precision": "BF16",
+      "primary_mfu_pct": 30.05695124498933,
+      "gpu_active_mfu_pct": 29.61966025973587
+    },
+    {
+      "capture_index": "3",
+      "scheme": "hbm",
+      "phase": "revisit",
+      "segment": "history",
+      "stage": "q_b_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 60.944126415178616,
+      "gpu_active_mfu_pct": 57.48693043319342
+    },
+    {
+      "capture_index": "3",
+      "scheme": "hbm",
+      "phase": "revisit",
+      "segment": "history",
+      "stage": "v_expand",
+      "precision": "BF16",
+      "primary_mfu_pct": 33.610293006507455,
+      "gpu_active_mfu_pct": 32.9339163195146
+    },
+    {
+      "capture_index": "5",
+      "scheme": "echo",
+      "phase": "cold",
+      "segment": "candidate",
+      "stage": "index_k_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 1.2400271915744492,
+      "gpu_active_mfu_pct": 0.819110972533353
+    },
+    {
+      "capture_index": "5",
+      "scheme": "echo",
+      "phase": "cold",
+      "segment": "candidate",
+      "stage": "index_q_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 20.568434392091486,
+      "gpu_active_mfu_pct": 13.428125198427203
+    },
+    {
+      "capture_index": "5",
+      "scheme": "echo",
+      "phase": "cold",
+      "segment": "candidate",
+      "stage": "index_weights_proj",
+      "precision": "FP32",
+      "primary_mfu_pct": 14.705062606430932,
+      "gpu_active_mfu_pct": 11.4307926145566
+    },
+    {
+      "capture_index": "5",
+      "scheme": "echo",
+      "phase": "cold",
+      "segment": "candidate",
+      "stage": "indexer_qk",
+      "precision": "FP8",
+      "primary_mfu_pct": 24.435902339173374,
+      "gpu_active_mfu_pct": 23.77793865883949
+    },
+    {
+      "capture_index": "5",
+      "scheme": "echo",
+      "phase": "cold",
+      "segment": "candidate",
+      "stage": "kv_a_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 5.546799722107048,
+      "gpu_active_mfu_pct": 3.640994843765294
+    },
+    {
+      "capture_index": "5",
+      "scheme": "echo",
+      "phase": "cold",
+      "segment": "candidate",
+      "stage": "lm_head",
+      "precision": "BF16",
+      "primary_mfu_pct": 0.4438268697300586,
+      "gpu_active_mfu_pct": 0.4430206466238635
+    },
+    {
+      "capture_index": "5",
+      "scheme": "echo",
+      "phase": "cold",
+      "segment": "candidate",
+      "stage": "mla_qk_pv",
+      "precision": "BF16",
+      "primary_mfu_pct": 57.30249959000913,
+      "gpu_active_mfu_pct": 57.30249959000913
+    },
+    {
+      "capture_index": "5",
+      "scheme": "echo",
+      "phase": "cold",
+      "segment": "candidate",
+      "stage": "mlp_down",
+      "precision": "FP8",
+      "primary_mfu_pct": 32.917671677349986,
+      "gpu_active_mfu_pct": 29.19478185772988
+    },
+    {
+      "capture_index": "5",
+      "scheme": "echo",
+      "phase": "cold",
+      "segment": "candidate",
+      "stage": "mlp_gate",
+      "precision": "FP8",
+      "primary_mfu_pct": 43.59208714024188,
+      "gpu_active_mfu_pct": 39.44818811480648
+    },
+    {
+      "capture_index": "5",
+      "scheme": "echo",
+      "phase": "cold",
+      "segment": "candidate",
+      "stage": "mlp_up",
+      "precision": "FP8",
+      "primary_mfu_pct": 43.00925330995954,
+      "gpu_active_mfu_pct": 40.658418168900404
+    },
+    {
+      "capture_index": "5",
+      "scheme": "echo",
+      "phase": "cold",
+      "segment": "candidate",
+      "stage": "o_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 32.61730345360324,
+      "gpu_active_mfu_pct": 28.5818308730895
+    },
+    {
+      "capture_index": "5",
+      "scheme": "echo",
+      "phase": "cold",
+      "segment": "candidate",
+      "stage": "q_a_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 12.705544096542095,
+      "gpu_active_mfu_pct": 9.338548252242333
+    },
+    {
+      "capture_index": "5",
+      "scheme": "echo",
+      "phase": "cold",
+      "segment": "candidate",
+      "stage": "q_absorb",
+      "precision": "BF16",
+      "primary_mfu_pct": 19.52806920112957,
+      "gpu_active_mfu_pct": 19.52806920112957
+    },
+    {
+      "capture_index": "5",
+      "scheme": "echo",
+      "phase": "cold",
+      "segment": "candidate",
+      "stage": "q_b_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 28.14927407395808,
+      "gpu_active_mfu_pct": 23.527168479020464
+    },
+    {
+      "capture_index": "5",
+      "scheme": "echo",
+      "phase": "cold",
+      "segment": "candidate",
+      "stage": "v_expand",
+      "precision": "BF16",
+      "primary_mfu_pct": 20.33612723703838,
+      "gpu_active_mfu_pct": 20.33612723703838
+    },
+    {
+      "capture_index": "5",
+      "scheme": "echo",
+      "phase": "cold",
+      "segment": "history",
+      "stage": "index_k_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 10.079852763091488,
+      "gpu_active_mfu_pct": 5.161142104209296
+    },
+    {
+      "capture_index": "5",
+      "scheme": "echo",
+      "phase": "cold",
+      "segment": "history",
+      "stage": "index_q_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 56.45953643330813,
+      "gpu_active_mfu_pct": 46.12254258971549
+    },
+    {
+      "capture_index": "5",
+      "scheme": "echo",
+      "phase": "cold",
+      "segment": "history",
+      "stage": "index_weights_proj",
+      "precision": "FP32",
+      "primary_mfu_pct": 42.15516507884683,
+      "gpu_active_mfu_pct": 35.18015646298604
+    },
+    {
+      "capture_index": "5",
+      "scheme": "echo",
+      "phase": "cold",
+      "segment": "history",
+      "stage": "indexer_qk",
+      "precision": "FP8",
+      "primary_mfu_pct": 50.21794731476303,
+      "gpu_active_mfu_pct": 49.07240109548252
+    },
+    {
+      "capture_index": "5",
+      "scheme": "echo",
+      "phase": "cold",
+      "segment": "history",
+      "stage": "kv_a_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 25.58976590200769,
+      "gpu_active_mfu_pct": 15.752436050721352
+    },
+    {
+      "capture_index": "5",
+      "scheme": "echo",
+      "phase": "cold",
+      "segment": "history",
+      "stage": "lm_head",
+      "precision": "BF16",
+      "primary_mfu_pct": 0.4389343015292665,
+      "gpu_active_mfu_pct": 0.43811294435330694
+    },
+    {
+      "capture_index": "5",
+      "scheme": "echo",
+      "phase": "cold",
+      "segment": "history",
+      "stage": "mla_qk_pv",
+      "precision": "BF16",
+      "primary_mfu_pct": 64.06907345582255,
+      "gpu_active_mfu_pct": 64.06907345582255
+    },
+    {
+      "capture_index": "5",
+      "scheme": "echo",
+      "phase": "cold",
+      "segment": "history",
+      "stage": "mlp_down",
+      "precision": "FP8",
+      "primary_mfu_pct": 63.14466626292041,
+      "gpu_active_mfu_pct": 58.17675434650878
+    },
+    {
+      "capture_index": "5",
+      "scheme": "echo",
+      "phase": "cold",
+      "segment": "history",
+      "stage": "mlp_gate",
+      "precision": "FP8",
+      "primary_mfu_pct": 62.86687085229923,
+      "gpu_active_mfu_pct": 60.907500147937135
+    },
+    {
+      "capture_index": "5",
+      "scheme": "echo",
+      "phase": "cold",
+      "segment": "history",
+      "stage": "mlp_up",
+      "precision": "FP8",
+      "primary_mfu_pct": 62.54173553751428,
+      "gpu_active_mfu_pct": 61.89853330241083
+    },
+    {
+      "capture_index": "5",
+      "scheme": "echo",
+      "phase": "cold",
+      "segment": "history",
+      "stage": "o_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 62.727039831587824,
+      "gpu_active_mfu_pct": 57.97590972462489
+    },
+    {
+      "capture_index": "5",
+      "scheme": "echo",
+      "phase": "cold",
+      "segment": "history",
+      "stage": "q_a_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 57.39348670891696,
+      "gpu_active_mfu_pct": 42.96099591479403
+    },
+    {
+      "capture_index": "5",
+      "scheme": "echo",
+      "phase": "cold",
+      "segment": "history",
+      "stage": "q_absorb",
+      "precision": "BF16",
+      "primary_mfu_pct": 30.479939115588568,
+      "gpu_active_mfu_pct": 30.053791335040728
+    },
+    {
+      "capture_index": "5",
+      "scheme": "echo",
+      "phase": "cold",
+      "segment": "history",
+      "stage": "q_b_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 64.12784234216889,
+      "gpu_active_mfu_pct": 60.47893161411235
+    },
+    {
+      "capture_index": "5",
+      "scheme": "echo",
+      "phase": "cold",
+      "segment": "history",
+      "stage": "v_expand",
+      "precision": "BF16",
+      "primary_mfu_pct": 33.9468953646676,
+      "gpu_active_mfu_pct": 33.312109373983695
+    },
+    {
+      "capture_index": "6",
+      "scheme": "echo",
+      "phase": "revisit",
+      "segment": "candidate",
+      "stage": "index_k_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 1.3326901860266933,
+      "gpu_active_mfu_pct": 0.8661620611209935
+    },
+    {
+      "capture_index": "6",
+      "scheme": "echo",
+      "phase": "revisit",
+      "segment": "candidate",
+      "stage": "index_q_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 21.371878311111352,
+      "gpu_active_mfu_pct": 13.905222447632793
+    },
+    {
+      "capture_index": "6",
+      "scheme": "echo",
+      "phase": "revisit",
+      "segment": "candidate",
+      "stage": "index_weights_proj",
+      "precision": "FP32",
+      "primary_mfu_pct": 15.717608904928822,
+      "gpu_active_mfu_pct": 12.129313367562553
+    },
+    {
+      "capture_index": "6",
+      "scheme": "echo",
+      "phase": "revisit",
+      "segment": "candidate",
+      "stage": "indexer_fused",
+      "precision": "FP8",
+      "primary_mfu_pct": 8.658345084043976,
+      "gpu_active_mfu_pct": 8.457411529523448
+    },
+    {
+      "capture_index": "6",
+      "scheme": "echo",
+      "phase": "revisit",
+      "segment": "candidate",
+      "stage": "kv_a_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 5.943780135573673,
+      "gpu_active_mfu_pct": 3.8492158846456905
+    },
+    {
+      "capture_index": "6",
+      "scheme": "echo",
+      "phase": "revisit",
+      "segment": "candidate",
+      "stage": "lm_head",
+      "precision": "BF16",
+      "primary_mfu_pct": 0.4381447146900983,
+      "gpu_active_mfu_pct": 0.437326307135049
+    },
+    {
+      "capture_index": "6",
+      "scheme": "echo",
+      "phase": "revisit",
+      "segment": "candidate",
+      "stage": "mla_qk_pv",
+      "precision": "BF16",
+      "primary_mfu_pct": 60.62091361741883,
+      "gpu_active_mfu_pct": 60.62091361741883
+    },
+    {
+      "capture_index": "6",
+      "scheme": "echo",
+      "phase": "revisit",
+      "segment": "candidate",
+      "stage": "mlp_down",
+      "precision": "FP8",
+      "primary_mfu_pct": 34.823361721459754,
+      "gpu_active_mfu_pct": 30.831056846974406
+    },
+    {
+      "capture_index": "6",
+      "scheme": "echo",
+      "phase": "revisit",
+      "segment": "candidate",
+      "stage": "mlp_gate",
+      "precision": "FP8",
+      "primary_mfu_pct": 43.957819282184225,
+      "gpu_active_mfu_pct": 39.86919676152925
+    },
+    {
+      "capture_index": "6",
+      "scheme": "echo",
+      "phase": "revisit",
+      "segment": "candidate",
+      "stage": "mlp_up",
+      "precision": "FP8",
+      "primary_mfu_pct": 44.701109368310654,
+      "gpu_active_mfu_pct": 42.263902104558255
+    },
+    {
+      "capture_index": "6",
+      "scheme": "echo",
+      "phase": "revisit",
+      "segment": "candidate",
+      "stage": "o_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 34.66033129935377,
+      "gpu_active_mfu_pct": 30.329208407181376
+    },
+    {
+      "capture_index": "6",
+      "scheme": "echo",
+      "phase": "revisit",
+      "segment": "candidate",
+      "stage": "q_a_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 13.753869273852583,
+      "gpu_active_mfu_pct": 10.0197030549723
+    },
+    {
+      "capture_index": "6",
+      "scheme": "echo",
+      "phase": "revisit",
+      "segment": "candidate",
+      "stage": "q_absorb",
+      "precision": "BF16",
+      "primary_mfu_pct": 20.323938967792326,
+      "gpu_active_mfu_pct": 20.323938967792326
+    },
+    {
+      "capture_index": "6",
+      "scheme": "echo",
+      "phase": "revisit",
+      "segment": "candidate",
+      "stage": "q_b_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 29.441515465986903,
+      "gpu_active_mfu_pct": 24.56070814593073
+    },
+    {
+      "capture_index": "6",
+      "scheme": "echo",
+      "phase": "revisit",
+      "segment": "candidate",
+      "stage": "v_expand",
+      "precision": "BF16",
+      "primary_mfu_pct": 20.275331639917187,
+      "gpu_active_mfu_pct": 20.275331639917187
+    },
+    {
+      "capture_index": "8",
+      "scheme": "serial_sparse",
+      "phase": "cold",
+      "segment": "candidate",
+      "stage": "index_k_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 1.2309729880328701,
+      "gpu_active_mfu_pct": 0.8131845360298537
+    },
+    {
+      "capture_index": "8",
+      "scheme": "serial_sparse",
+      "phase": "cold",
+      "segment": "candidate",
+      "stage": "index_q_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 19.970843443911363,
+      "gpu_active_mfu_pct": 13.153798358324863
+    },
+    {
+      "capture_index": "8",
+      "scheme": "serial_sparse",
+      "phase": "cold",
+      "segment": "candidate",
+      "stage": "index_weights_proj",
+      "precision": "FP32",
+      "primary_mfu_pct": 14.61860191557122,
+      "gpu_active_mfu_pct": 11.33829336451093
+    },
+    {
+      "capture_index": "8",
+      "scheme": "serial_sparse",
+      "phase": "cold",
+      "segment": "candidate",
+      "stage": "indexer_qk",
+      "precision": "FP8",
+      "primary_mfu_pct": 24.26314445016304,
+      "gpu_active_mfu_pct": 23.610999280075394
+    },
+    {
+      "capture_index": "8",
+      "scheme": "serial_sparse",
+      "phase": "cold",
+      "segment": "candidate",
+      "stage": "kv_a_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 5.519285834596596,
+      "gpu_active_mfu_pct": 3.6275419178048485
+    },
+    {
+      "capture_index": "8",
+      "scheme": "serial_sparse",
+      "phase": "cold",
+      "segment": "candidate",
+      "stage": "lm_head",
+      "precision": "BF16",
+      "primary_mfu_pct": 0.44248478983519873,
+      "gpu_active_mfu_pct": 0.4416501038273558
+    },
+    {
+      "capture_index": "8",
+      "scheme": "serial_sparse",
+      "phase": "cold",
+      "segment": "candidate",
+      "stage": "mla_qk_pv",
+      "precision": "BF16",
+      "primary_mfu_pct": 56.95002095962365,
+      "gpu_active_mfu_pct": 56.95002095962365
+    },
+    {
+      "capture_index": "8",
+      "scheme": "serial_sparse",
+      "phase": "cold",
+      "segment": "candidate",
+      "stage": "mlp_down",
+      "precision": "FP8",
+      "primary_mfu_pct": 32.562383641828184,
+      "gpu_active_mfu_pct": 28.883648466832497
+    },
+    {
+      "capture_index": "8",
+      "scheme": "serial_sparse",
+      "phase": "cold",
+      "segment": "candidate",
+      "stage": "mlp_gate",
+      "precision": "FP8",
+      "primary_mfu_pct": 43.09612294377822,
+      "gpu_active_mfu_pct": 38.998923084501165
+    },
+    {
+      "capture_index": "8",
+      "scheme": "serial_sparse",
+      "phase": "cold",
+      "segment": "candidate",
+      "stage": "mlp_up",
+      "precision": "FP8",
+      "primary_mfu_pct": 43.141268455379986,
+      "gpu_active_mfu_pct": 40.816790263114406
+    },
+    {
+      "capture_index": "8",
+      "scheme": "serial_sparse",
+      "phase": "cold",
+      "segment": "candidate",
+      "stage": "o_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 32.36830155036733,
+      "gpu_active_mfu_pct": 28.35150817342673
+    },
+    {
+      "capture_index": "8",
+      "scheme": "serial_sparse",
+      "phase": "cold",
+      "segment": "candidate",
+      "stage": "q_a_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 12.658566828835882,
+      "gpu_active_mfu_pct": 9.320946800039154
+    },
+    {
+      "capture_index": "8",
+      "scheme": "serial_sparse",
+      "phase": "cold",
+      "segment": "candidate",
+      "stage": "q_absorb",
+      "precision": "BF16",
+      "primary_mfu_pct": 19.432946801009454,
+      "gpu_active_mfu_pct": 19.432946801009454
+    },
+    {
+      "capture_index": "8",
+      "scheme": "serial_sparse",
+      "phase": "cold",
+      "segment": "candidate",
+      "stage": "q_b_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 28.15430533817065,
+      "gpu_active_mfu_pct": 23.447523358915454
+    },
+    {
+      "capture_index": "8",
+      "scheme": "serial_sparse",
+      "phase": "cold",
+      "segment": "candidate",
+      "stage": "v_expand",
+      "precision": "BF16",
+      "primary_mfu_pct": 19.906364642067214,
+      "gpu_active_mfu_pct": 19.906364642067214
+    },
+    {
+      "capture_index": "8",
+      "scheme": "serial_sparse",
+      "phase": "cold",
+      "segment": "history",
+      "stage": "index_k_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 9.565258900178264,
+      "gpu_active_mfu_pct": 4.98591032675769
+    },
+    {
+      "capture_index": "8",
+      "scheme": "serial_sparse",
+      "phase": "cold",
+      "segment": "history",
+      "stage": "index_q_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 54.18129697775297,
+      "gpu_active_mfu_pct": 44.40767180815196
+    },
+    {
+      "capture_index": "8",
+      "scheme": "serial_sparse",
+      "phase": "cold",
+      "segment": "history",
+      "stage": "index_weights_proj",
+      "precision": "FP32",
+      "primary_mfu_pct": 41.06876163632595,
+      "gpu_active_mfu_pct": 34.25971396161839
+    },
+    {
+      "capture_index": "8",
+      "scheme": "serial_sparse",
+      "phase": "cold",
+      "segment": "history",
+      "stage": "indexer_qk",
+      "precision": "FP8",
+      "primary_mfu_pct": 47.789363512103165,
+      "gpu_active_mfu_pct": 46.71254182624795
+    },
+    {
+      "capture_index": "8",
+      "scheme": "serial_sparse",
+      "phase": "cold",
+      "segment": "history",
+      "stage": "kv_a_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 24.424460565873186,
+      "gpu_active_mfu_pct": 15.220199916201338
+    },
+    {
+      "capture_index": "8",
+      "scheme": "serial_sparse",
+      "phase": "cold",
+      "segment": "history",
+      "stage": "lm_head",
+      "precision": "BF16",
+      "primary_mfu_pct": 0.4390660045590765,
+      "gpu_active_mfu_pct": 0.4382769697816837
+    },
+    {
+      "capture_index": "8",
+      "scheme": "serial_sparse",
+      "phase": "cold",
+      "segment": "history",
+      "stage": "mla_qk_pv",
+      "precision": "BF16",
+      "primary_mfu_pct": 60.57444514613125,
+      "gpu_active_mfu_pct": 60.57444514613125
+    },
+    {
+      "capture_index": "8",
+      "scheme": "serial_sparse",
+      "phase": "cold",
+      "segment": "history",
+      "stage": "mlp_down",
+      "precision": "FP8",
+      "primary_mfu_pct": 61.258458762793474,
+      "gpu_active_mfu_pct": 56.51687917430537
+    },
+    {
+      "capture_index": "8",
+      "scheme": "serial_sparse",
+      "phase": "cold",
+      "segment": "history",
+      "stage": "mlp_gate",
+      "precision": "FP8",
+      "primary_mfu_pct": 60.949355906758456,
+      "gpu_active_mfu_pct": 59.08809029282455
+    },
+    {
+      "capture_index": "8",
+      "scheme": "serial_sparse",
+      "phase": "cold",
+      "segment": "history",
+      "stage": "mlp_up",
+      "precision": "FP8",
+      "primary_mfu_pct": 61.20763513000982,
+      "gpu_active_mfu_pct": 60.57077680477109
+    },
+    {
+      "capture_index": "8",
+      "scheme": "serial_sparse",
+      "phase": "cold",
+      "segment": "history",
+      "stage": "o_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 60.7100322536527,
+      "gpu_active_mfu_pct": 56.192167054271124
+    },
+    {
+      "capture_index": "8",
+      "scheme": "serial_sparse",
+      "phase": "cold",
+      "segment": "history",
+      "stage": "q_a_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 55.11493187874653,
+      "gpu_active_mfu_pct": 41.4535571587573
+    },
+    {
+      "capture_index": "8",
+      "scheme": "serial_sparse",
+      "phase": "cold",
+      "segment": "history",
+      "stage": "q_absorb",
+      "precision": "BF16",
+      "primary_mfu_pct": 30.156217077333753,
+      "gpu_active_mfu_pct": 29.68107962514612
+    },
+    {
+      "capture_index": "8",
+      "scheme": "serial_sparse",
+      "phase": "cold",
+      "segment": "history",
+      "stage": "q_b_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 62.04114730757178,
+      "gpu_active_mfu_pct": 58.51543902328252
+    },
+    {
+      "capture_index": "8",
+      "scheme": "serial_sparse",
+      "phase": "cold",
+      "segment": "history",
+      "stage": "v_expand",
+      "precision": "BF16",
+      "primary_mfu_pct": 33.67534131258453,
+      "gpu_active_mfu_pct": 33.07311595543417
+    },
+    {
+      "capture_index": "9",
+      "scheme": "serial_sparse",
+      "phase": "revisit",
+      "segment": "candidate",
+      "stage": "index_k_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 1.3433393990760283,
+      "gpu_active_mfu_pct": 0.8720809030916797
+    },
+    {
+      "capture_index": "9",
+      "scheme": "serial_sparse",
+      "phase": "revisit",
+      "segment": "candidate",
+      "stage": "index_q_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 21.58071202869845,
+      "gpu_active_mfu_pct": 13.970265930140688
+    },
+    {
+      "capture_index": "9",
+      "scheme": "serial_sparse",
+      "phase": "revisit",
+      "segment": "candidate",
+      "stage": "index_weights_proj",
+      "precision": "FP32",
+      "primary_mfu_pct": 15.592473159395167,
+      "gpu_active_mfu_pct": 12.041406508893212
+    },
+    {
+      "capture_index": "9",
+      "scheme": "serial_sparse",
+      "phase": "revisit",
+      "segment": "candidate",
+      "stage": "indexer_qk",
+      "precision": "FP8",
+      "primary_mfu_pct": 26.041064670656095,
+      "gpu_active_mfu_pct": 25.313128138004366
+    },
+    {
+      "capture_index": "9",
+      "scheme": "serial_sparse",
+      "phase": "revisit",
+      "segment": "candidate",
+      "stage": "kv_a_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 5.89555646902865,
+      "gpu_active_mfu_pct": 3.807098623134149
+    },
+    {
+      "capture_index": "9",
+      "scheme": "serial_sparse",
+      "phase": "revisit",
+      "segment": "candidate",
+      "stage": "lm_head",
+      "precision": "BF16",
+      "primary_mfu_pct": 0.42795660646763434,
+      "gpu_active_mfu_pct": 0.42717578308714255
+    },
+    {
+      "capture_index": "9",
+      "scheme": "serial_sparse",
+      "phase": "revisit",
+      "segment": "candidate",
+      "stage": "mla_qk_pv",
+      "precision": "BF16",
+      "primary_mfu_pct": 60.565335121324004,
+      "gpu_active_mfu_pct": 60.565335121324004
+    },
+    {
+      "capture_index": "9",
+      "scheme": "serial_sparse",
+      "phase": "revisit",
+      "segment": "candidate",
+      "stage": "mlp_down",
+      "precision": "FP8",
+      "primary_mfu_pct": 34.74195539387441,
+      "gpu_active_mfu_pct": 30.740610665937236
+    },
+    {
+      "capture_index": "9",
+      "scheme": "serial_sparse",
+      "phase": "revisit",
+      "segment": "candidate",
+      "stage": "mlp_gate",
+      "precision": "FP8",
+      "primary_mfu_pct": 43.92528220347938,
+      "gpu_active_mfu_pct": 39.81866569564136
+    },
+    {
+      "capture_index": "9",
+      "scheme": "serial_sparse",
+      "phase": "revisit",
+      "segment": "candidate",
+      "stage": "mlp_up",
+      "precision": "FP8",
+      "primary_mfu_pct": 44.422147156121284,
+      "gpu_active_mfu_pct": 41.93198012824727
+    },
+    {
+      "capture_index": "9",
+      "scheme": "serial_sparse",
+      "phase": "revisit",
+      "segment": "candidate",
+      "stage": "o_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 34.60230658763982,
+      "gpu_active_mfu_pct": 30.296365670987832
+    },
+    {
+      "capture_index": "9",
+      "scheme": "serial_sparse",
+      "phase": "revisit",
+      "segment": "candidate",
+      "stage": "q_a_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 13.673585551516732,
+      "gpu_active_mfu_pct": 9.985911804003385
+    },
+    {
+      "capture_index": "9",
+      "scheme": "serial_sparse",
+      "phase": "revisit",
+      "segment": "candidate",
+      "stage": "q_absorb",
+      "precision": "BF16",
+      "primary_mfu_pct": 20.3789015431259,
+      "gpu_active_mfu_pct": 20.3789015431259
+    },
+    {
+      "capture_index": "9",
+      "scheme": "serial_sparse",
+      "phase": "revisit",
+      "segment": "candidate",
+      "stage": "q_b_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 29.607351479470896,
+      "gpu_active_mfu_pct": 24.648109271767403
+    },
+    {
+      "capture_index": "9",
+      "scheme": "serial_sparse",
+      "phase": "revisit",
+      "segment": "candidate",
+      "stage": "v_expand",
+      "precision": "BF16",
+      "primary_mfu_pct": 19.958905420755915,
+      "gpu_active_mfu_pct": 19.958905420755915
+    },
+    {
+      "capture_index": "11",
+      "scheme": "dense_prefetch",
+      "phase": "cold",
+      "segment": "candidate",
+      "stage": "index_k_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 1.2471284737218944,
+      "gpu_active_mfu_pct": 0.8189357652569914
+    },
+    {
+      "capture_index": "11",
+      "scheme": "dense_prefetch",
+      "phase": "cold",
+      "segment": "candidate",
+      "stage": "index_q_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 20.33003127563639,
+      "gpu_active_mfu_pct": 13.312153428851673
+    },
+    {
+      "capture_index": "11",
+      "scheme": "dense_prefetch",
+      "phase": "cold",
+      "segment": "candidate",
+      "stage": "index_weights_proj",
+      "precision": "FP32",
+      "primary_mfu_pct": 14.844541520042066,
+      "gpu_active_mfu_pct": 11.50522121591162
+    },
+    {
+      "capture_index": "11",
+      "scheme": "dense_prefetch",
+      "phase": "cold",
+      "segment": "candidate",
+      "stage": "indexer_qk",
+      "precision": "FP8",
+      "primary_mfu_pct": 24.595525346765395,
+      "gpu_active_mfu_pct": 23.92300222906052
+    },
+    {
+      "capture_index": "11",
+      "scheme": "dense_prefetch",
+      "phase": "cold",
+      "segment": "candidate",
+      "stage": "kv_a_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 5.595145948313815,
+      "gpu_active_mfu_pct": 3.6665905895914124
+    },
+    {
+      "capture_index": "11",
+      "scheme": "dense_prefetch",
+      "phase": "cold",
+      "segment": "candidate",
+      "stage": "lm_head",
+      "precision": "BF16",
+      "primary_mfu_pct": 0.4432880128816182,
+      "gpu_active_mfu_pct": 0.44245029665478497
+    },
+    {
+      "capture_index": "11",
+      "scheme": "dense_prefetch",
+      "phase": "cold",
+      "segment": "candidate",
+      "stage": "mla_qk_pv",
+      "precision": "BF16",
+      "primary_mfu_pct": 58.03353298606364,
+      "gpu_active_mfu_pct": 58.03353298606364
+    },
+    {
+      "capture_index": "11",
+      "scheme": "dense_prefetch",
+      "phase": "cold",
+      "segment": "candidate",
+      "stage": "mlp_down",
+      "precision": "FP8",
+      "primary_mfu_pct": 33.22483442402287,
+      "gpu_active_mfu_pct": 29.441008302228877
+    },
+    {
+      "capture_index": "11",
+      "scheme": "dense_prefetch",
+      "phase": "cold",
+      "segment": "candidate",
+      "stage": "mlp_gate",
+      "precision": "FP8",
+      "primary_mfu_pct": 43.42550220686588,
+      "gpu_active_mfu_pct": 39.30014889717369
+    },
+    {
+      "capture_index": "11",
+      "scheme": "dense_prefetch",
+      "phase": "cold",
+      "segment": "candidate",
+      "stage": "mlp_up",
+      "precision": "FP8",
+      "primary_mfu_pct": 43.372494417069426,
+      "gpu_active_mfu_pct": 40.94832262571199
+    },
+    {
+      "capture_index": "11",
+      "scheme": "dense_prefetch",
+      "phase": "cold",
+      "segment": "candidate",
+      "stage": "o_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 32.961524005652336,
+      "gpu_active_mfu_pct": 28.854566658544748
+    },
+    {
+      "capture_index": "11",
+      "scheme": "dense_prefetch",
+      "phase": "cold",
+      "segment": "candidate",
+      "stage": "q_a_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 12.841061652339967,
+      "gpu_active_mfu_pct": 9.437494921219397
+    },
+    {
+      "capture_index": "11",
+      "scheme": "dense_prefetch",
+      "phase": "cold",
+      "segment": "candidate",
+      "stage": "q_absorb",
+      "precision": "BF16",
+      "primary_mfu_pct": 19.82490041962087,
+      "gpu_active_mfu_pct": 19.82490041962087
+    },
+    {
+      "capture_index": "11",
+      "scheme": "dense_prefetch",
+      "phase": "cold",
+      "segment": "candidate",
+      "stage": "q_b_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 28.23766327312166,
+      "gpu_active_mfu_pct": 23.55610969844067
+    },
+    {
+      "capture_index": "11",
+      "scheme": "dense_prefetch",
+      "phase": "cold",
+      "segment": "candidate",
+      "stage": "v_expand",
+      "precision": "BF16",
+      "primary_mfu_pct": 20.526932304940374,
+      "gpu_active_mfu_pct": 20.526932304940374
+    },
+    {
+      "capture_index": "11",
+      "scheme": "dense_prefetch",
+      "phase": "cold",
+      "segment": "history",
+      "stage": "index_k_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 9.571624465739667,
+      "gpu_active_mfu_pct": 4.980427627574595
+    },
+    {
+      "capture_index": "11",
+      "scheme": "dense_prefetch",
+      "phase": "cold",
+      "segment": "history",
+      "stage": "index_q_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 54.199489856680586,
+      "gpu_active_mfu_pct": 44.43760206217546
+    },
+    {
+      "capture_index": "11",
+      "scheme": "dense_prefetch",
+      "phase": "cold",
+      "segment": "history",
+      "stage": "index_weights_proj",
+      "precision": "FP32",
+      "primary_mfu_pct": 41.034306179792615,
+      "gpu_active_mfu_pct": 34.231341671628286
+    },
+    {
+      "capture_index": "11",
+      "scheme": "dense_prefetch",
+      "phase": "cold",
+      "segment": "history",
+      "stage": "indexer_qk",
+      "precision": "FP8",
+      "primary_mfu_pct": 47.79715983365651,
+      "gpu_active_mfu_pct": 46.71961628723942
+    },
+    {
+      "capture_index": "11",
+      "scheme": "dense_prefetch",
+      "phase": "cold",
+      "segment": "history",
+      "stage": "kv_a_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 24.41190783205586,
+      "gpu_active_mfu_pct": 15.22749560811309
+    },
+    {
+      "capture_index": "11",
+      "scheme": "dense_prefetch",
+      "phase": "cold",
+      "segment": "history",
+      "stage": "lm_head",
+      "precision": "BF16",
+      "primary_mfu_pct": 0.4391967567939065,
+      "gpu_active_mfu_pct": 0.43837441800393695
+    },
+    {
+      "capture_index": "11",
+      "scheme": "dense_prefetch",
+      "phase": "cold",
+      "segment": "history",
+      "stage": "mla_qk_pv",
+      "precision": "BF16",
+      "primary_mfu_pct": 60.56489168575679,
+      "gpu_active_mfu_pct": 60.56489168575679
+    },
+    {
+      "capture_index": "11",
+      "scheme": "dense_prefetch",
+      "phase": "cold",
+      "segment": "history",
+      "stage": "mlp_down",
+      "precision": "FP8",
+      "primary_mfu_pct": 61.296081884281634,
+      "gpu_active_mfu_pct": 56.54374787331938
+    },
+    {
+      "capture_index": "11",
+      "scheme": "dense_prefetch",
+      "phase": "cold",
+      "segment": "history",
+      "stage": "mlp_gate",
+      "precision": "FP8",
+      "primary_mfu_pct": 60.9655949314958,
+      "gpu_active_mfu_pct": 59.09705822423676
+    },
+    {
+      "capture_index": "11",
+      "scheme": "dense_prefetch",
+      "phase": "cold",
+      "segment": "history",
+      "stage": "mlp_up",
+      "precision": "FP8",
+      "primary_mfu_pct": 61.24692765096511,
+      "gpu_active_mfu_pct": 60.60823429610904
+    },
+    {
+      "capture_index": "11",
+      "scheme": "dense_prefetch",
+      "phase": "cold",
+      "segment": "history",
+      "stage": "o_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 60.73625968212249,
+      "gpu_active_mfu_pct": 56.21164343364368
+    },
+    {
+      "capture_index": "11",
+      "scheme": "dense_prefetch",
+      "phase": "cold",
+      "segment": "history",
+      "stage": "q_a_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 55.08661152869364,
+      "gpu_active_mfu_pct": 41.44312513497328
+    },
+    {
+      "capture_index": "11",
+      "scheme": "dense_prefetch",
+      "phase": "cold",
+      "segment": "history",
+      "stage": "q_absorb",
+      "precision": "BF16",
+      "primary_mfu_pct": 30.155542724489386,
+      "gpu_active_mfu_pct": 29.6917207233878
+    },
+    {
+      "capture_index": "11",
+      "scheme": "dense_prefetch",
+      "phase": "cold",
+      "segment": "history",
+      "stage": "q_b_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 62.04680104118891,
+      "gpu_active_mfu_pct": 58.51928357170143
+    },
+    {
+      "capture_index": "11",
+      "scheme": "dense_prefetch",
+      "phase": "cold",
+      "segment": "history",
+      "stage": "v_expand",
+      "precision": "BF16",
+      "primary_mfu_pct": 33.72158726896229,
+      "gpu_active_mfu_pct": 33.09666844265405
+    },
+    {
+      "capture_index": "12",
+      "scheme": "dense_prefetch",
+      "phase": "revisit",
+      "segment": "candidate",
+      "stage": "index_k_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 1.3279187561498942,
+      "gpu_active_mfu_pct": 0.8700224500224695
+    },
+    {
+      "capture_index": "12",
+      "scheme": "dense_prefetch",
+      "phase": "revisit",
+      "segment": "candidate",
+      "stage": "index_q_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 21.635788282280835,
+      "gpu_active_mfu_pct": 13.974103915286332
+    },
+    {
+      "capture_index": "12",
+      "scheme": "dense_prefetch",
+      "phase": "revisit",
+      "segment": "candidate",
+      "stage": "index_weights_proj",
+      "precision": "FP32",
+      "primary_mfu_pct": 15.64131051342138,
+      "gpu_active_mfu_pct": 12.065194090669578
+    },
+    {
+      "capture_index": "12",
+      "scheme": "dense_prefetch",
+      "phase": "revisit",
+      "segment": "candidate",
+      "stage": "indexer_qk",
+      "precision": "FP8",
+      "primary_mfu_pct": 26.365968093753054,
+      "gpu_active_mfu_pct": 25.622129290876327
+    },
+    {
+      "capture_index": "12",
+      "scheme": "dense_prefetch",
+      "phase": "revisit",
+      "segment": "candidate",
+      "stage": "kv_a_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 5.924724908950408,
+      "gpu_active_mfu_pct": 3.8376547674604873
+    },
+    {
+      "capture_index": "12",
+      "scheme": "dense_prefetch",
+      "phase": "revisit",
+      "segment": "candidate",
+      "stage": "lm_head",
+      "precision": "BF16",
+      "primary_mfu_pct": 0.4419825571003453,
+      "gpu_active_mfu_pct": 0.4411497630185034
+    },
+    {
+      "capture_index": "12",
+      "scheme": "dense_prefetch",
+      "phase": "revisit",
+      "segment": "candidate",
+      "stage": "mla_qk_pv",
+      "precision": "BF16",
+      "primary_mfu_pct": 60.92699414920458,
+      "gpu_active_mfu_pct": 60.92699414920458
+    },
+    {
+      "capture_index": "12",
+      "scheme": "dense_prefetch",
+      "phase": "revisit",
+      "segment": "candidate",
+      "stage": "mlp_down",
+      "precision": "FP8",
+      "primary_mfu_pct": 35.09105553615647,
+      "gpu_active_mfu_pct": 31.091300805078752
+    },
+    {
+      "capture_index": "12",
+      "scheme": "dense_prefetch",
+      "phase": "revisit",
+      "segment": "candidate",
+      "stage": "mlp_gate",
+      "precision": "FP8",
+      "primary_mfu_pct": 44.44409554217365,
+      "gpu_active_mfu_pct": 40.32962398544478
+    },
+    {
+      "capture_index": "12",
+      "scheme": "dense_prefetch",
+      "phase": "revisit",
+      "segment": "candidate",
+      "stage": "mlp_up",
+      "precision": "FP8",
+      "primary_mfu_pct": 44.798595175821525,
+      "gpu_active_mfu_pct": 42.337608291080805
+    },
+    {
+      "capture_index": "12",
+      "scheme": "dense_prefetch",
+      "phase": "revisit",
+      "segment": "candidate",
+      "stage": "o_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 35.16887860535952,
+      "gpu_active_mfu_pct": 30.69405650547161
+    },
+    {
+      "capture_index": "12",
+      "scheme": "dense_prefetch",
+      "phase": "revisit",
+      "segment": "candidate",
+      "stage": "q_a_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 13.136812564990247,
+      "gpu_active_mfu_pct": 9.707201956420276
+    },
+    {
+      "capture_index": "12",
+      "scheme": "dense_prefetch",
+      "phase": "revisit",
+      "segment": "candidate",
+      "stage": "q_absorb",
+      "precision": "BF16",
+      "primary_mfu_pct": 19.663956026536095,
+      "gpu_active_mfu_pct": 19.663956026536095
+    },
+    {
+      "capture_index": "12",
+      "scheme": "dense_prefetch",
+      "phase": "revisit",
+      "segment": "candidate",
+      "stage": "q_b_proj",
+      "precision": "FP8",
+      "primary_mfu_pct": 28.748533299722446,
+      "gpu_active_mfu_pct": 24.053785427951883
+    },
+    {
+      "capture_index": "12",
+      "scheme": "dense_prefetch",
+      "phase": "revisit",
+      "segment": "candidate",
+      "stage": "v_expand",
+      "precision": "BF16",
+      "primary_mfu_pct": 20.7463100921206,
+      "gpu_active_mfu_pct": 20.7463100921206
+    }
+  ],
+  "all_groups_checked": 195,
+  "tolerance_percentage_points": 1e-09,
+  "input_sha256": {
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/motivation_c10_profile_20261004_01/metadata.json": "8e932a52b895f20512eb39a1d89de4354d1968ed116295f696cd7a881a2d7a0e",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/motivation_c10_profile_20261004_01/operator_calls.json": "d6348a1b8caba356f3b625589dc428347459472b51532b877f141a6806ff37ba",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/motivation_c10_profile_20261004_01/graph_capture_ledger.json": "c24886a93c45500d09d641e30193c99a928418375736612972e5483528598d37",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/motivation_c10_profile_20261004_01/capture_1.sqlite": "590dd21874c443872f648e96e55a97f8a11f91e7b563dea364d72dcb7b14e9f3",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/motivation_c10_profile_20261004_01/capture_4.sqlite": "f267d815a0018da2fc8ccebe78c47df5e43b5a566ebc2b28f199c8010ed9cd5c",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/motivation_c10_profile_20261004_01/capture_7.sqlite": "287467ccd5314acd137bdc98bd5bc924ce0d0316a5ebaa81cdb7e1118b886376",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/motivation_c10_profile_20261004_01/capture_10.sqlite": "63f4b767a41aba2e4a9bb8e1a2219d4035d3372f397f1091e9b00fd38a4c0e5e",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/motivation_c10_profile_20261004_01/capture_2.sqlite": "e64fdf0058831b28f69f189edccb0bb2a10d944f17e9d3d4a308be5fac4fca3a",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/motivation_c10_profile_20261004_01/capture_3.sqlite": "cf073d582d1f531ded73d52f3a4045f08ee40faee12150839c98bb6147d22de3",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/motivation_c10_profile_20261004_01/capture_5.sqlite": "4383608664212d616809635c9a196cd86231602c7e6d5a6ef8e3a82ef04cd721",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/motivation_c10_profile_20261004_01/capture_6.sqlite": "4d25f552d3a9e7520390e8b9a26d4119f58993632ce6813faff9a9531e9dc561",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/motivation_c10_profile_20261004_01/capture_8.sqlite": "6e4e637109707536928fbc9c7ade5cc01ccab8d83d893bf47e0c1db54f6a3c9c",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/motivation_c10_profile_20261004_01/capture_9.sqlite": "6d35ff456cc26712905b4a12075491971662eaa0102c3e9f8043348e7dd1c0a4",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/motivation_c10_profile_20261004_01/capture_11.sqlite": "06677b1c703593cefa02ff297e62c0ebc26d79c4b6290b21808e568177a99c07",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/motivation_c10_profile_20261004_01/capture_12.sqlite": "a399e3e240e3a9efc462ac04b3fcb79b8b2e350efa1d8a1f9b36b2e878605606",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/motivation_c10_flops_20261004_01/flops.json": "ee955382fc54dc38f823c5402d124b0d51237555a3ba30c991746a3adb41135a",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/motivation_c10_profile_20261004_01/analysis/operator_mfu/operator_mfu_calls.jsonl": "15793db95cdb42e0688d49ae45651e24829823571d15f16d72820c00f2455030",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/motivation_c10_profile_20261004_01/analysis/operator_mfu/operator_mfu.csv": "8bdd32e1799b4d048c9cb5f1588782536e0bc9710b8d60357ff6204fad761741",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/motivation_c10_profile_20261004_01/analysis/pipeline.json": "f4cffbdf9fc9fa3dea1713442b468546821f7ac4d6953c49b8524be7f404f040"
+  },
+  "analysis_source_sha256": {
+    "/tmp/deepseek_c10_profile_audit_graph_profile/attribution.py": "3b3ad68b1b5f9e708e1c3a96eb80996dc6e1948131f4fb225d5c559011260f09"
+  },
+  "boundaries": [
+    "Raw SQLite runtime/process/launch attribution and graph clone traversal are reimplemented here without importing production attribution code.",
+    "Every matrix invocation interval, every graph template/replay node, every operator aggregate and total pipeline activity union is checked.",
+    "Numerical correctness relies on the accepted profile exact-output record; this CPU audit does not rerun GPU work.",
+    "The primary entrypoint names and useful FLOP/peak semantics agree with the experiment; this is not a Tensor Core instruction counter.",
+    "Each C10 captured request has one actual instance-bound native-validation scope and one corresponding contained raw NVTX interval; NVTX and Python timer intervals are distinct observations."
+  ],
+  "adapted_from_sha256": "e2daf0aa454c7b674bd8ad395c56837be03553e4a7784fb3026b2e5a4ef8e4da",
+  "native_validation_scopes": [
+    {
+      "capture_index": 2,
+      "scheme": "hbm",
+      "phase": "cold",
+      "instance_validator_scope_count": 1,
+      "cpu_inclusive_ns": 404711,
+      "raw_nvtx_ns": 410785,
+      "contained_in_request": true
+    },
+    {
+      "capture_index": 3,
+      "scheme": "hbm",
+      "phase": "revisit",
+      "instance_validator_scope_count": 1,
+      "cpu_inclusive_ns": 815668,
+      "raw_nvtx_ns": 820711,
+      "contained_in_request": true
+    },
+    {
+      "capture_index": 5,
+      "scheme": "echo",
+      "phase": "cold",
+      "instance_validator_scope_count": 1,
+      "cpu_inclusive_ns": 396066,
+      "raw_nvtx_ns": 400208,
+      "contained_in_request": true
+    },
+    {
+      "capture_index": 6,
+      "scheme": "echo",
+      "phase": "revisit",
+      "instance_validator_scope_count": 1,
+      "cpu_inclusive_ns": 902814,
+      "raw_nvtx_ns": 916546,
+      "contained_in_request": true
+    },
+    {
+      "capture_index": 8,
+      "scheme": "serial_sparse",
+      "phase": "cold",
+      "instance_validator_scope_count": 1,
+      "cpu_inclusive_ns": 548062,
+      "raw_nvtx_ns": 553454,
+      "contained_in_request": true
+    },
+    {
+      "capture_index": 9,
+      "scheme": "serial_sparse",
+      "phase": "revisit",
+      "instance_validator_scope_count": 1,
+      "cpu_inclusive_ns": 2194220,
+      "raw_nvtx_ns": 2204386,
+      "contained_in_request": true
+    },
+    {
+      "capture_index": 11,
+      "scheme": "dense_prefetch",
+      "phase": "cold",
+      "instance_validator_scope_count": 1,
+      "cpu_inclusive_ns": 520647,
+      "raw_nvtx_ns": 526909,
+      "contained_in_request": true
+    },
+    {
+      "capture_index": 12,
+      "scheme": "dense_prefetch",
+      "phase": "revisit",
+      "instance_validator_scope_count": 1,
+      "cpu_inclusive_ns": 854087,
+      "raw_nvtx_ns": 859451,
+      "contained_in_request": true
+    }
+  ]
+}

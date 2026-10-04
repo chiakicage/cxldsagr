@@ -17,6 +17,12 @@ def test_runtime_collectors_include_complete_model_and_shared_operator_sources()
     } | {"operators/deepseek_v32/attention/reference/torch.py"}
     assert operator_sources <= replay_sources.keys()
     for sources in (model_sources, replay_sources):
+        assert {
+            "experiments/deepseek_v32_echo_prefill/src/backend_provenance.py",
+            "3rdparty/FlashMLA/csrc/kernels/sm90/prefill/sparse/phase1.cuh",
+            "3rdparty/DeepGEMM/deep_gemm/include/deep_gemm/impls/sm90_fp8_mqa_logits.cuh",
+            "3rdparty/cutlass/include/cute/tensor.hpp",
+        } <= sources.keys()
         assert all(Path(name).is_file() for name in sources)
         assert not any(name.startswith("operators/sm90/") for name in sources)
         assert not any("tests" in Path(name).parts for name in sources)

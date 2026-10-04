@@ -1,0 +1,2926 @@
+{
+  "schema": "echo-default-independent-assessment-v1",
+  "status": "reviewed_recommendation",
+  "final_default_selected": false,
+  "scope": "H200 SM90, ten-block checkpoint input replay surrogate, 16 users in two sequential passes, 64K+128, P32768/NH1050624, 4GiB HBM/64GiB DRAM.",
+  "method": "Read accepted metadata/independent_audit JSON and small measurements JSONL; derive arithmetic totals and linear-interpolated p95. No hashing, GPU execution, raw tensor/trace audit, or report generation.",
+  "shared_geometry": "fixed_c2048 is the same physical C2048/W2048 observation used as the deployment control; not an independent duplicate sample.",
+  "pending_run_ids": [],
+  "records": [
+    {
+      "run_id": "20261003_echo_gr_chunks_01_fixed_c256",
+      "configuration": "fixed_c256",
+      "scheme": "hbm",
+      "chunk": 256,
+      "workspace": 2048,
+      "audit_status": "accepted",
+      "source_sha256_recorded": "47585a615f0bb017f531118e8c8c180cb33cb14d63de447cd83c84966210a211",
+      "all": {
+        "count": 32,
+        "total_ms": 250325.1207380672,
+        "mean_ms": 7822.6600230646,
+        "p95_ms": 7850.760319741676
+      },
+      "first_visits": {
+        "count": 16,
+        "total_ms": 125269.73262499087,
+        "mean_ms": 7829.358289061929,
+        "p95_ms": 7854.974506495637
+      },
+      "revisits": {
+        "count": 16,
+        "total_ms": 125055.38811307633,
+        "mean_ms": 7815.961757067271,
+        "p95_ms": 7838.466925022658
+      },
+      "revisit_hits": {
+        "count": 0,
+        "total_ms": 0.0,
+        "mean_ms": null,
+        "p95_ms": null
+      },
+      "revisit_rebuilds": {
+        "count": 16,
+        "total_ms": 125055.38811307633,
+        "mean_ms": 7815.961757067271,
+        "p95_ms": 7838.466925022658
+      },
+      "cold_prefix": {
+        "count": 32,
+        "total_ms": 249036.60393692553,
+        "mean_ms": 7782.393873028923,
+        "p95_ms": 7810.736202014959
+      },
+      "first_prefix": {
+        "count": 16,
+        "total_ms": 124631.72080682125,
+        "mean_ms": 7789.482550426328,
+        "p95_ms": 7815.19849250617
+      },
+      "revisit_prefix": {
+        "count": 16,
+        "total_ms": 124404.88313010428,
+        "mean_ms": 7775.305195631518,
+        "p95_ms": 7793.660694005666
+      },
+      "candidate_extend": {
+        "count": 32,
+        "total_ms": 1012.1793940197676,
+        "mean_ms": 31.63060606311774,
+        "p95_ms": 31.591318728169426
+      },
+      "capacity": 2,
+      "max_cached_users": 2,
+      "evictions": 30,
+      "shared_reservation": {
+        "hbm": 2426933248,
+        "dram": 40
+      },
+      "session_reservation": {
+        "hbm": 856260480,
+        "dram": 0
+      },
+      "cache_request_boundary_peaks": {
+        "cache_dram_bytes": 0,
+        "cache_hbm_bytes": 1712519680,
+        "request_cache_dram_bytes": 0,
+        "request_cache_hbm_bytes": 1712519680,
+        "reserved_dram_bytes": 40,
+        "reserved_hbm_bytes": 4139454208
+      }
+    },
+    {
+      "run_id": "20261003_echo_gr_chunks_01_fixed_c256",
+      "configuration": "fixed_c256",
+      "scheme": "echo",
+      "chunk": 256,
+      "workspace": 2048,
+      "audit_status": "accepted",
+      "source_sha256_recorded": "47585a615f0bb017f531118e8c8c180cb33cb14d63de447cd83c84966210a211",
+      "all": {
+        "count": 32,
+        "total_ms": 455949.9043960823,
+        "mean_ms": 14248.434512377571,
+        "p95_ms": 14352.548205657513
+      },
+      "first_visits": {
+        "count": 16,
+        "total_ms": 226839.86582496436,
+        "mean_ms": 14177.491614060273,
+        "p95_ms": 14270.546482744976
+      },
+      "revisits": {
+        "count": 16,
+        "total_ms": 229110.0385711179,
+        "mean_ms": 14319.37741069487,
+        "p95_ms": 14357.264362246497
+      },
+      "revisit_hits": {
+        "count": 0,
+        "total_ms": 0.0,
+        "mean_ms": null,
+        "p95_ms": null
+      },
+      "revisit_rebuilds": {
+        "count": 16,
+        "total_ms": 229110.0385711179,
+        "mean_ms": 14319.37741069487,
+        "p95_ms": 14357.264362246497
+      },
+      "cold_prefix": {
+        "count": 32,
+        "total_ms": 453586.6756349569,
+        "mean_ms": 14174.583613592404,
+        "p95_ms": 14278.035929123871
+      },
+      "first_prefix": {
+        "count": 16,
+        "total_ms": 225676.77863698918,
+        "mean_ms": 14104.798664811824,
+        "p95_ms": 14192.870736515033
+      },
+      "revisit_prefix": {
+        "count": 16,
+        "total_ms": 227909.89699796773,
+        "mean_ms": 14244.368562372983,
+        "p95_ms": 14281.848430502578
+      },
+      "candidate_extend": {
+        "count": 32,
+        "total_ms": 1955.5921739665791,
+        "mean_ms": 61.1122554364556,
+        "p95_ms": 62.0903408707818
+      },
+      "capacity": 15,
+      "max_cached_users": 15,
+      "evictions": 17,
+      "shared_reservation": {
+        "hbm": 2922020446,
+        "dram": 21474902184
+      },
+      "session_reservation": {
+        "hbm": 86682744,
+        "dram": 4104
+      },
+      "cache_request_boundary_peaks": {
+        "cache_dram_bytes": 21474963704,
+        "cache_hbm_bytes": 1725981606,
+        "request_cache_dram_bytes": 21474963704,
+        "request_cache_hbm_bytes": 1725981606,
+        "reserved_dram_bytes": 21474963744,
+        "reserved_hbm_bytes": 4222261606
+      }
+    },
+    {
+      "run_id": "20261003_echo_gr_chunks_01_fixed_c256",
+      "configuration": "fixed_c256",
+      "scheme": "serial_sparse",
+      "chunk": 256,
+      "workspace": 2048,
+      "audit_status": "accepted",
+      "source_sha256_recorded": "47585a615f0bb017f531118e8c8c180cb33cb14d63de447cd83c84966210a211",
+      "all": {
+        "count": 32,
+        "total_ms": 420141.85592823196,
+        "mean_ms": 13129.432997757249,
+        "p95_ms": 13202.610846317839
+      },
+      "first_visits": {
+        "count": 16,
+        "total_ms": 209276.60310216015,
+        "mean_ms": 13079.78769388501,
+        "p95_ms": 13142.827276256867
+      },
+      "revisits": {
+        "count": 16,
+        "total_ms": 210865.2528260718,
+        "mean_ms": 13179.078301629488,
+        "p95_ms": 13209.449505520752
+      },
+      "revisit_hits": {
+        "count": 0,
+        "total_ms": 0.0,
+        "mean_ms": null,
+        "p95_ms": null
+      },
+      "revisit_rebuilds": {
+        "count": 16,
+        "total_ms": 210865.2528260718,
+        "mean_ms": 13179.078301629488,
+        "p95_ms": 13209.449505520752
+      },
+      "cold_prefix": {
+        "count": 32,
+        "total_ms": 417968.3133790386,
+        "mean_ms": 13061.509793094956,
+        "p95_ms": 13131.611964540207
+      },
+      "first_prefix": {
+        "count": 16,
+        "total_ms": 208209.64232005645,
+        "mean_ms": 13013.102645003528,
+        "p95_ms": 13077.590929766302
+      },
+      "revisit_prefix": {
+        "count": 16,
+        "total_ms": 209758.67105898215,
+        "mean_ms": 13109.916941186384,
+        "p95_ms": 13140.53614049044
+      },
+      "candidate_extend": {
+        "count": 32,
+        "total_ms": 1758.1786749651656,
+        "mean_ms": 54.943083592661424,
+        "p95_ms": 55.46442730992567
+      },
+      "capacity": 15,
+      "max_cached_users": 15,
+      "evictions": 17,
+      "shared_reservation": {
+        "hbm": 2922020446,
+        "dram": 21474902184
+      },
+      "session_reservation": {
+        "hbm": 86682744,
+        "dram": 4104
+      },
+      "cache_request_boundary_peaks": {
+        "cache_dram_bytes": 21474963704,
+        "cache_hbm_bytes": 1725981606,
+        "request_cache_dram_bytes": 21474963704,
+        "request_cache_hbm_bytes": 1725981606,
+        "reserved_dram_bytes": 21474963744,
+        "reserved_hbm_bytes": 4222261606
+      }
+    },
+    {
+      "run_id": "20261003_echo_gr_chunks_01_fixed_c256",
+      "configuration": "fixed_c256",
+      "scheme": "dense_prefetch",
+      "chunk": 256,
+      "workspace": 2048,
+      "audit_status": "accepted",
+      "source_sha256_recorded": "47585a615f0bb017f531118e8c8c180cb33cb14d63de447cd83c84966210a211",
+      "all": {
+        "count": 32,
+        "total_ms": 265539.58700591465,
+        "mean_ms": 8298.112093934833,
+        "p95_ms": 8640.325431662495
+      },
+      "first_visits": {
+        "count": 16,
+        "total_ms": 133905.51092399983,
+        "mean_ms": 8369.09443274999,
+        "p95_ms": 8640.436892499565
+      },
+      "revisits": {
+        "count": 16,
+        "total_ms": 131634.07608191483,
+        "mean_ms": 8227.129755119677,
+        "p95_ms": 8265.338028984843
+      },
+      "revisit_hits": {
+        "count": 0,
+        "total_ms": 0.0,
+        "mean_ms": null,
+        "p95_ms": null
+      },
+      "revisit_rebuilds": {
+        "count": 16,
+        "total_ms": 131634.07608191483,
+        "mean_ms": 8227.129755119677,
+        "p95_ms": 8265.338028984843
+      },
+      "cold_prefix": {
+        "count": 32,
+        "total_ms": 261567.14316201396,
+        "mean_ms": 8173.973223812936,
+        "p95_ms": 8211.587832449004
+      },
+      "first_prefix": {
+        "count": 16,
+        "total_ms": 130644.3909148802,
+        "mean_ms": 8165.274432180013,
+        "p95_ms": 8183.074528235011
+      },
+      "revisit_prefix": {
+        "count": 16,
+        "total_ms": 130922.75224713376,
+        "mean_ms": 8182.67201544586,
+        "p95_ms": 8221.068136248505
+      },
+      "candidate_extend": {
+        "count": 32,
+        "total_ms": 1058.3780749002472,
+        "mean_ms": 33.074314840632724,
+        "p95_ms": 33.78498540550936
+      },
+      "capacity": 7,
+      "max_cached_users": 7,
+      "evictions": 25,
+      "shared_reservation": {
+        "hbm": 2426933248,
+        "dram": 40
+      },
+      "session_reservation": {
+        "hbm": 251101056,
+        "dram": 1342177280
+      },
+      "cache_request_boundary_peaks": {
+        "cache_dram_bytes": 9395240960,
+        "cache_hbm_bytes": 1757702912,
+        "request_cache_dram_bytes": 9395240960,
+        "request_cache_hbm_bytes": 1757702912,
+        "reserved_dram_bytes": 9395241000,
+        "reserved_hbm_bytes": 4184640640
+      }
+    },
+    {
+      "run_id": "20261003_echo_gr_chunks_01_fixed_c1024",
+      "configuration": "fixed_c1024",
+      "scheme": "hbm",
+      "chunk": 1024,
+      "workspace": 2048,
+      "audit_status": "accepted",
+      "source_sha256_recorded": "47585a615f0bb017f531118e8c8c180cb33cb14d63de447cd83c84966210a211",
+      "all": {
+        "count": 32,
+        "total_ms": 91777.14555809507,
+        "mean_ms": 2868.035798690471,
+        "p95_ms": 2881.7925533629023
+      },
+      "first_visits": {
+        "count": 16,
+        "total_ms": 45810.8835319872,
+        "mean_ms": 2863.1802207492,
+        "p95_ms": 2873.2612139865523
+      },
+      "revisits": {
+        "count": 16,
+        "total_ms": 45966.26202610787,
+        "mean_ms": 2872.891376631742,
+        "p95_ms": 2885.277038512868
+      },
+      "revisit_hits": {
+        "count": 0,
+        "total_ms": 0.0,
+        "mean_ms": null,
+        "p95_ms": null
+      },
+      "revisit_rebuilds": {
+        "count": 16,
+        "total_ms": 45966.26202610787,
+        "mean_ms": 2872.891376631742,
+        "p95_ms": 2885.277038512868
+      },
+      "cold_prefix": {
+        "count": 32,
+        "total_ms": 90462.81626215205,
+        "mean_ms": 2826.9630081922514,
+        "p95_ms": 2837.829014201998
+      },
+      "first_prefix": {
+        "count": 16,
+        "total_ms": 45163.38921611896,
+        "mean_ms": 2822.711826007435,
+        "p95_ms": 2833.131647988921
+      },
+      "revisit_prefix": {
+        "count": 16,
+        "total_ms": 45299.42704603309,
+        "mean_ms": 2831.214190377068,
+        "p95_ms": 2839.0839094790863
+      },
+      "candidate_extend": {
+        "count": 32,
+        "total_ms": 1029.4990569236688,
+        "mean_ms": 32.17184552886465,
+        "p95_ms": 33.65556996141095
+      },
+      "capacity": 2,
+      "max_cached_users": 2,
+      "evictions": 30,
+      "shared_reservation": {
+        "hbm": 2426933248,
+        "dram": 40
+      },
+      "session_reservation": {
+        "hbm": 856260480,
+        "dram": 0
+      },
+      "cache_request_boundary_peaks": {
+        "cache_dram_bytes": 0,
+        "cache_hbm_bytes": 1712519680,
+        "request_cache_dram_bytes": 0,
+        "request_cache_hbm_bytes": 1712519680,
+        "reserved_dram_bytes": 40,
+        "reserved_hbm_bytes": 4139454208
+      }
+    },
+    {
+      "run_id": "20261003_echo_gr_chunks_01_fixed_c1024",
+      "configuration": "fixed_c1024",
+      "scheme": "echo",
+      "chunk": 1024,
+      "workspace": 2048,
+      "audit_status": "accepted",
+      "source_sha256_recorded": "47585a615f0bb017f531118e8c8c180cb33cb14d63de447cd83c84966210a211",
+      "all": {
+        "count": 32,
+        "total_ms": 155893.92524416326,
+        "mean_ms": 4871.685163880102,
+        "p95_ms": 4929.085964590195
+      },
+      "first_visits": {
+        "count": 16,
+        "total_ms": 77240.60413712868,
+        "mean_ms": 4827.537758570543,
+        "p95_ms": 4856.294122000691
+      },
+      "revisits": {
+        "count": 16,
+        "total_ms": 78653.32110703457,
+        "mean_ms": 4915.832569189661,
+        "p95_ms": 4930.282799468841
+      },
+      "revisit_hits": {
+        "count": 0,
+        "total_ms": 0.0,
+        "mean_ms": null,
+        "p95_ms": null
+      },
+      "revisit_rebuilds": {
+        "count": 16,
+        "total_ms": 78653.32110703457,
+        "mean_ms": 4915.832569189661,
+        "p95_ms": 4930.282799468841
+      },
+      "cold_prefix": {
+        "count": 32,
+        "total_ms": 153502.0644471515,
+        "mean_ms": 4796.939513973484,
+        "p95_ms": 4853.611328822444
+      },
+      "first_prefix": {
+        "count": 16,
+        "total_ms": 76063.57106199721,
+        "mean_ms": 4753.973191374826,
+        "p95_ms": 4783.842321499833
+      },
+      "revisit_prefix": {
+        "count": 16,
+        "total_ms": 77438.49338515429,
+        "mean_ms": 4839.905836572143,
+        "p95_ms": 4855.636499021784
+      },
+      "candidate_extend": {
+        "count": 32,
+        "total_ms": 1989.0233396436088,
+        "mean_ms": 62.156979363862774,
+        "p95_ms": 63.290888487244956
+      },
+      "capacity": 15,
+      "max_cached_users": 15,
+      "evictions": 17,
+      "shared_reservation": {
+        "hbm": 2922020446,
+        "dram": 21474902184
+      },
+      "session_reservation": {
+        "hbm": 86682744,
+        "dram": 4104
+      },
+      "cache_request_boundary_peaks": {
+        "cache_dram_bytes": 21474963704,
+        "cache_hbm_bytes": 1725981606,
+        "request_cache_dram_bytes": 21474963704,
+        "request_cache_hbm_bytes": 1725981606,
+        "reserved_dram_bytes": 21474963744,
+        "reserved_hbm_bytes": 4222261606
+      }
+    },
+    {
+      "run_id": "20261003_echo_gr_chunks_01_fixed_c1024",
+      "configuration": "fixed_c1024",
+      "scheme": "serial_sparse",
+      "chunk": 1024,
+      "workspace": 2048,
+      "audit_status": "accepted",
+      "source_sha256_recorded": "47585a615f0bb017f531118e8c8c180cb33cb14d63de447cd83c84966210a211",
+      "all": {
+        "count": 32,
+        "total_ms": 135558.1743461662,
+        "mean_ms": 4236.192948317694,
+        "p95_ms": 4296.344706919626
+      },
+      "first_visits": {
+        "count": 16,
+        "total_ms": 67026.39056212502,
+        "mean_ms": 4189.1494101328135,
+        "p95_ms": 4221.397495479323
+      },
+      "revisits": {
+        "count": 16,
+        "total_ms": 68531.78378404118,
+        "mean_ms": 4283.236486502574,
+        "p95_ms": 4298.559372022282
+      },
+      "revisit_hits": {
+        "count": 0,
+        "total_ms": 0.0,
+        "mean_ms": null,
+        "p95_ms": null
+      },
+      "revisit_rebuilds": {
+        "count": 16,
+        "total_ms": 68531.78378404118,
+        "mean_ms": 4283.236486502574,
+        "p95_ms": 4298.559372022282
+      },
+      "cold_prefix": {
+        "count": 32,
+        "total_ms": 133367.8558950196,
+        "mean_ms": 4167.745496719363,
+        "p95_ms": 4226.69325939205
+      },
+      "first_prefix": {
+        "count": 16,
+        "total_ms": 65947.4640150438,
+        "mean_ms": 4121.716500940238,
+        "p95_ms": 4153.980010756641
+      },
+      "revisit_prefix": {
+        "count": 16,
+        "total_ms": 67420.3918799758,
+        "mean_ms": 4213.774492498487,
+        "p95_ms": 4228.940553221037
+      },
+      "candidate_extend": {
+        "count": 32,
+        "total_ms": 1787.5988672603853,
+        "mean_ms": 55.86246460188704,
+        "p95_ms": 57.20048506918829
+      },
+      "capacity": 15,
+      "max_cached_users": 15,
+      "evictions": 17,
+      "shared_reservation": {
+        "hbm": 2922020446,
+        "dram": 21474902184
+      },
+      "session_reservation": {
+        "hbm": 86682744,
+        "dram": 4104
+      },
+      "cache_request_boundary_peaks": {
+        "cache_dram_bytes": 21474963704,
+        "cache_hbm_bytes": 1725981606,
+        "request_cache_dram_bytes": 21474963704,
+        "request_cache_hbm_bytes": 1725981606,
+        "reserved_dram_bytes": 21474963744,
+        "reserved_hbm_bytes": 4222261606
+      }
+    },
+    {
+      "run_id": "20261003_echo_gr_chunks_01_fixed_c1024",
+      "configuration": "fixed_c1024",
+      "scheme": "dense_prefetch",
+      "chunk": 1024,
+      "workspace": 2048,
+      "audit_status": "accepted",
+      "source_sha256_recorded": "47585a615f0bb017f531118e8c8c180cb33cb14d63de447cd83c84966210a211",
+      "all": {
+        "count": 32,
+        "total_ms": 96324.8483958887,
+        "mean_ms": 3010.1515123715217,
+        "p95_ms": 3355.530775053194
+      },
+      "first_visits": {
+        "count": 16,
+        "total_ms": 49489.40101196058,
+        "mean_ms": 3093.0875632475363,
+        "p95_ms": 3359.591979489778
+      },
+      "revisits": {
+        "count": 16,
+        "total_ms": 46835.44738392811,
+        "mean_ms": 2927.215461495507,
+        "p95_ms": 2939.166405747528
+      },
+      "revisit_hits": {
+        "count": 0,
+        "total_ms": 0.0,
+        "mean_ms": null,
+        "p95_ms": null
+      },
+      "revisit_rebuilds": {
+        "count": 16,
+        "total_ms": 46835.44738392811,
+        "mean_ms": 2927.215461495507,
+        "p95_ms": 2939.166405747528
+      },
+      "cold_prefix": {
+        "count": 32,
+        "total_ms": 92403.30073877703,
+        "mean_ms": 2887.6031480867823,
+        "p95_ms": 2898.1836104678223
+      },
+      "first_prefix": {
+        "count": 16,
+        "total_ms": 46263.70745286113,
+        "mean_ms": 2891.4817158038204,
+        "p95_ms": 2898.855257721152
+      },
+      "revisit_prefix": {
+        "count": 16,
+        "total_ms": 46139.59328591591,
+        "mean_ms": 2883.724580369744,
+        "p95_ms": 2895.712633515359
+      },
+      "candidate_extend": {
+        "count": 32,
+        "total_ms": 1053.2893137424253,
+        "mean_ms": 32.91529105445079,
+        "p95_ms": 33.76710563607048
+      },
+      "capacity": 7,
+      "max_cached_users": 7,
+      "evictions": 25,
+      "shared_reservation": {
+        "hbm": 2426933248,
+        "dram": 40
+      },
+      "session_reservation": {
+        "hbm": 251101056,
+        "dram": 1342177280
+      },
+      "cache_request_boundary_peaks": {
+        "cache_dram_bytes": 9395240960,
+        "cache_hbm_bytes": 1757702912,
+        "request_cache_dram_bytes": 9395240960,
+        "request_cache_hbm_bytes": 1757702912,
+        "reserved_dram_bytes": 9395241000,
+        "reserved_hbm_bytes": 4184640640
+      }
+    },
+    {
+      "run_id": "20261003_echo_gr_chunks_01_fixed_c2048",
+      "configuration": "fixed_c2048",
+      "scheme": "hbm",
+      "chunk": 2048,
+      "workspace": 2048,
+      "audit_status": "accepted",
+      "source_sha256_recorded": "47585a615f0bb017f531118e8c8c180cb33cb14d63de447cd83c84966210a211",
+      "all": {
+        "count": 32,
+        "total_ms": 87710.41418600362,
+        "mean_ms": 2740.950443312613,
+        "p95_ms": 2751.5405721467687
+      },
+      "first_visits": {
+        "count": 16,
+        "total_ms": 43798.12133300584,
+        "mean_ms": 2737.382583312865,
+        "p95_ms": 2749.0540707221953
+      },
+      "revisits": {
+        "count": 16,
+        "total_ms": 43912.29285299778,
+        "mean_ms": 2744.5183033123612,
+        "p95_ms": 2753.4428647049936
+      },
+      "revisit_hits": {
+        "count": 0,
+        "total_ms": 0.0,
+        "mean_ms": null,
+        "p95_ms": null
+      },
+      "revisit_rebuilds": {
+        "count": 16,
+        "total_ms": 43912.29285299778,
+        "mean_ms": 2744.5183033123612,
+        "p95_ms": 2753.4428647049936
+      },
+      "cold_prefix": {
+        "count": 32,
+        "total_ms": 86356.26972303726,
+        "mean_ms": 2698.6334288449143,
+        "p95_ms": 2708.243366534589
+      },
+      "first_prefix": {
+        "count": 16,
+        "total_ms": 43128.548130975105,
+        "mean_ms": 2695.534258185944,
+        "p95_ms": 2706.8530169926817
+      },
+      "revisit_prefix": {
+        "count": 16,
+        "total_ms": 43227.72159206215,
+        "mean_ms": 2701.7325995038846,
+        "p95_ms": 2708.3776192448568
+      },
+      "candidate_extend": {
+        "count": 32,
+        "total_ms": 1072.2276547458023,
+        "mean_ms": 33.50711421080632,
+        "p95_ms": 37.50021489977371
+      },
+      "capacity": 2,
+      "max_cached_users": 2,
+      "evictions": 30,
+      "shared_reservation": {
+        "hbm": 2426933248,
+        "dram": 40
+      },
+      "session_reservation": {
+        "hbm": 856260480,
+        "dram": 0
+      },
+      "cache_request_boundary_peaks": {
+        "cache_dram_bytes": 0,
+        "cache_hbm_bytes": 1712519680,
+        "request_cache_dram_bytes": 0,
+        "request_cache_hbm_bytes": 1712519680,
+        "reserved_dram_bytes": 40,
+        "reserved_hbm_bytes": 4139454208
+      }
+    },
+    {
+      "run_id": "20261003_echo_gr_chunks_01_fixed_c2048",
+      "configuration": "fixed_c2048",
+      "scheme": "echo",
+      "chunk": 2048,
+      "workspace": 2048,
+      "audit_status": "accepted",
+      "source_sha256_recorded": "47585a615f0bb017f531118e8c8c180cb33cb14d63de447cd83c84966210a211",
+      "all": {
+        "count": 32,
+        "total_ms": 129513.49256001413,
+        "mean_ms": 4047.2966425004415,
+        "p95_ms": 4116.702711756807
+      },
+      "first_visits": {
+        "count": 16,
+        "total_ms": 64037.09119895939,
+        "mean_ms": 4002.3181999349617,
+        "p95_ms": 4026.566863467451
+      },
+      "revisits": {
+        "count": 16,
+        "total_ms": 65476.40136105474,
+        "mean_ms": 4092.2750850659213,
+        "p95_ms": 4125.089400753495
+      },
+      "revisit_hits": {
+        "count": 0,
+        "total_ms": 0.0,
+        "mean_ms": null,
+        "p95_ms": null
+      },
+      "revisit_rebuilds": {
+        "count": 16,
+        "total_ms": 65476.40136105474,
+        "mean_ms": 4092.2750850659213,
+        "p95_ms": 4125.089400753495
+      },
+      "cold_prefix": {
+        "count": 32,
+        "total_ms": 127050.44728796929,
+        "mean_ms": 3970.3264777490404,
+        "p95_ms": 4037.964675531839
+      },
+      "first_prefix": {
+        "count": 16,
+        "total_ms": 62818.181375041604,
+        "mean_ms": 3926.1363359401003,
+        "p95_ms": 3950.210135008092
+      },
+      "revisit_prefix": {
+        "count": 16,
+        "total_ms": 64232.26591292769,
+        "mean_ms": 4014.5166195579804,
+        "p95_ms": 4047.7533612574916
+      },
+      "candidate_extend": {
+        "count": 32,
+        "total_ms": 2038.7566320132464,
+        "mean_ms": 63.71114475041395,
+        "p95_ms": 65.81114429282025
+      },
+      "capacity": 15,
+      "max_cached_users": 15,
+      "evictions": 17,
+      "shared_reservation": {
+        "hbm": 2922020446,
+        "dram": 21474902184
+      },
+      "session_reservation": {
+        "hbm": 86682744,
+        "dram": 4104
+      },
+      "cache_request_boundary_peaks": {
+        "cache_dram_bytes": 21474963704,
+        "cache_hbm_bytes": 1725981606,
+        "request_cache_dram_bytes": 21474963704,
+        "request_cache_hbm_bytes": 1725981606,
+        "reserved_dram_bytes": 21474963744,
+        "reserved_hbm_bytes": 4222261606
+      }
+    },
+    {
+      "run_id": "20261003_echo_gr_chunks_01_fixed_c2048",
+      "configuration": "fixed_c2048",
+      "scheme": "serial_sparse",
+      "chunk": 2048,
+      "workspace": 2048,
+      "audit_status": "accepted",
+      "source_sha256_recorded": "47585a615f0bb017f531118e8c8c180cb33cb14d63de447cd83c84966210a211",
+      "all": {
+        "count": 32,
+        "total_ms": 110386.48852391634,
+        "mean_ms": 3449.5777663723857,
+        "p95_ms": 3501.455785773578
+      },
+      "first_visits": {
+        "count": 16,
+        "total_ms": 54528.87900301721,
+        "mean_ms": 3408.0549376885756,
+        "p95_ms": 3448.3498729823623
+      },
+      "revisits": {
+        "count": 16,
+        "total_ms": 55857.60952089913,
+        "mean_ms": 3491.1005950561957,
+        "p95_ms": 3502.7755099727074
+      },
+      "revisit_hits": {
+        "count": 0,
+        "total_ms": 0.0,
+        "mean_ms": null,
+        "p95_ms": null
+      },
+      "revisit_rebuilds": {
+        "count": 16,
+        "total_ms": 55857.60952089913,
+        "mean_ms": 3491.1005950561957,
+        "p95_ms": 3502.7755099727074
+      },
+      "cold_prefix": {
+        "count": 32,
+        "total_ms": 108168.4689897229,
+        "mean_ms": 3380.2646559288405,
+        "p95_ms": 3431.8991613166872
+      },
+      "first_prefix": {
+        "count": 16,
+        "total_ms": 53439.34330181219,
+        "mean_ms": 3339.9589563632617,
+        "p95_ms": 3380.9644002467394
+      },
+      "revisit_prefix": {
+        "count": 16,
+        "total_ms": 54729.12568791071,
+        "mean_ms": 3420.5703554944193,
+        "p95_ms": 3432.3488517693477
+      },
+      "candidate_extend": {
+        "count": 32,
+        "total_ms": 1798.366566945333,
+        "mean_ms": 56.19895521704166,
+        "p95_ms": 57.641050074016675
+      },
+      "capacity": 15,
+      "max_cached_users": 15,
+      "evictions": 17,
+      "shared_reservation": {
+        "hbm": 2922020446,
+        "dram": 21474902184
+      },
+      "session_reservation": {
+        "hbm": 86682744,
+        "dram": 4104
+      },
+      "cache_request_boundary_peaks": {
+        "cache_dram_bytes": 21474963704,
+        "cache_hbm_bytes": 1725981606,
+        "request_cache_dram_bytes": 21474963704,
+        "request_cache_hbm_bytes": 1725981606,
+        "reserved_dram_bytes": 21474963744,
+        "reserved_hbm_bytes": 4222261606
+      }
+    },
+    {
+      "run_id": "20261003_echo_gr_chunks_01_fixed_c2048",
+      "configuration": "fixed_c2048",
+      "scheme": "dense_prefetch",
+      "chunk": 2048,
+      "workspace": 2048,
+      "audit_status": "accepted",
+      "source_sha256_recorded": "47585a615f0bb017f531118e8c8c180cb33cb14d63de447cd83c84966210a211",
+      "all": {
+        "count": 32,
+        "total_ms": 91345.02404229715,
+        "mean_ms": 2854.532001321786,
+        "p95_ms": 3200.850966665894
+      },
+      "first_visits": {
+        "count": 16,
+        "total_ms": 46937.96399811981,
+        "mean_ms": 2933.6227498824883,
+        "p95_ms": 3202.701929723844
+      },
+      "revisits": {
+        "count": 16,
+        "total_ms": 44407.06004417734,
+        "mean_ms": 2775.441252761084,
+        "p95_ms": 2783.08123529132
+      },
+      "revisit_hits": {
+        "count": 0,
+        "total_ms": 0.0,
+        "mean_ms": null,
+        "p95_ms": null
+      },
+      "revisit_rebuilds": {
+        "count": 16,
+        "total_ms": 44407.06004417734,
+        "mean_ms": 2775.441252761084,
+        "p95_ms": 2783.08123529132
+      },
+      "cold_prefix": {
+        "count": 32,
+        "total_ms": 87382.27635395015,
+        "mean_ms": 2730.696136060942,
+        "p95_ms": 2737.9501727438765
+      },
+      "first_prefix": {
+        "count": 16,
+        "total_ms": 43694.93528897874,
+        "mean_ms": 2730.9334555611713,
+        "p95_ms": 2737.3544635338476
+      },
+      "revisit_prefix": {
+        "count": 16,
+        "total_ms": 43687.341064971406,
+        "mean_ms": 2730.458816560713,
+        "p95_ms": 2738.3314347534906
+      },
+      "candidate_extend": {
+        "count": 32,
+        "total_ms": 1077.6667668833397,
+        "mean_ms": 33.67708646510437,
+        "p95_ms": 34.15075130178593
+      },
+      "capacity": 7,
+      "max_cached_users": 7,
+      "evictions": 25,
+      "shared_reservation": {
+        "hbm": 2426933248,
+        "dram": 40
+      },
+      "session_reservation": {
+        "hbm": 251101056,
+        "dram": 1342177280
+      },
+      "cache_request_boundary_peaks": {
+        "cache_dram_bytes": 9395240960,
+        "cache_hbm_bytes": 1757702912,
+        "request_cache_dram_bytes": 9395240960,
+        "request_cache_hbm_bytes": 1757702912,
+        "reserved_dram_bytes": 9395241000,
+        "reserved_hbm_bytes": 4184640640
+      }
+    },
+    {
+      "run_id": "20261003_echo_gr_chunks_01_deployment_c256",
+      "configuration": "deployment_c256",
+      "scheme": "hbm",
+      "chunk": 256,
+      "workspace": 256,
+      "audit_status": "accepted",
+      "source_sha256_recorded": "47585a615f0bb017f531118e8c8c180cb33cb14d63de447cd83c84966210a211",
+      "all": {
+        "count": 32,
+        "total_ms": 249677.53946688026,
+        "mean_ms": 7802.423108340008,
+        "p95_ms": 7885.745784075698
+      },
+      "first_visits": {
+        "count": 16,
+        "total_ms": 125184.23910497222,
+        "mean_ms": 7824.014944060764,
+        "p95_ms": 7914.956118460395
+      },
+      "revisits": {
+        "count": 16,
+        "total_ms": 124493.30036190804,
+        "mean_ms": 7780.831272619253,
+        "p95_ms": 7860.502231007558
+      },
+      "revisit_hits": {
+        "count": 0,
+        "total_ms": 0.0,
+        "mean_ms": null,
+        "p95_ms": null
+      },
+      "revisit_rebuilds": {
+        "count": 16,
+        "total_ms": 124493.30036190804,
+        "mean_ms": 7780.831272619253,
+        "p95_ms": 7860.502231007558
+      },
+      "cold_prefix": {
+        "count": 32,
+        "total_ms": 248383.18514992716,
+        "mean_ms": 7761.974535935224,
+        "p95_ms": 7844.750533709885
+      },
+      "first_prefix": {
+        "count": 16,
+        "total_ms": 124537.12342691142,
+        "mean_ms": 7783.570214181964,
+        "p95_ms": 7873.710996995214
+      },
+      "revisit_prefix": {
+        "count": 16,
+        "total_ms": 123846.06172301574,
+        "mean_ms": 7740.378857688484,
+        "p95_ms": 7819.48071125953
+      },
+      "candidate_extend": {
+        "count": 32,
+        "total_ms": 1000.519230030477,
+        "mean_ms": 31.266225938452408,
+        "p95_ms": 31.548718659905717
+      },
+      "capacity": 4,
+      "max_cached_users": 4,
+      "evictions": 28,
+      "shared_reservation": {
+        "hbm": 305205248,
+        "dram": 40
+      },
+      "session_reservation": {
+        "hbm": 856260480,
+        "dram": 0
+      },
+      "cache_request_boundary_peaks": {
+        "cache_dram_bytes": 0,
+        "cache_hbm_bytes": 3425039360,
+        "request_cache_dram_bytes": 0,
+        "request_cache_hbm_bytes": 3425039360,
+        "reserved_dram_bytes": 40,
+        "reserved_hbm_bytes": 3730247168
+      }
+    },
+    {
+      "run_id": "20261003_echo_gr_chunks_01_deployment_c256",
+      "configuration": "deployment_c256",
+      "scheme": "echo",
+      "chunk": 256,
+      "workspace": 256,
+      "audit_status": "accepted",
+      "source_sha256_recorded": "47585a615f0bb017f531118e8c8c180cb33cb14d63de447cd83c84966210a211",
+      "all": {
+        "count": 32,
+        "total_ms": 227801.6685959301,
+        "mean_ms": 7118.8021436228155,
+        "p95_ms": 14199.850628734566
+      },
+      "first_visits": {
+        "count": 16,
+        "total_ms": 226619.00419398444,
+        "mean_ms": 14163.687762124027,
+        "p95_ms": 14203.08902124816
+      },
+      "revisits": {
+        "count": 16,
+        "total_ms": 1182.664401945658,
+        "mean_ms": 73.91652512160363,
+        "p95_ms": 74.75386500300374
+      },
+      "revisit_hits": {
+        "count": 16,
+        "total_ms": 1182.664401945658,
+        "mean_ms": 73.91652512160363,
+        "p95_ms": 74.75386500300374
+      },
+      "revisit_rebuilds": {
+        "count": 0,
+        "total_ms": 0.0,
+        "mean_ms": null,
+        "p95_ms": null
+      },
+      "cold_prefix": {
+        "count": 16,
+        "total_ms": 225463.01840886008,
+        "mean_ms": 14091.438650553755,
+        "p95_ms": 14129.8305082164
+      },
+      "first_prefix": {
+        "count": 16,
+        "total_ms": 225463.01840886008,
+        "mean_ms": 14091.438650553755,
+        "p95_ms": 14129.8305082164
+      },
+      "revisit_prefix": {
+        "count": 16,
+        "total_ms": 0.0032228417694568634,
+        "mean_ms": 0.00020142761059105396,
+        "p95_ms": 0.00025397457648068666
+      },
+      "candidate_extend": {
+        "count": 32,
+        "total_ms": 1971.1956579703838,
+        "mean_ms": 61.59986431157449,
+        "p95_ms": 63.3362946449779
+      },
+      "capacity": 16,
+      "max_cached_users": 16,
+      "evictions": 0,
+      "shared_reservation": {
+        "hbm": 800292446,
+        "dram": 21474902184
+      },
+      "session_reservation": {
+        "hbm": 86682744,
+        "dram": 4104
+      },
+      "cache_request_boundary_peaks": {
+        "cache_dram_bytes": 21474967808,
+        "cache_hbm_bytes": 1812663710,
+        "request_cache_dram_bytes": 21474967808,
+        "request_cache_hbm_bytes": 1812663710,
+        "reserved_dram_bytes": 21474967848,
+        "reserved_hbm_bytes": 2187216350
+      }
+    },
+    {
+      "run_id": "20261003_echo_gr_chunks_01_deployment_c256",
+      "configuration": "deployment_c256",
+      "scheme": "serial_sparse",
+      "chunk": 256,
+      "workspace": 256,
+      "audit_status": "accepted",
+      "source_sha256_recorded": "47585a615f0bb017f531118e8c8c180cb33cb14d63de447cd83c84966210a211",
+      "all": {
+        "count": 32,
+        "total_ms": 209915.29240598902,
+        "mean_ms": 6559.852887687157,
+        "p95_ms": 13088.80643855373
+      },
+      "first_visits": {
+        "count": 16,
+        "total_ms": 208824.33005806524,
+        "mean_ms": 13051.520628629078,
+        "p95_ms": 13105.293987988262
+      },
+      "revisits": {
+        "count": 16,
+        "total_ms": 1090.962347923778,
+        "mean_ms": 68.18514674523612,
+        "p95_ms": 69.73142152128275
+      },
+      "revisit_hits": {
+        "count": 16,
+        "total_ms": 1090.962347923778,
+        "mean_ms": 68.18514674523612,
+        "p95_ms": 69.73142152128275
+      },
+      "revisit_rebuilds": {
+        "count": 0,
+        "total_ms": 0.0,
+        "mean_ms": null,
+        "p95_ms": null
+      },
+      "cold_prefix": {
+        "count": 16,
+        "total_ms": 207756.02131104097,
+        "mean_ms": 12984.75133194006,
+        "p95_ms": 13039.383531009662
+      },
+      "first_prefix": {
+        "count": 16,
+        "total_ms": 207756.02131104097,
+        "mean_ms": 12984.75133194006,
+        "p95_ms": 13039.383531009662
+      },
+      "revisit_prefix": {
+        "count": 16,
+        "total_ms": 0.003525055944919586,
+        "mean_ms": 0.00022031599655747414,
+        "p95_ms": 0.000286236172541976
+      },
+      "candidate_extend": {
+        "count": 32,
+        "total_ms": 1783.7403118610382,
+        "mean_ms": 55.741884745657444,
+        "p95_ms": 57.682158052921295
+      },
+      "capacity": 16,
+      "max_cached_users": 16,
+      "evictions": 0,
+      "shared_reservation": {
+        "hbm": 800292446,
+        "dram": 21474902184
+      },
+      "session_reservation": {
+        "hbm": 86682744,
+        "dram": 4104
+      },
+      "cache_request_boundary_peaks": {
+        "cache_dram_bytes": 21474967808,
+        "cache_hbm_bytes": 1812663710,
+        "request_cache_dram_bytes": 21474967808,
+        "request_cache_hbm_bytes": 1812663710,
+        "reserved_dram_bytes": 21474967848,
+        "reserved_hbm_bytes": 2187216350
+      }
+    },
+    {
+      "run_id": "20261003_echo_gr_chunks_01_deployment_c256",
+      "configuration": "deployment_c256",
+      "scheme": "dense_prefetch",
+      "chunk": 256,
+      "workspace": 256,
+      "audit_status": "accepted",
+      "source_sha256_recorded": "47585a615f0bb017f531118e8c8c180cb33cb14d63de447cd83c84966210a211",
+      "all": {
+        "count": 32,
+        "total_ms": 266933.95017267903,
+        "mean_ms": 8341.68594289622,
+        "p95_ms": 8588.639429054456
+      },
+      "first_visits": {
+        "count": 16,
+        "total_ms": 136186.84139184188,
+        "mean_ms": 8511.677586990118,
+        "p95_ms": 8598.3658995101
+      },
+      "revisits": {
+        "count": 16,
+        "total_ms": 130747.10878083715,
+        "mean_ms": 8171.694298802322,
+        "p95_ms": 8206.115023727762
+      },
+      "revisit_hits": {
+        "count": 0,
+        "total_ms": 0.0,
+        "mean_ms": null,
+        "p95_ms": null
+      },
+      "revisit_rebuilds": {
+        "count": 16,
+        "total_ms": 130747.10878083715,
+        "mean_ms": 8171.694298802322,
+        "p95_ms": 8206.115023727762
+      },
+      "cold_prefix": {
+        "count": 32,
+        "total_ms": 259581.19720820105,
+        "mean_ms": 8111.912412756283,
+        "p95_ms": 8159.098856258788
+      },
+      "first_prefix": {
+        "count": 16,
+        "total_ms": 129572.95958022587,
+        "mean_ms": 8098.309973764117,
+        "p95_ms": 8130.139887041878
+      },
+      "revisit_prefix": {
+        "count": 16,
+        "total_ms": 130008.23762797518,
+        "mean_ms": 8125.514851748449,
+        "p95_ms": 8159.52165548515
+      },
+      "candidate_extend": {
+        "count": 32,
+        "total_ms": 1047.9648856562562,
+        "mean_ms": 32.74890267675801,
+        "p95_ms": 33.17757191543933
+      },
+      "capacity": 15,
+      "max_cached_users": 15,
+      "evictions": 17,
+      "shared_reservation": {
+        "hbm": 305205248,
+        "dram": 40
+      },
+      "session_reservation": {
+        "hbm": 251101056,
+        "dram": 1342177280
+      },
+      "cache_request_boundary_peaks": {
+        "cache_dram_bytes": 20132659200,
+        "cache_hbm_bytes": 3766506240,
+        "request_cache_dram_bytes": 20132659200,
+        "request_cache_hbm_bytes": 3766506240,
+        "reserved_dram_bytes": 20132659240,
+        "reserved_hbm_bytes": 4071721088
+      }
+    },
+    {
+      "run_id": "20261003_echo_gr_chunks_01_deployment_c1024",
+      "configuration": "deployment_c1024",
+      "scheme": "hbm",
+      "chunk": 1024,
+      "workspace": 1024,
+      "audit_status": "accepted",
+      "source_sha256_recorded": "47585a615f0bb017f531118e8c8c180cb33cb14d63de447cd83c84966210a211",
+      "all": {
+        "count": 32,
+        "total_ms": 92012.10209383862,
+        "mean_ms": 2875.378190432457,
+        "p95_ms": 2883.344002676313
+      },
+      "first_visits": {
+        "count": 16,
+        "total_ms": 45953.47959391074,
+        "mean_ms": 2872.0924746194214,
+        "p95_ms": 2882.7055444708094
+      },
+      "revisits": {
+        "count": 16,
+        "total_ms": 46058.62249992788,
+        "mean_ms": 2878.6639062454924,
+        "p95_ms": 2883.3157997578382
+      },
+      "revisit_hits": {
+        "count": 0,
+        "total_ms": 0.0,
+        "mean_ms": null,
+        "p95_ms": null
+      },
+      "revisit_rebuilds": {
+        "count": 16,
+        "total_ms": 46058.62249992788,
+        "mean_ms": 2878.6639062454924,
+        "p95_ms": 2883.3157997578382
+      },
+      "cold_prefix": {
+        "count": 32,
+        "total_ms": 90703.20133876521,
+        "mean_ms": 2834.475041836413,
+        "p95_ms": 2842.4556873564143
+      },
+      "first_prefix": {
+        "count": 16,
+        "total_ms": 45300.38221983705,
+        "mean_ms": 2831.2738887398154,
+        "p95_ms": 2842.1471059991745
+      },
+      "revisit_prefix": {
+        "count": 16,
+        "total_ms": 45402.819118928164,
+        "mean_ms": 2837.6761949330103,
+        "p95_ms": 2842.487949281349
+      },
+      "candidate_extend": {
+        "count": 32,
+        "total_ms": 1029.8691491479985,
+        "mean_ms": 32.183410910874954,
+        "p95_ms": 32.38941635063384
+      },
+      "capacity": 3,
+      "max_cached_users": 3,
+      "evictions": 29,
+      "shared_reservation": {
+        "hbm": 1214517248,
+        "dram": 40
+      },
+      "session_reservation": {
+        "hbm": 856260480,
+        "dram": 0
+      },
+      "cache_request_boundary_peaks": {
+        "cache_dram_bytes": 0,
+        "cache_hbm_bytes": 2568779520,
+        "request_cache_dram_bytes": 0,
+        "request_cache_hbm_bytes": 2568779520,
+        "reserved_dram_bytes": 40,
+        "reserved_hbm_bytes": 3783298688
+      }
+    },
+    {
+      "run_id": "20261003_echo_gr_chunks_01_deployment_c1024",
+      "configuration": "deployment_c1024",
+      "scheme": "echo",
+      "chunk": 1024,
+      "workspace": 1024,
+      "audit_status": "accepted",
+      "source_sha256_recorded": "47585a615f0bb017f531118e8c8c180cb33cb14d63de447cd83c84966210a211",
+      "all": {
+        "count": 32,
+        "total_ms": 78436.8626208161,
+        "mean_ms": 2451.151956900503,
+        "p95_ms": 4833.571264607599
+      },
+      "first_visits": {
+        "count": 16,
+        "total_ms": 77239.32183592115,
+        "mean_ms": 4827.457614745072,
+        "p95_ms": 4855.557326474809
+      },
+      "revisits": {
+        "count": 16,
+        "total_ms": 1197.5407848949544,
+        "mean_ms": 74.84629905593465,
+        "p95_ms": 75.73362725088373
+      },
+      "revisit_hits": {
+        "count": 16,
+        "total_ms": 1197.5407848949544,
+        "mean_ms": 74.84629905593465,
+        "p95_ms": 75.73362725088373
+      },
+      "revisit_rebuilds": {
+        "count": 0,
+        "total_ms": 0.0,
+        "mean_ms": null,
+        "p95_ms": null
+      },
+      "cold_prefix": {
+        "count": 16,
+        "total_ms": 76070.04487508675,
+        "mean_ms": 4754.377804692922,
+        "p95_ms": 4781.567733021802
+      },
+      "first_prefix": {
+        "count": 16,
+        "total_ms": 76070.04487508675,
+        "mean_ms": 4754.377804692922,
+        "p95_ms": 4781.567733021802
+      },
+      "revisit_prefix": {
+        "count": 16,
+        "total_ms": 0.003168126568198204,
+        "mean_ms": 0.00019800791051238775,
+        "p95_ms": 0.00026829366106539965
+      },
+      "candidate_extend": {
+        "count": 32,
+        "total_ms": 2004.1856778552756,
+        "mean_ms": 62.63080243297736,
+        "p95_ms": 64.1923099203268
+      },
+      "capacity": 16,
+      "max_cached_users": 16,
+      "evictions": 0,
+      "shared_reservation": {
+        "hbm": 1709604446,
+        "dram": 21474902184
+      },
+      "session_reservation": {
+        "hbm": 86682744,
+        "dram": 4104
+      },
+      "cache_request_boundary_peaks": {
+        "cache_dram_bytes": 21474967808,
+        "cache_hbm_bytes": 1812663710,
+        "request_cache_dram_bytes": 21474967808,
+        "request_cache_hbm_bytes": 1812663710,
+        "reserved_dram_bytes": 21474967848,
+        "reserved_hbm_bytes": 3096528350
+      }
+    },
+    {
+      "run_id": "20261003_echo_gr_chunks_01_deployment_c1024",
+      "configuration": "deployment_c1024",
+      "scheme": "serial_sparse",
+      "chunk": 1024,
+      "workspace": 1024,
+      "audit_status": "accepted",
+      "source_sha256_recorded": "47585a615f0bb017f531118e8c8c180cb33cb14d63de447cd83c84966210a211",
+      "all": {
+        "count": 32,
+        "total_ms": 68267.87908107508,
+        "mean_ms": 2133.3712212835962,
+        "p95_ms": 4227.8058775671525
+      },
+      "first_visits": {
+        "count": 16,
+        "total_ms": 67168.49864716642,
+        "mean_ms": 4198.031165447901,
+        "p95_ms": 4254.420428784215
+      },
+      "revisits": {
+        "count": 16,
+        "total_ms": 1099.3804339086637,
+        "mean_ms": 68.71127711929148,
+        "p95_ms": 69.83582250541076
+      },
+      "revisit_hits": {
+        "count": 16,
+        "total_ms": 1099.3804339086637,
+        "mean_ms": 68.71127711929148,
+        "p95_ms": 69.83582250541076
+      },
+      "revisit_rebuilds": {
+        "count": 0,
+        "total_ms": 0.0,
+        "mean_ms": null,
+        "p95_ms": null
+      },
+      "cold_prefix": {
+        "count": 16,
+        "total_ms": 66092.87526778644,
+        "mean_ms": 4130.8047042366525,
+        "p95_ms": 4187.576329975855
+      },
+      "first_prefix": {
+        "count": 16,
+        "total_ms": 66092.87526778644,
+        "mean_ms": 4130.8047042366525,
+        "p95_ms": 4187.576329975855
+      },
+      "revisit_prefix": {
+        "count": 16,
+        "total_ms": 0.0030717928893864155,
+        "mean_ms": 0.00019198705558665097,
+        "p95_ms": 0.0002537417458370328
+      },
+      "candidate_extend": {
+        "count": 32,
+        "total_ms": 1809.1691822046414,
+        "mean_ms": 56.536536943895044,
+        "p95_ms": 58.26924717694055
+      },
+      "capacity": 16,
+      "max_cached_users": 16,
+      "evictions": 0,
+      "shared_reservation": {
+        "hbm": 1709604446,
+        "dram": 21474902184
+      },
+      "session_reservation": {
+        "hbm": 86682744,
+        "dram": 4104
+      },
+      "cache_request_boundary_peaks": {
+        "cache_dram_bytes": 21474967808,
+        "cache_hbm_bytes": 1812663710,
+        "request_cache_dram_bytes": 21474967808,
+        "request_cache_hbm_bytes": 1812663710,
+        "reserved_dram_bytes": 21474967848,
+        "reserved_hbm_bytes": 3096528350
+      }
+    },
+    {
+      "run_id": "20261003_echo_gr_chunks_01_deployment_c1024",
+      "configuration": "deployment_c1024",
+      "scheme": "dense_prefetch",
+      "chunk": 1024,
+      "workspace": 1024,
+      "audit_status": "accepted",
+      "source_sha256_recorded": "47585a615f0bb017f531118e8c8c180cb33cb14d63de447cd83c84966210a211",
+      "all": {
+        "count": 32,
+        "total_ms": 98697.53525301348,
+        "mean_ms": 3084.2979766566714,
+        "p95_ms": 3370.6445740215713
+      },
+      "first_visits": {
+        "count": 16,
+        "total_ms": 51671.50187300285,
+        "mean_ms": 3229.4688670626783,
+        "p95_ms": 3371.5368835255504
+      },
+      "revisits": {
+        "count": 16,
+        "total_ms": 47026.03338001063,
+        "mean_ms": 2939.1270862506644,
+        "p95_ms": 2952.372649728204
+      },
+      "revisit_hits": {
+        "count": 0,
+        "total_ms": 0.0,
+        "mean_ms": null,
+        "p95_ms": null
+      },
+      "revisit_rebuilds": {
+        "count": 16,
+        "total_ms": 47026.03338001063,
+        "mean_ms": 2939.1270862506644,
+        "p95_ms": 2952.372649728204
+      },
+      "cold_prefix": {
+        "count": 32,
+        "total_ms": 92606.3237648923,
+        "mean_ms": 2893.947617652884,
+        "p95_ms": 2906.1379479797324
+      },
+      "first_prefix": {
+        "count": 16,
+        "total_ms": 46319.28285502363,
+        "mean_ms": 2894.955178438977,
+        "p95_ms": 2905.5593117373064
+      },
+      "revisit_prefix": {
+        "count": 16,
+        "total_ms": 46287.040909868665,
+        "mean_ms": 2892.9400568667916,
+        "p95_ms": 2905.8479239902226
+      },
+      "candidate_extend": {
+        "count": 32,
+        "total_ms": 1074.9714840203524,
+        "mean_ms": 33.59285887563601,
+        "p95_ms": 34.396779257804155
+      },
+      "capacity": 12,
+      "max_cached_users": 12,
+      "evictions": 20,
+      "shared_reservation": {
+        "hbm": 1214517248,
+        "dram": 40
+      },
+      "session_reservation": {
+        "hbm": 251101056,
+        "dram": 1342177280
+      },
+      "cache_request_boundary_peaks": {
+        "cache_dram_bytes": 16106127360,
+        "cache_hbm_bytes": 3013204992,
+        "request_cache_dram_bytes": 16106127360,
+        "request_cache_hbm_bytes": 3013204992,
+        "reserved_dram_bytes": 16106127400,
+        "reserved_hbm_bytes": 4227729920
+      }
+    },
+    {
+      "run_id": "20261003_echo_gr_chunks_repeat_01_deployment_c1024",
+      "configuration": "repeat_deployment_c1024",
+      "scheme": "hbm",
+      "chunk": 1024,
+      "workspace": 1024,
+      "audit_status": "accepted",
+      "source_sha256_recorded": "47585a615f0bb017f531118e8c8c180cb33cb14d63de447cd83c84966210a211",
+      "all": {
+        "count": 32,
+        "total_ms": 91913.99124002783,
+        "mean_ms": 2872.3122262508696,
+        "p95_ms": 2880.5258142994717
+      },
+      "first_visits": {
+        "count": 16,
+        "total_ms": 45913.99049805477,
+        "mean_ms": 2869.6244061284233,
+        "p95_ms": 2876.846716477303
+      },
+      "revisits": {
+        "count": 16,
+        "total_ms": 46000.000741973054,
+        "mean_ms": 2875.000046373316,
+        "p95_ms": 2881.0048770101275
+      },
+      "revisit_hits": {
+        "count": 0,
+        "total_ms": 0.0,
+        "mean_ms": null,
+        "p95_ms": null
+      },
+      "revisit_rebuilds": {
+        "count": 16,
+        "total_ms": 46000.000741973054,
+        "mean_ms": 2875.000046373316,
+        "p95_ms": 2881.0048770101275
+      },
+      "cold_prefix": {
+        "count": 32,
+        "total_ms": 90642.3382901121,
+        "mean_ms": 2832.573071566003,
+        "p95_ms": 2841.022211650852
+      },
+      "first_prefix": {
+        "count": 16,
+        "total_ms": 45276.7736450769,
+        "mean_ms": 2829.7983528173063,
+        "p95_ms": 2837.1288417547476
+      },
+      "revisit_prefix": {
+        "count": 16,
+        "total_ms": 45365.56464503519,
+        "mean_ms": 2835.3477903146995,
+        "p95_ms": 2841.2864862475544
+      },
+      "candidate_extend": {
+        "count": 32,
+        "total_ms": 995.3844769042917,
+        "mean_ms": 31.105764903259114,
+        "p95_ms": 31.30767914117314
+      },
+      "capacity": 3,
+      "max_cached_users": 3,
+      "evictions": 29,
+      "shared_reservation": {
+        "hbm": 1214517248,
+        "dram": 40
+      },
+      "session_reservation": {
+        "hbm": 856260480,
+        "dram": 0
+      },
+      "cache_request_boundary_peaks": {
+        "cache_dram_bytes": 0,
+        "cache_hbm_bytes": 2568779520,
+        "request_cache_dram_bytes": 0,
+        "request_cache_hbm_bytes": 2568779520,
+        "reserved_dram_bytes": 40,
+        "reserved_hbm_bytes": 3783298688
+      }
+    },
+    {
+      "run_id": "20261003_echo_gr_chunks_repeat_01_deployment_c1024",
+      "configuration": "repeat_deployment_c1024",
+      "scheme": "echo",
+      "chunk": 1024,
+      "workspace": 1024,
+      "audit_status": "accepted",
+      "source_sha256_recorded": "47585a615f0bb017f531118e8c8c180cb33cb14d63de447cd83c84966210a211",
+      "all": {
+        "count": 32,
+        "total_ms": 76981.56448104419,
+        "mean_ms": 2405.673890032631,
+        "p95_ms": 4744.087127619423
+      },
+      "first_visits": {
+        "count": 16,
+        "total_ms": 75809.27330005215,
+        "mean_ms": 4738.07958125326,
+        "p95_ms": 4762.930839511682
+      },
+      "revisits": {
+        "count": 16,
+        "total_ms": 1172.2911809920333,
+        "mean_ms": 73.26819881200208,
+        "p95_ms": 74.06345823255833
+      },
+      "revisit_hits": {
+        "count": 16,
+        "total_ms": 1172.2911809920333,
+        "mean_ms": 73.26819881200208,
+        "p95_ms": 74.06345823255833
+      },
+      "revisit_rebuilds": {
+        "count": 0,
+        "total_ms": 0.0,
+        "mean_ms": null,
+        "p95_ms": null
+      },
+      "cold_prefix": {
+        "count": 16,
+        "total_ms": 74667.08481893875,
+        "mean_ms": 4666.692801183672,
+        "p95_ms": 4692.714479271672
+      },
+      "first_prefix": {
+        "count": 16,
+        "total_ms": 74667.08481893875,
+        "mean_ms": 4666.692801183672,
+        "p95_ms": 4692.714479271672
+      },
+      "revisit_prefix": {
+        "count": 16,
+        "total_ms": 0.0029219663701951504,
+        "mean_ms": 0.0001826228981371969,
+        "p95_ms": 0.00024124165065586567
+      },
+      "candidate_extend": {
+        "count": 32,
+        "total_ms": 1948.1652800459415,
+        "mean_ms": 60.88016500143567,
+        "p95_ms": 62.52579280117061
+      },
+      "capacity": 16,
+      "max_cached_users": 16,
+      "evictions": 0,
+      "shared_reservation": {
+        "hbm": 1709604446,
+        "dram": 21474902184
+      },
+      "session_reservation": {
+        "hbm": 86682744,
+        "dram": 4104
+      },
+      "cache_request_boundary_peaks": {
+        "cache_dram_bytes": 21474967808,
+        "cache_hbm_bytes": 1812663710,
+        "request_cache_dram_bytes": 21474967808,
+        "request_cache_hbm_bytes": 1812663710,
+        "reserved_dram_bytes": 21474967848,
+        "reserved_hbm_bytes": 3096528350
+      }
+    },
+    {
+      "run_id": "20261003_echo_gr_chunks_repeat_01_deployment_c1024",
+      "configuration": "repeat_deployment_c1024",
+      "scheme": "serial_sparse",
+      "chunk": 1024,
+      "workspace": 1024,
+      "audit_status": "accepted",
+      "source_sha256_recorded": "47585a615f0bb017f531118e8c8c180cb33cb14d63de447cd83c84966210a211",
+      "all": {
+        "count": 32,
+        "total_ms": 66788.64663792774,
+        "mean_ms": 2087.145207435242,
+        "p95_ms": 4110.774908648455
+      },
+      "first_visits": {
+        "count": 16,
+        "total_ms": 65708.92858994193,
+        "mean_ms": 4106.808036871371,
+        "p95_ms": 4135.779675008962
+      },
+      "revisits": {
+        "count": 16,
+        "total_ms": 1079.718047985807,
+        "mean_ms": 67.48237799911294,
+        "p95_ms": 69.03665728168562
+      },
+      "revisit_hits": {
+        "count": 16,
+        "total_ms": 1079.718047985807,
+        "mean_ms": 67.48237799911294,
+        "p95_ms": 69.03665728168562
+      },
+      "revisit_rebuilds": {
+        "count": 0,
+        "total_ms": 0.0,
+        "mean_ms": null,
+        "p95_ms": null
+      },
+      "cold_prefix": {
+        "count": 16,
+        "total_ms": 64653.832040086854,
+        "mean_ms": 4040.8645025054284,
+        "p95_ms": 4067.5213387730764
+      },
+      "first_prefix": {
+        "count": 16,
+        "total_ms": 64653.832040086854,
+        "mean_ms": 4040.8645025054284,
+        "p95_ms": 4067.5213387730764
+      },
+      "revisit_prefix": {
+        "count": 16,
+        "total_ms": 0.0032371608540415764,
+        "mean_ms": 0.00020232255337759852,
+        "p95_ms": 0.0002557499101385474
+      },
+      "candidate_extend": {
+        "count": 32,
+        "total_ms": 1765.1237961254083,
+        "mean_ms": 55.16011862891901,
+        "p95_ms": 57.826301545719616
+      },
+      "capacity": 16,
+      "max_cached_users": 16,
+      "evictions": 0,
+      "shared_reservation": {
+        "hbm": 1709604446,
+        "dram": 21474902184
+      },
+      "session_reservation": {
+        "hbm": 86682744,
+        "dram": 4104
+      },
+      "cache_request_boundary_peaks": {
+        "cache_dram_bytes": 21474967808,
+        "cache_hbm_bytes": 1812663710,
+        "request_cache_dram_bytes": 21474967808,
+        "request_cache_hbm_bytes": 1812663710,
+        "reserved_dram_bytes": 21474967848,
+        "reserved_hbm_bytes": 3096528350
+      }
+    },
+    {
+      "run_id": "20261003_echo_gr_chunks_repeat_01_deployment_c1024",
+      "configuration": "repeat_deployment_c1024",
+      "scheme": "dense_prefetch",
+      "chunk": 1024,
+      "workspace": 1024,
+      "audit_status": "accepted",
+      "source_sha256_recorded": "47585a615f0bb017f531118e8c8c180cb33cb14d63de447cd83c84966210a211",
+      "all": {
+        "count": 32,
+        "total_ms": 98551.95249605458,
+        "mean_ms": 3079.7485155017057,
+        "p95_ms": 3366.620847969898
+      },
+      "first_visits": {
+        "count": 16,
+        "total_ms": 51646.62946900353,
+        "mean_ms": 3227.9143418127205,
+        "p95_ms": 3369.5580839848844
+      },
+      "revisits": {
+        "count": 16,
+        "total_ms": 46905.323027051054,
+        "mean_ms": 2931.582689190691,
+        "p95_ms": 2942.7813479851466
+      },
+      "revisit_hits": {
+        "count": 0,
+        "total_ms": 0.0,
+        "mean_ms": null,
+        "p95_ms": null
+      },
+      "revisit_rebuilds": {
+        "count": 16,
+        "total_ms": 46905.323027051054,
+        "mean_ms": 2931.582689190691,
+        "p95_ms": 2942.7813479851466
+      },
+      "cold_prefix": {
+        "count": 32,
+        "total_ms": 92452.67348521156,
+        "mean_ms": 2889.1460464128613,
+        "p95_ms": 2898.8653031206923
+      },
+      "first_prefix": {
+        "count": 16,
+        "total_ms": 46280.266269051936,
+        "mean_ms": 2892.516641815746,
+        "p95_ms": 2899.3197984964354
+      },
+      "revisit_prefix": {
+        "count": 16,
+        "total_ms": 46172.40721615963,
+        "mean_ms": 2885.7754510099767,
+        "p95_ms": 2897.0912225340726
+      },
+      "candidate_extend": {
+        "count": 32,
+        "total_ms": 1044.876298867166,
+        "mean_ms": 32.65238433959894,
+        "p95_ms": 33.38381709472742
+      },
+      "capacity": 12,
+      "max_cached_users": 12,
+      "evictions": 20,
+      "shared_reservation": {
+        "hbm": 1214517248,
+        "dram": 40
+      },
+      "session_reservation": {
+        "hbm": 251101056,
+        "dram": 1342177280
+      },
+      "cache_request_boundary_peaks": {
+        "cache_dram_bytes": 16106127360,
+        "cache_hbm_bytes": 3013204992,
+        "request_cache_dram_bytes": 16106127360,
+        "request_cache_hbm_bytes": 3013204992,
+        "reserved_dram_bytes": 16106127400,
+        "reserved_hbm_bytes": 4227729920
+      }
+    },
+    {
+      "run_id": "20261003_echo_gr_chunks_repeat_01_deployment_c2048",
+      "configuration": "repeat_deployment_c2048",
+      "scheme": "hbm",
+      "chunk": 2048,
+      "workspace": 2048,
+      "audit_status": "accepted",
+      "source_sha256_recorded": "47585a615f0bb017f531118e8c8c180cb33cb14d63de447cd83c84966210a211",
+      "all": {
+        "count": 32,
+        "total_ms": 87638.74183304142,
+        "mean_ms": 2738.7106822825444,
+        "p95_ms": 2747.7700195391662
+      },
+      "first_visits": {
+        "count": 16,
+        "total_ms": 43770.873849105556,
+        "mean_ms": 2735.679615569097,
+        "p95_ms": 2746.178150526248
+      },
+      "revisits": {
+        "count": 16,
+        "total_ms": 43867.86798393587,
+        "mean_ms": 2741.7417489959917,
+        "p95_ms": 2748.4317092748825
+      },
+      "revisit_hits": {
+        "count": 0,
+        "total_ms": 0.0,
+        "mean_ms": null,
+        "p95_ms": null
+      },
+      "revisit_rebuilds": {
+        "count": 16,
+        "total_ms": 43867.86798393587,
+        "mean_ms": 2741.7417489959917,
+        "p95_ms": 2748.4317092748825
+      },
+      "cold_prefix": {
+        "count": 32,
+        "total_ms": 86342.80646790285,
+        "mean_ms": 2698.212702121964,
+        "p95_ms": 2707.4053211603314
+      },
+      "first_prefix": {
+        "count": 16,
+        "total_ms": 43123.21099196561,
+        "mean_ms": 2695.2006869978504,
+        "p95_ms": 2706.1402524850564
+      },
+      "revisit_prefix": {
+        "count": 16,
+        "total_ms": 43219.59547593724,
+        "mean_ms": 2701.2247172460775,
+        "p95_ms": 2708.108597289538
+      },
+      "candidate_extend": {
+        "count": 32,
+        "total_ms": 1025.3609130741097,
+        "mean_ms": 32.04252853356593,
+        "p95_ms": 32.91310044878628
+      },
+      "capacity": 2,
+      "max_cached_users": 2,
+      "evictions": 30,
+      "shared_reservation": {
+        "hbm": 2426933248,
+        "dram": 40
+      },
+      "session_reservation": {
+        "hbm": 856260480,
+        "dram": 0
+      },
+      "cache_request_boundary_peaks": {
+        "cache_dram_bytes": 0,
+        "cache_hbm_bytes": 1712519680,
+        "request_cache_dram_bytes": 0,
+        "request_cache_hbm_bytes": 1712519680,
+        "reserved_dram_bytes": 40,
+        "reserved_hbm_bytes": 4139454208
+      }
+    },
+    {
+      "run_id": "20261003_echo_gr_chunks_repeat_01_deployment_c2048",
+      "configuration": "repeat_deployment_c2048",
+      "scheme": "echo",
+      "chunk": 2048,
+      "workspace": 2048,
+      "audit_status": "accepted",
+      "source_sha256_recorded": "47585a615f0bb017f531118e8c8c180cb33cb14d63de447cd83c84966210a211",
+      "all": {
+        "count": 32,
+        "total_ms": 128348.68299408117,
+        "mean_ms": 4010.8963435650367,
+        "p95_ms": 4059.9996561475564
+      },
+      "first_visits": {
+        "count": 16,
+        "total_ms": 63525.848727091216,
+        "mean_ms": 3970.365545443201,
+        "p95_ms": 3997.9393002286088
+      },
+      "revisits": {
+        "count": 16,
+        "total_ms": 64822.83426698996,
+        "mean_ms": 4051.4271416868723,
+        "p95_ms": 4061.423390026903
+      },
+      "revisit_hits": {
+        "count": 0,
+        "total_ms": 0.0,
+        "mean_ms": null,
+        "p95_ms": null
+      },
+      "revisit_rebuilds": {
+        "count": 16,
+        "total_ms": 64822.83426698996,
+        "mean_ms": 4051.4271416868723,
+        "p95_ms": 4061.423390026903
+      },
+      "cold_prefix": {
+        "count": 32,
+        "total_ms": 125960.20042797318,
+        "mean_ms": 3936.256263374162,
+        "p95_ms": 3984.344366908772
+      },
+      "first_prefix": {
+        "count": 16,
+        "total_ms": 62353.62701804843,
+        "mean_ms": 3897.1016886280267,
+        "p95_ms": 3922.8609109995887
+      },
+      "revisit_prefix": {
+        "count": 16,
+        "total_ms": 63606.57340992475,
+        "mean_ms": 3975.410838120297,
+        "p95_ms": 3985.321082000155
+      },
+      "candidate_extend": {
+        "count": 32,
+        "total_ms": 1978.248269064352,
+        "mean_ms": 61.820258408261,
+        "p95_ms": 62.94732233218383
+      },
+      "capacity": 15,
+      "max_cached_users": 15,
+      "evictions": 17,
+      "shared_reservation": {
+        "hbm": 2922020446,
+        "dram": 21474902184
+      },
+      "session_reservation": {
+        "hbm": 86682744,
+        "dram": 4104
+      },
+      "cache_request_boundary_peaks": {
+        "cache_dram_bytes": 21474963704,
+        "cache_hbm_bytes": 1725981606,
+        "request_cache_dram_bytes": 21474963704,
+        "request_cache_hbm_bytes": 1725981606,
+        "reserved_dram_bytes": 21474963744,
+        "reserved_hbm_bytes": 4222261606
+      }
+    },
+    {
+      "run_id": "20261003_echo_gr_chunks_repeat_01_deployment_c2048",
+      "configuration": "repeat_deployment_c2048",
+      "scheme": "serial_sparse",
+      "chunk": 2048,
+      "workspace": 2048,
+      "audit_status": "accepted",
+      "source_sha256_recorded": "47585a615f0bb017f531118e8c8c180cb33cb14d63de447cd83c84966210a211",
+      "all": {
+        "count": 32,
+        "total_ms": 109866.96678888984,
+        "mean_ms": 3433.3427121528075,
+        "p95_ms": 3484.1402517893584
+      },
+      "first_visits": {
+        "count": 16,
+        "total_ms": 54269.20642587356,
+        "mean_ms": 3391.8254016170977,
+        "p95_ms": 3417.915221507428
+      },
+      "revisits": {
+        "count": 16,
+        "total_ms": 55597.76036301628,
+        "mean_ms": 3474.8600226885173,
+        "p95_ms": 3484.669070254313
+      },
+      "revisit_hits": {
+        "count": 0,
+        "total_ms": 0.0,
+        "mean_ms": null,
+        "p95_ms": null
+      },
+      "revisit_rebuilds": {
+        "count": 16,
+        "total_ms": 55597.76036301628,
+        "mean_ms": 3474.8600226885173,
+        "p95_ms": 3484.669070254313
+      },
+      "cold_prefix": {
+        "count": 32,
+        "total_ms": 107667.58063575253,
+        "mean_ms": 3364.6118948672665,
+        "p95_ms": 3414.0987761726137
+      },
+      "first_prefix": {
+        "count": 16,
+        "total_ms": 53187.486450886354,
+        "mean_ms": 3324.217903180397,
+        "p95_ms": 3351.6963677539025
+      },
+      "revisit_prefix": {
+        "count": 16,
+        "total_ms": 54480.094184866175,
+        "mean_ms": 3405.005886554136,
+        "p95_ms": 3414.4541672430933
+      },
+      "candidate_extend": {
+        "count": 32,
+        "total_ms": 1778.0959784868173,
+        "mean_ms": 55.56549932771304,
+        "p95_ms": 56.68584078666754
+      },
+      "capacity": 15,
+      "max_cached_users": 15,
+      "evictions": 17,
+      "shared_reservation": {
+        "hbm": 2922020446,
+        "dram": 21474902184
+      },
+      "session_reservation": {
+        "hbm": 86682744,
+        "dram": 4104
+      },
+      "cache_request_boundary_peaks": {
+        "cache_dram_bytes": 21474963704,
+        "cache_hbm_bytes": 1725981606,
+        "request_cache_dram_bytes": 21474963704,
+        "request_cache_hbm_bytes": 1725981606,
+        "reserved_dram_bytes": 21474963744,
+        "reserved_hbm_bytes": 4222261606
+      }
+    },
+    {
+      "run_id": "20261003_echo_gr_chunks_repeat_01_deployment_c2048",
+      "configuration": "repeat_deployment_c2048",
+      "scheme": "dense_prefetch",
+      "chunk": 2048,
+      "workspace": 2048,
+      "audit_status": "accepted",
+      "source_sha256_recorded": "47585a615f0bb017f531118e8c8c180cb33cb14d63de447cd83c84966210a211",
+      "all": {
+        "count": 32,
+        "total_ms": 91294.24127185484,
+        "mean_ms": 2852.945039745464,
+        "p95_ms": 3199.2132131941617
+      },
+      "first_visits": {
+        "count": 16,
+        "total_ms": 46935.523337859195,
+        "mean_ms": 2933.4702086161997,
+        "p95_ms": 3201.4748955116374
+      },
+      "revisits": {
+        "count": 16,
+        "total_ms": 44358.71793399565,
+        "mean_ms": 2772.419870874728,
+        "p95_ms": 2779.2884527443675
+      },
+      "revisit_hits": {
+        "count": 0,
+        "total_ms": 0.0,
+        "mean_ms": null,
+        "p95_ms": null
+      },
+      "revisit_rebuilds": {
+        "count": 16,
+        "total_ms": 44358.71793399565,
+        "mean_ms": 2772.419870874728,
+        "p95_ms": 2779.2884527443675
+      },
+      "cold_prefix": {
+        "count": 32,
+        "total_ms": 87309.07319573453,
+        "mean_ms": 2728.408537366704,
+        "p95_ms": 2735.3320900991093
+      },
+      "first_prefix": {
+        "count": 16,
+        "total_ms": 43669.705575855915,
+        "mean_ms": 2729.3565984909947,
+        "p95_ms": 2735.4996145004407
+      },
+      "revisit_prefix": {
+        "count": 16,
+        "total_ms": 43639.36761987861,
+        "mean_ms": 2727.4604762424133,
+        "p95_ms": 2733.993864239892
+      },
+      "candidate_extend": {
+        "count": 32,
+        "total_ms": 1076.7366681830026,
+        "mean_ms": 33.64802088071883,
+        "p95_ms": 34.502985957078636
+      },
+      "capacity": 7,
+      "max_cached_users": 7,
+      "evictions": 25,
+      "shared_reservation": {
+        "hbm": 2426933248,
+        "dram": 40
+      },
+      "session_reservation": {
+        "hbm": 251101056,
+        "dram": 1342177280
+      },
+      "cache_request_boundary_peaks": {
+        "cache_dram_bytes": 9395240960,
+        "cache_hbm_bytes": 1757702912,
+        "request_cache_dram_bytes": 9395240960,
+        "request_cache_hbm_bytes": 1757702912,
+        "reserved_dram_bytes": 9395241000,
+        "reserved_hbm_bytes": 4184640640
+      }
+    }
+  ],
+  "initial_assessments": {
+    "trace_variability": "Only the initial trace per physical configuration is available. ECHO deployment totals are C256 227801.668596 ms, C1024 78436.862621 ms, and C2048 129513.492560 ms. C2048 reuses the single fixed_c2048 observation. Do not select a final default until the declared C1024/C2048 deployment repeats are accepted; within-trace request dispersion is not independent between-run variation.",
+    "cold_prefix_and_revisit": "At W=C, C1024 is 39.4373% lower in full ECHO trace time than C2048, but first-visit mean is 4827.457615 vs 4002.318200 ms and all-request p95 is 4833.571265 vs 4116.702712 ms. Its revisit mean is 74.846299 vs 4092.275085 ms because the former has 16/16 prefix hits and the latter has 16/16 rebuilds. C256 also has 16 hits and slightly lower hit latency, but cold construction makes its full trace 2.9043 times C1024. The predeclared trace mixes sixteen first visits and sixteen revisits; do not invent another mixture to erase the cold/tail tradeoff.",
+    "workspace_and_capacity": "Fixed W2048 keeps ECHO capacity at 15 sessions for all C and all sixteen revisits rebuild; larger C lowers complete cold execution cost. Deployment C1024/W1024 reserves 1709604446 shared HBM bytes, versus 2922020446 at C2048/W2048, with unchanged 86682744 HBM and 4104 DRAM bytes per session. The smaller workspace permits all sixteen users instead of fifteen under the same 4GiB cap and fixed NH/P. C256/W256 reserves still less workspace but preserves no additional user in this 16-user trace. The result is a session capacity threshold, not measured token-cache hits or an offload kernel overlap result.",
+    "scope_and_limitations": "H200 SM90, checkpoint workload surrogate with ten independent source-input replay dense blocks, 64K+128, 16 users in two serial passes, fixed P32768/NH1050624 and 4GiB HBM/64GiB DRAM. Initial C1024 ECHO trace is 14.7538% lower than same-C HBM, while ECHO is 14.8957% slower than same-C serial_sparse. No ECHO fusion speedup is established. All-request p95 and cold request costs matter separately from the full-trace objective. Cache reservations/observed boundary bytes are not process peaks; session prefix hits do not quantify HBM token hits. No general optimal C, real workload quality, concurrency or throughput conclusion."
+  },
+  "repeat_record_checks": [
+    {
+      "run_id": "20261003_echo_gr_chunks_repeat_01_deployment_c1024",
+      "accepted": true,
+      "requests": 128,
+      "formal_source_identity_record_matches_initial": true,
+      "recorded_gpu_uuid_matches_initial": true,
+      "workload_identity_record_matches_initial": true,
+      "configuration_matches_initial": true
+    },
+    {
+      "run_id": "20261003_echo_gr_chunks_repeat_01_deployment_c2048",
+      "accepted": true,
+      "requests": 128,
+      "formal_source_identity_record_matches_initial": true,
+      "recorded_gpu_uuid_matches_initial": true,
+      "workload_identity_record_matches_initial": true,
+      "configuration_matches_initial": true
+    }
+  ],
+  "repeated_comparisons": [
+    {
+      "scheme": "hbm",
+      "chunk": 1024,
+      "workspace": 1024,
+      "run_ids": [
+        "20261003_echo_gr_chunks_01_deployment_c1024",
+        "20261003_echo_gr_chunks_repeat_01_deployment_c1024"
+      ],
+      "trace_total_ms": {
+        "samples": 2,
+        "min": 91913.99124002783,
+        "max": 92012.10209383862,
+        "mean": 91963.04666693322,
+        "span": 98.11085381079465,
+        "span_over_mean_percent": 0.10668508424490027
+      },
+      "first_mean_ms": {
+        "samples": 2,
+        "min": 2869.6244061284233,
+        "max": 2872.0924746194214,
+        "mean": 2870.8584403739223,
+        "span": 2.468068490998121,
+        "span_over_mean_percent": 0.08596970356631939
+      },
+      "revisit_mean_ms": {
+        "samples": 2,
+        "min": 2875.000046373316,
+        "max": 2878.6639062454924,
+        "mean": 2876.831976309404,
+        "span": 3.6638598721765447,
+        "span_over_mean_percent": 0.1273574509164346
+      },
+      "all_p95_ms": {
+        "samples": 2,
+        "min": 2880.5258142994717,
+        "max": 2883.344002676313,
+        "mean": 2881.9349084878922,
+        "span": 2.8181883768411353,
+        "span_over_mean_percent": 0.09778806483591942
+      },
+      "revisit_p95_ms": {
+        "samples": 2,
+        "min": 2881.0048770101275,
+        "max": 2883.3157997578382,
+        "mean": 2882.160338383983,
+        "span": 2.3109227477107197,
+        "span_over_mean_percent": 0.08018022859222489
+      },
+      "cold_prefix_mean_ms": {
+        "samples": 2,
+        "min": 2832.573071566003,
+        "max": 2834.475041836413,
+        "mean": 2833.524056701208,
+        "span": 1.9019702704099473,
+        "span_over_mean_percent": 0.06712384410189985
+      },
+      "revisit_hits": [
+        0,
+        0
+      ],
+      "revisit_rebuilds": [
+        16,
+        16
+      ],
+      "capacities": [
+        3,
+        3
+      ]
+    },
+    {
+      "scheme": "hbm",
+      "chunk": 2048,
+      "workspace": 2048,
+      "run_ids": [
+        "20261003_echo_gr_chunks_01_fixed_c2048",
+        "20261003_echo_gr_chunks_repeat_01_deployment_c2048"
+      ],
+      "trace_total_ms": {
+        "samples": 2,
+        "min": 87638.74183304142,
+        "max": 87710.41418600362,
+        "mean": 87674.57800952252,
+        "span": 71.67235296219587,
+        "span_over_mean_percent": 0.08174815846209307
+      },
+      "first_mean_ms": {
+        "samples": 2,
+        "min": 2735.679615569097,
+        "max": 2737.382583312865,
+        "mean": 2736.531099440981,
+        "span": 1.7029677437676582,
+        "span_over_mean_percent": 0.06223089312288615
+      },
+      "revisit_mean_ms": {
+        "samples": 2,
+        "min": 2741.7417489959917,
+        "max": 2744.5183033123612,
+        "mean": 2743.1300261541764,
+        "span": 2.776554316369584,
+        "span_over_mean_percent": 0.10121847268983701
+      },
+      "all_p95_ms": {
+        "samples": 2,
+        "min": 2747.7700195391662,
+        "max": 2751.5405721467687,
+        "mean": 2749.6552958429675,
+        "span": 3.77055260760244,
+        "span_over_mean_percent": 0.13712819251572747
+      },
+      "revisit_p95_ms": {
+        "samples": 2,
+        "min": 2748.4317092748825,
+        "max": 2753.4428647049936,
+        "mean": 2750.937286989938,
+        "span": 5.011155430111103,
+        "span_over_mean_percent": 0.1821617473364609
+      },
+      "cold_prefix_mean_ms": {
+        "samples": 2,
+        "min": 2698.212702121964,
+        "max": 2698.6334288449143,
+        "mean": 2698.423065483439,
+        "span": 0.42072672295034863,
+        "span_over_mean_percent": 0.015591577478417856
+      },
+      "revisit_hits": [
+        0,
+        0
+      ],
+      "revisit_rebuilds": [
+        16,
+        16
+      ],
+      "capacities": [
+        2,
+        2
+      ]
+    },
+    {
+      "scheme": "echo",
+      "chunk": 1024,
+      "workspace": 1024,
+      "run_ids": [
+        "20261003_echo_gr_chunks_01_deployment_c1024",
+        "20261003_echo_gr_chunks_repeat_01_deployment_c1024"
+      ],
+      "trace_total_ms": {
+        "samples": 2,
+        "min": 76981.56448104419,
+        "max": 78436.8626208161,
+        "mean": 77709.21355093014,
+        "span": 1455.2981397719122,
+        "span_over_mean_percent": 1.8727485111120301
+      },
+      "first_mean_ms": {
+        "samples": 2,
+        "min": 4738.07958125326,
+        "max": 4827.457614745072,
+        "mean": 4782.768597999166,
+        "span": 89.37803349181195,
+        "span_over_mean_percent": 1.8687509474993742
+      },
+      "revisit_mean_ms": {
+        "samples": 2,
+        "min": 73.26819881200208,
+        "max": 74.84629905593465,
+        "mean": 74.05724893396837,
+        "span": 1.5781002439325675,
+        "span_over_mean_percent": 2.130919345032177
+      },
+      "all_p95_ms": {
+        "samples": 2,
+        "min": 4744.087127619423,
+        "max": 4833.571264607599,
+        "mean": 4788.829196113511,
+        "span": 89.48413698817603,
+        "span_over_mean_percent": 1.868601558410123
+      },
+      "revisit_p95_ms": {
+        "samples": 2,
+        "min": 74.06345823255833,
+        "max": 75.73362725088373,
+        "mean": 74.89854274172103,
+        "span": 1.6701690183253959,
+        "span_over_mean_percent": 2.229908563221024
+      },
+      "cold_prefix_mean_ms": {
+        "samples": 2,
+        "min": 4666.692801183672,
+        "max": 4754.377804692922,
+        "mean": 4710.535302938297,
+        "span": 87.68500350925024,
+        "span_over_mean_percent": 1.861465796775896
+      },
+      "revisit_hits": [
+        16,
+        16
+      ],
+      "revisit_rebuilds": [
+        0,
+        0
+      ],
+      "capacities": [
+        16,
+        16
+      ]
+    },
+    {
+      "scheme": "echo",
+      "chunk": 2048,
+      "workspace": 2048,
+      "run_ids": [
+        "20261003_echo_gr_chunks_01_fixed_c2048",
+        "20261003_echo_gr_chunks_repeat_01_deployment_c2048"
+      ],
+      "trace_total_ms": {
+        "samples": 2,
+        "min": 128348.68299408117,
+        "max": 129513.49256001413,
+        "mean": 128931.08777704765,
+        "span": 1164.8095659329556,
+        "span_over_mean_percent": 0.9034357702365676
+      },
+      "first_mean_ms": {
+        "samples": 2,
+        "min": 3970.365545443201,
+        "max": 4002.3181999349617,
+        "mean": 3986.3418726890814,
+        "span": 31.952654491760768,
+        "span_over_mean_percent": 0.8015532915195341
+      },
+      "revisit_mean_ms": {
+        "samples": 2,
+        "min": 4051.4271416868723,
+        "max": 4092.2750850659213,
+        "mean": 4071.851113376397,
+        "span": 40.84794337904896,
+        "span_over_mean_percent": 1.0031787077101073
+      },
+      "all_p95_ms": {
+        "samples": 2,
+        "min": 4059.9996561475564,
+        "max": 4116.702711756807,
+        "mean": 4088.3511839521816,
+        "span": 56.70305560925044,
+        "span_over_mean_percent": 1.386941900486053
+      },
+      "revisit_p95_ms": {
+        "samples": 2,
+        "min": 4061.423390026903,
+        "max": 4125.089400753495,
+        "mean": 4093.256395390199,
+        "span": 63.6660107265925,
+        "span_over_mean_percent": 1.5553878031753101
+      },
+      "cold_prefix_mean_ms": {
+        "samples": 2,
+        "min": 3936.256263374162,
+        "max": 3970.3264777490404,
+        "mean": 3953.291370561601,
+        "span": 34.07021437487856,
+        "span_over_mean_percent": 0.8618189549240985
+      },
+      "revisit_hits": [
+        0,
+        0
+      ],
+      "revisit_rebuilds": [
+        16,
+        16
+      ],
+      "capacities": [
+        15,
+        15
+      ]
+    },
+    {
+      "scheme": "serial_sparse",
+      "chunk": 1024,
+      "workspace": 1024,
+      "run_ids": [
+        "20261003_echo_gr_chunks_01_deployment_c1024",
+        "20261003_echo_gr_chunks_repeat_01_deployment_c1024"
+      ],
+      "trace_total_ms": {
+        "samples": 2,
+        "min": 66788.64663792774,
+        "max": 68267.87908107508,
+        "mean": 67528.26285950141,
+        "span": 1479.232443147339,
+        "span_over_mean_percent": 2.1905382731746177
+      },
+      "first_mean_ms": {
+        "samples": 2,
+        "min": 4106.808036871371,
+        "max": 4198.031165447901,
+        "mean": 4152.419601159636,
+        "span": 91.22312857653014,
+        "span_over_mean_percent": 2.196866823166293
+      },
+      "revisit_mean_ms": {
+        "samples": 2,
+        "min": 67.48237799911294,
+        "max": 68.71127711929148,
+        "mean": 68.09682755920221,
+        "span": 1.2288991201785393,
+        "span_over_mean_percent": 1.804634906244576
+      },
+      "all_p95_ms": {
+        "samples": 2,
+        "min": 4110.774908648455,
+        "max": 4227.8058775671525,
+        "mean": 4169.2903931078035,
+        "span": 117.03096891869791,
+        "span_over_mean_percent": 2.806975717310557
+      },
+      "revisit_p95_ms": {
+        "samples": 2,
+        "min": 69.03665728168562,
+        "max": 69.83582250541076,
+        "mean": 69.43623989354819,
+        "span": 0.7991652237251401,
+        "span_over_mean_percent": 1.1509338998631407
+      },
+      "cold_prefix_mean_ms": {
+        "samples": 2,
+        "min": 4040.8645025054284,
+        "max": 4130.8047042366525,
+        "mean": 4085.8346033710404,
+        "span": 89.94020173122408,
+        "span_over_mean_percent": 2.2012687850119637
+      },
+      "revisit_hits": [
+        16,
+        16
+      ],
+      "revisit_rebuilds": [
+        0,
+        0
+      ],
+      "capacities": [
+        16,
+        16
+      ]
+    },
+    {
+      "scheme": "serial_sparse",
+      "chunk": 2048,
+      "workspace": 2048,
+      "run_ids": [
+        "20261003_echo_gr_chunks_01_fixed_c2048",
+        "20261003_echo_gr_chunks_repeat_01_deployment_c2048"
+      ],
+      "trace_total_ms": {
+        "samples": 2,
+        "min": 109866.96678888984,
+        "max": 110386.48852391634,
+        "mean": 110126.72765640309,
+        "span": 519.5217350265011,
+        "span_over_mean_percent": 0.47174899870576026
+      },
+      "first_mean_ms": {
+        "samples": 2,
+        "min": 3391.8254016170977,
+        "max": 3408.0549376885756,
+        "mean": 3399.9401696528366,
+        "span": 16.229536071477924,
+        "span_over_mean_percent": 0.47734769618416845
+      },
+      "revisit_mean_ms": {
+        "samples": 2,
+        "min": 3474.8600226885173,
+        "max": 3491.1005950561957,
+        "mean": 3482.9803088723565,
+        "span": 16.240572367678396,
+        "span_over_mean_percent": 0.4662837836409249
+      },
+      "all_p95_ms": {
+        "samples": 2,
+        "min": 3484.1402517893584,
+        "max": 3501.455785773578,
+        "mean": 3492.7980187814683,
+        "span": 17.315533984219655,
+        "span_over_mean_percent": 0.4957496508847804
+      },
+      "revisit_p95_ms": {
+        "samples": 2,
+        "min": 3484.669070254313,
+        "max": 3502.7755099727074,
+        "mean": 3493.72229011351,
+        "span": 18.10643971839454,
+        "span_over_mean_percent": 0.5182564100653309
+      },
+      "cold_prefix_mean_ms": {
+        "samples": 2,
+        "min": 3364.6118948672665,
+        "max": 3380.2646559288405,
+        "mean": 3372.4382753980535,
+        "span": 15.652761061573983,
+        "span_over_mean_percent": 0.46413780722870207
+      },
+      "revisit_hits": [
+        0,
+        0
+      ],
+      "revisit_rebuilds": [
+        16,
+        16
+      ],
+      "capacities": [
+        15,
+        15
+      ]
+    },
+    {
+      "scheme": "dense_prefetch",
+      "chunk": 1024,
+      "workspace": 1024,
+      "run_ids": [
+        "20261003_echo_gr_chunks_01_deployment_c1024",
+        "20261003_echo_gr_chunks_repeat_01_deployment_c1024"
+      ],
+      "trace_total_ms": {
+        "samples": 2,
+        "min": 98551.95249605458,
+        "max": 98697.53525301348,
+        "mean": 98624.74387453403,
+        "span": 145.58275695890188,
+        "span_over_mean_percent": 0.14761281118671976
+      },
+      "first_mean_ms": {
+        "samples": 2,
+        "min": 3227.9143418127205,
+        "max": 3229.4688670626783,
+        "mean": 3228.6916044376994,
+        "span": 1.5545252499578055,
+        "span_over_mean_percent": 0.04814722000147603
+      },
+      "revisit_mean_ms": {
+        "samples": 2,
+        "min": 2931.582689190691,
+        "max": 2939.1270862506644,
+        "mean": 2935.3548877206777,
+        "span": 7.544397059973562,
+        "span_over_mean_percent": 0.2570182260255364
+      },
+      "all_p95_ms": {
+        "samples": 2,
+        "min": 3366.620847969898,
+        "max": 3370.6445740215713,
+        "mean": 3368.6327109957347,
+        "span": 4.023726051673293,
+        "span_over_mean_percent": 0.11944686158687569
+      },
+      "revisit_p95_ms": {
+        "samples": 2,
+        "min": 2942.7813479851466,
+        "max": 2952.372649728204,
+        "mean": 2947.5769988566753,
+        "span": 9.591301743057556,
+        "span_over_mean_percent": 0.32539613882106866
+      },
+      "cold_prefix_mean_ms": {
+        "samples": 2,
+        "min": 2889.1460464128613,
+        "max": 2893.947617652884,
+        "mean": 2891.5468320328728,
+        "span": 4.801571240022895,
+        "span_over_mean_percent": 0.16605545470785957
+      },
+      "revisit_hits": [
+        0,
+        0
+      ],
+      "revisit_rebuilds": [
+        16,
+        16
+      ],
+      "capacities": [
+        12,
+        12
+      ]
+    },
+    {
+      "scheme": "dense_prefetch",
+      "chunk": 2048,
+      "workspace": 2048,
+      "run_ids": [
+        "20261003_echo_gr_chunks_01_fixed_c2048",
+        "20261003_echo_gr_chunks_repeat_01_deployment_c2048"
+      ],
+      "trace_total_ms": {
+        "samples": 2,
+        "min": 91294.24127185484,
+        "max": 91345.02404229715,
+        "mean": 91319.632657076,
+        "span": 50.78277044231072,
+        "span_over_mean_percent": 0.05560991537604019
+      },
+      "first_mean_ms": {
+        "samples": 2,
+        "min": 2933.4702086161997,
+        "max": 2933.6227498824883,
+        "mean": 2933.546479249344,
+        "span": 0.1525412662886083,
+        "span_over_mean_percent": 0.005199892599882775
+      },
+      "revisit_mean_ms": {
+        "samples": 2,
+        "min": 2772.419870874728,
+        "max": 2775.441252761084,
+        "mean": 2773.930561817906,
+        "span": 3.0213818863558117,
+        "span_over_mean_percent": 0.10892060269799031
+      },
+      "all_p95_ms": {
+        "samples": 2,
+        "min": 3199.2132131941617,
+        "max": 3200.850966665894,
+        "mean": 3200.0320899300277,
+        "span": 1.6377534717321396,
+        "span_over_mean_percent": 0.051179282760503535
+      },
+      "revisit_p95_ms": {
+        "samples": 2,
+        "min": 2779.2884527443675,
+        "max": 2783.08123529132,
+        "mean": 2781.1848440178437,
+        "span": 3.792782546952367,
+        "span_over_mean_percent": 0.13637290434364358
+      },
+      "cold_prefix_mean_ms": {
+        "samples": 2,
+        "min": 2728.408537366704,
+        "max": 2730.696136060942,
+        "mean": 2729.552336713823,
+        "span": 2.2875986942381132,
+        "span_over_mean_percent": 0.08380856682866214
+      },
+      "revisit_hits": [
+        0,
+        0
+      ],
+      "revisit_rebuilds": [
+        16,
+        16
+      ],
+      "capacities": [
+        7,
+        7
+      ]
+    }
+  ],
+  "echo_c1024_vs_c2048": {
+    "mean_trace_reduction_percent": 39.72810212746537,
+    "slowest_c1024_vs_fastest_c2048_reduction_percent": 38.88767629627081,
+    "slowest_c1024_vs_fastest_c2048_gap_ms": 49911.82037326507,
+    "mean_first_visit_penalty_percent": 19.978886677193984,
+    "mean_all_p95_penalty_percent": 17.133508855865507
+  },
+  "recommendation": {
+    "chunk": 1024,
+    "workspace_query_tokens": 1024,
+    "extend_query_tokens": 128,
+    "target": "ECHO deployment prefill configuration for the predeclared complete trace",
+    "decision_authority": "Independent recommendation only; root owns the official default_review and default configuration.",
+    "reason": "The complete-trace objective favors C1024 because it retains all sixteen sessions and avoids all second-pass rebuilds. C2048 lowers cold construction cost but its larger workspace admits only fifteen sessions, so this cyclic access pattern rebuilds every revisit. Both repeats reproduce that mechanism and ordering.",
+    "scope": "H200 SM90; ten independent checkpoint source-input replay dense blocks; fixed 65536-token history and 128-token candidate; sixteen users visited sequentially twice; P32768 per layer, NH1050624, 4GiB HBM and 64GiB CPU DRAM cache budgets; complete hidden and last-token head; recorded runtime source 47585a615f0bb017f531118e8c8c180cb33cb14d63de447cd83c84966210a211."
+  },
+  "further_repetitions": {
+    "needed_for_this_selection": false,
+    "reason": "The slowest accepted C1024 trace is still 49.911820 s faster than the fastest C2048 trace (38.8877% lower). The within-configuration trace spans are 1.455298 s and 1.164810 s, respectively; capacities and sixteen hit/rebuild outcomes are unchanged. There is no unresolved ordering or variation that justifies another trace for this decision. C256 is not the leader and its accepted initial total is 227.801669 s, so no new repeat or diagnostic point is requested.",
+    "statistical_limit": "Two complete traces per C1024/C2048 configuration provide a descriptive observed range, not a confidence interval, significance test or bound on future variance. Per-request samples within a trace are not independent trace repetitions."
+  },
+  "final_assessments": {
+    "trace_variability": "C1024 ECHO totals are 76.981564\u201378.436863 s; C2048 totals are 128.348683\u2013129.513493 s. Their spans divided by their respective two-run means are 1.8727% and 0.9034%. Mean complete trace time is 39.7281% lower at C1024. The initial fixed_c2048 run supplies the C2048 deployment observation once; it is not counted again as a separate repeat.",
+    "cold_prefix_and_revisit": "C1024 first-visit means are 4738.079581\u20134827.457615 ms versus C2048 3970.365545\u20134002.318200 ms; actual cold-prefix means are 4666.692801\u20134754.377805 versus 3936.256263\u20133970.326478 ms. C1024 revisit means are 73.268199\u201374.846299 ms, sixteen hits in each trace; C2048 is 4051.427142\u20134092.275085 ms, sixteen rebuilds in each. All-request per-trace p95 is 4744.087128\u20134833.571265 ms at C1024 versus 4059.999656\u20134116.702712 at C2048. Recommend C1024 for the declared sixteen-first/sixteen-revisit trace objective while preserving its colder-request and overall-tail disadvantage; do not reweight the request mix or call the mean of per-trace p95 values a pooled p95.",
+    "workspace_and_capacity": "At fixed W2048, every tested ECHO C admits fifteen sessions and rebuilds all sixteen revisits; C2048 is the fastest initial complete trace within that controlled-workspace comparison. The deployment choice separately reduces W to C. C1024 shared HBM reservation is 1709604446 bytes versus 2922020446 at C2048, with the same 86682744 HBM/4104 DRAM bytes per session, P32768 and NH1050624. Sixteen sessions at C1024 reserve 3096528350 HBM bytes; fifteen at C2048 reserve 4222261606. C256 uses less workspace but cannot retain more than the sixteen users actually present and is much slower to build. Accepted C1024/C2048 memory gates and matching diagnostics support the selected/control geometries; this independent read does not rerun those audits or broaden their coverage.",
+    "scope_and_limitations": "The selected C1024 ECHO mean trace is 15.4995% lower than same-C HBM, but 15.0766% slower than same-C serial_sparse, whose trace range is 66.788647\u201368.267879 s. Thus the recommendation does not establish a fused-prefetch speed advantage or select ECHO as the fastest scheme. It is a session-capacity tradeoff in this fixed cyclic trace, not evidence of HBM token hit rate, kernel overlap, general cache optimality, model quality, concurrent throughput or a trained ten-block model. Cache-owned reservations and request-boundary samples do not equal process peaks. C512 remains numerically excluded and C4096 budget-excluded; neither enters rankings. The original initial_assessments are retained as historical pre-repeat reasoning, not the final decision basis."
+  },
+  "memory_and_diagnostic_basis": {
+    "memory_summary": "docs/agents/system/memory_acceptance_summary.json",
+    "direct_control_memory_runs": [
+      "20261003_echo_memory_c1024_03",
+      "20261003_echo_memory_c2048_fixed_03"
+    ],
+    "matching_diagnostic_runs": [
+      "20261003_echo_gr_diagnostics_c1024_04",
+      "20261003_echo_gr_diagnostics_c2048_04"
+    ],
+    "boundary": "Previously accepted engineering prerequisites, including original observer source identities and coverage. No hashing or raw allocation/diagnostic re-audit is performed by this recommendation."
+  }
+}

@@ -1,4 +1,4 @@
-"""Serve repeated GR users with persistent, budgeted caches on one Hopper GPU.
+"""Serve repeated GR users with persistent caches on one Hopper GPU.
 
 This CLI performs no separate warmup. Request timings include first-use JIT
 compilation; formal paired experiments provide their own warmup and validation.
@@ -20,6 +20,14 @@ DEFAULT_PATHS = {
     "deepseek_v32": Path("/preset-models"),
     "nosa": Path("/mnt/ssd-wlcb/chenkaiqi/NOSA-8B"),
 }
+
+
+class RemovedSessionSlots(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string=None):
+        parser.error(
+            "--deepseek-slots was per-session and has been removed; "
+            "use --sparse-pool-tokens for the shared backend pool"
+        )
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -58,15 +66,30 @@ def _build_parser() -> argparse.ArgumentParser:
         type=int,
         help="Explicit generation context limit; NOSA supports a configured limit up to 262144",
     )
-    parser.add_argument("--hbm-budget-gib", type=float, default=1.0)
-    parser.add_argument("--dram-budget-gib", type=float, default=16.0)
+    parser.add_argument(
+        "--resource-mode",
+        choices=("budget", "fixed-pools"),
+        default="budget",
+        help="budget: byte-limited admission; fixed-pools: explicit P/NH, host-page admission only",
+    )
+    parser.add_argument(
+        "--hbm-budget-gib", type=float, help="cache sub-budget; default 1 in budget mode"
+    )
+    parser.add_argument(
+        "--dram-budget-gib", type=float, help="cache sub-budget; default 16 in budget mode"
+    )
     parser.add_argument("--chunk-size", type=int, default=1024)
-    parser.add_argument("--deepseek-slots", type=int, default=4096)
+    parser.add_argument("--deepseek-slots", action=RemovedSessionSlots, help=argparse.SUPPRESS)
+    parser.add_argument("--sparse-pool-tokens", type=int, default=32768)
+    parser.add_argument("--host-arena-tokens", type=int)
+    parser.add_argument("--workspace-query-tokens", type=int)
+    parser.add_argument("--extend-chunk-size", type=int)
     parser.add_argument("--device", default="cuda:0")
     return parser
 
 
 def _validate_args(args, parser) -> None:
+    del args.deepseek_slots
     if args.scheme not in SCHEMES[args.model]:
         parser.error(f"{args.model} supports schemes: {', '.join(SCHEMES[args.model])}")
     for name in ("num_users", "count", "history_tokens", "candidate_tokens", "chunk_size"):
@@ -78,16 +101,43 @@ def _validate_args(args, parser) -> None:
         parser.error("--max-revisits must be nonnegative")
     if args.context_limit is not None and args.context_limit < 1:
         parser.error("--context-limit must be positive")
-    for name in ("hbm_budget_gib", "dram_budget_gib"):
-        value = getattr(args, name)
-        if not math.isfinite(value) or value < 0:
-            parser.error(f"--{name.replace('_', '-')} must be finite and nonnegative")
-    args.hbm_budget_bytes = int(args.hbm_budget_gib * 2**30)
-    args.dram_budget_bytes = int(args.dram_budget_gib * 2**30)
-    if args.hbm_budget_bytes < 1:
-        parser.error("--hbm-budget-gib must allow at least one byte")
-    if args.model == "deepseek_v32" and args.deepseek_slots < args.chunk_size:
-        parser.error("--deepseek-slots must be at least --chunk-size")
+    if args.resource_mode == "fixed-pools":
+        if args.model != "deepseek_v32" or args.scheme not in ("echo", "serial_sparse"):
+            parser.error("fixed-pools requires DeepSeek echo or serial_sparse")
+        if args.host_arena_tokens is None:
+            parser.error("fixed-pools requires explicit --host-arena-tokens (NH)")
+        if args.hbm_budget_gib is not None or args.dram_budget_gib is not None:
+            parser.error("fixed-pools does not accept HBM/DRAM byte sub-budgets")
+        if args.workspace_query_tokens is not None:
+            parser.error(
+                "fixed-pools derives workspace from chunk and candidate sizes; do not set W"
+            )
+        args.hbm_budget_bytes = args.dram_budget_bytes = None
+    else:
+        for name, default in (("hbm_budget_gib", 1.0), ("dram_budget_gib", 16.0)):
+            value = getattr(args, name)
+            if value is None:
+                value = default
+                setattr(args, name, value)
+            if not math.isfinite(value) or value < 0:
+                parser.error(f"--{name.replace('_', '-')} must be finite and nonnegative")
+        args.hbm_budget_bytes = int(args.hbm_budget_gib * 2**30)
+        args.dram_budget_bytes = int(args.dram_budget_gib * 2**30)
+        if args.hbm_budget_bytes < 1:
+            parser.error("--hbm-budget-gib must allow at least one byte")
+    if args.sparse_pool_tokens < 1:
+        parser.error("--sparse-pool-tokens must be positive")
+    if args.extend_chunk_size is not None and args.extend_chunk_size < 1:
+        parser.error("--extend-chunk-size must be positive")
+    if args.host_arena_tokens is not None and (
+        args.host_arena_tokens < 64 or args.host_arena_tokens % 64
+    ):
+        parser.error("--host-arena-tokens must be a positive multiple of 64")
+    queries = max(args.chunk_size, args.extend_chunk_size or args.candidate_tokens)
+    if args.workspace_query_tokens is None:
+        args.workspace_query_tokens = queries
+    elif args.workspace_query_tokens < queries:
+        parser.error("--workspace-query-tokens must cover both prefill and extend batches")
     if args.model_path is None:
         args.model_path = DEFAULT_PATHS[args.model]
 
@@ -156,7 +206,10 @@ def _build_backend(args):
             scheme=args.scheme,
             device=device,
             chunk_size=args.chunk_size,
-            slots=args.deepseek_slots,
+            sparse_pool_tokens=args.sparse_pool_tokens,
+            host_arena_tokens=args.host_arena_tokens,
+            workspace_query_tokens=args.workspace_query_tokens,
+            extend_chunk_size=args.extend_chunk_size,
         )
     from models.nosa.serving import NosaServingBackend
 
@@ -182,68 +235,79 @@ def main(argv: list[str] | None = None) -> None:
 
         generator = _build_generator(args)
         backend = _build_backend(args)
-        _emit(
-            {
-                "status": "started",
-                "model": args.model,
-                "scheme": args.scheme,
-                "model_path": str(args.model_path),
-                "num_users": args.num_users,
-                "count": args.count,
-                "max_revisits": args.max_revisits,
-                "context_limit": args.context_limit,
-                "seed": args.seed,
-                "history_tokens": args.history_tokens,
-                "candidate_tokens": args.candidate_tokens,
-                "hbm_budget_bytes": args.hbm_budget_bytes,
-                "dram_budget_bytes": args.dram_budget_bytes,
-                "timing": "no separate warmup; request latency includes first-use JIT compilation, excludes weight loading and GR generation",
-                "heat": generator.population.metadata,
-                "backend": backend.describe(),
-            }
-        )
-        completed = revisits = hits = evictions = 0
-        visits_per_user = Counter()
-        total_ms = revisit_ms = 0.0
-        with PersistentGRRunner(
-            backend,
-            hbm_budget_bytes=args.hbm_budget_bytes,
-            dram_budget_bytes=args.dram_budget_bytes,
-        ) as runner:
-            for result in runner.run(generator.iter_generate(args.count)):
-                metrics = result.metrics
-                _emit(
-                    {
-                        "status": "completed",
-                        "metrics": metrics,
-                        "hidden_shape": list(result.hidden.shape),
-                        "hidden_dtype": str(result.hidden.dtype),
-                        "hidden_device": str(result.hidden.device),
-                    }
-                )
-                completed += 1
-                visits_per_user[metrics["user_id"]] += 1
-                revisits += metrics["is_revisit"]
-                hits += metrics["prefix_cache_hit"]
-                evictions += len(metrics["evicted_users"])
-                total_ms += metrics["latency_ms"]
-                if metrics["is_revisit"]:
-                    revisit_ms += metrics["latency_ms"]
-                del result
-        _emit(
-            {
-                "status": "finished",
-                "requests": completed,
-                "first_visits": completed - revisits,
-                "revisits": revisits,
-                "returning_users": sum(count > 1 for count in visits_per_user.values()),
-                "prefix_cache_hits": hits,
-                "evicted_users": evictions,
-                "mean_latency_ms": total_ms / completed if completed else None,
-                "revisit_mean_latency_ms": revisit_ms / revisits if revisits else None,
-                "separate_warmup": False,
-            }
-        )
+        try:
+            _emit(
+                {
+                    "status": "started",
+                    "model": args.model,
+                    "scheme": args.scheme,
+                    "model_path": str(args.model_path),
+                    "num_users": args.num_users,
+                    "count": args.count,
+                    "max_revisits": args.max_revisits,
+                    "context_limit": args.context_limit,
+                    "seed": args.seed,
+                    "history_tokens": args.history_tokens,
+                    "candidate_tokens": args.candidate_tokens,
+                    "resource_mode": args.resource_mode.replace("-", "_"),
+                    "hbm_budget_bytes": args.hbm_budget_bytes,
+                    "dram_budget_bytes": args.dram_budget_bytes,
+                    "timing": "no separate warmup; request latency includes first-use JIT compilation, excludes weight loading and GR generation",
+                    "heat": generator.population.metadata,
+                    "backend": backend.describe(),
+                }
+            )
+            completed = revisits = hits = evictions = 0
+            visits_per_user = Counter()
+            total_ms = revisit_ms = 0.0
+            with PersistentGRRunner(
+                backend,
+                hbm_budget_bytes=args.hbm_budget_bytes,
+                dram_budget_bytes=args.dram_budget_bytes,
+                resource_limits={
+                    "max_session_capacity": args.history_tokens + args.candidate_tokens,
+                    "max_history_tokens": args.history_tokens,
+                    "max_candidate_tokens": args.candidate_tokens,
+                },
+            ) as runner:
+                for result in runner.run(generator.iter_generate(args.count)):
+                    metrics = result.metrics
+                    _emit(
+                        {
+                            "status": "completed",
+                            "metrics": metrics,
+                            "hidden_shape": list(result.hidden.shape),
+                            "hidden_dtype": str(result.hidden.dtype),
+                            "hidden_device": str(result.hidden.device),
+                        }
+                    )
+                    completed += 1
+                    visits_per_user[metrics["user_id"]] += 1
+                    revisits += metrics["is_revisit"]
+                    hits += metrics["prefix_cache_hit"]
+                    evictions += len(metrics["evicted_users"])
+                    total_ms += metrics["latency_ms"]
+                    if metrics["is_revisit"]:
+                        revisit_ms += metrics["latency_ms"]
+                    del result
+            _emit(
+                {
+                    "status": "finished",
+                    "requests": completed,
+                    "first_visits": completed - revisits,
+                    "revisits": revisits,
+                    "returning_users": sum(count > 1 for count in visits_per_user.values()),
+                    "prefix_cache_hits": hits,
+                    "evicted_users": evictions,
+                    "mean_latency_ms": total_ms / completed if completed else None,
+                    "revisit_mean_latency_ms": revisit_ms / revisits if revisits else None,
+                    "separate_warmup": False,
+                }
+            )
+        finally:
+            close = getattr(backend, "close", None)
+            if close is not None:
+                close()
     except ImportError as exc:
         parser.exit(1, f"error: missing or incompatible dependency: {exc}. Run uv sync.\n")
     except (OSError, TypeError, ValueError, RuntimeError) as exc:

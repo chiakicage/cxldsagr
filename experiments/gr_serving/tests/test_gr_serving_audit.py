@@ -1039,3 +1039,173 @@ def test_legacy_weighted_manifest_without_sampling_still_audits(tmp_path):
     manifest["workload_sha256"] = audit.hashlib.sha256(audit.canonical(identity)).hexdigest()
     write_fixture(tmp_path, manifest, requests)
     audit.audit_workload(tmp_path, "nosa", 3, small_contract())
+
+
+def test_lru_oracle_subtracts_shared_reservation_and_obeys_host_page_quota():
+    requests = [{"user_id": user} for user in [0, 1, 2, 0]]
+    reservation = {"hbm": 10, "dram": 4}
+    caps = {"hbm": 100, "dram": 100}
+    rows = list(
+        audit.lru_oracle(
+            requests,
+            reservation,
+            caps,
+            shared={"hbm": 50, "dram": 64},
+            host_pages=4,
+            session_pages=2,
+        )
+    )
+    assert [row["capacity"] for row in rows] == [2] * 4
+    assert [row["hit"] for row in rows] == [False] * 4
+    assert [row["evicted"] for row in rows] == [[], [], [0], [1]]
+    with pytest.raises(audit.AuditError, match="no whole session"):
+        list(
+            audit.lru_oracle(
+                requests,
+                reservation,
+                caps,
+                shared={"hbm": 100, "dram": 64},
+                host_pages=4,
+                session_pages=2,
+            )
+        )
+
+
+@pytest.fixture
+def shared_host_case(tmp_path):
+    def build(scheme):
+        contract = replace(small_contract(), models=("deepseek_v32",))
+        manifest, requests = fixture(tmp_path, contract=contract)
+        rows = measurements(manifest, requests)
+        pooled = scheme in ("echo", "serial_sparse")
+        shared_host = 120 if pooled else 0
+        session_host = 4 if pooled else (50 if scheme == "dense_prefetch" else 0)
+        case = {
+            "session_reservation": {"hbm": 10, "dram": session_host},
+            "shared_reservation": {"hbm": 80, "dram": shared_host + 40},
+            "host_page_capacity": 12 if pooled else 0,
+            "session_host_pages": 4 if pooled else 0,
+            "duration_seconds": 0.1,
+            "cache_resource_plan": {
+                "workspace_cpu_indexer_bytes": 8,
+                "workspace_cpu_scalar_bytes": 8,
+                "workspace_cpu_metrics_bytes": 24,
+                "workspace_cpu_bytes": 40,
+            },
+        }
+        # The existing hand-computed trace retains at most two users. HBM
+        # admission fixes that capacity here; DRAM and host pages do not bind.
+        for row in rows:
+            count = row["cached_users"]
+            fixed_host = shared_host + session_host * count
+            row.update(
+                scheme=scheme,
+                prefix_hit_tier=("hbm" if scheme == "hbm" else "dram")
+                if row["prefix_cache_hit"]
+                else "miss",
+                dram_budget_bytes=1000,
+                reserved_hbm_bytes=80 + count * 10,
+                reserved_dram_bytes=fixed_host + 40,
+                cache_hbm_bytes=60 + count * 8,
+                request_cache_hbm_bytes=60 + count * 9,
+                cache_dram_bytes=fixed_host,
+                request_cache_dram_bytes=fixed_host,
+                shared_reserved_hbm_bytes=80,
+                shared_reserved_dram_bytes=shared_host + 40,
+                session_reserved_hbm_bytes=count * 10,
+                session_reserved_dram_bytes=count * session_host,
+                shared_cache_hbm_bytes=60,
+                shared_cache_dram_bytes=shared_host,
+                cache_host_pages=case["session_host_pages"] * count,
+                host_page_capacity=case["host_page_capacity"],
+            )
+        args = (
+            ("deepseek_v32", scheme, 3),
+            rows,
+            case,
+            requests,
+            manifest,
+            "unit",
+            {"hbm": 100, "dram": 1000},
+        )
+        return args
+
+    return build
+
+
+@pytest.mark.parametrize("scheme", ["hbm", "echo", "serial_sparse", "dense_prefetch"])
+def test_host_capacity_excludes_only_validated_shared_cpu_workspace(shared_host_case, scheme):
+    args = shared_host_case(scheme)
+    result = audit.audit_case_rows(*args)
+    assert result["requests"] == 6
+    assert result["admitted_session_capacity"] == 2
+    assert result["peaks"]["reserved_dram_bytes"] - result["peaks"]["cache_dram_bytes"] == 40
+
+
+@pytest.mark.parametrize("scheme", ["echo", "serial_sparse", "dense_prefetch"])
+@pytest.mark.parametrize(
+    ("field", "change", "error"),
+    [
+        ("cache_dram_bytes", -1, "fixed host backing capacity"),
+        ("shared_cache_dram_bytes", 1, "fixed shared host storage"),
+        ("request_cache_dram_bytes", 1, "pre-cleanup fixed host backing capacity"),
+    ],
+)
+def test_host_capacity_rejects_missing_or_misattributed_storage(
+    shared_host_case, scheme, field, change, error
+):
+    args = shared_host_case(scheme)
+    args[1][-1][field] += change
+    with pytest.raises(audit.AuditError, match=error):
+        audit.audit_case_rows(*args)
+
+
+def test_host_capacity_rejects_missing_shared_backing_with_unchanged_total(shared_host_case):
+    args = shared_host_case("echo")
+    args[1][-1]["shared_cache_dram_bytes"] -= 1
+    with pytest.raises(audit.AuditError, match="fixed shared host storage"):
+        audit.audit_case_rows(*args)
+
+
+def test_host_capacity_rejects_missing_session_page_table(shared_host_case):
+    args = shared_host_case("serial_sparse")
+    row = args[1][-1]
+    row["cache_dram_bytes"] -= args[2]["session_reservation"]["dram"]
+    row["request_cache_dram_bytes"] = row["cache_dram_bytes"]
+    with pytest.raises(audit.AuditError, match="fixed host backing capacity"):
+        audit.audit_case_rows(*args)
+
+
+@pytest.mark.parametrize(
+    ("field", "value", "error"),
+    [
+        ("workspace_cpu_bytes", 41, "CPU workspace sum"),
+        ("workspace_cpu_metrics_bytes", 23, "workspace_cpu_metrics_bytes"),
+        ("workspace_cpu_scalar_bytes", None, "workspace_cpu_scalar_bytes"),
+    ],
+)
+def test_host_capacity_rejects_unverified_workspace_allowance(
+    shared_host_case, field, value, error
+):
+    args = shared_host_case("echo")
+    plan = args[2]["cache_resource_plan"]
+    if value is None:
+        del plan[field]
+    else:
+        plan[field] = value
+    with pytest.raises(audit.AuditError, match=error):
+        audit.audit_case_rows(*args)
+
+
+def test_host_capacity_does_not_assume_workspace_from_an_unexplained_gap(shared_host_case):
+    args = shared_host_case("dense_prefetch")
+    del args[2]["cache_resource_plan"]
+    with pytest.raises(audit.AuditError, match="fixed shared host storage"):
+        audit.audit_case_rows(*args)
+
+
+def test_host_capacity_rejects_unreserved_workspace(shared_host_case):
+    args = shared_host_case("hbm")
+    args[2]["shared_reservation"]["dram"] = 39
+    with pytest.raises(audit.AuditError, match="unreserved CPU workspace"):
+        audit.audit_case_rows(*args)

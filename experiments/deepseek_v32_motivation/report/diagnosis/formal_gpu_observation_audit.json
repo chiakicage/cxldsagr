@@ -1,0 +1,59 @@
+{
+  "passed": true,
+  "run_id": "motivation_c10_20261004_u16_r2_01",
+  "samples": 127,
+  "expected_pid": 2069546,
+  "process_observations": 81,
+  "only_expected_pid_observed": true,
+  "observed_gpu_uuids": [
+    "GPU-1bdee8b4-22ac-536c-208b-bfb4ed38b878"
+  ],
+  "empty_first_and_final_observations": true,
+  "post_completion_process_command_unavailable": [
+    {
+      "unix_seconds": 1791074953.671175,
+      "gpu_uuid": "GPU-1bdee8b4-22ac-536c-208b-bfb4ed38b878",
+      "pid": 2069546,
+      "name": "[No data]",
+      "memory_mib": "25640",
+      "command": ""
+    },
+    {
+      "unix_seconds": 1791074958.77053,
+      "gpu_uuid": "GPU-1bdee8b4-22ac-536c-208b-bfb4ed38b878",
+      "pid": 2069546,
+      "name": "[No data]",
+      "memory_mib": "25640",
+      "command": ""
+    },
+    {
+      "unix_seconds": 1791074963.8684738,
+      "gpu_uuid": "GPU-1bdee8b4-22ac-536c-208b-bfb4ed38b878",
+      "pid": 2069546,
+      "name": "[No data]",
+      "memory_mib": "25640",
+      "command": ""
+    },
+    {
+      "unix_seconds": 1791074968.9654934,
+      "gpu_uuid": "GPU-1bdee8b4-22ac-536c-208b-bfb4ed38b878",
+      "pid": 2069546,
+      "name": "[No data]",
+      "memory_mib": "25640",
+      "command": ""
+    }
+  ],
+  "first_observation_unix": 1791074360.8774915,
+  "last_observation_unix": 1791075027.091486,
+  "maximum_sample_gap_seconds": 27.54065465927124,
+  "input_sha256": {
+    "gpu_observations.jsonl": "34bec6221e65ee1c18b99e01dd3f531bb85588ec2aa9d870e2270944cf3fec64",
+    "gpu_monitor_source.py": "2df24ae479868a7bd50dd67147fa7b4c13a3d4b4b225fd9b704eeeecf933220b",
+    "gpu_monitor_run_identity.json": "2b3f8fd0f21fd933130290a3cd56f3014f44f5c665d33f09d49f16a79887ddbf",
+    "gpu_hardware.csv": "18ae2ab12e95cc4e5e2927db61b1c7d8ed688ac26a57f782faf308ae400de553",
+    "metadata.json": "bd7661384311bd3e204c28ac719ab25ae362cb38b62bcf1be0a4d4d9095466b2",
+    "gpu_observations_boundary.json": "337696ca2155fc230122813fcd8a801ae02a09fa937736a294abc20309b94455"
+  },
+  "audit_source_sha256": "bf05928026d521070fc60cc7ace2d435eec9c142553c424e3ca10990ed4476e9",
+  "boundary": "Discrete process observations span startup through completion; they do not prove absence of other work between samples."
+}

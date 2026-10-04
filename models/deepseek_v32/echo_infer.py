@@ -75,7 +75,12 @@ class DeepSeekEchoModel:
         capacity=66560,
         offload=False,
         slots=16384,
-        chunk_size=1024,
+        chunk_size=2048,
+        extend_chunk_size=None,
+        host_arena_tokens=None,
+        workspace_query_tokens=None,
+        hbm_cache_budget_bytes=None,
+        dram_cache_budget_bytes=64 * 2**30,
         reserve_gib=5,
         num_layers=None,
     ):
@@ -83,6 +88,8 @@ class DeepSeekEchoModel:
 
         self.path = Path(model_path)
         self.cfg = Config.from_checkpoint(self.path)
+        if offload and slots < min(self.cfg.index_topk, capacity):
+            raise ValueError("sparse pool must fit one query's full exact selection")
         self.num_layers = self.cfg.num_hidden_layers if num_layers is None else num_layers
         if (
             not isinstance(self.num_layers, int)
@@ -123,13 +130,58 @@ class DeepSeekEchoModel:
                 if torch.cuda.get_device_capability(device)[0] != 9:
                     raise ValueError("this implementation requires Hopper SM90 GPUs")
                 free, _ = torch.cuda.mem_get_info(device)
-                budgets.append(free - int(reserve_gib * 2**30))
+                budgets.append(free - max(int(reserve_gib * 2**30), hbm_cache_budget_bytes or 0))
         # Embedding and LM head remain BF16 on endpoint devices.
         for index, name in ((0, "model.embed_tokens.weight"), (-1, "lm_head.weight")):
             offsets = self.reader.tensor_metadata[name]["data_offsets"]
             budgets[index] -= offsets[1] - offsets[0]
         self.placement = plan_layer_devices(sizes, self.devices, budgets)
+        if chunk_size < 1 or extend_chunk_size is not None and extend_chunk_size < 1:
+            raise ValueError("chunk sizes must be positive")
+        if offload and max(chunk_size, extend_chunk_size or 0) > slots:
+            raise ValueError("query batch must fit the usable sparse pool")
+        from models.deepseek_v32.cache_resources import execution_reservation, padded_tokens
+
+        minimum_host = padded_tokens(capacity)
+        if host_arena_tokens is not None and (
+            type(host_arena_tokens) is not int
+            or host_arena_tokens < minimum_host
+            or host_arena_tokens % 64
+        ):
+            raise ValueError(
+                "host_arena_tokens must be a 64-token multiple covering session capacity"
+            )
+        self.host_arena_tokens = host_arena_tokens or minimum_host
+        required_queries = max(chunk_size, extend_chunk_size or 0)
+        if workspace_query_tokens is not None and (
+            type(workspace_query_tokens) is not int or workspace_query_tokens < required_queries
+        ):
+            raise ValueError(
+                "workspace_query_tokens must cover configured prefill and extend chunks"
+            )
+        self.workspace_query_tokens = workspace_query_tokens or required_queries
+        self.execution_reservation = execution_reservation(
+            self.workspace_query_tokens,
+            capacity,
+            topk=self.cfg.index_topk,
+            width=self.cfg.kv_lora_rank + self.cfg.qk_rope_head_dim,
+        )
+        self.extend_chunk_size = extend_chunk_size
         self.capacity, self.slots, self.chunk_size = capacity, slots, chunk_size
+        self._shared_pools, self._shared_sessions = {}, {}
+        self._cache_generation = 0
+        self._poisoned = False
+        self.hbm_cache_budget_bytes = (
+            int(reserve_gib * 2**30) if hbm_cache_budget_bytes is None else hbm_cache_budget_bytes
+        )
+        self.dram_cache_budget_bytes = dram_cache_budget_bytes
+        if any(
+            type(value) is not int or value < 1
+            for value in (self.hbm_cache_budget_bytes, self.dram_cache_budget_bytes)
+        ):
+            raise ValueError("cache HBM and DRAM budgets must be positive bytes")
+        self._cache_resource_plan = self._plan_cache_resources(offload)
+        caches = self._allocate_shared_caches() if offload else {}
         self.blocks = []
         self.embedding_weight = self.reader.get_tensor("model.embed_tokens.weight").to(
             self.devices[0]
@@ -147,12 +199,121 @@ class DeepSeekEchoModel:
                     offload=offload,
                     slots=slots,
                     chunk_size=chunk_size,
+                    cache=caches.get(layer),
                 )
                 self.blocks.append(block)
             print(f"loaded layer {layer + 1}/{self.num_layers} on {device}", flush=True)
         self.length = 0
         self.offload = offload
         self.synchronize()
+
+    def _plan_cache_resources(self, offload):
+        """Check each device ledger before allocating any model cache tensor."""
+        from cache.prefix_pool import CacheBudgetExceeded
+        from cache.sparse_token_pool import SharedSparseTokenPool
+
+        if offload and self.slots < min(self.cfg.index_topk, self.capacity):
+            raise ValueError("sparse pool must fit one query's full exact selection")
+        if (
+            offload
+            and max(
+                self.execution_reservation.query_tokens,
+                getattr(self, "chunk_size", 0),
+                getattr(self, "extend_chunk_size", None) or 0,
+            )
+            > self.slots
+        ):
+            raise ValueError("query batch and workspace must fit the usable sparse pool")
+        width = self.cfg.kv_lora_rank + self.cfg.qk_rope_head_dim
+        by_device, total_dram = {}, 0
+        for device in self.devices:
+            layers = self.placement.count(device)
+            if not layers:
+                continue
+            index = layers * (self.capacity * (self.cfg.index_head_dim + 4) + 3 * 64)
+            if offload:
+                shared = SharedSparseTokenPool.estimate_shared_bytes(
+                    self.host_arena_tokens, width, layers, self.slots, device=device
+                )
+                session = SharedSparseTokenPool.estimate_session_bytes(
+                    self.capacity, layers=layers, device=device
+                )
+                metadata_workspace = SharedSparseTokenPool.estimate_execution_workspace_bytes(
+                    self.host_arena_tokens, self.slots
+                )
+                hbm = shared["hbm"] + session["hbm"] + metadata_workspace + index
+                dram = shared["dram"] + session["dram"]
+            else:
+                hbm = layers * self.capacity * (width * 2 + 20) + index
+                dram, metadata_workspace = 0, 0
+            hbm += self.execution_reservation.hbm
+            dram += self.execution_reservation.dram
+            if hbm > self.hbm_cache_budget_bytes:
+                raise CacheBudgetExceeded(
+                    f"{device} cache needs {hbm} bytes including execution reservation; "
+                    f"budget is {self.hbm_cache_budget_bytes}"
+                )
+            by_device[str(device)] = {
+                "hbm": hbm,
+                "dram": dram,
+                "layers": layers,
+                "metadata_workspace_bytes": metadata_workspace,
+                "indexer_workspace_bytes": self.execution_reservation.indexer_bytes,
+                "copy_source_bytes": self.execution_reservation.copy_source_bytes,
+                **self.execution_reservation.cpu_workspace_metadata,
+            }
+            total_dram += dram
+        if total_dram > self.dram_cache_budget_bytes:
+            raise CacheBudgetExceeded(
+                f"cache arenas and host metadata need {total_dram} DRAM bytes; "
+                f"budget is {self.dram_cache_budget_bytes}"
+            )
+        return {
+            "devices": by_device,
+            "dram_bytes": total_dram,
+            "hbm_budget_per_device": self.hbm_cache_budget_bytes,
+            "dram_budget": self.dram_cache_budget_bytes,
+        }
+
+    def _allocate_shared_caches(self):
+        from cache.sparse_token_pool import SharedSparseTokenPool
+        from operators.deepseek_v32.indexer import cache_ops
+
+        caches = {}
+        try:
+            for device in self.devices:
+                layers = [layer for layer, placed in enumerate(self.placement) if placed == device]
+                if not layers:
+                    continue
+                pool = SharedSparseTokenPool(
+                    self.host_arena_tokens,
+                    self.cfg.kv_lora_rank + self.cfg.qk_rope_head_dim,
+                    len(layers),
+                    self.slots,
+                    device=device,
+                    metadata_ops=cache_ops,
+                )
+                self._shared_pools[device] = pool
+                session = pool.allocate_session(self.capacity)
+                self._shared_sessions[device] = session
+                for local, layer in enumerate(layers):
+                    caches[layer] = session.layer(local)
+        except BaseException as error:
+            try:
+                self._release_shared_caches()
+            except (RuntimeError, ValueError) as cleanup_error:
+                self._poisoned = True
+                error.add_note(f"partial cache allocation cleanup failed: {cleanup_error}")
+            raise
+        return caches
+
+    def _release_shared_caches(self):
+        for session in self._shared_sessions.values():
+            session.release()
+        for pool in self._shared_pools.values():
+            pool.close()
+        self._shared_pools.clear()
+        self._shared_sessions.clear()
 
     def synchronize(self):
         for device in self.devices:
@@ -161,19 +322,37 @@ class DeepSeekEchoModel:
     def set_cache_mode(self, offload):
         from models.deepseek_v32.echo_attention import EchoAttentionRunner
 
+        planned = self._plan_cache_resources(offload)
         self.synchronize()
+        attentions = [block.attention.attention for block in self.blocks]
+        self._release_shared_caches()
+        # Drop every old cache before the new plan's buffers are allocated.
         for block in self.blocks:
-            old = block.attention
-            device = old.attention.device
-            with torch.cuda.device(device):
-                block.attention = EchoAttentionRunner(
-                    old.attention,
-                    self.capacity,
-                    offload=offload,
-                    slots=self.slots,
-                    chunk_size=self.chunk_size,
-                )
-                block.cache = block.attention.cache
+            block.attention = block.cache = None
+        self._cache_resource_plan = planned
+        self._cache_generation += 1
+        try:
+            caches = self._allocate_shared_caches() if offload else {}
+            for layer, block in enumerate(self.blocks):
+                attention = attentions[layer]
+                device = attention.device
+                with torch.cuda.device(device):
+                    block.attention = EchoAttentionRunner(
+                        attention,
+                        self.capacity,
+                        offload=offload,
+                        slots=self.slots,
+                        chunk_size=self.chunk_size,
+                        cache=caches.get(layer),
+                    )
+                    block.cache = block.attention.cache
+        except BaseException as error:
+            self._poisoned = True
+            try:
+                self._release_shared_caches()
+            except (RuntimeError, ValueError) as cleanup_error:
+                error.add_note(f"replacement cache cleanup failed: {cleanup_error}")
+            raise
         self.length, self.offload = 0, offload
 
     @torch.inference_mode()
@@ -186,21 +365,34 @@ class DeepSeekEchoModel:
         diagnostic model these are outputs after its selected transformer prefix,
         not the full checkpoint's hidden states or language-model predictions.
         """
+        if getattr(self, "_poisoned", False):
+            raise RuntimeError("model is poisoned after an asynchronous CUDA failure")
         scope = scope or (lambda _: nullcontext())
         ids = torch.as_tensor(token_ids, dtype=torch.long, device=self.devices[0])
         if ids.ndim != 1 or ids.numel() < 1 or self.length + ids.numel() > self.capacity:
             raise ValueError("expected a nonempty single sequence fitting cache capacity")
         if int(ids.min()) < 0 or int(ids.max()) >= self.cfg.vocab_size:
             raise ValueError("token ID is outside the checkpoint vocabulary")
+        query_chunk = (
+            self.chunk_size if not self.length else getattr(self, "extend_chunk_size", None)
+        ) or len(ids)
+        if query_chunk > getattr(self, "workspace_query_tokens", query_chunk):
+            raise ValueError("query batch exceeds reserved workspace_query_tokens")
+        if getattr(self, "offload", False) and query_chunk > self.slots:
+            raise ValueError("query batch exceeds usable pool; configure extend_chunk_size")
         started = []
+        offsets = [
+            block.attention.offset.clone() if hasattr(block, "attention") else None
+            for block in self.blocks
+        ]
         try:
             for block in self.blocks:
                 block.cache.begin_step(ids.numel())
                 started.append(block.cache)
             logits_parts = []
             hidden_parts = []
-            for chunk_start in range(0, ids.numel(), self.chunk_size):
-                chunk_stop = min(ids.numel(), chunk_start + self.chunk_size)
+            for chunk_start in range(0, ids.numel(), query_chunk):
+                chunk_stop = min(ids.numel(), chunk_start + query_chunk)
                 with torch.cuda.device(self.devices[0]), scope("embedding"):
                     hidden = F.embedding(ids[chunk_start:chunk_stop], self.embedding_weight)
                     residual = None
@@ -210,6 +402,9 @@ class DeepSeekEchoModel:
                             hidden = hidden.to(device, non_blocking=True)
                             if residual is not None:
                                 residual = residual.to(device, non_blocking=True)
+                        # Outer scheduling owns the full layer batch, including
+                        # norm/MLP geometry for independently configured extend.
+                        block.chunk_size = len(hidden)
                         with scope(f"layer_{layer}"):
                             hidden, residual = block.forward(hidden, residual, scope=scope)
                 if return_hidden or all_logits or chunk_stop == ids.numel():
@@ -243,47 +438,54 @@ class DeepSeekEchoModel:
                 block.cache.commit()
             self.length += ids.numel()
             return output
-        except BaseException:
+        except BaseException as error:
+            try:
+                self.synchronize()
+            except RuntimeError as synchronization_error:
+                self._poisoned = True
+                error.add_note(f"model poisoned; GPU drain failed: {synchronization_error}")
+                raise error from synchronization_error
             for cache in started:
                 if cache._step_end is not None:
                     cache.rollback()
+            for block, offset in zip(self.blocks, offsets, strict=True):
+                if offset is not None:
+                    block.attention.offset.copy_(offset)
             raise
 
     def snapshot_prefix(self):
-        """Save exact HBM residency to CPU, outside measurement iterations."""
+        """Snapshot shared pools once; diagnostic CPU storage is not serving capacity."""
         self.synchronize()
-        states = []
-        for block in self.blocks:
-            cache = block.cache
-            states.append(
-                {
-                    "length": cache.length,
-                    "records": cache.records.cpu() if self.offload else None,
-                    "host_to_device": cache.host_to_device.cpu(),
-                    "device_to_host": cache.device_to_host.cpu(),
-                    "age": cache.age.cpu(),
-                    "clock": cache._clock,
-                    "offset": block.attention.offset.cpu(),
-                }
-            )
-        return states
+        return {
+            "schema": "echo-shared-prefix-v1",
+            "generation": self._cache_generation,
+            "length": self.length,
+            "offload": self.offload,
+            "pools": {str(device): pool.snapshot() for device, pool in self._shared_pools.items()},
+            "offsets": [block.attention.offset.cpu().clone() for block in self.blocks],
+            # Resident records retain their unchanged prefix; only lengths rewind.
+            "resident_lengths": [block.cache.length for block in self.blocks],
+        }
 
-    def restore_prefix(self, states):
+    def restore_prefix(self, state):
+        if (
+            state.get("schema") != "echo-shared-prefix-v1"
+            or state["generation"] != self._cache_generation
+            or state["offload"] != self.offload
+            or len(state["offsets"]) != len(self.blocks)
+        ):
+            raise ValueError("prefix snapshot does not match the current model cache")
         self.synchronize()
-        for block, state in zip(self.blocks, states):
-            cache = block.cache
-            with torch.cuda.device(cache.device):
-                if state["records"] is not None:
-                    cache.records.copy_(state["records"])
-                cache.host_to_device.copy_(state["host_to_device"])
-                cache.device_to_host.copy_(state["device_to_host"])
-                cache.age.copy_(state["age"])
-                cache._clock = state["clock"]
-                cache.length = cache.written = state["length"]
-                cache._step_end = None
-                cache.reset_stats()
-                block.attention.offset.copy_(state["offset"])
-        self.length = states[0]["length"]
+        for device, pool in self._shared_pools.items():
+            pool.restore(state["pools"][str(device)])
+        for block, length, offset in zip(
+            self.blocks, state["resident_lengths"], state["offsets"], strict=True
+        ):
+            if not self.offload:
+                block.cache.truncate(length)
+            block.cache.reset_stats()
+            block.attention.offset.copy_(offset)
+        self.length = state["length"]
         self.synchronize()
 
 
@@ -294,8 +496,11 @@ def main():
     parser.add_argument("--input-ids", type=Path, required=True, help="JSON token ID list")
     parser.add_argument("--history", type=int, default=65536)
     parser.add_argument("--offload", action="store_true")
-    parser.add_argument("--slots", type=int, default=16384)
-    parser.add_argument("--chunk-size", type=int, default=1024)
+    parser.add_argument("--sparse-pool-tokens", "--slots", dest="slots", type=int, default=16384)
+    parser.add_argument("--host-arena-tokens", type=int)
+    parser.add_argument("--workspace-query-tokens", type=int)
+    parser.add_argument("--chunk-size", type=int, default=2048)
+    parser.add_argument("--extend-chunk-size", type=int, default=None)
     parser.add_argument(
         "--num-layers", type=int, help="execute only the first N checkpoint layers for diagnostics"
     )
@@ -308,6 +513,10 @@ def main():
         offload=args.offload,
         slots=args.slots,
         chunk_size=args.chunk_size,
+        extend_chunk_size=args.extend_chunk_size,
+        host_arena_tokens=args.host_arena_tokens,
+        workspace_query_tokens=args.workspace_query_tokens
+        or max(args.chunk_size, args.extend_chunk_size or len(ids) - args.history),
         num_layers=args.num_layers,
     )
     model.forward(ids[: args.history])

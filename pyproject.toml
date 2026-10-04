@@ -15,6 +15,8 @@ dependencies = [
     "cuda-pathfinder==1.8.1",
     "cuda-toolkit==13.0.2",
     "flashinfer-python[cu13]==0.6.18",
+    "deep-gemm",
+    "flash-mla",
     "apache-tvm-ffi>=0.1.13.post3,<0.2",
     # 构建与测试工具
     "ninja==1.13.0",
@@ -65,17 +67,27 @@ python-preference = "only-managed"
 # 与运行时使用相同版本，避免扩展的 PyTorch ABI 不匹配。
 [tool.uv.extra-build-dependencies]
 deep-gemm = ["torch==2.12.1+cu130", "packaging==26.2", "wheel==0.47.0", "ninja==1.13.0"]
+flash-mla = ["torch==2.12.1+cu130", "packaging==26.2", "wheel==0.47.0", "ninja==1.13.0"]
+
+[tool.uv.extra-build-variables]
+flash-mla = { FLASH_MLA_DISABLE_SM100 = "1", NVCC_THREADS = "4", MAX_JOBS = "8" }
 
 # DeepGEMM 的 setup.py 没有 install_requires。静态元数据避免基础环境解析加载 CUDA 工具链。
 # DeepGEMM 的版本与 .gitmodules 对应的 gitlink 同步。
 [[tool.uv.dependency-metadata]]
 name = "deep-gemm"
-version = "2.8.0+b64107f"
+version = "2.8.1+057ca59"
+requires-dist = []
+
+[[tool.uv.dependency-metadata]]
+name = "flash-mla"
+version = "1.0.0+ba89a34"
 requires-dist = []
 
 [tool.uv.sources]
 torch = { index = "pytorch-cu130" }
 deep-gemm = { path = "3rdparty/DeepGEMM" }
+flash-mla = { path = "3rdparty/FlashMLA" }
 
 # 显式使用官方索引，避免镜像重定向和下载超时。
 [[tool.uv.index]]
@@ -105,11 +117,8 @@ indent-style = "space"
 line-ending = "lf"
 
 [dependency-groups]
-# DeepGEMM 仅供 legacy 独立基准使用；Hopper 开发环境不默认安装。
-# DeepGEMM 版本后缀由子项目源码状态生成。
-legacy = [
-    "deep-gemm",
-]
+# 保留旧独立基准的组名；DeepGEMM 现由 Hopper 模型的基础环境安装。
+legacy = []
 analysis = [
     "matplotlib>=3.11.1",
 ]

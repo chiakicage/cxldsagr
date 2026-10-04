@@ -2,16 +2,27 @@
 
 [prefix_pool.py](prefix_pool.py) 提供 serving 使用的 `PrefixSessionPool`：以用户固定
 历史的 token 身份管理跨请求 session，按 LRU 整用户淘汰。分配前同时检查 HBM / DRAM
-峰值预留，执行后核验实际 cache tensor 容量；模型提供布局、分配、统计与同步释放。
+峰值预留，执行后核验实际 cache tensor 容量；省略字节预算的固定 P/NH 模式按 host
+页配额准入。模型提供布局、分配、统计与同步释放。
 预算包含 KV、索引派生记录、映射、cache scratch、staging 和待提交 append，模型权重及
-普通计算 activation 另计。候选 suffix 由 serving 在执行完成后 truncate，保留用户历史。
+普通计算 activation 另计。DeepSeek GR 的 `echo/serial_sparse` 只为 history 准入，
+候选使用共享 GPU 临时空间，正常结束后 discard，失败直接报错终止；其他后端仍由 serving 在执行后
+truncate 候选 suffix，保留用户历史。
 这一层是有限预算的用户 session 管理，不改变 NOSA 内部仍采用完整逻辑地址 staging、
 没有页级有限 slots / eviction 的事实。运行入口见 [serving](../serving/README.md)。
 
-当前预算核验依赖模型的预留与 tensor 统计。DeepSeek 在 recall、预取槽位回收和 remap
-过程中分配的临时 cache scratch 尚需完整峰值审计，执行后采样不能证明硬预算覆盖了
-所有瞬时分配；ECHO 的主动预取淘汰策略也待修正核查。见
-[系统审计范围](../docs/agents/system/implementation-status.md)。
+[staging.py](staging.py) 为模型提供两个固定容量的命名 record buffer 及串行 lease，
+不选择预取内容。槽位身份包含 session、generation 和 layer；写入等待旧 consumer，
+消费等待 copy ready，异常归还也等待未消费的预取。无法确认完成时保留所有权并禁用
+后续复用。DeepSeek dense backend 已接入，模型布局和资源计划由该 backend 提供。
+
+DeepSeek 已将共享 pool、session 私有状态和执行 workspace 分别预留；此前持久 append
+路径的 11 个直接采样配置已通过分配/释放轨迹与 pinned 档位核验。具体配置和未直接采样范围见
+[内存验收](../docs/agents/system/echo_cache_memory_audit.md)，不能把执行后 tensor 统计
+单独当作瞬时峰值证明。实现与验收进度见
+[ECHO cache checkpoint](../docs/agents/system/echo_cache_implementation_checkpoint.md)。
+这些记录不构成当前 GR GPU candidate 的容量验收；新路径已通过短 GPU 正确性检查，
+完整多用户容量与实际峰值尚未实测。
 
 [manager.py](manager.py) 提供 `CacheManager` 与 `ResidentCache`。
 模型通过 `CacheSpec` 声明层数、上下文容量上限、命名 record shape 和兼容信息；
@@ -41,6 +52,11 @@ manager 通过弱引用记录 session，兼容既有 `model.new_cache()` 使用�
 显式 `cache_backend="offload"` 使用下述 host backing 适配。CPU placement 用于独立
 数学测试。`layer_view` 的连续张量保证仅属于 resident 后端，main sparse attention
 通过 cache access 获取实际布局。
+
+`PrefixSessionPool` 还支持与 host pages 独立的 HBM history token 配额，用于固定
+P 的 HBM-only serving。准入、LRU 和实际占用审计分别检查两种配额。resident
+`SparseTokenCache` 可带独立 candidate 容量：候选只在 GPU 临时写入，结束后丢弃，
+不推进历史长度，也不占 history token 配额。
 
 ## NOSA host backing
 
@@ -82,17 +98,49 @@ DRAM，未验证 CXL/RDMA；offload 算子本身不复用跨请求已取回的 H
 
 ## DeepSeek ECHO token cache
 
-[sparse_token_cache.py](sparse_token_cache.py) 提供独立的 `SparseTokenCache`，由模型显式
-提供 record 宽度与 dtype。支持完整 resident 分配，或 pinned CPU DRAM backing 加有限
-HBM slots；维护 logical/physical ID、淘汰、当前工作集保护、精确 recall 与传输计数。
+[sparse_token_pool.py](sparse_token_pool.py) 提供模型/backend 所有的共享 host arena 和
+逐层有限 HBM pool，host 按 64-token page 分配。各 session 持有独立 page table、
+history indexer 状态与长度；持久 token 经 page table 映射为全局 host ID，逐层双向映射维护
+其 HBM residency。[sparse_token_cache.py](sparse_token_cache.py) 提供 session/layer
+view、完整 resident 存储、工作集保护、精确 recall 与缓存事务，record 宽度和 dtype
+由模型显式提供。用户级 LRU 释放 host pages，token eviction 只失效 HBM 映射。
+[host_allocation.py](host_allocation.py) 按 PyTorch pinned allocator 的 2 的幂次
+档位逐层预留 host backing，并让逻辑视图的 storage 显式保留完整档位以便分配后核验。
+普通 CPU reference 不做该取整；传输字节始终按实际 record 计算。DeepSeek dense
+backing 使用同一规则。修正与验证边界见
+[pinned 容量记录](../docs/agents/system/echo_pinned_allocation_checkpoint.md)。
 [DeepSeek SM90](../models/deepseek_v32/README.md) 为主 KV 使用 BF16 512 latent + 64 RoPE
-record，indexer K/scales 仍常驻 GPU。ECHO indexer 使用预先腾出的 slots 融合预取，
-attention 前精确补取剩余 miss；选择并集超过 pool 时拆分 query 消费，不改变每 query 的选择。
+record，indexer K/scales 仍常驻 GPU。每个外层 query batch 先写 index-K，再执行
+融合历史预取与精确 top-k；实际 miss 领取槽位时才淘汰。当前主 KV 直接写 HBM，并
+异步写回 host；这是普通持久 append 的行为。精确 recall 等待对应写回完成，attention
+消费完成前保护其 slots。选择并集超过 pool 时只拆分 query 消费，保留完整的每-query
+选择并统计跨组重读。
 
-完整模型为各层调用 `begin_step`，逐 chunk `append`；全部 61 层、输出与 GPU 同步成功
-后统一 `commit`。失败只回滚本次启动的 step，保留已提交历史；支持 `truncate` / `reset`。
-实验在计时外保存与恢复 prefix 的 HBM residency，避免把重复 extend 的热缓存当成基准。
+DeepSeek GR 的 `echo/serial_sparse` 使用显式 transient step。session 容量与 NH
+配额只覆盖 `padded(H)=ceil(H/64)×64`，candidate 不申请 host pages，也不写回 DRAM。
+candidate 一次整批进入各层，history prefill 的 chunk 调度保持不变。
+每层 records 在 P 个历史槽和 sentinel 后额外保留 Amax 个 GPU 行；候选逻辑 ID
+`H+i` 直接对应物理行 `P+1+i`。host→device 映射仍长 NH，device→host、priority
+和 free bitmap 仍长 P+1，候选不进入这些历史映射或淘汰状态。混合选择只对历史部分
+精确 recall；候选保持在 GPU 尾部，是否拆分消费也只由选中的历史并集与 P 决定。
+
+`begin_transient(A)` 保持 committed length 为 H，只推进本次可见的 written 范围；
+`commit` 拒绝提交临时候选。正常结束调用 `discard_transient`，等待相关 GPU 操作
+完成后清除候选可见范围与所有权。候选共享存储跨用户复用，
+同层仅允许一个 owner；history 的内容、页所有权与已提交 indexer 状态保持独立。
+候选执行失败直接报错终止，runner 释放对应 session，不恢复或重试。
+当前层的候选 indexer 直接与 history 拼入 backend 共享的一层 `[H+A,d]` K/scales
+workspace，不另存逐层候选 indexer。这份 workspace 和每层候选 KV 尾部一起计入
+共享资源，不按用户数重复计费。完整请求的 H+A 上下文和 A 执行上限仍须在准入前检查。
+
+普通持久模型为所选各层调用 `begin_step`，每个 token chunk 顺序执行全部所选层；全部层、
+输出与 GPU 同步成功后统一 `commit`。失败先 drain，再回滚本次 step；无法安全 drain
+时禁用 backend。`truncate` 只失效该 session 的 suffix，不重置共享池。
+实验在计时外保存与恢复全局 pool、session 和 prefix 状态；快照要求 host ownership
+及 prefix 内容不变，其额外诊断存储单独披露。
 这条路径使用本地 DRAM，不包含 CXL/RDMA，也未接入 NOSA 的 `CacheManager`。
-修复前完整 61 层的 64K + 1K resident/offload 测量已验收；KV gather 对齐修复后的
-完整模型性能待补测，版本与结果见
-[ECHO 实验](../experiments/deepseek_v32_echo_prefill/README.md)。
+当前非 GR 验收限定真实 checkpoint 第 0–2 层的 64K + 1K；模型保留完整层数能力。
+直接 `backend.extend` 和非 GR 模型保持上述持久事务；`hbm/dense_prefetch` serving
+对照尚未改为 GPU transient。GR 候选路径已通过短 GPU 正确性检查，容量报告仅包含
+静态规划，见 [ECHO cache 实验](../experiments/deepseek_v32_echo_cache/README.md)。
+不能将用户历史命中等同为所选历史 token 已驻留 HBM。

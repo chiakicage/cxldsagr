@@ -4,6 +4,7 @@ import pytest
 import torch
 
 from operators.deepseek_v32.linear.fp8 import (
+    _PreparedFP8Activation,
     fp8_linear,
     grouped_fp8_linear,
     prepare_expert_routing,
@@ -35,6 +36,82 @@ def test_cpu_linear_known_block_scales_and_activation_rounding():
     output = fp8_linear(x, weight, scales)
     expected = torch.cat((torch.full((2, 128), 193.5), torch.full((2, 2), 579.0)), dim=1)
     torch.testing.assert_close(output, expected.to(torch.bfloat16), rtol=0, atol=0)
+
+
+def test_prepared_activation_binds_source_and_allows_one_consumption():
+    source = torch.randn(3, 128).bfloat16()
+    data, scales = reference_quantize_fp8_activation(source)
+    prepared = _PreparedFP8Activation.capture(source, data, scales)
+    with pytest.raises(ValueError, match="unchanged source"):
+        prepared.consume(source.view_as(source))
+    actual_data, actual_scales = prepared.consume(source)
+    assert actual_data is data and actual_scales is scales
+    with pytest.raises(ValueError, match="already been consumed"):
+        prepared.consume(source)
+    prepared = _PreparedFP8Activation.capture(source, data, scales)
+    source.add_(1)
+    with pytest.raises(ValueError, match="unchanged source"):
+        prepared.consume(source)
+
+
+@torch.inference_mode()
+def test_prepared_inference_activation_does_not_read_missing_version_counter():
+    source = torch.zeros(2, 128).bfloat16()
+    data, scales = reference_quantize_fp8_activation(source)
+    prepared = _PreparedFP8Activation.capture(source, data, scales)
+    assert prepared.version is None
+    assert prepared.consume(source)[0] is data
+
+
+@pytest.mark.parametrize("option", ["out", "quantized", "return_quantized"])
+def test_explicit_packed_linear_options_reject_cpu_instead_of_ignoring_them(option):
+    source = torch.ones(2, 128).bfloat16()
+    weight, scales = make_weight((64, 128), "cpu")
+    value = torch.empty(2, 64).bfloat16() if option == "out" else True
+    with pytest.raises(ValueError, match="CUDA inference"):
+        fp8_linear(source, weight, scales, **{option: value})
+
+
+@pytest.mark.parametrize("rows,columns,channels,padding", [(1, 64, 128, 0), (129, 192, 256, 16)])
+@torch.inference_mode()
+def test_cuda_packed_views_and_shared_activation_are_exact(rows, columns, channels, padding):
+    require_sm90()
+    source = torch.randn(rows, channels + padding, device="cuda", dtype=torch.bfloat16)
+    hidden = source[:, :channels]
+    original = source.clone()
+    gate_w, gate_s = make_weight((columns, channels), "cuda")
+    up_w, up_s = make_weight((columns, channels), "cuda")
+    expected_gate = fp8_linear(hidden, gate_w, gate_s)
+    expected_up = fp8_linear(hidden, up_w, up_s)
+    expected_data, expected_scales = quantize_fp8_activation(hidden)
+    owner = torch.full((rows + 2, 2 * columns), 13, device="cuda", dtype=torch.bfloat16)
+    packed = owner[1:-1]
+    gate, up = packed[:, :columns], packed[:, columns:]
+    returned, prepared = fp8_linear(hidden, gate_w, gate_s, out=gate, return_quantized=True)
+    assert returned is gate
+    torch.testing.assert_close(up, torch.full_like(up, 13), rtol=0, atol=0)
+    assert torch.equal(prepared.data.view(torch.uint8), expected_data.view(torch.uint8))
+    torch.testing.assert_close(prepared.scales, expected_scales, rtol=0, atol=0)
+    assert fp8_linear(hidden, up_w, up_s, out=up, quantized=prepared) is up
+    torch.testing.assert_close(gate, expected_gate, rtol=0, atol=0)
+    torch.testing.assert_close(up, expected_up, rtol=0, atol=0)
+    torch.testing.assert_close(source, original, rtol=0, atol=0)
+    torch.testing.assert_close(owner[[0, -1]], torch.full_like(owner[[0, -1]], 13), rtol=0, atol=0)
+    with pytest.raises(ValueError, match="already been consumed"):
+        fp8_linear(hidden, up_w, up_s, out=up, quantized=prepared)
+
+
+@torch.inference_mode()
+def test_cuda_output_options_reject_alias_overlap_and_misalignment():
+    require_sm90()
+    hidden = torch.randn(3, 128, device="cuda", dtype=torch.bfloat16)
+    weight, scales = make_weight((128, 128), "cuda")
+    with pytest.raises(ValueError, match="must not alias"):
+        fp8_linear(hidden, weight, scales, out=hidden)
+    owner = torch.empty(3, 256, device="cuda", dtype=torch.bfloat16)
+    for invalid in (owner[:, 1:129], owner.as_strided((3, 128), (64, 1))):
+        with pytest.raises(ValueError, match="aligned, disjoint"):
+            fp8_linear(hidden, weight, scales, out=invalid)
 
 
 def test_cpu_grouped_broadcast_and_route_inputs_with_empty_experts():
@@ -78,7 +155,15 @@ def test_cuda_quantization_matches_independent_oracle(columns):
 
 @pytest.mark.parametrize(
     ("rows", "out_channels", "in_channels"),
-    [(1, 17, 24), (7, 137, 257), (65, 512, 1024), (128, 1536, 7168)],
+    [
+        (1, 17, 24),
+        (7, 137, 257),
+        (65, 512, 1024),
+        (128, 1536, 7168),
+        (17, 33, 1025),  # Partial M/N/K tiles require layout padding.
+        (129, 128, 1025),
+        (1024, 128, 7168),  # Checkpoint index_k projection geometry.
+    ],
 )
 def test_cuda_dense_matches_fp32_oracle(rows, out_channels, in_channels):
     require_sm90()
@@ -131,6 +216,20 @@ def test_cuda_grouped_reuses_routing_for_down_projection():
     torch.testing.assert_close(actual, expected, atol=0.0625, rtol=8e-3)
     with pytest.raises(ValueError, match="same expert_ids"):
         grouped_fp8_linear(x, ids.clone(), up_w, up_s, routing=plan)
+
+
+def test_cuda_grouped_padding_across_multiple_tiles_and_all_invalid_routes():
+    require_sm90()
+    torch.manual_seed(442)
+    x = torch.randn(129, 257, device="cuda", dtype=torch.bfloat16)
+    ids = torch.zeros((129, 3), device="cuda", dtype=torch.int32)
+    ids[:, 1] = 1
+    weights, scales = make_weight((4, 129, 257), "cuda")
+    expected = reference_grouped_fp8_linear(x, ids, weights, scales)
+    actual = grouped_fp8_linear(x, ids, weights, scales)
+    torch.testing.assert_close(actual, expected, atol=0.0625, rtol=8e-3)
+    invalid = torch.full_like(ids, -1)
+    assert torch.count_nonzero(grouped_fp8_linear(x, invalid, weights, scales)) == 0
 
 
 @pytest.mark.parametrize("grouped", [False, True])

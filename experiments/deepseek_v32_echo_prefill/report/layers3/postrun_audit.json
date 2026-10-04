@@ -1,484 +1,434 @@
 {
   "schema_version": 1,
-  "run_id": "20261002_echo_layers3_mfu_01",
-  "audited_at_utc": "2026-10-02T15:08:17.498427+00:00",
+  "run_id": "20261003_echo_layers3_nonmatrix_candidate_02",
   "accepted": true,
-  "auditor": "profile_audit independent post-run CPU audit",
-  "audit_script_sha256": "3323bd176dbea3e50c4aee7e8cb1aecfe1dd23945b2a3d806555dc6f71b2ec80",
-  "source_hashes": [
-    {
-      "path": "models/deepseek_v32/echo_attention.py",
-      "sha256": "42a5709db467d20a371b609260c9eca74924ed443f52090b092eb5db56be0f83",
-      "saved_and_current_match": true
-    },
-    {
-      "path": "models/deepseek_v32/echo_block.py",
-      "sha256": "5e10ecce4bdfd05431aec0d8a12859629beaf9b5a12f70e43e41f80f715cf0a3",
-      "saved_and_current_match": true
-    },
-    {
-      "path": "models/deepseek_v32/echo_infer.py",
-      "sha256": "bda86a7aa2ca402ac1c02f35481587b5ec5b03d53fcb455b9baaef8044d90701",
-      "saved_and_current_match": true
-    },
-    {
-      "path": "models/deepseek_v32/echo_model.py",
-      "sha256": "c08e43a7a76d36a701f011b26b5d8292559f621f61813413595611729b3da53f",
-      "saved_and_current_match": true
-    },
-    {
-      "path": "operators/deepseek_v32/attention/_validation.py",
-      "sha256": "9fcd9c2c39d9981374de81f2ad8ef1d40a48bbb929ba8e995d0a572dd11c535a",
-      "saved_and_current_match": true
-    },
-    {
-      "path": "operators/deepseek_v32/indexer/echo.py",
-      "sha256": "0fda8ac70338221902c96fb031a9076fb7206c5788e74452127f657e86abc105",
-      "saved_and_current_match": true
-    },
-    {
-      "path": "operators/deepseek_v32/linear/fp8.py",
-      "sha256": "2ad05824f2cc3110524b8b34e2cf25174180ea614dee5dca96037427efb6e61b",
-      "saved_and_current_match": true
-    },
-    {
-      "path": "operators/deepseek_v32/attention/device_only/mla.py",
-      "sha256": "c4c99a4c39c0464410be24db2f08b946c2842252ec8093a4d4cdbb427db7a947",
-      "saved_and_current_match": true
-    },
-    {
-      "path": "operators/deepseek_v32/attention/offload/mla.py",
-      "sha256": "6fe6590e18c359c3dc60c9660180ce1bcc756612d015d04ad3988e342ab20112",
-      "saved_and_current_match": true
-    },
-    {
-      "path": "operators/deepseek_v32/attention/reference/torch.py",
-      "sha256": "819cc165096790ac68585bcc90c8147b46ee99e6c7a2a3bf616fe01cd9f9b919",
-      "saved_and_current_match": true
-    },
-    {
-      "path": "operators/deepseek_v32/indexer/csrc/echo_helpers.cuh",
-      "sha256": "08c8f8db1ce344f2532c0913f18f9326769e4f2715bca48eed6bae1b1883ab21",
-      "saved_and_current_match": true
-    },
-    {
-      "path": "operators/deepseek_v32/indexer/csrc/echo_indexer.cu",
-      "sha256": "4da70fd21fada2f33cb5e1a3b68e68a8ac96b566153dfc53cf87e4e83f2a075e",
-      "saved_and_current_match": true
-    },
-    {
-      "path": "operators/deepseek_v32/indexer/csrc/echo_logits.cuh",
-      "sha256": "f6a264659b676f4ed9908834d19c83e183d7bb3fb67de5f97aabb47bd7ba99b3",
-      "saved_and_current_match": true
-    },
-    {
-      "path": "operators/common/kv_transfer.py",
-      "sha256": "bc65f850a908dfc4642b7f90170513881a0a564561d9902c736d8e7d7f16b919",
-      "saved_and_current_match": true
-    },
-    {
-      "path": "operators/common/csrc/kv_transfer.cu",
-      "sha256": "e082e3b2ef47bad7224f14213c4fe57a6d0bda7399a556230a814d145466bf1b",
-      "saved_and_current_match": true
-    },
-    {
-      "path": "cache/sparse_token_cache.py",
-      "sha256": "646066a9bdf70c58a272f4838b7dbe484fdccfd2e51202f7f97e5e44416399a6",
-      "saved_and_current_match": true
-    },
-    {
-      "path": "experiments/deepseek_v32_echo_prefill/src/measure.py",
-      "sha256": "fb45fd6fb3255e9f498ea35fecc5707ac87110d717a818162f23a47de614d45a",
-      "saved_and_current_match": true
-    },
-    {
-      "path": "experiments/deepseek_v32_echo_prefill/src/profile_layers.py",
-      "sha256": "58538957c78ed4d7bd92ab25f6e640621154a961f30eaa64a551354e91f6d0b9",
-      "saved_and_current_match": true
-    },
-    {
-      "path": "experiments/deepseek_v32_echo_prefill/src/operator_instrumentation.py",
-      "sha256": "c9224ebb41802f0ec83a3dd5e0896863c6f2c507b039f041d38d5bb1f8982023",
-      "saved_and_current_match": true
-    },
-    {
-      "path": "experiments/deepseek_v32_echo_prefill/src/operator_flops.py",
-      "sha256": "f90ba7725e63489c59e202df0b51bfffea23c84cdb27840525b58d23503f97fd",
-      "saved_and_current_match": true
-    },
-    {
-      "path": "experiments/deepseek_v32_echo_prefill/src/profile_hardware.py",
-      "sha256": "5e527c1b4c7ee892afa93f2dc8fb4379eb3be332082212c0b46a86454a6c458b",
-      "saved_and_current_match": true
-    },
-    {
-      "path": "experiments/deepseek_v32_echo_prefill/scripts/profile_layers.sh",
-      "sha256": "b858001272645fdb9ad41d3e195213e18cc2eacf464a120e010e83a711d6ef48",
-      "saved_and_current_match": true
-    }
-  ],
-  "input_hashes": {
-    "result.json": "2e1f5d26af687b669f4e37ff502968404f0b9cc3e0c8e9dee1d68679e986e757",
-    "operator_calls.json": "7884c878bb8734ef3cda58330b945842f3ee056acfb6ad7d199a5d7ee98f15d6",
-    "hardware.json": "59a376df7f32bee6bcf2800e9df1cb2fca08c6efe37bf8c9085a4a82961c6fc3",
-    "analysis/analysis.json": "f62b062bc23d8656130fef341e56378fbbd32773aeb2194cffa27946fea281b7"
+  "auditor_sha256": "0c8298ff7652858c0aa39feb10e9718734026570b36bc6cbd891d7a81f5cb6b6",
+  "input_sha256": {
+    "result.json": "d4b5cae79107747c6728d9607fcedf27d2fee216efc9382838576bb7b1e3f409",
+    "operator_calls.json": "7958aa031b55d2f45659682b4cbf588c5dc49bdc17dcbe5e8de3bdc47c1bd768",
+    "analysis": "c0397550446c4b8caf4fbd60b5d408002498d49c1703e3ec917d4226058743a0"
   },
-  "query_and_operator_coverage": [
-    {
-      "mode": "resident",
-      "phase": "prefill_annotated",
-      "layer": "layer_0",
-      "compute_stage_count": 14,
-      "query_rows": 65536,
-      "mla_leaf_calls": 64,
-      "no_duplicate_or_missing_query_intervals": true
-    },
-    {
-      "mode": "resident",
-      "phase": "prefill_annotated",
-      "layer": "layer_1",
-      "compute_stage_count": 14,
-      "query_rows": 65536,
-      "mla_leaf_calls": 64,
-      "no_duplicate_or_missing_query_intervals": true
-    },
-    {
-      "mode": "resident",
-      "phase": "prefill_annotated",
-      "layer": "layer_2",
-      "compute_stage_count": 14,
-      "query_rows": 65536,
-      "mla_leaf_calls": 64,
-      "no_duplicate_or_missing_query_intervals": true
-    },
-    {
-      "mode": "resident",
-      "phase": "extend_annotated",
-      "layer": "layer_0",
-      "compute_stage_count": 14,
-      "query_rows": 1024,
-      "mla_leaf_calls": 1,
-      "no_duplicate_or_missing_query_intervals": true
-    },
-    {
-      "mode": "resident",
-      "phase": "extend_annotated",
-      "layer": "layer_1",
-      "compute_stage_count": 14,
-      "query_rows": 1024,
-      "mla_leaf_calls": 1,
-      "no_duplicate_or_missing_query_intervals": true
-    },
-    {
-      "mode": "resident",
-      "phase": "extend_annotated",
-      "layer": "layer_2",
-      "compute_stage_count": 14,
-      "query_rows": 1024,
-      "mla_leaf_calls": 1,
-      "no_duplicate_or_missing_query_intervals": true
-    },
-    {
-      "mode": "offload",
-      "phase": "prefill_annotated",
-      "layer": "layer_0",
-      "compute_stage_count": 14,
-      "query_rows": 65536,
-      "mla_leaf_calls": 64,
-      "no_duplicate_or_missing_query_intervals": true
-    },
-    {
-      "mode": "offload",
-      "phase": "prefill_annotated",
-      "layer": "layer_1",
-      "compute_stage_count": 14,
-      "query_rows": 65536,
-      "mla_leaf_calls": 64,
-      "no_duplicate_or_missing_query_intervals": true
-    },
-    {
-      "mode": "offload",
-      "phase": "prefill_annotated",
-      "layer": "layer_2",
-      "compute_stage_count": 14,
-      "query_rows": 65536,
-      "mla_leaf_calls": 95,
-      "no_duplicate_or_missing_query_intervals": true
-    },
-    {
-      "mode": "offload",
-      "phase": "extend_annotated",
-      "layer": "layer_0",
-      "compute_stage_count": 14,
-      "query_rows": 1024,
-      "mla_leaf_calls": 1,
-      "no_duplicate_or_missing_query_intervals": true
-    },
-    {
-      "mode": "offload",
-      "phase": "extend_annotated",
-      "layer": "layer_1",
-      "compute_stage_count": 14,
-      "query_rows": 1024,
-      "mla_leaf_calls": 1,
-      "no_duplicate_or_missing_query_intervals": true
-    },
-    {
-      "mode": "offload",
-      "phase": "extend_annotated",
-      "layer": "layer_2",
-      "compute_stage_count": 14,
-      "query_rows": 1024,
-      "mla_leaf_calls": 2,
-      "no_duplicate_or_missing_query_intervals": true
-    }
-  ],
-  "checked_compute_call_counts": {
-    "q_a_proj": 390,
-    "q_b_proj": 390,
-    "q_absorb": 390,
-    "kv_a_proj": 390,
-    "index_q_proj": 390,
-    "index_k_proj": 390,
-    "index_weights_proj": 390,
-    "indexer_qk": 195,
-    "mla_qk_pv": 422,
-    "v_expand": 390,
-    "o_proj": 390,
-    "mlp_gate": 390,
-    "mlp_up": 390,
-    "mlp_down": 390,
-    "lm_head": 4,
-    "indexer_fused": 195
+  "summary_conservation": {
+    "captures": [
+      {
+        "mode": "resident",
+        "phase": "prefill_annotated",
+        "activity_totals": {
+          "kernel": {
+            "count": 20489,
+            "total_ns": 782733267
+          },
+          "memcpy": {
+            "count": 2247,
+            "total_ns": 18861667
+          },
+          "memset": {
+            "count": 583,
+            "total_ns": 525253
+          }
+        },
+        "busy_gap_arithmetic_matches": true
+      },
+      {
+        "mode": "resident",
+        "phase": "extend_annotated",
+        "activity_totals": {
+          "kernel": {
+            "count": 329,
+            "total_ns": 15677305
+          },
+          "memcpy": {
+            "count": 42,
+            "total_ns": 490533
+          },
+          "memset": {
+            "count": 13,
+            "total_ns": 11584
+          }
+        },
+        "busy_gap_arithmetic_matches": true
+      },
+      {
+        "mode": "offload",
+        "phase": "prefill_annotated",
+        "activity_totals": {
+          "kernel": {
+            "count": 59441,
+            "total_ns": 1089383412
+          },
+          "memcpy": {
+            "count": 9309,
+            "total_ns": 33915394
+          },
+          "memset": {
+            "count": 8725,
+            "total_ns": 9783720
+          }
+        },
+        "busy_gap_arithmetic_matches": true
+      },
+      {
+        "mode": "offload",
+        "phase": "extend_annotated",
+        "activity_totals": {
+          "kernel": {
+            "count": 1055,
+            "total_ns": 23423718
+          },
+          "memcpy": {
+            "count": 173,
+            "total_ns": 762242
+          },
+          "memset": {
+            "count": 167,
+            "total_ns": 182274
+          }
+        },
+        "busy_gap_arithmetic_matches": true
+      }
+    ],
+    "operator_rows": 444,
+    "kernel_count": 81314,
+    "end_to_end_precision_normalized_utilization": [
+      {
+        "mode": "resident",
+        "phase": "prefix",
+        "metric": "end_to_end_precision_normalized_useful_compute_utilization",
+        "scope": "checkpoint_layers_0_1_2_embedding_final_norm_last_token_lm_head",
+        "device_count": 1,
+        "formula": "100 * sum_precision(useful_flops / (dense_peak_tflops * 1e9)) / wall_ms",
+        "work_basis": "useful matrix work of the measured implementation, including absorbed MLA",
+        "timing_basis": "uninstrumented synchronized end-to-end wall; one semantic ledger per sample",
+        "matrix_call_count": 2689,
+        "explicit_nonmatrix_call_count": 4867,
+        "useful_flops_by_precision": {
+          "BF16": 116997618139136,
+          "FP32": 180388626432,
+          "FP8": 333694799708160
+        },
+        "dense_peaks_tflops": {
+          "BF16": 989.5,
+          "FP32": 67.0,
+          "FP8": 1979.0
+        },
+        "ideal_compute_ms_by_precision": {
+          "BF16": 118.23912899356847,
+          "FP32": 2.692367558686567,
+          "FP8": 168.61788767466396
+        },
+        "ideal_compute_ms": 289.549384226919,
+        "wall_samples_ms": [
+          854.1351080057211,
+          850.6641919957474,
+          849.0506599773653
+        ],
+        "wall_median_ms": 850.6641919957474,
+        "utilization_samples_percent": [
+          33.899716978379914,
+          34.03803603718241,
+          34.102721766288724
+        ],
+        "utilization_at_median_wall_percent": 34.03803603718241,
+        "limitations": "Single-device workload only; no extrapolation to other layers or devices. Reference peak normalization is not achieved-clock normalization or Tensor Core activity. No arithmetic mean of operator utilization is used. Nonmatrix work, padding and transfers add no useful matrix FLOPs; all remain in wall time."
+      },
+      {
+        "mode": "resident",
+        "phase": "extend",
+        "metric": "end_to_end_precision_normalized_useful_compute_utilization",
+        "scope": "checkpoint_layers_0_1_2_embedding_final_norm_last_token_lm_head",
+        "device_count": 1,
+        "formula": "100 * sum_precision(useful_flops / (dense_peak_tflops * 1e9)) / wall_ms",
+        "work_basis": "useful matrix work of the measured implementation, including absorbed MLA",
+        "timing_basis": "uninstrumented synchronized end-to-end wall; one semantic ledger per sample",
+        "matrix_call_count": 43,
+        "explicit_nonmatrix_call_count": 79,
+        "useful_flops_by_precision": {
+          "BF16": 1857279229952,
+          "FP32": 2818572288,
+          "FP8": 6889018490880
+        },
+        "dense_peaks_tflops": {
+          "BF16": 989.5,
+          "FP32": 67.0,
+          "FP8": 1979.0
+        },
+        "ideal_compute_ms_by_precision": {
+          "BF16": 1.8769875997493684,
+          "FP32": 0.04206824310447761,
+          "FP8": 3.4810603794239516
+        },
+        "ideal_compute_ms": 5.400116222277798,
+        "wall_samples_ms": [
+          18.376850988715887,
+          18.34420900559053,
+          18.34576000692323,
+          18.305273028090596,
+          18.313526990823448
+        ],
+        "wall_median_ms": 18.34420900559053,
+        "utilization_samples_percent": [
+          29.385427490235852,
+          29.437716396668147,
+          29.435227650639327,
+          29.50033148367128,
+          29.487035593873813
+        ],
+        "utilization_at_median_wall_percent": 29.437716396668147,
+        "limitations": "Single-device workload only; no extrapolation to other layers or devices. Reference peak normalization is not achieved-clock normalization or Tensor Core activity. No arithmetic mean of operator utilization is used. Nonmatrix work, padding and transfers add no useful matrix FLOPs; all remain in wall time."
+      },
+      {
+        "mode": "offload",
+        "phase": "prefix",
+        "metric": "end_to_end_precision_normalized_useful_compute_utilization",
+        "scope": "checkpoint_layers_0_1_2_embedding_final_norm_last_token_lm_head",
+        "device_count": 1,
+        "formula": "100 * sum_precision(useful_flops / (dense_peak_tflops * 1e9)) / wall_ms",
+        "work_basis": "useful matrix work of the measured implementation, including absorbed MLA",
+        "timing_basis": "uninstrumented synchronized end-to-end wall; one semantic ledger per sample",
+        "matrix_call_count": 2719,
+        "explicit_nonmatrix_call_count": 5341,
+        "useful_flops_by_precision": {
+          "BF16": 116997618139136,
+          "FP32": 180388626432,
+          "FP8": 333694799708160
+        },
+        "dense_peaks_tflops": {
+          "BF16": 989.5,
+          "FP32": 67.0,
+          "FP8": 1979.0
+        },
+        "ideal_compute_ms_by_precision": {
+          "BF16": 118.23912899356847,
+          "FP32": 2.692367558686567,
+          "FP8": 168.61788767466396
+        },
+        "ideal_compute_ms": 289.549384226919,
+        "wall_samples_ms": [
+          1804.4247000361793,
+          1756.86072796816,
+          1773.963095038198
+        ],
+        "wall_median_ms": 1773.963095038198,
+        "utilization_samples_percent": [
+          16.046631606246216,
+          16.481066462324986,
+          16.322176320172225
+        ],
+        "utilization_at_median_wall_percent": 16.322176320172225,
+        "limitations": "Single-device workload only; no extrapolation to other layers or devices. Reference peak normalization is not achieved-clock normalization or Tensor Core activity. No arithmetic mean of operator utilization is used. Nonmatrix work, padding and transfers add no useful matrix FLOPs; all remain in wall time."
+      },
+      {
+        "mode": "offload",
+        "phase": "extend",
+        "metric": "end_to_end_precision_normalized_useful_compute_utilization",
+        "scope": "checkpoint_layers_0_1_2_embedding_final_norm_last_token_lm_head",
+        "device_count": 1,
+        "formula": "100 * sum_precision(useful_flops / (dense_peak_tflops * 1e9)) / wall_ms",
+        "work_basis": "useful matrix work of the measured implementation, including absorbed MLA",
+        "timing_basis": "uninstrumented synchronized end-to-end wall; one semantic ledger per sample",
+        "matrix_call_count": 44,
+        "explicit_nonmatrix_call_count": 88,
+        "useful_flops_by_precision": {
+          "BF16": 1857279229952,
+          "FP32": 2818572288,
+          "FP8": 6889018490880
+        },
+        "dense_peaks_tflops": {
+          "BF16": 989.5,
+          "FP32": 67.0,
+          "FP8": 1979.0
+        },
+        "ideal_compute_ms_by_precision": {
+          "BF16": 1.8769875997493684,
+          "FP32": 0.04206824310447761,
+          "FP8": 3.4810603794239516
+        },
+        "ideal_compute_ms": 5.400116222277798,
+        "wall_samples_ms": [
+          36.35243297321722,
+          36.24513902468607,
+          36.28924099029973,
+          36.16522700758651,
+          36.16509900894016
+        ],
+        "wall_median_ms": 36.24513902468607,
+        "utilization_samples_percent": [
+          14.854896304344614,
+          14.898870214292328,
+          14.880763760590286,
+          14.931791306453007,
+          14.931844154340258
+        ],
+        "utilization_at_median_wall_percent": 14.898870214292328,
+        "limitations": "Single-device workload only; no extrapolation to other layers or devices. Reference peak normalization is not achieved-clock normalization or Tensor Core activity. No arithmetic mean of operator utilization is used. Nonmatrix work, padding and transfers add no useful matrix FLOPs; all remain in wall time."
+      }
+    ]
   },
-  "nonmatrix_scopes_preserved_with_null_mfu": [
-    "apply_rope",
-    "attention_output",
-    "attention_projection",
-    "cache_write",
-    "dense_mlp",
-    "embedding",
-    "exact_topk",
-    "final_norm_lm_head",
-    "forward_misc",
-    "hidden_transfer",
-    "index_layer_norm",
-    "indexer_aux",
-    "indexer_prefetch_aux",
-    "input_residual_norm",
-    "layer_misc",
-    "normalized_hadamard",
-    "offload_exact_recall",
-    "offload_prepare",
-    "post_attention_residual_norm",
-    "quantize_index",
-    "rms_norm",
-    "sparse_mla_aux"
-  ],
-  "all_172_compute_layer_rows_have_verified_mfu": true,
-  "resident_offload_useful_flops_equal_per_stage": true,
-  "trace_independent_checks": [
-    {
-      "mode": "resident",
-      "phase": "prefill_annotated",
-      "original_path": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-profile/deepseek-layers3-20261002_echo_layers3_mfu_01.2ZVeKe/data/capture_1.sqlite",
-      "current_path": "experiments/deepseek_v32_echo_prefill/output/data/20261002_echo_layers3_mfu_01/capture_1.sqlite",
-      "sha256": "e592a5d4c13e552758dd7d005fe28541c5120697a296fdf39b8047de050476d0",
-      "sha_matches": true,
-      "independent_scope_event_sweep_matches_all_kernel_rows": true,
-      "kernel_count": 47502,
-      "kernel_ns": 2594893285,
-      "cuda_logical_device": 0,
-      "nsys_physical_gpu": 1,
-      "nsys_gpu_uuid": "a2226185-cb05-a411-80da-f365154128fe"
+  "saved_output_checks": {
+    "tensor_checks": [
+      {
+        "file": "resident_control.pt",
+        "field": "hidden",
+        "shape": [
+          1024,
+          7168
+        ],
+        "dtype": "torch.bfloat16",
+        "elements_compared": 7340032,
+        "bitwise_equal": true,
+        "max_abs": 0.0,
+        "mean_abs": 0.0,
+        "relative_l2": 0.0,
+        "allclose_at_original_tolerance": true,
+        "elements_outside_original_tolerance": 0,
+        "rows_outside_original_tolerance": 0,
+        "rtol": 0.01,
+        "atol": 0.02
+      },
+      {
+        "file": "resident_control.pt",
+        "field": "logits",
+        "shape": [
+          1,
+          129280
+        ],
+        "dtype": "torch.float32",
+        "elements_compared": 129280,
+        "bitwise_equal": true,
+        "max_abs": 0.0,
+        "mean_abs": 0.0,
+        "relative_l2": 0.0,
+        "allclose_at_original_tolerance": true,
+        "elements_outside_original_tolerance": 0,
+        "rows_outside_original_tolerance": 0,
+        "rtol": 0.01,
+        "atol": 0.02
+      },
+      {
+        "file": "offload_control.pt",
+        "field": "hidden",
+        "shape": [
+          1024,
+          7168
+        ],
+        "dtype": "torch.bfloat16",
+        "elements_compared": 7340032,
+        "bitwise_equal": true,
+        "max_abs": 0.0,
+        "mean_abs": 0.0,
+        "relative_l2": 0.0,
+        "allclose_at_original_tolerance": true,
+        "elements_outside_original_tolerance": 0,
+        "rows_outside_original_tolerance": 0,
+        "rtol": 0.01,
+        "atol": 0.02
+      },
+      {
+        "file": "offload_control.pt",
+        "field": "logits",
+        "shape": [
+          1,
+          129280
+        ],
+        "dtype": "torch.float32",
+        "elements_compared": 129280,
+        "bitwise_equal": true,
+        "max_abs": 0.0,
+        "mean_abs": 0.0,
+        "relative_l2": 0.0,
+        "allclose_at_original_tolerance": true,
+        "elements_outside_original_tolerance": 0,
+        "rows_outside_original_tolerance": 0,
+        "rtol": 0.01,
+        "atol": 0.02
+      },
+      {
+        "file": "resident_profile_output.pt",
+        "field": "hidden",
+        "shape": [
+          1024,
+          7168
+        ],
+        "dtype": "torch.bfloat16",
+        "elements_compared": 7340032,
+        "bitwise_equal": true,
+        "max_abs": 0.0,
+        "mean_abs": 0.0,
+        "relative_l2": 0.0,
+        "allclose_at_original_tolerance": true,
+        "elements_outside_original_tolerance": 0,
+        "rows_outside_original_tolerance": 0,
+        "rtol": 0.01,
+        "atol": 0.02
+      },
+      {
+        "file": "resident_profile_output.pt",
+        "field": "logits",
+        "shape": [
+          1,
+          129280
+        ],
+        "dtype": "torch.float32",
+        "elements_compared": 129280,
+        "bitwise_equal": true,
+        "max_abs": 0.0,
+        "mean_abs": 0.0,
+        "relative_l2": 0.0,
+        "allclose_at_original_tolerance": true,
+        "elements_outside_original_tolerance": 0,
+        "rows_outside_original_tolerance": 0,
+        "rtol": 0.01,
+        "atol": 0.02
+      },
+      {
+        "file": "offload_profile_output.pt",
+        "field": "hidden",
+        "shape": [
+          1024,
+          7168
+        ],
+        "dtype": "torch.bfloat16",
+        "elements_compared": 7340032,
+        "bitwise_equal": true,
+        "max_abs": 0.0,
+        "mean_abs": 0.0,
+        "relative_l2": 0.0,
+        "allclose_at_original_tolerance": true,
+        "elements_outside_original_tolerance": 0,
+        "rows_outside_original_tolerance": 0,
+        "rtol": 0.01,
+        "atol": 0.02
+      },
+      {
+        "file": "offload_profile_output.pt",
+        "field": "logits",
+        "shape": [
+          1,
+          129280
+        ],
+        "dtype": "torch.float32",
+        "elements_compared": 129280,
+        "bitwise_equal": true,
+        "max_abs": 0.0,
+        "mean_abs": 0.0,
+        "relative_l2": 0.0,
+        "allclose_at_original_tolerance": true,
+        "elements_outside_original_tolerance": 0,
+        "rows_outside_original_tolerance": 0,
+        "rtol": 0.01,
+        "atol": 0.02
+      }
+    ],
+    "file_sha256": {
+      "resident_control.pt": "6a264d6b15c676401eb511b6ad235e5007a8dc4e6f4a3f74de17ac2dab150100",
+      "offload_control.pt": "a341908f8abea7d973980c50638fa2be35411794698dcede709b2e76c6f4dcc1",
+      "resident_profile_output.pt": "314f36eebe4e9dc73519b4eacea210c6135d68dd75e8d750b8b7660b6c769b0f",
+      "offload_profile_output.pt": "5eddd3da9b77fe823a4286209bee86ed164eebb48ddba88a68dca79a747490f1"
     },
-    {
-      "mode": "resident",
-      "phase": "extend_annotated",
-      "original_path": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-profile/deepseek-layers3-20261002_echo_layers3_mfu_01.2ZVeKe/data/capture_2.sqlite",
-      "current_path": "experiments/deepseek_v32_echo_prefill/output/data/20261002_echo_layers3_mfu_01/capture_2.sqlite",
-      "sha256": "c30e835f5ad5b0038002832748dd9a4533ca95b9604137e6b32611ec21cc1920",
-      "sha_matches": true,
-      "independent_scope_event_sweep_matches_all_kernel_rows": true,
-      "kernel_count": 756,
-      "kernel_ns": 44906074,
-      "cuda_logical_device": 0,
-      "nsys_physical_gpu": 1,
-      "nsys_gpu_uuid": "a2226185-cb05-a411-80da-f365154128fe"
-    },
-    {
-      "mode": "offload",
-      "phase": "prefill_annotated",
-      "original_path": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-profile/deepseek-layers3-20261002_echo_layers3_mfu_01.2ZVeKe/data/capture_3.sqlite",
-      "current_path": "experiments/deepseek_v32_echo_prefill/output/data/20261002_echo_layers3_mfu_01/capture_3.sqlite",
-      "sha256": "97560884ae2ff79bf7bfdabc990bf4438f89dbff7e67535211c06005882be8f3",
-      "sha_matches": true,
-      "independent_scope_event_sweep_matches_all_kernel_rows": true,
-      "kernel_count": 87174,
-      "kernel_ns": 3014085599,
-      "cuda_logical_device": 0,
-      "nsys_physical_gpu": 1,
-      "nsys_gpu_uuid": "a2226185-cb05-a411-80da-f365154128fe"
-    },
-    {
-      "mode": "offload",
-      "phase": "extend_annotated",
-      "original_path": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-profile/deepseek-layers3-20261002_echo_layers3_mfu_01.2ZVeKe/data/capture_4.sqlite",
-      "current_path": "experiments/deepseek_v32_echo_prefill/output/data/20261002_echo_layers3_mfu_01/capture_4.sqlite",
-      "sha256": "78300244a346cc8cd77f28695d3808fa056227e3d56d93d0b174485d01a9c87d",
-      "sha_matches": true,
-      "independent_scope_event_sweep_matches_all_kernel_rows": true,
-      "kernel_count": 1455,
-      "kernel_ns": 56037136,
-      "cuda_logical_device": 0,
-      "nsys_physical_gpu": 1,
-      "nsys_gpu_uuid": "a2226185-cb05-a411-80da-f365154128fe"
-    }
-  ],
-  "saved_output_cpu_checks": [
-    {
-      "file": "resident_control.pt",
-      "field": "hidden",
-      "shape": [
-        1024,
-        7168
-      ],
-      "dtype": "torch.bfloat16",
-      "finite": true,
-      "bitwise_equal_to_resident_control": true
-    },
-    {
-      "file": "resident_control.pt",
-      "field": "logits",
-      "shape": [
-        1,
-        129280
-      ],
-      "dtype": "torch.float32",
-      "finite": true,
-      "bitwise_equal_to_resident_control": true
-    },
-    {
-      "file": "offload_control.pt",
-      "field": "hidden",
-      "shape": [
-        1024,
-        7168
-      ],
-      "dtype": "torch.bfloat16",
-      "finite": true,
-      "bitwise_equal_to_resident_control": true
-    },
-    {
-      "file": "offload_control.pt",
-      "field": "logits",
-      "shape": [
-        1,
-        129280
-      ],
-      "dtype": "torch.float32",
-      "finite": true,
-      "bitwise_equal_to_resident_control": true
-    },
-    {
-      "file": "resident_profile_output.pt",
-      "field": "hidden",
-      "shape": [
-        1024,
-        7168
-      ],
-      "dtype": "torch.bfloat16",
-      "finite": true,
-      "bitwise_equal_to_resident_control": true
-    },
-    {
-      "file": "resident_profile_output.pt",
-      "field": "logits",
-      "shape": [
-        1,
-        129280
-      ],
-      "dtype": "torch.float32",
-      "finite": true,
-      "bitwise_equal_to_resident_control": true
-    },
-    {
-      "file": "offload_profile_output.pt",
-      "field": "hidden",
-      "shape": [
-        1024,
-        7168
-      ],
-      "dtype": "torch.bfloat16",
-      "finite": true,
-      "bitwise_equal_to_resident_control": true
-    },
-    {
-      "file": "offload_profile_output.pt",
-      "field": "logits",
-      "shape": [
-        1,
-        129280
-      ],
-      "dtype": "torch.float32",
-      "finite": true,
-      "bitwise_equal_to_resident_control": true
-    }
-  ],
-  "saved_extend_selection_checks": [
-    {
-      "layer": 0,
-      "source_run_id": "20261002_echo_layers3_mfu_01",
-      "query_start": 65536,
-      "shape": [
-        1024,
-        2048
-      ],
-      "valid_causal_pairs": 2097152,
-      "duplicate_ids_per_query": 0,
-      "selection_saved_in_separate_untimed_offload_replay": true
-    },
-    {
-      "layer": 1,
-      "source_run_id": "20261002_echo_layers3_mfu_01",
-      "query_start": 65536,
-      "shape": [
-        1024,
-        2048
-      ],
-      "valid_causal_pairs": 2097152,
-      "duplicate_ids_per_query": 0,
-      "selection_saved_in_separate_untimed_offload_replay": true
-    },
-    {
-      "layer": 2,
-      "source_run_id": "20261002_echo_layers3_mfu_01",
-      "query_start": 65536,
-      "shape": [
-        1024,
-        2048
-      ],
-      "valid_causal_pairs": 2097152,
-      "duplicate_ids_per_query": 0,
-      "selection_saved_in_separate_untimed_offload_replay": true
-    }
-  ],
-  "reported_correctness_checks": 8,
-  "cuda_initialized_during_audit": false,
-  "hardware_uuid_nvml_cuda_nsys_matches": true,
-  "peaks_match_verified_official_dense_specification": true,
-  "boundaries": [
-    "Real consecutive checkpoint layers 0-2 only; no MoE layers or full 61-layer performance claim.",
-    "One annotated capture per mode and phase; operator MFUs use that capture, not confidence intervals or the unannotated wall-time median.",
-    "FP8 linear MFU includes activation-quantization and GEMM kernel time; indexer_qk/fused includes its complete logits API helpers.",
-    "FP32 index-head-weight projection uses IEEE FP32 with TF32 disabled; its peak is 67 TFLOPS, not BF16/FP8 peak.",
-    "MLA QK and PV are one fused kernel with one shared duration; failed cache capacity probes add no MLA FLOPs; successful split leaves cover each query exactly once.",
-    "Offload 16,384 slots per layer and fixed restored prefix residency; mapped-host reads execute in kernels and are not CUDA memcpy transfer records.",
-    "Each prefix is rebuilt from an independent empty resident/offload cache; all 1024 extend hidden vectors match, while prefix correctness checks only last-token logits.",
-    "Saved extend selection validates the exact-top-k work count in a separate untimed replay; every prefix selection value is not saved, so early-prefix pair counts use the exact causal top-k contract.",
-    "The same NVIDIA-SMI physical GPU 1 maps to CUDA logical device 0 in all four traces; clock values are snapshots, not continuous power or clock telemetry.",
-    "Checkpoint config/tokenizer/index metadata hashes are present; complete weight-shard content hashes are not recorded.",
-    "Nsight capture relative ordering and all SQLite bytes verified; original staging absolute paths remain historical and map by basename to the current run-root SQLite files.",
-    "Scalar/selection/cache/transfer scopes use N/A Tensor MFU; their timings remain in complete kernel inventory and API/busy/gap accounting."
-  ]
+    "runtime_only_prefix_checks": [
+      "resident_profile_prefix_logits",
+      "offload_profile_prefix_logits"
+    ]
+  },
+  "boundary": "Checks result/ledger/analysis consistency, reported activity count/time and busy/gap arithmetic, and all saved extend hidden/logit tensors on CPU. Does not independently parse native traces, inspect native kernels, or verify source/native-library hashes. Prefix numerical checks are runtime-only because prefix control tensors are not saved. Annotated kernel sums and unannotated wall time remain separate metrics."
 }

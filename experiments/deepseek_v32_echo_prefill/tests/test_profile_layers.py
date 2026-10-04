@@ -6,7 +6,7 @@ from types import SimpleNamespace
 import pytest
 import torch
 
-from experiments.deepseek_v32_echo_prefill.src import profile_layers
+from experiments.deepseek_v32_echo_prefill.src import backend_provenance, profile_layers
 from models.deepseek_v32.echo_model import rms_norm
 
 
@@ -14,7 +14,10 @@ class FakeBlock:
     def __init__(self, layer):
         self.layer = layer
         self.is_moe = False
-        self.attention = SimpleNamespace(capture_hook=None)
+        self.attention = SimpleNamespace(
+            capture_hook=None,
+            attention=SimpleNamespace(precision={"fixture": "CPU FP32"}),
+        )
         self.cache = SimpleNamespace(metrics=lambda: {"layer": layer})
 
     def forward(self, hidden, residual=None, *, scope=None):
@@ -153,6 +156,24 @@ def test_timed_path_keeps_default_output_and_sync_boundary(monkeypatch):
     assert events == ["sync", "forward_with_internal_sync"]
 
 
+def test_annotated_hidden_norm_keeps_inference_mode_after_capture(cpu_annotation, monkeypatch):
+    model = FakeModel(chunk_size=2)
+    norm_modes = []
+
+    def verify_norm(*args):
+        assert cpu_annotation == ["start", "stop"]
+        assert not model.instrumented
+        norm_modes.append((torch.is_inference_mode_enabled(), torch.is_grad_enabled()))
+        return rms_norm(*args)
+
+    monkeypatch.setattr(profile_layers, "rms_norm", verify_norm)
+    with torch.enable_grad():
+        assert not torch.is_inference_mode_enabled()
+        profile_layers.annotate(model, [2, 4, 6], "resident", "extend_annotated", True)
+        assert torch.is_grad_enabled()
+    assert norm_modes == [(True, False), (True, False)]
+
+
 def test_driver_uses_independent_prefixes_and_restores_each_extend(
     tmp_path, monkeypatch, cpu_annotation
 ):
@@ -183,6 +204,16 @@ def test_driver_uses_independent_prefixes_and_restores_each_extend(
         torch.cuda, "get_device_properties", lambda _: SimpleNamespace(uuid="GPU-1")
     )
     monkeypatch.setattr(profile_layers, "build_info", dict)
+    monkeypatch.setattr(backend_provenance, "collect_backend_provenance", lambda: {"fixture": True})
+
+    def runtime_identity():
+        assert not model.instrumented
+        assert cpu_annotation == ["start", "stop"] * 4
+        return {"fixture": True, "after_execution": True}
+
+    monkeypatch.setattr(
+        backend_provenance, "collect_flashinfer_runtime_artifacts", runtime_identity
+    )
     monkeypatch.setattr(profile_layers.importlib.metadata, "version", lambda _: "test")
     monkeypatch.setattr(
         sys,
@@ -217,6 +248,9 @@ def test_driver_uses_independent_prefixes_and_restores_each_extend(
     profile_layers.main()
     result = json.loads((output / "result.json").read_text())
     assert result["accepted"] and len(result["correctness"]) == 8
+    assert result["backend_provenance"] == {"fixture": True}
+    assert result["compute_precision"] == {"fixture": "CPU FP32"}
+    assert result["flashinfer_runtime_artifacts"] == {"fixture": True, "after_execution": True}
     assert cpu_annotation == ["start", "stop"] * 4
     for offload in (False, True):
         calls = [event for event in model.events if event[0] == "forward" and event[1] == offload]
@@ -232,3 +266,12 @@ def test_driver_uses_independent_prefixes_and_restores_each_extend(
         mode = "offload" if offload else "resident"
         assert len(result["measurements"][mode]["prefix_samples_ms"]) == 2
         assert len(result["measurements"][mode]["extend_samples_ms"]) == 2
+
+
+def test_snapshot_bytes_include_pool_dataclass_tensors_once():
+    from dataclasses import make_dataclass
+
+    record = torch.ones(4, 8, dtype=torch.bfloat16)
+    pool_type = make_dataclass("PoolSnapshotFixture", [("records", object), ("alias", object)])
+    snapshot = {"pool": pool_type(record, record[:1]), "offset": torch.zeros(16)}
+    assert profile_layers.tensor_storage_bytes(snapshot) == record.nbytes + 64

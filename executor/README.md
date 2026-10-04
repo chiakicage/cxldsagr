@@ -5,6 +5,11 @@ session 容量估计、分配、prefix 构建、完整 candidate hidden 输出�
 DeepSeek 与 NOSA 在模型目录实现该契约；用户身份、热度、预算准入和 LRU 由 serving/cache
 负责，执行器不读取 GR 请求。
 
+共享资源扩展通过纯 `plan_resources` 预留，`allocate_shared` 分配一次。
+runner 在分配前 `bind_owner`，关闭全部 session 后 `unbind_owner`，共享资源由外层
+`backend.close()` 释放。构造回滚只释放本次绑定后新建的资源；已有相同 plan 保留。
+无法确认异步完成时保留 owner 并禁用复用，避免第二个 pool 重复占用同一预算。
+
 [model_executor.py](model_executor.py) 提供与 GR 请求格式无关的 token tensor 执行接口。
 `ModelExecutor(model, cache_manager=None, chunk_size=1024)` 负责分配/释放 session，
 并用共享分块循环执行 `prefill` 和 `extend`。prefill 要求空 cache，extend 要求已有前缀；

@@ -131,3 +131,37 @@ def test_report_artifacts_preserve_rows_and_render_valid_svg(tmp_path):
     comparison = ElementTree.fromstring((tmp_path / "summary.svg").read_text())
     assert len(comparison.findall("{http://www.w3.org/2000/svg}circle")) == 8
     assert "Revisits only" in (tmp_path / "summary.svg").read_text()
+
+
+def sequential_rows():
+    rows = measured_rows()
+    for row in rows:
+        row.update(
+            sequential_loops_schema=1,
+            rounds=2,
+            round_index=row["request_id"] // 2,
+            round_user_index=row["request_id"] % 2,
+        )
+    return rows
+
+
+def test_report_summarizes_each_complete_round(tmp_path):
+    summary = write_report(sequential_rows(), tmp_path)
+    assert summary["schema_version"] == 2
+    assert len(summary["rounds"]) == 4
+    assert [row["count"] for row in summary["rounds"]] == [2] * 4
+    assert [row["prefix_hits"] for row in summary["rounds"]] == [0, 1, 0, 1]
+    assert len((tmp_path / "rounds.csv").read_text().splitlines()) == 5
+
+
+@pytest.mark.parametrize("mutation", ["partial", "wrong_index", "missing_schema"])
+def test_report_rejects_incomplete_round_coverage(mutation):
+    rows = sequential_rows()
+    if mutation == "partial":
+        rows = [row for row in rows if row["request_id"] < 3]
+    elif mutation == "wrong_index":
+        rows[0]["round_index"] = 1
+    else:
+        del rows[0]["sequential_loops_schema"]
+    with pytest.raises(ValueError, match="round"):
+        summarize(rows)

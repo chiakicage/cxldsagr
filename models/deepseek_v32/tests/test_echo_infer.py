@@ -22,7 +22,14 @@ def test_impossible_placement_fails_without_partial_model():
 @pytest.fixture
 def constructor_fixture(monkeypatch, tmp_path):
     """Track checkpoint access and placement without constructing CUDA blocks."""
-    config = SimpleNamespace(num_hidden_layers=61, max_seq_len=128)
+    config = SimpleNamespace(
+        num_hidden_layers=61,
+        max_seq_len=128,
+        index_topk=2048,
+        kv_lora_rank=512,
+        qk_rope_head_dim=64,
+        index_head_dim=128,
+    )
     names = ["model.embed_tokens.weight", "model.norm.weight", "lm_head.weight"]
     names += [f"model.layers.{layer}.input_layernorm.weight" for layer in range(61)]
     reader = SimpleNamespace(
@@ -245,6 +252,7 @@ def test_failed_begin_rolls_back_only_steps_owned_by_current_call(fake_model_fac
 def test_failed_model_step_preserves_prefix_and_can_retry(fake_model_factory, failure):
     model = fake_model_factory()
     expected_model = fake_model_factory()
+    model.extend_chunk_size = expected_model.extend_chunk_size = 2
     prefix, extend = [1, 2, 3], [4, 5, 6]
     model.forward(prefix)
     expected_model.forward(prefix)
@@ -255,9 +263,14 @@ def test_failed_model_step_preserves_prefix_and_can_retry(fake_model_factory, fa
         # previous layer has already appended part of the second chunk.
         model.blocks[1].fail_on_call = model.blocks[1].calls + 2
     elif failure == "synchronize":
+        attempts = 0
 
         def failed_synchronize():
-            raise RuntimeError("injected asynchronous execution failure")
+            nonlocal attempts
+            attempts += 1
+            if attempts == 1:
+                raise RuntimeError("injected recoverable synchronization failure")
+            synchronize()
 
         model.synchronize = failed_synchronize
     else:
@@ -276,3 +289,253 @@ def test_failed_model_step_preserves_prefix_and_can_retry(fake_model_factory, fa
     actual = model.forward(extend, all_logits=True)
     expected = expected_model.forward(extend, all_logits=True)
     torch.testing.assert_close(actual, expected, rtol=0, atol=0)
+
+
+def test_unrecoverable_cuda_drain_poison_prevents_retry(fake_model_factory):
+    model = fake_model_factory()
+    model.forward([1, 2, 3])
+
+    def failed_synchronize():
+        raise RuntimeError("permanent CUDA failure")
+
+    model.synchronize = failed_synchronize
+    with pytest.raises(RuntimeError, match="permanent CUDA"):
+        model.forward([4, 5])
+    assert model._poisoned
+    assert model.length == 3
+    assert all(block.cache.commits == 1 for block in model.blocks)
+    with pytest.raises(RuntimeError, match="poisoned"):
+        model.forward([4, 5])
+
+
+@pytest.mark.parametrize("offload", [False, True])
+def test_cache_hbm_budget_fails_before_any_layer_cache_allocation(constructor_fixture, offload):
+    from cache.prefix_pool import CacheBudgetExceeded
+
+    path, _, loaded = constructor_fixture
+    with pytest.raises(CacheBudgetExceeded, match="cache needs"):
+        DeepSeekEchoModel(
+            path,
+            devices=[0],
+            capacity=16,
+            num_layers=3,
+            offload=offload,
+            hbm_cache_budget_bytes=1,
+        )
+    assert loaded == []
+
+
+def test_host_arena_dram_budget_fails_before_gpu_or_host_pool_allocation(
+    constructor_fixture, monkeypatch
+):
+    from cache.prefix_pool import CacheBudgetExceeded
+    from cache.sparse_token_pool import SharedSparseTokenPool
+
+    path, _, loaded = constructor_fixture
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("allocated a pool before checking DRAM budget")
+
+    monkeypatch.setattr(SharedSparseTokenPool, "__init__", forbidden)
+    with pytest.raises(CacheBudgetExceeded, match="DRAM bytes"):
+        DeepSeekEchoModel(
+            path,
+            devices=[0],
+            capacity=16,
+            num_layers=3,
+            offload=True,
+            dram_cache_budget_bytes=1,
+        )
+    assert loaded == []
+
+
+@pytest.mark.parametrize("failure_stage", ["pool", "session", "layer_view"])
+def test_later_device_cache_allocation_failure_releases_earlier_resources(
+    monkeypatch, failure_stage
+):
+    import cache.sparse_token_pool as cache_module
+
+    model = object.__new__(DeepSeekEchoModel)
+    model.devices = [torch.device("cuda:0"), torch.device("cuda:1")]
+    model.placement = model.devices
+    model.capacity, model.host_arena_tokens, model.slots = 32, 64, 4
+    model.cfg = SimpleNamespace(kv_lora_rank=2, qk_rope_head_dim=2)
+    model._shared_pools, model._shared_sessions = {}, {}
+    model._poisoned = False
+    pools, sessions = [], []
+    fail = True
+
+    class Session:
+        def __init__(self, device):
+            self.device = device
+            self.released = False
+            sessions.append(self)
+
+        def layer(self, index):
+            if fail and self.device.index == 1 and failure_stage == "layer_view":
+                raise RuntimeError("later device allocation failed")
+            return (self.device, index)
+
+        def release(self):
+            self.released = True
+
+    class Pool:
+        def __init__(self, *args, device, **kwargs):
+            if fail and device.index == 1 and failure_stage == "pool":
+                raise RuntimeError("later device allocation failed")
+            self.device, self.closed = device, False
+            pools.append(self)
+
+        def allocate_session(self, capacity):
+            if fail and self.device.index == 1 and failure_stage == "session":
+                raise RuntimeError("later device allocation failed")
+            return Session(self.device)
+
+        def close(self):
+            self.closed = True
+
+    monkeypatch.setattr(cache_module, "SharedSparseTokenPool", Pool)
+    with pytest.raises(RuntimeError, match="later device allocation"):
+        model._allocate_shared_caches()
+    assert pools and all(pool.closed for pool in pools)
+    assert sessions and all(session.released for session in sessions)
+    assert model._shared_pools == model._shared_sessions == {}
+    assert not model._poisoned
+    # Fully cleaned allocation failure may be retried without leaked ownership.
+    fail = False
+    allocated = model._allocate_shared_caches()
+    assert set(allocated) == {0, 1}
+    assert set(model._shared_pools) == set(model.devices)
+    model._release_shared_caches()
+
+
+def test_failed_later_cache_runner_replacement_cleans_pools_and_poisons_model(monkeypatch):
+    import models.deepseek_v32.echo_attention as attention_module
+
+    model = object.__new__(DeepSeekEchoModel)
+    device = torch.device("cpu")
+    model.devices = [device]
+    model.capacity, model.slots, model.chunk_size = 32, 4, 4
+    model.length, model.offload = 8, False
+    model._cache_generation = 3
+    model._poisoned = False
+    model.synchronize = lambda: None
+    model._plan_cache_resources = lambda offload: {"offload": offload}
+    old_caches = [object() for _ in range(3)]
+    model.blocks = [
+        SimpleNamespace(
+            attention=SimpleNamespace(attention=SimpleNamespace(device=device)), cache=cache
+        )
+        for cache in old_caches
+    ]
+    released = []
+    closed = []
+    model._shared_pools, model._shared_sessions = {}, {}
+
+    def allocate_replacements():
+        assert all(block.attention is block.cache is None for block in model.blocks)
+        model._shared_pools[device] = SimpleNamespace(close=lambda: closed.append(True))
+        model._shared_sessions[device] = SimpleNamespace(release=lambda: released.append(True))
+        return {layer: object() for layer in range(3)}
+
+    model._allocate_shared_caches = allocate_replacements
+    created = []
+
+    def runner(*args, cache, **kwargs):
+        if created:
+            raise RuntimeError("later indexer cache allocation failed")
+        result = SimpleNamespace(cache=cache)
+        created.append(result)
+        return result
+
+    monkeypatch.setattr(attention_module, "EchoAttentionRunner", runner)
+    monkeypatch.setattr(torch.cuda, "device", lambda device: nullcontext())
+    with pytest.raises(RuntimeError, match="later indexer cache allocation"):
+        model.set_cache_mode(True)
+    assert released == closed == [True]
+    assert model._shared_pools == model._shared_sessions == {}
+    assert model._cache_generation == 4
+    assert model._poisoned
+    with pytest.raises(RuntimeError, match="poisoned"):
+        model.forward([1])
+
+
+def test_single_query_capacity_is_checked_before_loading_checkpoint_layers(constructor_fixture):
+    path, _, loaded = constructor_fixture
+    with pytest.raises(ValueError, match="exact selection"):
+        DeepSeekEchoModel(
+            path, devices=[0], capacity=16, num_layers=3, offload=True, slots=8, chunk_size=4
+        )
+    assert loaded == []
+
+
+def test_small_pool_mode_change_preserves_existing_resident_prefix(fake_model_factory):
+    model, oracle = fake_model_factory(), fake_model_factory()
+    prefix, candidate = [1, 2, 3], [4, 5]
+    model.forward(prefix)
+    oracle.forward(prefix)
+    model.cfg.index_topk = 16
+    model.slots, model.offload, model._poisoned = 8, False, False
+    model._cache_generation = 7
+    resource_plan = model._cache_resource_plan = {"resident": True}
+    pools = model._shared_pools = {}
+    sessions = model._shared_sessions = {}
+    caches = [block.cache for block in model.blocks]
+    contents = [torch.stack(cache.rows).clone() for cache in caches]
+    syncs = len(model.sync_observations)
+    with pytest.raises(ValueError, match="full exact selection"):
+        model.set_cache_mode(True)
+    assert model._cache_generation == 7 and not model._poisoned and not model.offload
+    assert model._cache_resource_plan is resource_plan
+    assert model._shared_pools is pools and model._shared_sessions is sessions
+    assert len(model.sync_observations) == syncs
+    assert model.length == len(prefix)
+    for block, cache, expected in zip(model.blocks, caches, contents, strict=True):
+        assert block.cache is cache and cache.length == cache.written == len(prefix)
+        torch.testing.assert_close(torch.stack(cache.rows), expected, rtol=0, atol=0)
+    # A rejected offload admission must leave the current resident model usable.
+    torch.testing.assert_close(model.forward(candidate), oracle.forward(candidate), rtol=0, atol=0)
+
+
+def test_extend_mlp_geometry_uses_outer_batch_not_prefill_chunk(fake_model_factory):
+    model = fake_model_factory(chunk_size=2)
+    model.forward([1, 2, 3])
+    model.forward([4, 5, 6, 7, 8])
+    assert all(block.chunk_size == 5 for block in model.blocks)
+    model.extend_chunk_size = 3
+    model.forward([9, 10, 11, 12])
+    assert all(block.chunk_size == 1 for block in model.blocks)  # Actual final tail.
+
+
+@pytest.mark.parametrize("oversized", ["prefill", "extend", "workspace"])
+def test_oversized_query_mode_change_preserves_resident_prefix(fake_model_factory, oversized):
+    model, oracle = fake_model_factory(), fake_model_factory()
+    prefix, candidate = [1, 2, 3], [4, 5]
+    model.forward(prefix)
+    oracle.forward(prefix)
+    model.cfg.index_topk = 4  # A single exact selection fits; only Q exceeds P.
+    model.slots, model.offload, model._poisoned = 8, False, False
+    model.execution_reservation = SimpleNamespace(
+        query_tokens=16 if oversized == "workspace" else 8
+    )
+    if oversized == "prefill":
+        model.chunk_size = 16
+    elif oversized == "extend":
+        model.extend_chunk_size = 16
+    model._cache_generation = 9
+    resource_plan = model._cache_resource_plan = {"resident": True}
+    pools = model._shared_pools = {}
+    sessions = model._shared_sessions = {}
+    caches = [block.cache for block in model.blocks]
+    contents = [torch.stack(cache.rows).clone() for cache in caches]
+    syncs = len(model.sync_observations)
+    with pytest.raises(ValueError, match="query batch and workspace"):
+        model.set_cache_mode(True)
+    assert model._cache_generation == 9 and not model._poisoned and not model.offload
+    assert model._cache_resource_plan is resource_plan
+    assert model._shared_pools is pools and model._shared_sessions is sessions
+    assert len(model.sync_observations) == syncs and model.length == len(prefix)
+    for block, cache, expected in zip(model.blocks, caches, contents, strict=True):
+        assert block.cache is cache and cache.length == cache.written == len(prefix)
+        torch.testing.assert_close(torch.stack(cache.rows), expected, rtol=0, atol=0)
+    torch.testing.assert_close(model.forward(candidate), oracle.forward(candidate), rtol=0, atol=0)

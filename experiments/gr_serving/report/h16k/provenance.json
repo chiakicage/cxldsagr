@@ -1,107 +1,44 @@
 {
+  "schema": "echo-gr-nosa-subset-v1",
   "run_id": "gr_serving_h200_20261002_h16k_01",
+  "status": "retained_subset",
+  "note": "Retained NOSA subset of the original mixed run, not a new measurement. Original numerical and latency evidence is unchanged for NOSA. Original cache reservations and boundary samples do not establish complete hard-budget acceptance, and do not validate the later NOSA shared-workspace implementation.",
   "source_sha256": "45511acf6b7ec0e0a9bf3e21a4f9b1c9b74f88a46f03303f3f93cc9460dfd44c",
-  "measurement_status": "accepted",
-  "audit_status": "accepted",
+  "original_provenance_sha256": "315fc0b5ba9f32edd7d1bf9eadb1ec80ce489acd138a1a87ed54a7b94f603146",
+  "derivation_tool_sha256": "46795300ebf3fa60ef5b6f3abe1ff7dda38f5d660436024e2a1ec3df3f7b22a4",
   "source_directory": "experiments/gr_serving/output/data/gr_serving_h200_20261002_h16k_01",
-  "copied_files": {
-    "summary.csv": {
-      "source": "analysis/summary.csv",
-      "sha256": "6da3f94c091d0509dd91dbba442f3ea99f9d1283257dd55e79d54ede3b0c2505"
-    },
-    "summary.json": {
-      "source": "analysis/summary.json",
-      "sha256": "1d5d75729eadc46d32c398f4be2bb95843bdae6aed7fe23c9bcc0e61c39f2f30"
-    },
-    "summary.svg": {
-      "source": "analysis/summary.svg",
-      "sha256": "721d4bcd0121717fb57343ced63abfe30f15287d72d8da275f5d754d6b8fcc22"
-    },
-    "per_request.csv": {
-      "source": "analysis/per_request.csv",
-      "sha256": "a27db59aab392c49723ddd19de69b17efb05588bec1820dd2ae58c24e622a443"
-    },
-    "per_request.svg": {
-      "source": "analysis/per_request.svg",
-      "sha256": "4a3a7087db7f41bbe834c74d7e2947a8da18f833e25cb6f1c7ca14d2dff90f7a"
-    },
-    "metadata.json": {
-      "source": "metadata.json",
-      "sha256": "c3fdeefa65b2ff24552d6a09d6e8f304c739f1f167d7ce2486ceade478aaf6ca"
-    },
-    "source_manifest.json": {
-      "source": "source_manifest.json",
-      "sha256": "38aa4a382c9e010a53ed0d0d315b5c991b51c897293a5ea7274d5a7837c25d56"
-    },
-    "audit.json": {
-      "source": "audit.json",
-      "sha256": "b9fef64139febe6f3e4a474361a9762e889f695b899ee8d166f6534b68482858"
-    }
+  "profile_metadata_derivation": {
+    "schema": "echo-gr-nosa-subset-v1",
+    "note": "Retained NOSA subset of the original mixed run, not a new measurement. Original numerical and latency evidence is unchanged for NOSA. Original cache reservations and boundary samples do not establish complete hard-budget acceptance, and do not validate the later NOSA shared-workspace implementation.",
+    "profile_identity_unchanged": true,
+    "profile_run_id": "gr_serving_h200_20261002_h16k_profile_01",
+    "profile_data_directory": "experiments/gr_serving/output/data/gr_serving_h200_20261002_h16k_profile_01",
+    "original_profile_metadata_sha256": "de94f39e5316f5b6d2992ade6fa1f98600e8a3f5e00164286154664b93664bca",
+    "original_formal_metadata_sha256": "c3fdeefa65b2ff24552d6a09d6e8f304c739f1f167d7ce2486ceade478aaf6ca",
+    "retained_formal_metadata_sha256": "b82f908d41d2ce4ec2582a6927bc1ff9434db707b9dbd055819b5a13650e7c12",
+    "formal_source_manifest_sha256": "38aa4a382c9e010a53ed0d0d315b5c991b51c897293a5ea7274d5a7837c25d56",
+    "original_formal_run_id": "gr_serving_h200_20261002_h16k_01",
+    "boundary": "Only this copied formal metadata is derived. Original profile metadata, source identity, inputs, actual intervals and output tensors are byte-identical; this is not profile reacceptance."
   },
-  "supplemental_renderer": {
-    "path": "experiments/gr_serving/output/data/gr_serving_h200_20261002_h16k_01/render_report.py",
-    "sha256": "71704ada5c64e417f4af703f21043eca5d3232bb5e26934cc6dc0ef93bec166d",
-    "command": ".venv/bin/python experiments/gr_serving/output/data/gr_serving_h200_20261002_h16k_01/render_report.py --summary experiments/gr_serving/report/h16k/summary.json --metadata experiments/gr_serving/report/h16k/metadata.json --output-dir experiments/gr_serving/report/h16k",
-    "input_summary_sha256": "1d5d75729eadc46d32c398f4be2bb95843bdae6aed7fe23c9bcc0e61c39f2f30",
-    "changes": "Categorical user-population x spacing and independent all/revisit y axes; unchanged measured means/p95. 4K renderer reused byte-for-byte.",
-    "matplotlib_version": "3.11.1"
-  },
-  "derived_tables": {
-    "population_coverage.csv": "Per-population requests/observed_users/revisits/max_revisits_observed from metadata cases; all model/scheme cases asserted equal. first_visits equals observed_users.",
-    "cache_and_memory.csv": "Per model/scheme maximum of each audit.case_audit.peaks field and metadata.cases GPU allocator peaks over seven populations; admission capacity/reservations from audit; evictions/revisit misses summed over cases."
-  },
-  "interpretation": [
-    "HBM and DRAM budgets are artificial cache quotas, not whole-device memory limits.",
-    "NOSA HBM has 13 revisit misses among 63 revisits; offload schemes have none on this trace.",
-    "DeepSeek HBM evicts sessions but every observed revisit still hits; no measured revisit capacity benefit.",
-    "CUDA allocator peaks include model-transition retention and are not isolated model or activation peaks.",
-    "64K remains a separate pending run; no extrapolation from this matrix."
-  ],
-  "profile": {
-    "run_id": "gr_serving_h200_20261002_h16k_profile_01",
-    "source_directory": "experiments/gr_serving/output/data/gr_serving_h200_20261002_h16k_profile_01",
-    "status": "accepted",
-    "formal_run_id": "gr_serving_h200_20261002_h16k_01",
-    "formal_source_sha256": "45511acf6b7ec0e0a9bf3e21a4f9b1c9b74f88a46f03303f3f93cc9460dfd44c",
-    "source_sha256": "cd72caf5edbac19a54d162e26d3339b05dd0671048162d970729669af5d0c48b",
-    "formal_source_comparison": {
-      "source_sha256": "45511acf6b7ec0e0a9bf3e21a4f9b1c9b74f88a46f03303f3f93cc9460dfd44c",
-      "allowed_diagnostic_source_changes": [],
-      "reason": "Only the post-run profile entry point and its CPU tests may differ. Neither is executed by the formal latency measurement. Saved formal copies are verified against its manifest; current diagnostic copies have their own profile snapshot. All other formal sources, including performance/runtime code, must be unchanged."
-    },
-    "overlap_claim": {
-      "threshold": 0.9,
-      "samples": 3,
-      "all_samples_both_ratios_at_least_90_percent": false,
-      "below_threshold_samples_remain_valid": true
-    },
-    "scope": "Layer 31, first three revisits of the chosen saved NOSA population, one sample each",
-    "files": {
-      "profile_metadata.json": {
-        "source": "metadata.json",
-        "sha256": "de94f39e5316f5b6d2992ade6fa1f98600e8a3f5e00164286154664b93664bca"
-      },
-      "profile_analysis.json": {
-        "source": "analysis.json",
-        "sha256": "61f9975dc0f9496960cda23243f0851adb99d85d7a9c5b8583569ca5b2e93a6f"
-      }
-    }
-  },
-  "visual_inspection": {
-    "status": "passed",
-    "checked": [
-      "all fourteen original per_request panels",
-      "all four summary_readable panels"
-    ],
-    "original_summary_limitation": "Original numeric x-axis crowds 1/8 labels; original file is preserved. Readable rendering uses categorical spacing."
-  },
-  "report_generation": "Original five analysis files copied byte-for-byte from accepted analysis outputs; summary.png/per_request.png render original SVGs via librsvg/cairo. Derived tables select/aggregate verified metadata/audit fields. summary_readable SVG/PNG reuse the 4K renderer without alteration.",
   "derived_files_sha256": {
-    "cache_and_memory.csv": "e7fb837e41f2f0f81267e71437f28a7ac31c8434c7fab994253a09bc61656cb6",
-    "per_request.png": "b6a004093d2e74b2288172237864569343711cb38884e089adf6c4bb10036bf2",
+    "audit.json": "2b331dd0127088993c2b88ced20a33e97d3d72dc07f4b718dd9f62dc2fdef0c8",
+    "cache_and_memory.csv": "ebdc3fd1502fc5d389130dc5d91c032baffc93b24216cea3cddb80f74a47889e",
+    "metadata.json": "b82f908d41d2ce4ec2582a6927bc1ff9434db707b9dbd055819b5a13650e7c12",
+    "per_request.csv": "db677fac98353cc322377f4c954d1b670a14f6929edd0a9c03ff22c1bf790350",
+    "per_request.png": "d09bb2e38ab658ed9b3e775f2407c6a9ca48210be91262f61a4b82efb49e6fba",
+    "per_request.svg": "bddbac7e07398609936f587a4f5b56ea4d2a4b005b943a51181bb83d21afae18",
+    "per_request_readable.png": "d09bb2e38ab658ed9b3e775f2407c6a9ca48210be91262f61a4b82efb49e6fba",
+    "per_request_readable.svg": "bec6e11272f8b619b78374cd245be09ea1d04d77013d44aed717a5687fba3a26",
     "population_coverage.csv": "9b186041d37dc1d1522623437c29a4ea23e0c46faf1ac3ccef21b61bc4cfafa3",
-    "summary.png": "070224e8022b266ee27aab95be6ef420d37fed0482577afcb74e2b29f3686249",
-    "summary_readable.png": "6c8bafaa5a56f050b529fff36081f1b36b6e0f9f9df8409b20c8a51022c34f1f",
-    "summary_readable.svg": "abf71642a55e52d205499bec0fe40cdd51318a3a155aee31872f50e31f260011"
-  }
+    "profile_analysis.json": "61f9975dc0f9496960cda23243f0851adb99d85d7a9c5b8583569ca5b2e93a6f",
+    "profile_metadata.json": "de94f39e5316f5b6d2992ade6fa1f98600e8a3f5e00164286154664b93664bca",
+    "source_manifest.json": "38aa4a382c9e010a53ed0d0d315b5c991b51c897293a5ea7274d5a7837c25d56",
+    "summary.csv": "12d05a9d572050370872a49d153f7067132027cf9f5f2059e17777edc3dbc39c",
+    "summary.json": "a2ea2ea23fb2df8b91031883d4ed11f81a9db4370f575629b18b973520f97b91",
+    "summary.png": "97cb73954f44213a6f3ec142d9d49d6befbd4cf1faada335349145cbeb61b8f7",
+    "summary.svg": "b68a6b013ca171c742320debecdcc582e5e5ba1f3410d13da98d3bfad7e04f22",
+    "summary_readable.png": "97cb73954f44213a6f3ec142d9d49d6befbd4cf1faada335349145cbeb61b8f7",
+    "summary_readable.svg": "7b6af83843a19131d68204ef39945193beb390f60630883190d29369bf12d71d"
+  },
+  "visual_inspection": "Preparation does not assert visual acceptance. The final echo-cache-publication-v1 ledger separately records review of these hashed images before installation."
 }

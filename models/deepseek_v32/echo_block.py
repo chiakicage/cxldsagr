@@ -17,8 +17,8 @@ from models.deepseek_v32.echo_model import (
     CheckpointLinear,
     CheckpointReader,
     Config,
-    rms_norm,
 )
+from models.deepseek_v32.nonmatrix import residual_rms_norm, silu_mul, silu_mul_packed
 from operators.deepseek_v32.linear.fp8 import grouped_fp8_linear, prepare_expert_routing
 
 
@@ -57,7 +57,8 @@ def route_experts(hidden, gate_weight, correction_bias, cfg):
 class CheckpointMLP:
     """A dense or shared SwiGLU MLP loaded without dequantizing FP8 weights."""
 
-    def __init__(self, reader, stem, cfg, *, device, linear_backend="fp8"):
+    def __init__(self, reader, stem, cfg, *, device, linear_backend="fp8", pack_gate_up=False):
+        self.pack_gate_up = pack_gate_up
         self.gate = CheckpointLinear(
             reader,
             stem + ".gate_proj",
@@ -80,9 +81,47 @@ class CheckpointMLP:
             block_size=cfg.weight_block_size,
         )
 
+    def _can_pack_gate_up(self, hidden):
+        if (
+            not self.pack_gate_up
+            or hidden.device.type != "cuda"
+            or hidden.dtype != torch.bfloat16
+            or hidden.ndim != 2
+            or not hidden.numel()
+            or hidden.stride(-1) != 1
+            or torch.is_grad_enabled()
+            or self.gate.scales is None
+            or self.up.scales is None
+        ):
+            return False
+        gate, up = self.gate.weight, self.up.weight
+        return (
+            gate.ndim == up.ndim == 2
+            and gate.shape == up.shape
+            and gate.shape[1] == hidden.shape[1]
+            and gate.shape[0] > 0
+            and gate.shape[0] % 64 == 0
+            and gate.shape[1] % 128 == 0
+            and gate.dtype == up.dtype == torch.float8_e4m3fn
+            and gate.device == up.device == hidden.device
+            and gate.data_ptr() != up.data_ptr()
+            and self.gate.scales.data_ptr() != self.up.scales.data_ptr()
+            and torch.cuda.get_device_capability(hidden.device) == (9, 0)
+        )
+
     def __call__(self, hidden):
+        if self._can_pack_gate_up(hidden):
+            columns = self.gate.weight.shape[0]
+            packed = torch.empty(
+                (len(hidden), 2 * columns), device=hidden.device, dtype=torch.bfloat16
+            )
+            quantized = self.gate(hidden, out=packed[:, :columns], return_quantized=True)[1]
+            self.up(hidden, out=packed[:, columns:], quantized=quantized)
+            intermediate = silu_mul_packed(packed)
+            del packed, quantized
+            return self.down(intermediate)
         gate, up = self.gate(hidden), self.up(hidden)
-        intermediate = (F.silu(gate.float()) * up.float()).bfloat16()
+        intermediate = silu_mul(gate, up)
         return self.down(intermediate)
 
 
@@ -160,7 +199,7 @@ class CheckpointMoE:
                 self.scales["up_proj"],
                 routing=routing,
             )
-            intermediate = (F.silu(gate.float()) * up.float()).bfloat16()
+            intermediate = silu_mul(gate, up)
             del gate, up
             output = grouped_fp8_linear(
                 intermediate,
@@ -196,6 +235,7 @@ class CheckpointBlock:
         slots=16384,
         chunk_size=1024,
         linear_backend="fp8",
+        cache=None,
     ):
         if chunk_size < 1:
             raise ValueError("chunk_size must be positive")
@@ -217,6 +257,7 @@ class CheckpointBlock:
             offload=offload,
             slots=slots,
             chunk_size=chunk_size,
+            cache=cache,
         )
         self.cache = self.attention.cache
         stem = f"model.layers.{layer_idx}."
@@ -225,7 +266,10 @@ class CheckpointBlock:
         )
         self.is_moe = layer_idx >= self.cfg.first_k_dense_replace
         cls = CheckpointMoE if self.is_moe else CheckpointMLP
-        self.mlp = cls(reader, stem + "mlp", self.cfg, device=device, linear_backend=linear_backend)
+        options = {} if self.is_moe else {"pack_gate_up": True}
+        self.mlp = cls(
+            reader, stem + "mlp", self.cfg, device=device, linear_backend=linear_backend, **options
+        )
 
     @torch.inference_mode()
     def forward(self, hidden, residual=None, *, scope=None):
@@ -240,27 +284,51 @@ class CheckpointBlock:
         ):
             raise ValueError("Residual must match hidden shape, device, and BF16 dtype")
         scope = scope or (lambda _: nullcontext())
+        if len(hidden) <= self.chunk_size:
+            # Serving already chunks the complete block. Keep the norm/MLP
+            # outputs directly instead of copying them into one-slice buffers.
+            with scope("input_residual_norm"):
+                normalized, saved = residual_rms_norm(
+                    hidden,
+                    residual,
+                    self.attention.attention.input_norm_weight,
+                    self.cfg.norm_eps,
+                )
+            attention = self.attention.forward(normalized, scope=scope, normalized=True)
+            with scope("post_attention_residual_norm"):
+                normalized, output_residual = residual_rms_norm(
+                    saved, attention, self.post_norm_weight, self.cfg.norm_eps
+                )
+            with scope("moe" if self.is_moe else "dense_mlp"):
+                output = self.mlp(normalized, scope=scope) if self.is_moe else self.mlp(normalized)
+            return output, output_residual
         normalized_input = torch.empty_like(hidden)
         attention_residual = hidden if residual is None else torch.empty_like(hidden)
         for start in range(0, len(hidden), self.chunk_size):
             stop = min(start + self.chunk_size, len(hidden))
             with scope("input_residual_norm"):
-                summed = hidden[start:stop].float()
+                normalized, saved = residual_rms_norm(
+                    hidden[start:stop],
+                    None if residual is None else residual[start:stop],
+                    self.attention.attention.input_norm_weight,
+                    self.cfg.norm_eps,
+                )
                 if residual is not None:
-                    summed = summed + residual[start:stop].float()
-                    attention_residual[start:stop] = summed.bfloat16()
-                normalized_input[start:stop] = rms_norm(
-                    summed, self.attention.attention.input_norm_weight, self.cfg.norm_eps
-                ).bfloat16()
+                    attention_residual[start:stop] = saved
+                normalized_input[start:stop] = normalized
         attention = self.attention.forward(normalized_input, scope=scope, normalized=True)
         output = torch.empty_like(hidden)
         output_residual = torch.empty_like(hidden)
         for start in range(0, len(hidden), self.chunk_size):
             stop = min(start + self.chunk_size, len(hidden))
             with scope("post_attention_residual_norm"):
-                summed = attention_residual[start:stop].float() + attention[start:stop].float()
-                normalized = rms_norm(summed, self.post_norm_weight, self.cfg.norm_eps).bfloat16()
-                output_residual[start:stop] = summed.bfloat16()
+                normalized, saved = residual_rms_norm(
+                    attention_residual[start:stop],
+                    attention[start:stop],
+                    self.post_norm_weight,
+                    self.cfg.norm_eps,
+                )
+                output_residual[start:stop] = saved
             with scope("moe" if self.is_moe else "dense_mlp"):
                 ffn = self.mlp(normalized, scope=scope) if self.is_moe else self.mlp(normalized)
             output[start:stop] = ffn

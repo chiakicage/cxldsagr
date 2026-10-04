@@ -42,6 +42,10 @@ def value(option):
 
 phase = os.environ.get("MOCK_FAILURE", "")
 if name == "python":
+    if args[0] == "-":
+        sys.argv = args
+        exec(compile(sys.stdin.read(), "<script-result-validation>", "exec"))
+        sys.exit(0)
     if "--help" in args:
         print("Mock experiment options")
         sys.exit(0)
@@ -55,8 +59,8 @@ if name == "python":
             sys.exit(37)
         (output / "result.json").write_text(json.dumps({
             "run_id": value("--run-id"), "accepted": True,
+            "num_layers": 3, "correctness": {str(i): {} for i in range(8)},
         }))
-        (Path(value("--profile-dir")) / "resident_extend.json").write_text("{}\n")
     else:
         Path(value("--metadata")).write_text(json.dumps({
             "run_id": value("--run-id"), "accepted": True,
@@ -139,7 +143,7 @@ def assert_unpublished(fixture):
 @pytest.mark.parametrize("nsys", ["0", "1"])
 def test_measure_success_publishes_relocatable_run(script_repo, nsys):
     _, experiment, _, temp, _, env = script_repo
-    completed = invoke(script_repo, "run.sh", "--devices", "0,1", ECHO_NSYS=nsys)
+    completed = invoke(script_repo, "run.sh", "--physical-device", "2", ECHO_NSYS=nsys)
     assert completed.returncode == 0, completed.stderr
     assert not list(temp.iterdir())
     output = experiment / "output"
@@ -148,11 +152,10 @@ def test_measure_success_publishes_relocatable_run(script_repo, nsys):
     assert result["accepted"] and result["run_id"] == result_path.parent.name
     assert (output / "log" / RUN_ID / "stdout.log").read_text() == "mock stdout\n"
     assert (output / "log" / RUN_ID / "stderr.log").read_text() == "mock stderr\n"
-    assert (output / "profile" / RUN_ID / "resident_extend.json").is_file()
-    assert (output / "profile" / RUN_ID / "extend.nsys-rep").exists() == (nsys == "1")
+    assert (output / "profile" / RUN_ID / "layers3.nsys-rep").exists() == (nsys == "1")
     calls = [json.loads(line) for line in Path(env["MOCK_CALLS"]).read_text().splitlines()]
     measure = next(call for call in calls if call[0] == "python")
-    assert measure[-2:] == (["0,1", "--nsys"] if nsys == "1" else ["--devices", "0,1"])
+    assert measure[-2:] == (["2", "--nsys"] if nsys == "1" else ["--physical-device", "2"])
 
 
 @pytest.mark.parametrize("nsys", ["0", "1"])

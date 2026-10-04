@@ -59,9 +59,9 @@ if [[ -z "$input" || -z "$kernel" ]]; then
   exit 2
 fi
 case "$kernel" in
-  indexer-resident) kernel_regex='echo_native::sm90_fp8_mqa_logits<' ;;
+  indexer-resident) kernel_regex='deep_gemm::sm90_fp8_mqa_logits<' ;;
   indexer-offload) kernel_regex='echo_native::sm90_fp8_mqa_logits_fuse_prefetch<' ;;
-  mla) kernel_regex='_sparse_mla_kernel' ;;
+  mla) kernel_regex='sparse_attn_fwd_kernel' ;;
   recall) kernel_regex='gather_records' ;;
   *) echo "Invalid kernel: $kernel" >&2; exit 2 ;;
 esac
@@ -88,6 +88,7 @@ script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 cd -- "$script_dir/../../.."
 export PATH="$PWD/.venv/bin:$PATH"
 export PYTHONDONTWRITEBYTECODE=1
+export DG_JIT_WITH_LINEINFO=1
 ncu_bin="${NCU:-ncu}"
 command -v "$ncu_bin" >/dev/null
 if [[ -z "$run_id" ]]; then

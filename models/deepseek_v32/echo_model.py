@@ -1,7 +1,7 @@
 """Checkpoint-backed DeepSeek V3.2 attention for standalone ECHO-style extend.
 
 The MLA record is a BF16 latent plus rotary key (576 elements for V3.2).
-Indexer Q/K use normalized Hadamard rotation followed by FP8 quantization.
+Indexer Q/K use RoPE followed by FP8 quantization, without Hadamard rotation.
 The explicit BF16 backend block-dequantizes checkpoint weights once. The FP8
 backend retains checkpoint weights and quantizes activations in the SM90
 linear operator. Neither backend imports SGLang or a legacy experiment.
@@ -19,6 +19,9 @@ from typing import ClassVar
 import torch
 from safetensors import safe_open
 from torch.nn import functional as F
+
+from models.deepseek_v32.nonmatrix import rms_norm
+from operators.deepseek_v32.indexer.quantization import quantize_index
 
 
 @dataclass(frozen=True)
@@ -135,8 +138,6 @@ class Config:
             raise ValueError("Model dimensions and context lengths must be positive integers")
         if self.qk_rope_head_dim % 2 or self.qk_rope_head_dim > self.index_head_dim:
             raise ValueError("RoPE dimension must be even and fit the indexer head")
-        if self.index_head_dim & (self.index_head_dim - 1):
-            raise ValueError("Hadamard indexer head dimension must be a power of two")
         if len(self.weight_block_size) != 2 or any(x <= 0 for x in self.weight_block_size):
             raise ValueError("weight_block_size must have two positive dimensions")
         if self.scale_fmt not in (None, "ue8m0"):
@@ -243,17 +244,21 @@ class CheckpointLinear:
             else:
                 raise ValueError(f"Unsupported checkpoint weight dtype: {stem}")
 
-    def __call__(self, x):
+    def __call__(self, x, *, out=None, quantized=None, return_quantized=False):
         if self.scales is not None:
             from operators.deepseek_v32.linear.fp8 import fp8_linear
 
-            return fp8_linear(x, self.weight, self.scales)
+            return fp8_linear(
+                x,
+                self.weight,
+                self.scales,
+                out=out,
+                quantized=quantized,
+                return_quantized=return_quantized,
+            )
+        if out is not None or quantized is not None or return_quantized:
+            raise ValueError("Prepared input and output views require the checkpoint FP8 path")
         return F.linear(x, self.weight)
-
-
-def rms_norm(x: torch.Tensor, weight: torch.Tensor, eps: float) -> torch.Tensor:
-    xf = x.float()
-    return (xf * torch.rsqrt(xf.square().mean(-1, keepdim=True) + eps) * weight.float()).to(x.dtype)
 
 
 def normalized_hadamard(x: torch.Tensor) -> torch.Tensor:
@@ -270,17 +275,6 @@ def normalized_hadamard(x: torch.Tensor) -> torch.Tensor:
         y = torch.stack((a + b, a - b), dim=-2).reshape(shape)
         stride *= 2
     return (y * width**-0.5).to(x.dtype)
-
-
-def quantize_index(x: torch.Tensor, scale_fmt: str | None = "ue8m0"):
-    amax = x.float().abs().amax(-1, keepdim=True).clamp_min(1e-4)
-    scale = amax / 448.0
-    if scale_fmt == "ue8m0":
-        scale = torch.exp2(torch.ceil(torch.log2(scale)))
-    elif scale_fmt is not None:
-        raise ValueError("Unsupported indexer quantization scale format")
-    quantized = (x.float() / scale).clamp(-448, 448).to(torch.float8_e4m3fn)
-    return quantized.contiguous(), scale.contiguous()
 
 
 def rotary_frequencies(config: Config, *, device) -> torch.Tensor:
@@ -316,6 +310,35 @@ def apply_rope(x: torch.Tensor, angles: torch.Tensor, *, interleaved: bool) -> t
     return result.to(x.dtype)
 
 
+def prepare_rotary_cache(angles):
+    """Build one per-call trig table, shared by MLA and indexer rotations."""
+    return (
+        torch.arange(len(angles), device=angles.device, dtype=torch.int64),
+        torch.cat((angles.cos(), angles.sin()), dim=-1),
+    )
+
+
+def apply_rope_pair(q, k, angles, *, interleaved, cache=None):
+    from operators import flashinfer
+
+    if (
+        flashinfer.can_use_flashinfer(q)
+        and q.shape[-1] in (32, 64, 128, 256, 512)
+        and q.shape[-1] == k.shape[-1]
+        and angles.shape[-1] * 2 <= q.shape[-1]
+    ):
+        positions, trig = prepare_rotary_cache(angles) if cache is None else cache
+        return flashinfer.rotary_pair(q, k, positions, trig, interleaved=interleaved)
+    width = angles.shape[-1] * 2
+    return tuple(
+        torch.cat(
+            (apply_rope(x[..., :width], angles, interleaved=interleaved), x[..., width:]),
+            dim=-1,
+        )
+        for x in (q, k)
+    )
+
+
 @dataclass
 class Projected:
     q: torch.Tensor
@@ -338,7 +361,7 @@ class CheckpointAttention:
         "projection": "checkpoint_block_fp8_dequant_to_bf16_then_bf16_gemm",
         "projection_activation_quantization": False,
         "main_kv": "bf16_latent_and_rope_no_fp8_roundtrip",
-        "indexer": "bf16_rope_normalized_hadamard_then_fp8_e4m3",
+        "indexer": "bf16_rope_then_fp8_e4m3_no_hadamard",
         "indexer_head_weights": "fp32_linear_from_checkpoint_weight",
     }
 
@@ -408,26 +431,75 @@ class CheckpointAttention:
 
     @torch.inference_mode()
     def project(self, hidden: torch.Tensor, start_pos: int, *, normalized=False) -> Projected:
+        self._validate_project_hidden(hidden)
+        count = hidden.shape[0]
+        if (
+            not isinstance(start_pos, int)
+            or start_pos < 0
+            or start_pos + count > self.cfg.max_seq_len
+        ):
+            raise ValueError("Token positions exceed the checkpoint context limit")
+        positions = torch.arange(start_pos, start_pos + count, device=hidden.device).float()
+        return self.project_positions(hidden, positions, normalized=normalized)
+
+    def _validate_project_hidden(self, hidden):
         cfg = self.cfg
         if hidden.ndim != 2 or hidden.shape[1] != cfg.dim or not hidden.shape[0]:
             raise ValueError(f"hidden must have nonempty shape [tokens, {cfg.dim}]")
         if hidden.device != self.wq_a.weight.device or hidden.dtype != torch.bfloat16:
             raise ValueError("hidden must be BF16 on the attention layer's device")
+
+    @torch.inference_mode()
+    def project_positions(self, hidden, positions, *, normalized=False) -> Projected:
+        """Pure projection with explicit FP32 positions; caller validates their values.
+
+        The serving graph caller validates its integer start and context bound
+        before updating a device scalar. No tensor value is read on the CPU.
+        """
+        self._validate_project_hidden(hidden)
+        if (
+            positions.shape != (len(hidden),)
+            or positions.device != hidden.device
+            or positions.dtype != torch.float32
+        ):
+            raise ValueError("positions must be one FP32 value per token on the hidden device")
+        cfg = self.cfg
         count = hidden.shape[0]
-        if not isinstance(start_pos, int) or start_pos < 0 or start_pos + count > cfg.max_seq_len:
-            raise ValueError("Token positions exceed the checkpoint context limit")
         x = hidden if normalized else rms_norm(hidden, self.input_norm_weight, cfg.norm_eps)
         qr = rms_norm(self.wq_a(x), self.q_norm_weight, cfg.norm_eps)
-        positions = torch.arange(start_pos, start_pos + count, device=hidden.device).float()
         angles = positions[:, None] * self.frequencies[None, :]
+        rotary_cache = prepare_rotary_cache(angles) if hidden.is_cuda else None
         q = self.wq_b(qr).reshape(count, cfg.n_heads, -1)
         q_nope, q_pe = q.split((cfg.qk_nope_head_dim, cfg.qk_rope_head_dim), -1)
-        q_pe = apply_rope(q_pe, angles, interleaved=True)
-        q_latent = torch.bmm(q_nope.transpose(0, 1), self.wk_b).transpose(0, 1)
+        if hidden.is_cuda:
+            # cuBLAS accepts this strided output directly. Writing into the
+            # final token-major layout avoids repacking a head-major Q tensor.
+            projected_q = torch.empty(
+                (count, cfg.n_heads, cfg.qk_head_dim), device=hidden.device, dtype=hidden.dtype
+            )
+            torch.bmm(
+                q_nope.transpose(0, 1),
+                self.wk_b,
+                out=projected_q[..., : cfg.kv_lora_rank].transpose(0, 1),
+            )
+        else:
+            q_latent = torch.bmm(q_nope.transpose(0, 1), self.wk_b).transpose(0, 1)
         kv = self.wkv_a(x)
         latent, k_pe = kv.split((cfg.kv_lora_rank, cfg.qk_rope_head_dim), -1)
         latent = rms_norm(latent, self.kv_norm_weight, cfg.norm_eps)
-        k_pe = apply_rope(k_pe, angles, interleaved=True)
+        direct_rotary_output = hidden.is_cuda and q_pe.shape[1:] == (128, 64)
+        if direct_rotary_output:
+            from operators.flashinfer import rotary_pair_into
+
+            q_pe, k_pe = rotary_pair_into(
+                q_pe,
+                k_pe,
+                *rotary_cache,
+                projected_q[..., cfg.kv_lora_rank :],
+                interleaved=True,
+            )
+        else:
+            q_pe, k_pe = apply_rope_pair(q_pe, k_pe, angles, interleaved=True, cache=rotary_cache)
         index_q = self.index_wq(qr).reshape(count, cfg.index_n_heads, cfg.index_head_dim)
         index_k = F.layer_norm(
             self.index_wk(x).float(),
@@ -436,19 +508,20 @@ class CheckpointAttention:
             self.index_norm_bias,
             cfg.norm_eps,
         ).bfloat16()
-        rd = cfg.qk_rope_head_dim
-        index_q = torch.cat(
-            (apply_rope(index_q[..., :rd], angles, interleaved=False), index_q[..., rd:]), -1
+        index_q, index_k = apply_rope_pair(
+            index_q, index_k, angles, interleaved=False, cache=rotary_cache
         )
-        index_k = torch.cat(
-            (apply_rope(index_k[..., :rd], angles, interleaved=False), index_k[..., rd:]), -1
-        )
-        index_q, q_scale = quantize_index(normalized_hadamard(index_q), cfg.scale_fmt)
-        index_k, k_scale = quantize_index(normalized_hadamard(index_k), cfg.scale_fmt)
+        index_q, q_scale = quantize_index(index_q, cfg.scale_fmt)
+        index_k, k_scale = quantize_index(index_k, cfg.scale_fmt)
         weights = F.linear(x.float(), self.index_head_weight) * cfg.index_n_heads**-0.5
         weights = weights * q_scale[..., 0] * cfg.index_head_dim**-0.5
+        if hidden.is_cuda:
+            if not direct_rotary_output:
+                projected_q[..., cfg.kv_lora_rank :].copy_(q_pe)
+        else:
+            projected_q = torch.cat((q_latent, q_pe), -1).contiguous()
         return Projected(
-            q=torch.cat((q_latent, q_pe), -1).contiguous(),
+            q=projected_q,
             kv=torch.cat((latent, k_pe), -1).contiguous(),
             index_q=index_q,
             index_k=index_k,
@@ -457,11 +530,37 @@ class CheckpointAttention:
         )
 
     @torch.inference_mode()
-    def output(self, attention: torch.Tensor) -> torch.Tensor:
+    def _expand_values(self, attention: torch.Tensor, *, out=None) -> torch.Tensor:
+        """Expand absorbed values, optionally into owned graph input storage."""
         cfg = self.cfg
         if attention.ndim != 3 or attention.shape[1:] != (cfg.n_heads, cfg.kv_lora_rank):
             raise ValueError("Attention output must have shape [tokens, heads, kv_lora_rank]")
         if attention.device != self.wo.weight.device or attention.dtype != torch.bfloat16:
             raise ValueError("Attention output must be BF16 on the attention layer's device")
-        head_out = torch.bmm(attention.transpose(0, 1), self.wv_b).transpose(0, 1)
+        if out is not None:
+            if (
+                out.shape != (attention.shape[0], cfg.n_heads, cfg.v_head_dim)
+                or out.dtype != attention.dtype
+                or out.device != attention.device
+                or not out.is_contiguous()
+            ):
+                raise ValueError("Expanded output must be contiguous BF16 [tokens, heads, values]")
+            torch.bmm(attention.transpose(0, 1), self.wv_b, out=out.transpose(0, 1))
+            return out
+        if attention.is_cuda:
+            # Write into the final token-major layout so flattening for o_proj
+            # does not repack a head-major BMM result.
+            head_out = torch.empty(
+                (attention.shape[0], cfg.n_heads, cfg.v_head_dim),
+                device=attention.device,
+                dtype=attention.dtype,
+            )
+            torch.bmm(attention.transpose(0, 1), self.wv_b, out=head_out.transpose(0, 1))
+        else:
+            head_out = torch.bmm(attention.transpose(0, 1), self.wv_b).transpose(0, 1)
+        return head_out
+
+    @torch.inference_mode()
+    def output(self, attention: torch.Tensor) -> torch.Tensor:
+        head_out = self._expand_values(attention)
         return self.wo(head_out.reshape(attention.shape[0], -1))

@@ -1,3 +1,4 @@
+from contextlib import contextmanager
 from types import SimpleNamespace
 
 import pytest
@@ -170,28 +171,77 @@ def test_failed_begin_does_not_rollback_an_existing_transaction():
     assert session.runners[2].cache._step_end == 1
 
 
-def test_estimates_include_indexer_metadata_pool_counters_and_double_stage():
+def test_session_estimate_excludes_shared_pools_and_includes_hint_backups():
     capacity = 32
     model, _ = _model(scheme="hbm")
-    assert model.estimate_session_bytes(capacity) == {"hbm": 10 * (1304 * 32 + 64), "dram": 0}
+    model.device = torch.device("cuda:0")  # Allocation-free estimate only.
+    assert model.estimate_session_bytes(capacity) == {"hbm": 10 * (1304 * 32 + 192), "dram": 0}
     model.scheme = "serial_sparse"
-    assert model.estimate_session_bytes(capacity) == {
-        "hbm": 10 * (136 * 32 + 1168 * 16 + 64),
-        "dram": 10 * 32 * 1152,
-    }
+    expected = {"hbm": 10 * (132 * 32 + 192 + 56) + 4, "dram": 4}
+    assert model.estimate_session_bytes(capacity) == expected
     model.scheme = "echo"
-    assert model.estimate_session_bytes(capacity)["hbm"] == 10 * (136 * 32 + 1168 * 16 + 64 + 8 * 4)
+    model.slots = 32768
+    assert model.estimate_session_bytes(capacity) == expected
     model.scheme = "dense_prefetch"
     assert model.estimate_session_bytes(capacity) == {
-        "hbm": 10 * (152 * 32 + 64) + 2 * 32 * 1152,
-        "dram": 10 * 32 * 1152,
+        "hbm": 10 * (152 * 32 + 192),
+        "dram": 10 * 65536,
     }
+
+
+@pytest.mark.parametrize("scheme", ["echo", "serial_sparse"])
+def test_small_pool_resource_plan_rejects_without_mutating_existing_sessions(scheme):
+    from cache.prefix_pool import CacheBudgetExceeded, CacheFootprint
+
+    model, session = _model(scheme=scheme)
+    oracle, reference = _model(scheme=scheme)
+    prefix, candidate = [1, 2, 3], [4, 5]
+    model.prefill(session, prefix)
+    oracle.prefill(reference, prefix)
+    model.cfg.index_topk, model.slots = 16, 8
+    old_plan = model._resource_plan = SimpleNamespace(metadata={"workspace_query_tokens": 128})
+    old_pool = model._shared_pool = object()
+    old_sessions = model._sessions = [session]
+    caches = [runner.cache for runner in session.runners]
+    contents = [torch.stack(cache.records).clone() for cache in caches]
+    with pytest.raises(CacheBudgetExceeded, match="full exact selection"):
+        model.plan_resources(CacheFootprint(2**30, 2**30), {"max_session_capacity": 32})
+    assert model._resource_plan is old_plan and model._shared_pool is old_pool
+    assert model._sessions is old_sessions and model._sessions == [session]
+    assert session.length == len(prefix) and not session.released
+    for runner, cache, expected in zip(session.runners, caches, contents, strict=True):
+        assert runner.cache is cache and cache.length == cache.written == len(prefix)
+        torch.testing.assert_close(torch.stack(cache.records), expected, rtol=0, atol=0)
+    torch.testing.assert_close(
+        model.extend(session, candidate), oracle.extend(reference, candidate), rtol=0, atol=0
+    )
 
 
 def test_storage_accounting_counts_shared_buffers_once_and_entire_storage():
-    storage = torch.empty(128, dtype=torch.bfloat16)
+    storage = torch.empty(129, dtype=torch.bfloat16)
     other = torch.empty(16, dtype=torch.float32)
-    assert _storage_bytes([storage[:2], storage[32:], other, None]) == {"hbm": 0, "dram": 320}
+    assert _storage_bytes([storage[:2], storage[32:], other, None]) == {"hbm": 0, "dram": 322}
+
+
+@pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA required")
+def test_dense_pinned_bin_does_not_inflate_record_transfer_bytes():
+    from models.deepseek_v32.serving_backend import _DenseCache
+
+    records = torch.empty((65, 576), dtype=torch.bfloat16, device="cuda")
+    backend = SimpleNamespace(_dense_sources=[], _check_dense_execution=lambda session: None)
+    cache = _DenseCache(65, 576, device="cuda", backend=backend)
+    cache.records = records
+    assert cache.host.shape == (65, 576) and cache.host.is_pinned()
+    assert _storage_bytes([cache.host, cache.host[:1]]) == {"hbm": 0, "dram": 131072}
+    cache.begin_step(1)
+    cache.append(torch.ones((1, 576), dtype=torch.bfloat16, device="cuda"))
+    torch.cuda.synchronize()
+    cache.commit()
+    metrics = cache.metrics()
+    assert metrics["device_to_host_bytes"] == 1152
+    assert metrics["host_record_bytes"] == 65 * 1152
+    assert metrics["host_allocation_bytes"] == 131072
+    torch.testing.assert_close(cache.host[:1], torch.ones((1, 576), dtype=torch.bfloat16))
 
 
 def test_parameter_count_uses_physical_copies_and_excludes_scale_metadata():
@@ -220,3 +270,452 @@ def test_released_or_foreign_sessions_fail_before_execution():
     model.release_session(session)
     with pytest.raises(ValueError, match="released"):
         model.extend(session, [1])
+
+
+def test_prefill_chunks_all_layers_and_executes_last_token_head_once(monkeypatch):
+    import models.deepseek_v32.serving_backend as module
+
+    model, session = _model()
+    oracle, reference = _model()
+    model.chunk_size, oracle.chunk_size = 2, 64
+    calls = []
+    original = module.F.linear
+
+    def head(input, weight):
+        calls.append(tuple(input.shape))
+        return original(input, weight)
+
+    ids = [1, 4, 3, 8, 2, 6, 5]
+    expected = oracle.prefill(reference, ids)
+    with monkeypatch.context() as patch:
+        patch.setattr(module.F, "linear", head)
+        actual = model.prefill(session, ids)
+    torch.testing.assert_close(actual, expected, rtol=0, atol=0)
+    torch.testing.assert_close(model.last_logits, oracle.last_logits, rtol=0, atol=0)
+    assert calls == [(1, 8)]
+    for layer, block in enumerate(model.blocks):
+        assert [len(hidden) for hidden, _ in block.inputs] == [2, 2, 2, 1]
+        if layer >= 3:
+            for actual_input, source_input in zip(block.inputs, model.blocks[layer % 3].inputs):
+                for actual_tensor, source_tensor in zip(actual_input, source_input):
+                    if source_tensor is not None:
+                        torch.testing.assert_close(actual_tensor, source_tensor, rtol=0, atol=0)
+                        assert actual_tensor.data_ptr() != source_tensor.data_ptr()
+    assert session.length == len(ids)
+
+
+def test_prefill_chunk_size_does_not_split_candidate_batch():
+    model, session = _model()
+    model.chunk_size = 2
+    model.prefill(session, [1, 2, 3])
+    model.extend(session, [4, 5, 6, 7, 8])
+    assert all(len(block.inputs[-1][0]) == 5 for block in model.blocks)
+    assert all(block.chunk_size == 5 for block in model.blocks)
+
+
+def test_serving_unrecoverable_drain_poison_prevents_retry():
+    model, session = _model()
+    model.prefill(session, [1, 2, 3])
+
+    def failure():
+        raise RuntimeError("permanent CUDA failure")
+
+    model.synchronize = failure
+    with pytest.raises(RuntimeError, match="permanent CUDA"):
+        model.extend(session, [4, 5])
+    assert model._poisoned
+    assert session.length == 3
+    with pytest.raises(RuntimeError, match="poisoned"):
+        model.extend(session, [4, 5])
+
+
+def test_graph_completion_failure_retains_backend_and_admission_owner():
+    model, session = _model()
+    owner = object()
+    model._admission_owner = owner
+
+    class FailedCompletion:
+        failed = False
+
+        @contextmanager
+        def execution(self):
+            yield
+            self.failed = True
+            raise RuntimeError("injected graph completion event failure")
+
+    graph = model._compute_graphs = FailedCompletion()
+    with pytest.raises(RuntimeError, match="graph completion event"), model._execution(session):
+        assert model._active_session is session
+    assert model._poisoned and model._active_session is session
+    assert model._admission_owner is owner and model._compute_graphs is graph
+    assert model._execution_active()
+    with pytest.raises(RuntimeError, match="poisoned"):
+        model.extend(session, [4, 5])
+    with pytest.raises(RuntimeError, match="release sessions and execution"):
+        model.unbind_owner(owner)
+    with pytest.raises(RuntimeError, match="poisoned"):
+        model._release_shared()
+
+
+def test_completed_transient_cleanup_keeps_history_without_truncating_again():
+    model, session = _model()
+    model.prefill(session, [1, 2, 3])
+    session.last_candidate_transient = True
+    for runner in session.runners:
+        runner.cache.indexer_visible_end = session.length
+        runner.cache.transient_start = None
+
+        def unexpected_truncate(length):
+            raise AssertionError("completed transient history was truncated again")
+
+        runner.cache.truncate = unexpected_truncate
+    synchronized = []
+    model.synchronize = lambda: synchronized.append(True)
+    saved = [[row.clone() for row in runner.cache.records] for runner in session.runners]
+    model.truncate(session, 3)
+    assert not synchronized and session.length == 3
+    for runner, records in zip(session.runners, saved, strict=True):
+        torch.testing.assert_close(runner.cache.records, records, rtol=0, atol=0)
+
+
+@pytest.mark.parametrize("target", [2, 3])
+def test_ordinary_and_shorter_transient_cleanup_still_truncate(target):
+    model, session = _model()
+    model.prefill(session, [1, 2, 3])
+    session.last_candidate_transient = target < 3
+    calls = []
+    for runner in session.runners:
+        original = runner.cache.truncate
+
+        def truncate(length, original=original):
+            calls.append(length)
+            original(length)
+
+        runner.cache.truncate = truncate
+    model.truncate(session, target)
+    assert calls == [target] * len(session.runners)
+    assert session.length == target
+
+
+def test_transient_cleanup_does_not_hide_an_unfinished_layer():
+    model, session = _model()
+    model.prefill(session, [1, 2, 3])
+    session.last_candidate_transient = True
+    for runner in session.runners:
+        runner.cache.indexer_visible_end = session.length
+        runner.cache.transient_start = None
+    cache = session.runners[0].cache
+    cache._step_end = 4
+
+    def reject_unfinished(length):
+        raise RuntimeError("rollback active step before truncation")
+
+    cache.truncate = reject_unfinished
+    with pytest.raises(RuntimeError, match="rollback active step"):
+        model.truncate(session, 3)
+
+
+class _DenseBlock(_Block):
+    def forward(self, hidden, residual, scope=None):
+        if self.fail:
+            raise RuntimeError("injected layer failure")
+        self.inputs.append((hidden, residual))
+        combined = hidden.float() if residual is None else hidden.float() + residual.float()
+        cache = self.cache
+        cache.reserve_append_source()
+        records = combined.bfloat16()
+        past = cache.records[: cache.written].float()
+        cumulative = torch.cat((past, records.float())).cumsum(0)[cache.written :]
+        denominator = torch.arange(
+            cache.written + 1, cache.written + len(hidden) + 1, device=hidden.device
+        )[:, None]
+        cache.append(records)
+        return (
+            (combined * 0.25 + cumulative / denominator * 0.5 + self.source).bfloat16(),
+            (combined * 0.125).bfloat16(),
+        )
+
+
+def _dense_model(monkeypatch, *, device="cpu"):
+    import models.deepseek_v32.serving_backend as module
+    from cache.prefix_pool import CacheFootprint
+
+    model, _ = _model(scheme="dense_prefetch")
+    model.device = torch.device(device)
+    model.embedding_weight = model.embedding_weight.to(model.device)
+    model.head_weight = model.head_weight.to(model.device)
+    model.final_norm = model.final_norm.to(model.device)
+    if model.device.type == "cuda":
+        model.synchronize = lambda: torch.cuda.synchronize(model.device)
+    model.cfg.kv_lora_rank, model.cfg.qk_rope_head_dim = 6, 2
+    model.cfg.index_topk, model.cfg.index_head_dim = 4, 4
+    model._sessions = []
+    model._shared_pool = model._resource_plan = model._dense_staging = None
+    model._dense_lease = None
+    model._dense_sources = []
+    model._active_session = model._admission_owner = None
+    model._poisoned = False
+    model.workspace_query_tokens = 8
+    model.extend_chunk_size = None
+    model.host_arena_tokens = None
+    model.attentions = [object() for _ in range(model.num_layers)]
+    model.blocks = [_DenseBlock(layer % 3) for layer in range(model.num_layers)]
+
+    def attention_stub(attention, capacity, *, dense_backend, **kwargs):
+        return SimpleNamespace(
+            cache=module._DenseCache(capacity, 8, device=model.device, backend=dense_backend),
+            index_keys=torch.empty((capacity, 4), dtype=torch.float8_e4m3fn, device=model.device),
+            index_scales=torch.empty(capacity, dtype=torch.float32, device=model.device),
+            offset=torch.zeros(16, dtype=torch.float32, device=model.device),
+        )
+
+    monkeypatch.setattr(module, "_ServingAttention", attention_stub)
+    plan = model.plan_resources(CacheFootprint(2**20, 2**20), {"max_session_capacity": 64})
+    model.allocate_shared(plan)
+    model.synchronize()
+    return model
+
+
+def test_dense_shared_staging_alternating_users_chunks_aliases_and_full_copy_bytes(monkeypatch):
+    model = _dense_model(monkeypatch)
+    alice, bob = model.create_session(32), model.create_session(48)
+    storage = model._dense_staging.storage_tensors()[0]
+    fixed = model.shared_bytes()
+    assert fixed == {"hbm": 2 * 64 * 8 * 2, "dram": 0}
+    assert not alice.stages and not bob.stages
+    assert all(runner.cache.records is None for runner in alice.runners + bob.runners)
+    assert all(
+        left.cache.host.data_ptr() != right.cache.host.data_ptr()
+        for left, right in zip(alice.runners, bob.runners, strict=True)
+    )
+    prefix, candidate = [1, 3, 8, 4, 2], [5, 7]
+    model.prefill(alice, prefix)
+    expected = model.extend(alice, candidate).clone()
+    logits = model.last_logits.clone()
+    model.truncate(alice, len(prefix))
+    model.prefill(bob, [9, 11, 8, 7, 3, 2, 5])
+    model.extend(bob, [12, 13, 4])
+    model.truncate(bob, 7)
+    actual = model.extend(alice, candidate)
+    torch.testing.assert_close(actual, expected, rtol=0, atol=0)
+    torch.testing.assert_close(model.last_logits, logits, rtol=0, atol=0)
+    assert model.shared_bytes() == fixed
+    assert model._dense_staging.storage_tensors()[0] is storage
+    assert model._dense_lease is model._active_session is None
+    assert not model._dense_sources
+    assert all(runner.cache.records is None for runner in alice.runners + bob.runners)
+    assert sum(runner.cache.metrics()["host_to_device_bytes"] for runner in alice.runners) == (
+        model.num_layers * len(prefix) * 8 * 2
+    )
+    assert sum(runner.cache.metrics()["device_to_host_bytes"] for runner in alice.runners) == (
+        model.num_layers * len(candidate) * 8 * 2
+    )
+    model.release_session(alice)
+    model.release_session(bob)
+    assert model._dense_staging.storage_tensors()[0] is storage
+    model.close()
+    assert model._dense_staging is None
+
+
+def test_dense_session_accounting_excludes_borrowed_storage_even_during_execution(monkeypatch):
+    model = _dense_model(monkeypatch)
+    session = model.create_session(32)
+    before = model.session_bytes(session)
+    observations = []
+    model.capture_hook = lambda *args: observations.append(model.session_bytes(session))
+    model.extend(session, [1, 2])
+    assert observations == [before] * model.num_layers
+    assert all(runner.cache.records is None for runner in session.runners)
+    with pytest.raises(RuntimeError, match="execution lease"):
+        session.runners[0].cache.begin_step(1)
+    model.release_session(session)
+    model.close()
+
+
+def test_dense_failure_drains_speculative_copy_then_other_user_and_retry_match(monkeypatch):
+    model = _dense_model(monkeypatch)
+    alice, bob = model.create_session(32), model.create_session(32)
+    model.prefill(alice, [1, 2, 3])
+    expected = model.extend(alice, [4, 5]).clone()
+    logits = model.last_logits.clone()
+    model.truncate(alice, 3)
+    model.blocks[4].fail = True
+    with pytest.raises(RuntimeError, match="injected layer"):
+        model.extend(alice, [4, 5])
+    assert alice.length == 3
+    assert all(runner.cache.written == runner.cache.length == 3 for runner in alice.runners)
+    assert model._dense_staging.active_lease is None
+    assert all(runner.cache.records is None for runner in alice.runners)
+    model.blocks[4].fail = False
+    model.prefill(bob, [8, 9, 6])
+    actual = model.extend(alice, [4, 5])
+    torch.testing.assert_close(actual, expected, rtol=0, atol=0)
+    torch.testing.assert_close(model.last_logits, logits, rtol=0, atol=0)
+    model.release_session(alice)
+    model.release_session(bob)
+    model.close()
+
+
+def test_dense_failed_lease_join_retains_borrowed_aliases_sources_and_ownership(monkeypatch):
+    model = _dense_model(monkeypatch)
+    session = model.create_session(32)
+    model.blocks[1].fail = True
+
+    def fail(lease):
+        raise RuntimeError("injected copy stream join failure")
+
+    monkeypatch.setattr(model._dense_staging, "_join", fail)
+    with pytest.raises(RuntimeError, match="copy stream join failure"):
+        model.extend(session, [1, 2])
+    assert model._poisoned and model._active_session is session
+    assert model._dense_lease is not None and model._dense_sources
+    assert session.runners[1].cache.records is not None
+    with pytest.raises(RuntimeError, match="poisoned"):
+        model.extend(session, [3])
+    with pytest.raises(RuntimeError, match="execution"):
+        model.close()
+
+
+def test_dense_failed_reset_join_stays_poisoned_after_later_cleanup_join(monkeypatch):
+    model = _dense_model(monkeypatch)
+    session = model.create_session(32)
+    staging = model._dense_staging
+    storage = staging.storage_tensors()[0]
+    original = staging._join
+    attempted = []
+
+    def fail_once(lease):
+        attempted.append(True)
+        if len(attempted) == 1:
+            error = RuntimeError("injected chunk join failure")
+            staging._poison(error)
+            raise error
+        return original(lease)
+
+    monkeypatch.setattr(staging, "_join", fail_once)
+    with pytest.raises(RuntimeError, match="poisoned"):
+        model.prefill(session, [1, 2, 3, 4, 5])
+    assert len(attempted) == 2 and model._poisoned
+    assert model._active_session is session and model._dense_lease is not None
+    assert staging.storage_tensors()[0] is storage
+    with pytest.raises(RuntimeError, match="poisoned"):
+        model.extend(session, [6])
+
+
+def test_dense_source_reservation_waits_before_a_third_projection(monkeypatch):
+    from models.deepseek_v32.serving_backend import _DenseWrite
+
+    model = _dense_model(monkeypatch)
+    session = model.create_session(32)
+    waited = []
+    with model._execution(session):
+        model.device = torch.device("cuda:0")  # Fake events; no CUDA call.
+        model._dense_sources = [
+            _DenseWrite(
+                torch.empty((8, 8), dtype=torch.bfloat16),
+                SimpleNamespace(query=lambda: False, synchronize=lambda: waited.append(True)),
+            )
+            for _ in range(2)
+        ]
+        model._reserve_dense_source()
+        assert waited == [True] and len(model._dense_sources) == 1
+        model.device = torch.device("cpu")
+    model.release_session(session)
+    model.close()
+
+
+def test_planned_candidate_rejects_before_forward_or_any_cache_mutation(monkeypatch):
+    from cache.prefix_pool import CacheBudgetExceeded
+
+    model = _dense_model(monkeypatch)
+    session = model.create_session(32)
+    model.prefill(session, [1, 2, 3])
+    storage = model._dense_staging.storage_tensors()[0]
+    before = [runner.cache.host[:3].clone() for runner in session.runners]
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("oversized candidate reached forward or allocation")
+
+    monkeypatch.setattr(model, "_forward", forbidden)
+    monkeypatch.setattr(torch, "as_tensor", forbidden)
+    with pytest.raises(CacheBudgetExceeded, match="planned candidate limit"):
+        model.extend(session, list(range(1, 10)))
+    assert session.length == 3 and model._active_session is None
+    assert model._dense_staging.storage_tensors()[0] is storage
+    for runner, expected in zip(session.runners, before, strict=True):
+        assert runner.cache.written == runner.cache.length == 3
+        torch.testing.assert_close(runner.cache.host[:3], expected, rtol=0, atol=0)
+    model.release_session(session)
+    model.close()
+
+
+def test_partial_dense_session_failure_drains_and_retains_shared_staging(monkeypatch):
+    import models.deepseek_v32.serving_backend as module
+
+    model = _dense_model(monkeypatch)
+    staging = model._dense_staging
+    original = module._ServingAttention
+    calls, drained = [], []
+
+    def failure(*args, **kwargs):
+        if calls:
+            raise RuntimeError("injected partial dense session failure")
+        calls.append(True)
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(module, "_ServingAttention", failure)
+    monkeypatch.setattr(model, "synchronize", lambda: drained.append(True))
+    with pytest.raises(RuntimeError, match="partial dense session failure"):
+        model.create_session(32)
+    assert drained == [True] and not model._sessions
+    assert model._dense_staging is staging and not staging.closed
+    model.close()
+
+
+@pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA required")
+def test_dense_cuda_session_ready_stream_handoff_and_failed_speculative_copy(monkeypatch):
+    model = _dense_model(monkeypatch, device="cuda:0")
+    allocation_stream = torch.cuda.Stream()
+    caller = torch.cuda.Stream()
+    with torch.cuda.stream(allocation_stream):
+        torch.cuda._sleep(200_000_000)
+        alice = model.create_session(32)
+    assert alice.dense_allocation_ready is not None
+    with torch.cuda.stream(caller):
+        model.prefill(alice, [1, 2, 3, 4, 5])
+        expected = model.extend(alice, [6, 7]).clone()
+        logits = model.last_logits.clone()
+        model.truncate(alice, 5)
+    bob = model.create_session(48)
+    model.prefill(bob, [8, 9, 10, 11, 12, 13])
+    actual = model.extend(alice, [6, 7])
+    torch.testing.assert_close(actual, expected, rtol=0, atol=0)
+    torch.testing.assert_close(model.last_logits, logits, rtol=0, atol=0)
+    model.truncate(alice, 5)
+    assert all(runner.cache.records is None for runner in alice.runners + bob.runners)
+    original = model._prefetch_dense_layer
+    speculative_done = torch.cuda.Event()
+
+    def delayed(session, layer):
+        if layer == 2:
+            with torch.cuda.stream(model._dense_staging._copy_stream):
+                torch.cuda._sleep(20_000_000)
+        original(session, layer)
+        if layer == 2:
+            speculative_done.record(model._dense_staging._copy_stream)
+
+    monkeypatch.setattr(model, "_prefetch_dense_layer", delayed)
+    model.blocks[1].fail = True
+    with torch.cuda.stream(caller), pytest.raises(RuntimeError, match="injected layer"):
+        model.extend(alice, [6, 7])
+    assert speculative_done.query()
+    assert alice.length == 5 and model._dense_staging.active_lease is None
+    assert all(runner.cache.records is None for runner in alice.runners)
+    model.blocks[1].fail = False
+    with torch.cuda.stream(caller):
+        actual = model.extend(alice, [6, 7])
+    torch.testing.assert_close(actual, expected, rtol=0, atol=0)
+    torch.testing.assert_close(model.last_logits, logits, rtol=0, atol=0)
+    model.release_session(alice)
+    model.release_session(bob)
+    model.close()

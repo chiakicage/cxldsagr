@@ -1,0 +1,444 @@
+{
+  "status": "complete",
+  "run_ids": {
+    "deepseek_v32_motivation": "motivation_c10_20261004_u16_r2_01",
+    "deepseek_v32_echo_official": "echo_official_c10_20261004_u16_r2_01"
+  },
+  "selected_sha256": {
+    "deepseek_v32_motivation": {
+      "report": {
+        "diagnosis/aggregate_arithmetic.json": "2164b6e1e37f6db881d47ef0ccb3f81c626a7cbf7cf3bfa5ffb14abc56cd44c5",
+        "diagnosis/aggregate_mfu.csv": "a5e5bd1f20ff1ae74c047edbe376fb824e6ebebc5360c6d003eb2248ed0881e5",
+        "diagnosis/aggregate_mfu.json": "42238b4801ea7f959edbad18478698db1fe4dc9371fcbe19aac95047d53c88f6",
+        "diagnosis/bottleneck_summary.json": "c5e1c40b6b067ce0aa5a2985379904f61386ec4757148394f526e3f0e8250484",
+        "diagnosis/completion_receipt.json": "cc30286b462b21f1ac542155e871cd2f3843131e6a324914b67d9c89b313a829",
+        "diagnosis/cuda_apis.csv": "e53fafd01898566aa98b16587d7fe0b84ad61bae96fb42a4bb9d32f21923e985",
+        "diagnosis/flops.json": "ee955382fc54dc38f823c5402d124b0d51237555a3ba30c991746a3adb41135a",
+        "diagnosis/flops_verification.json": "1abf8a9b1e1e6703805f466e7414c5336cba7160d1b589713051d60322a04eaf",
+        "diagnosis/formal_audit.json": "c54e33392a99bfd60190ba3c9400dce52063edd64c13da543909b37cc24ec3dc",
+        "diagnosis/formal_gpu_observation_audit.json": "128de188fbcda42214f8445ef0b1025e19bd7499558666293fa5e77a67f483a1",
+        "diagnosis/formal_report_arithmetic_crosscheck.json": "afcfc2a5fc6bd7ef88f7b305132874a8b4527c457d3a2f53b513b83a42fd6592",
+        "diagnosis/formal_runtime_graph_audit.json": "f77edb334589f7e37208a11490fc486aaa0ab721576cefa60af34ea9e0ef8c1c",
+        "diagnosis/gpu_observation_audit.json": "fd5b33ad41aed9eeec69405638eceacc5afd1a8148436f8449866477f1307bf3",
+        "diagnosis/graph_capture_ledger.json": "c24886a93c45500d09d641e30193c99a928418375736612972e5483528598d37",
+        "diagnosis/graph_copy_kernels.json": "b9ec70b12533fa9b9fa336e8fc93d99ab75d7c8110ec4d10dee68838f5a0b4b5",
+        "diagnosis/independent_nonmatrix.csv": "57c6e3c100e7bca4bd23334d16a3c8d5edfff9296ce588ccb80e48bc64162412",
+        "diagnosis/independent_numerical_audit.json": "6d59485f30af4c7009d9eb7a0a9b460a9c9652c4d955bd39c53ceeb11dc18bb4",
+        "diagnosis/independent_provenance_audit.json": "7397b71f167dab5c271f27faf4b42dbd0ced5bbbb8263bb31436ef1110d5411c",
+        "diagnosis/kernel_inventory_audit.json": "9a3306bfd0db9cc848de04e22a68adf7dbca82959ec6f242f35f3ca1943782db",
+        "diagnosis/operator_flops.csv": "2b31003fa565d73b954948b1312319d7e74050d5f4facbe4674712d564f1569e",
+        "diagnosis/operator_stage_totals.csv": "402968b1ff565430233243897f3b0f986db8db080390cbbab4e3599ad78d74d9",
+        "diagnosis/pipeline.json": "f4cffbdf9fc9fa3dea1713442b468546821f7ac4d6953c49b8524be7f404f040",
+        "diagnosis/pipeline_dense_prefetch_revisit.png": "e80b6aff0a195732f46490cba50f96c1e936e7ac031e2d64e1470ecf65ee28ad",
+        "diagnosis/pipeline_dense_prefetch_revisit.svg": "b84fafe16a0490566b4afb1c5df7b5e8b401ea77379aed1ab7261161e94c7fd4",
+        "diagnosis/pipeline_echo_revisit.png": "582039ed0260c17f80c245f0e4a7c07f09ec7919bfd5f9bb79da4eb5dc623c26",
+        "diagnosis/pipeline_echo_revisit.svg": "db06d923257418712ed360845389e3955a9d8decaae17e96c154bf62affee85d",
+        "diagnosis/pipeline_hbm_cold.png": "f7d5d05dc11764b3f3faff51728ecd00f78a5d218422b85d0ebe3dc696bc707a",
+        "diagnosis/pipeline_hbm_cold.svg": "32c67a7b41a67aa96af1eb5adeff47c973fc28293aaecf82544f174eff605af5",
+        "diagnosis/pipeline_serial_sparse_revisit.png": "315242c5f37f134b11de676b99226670e63437e0cad1f8f1d6f3f86567ea0f44",
+        "diagnosis/pipeline_serial_sparse_revisit.svg": "aace3d85fd3cedd43403c2d29baf1569d8f253638d442902c2024e60cfb403d9",
+        "diagnosis/stage_costs.csv": "56943bd0b368cc0500a5f37c03e7ab16586a25dc5cf513773a32d3cd46d9cd78",
+        "diagnosis/stage_mfu.csv": "0c370402d72a12b44b67db66df27624e8eb621890abaf48bc59072aa7a662481",
+        "diagnosis.md": "a6dba31817035834bcfc3b664fe525b13924c69ac31afaef319f7ad634a2efe3",
+        "latency_per_request.png": "960c1b55e729cf4c9490a8481660c88715cde7766a37cabc98e4e98a570d1542",
+        "latency_per_request.svg": "d5c3481b044cee9e839d83eb3d73fef96ac012ea6101d7c5b70ab079eafc5382",
+        "latency_summary.png": "9775a2a33a09551694cb93f30f85255a0c618216279768b3e41a9004051cee0c",
+        "latency_summary.svg": "66b8f90dc659104f323727c2e03e2d7f7c5a00aa7af8b5c2e55245f8ce552af9",
+        "operator_mfu/crosscheck.json": "bc14c30de3b0f42c3f388c476b2c93b70d4a478a1b3335e3c58e0a9903af2758",
+        "operator_mfu/operator_kernel_inventory.csv": "01736f8f61b172923f550bd1391566271635a449a44b0ecf8b4d5e7b8b2d6cba",
+        "operator_mfu/operator_mfu.csv": "8bdd32e1799b4d048c9cb5f1588782536e0bc9710b8d60357ff6204fad761741",
+        "operator_mfu/operator_mfu_by_layer.csv": "1ccf8066da9eba6cf7d77ac4f881787736f5181c1d17fa99099e774132824b29",
+        "operator_mfu/operator_mfu_summary.json": "f99b35bd6dd774ae23453d4a27dd2c963899917700be3b15b6022d5d41f97ef2",
+        "operator_mfu/publication.json": "5f34bf1dcecad8b28e57a22b8e0d96e4c75c42b69205842160760dbdb669e323",
+        "operator_mfu.md": "b25b8d4e5504f5458735af4765f364bd14592cf06e6df00d6311f99671c3ea54",
+        "per_request.csv": "8f6f70493e94a3d4c1adca2b054a5120e570d80108b842db9fc8c3636bb4d1db",
+        "publication_manifest.json": "348b428052d6b0b3036be3925a215a78c6490fee709d86cc431904878d9228c9",
+        "report_provenance.json": "2240a6c5f8a75305602c42339f1e851f8bea9923e83fcb731a42f6854f449c99",
+        "results.md": "f27ed8e483481f19d94c97f62c2bd3cc5ad4fabfa0501da8b170d5848e10c46e",
+        "summary.csv": "9c78f3d814df6c1142e87439ec602dbe8219e5e62f86330ea5883dca957a31be",
+        "summary.json": "a00fb1dba99cb33ca0bed7ff34e192206829689974224e65ebc6892c6899a4db"
+      },
+      "README.md": "78951c264228f100de0c38ece936cdd2149dcfc9690bddcf53d22572e1e7ab7d"
+    },
+    "deepseek_v32_echo_official": {
+      "report": {
+        "existing_implementation_comparison.csv": "8771b328bfa2ae66e8cc32cc8b7582d413aaa8f1f4c1586c354470a67ad799fe",
+        "existing_implementation_comparison.json": "068194fe58b75f4c3e3a2ceba0697e21844cfec4aded72c3f85b747e3f8c3834",
+        "existing_implementation_comparison.md": "a7bcaf7e3e64515e96beaceb86151d40f4c0486bc4bc5ad4c8d3c5f9232dcbf7",
+        "numerical_summary.json": "3be40a8f45d524835c6681f6684a920833042512cf368285344481e9bfac4c7a",
+        "per_request.csv": "11469855dd320bc32e99bf15913d92a7bc1b1a6f9dfb6a02b23c98a158597190",
+        "report_provenance.json": "f4e5012a78133d245ee699a7409fa7dcdc78d7454cb052431ce1e875c031b00d",
+        "results.md": "fc5fdc7f1e644e879b68b9db10b792f0a40062aa8ae903d47d27e2253b7f77f8",
+        "summary.csv": "9dee1f7b1885a50a6c58ac2a48b546b11197e9096de154289b8107747fcbc351",
+        "summary.json": "a7dd7655b97c6bc8ed3fd579f8ff64fdfe75f1eae494a63461b519872c1c7b16"
+      },
+      "README.md": "7229890c953ade289c3b54f48e1824370120cabced339ff3a84b8f1c28555132"
+    }
+  },
+  "replaced_sha256": {
+    "deepseek_v32_motivation": {
+      "report": {
+        "diagnosis/cuda_apis.csv": "a09caed496c4db14fe7c49b91511e75d507e55dadd3831ae6468492c57bc966a",
+        "diagnosis/flops.json": "9cd120dafb7c18e03077d7a9b22d2e158d9fcb0d671480d6fd9265b48e8c78a1",
+        "diagnosis/flops_verification.json": "1fc90da16084b8d063add8a8bac4cdd0fd70e88083b985cd817446a0c8eb2ba5",
+        "diagnosis/formal_latency_mfu.csv": "c95bbed366f13974b20b65e8d026fe6fedad15563fb333cf9d8251e5965744d7",
+        "diagnosis/operator_flops.csv": "6771fef40dc3e60ddc6630bf2fb7d17d393b60e2d17511611a6642222796ac04",
+        "diagnosis/pipeline.json": "2f686f08001e36a7efe18a56f257e354516f475a77298aa0a238a11dcfc3ae43",
+        "diagnosis/pipeline_dense_prefetch_cold.png": "c3b323e2a123761ad97c1fe41b3ace0566a8018b78df6a784af8a1c7a49b5558",
+        "diagnosis/pipeline_dense_prefetch_cold.svg": "ef8609cea67dc54b825f8b1178a11bff414979b8be5b8a174abe4d320bd4d9c2",
+        "diagnosis/pipeline_dense_prefetch_revisit.png": "e5400cc70a6db9fc5282a22a7d0e6464b9906e6c175b5651ae51f57545015506",
+        "diagnosis/pipeline_dense_prefetch_revisit.svg": "268413da30ec4b718f453a32666104362f9c50ccc2ec46f1339f4adc6ced5fce",
+        "diagnosis/pipeline_echo_cold.png": "b873c23beef6880875708e2e758ede4a1e21c59e814e20dcd322350aa08847a3",
+        "diagnosis/pipeline_echo_cold.svg": "3e9693dfa8c27d946948070d8e721371790089cce3b5a3aef980e733356c2c23",
+        "diagnosis/pipeline_echo_revisit.png": "64a8b25fcdbe5aa8bd419908212960f9eb25d6c30fcaa3aa606b0f646d5b3564",
+        "diagnosis/pipeline_echo_revisit.svg": "1e11a55675d32c4a8f62e8ecf299ce30ed65858b109a7530e0a9d3c9fd362d26",
+        "diagnosis/pipeline_hbm_cold.png": "be6bb11a2e808e6a9a9ddf6f2becce7c74b516b3049c491407ebd69ade0e9bce",
+        "diagnosis/pipeline_hbm_cold.svg": "35641f9e5e88724699032ffefa1092642dfa757e73005a855a072f3440a95d0c",
+        "diagnosis/pipeline_hbm_revisit.png": "8f916d7cbdbedc1a499eb1d910138cf365445d05f08d52c1df1414755d6ebd47",
+        "diagnosis/pipeline_hbm_revisit.svg": "05923767e78f9806914820f852c06f9a54b7fea0648fc96e015f51d21686ac03",
+        "diagnosis/pipeline_serial_sparse_cold.png": "e3d7002b77fa23cecd54f9be766e955a75711cf0e3c7937f92fc158a49dacfca",
+        "diagnosis/pipeline_serial_sparse_cold.svg": "2081281b92d144b2e2baa374170b7a5622c48859c7c66352ac121110d4cab364",
+        "diagnosis/pipeline_serial_sparse_revisit.png": "c5de0ca583d96b84ae47490c5d00492f4d712f647ceb14b016271c2039838a58",
+        "diagnosis/pipeline_serial_sparse_revisit.svg": "68cedb499ca39d6d9b76d6c8827d514939ca9fb3884194c493dd684a607651db",
+        "diagnosis/profile_metadata.json": "9a0f3c58b2c95e31182f68ebf765eb8afa3718ae87f3f319891db8b20b0d8d20",
+        "diagnosis/publication.json": "e2e6d956b586fac653b819d46ab591ff326e158d859e2defeb210c9bfb212ec4",
+        "diagnosis/revisit_dependency_edges.csv": "1ca8f719e12d59eac084b390d6a51e7d8c9427f026bcbc7cc61f3bcd5034e335",
+        "diagnosis/revisit_fetch_windows.csv": "e4b7b2fb1d2f215e6038c7b8115556108c69f2817c78e87b7b6a0ad3bf7dedbd",
+        "diagnosis/revisit_layer_pipeline.csv": "ed626763428fa80a3a0f69fa2ca3aa6a7e7781775698e4a4226df1cedd0f8f7c",
+        "diagnosis/revisit_pipeline_evidence.json": "a75ad96f615a6ff5eb96950cf176bb578f1aff53996d30cf9e8ef54000f61292",
+        "diagnosis/stage_costs.csv": "2593233aacd4d970352a61d932fc576c3ae89eba3f8aa31951c2550ce2cd99e1",
+        "diagnosis/stage_mfu.csv": "c5572cd9f380badbd5f09356cbad7d139acac4d68e90654c00253920544861b2",
+        "diagnosis.md": "aa18847c634b1ea55561720f234c48b95a7e816f6ee1d904fa4d3d35eb084640",
+        "field_audit.json": "7904c3281b09b197c9dc07ff10d200a208df957c2c7f9bdf025beaf74e9eee51",
+        "latency_per_request.png": "091bd20073ef36ada465b8542aaf690249d192675e5c707a4d39661252171392",
+        "latency_per_request.svg": "4f00f3f9675e6c052238ad24e231cc5e7544d67107f3dd8290a7d4b09635afd6",
+        "latency_summary.png": "45a6ad325434486caa8bbb8db3ecbb00e79ab99250ba7184be08c5c7af87f4e5",
+        "latency_summary.svg": "ee2fbda71a55031edf9cbba346b454d5b0a38e60210780071ec8660952e24c0c",
+        "operator_mfu/crosscheck.json": "9c292b13663daae4f7a597684e28319e6d46ad612eaebd8f3e9842beb3f6b2d4",
+        "operator_mfu/operator_kernel_inventory.csv": "30742e4f778b12e4132182807d7ac19ac577c6bb85cc6ad89c06253161d6eac0",
+        "operator_mfu/operator_mfu.csv": "27a9078295e04d12b26de4dedbbf3abf0a37b27e328dc1f58026de025d065551",
+        "operator_mfu/operator_mfu_by_layer.csv": "044d51a36b4a66e01b2f09b9aba9fe1bf9009062b904500c320a39b477e0d6a2",
+        "operator_mfu/operator_mfu_summary.json": "3fcecd3f9e88cd811bcbcb4dada1c81c3114071ba3f0d5d509e85e33aff38214",
+        "operator_mfu/publication.json": "d0834cd4bfb69d58294b69a66701ef2f2ba826204b7a917725c74565d3661076",
+        "operator_mfu.md": "ab338b18c391445d7b3ffc39fa495c2f217f2a0315e045d878de1e64d7304921",
+        "overall.csv": "96758a2518d500c767ec6a2e3d7ba2a551e4f771c8d3689b3689242d57415d84",
+        "per_request.csv": "5906f8306c36a328f5884c576a9ed952fc04c74db74e9a39fa53c3dd320fd24a",
+        "publication.json": "9d49e3251298134405bcfaed33dd269f3ebecf234ae1eabbb473d648197b77e1",
+        "report_provenance.json": "211b3bd6d4a7964edf16eee85ead813bf2e217668778105dd8f259a204ab4c2a",
+        "results.md": "9b7d874b446488190c1ca08d5fb2001cfa9e7ab0f24160efb2a05dbf93b00905",
+        "summary.csv": "207f9d603d5ab93e241c90efe32bcf5bd5847da68fd5694012508209364c900f",
+        "summary.json": "a18f3f79880ac8e8f9aead319bf260518ce9be0571c1d9a0e64220d16cd3ef68"
+      },
+      "README.md": "b6e5bf2ab524930438408819861fcc736636d22938fb1416774df81d8b5699aa"
+    },
+    "deepseek_v32_echo_official": {
+      "report": {
+        "existing_implementation_comparison.csv": "4a24b41d30465008df662bb1d8339e2307125a7f3fe9e23919dda92f4d5c9076",
+        "existing_implementation_comparison.json": "b97637db44a5db46f9cc01ee0a7a469f139bd4f8fcf44e716f5282e9fa6767ac",
+        "existing_implementation_comparison.md": "13ced73f138b94001c76b7fbfc003efa3ec0001cb5cd9277ca41668d76dbc3da",
+        "numerical_summary.json": "30e239d0485c00dabe39ebc1015adbfed7b45cffb9735b7a29117ae85442c6f3",
+        "per_request.csv": "7793e5a875761d8564d297876353e3bbdfbc5de4a58aab83952dd74445612b61",
+        "report_provenance.json": "f19c8710256835a24d69d62d989508f7c931d2037b78521e686d8f2381171396",
+        "results.md": "84f93bf7363e37e842eb8c6e36457d74c3d6e16d21f451b8c47c131b91cfd04b",
+        "summary.csv": "530299306254ef68849e9769a4106b2f92dff2e093ece0bb5d5ce435127114d4",
+        "summary.json": "34c462d718bfc30c2ca9f4ade18be6e6d3ae64f54872d9297d639cf6a3fcb199"
+      },
+      "README.md": "b678c7f65d0b0bd10f3e44cd2d93a888df9860653a258bf0d2435b688088963c"
+    }
+  },
+  "checked_links": [
+    {
+      "document": "experiments/deepseek_v32_motivation/README.md",
+      "target": "report/diagnosis.md"
+    },
+    {
+      "document": "experiments/deepseek_v32_motivation/README.md",
+      "target": "report/operator_mfu.md"
+    },
+    {
+      "document": "experiments/deepseek_v32_motivation/README.md",
+      "target": "report/latency_summary.png"
+    },
+    {
+      "document": "experiments/deepseek_v32_motivation/README.md",
+      "target": "report/latency_per_request.png"
+    },
+    {
+      "document": "experiments/deepseek_v32_motivation/README.md",
+      "target": "report/results.md"
+    },
+    {
+      "document": "experiments/deepseek_v32_motivation/README.md",
+      "target": "report/per_request.csv"
+    },
+    {
+      "document": "experiments/deepseek_v32_motivation/README.md",
+      "target": "report/diagnosis.md"
+    },
+    {
+      "document": "experiments/deepseek_v32_motivation/README.md",
+      "target": "report/report_provenance.json"
+    },
+    {
+      "document": "experiments/deepseek_v32_motivation/README.md",
+      "target": "report/summary.json"
+    },
+    {
+      "document": "experiments/deepseek_v32_motivation/README.md",
+      "target": "report/publication_manifest.json"
+    },
+    {
+      "document": "experiments/deepseek_v32_motivation/report/diagnosis.md",
+      "target": "../README.md"
+    },
+    {
+      "document": "experiments/deepseek_v32_motivation/report/diagnosis.md",
+      "target": "operator_mfu.md"
+    },
+    {
+      "document": "experiments/deepseek_v32_motivation/report/diagnosis.md",
+      "target": "diagnosis/aggregate_mfu.csv"
+    },
+    {
+      "document": "experiments/deepseek_v32_motivation/report/diagnosis.md",
+      "target": "diagnosis/pipeline_hbm_cold.png"
+    },
+    {
+      "document": "experiments/deepseek_v32_motivation/report/diagnosis.md",
+      "target": "diagnosis/pipeline_echo_revisit.png"
+    },
+    {
+      "document": "experiments/deepseek_v32_motivation/report/diagnosis.md",
+      "target": "diagnosis/pipeline_serial_sparse_revisit.png"
+    },
+    {
+      "document": "experiments/deepseek_v32_motivation/report/diagnosis.md",
+      "target": "diagnosis/pipeline_dense_prefetch_revisit.png"
+    },
+    {
+      "document": "experiments/deepseek_v32_motivation/report/diagnosis.md",
+      "target": "diagnosis/completion_receipt.json"
+    },
+    {
+      "document": "experiments/deepseek_v32_motivation/report/diagnosis.md",
+      "target": "diagnosis/independent_numerical_audit.json"
+    },
+    {
+      "document": "experiments/deepseek_v32_motivation/report/diagnosis.md",
+      "target": "diagnosis/independent_provenance_audit.json"
+    },
+    {
+      "document": "experiments/deepseek_v32_motivation/report/diagnosis.md",
+      "target": "operator_mfu/crosscheck.json"
+    },
+    {
+      "document": "experiments/deepseek_v32_motivation/report/diagnosis.md",
+      "target": "diagnosis/bottleneck_summary.json"
+    },
+    {
+      "document": "experiments/deepseek_v32_motivation/report/diagnosis.md",
+      "target": "diagnosis/kernel_inventory_audit.json"
+    },
+    {
+      "document": "experiments/deepseek_v32_motivation/report/diagnosis.md",
+      "target": "diagnosis/graph_copy_kernels.json"
+    },
+    {
+      "document": "experiments/deepseek_v32_motivation/report/diagnosis.md",
+      "target": "diagnosis/gpu_observation_audit.json"
+    },
+    {
+      "document": "experiments/deepseek_v32_motivation/report/diagnosis.md",
+      "target": "publication_manifest.json"
+    },
+    {
+      "document": "experiments/deepseek_v32_motivation/report/operator_mfu.md",
+      "target": "operator_mfu/operator_mfu.csv"
+    },
+    {
+      "document": "experiments/deepseek_v32_motivation/report/operator_mfu.md",
+      "target": "operator_mfu/operator_mfu_by_layer.csv"
+    },
+    {
+      "document": "experiments/deepseek_v32_motivation/report/operator_mfu.md",
+      "target": "operator_mfu/operator_kernel_inventory.csv"
+    },
+    {
+      "document": "experiments/deepseek_v32_motivation/report/operator_mfu.md",
+      "target": "operator_mfu/operator_mfu_summary.json"
+    },
+    {
+      "document": "experiments/deepseek_v32_motivation/report/operator_mfu.md",
+      "target": "operator_mfu/crosscheck.json"
+    },
+    {
+      "document": "experiments/deepseek_v32_motivation/report/operator_mfu.md",
+      "target": "operator_mfu/publication.json"
+    },
+    {
+      "document": "experiments/deepseek_v32_motivation/report/results.md",
+      "target": "per_request.csv"
+    },
+    {
+      "document": "experiments/deepseek_v32_motivation/report/results.md",
+      "target": "summary.csv"
+    },
+    {
+      "document": "experiments/deepseek_v32_motivation/report/results.md",
+      "target": "summary.json"
+    },
+    {
+      "document": "experiments/deepseek_v32_motivation/report/results.md",
+      "target": "report_provenance.json"
+    },
+    {
+      "document": "experiments/deepseek_v32_echo_official/README.md",
+      "target": "../deepseek_v32_motivation/README.md"
+    },
+    {
+      "document": "experiments/deepseek_v32_echo_official/README.md",
+      "target": "report/results.md"
+    },
+    {
+      "document": "experiments/deepseek_v32_echo_official/README.md",
+      "target": "report/summary.csv"
+    },
+    {
+      "document": "experiments/deepseek_v32_echo_official/README.md",
+      "target": "report/per_request.csv"
+    },
+    {
+      "document": "experiments/deepseek_v32_echo_official/README.md",
+      "target": "report/summary.json"
+    },
+    {
+      "document": "experiments/deepseek_v32_echo_official/README.md",
+      "target": "report/report_provenance.json"
+    },
+    {
+      "document": "experiments/deepseek_v32_echo_official/README.md",
+      "target": "report/existing_implementation_comparison.md"
+    },
+    {
+      "document": "experiments/deepseek_v32_echo_official/README.md",
+      "target": "report/existing_implementation_comparison.csv"
+    },
+    {
+      "document": "experiments/deepseek_v32_echo_official/README.md",
+      "target": "report/existing_implementation_comparison.json"
+    },
+    {
+      "document": "experiments/deepseek_v32_echo_official/README.md",
+      "target": "report/numerical_summary.json"
+    },
+    {
+      "document": "experiments/deepseek_v32_echo_official/README.md",
+      "target": "../../docs/agents/system/deepseek_echo_official_c10_validation.md"
+    },
+    {
+      "document": "experiments/deepseek_v32_echo_official/README.md",
+      "target": "../../3rdparty/README.md"
+    },
+    {
+      "document": "experiments/deepseek_v32_echo_official/report/results.md",
+      "target": "per_request.csv"
+    },
+    {
+      "document": "experiments/deepseek_v32_echo_official/report/results.md",
+      "target": "summary.csv"
+    },
+    {
+      "document": "experiments/deepseek_v32_echo_official/report/results.md",
+      "target": "summary.json"
+    },
+    {
+      "document": "experiments/deepseek_v32_echo_official/report/results.md",
+      "target": "report_provenance.json"
+    }
+  ],
+  "cleanup_paths": [
+    "experiments/deepseek_v32_motivation/output/data/deepseek_v32_motivation_20261004_p65536_nh16777216_u16_r2_02",
+    "experiments/deepseek_v32_motivation/output/data/deepseek_v32_motivation_profile_20261004_01",
+    "experiments/deepseek_v32_motivation/output/data/motivation_c3_20261004_u16_r2_01",
+    "experiments/deepseek_v32_motivation/output/data/motivation_c3_flops_20261004_01",
+    "experiments/deepseek_v32_motivation/output/data/motivation_c3_profile_20261004_01",
+    "experiments/deepseek_v32_motivation/output/data/motivation_c4_20261004_u16_r2_02",
+    "experiments/deepseek_v32_motivation/output/data/motivation_c4_flops_20261004_02",
+    "experiments/deepseek_v32_motivation/output/data/motivation_c6_20261004_u16_r2_01",
+    "experiments/deepseek_v32_motivation/output/data/motivation_c6_dense_profile_20261004_01",
+    "experiments/deepseek_v32_motivation/output/data/motivation_c6_flops_20261004_01",
+    "experiments/deepseek_v32_motivation/output/data/motivation_c7_hint_20261004_u16_r2_01",
+    "experiments/deepseek_v32_motivation/output/data/motivation_c7_hint_flops_20261004_01",
+    "experiments/deepseek_v32_motivation/output/data/motivation_c9_triton_20261004_u16_r2_01",
+    "experiments/deepseek_v32_motivation/output/data/motivation_c9_triton_flops_20261004_01",
+    "experiments/deepseek_v32_motivation/output/data/motivation_c9_triton_profile_20261004_01",
+    "experiments/deepseek_v32_motivation/output/data/motivation_flops_20261004_01",
+    "experiments/deepseek_v32_motivation/output/data/motivation_operator_mfu_20261004_01",
+    "experiments/deepseek_v32_motivation/output/data/motivation_opt_flops_screen_20261004_01",
+    "experiments/deepseek_v32_motivation/output/data/motivation_opt_profile_screen_20261004_01",
+    "experiments/deepseek_v32_motivation/output/data/motivation_opt_screen_20261004_01",
+    "experiments/deepseek_v32_motivation/output/log/deepseek_v32_motivation_20261004_p65536_nh16777216_u16_r2_02",
+    "experiments/deepseek_v32_motivation/output/log/deepseek_v32_motivation_profile_20261004_01",
+    "experiments/deepseek_v32_motivation/output/log/motivation_c3_20261004_u16_r2_01",
+    "experiments/deepseek_v32_motivation/output/log/motivation_c3_profile_20261004_01",
+    "experiments/deepseek_v32_motivation/output/log/motivation_c4_20261004_u16_r2_02",
+    "experiments/deepseek_v32_motivation/output/log/motivation_c6_20261004_u16_r2_01",
+    "experiments/deepseek_v32_motivation/output/log/motivation_c6_dense_profile_20261004_01",
+    "experiments/deepseek_v32_motivation/output/log/motivation_c7_hint_20261004_u16_r2_01",
+    "experiments/deepseek_v32_motivation/output/log/motivation_c9_triton_20261004_u16_r2_01",
+    "experiments/deepseek_v32_motivation/output/log/motivation_c9_triton_profile_20261004_01",
+    "experiments/deepseek_v32_motivation/output/log/motivation_opt_profile_screen_20261004_01",
+    "experiments/deepseek_v32_motivation/output/log/motivation_opt_screen_20261004_01",
+    "experiments/deepseek_v32_motivation/output/profile/deepseek_v32_motivation_profile_20261004_01",
+    "experiments/deepseek_v32_motivation/output/profile/motivation_c3_profile_20261004_01",
+    "experiments/deepseek_v32_motivation/output/profile/motivation_c6_dense_profile_20261004_01",
+    "experiments/deepseek_v32_motivation/output/profile/motivation_c9_triton_profile_20261004_01",
+    "experiments/deepseek_v32_motivation/output/profile/motivation_opt_profile_screen_20261004_01",
+    "experiments/deepseek_v32_echo_official/output/data/deepseek_v32_echo_official_20261004_p65536_nh16777216_u16_r2_01",
+    "experiments/deepseek_v32_echo_official/output/log/deepseek_v32_echo_official_20261004_p65536_nh16777216_u16_r2_01"
+  ],
+  "deleted_paths": [
+    "experiments/deepseek_v32_motivation/output/data/deepseek_v32_motivation_20261004_p65536_nh16777216_u16_r2_02",
+    "experiments/deepseek_v32_motivation/output/data/deepseek_v32_motivation_profile_20261004_01",
+    "experiments/deepseek_v32_motivation/output/data/motivation_c3_20261004_u16_r2_01",
+    "experiments/deepseek_v32_motivation/output/data/motivation_c3_flops_20261004_01",
+    "experiments/deepseek_v32_motivation/output/data/motivation_c3_profile_20261004_01",
+    "experiments/deepseek_v32_motivation/output/data/motivation_c4_20261004_u16_r2_02",
+    "experiments/deepseek_v32_motivation/output/data/motivation_c4_flops_20261004_02",
+    "experiments/deepseek_v32_motivation/output/data/motivation_c6_20261004_u16_r2_01",
+    "experiments/deepseek_v32_motivation/output/data/motivation_c6_dense_profile_20261004_01",
+    "experiments/deepseek_v32_motivation/output/data/motivation_c6_flops_20261004_01",
+    "experiments/deepseek_v32_motivation/output/data/motivation_c7_hint_20261004_u16_r2_01",
+    "experiments/deepseek_v32_motivation/output/data/motivation_c7_hint_flops_20261004_01",
+    "experiments/deepseek_v32_motivation/output/data/motivation_c9_triton_20261004_u16_r2_01",
+    "experiments/deepseek_v32_motivation/output/data/motivation_c9_triton_flops_20261004_01",
+    "experiments/deepseek_v32_motivation/output/data/motivation_c9_triton_profile_20261004_01",
+    "experiments/deepseek_v32_motivation/output/data/motivation_flops_20261004_01",
+    "experiments/deepseek_v32_motivation/output/data/motivation_operator_mfu_20261004_01",
+    "experiments/deepseek_v32_motivation/output/data/motivation_opt_flops_screen_20261004_01",
+    "experiments/deepseek_v32_motivation/output/data/motivation_opt_profile_screen_20261004_01",
+    "experiments/deepseek_v32_motivation/output/data/motivation_opt_screen_20261004_01",
+    "experiments/deepseek_v32_motivation/output/log/deepseek_v32_motivation_20261004_p65536_nh16777216_u16_r2_02",
+    "experiments/deepseek_v32_motivation/output/log/deepseek_v32_motivation_profile_20261004_01",
+    "experiments/deepseek_v32_motivation/output/log/motivation_c3_20261004_u16_r2_01",
+    "experiments/deepseek_v32_motivation/output/log/motivation_c3_profile_20261004_01",
+    "experiments/deepseek_v32_motivation/output/log/motivation_c4_20261004_u16_r2_02",
+    "experiments/deepseek_v32_motivation/output/log/motivation_c6_20261004_u16_r2_01",
+    "experiments/deepseek_v32_motivation/output/log/motivation_c6_dense_profile_20261004_01",
+    "experiments/deepseek_v32_motivation/output/log/motivation_c7_hint_20261004_u16_r2_01",
+    "experiments/deepseek_v32_motivation/output/log/motivation_c9_triton_20261004_u16_r2_01",
+    "experiments/deepseek_v32_motivation/output/log/motivation_c9_triton_profile_20261004_01",
+    "experiments/deepseek_v32_motivation/output/log/motivation_opt_profile_screen_20261004_01",
+    "experiments/deepseek_v32_motivation/output/log/motivation_opt_screen_20261004_01",
+    "experiments/deepseek_v32_motivation/output/profile/deepseek_v32_motivation_profile_20261004_01",
+    "experiments/deepseek_v32_motivation/output/profile/motivation_c3_profile_20261004_01",
+    "experiments/deepseek_v32_motivation/output/profile/motivation_c6_dense_profile_20261004_01",
+    "experiments/deepseek_v32_motivation/output/profile/motivation_c9_triton_profile_20261004_01",
+    "experiments/deepseek_v32_motivation/output/profile/motivation_opt_profile_screen_20261004_01",
+    "experiments/deepseek_v32_echo_official/output/data/deepseek_v32_echo_official_20261004_p65536_nh16777216_u16_r2_01",
+    "experiments/deepseek_v32_echo_official/output/log/deepseek_v32_echo_official_20261004_p65536_nh16777216_u16_r2_01"
+  ],
+  "source_sha256": "7d1be0caabc718573447f6ddead8c5fc4c4b241560692ef2de544e67bd00c249",
+  "accepted_profile_receipt_sha256": "cc30286b462b21f1ac542155e871cd2f3843131e6a324914b67d9c89b313a829",
+  "accepted_official_audit_sha256": "ce873a1699bd4d24494c0bc5e3807fd900e50f678b3ef15ac3b5e489e544e911"
+}

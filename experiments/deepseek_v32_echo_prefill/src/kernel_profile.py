@@ -17,11 +17,13 @@ from pathlib import Path
 
 import torch
 
+from experiments.deepseek_v32_echo_prefill.src.backend_provenance import source_files
+
 KERNELS = ("indexer-resident", "indexer-offload", "mla", "recall")
 KERNEL_REGEX = {
-    "indexer-resident": r"echo_native::sm90_fp8_mqa_logits<",
+    "indexer-resident": r"deep_gemm::sm90_fp8_mqa_logits<",
     "indexer-offload": r"echo_native::sm90_fp8_mqa_logits_fuse_prefetch<",
-    "mla": r"_sparse_mla_kernel",
+    "mla": r"sparse_attn_fwd_kernel",
     "recall": r"gather_records",
 }
 _ROOT = Path(__file__).resolve().parents[3]
@@ -97,6 +99,7 @@ def load_inputs(path):
 
 def source_manifest():
     files = {
+        *source_files(),
         Path(__file__),
         Path(__file__).parents[1] / "scripts/ncu.sh",
         *(
@@ -131,20 +134,29 @@ def prepare_replay(data, kernel, pool_slots, prefetch_limit):
         state = None
         if kernel == "indexer-offload":
             if pool_slots < rows:
-                raise ValueError("pool_slots must hold every protected current-chunk record")
+                raise ValueError(
+                    "pool_slots must hold the pending query chunk, excluding sentinel zero"
+                )
             limit = min(prefetch_limit, pool_slots - rows, 8192)
-            host = torch.empty_like(data["kv"], pin_memory=True).copy_(data["kv"])
-            pool = torch.empty((pool_slots, 576), device=device, dtype=torch.bfloat16)
-            h2d = torch.empty(columns, device=device, dtype=torch.int32)
-            d2h = torch.empty(pool_slots, device=device, dtype=torch.int64)
-            current_ids = torch.arange(start, start + rows, device=device)
-            slots = torch.arange(rows, pool_slots, device=device, dtype=torch.int32)
+            host_capacity = (columns + 63) // 64 * 64
+            host = torch.empty((host_capacity, 576), dtype=torch.bfloat16, pin_memory=True)
+            host[:columns].copy_(data["kv"])
+            pool = torch.empty((pool_slots + 1, 576), device=device, dtype=torch.bfloat16)
+            h2d = torch.empty(host_capacity, device=device, dtype=torch.int32)
+            d2h = torch.empty(pool_slots + 1, device=device, dtype=torch.int64)
+            slots = torch.arange(1, pool_slots + 1, device=device, dtype=torch.int32)
             state = {
                 "host": host,
                 "device": pool,
                 "host_to_device": h2d,
                 "device_to_host": d2h,
                 "free_slots": slots,
+                "page_table": torch.arange(host_capacity // 64, device=device, dtype=torch.int32),
+                "history_length": start,
+                "allocation_log": torch.full(
+                    (pool_slots + 1,), 2**31 - 1, device=device, dtype=torch.int64
+                ),
+                "prefetch_stats": torch.zeros(3, device=device, dtype=torch.int64),
                 "counter": torch.zeros(1, device=device, dtype=torch.uint32),
                 "offset": torch.zeros(16, device=device, dtype=torch.float32),
                 "max_prefetch": limit,
@@ -153,15 +165,17 @@ def prepare_replay(data, kernel, pool_slots, prefetch_limit):
             def reset():
                 h2d.fill_(2**31 - 1)
                 d2h.fill_(2**31 - 1)
-                pool[:rows].copy_(host[start : start + rows], non_blocking=True)
-                h2d[start : start + rows] = torch.arange(rows, device=device, dtype=torch.int32)
-                d2h[:rows] = current_ids
+                pool[0].zero_()
                 state["counter"].zero_()
 
             boundary.update(
                 replay="actual_activations_with_cold_historical_pool",
                 pool_slots=pool_slots,
-                protected_current_records=rows,
+                pending_current_records=rows,
+                current_records_installed=False,
+                padding_slots=1,
+                page_size=64,
+                cache_policy_revision="echo-global-pages-fifo-v1",
                 historical_resident_records_before_launch=0,
                 max_prefetch=limit,
                 coarse_bin_offset=0.0,
@@ -184,17 +198,21 @@ def prepare_replay(data, kernel, pool_slots, prefetch_limit):
                 fetched = torch.nonzero(h2d[:start] != 2**31 - 1).flatten()
                 count = len(fetched)
                 attempts = int(state["counter"].item())
-                if count != min(attempts, limit):
+                if (
+                    count != state["prefetch_stats"][0].item()
+                    or count != (state["allocation_log"] != 2**31 - 1).sum().item()
+                ):
                     raise RuntimeError("prefetch counter and published cache mappings disagree")
                 torch.testing.assert_close(
                     pool[h2d[fetched].long()].cpu(), host[fetched.cpu()], rtol=0, atol=0
                 )
-                torch.testing.assert_close(
-                    pool[:rows].cpu(), host[start : start + rows], rtol=0, atol=0
-                )
+                if not h2d[start:columns].eq(2**31 - 1).all() or not pool[0].eq(0).all():
+                    raise RuntimeError("pending suffix or padding sentinel was overwritten")
                 result.update(
                     prefetched_records=count,
                     reservation_attempts=attempts,
+                    actual_evictions=int(state["prefetch_stats"][1].item()),
+                    rejected_reservations=int(state["prefetch_stats"][2].item()),
                     copied_bytes=1152 * count,
                 )
             return result
@@ -278,6 +296,12 @@ def main():
         reset()
         output = launch()
         torch.cuda.synchronize()
+    from experiments.deepseek_v32_echo_prefill.src.backend_provenance import (
+        collect_backend_provenance,
+        collect_flashinfer_runtime_artifacts,
+    )
+
+    backend_identity = collect_backend_provenance()
     reset()
     torch.cuda.synchronize()
     # NCU's kernel-name filter selects exactly one computational launch. The
@@ -291,6 +315,8 @@ def main():
     verification = verify(output)
     if source_manifest() != sources:
         raise RuntimeError("kernel or harness source changed during replay")
+    if collect_backend_provenance() != backend_identity:
+        raise RuntimeError("Official backend libraries changed during replay")
     metadata = {
         "run_id": args.run_id or datetime.now(UTC).strftime("%Y%m%dT%H%M%S.%fZ"),
         "source_run_id": data["source_run_id"],
@@ -311,6 +337,8 @@ def main():
         "measurement_boundary": boundary,
         "verification": verification,
         "source_sha256": sources,
+        "backend_provenance": backend_identity,
+        "flashinfer_runtime_artifacts": collect_flashinfer_runtime_artifacts(),
         "hardware": str(torch.cuda.get_device_properties(0)),
         "cuda_visible_devices": os.environ.get("CUDA_VISIBLE_DEVICES"),
         "dependencies": {

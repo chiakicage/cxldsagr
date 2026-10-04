@@ -1,0 +1,65 @@
+{
+  "passed": true,
+  "run_id": "motivation_c10_profile_20261004_01",
+  "samples": 162,
+  "expected_pid": 2119270,
+  "process_observations": 158,
+  "only_expected_pid_observed": true,
+  "observed_gpu_uuids": [
+    "GPU-1bdee8b4-22ac-536c-208b-bfb4ed38b878"
+  ],
+  "empty_first_and_final_observations": true,
+  "first_observation_unix": 1791077117.9251342,
+  "last_observation_unix": 1791077962.9946191,
+  "run_started_unix": 1791077124.4597476,
+  "run_completed_unix": 1791077910.6322207,
+  "maximum_sample_gap_seconds": 28.836934328079224,
+  "post_completion_process_command_unavailable": [
+    {
+      "unix_seconds": 1791077913.7649627,
+      "gpu_uuid": "GPU-1bdee8b4-22ac-536c-208b-bfb4ed38b878",
+      "pid": 2119270,
+      "name": "[No data]",
+      "memory_mib": "25654",
+      "command": ""
+    },
+    {
+      "unix_seconds": 1791077918.8627908,
+      "gpu_uuid": "GPU-1bdee8b4-22ac-536c-208b-bfb4ed38b878",
+      "pid": 2119270,
+      "name": "[No data]",
+      "memory_mib": "25654",
+      "command": ""
+    },
+    {
+      "unix_seconds": 1791077923.9606738,
+      "gpu_uuid": "GPU-1bdee8b4-22ac-536c-208b-bfb4ed38b878",
+      "pid": 2119270,
+      "name": "[No data]",
+      "memory_mib": "25654",
+      "command": ""
+    },
+    {
+      "unix_seconds": 1791077929.0591311,
+      "gpu_uuid": "GPU-1bdee8b4-22ac-536c-208b-bfb4ed38b878",
+      "pid": 2119270,
+      "name": "[No data]",
+      "memory_mib": "25654",
+      "command": ""
+    }
+  ],
+  "monitor_stdout_stderr": "Captured by exec tool without redirection; no output returned through current observation. Each nvidia-smi stderr and status is retained in JSONL.",
+  "monitor_exit_code": 0,
+  "profile_exit_code": 0,
+  "query_stderr_and_return_codes": "Recorded per JSONL observation; all successful and empty",
+  "input_sha256": {
+    "gpu_observations.jsonl": "63b471f4b5214f4e0db4cc8b242e1caa2a9fad6e6bc50075a63102a24281648f",
+    "gpu_monitor_source.py": "2df24ae479868a7bd50dd67147fa7b4c13a3d4b4b225fd9b704eeeecf933220b",
+    "gpu_monitor_window.json": "cdd9d1eee7465c5d80f9fa5d7599faa21a04108cf632ec6081e2566500e87189",
+    "gpu_monitor_completion.json": "85b2629cb2c4734b0399bbf6e90f25d9866f5e49435ca173f6e1c7c7089c8663",
+    "metadata.json": "8e932a52b895f20512eb39a1d89de4354d1968ed116295f696cd7a881a2d7a0e",
+    "result.json": "c5673e64b98f247054c74f7a9191d36534a166b2265a3f9b8c5002d7fa405d16"
+  },
+  "audit_source_sha256": "7b9e8c1f0af229434b1e0a02fc77ac116d42c4a8f06335b7a1391eb8b702f3e6",
+  "boundary": "Discrete all-device compute-process observations span profile startup and completion. They cannot establish absence of other work between samples. Monitor stdout/stderr were captured by the exec tool; no separate original redirected stderr is claimed."
+}

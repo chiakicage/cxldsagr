@@ -1,0 +1,576 @@
+diff --git a/operators/deepseek_v32/indexer/csrc/echo_indexer.cu b/operators/deepseek_v32/indexer/csrc/echo_indexer.cu
+index d0a2bbf..845b249 100644
+--- a/operators/deepseek_v32/indexer/csrc/echo_indexer.cu
++++ b/operators/deepseek_v32/indexer/csrc/echo_indexer.cu
+@@ -48,7 +48,7 @@ void forward(TensorView q, TensorView k, TensorView weights, TensorView scales,
+              TensorView host, TensorView device, TensorView host_to_device,
+              TensorView device_to_host, TensorView slots, TensorView allocations,
+              TensorView counter, TensorView offsets, int64_t query_start,
+-             int64_t max_prefetch, bool prefetch) {
++             int64_t max_prefetch) {
+   const int rows = q.size(0), columns = k.size(0), stride = output.size(1);
+   const int gpu = q.device().device_id;
+   checked(cudaSetDevice(gpu));
+@@ -67,29 +67,22 @@ void forward(TensorView q, TensorView k, TensorView weights, TensorView scales,
+   auto begin = static_cast<uint32_t*>(starts.data_ptr());
+   auto end = static_cast<uint32_t*>(ends.data_ptr());
+   auto logits = static_cast<float*>(output.data_ptr());
+-  if (prefetch) {
+-    void* mapped = nullptr;
+-    checked(cudaHostGetDevicePointer(&mapped, host.data_ptr(), 0));
+-    constexpr int stages = 96;
+-    constexpr int fixed = 16384 + 3*16384 + 3*16384 + 3*512 + 3*512 + 16*8 + 4;
+-    constexpr int shared_bytes = fixed + stages*(1024+16);
+-    auto kernel = sm90_fp8_mqa_logits_fuse_prefetch<64,128,576,2,128,3,3,stages,128,256,256,16384>;
+-    checked(cudaFuncSetAttribute(kernel, cudaFuncAttributeMaxDynamicSharedMemorySize, shared_bytes));
+-    kernel<<<grid,640,shared_bytes,stream>>>(
+-        rows, columns, stride, page_table.size(1), begin, end, logits,
+-        static_cast<int*>(page_table.data_ptr()), static_cast<int*>(extend_lengths.data_ptr()),
+-        static_cast<int*>(query_requests.data_ptr()),
+-        static_cast<__nv_bfloat16*>(device.data_ptr()), static_cast<__nv_bfloat16*>(mapped),
+-        static_cast<int*>(allocations.data_ptr()), static_cast<int*>(slots.data_ptr()),
+-        static_cast<int64_t*>(device_to_host.data_ptr()), static_cast<int*>(host_to_device.data_ptr()),
+-        static_cast<uint32_t*>(counter.data_ptr()), static_cast<float*>(offsets.data_ptr()),
+-        max_prefetch, query_start, tq, tk, ts, tw);
+-  } else {
+-    constexpr int shared_bytes = 3*16384 + 3*16384 + 3*512 + 3*512 + 12*8;
+-    auto kernel = sm90_fp8_mqa_logits<64,128,2,128,3,3,128,256>;
+-    checked(cudaFuncSetAttribute(kernel, cudaFuncAttributeMaxDynamicSharedMemorySize, shared_bytes));
+-    kernel<<<grid,384,shared_bytes,stream>>>(rows, columns, stride, begin, end, logits, tq, tk, ts, tw);
+-  }
++  void* mapped = nullptr;
++  checked(cudaHostGetDevicePointer(&mapped, host.data_ptr(), 0));
++  constexpr int stages = 96;
++  constexpr int fixed = 16384 + 3*16384 + 3*16384 + 3*512 + 3*512 + 16*8 + 4;
++  constexpr int shared_bytes = fixed + stages*(1024+16);
++  auto kernel = sm90_fp8_mqa_logits_fuse_prefetch<64,128,576,2,128,3,3,stages,128,256,256,16384>;
++  checked(cudaFuncSetAttribute(kernel, cudaFuncAttributeMaxDynamicSharedMemorySize, shared_bytes));
++  kernel<<<grid,640,shared_bytes,stream>>>(
++      rows, columns, stride, page_table.size(1), begin, end, logits,
++      static_cast<int*>(page_table.data_ptr()), static_cast<int*>(extend_lengths.data_ptr()),
++      static_cast<int*>(query_requests.data_ptr()),
++      static_cast<__nv_bfloat16*>(device.data_ptr()), static_cast<__nv_bfloat16*>(mapped),
++      static_cast<int*>(allocations.data_ptr()), static_cast<int*>(slots.data_ptr()),
++      static_cast<int64_t*>(device_to_host.data_ptr()), static_cast<int*>(host_to_device.data_ptr()),
++      static_cast<uint32_t*>(counter.data_ptr()), static_cast<float*>(offsets.data_ptr()),
++      max_prefetch, query_start, tq, tk, ts, tw);
+   checked(cudaGetLastError());
+   clean<<<std::min<int64_t>(1024, (int64_t(rows)*columns+255)/256),256,0,stream>>>(
+       logits, rows, columns, stride, query_start);
+diff --git a/operators/deepseek_v32/indexer/csrc/echo_logits.cuh b/operators/deepseek_v32/indexer/csrc/echo_logits.cuh
+index bf6852a..5cc18f1 100644
+--- a/operators/deepseek_v32/indexer/csrc/echo_logits.cuh
++++ b/operators/deepseek_v32/indexer/csrc/echo_logits.cuh
+@@ -37,296 +37,6 @@ static constexpr int to_swizzle_cute_type() {
+         return static_cast<int>(cute::SM90::GMMA::LayoutType::B128);
+ }
+ 
+-template <uint32_t kNumHeads, uint32_t kHeadDim,
+-          uint32_t BLOCK_Q, uint32_t BLOCK_KV,
+-          uint32_t kNumQStages, uint32_t kNumKVStages,
+-          uint32_t kNumTMAThreads, uint32_t kNumMathThreads>
+-__global__ __launch_bounds__(kNumTMAThreads + kNumMathThreads, 1)
+-void sm90_fp8_mqa_logits(const uint32_t seq_len, const uint32_t seq_len_kv, const uint64_t stride_kv,
+-                         uint32_t* cu_seq_len_k_start,
+-                         uint32_t* cu_seq_len_k_end,
+-                         float* logits,
+-                         const __grid_constant__ cute::TmaDescriptor tensor_map_q,
+-                         const __grid_constant__ cute::TmaDescriptor tensor_map_kv,
+-                         const __grid_constant__ cute::TmaDescriptor tensor_map_kv_scales,
+-                         const __grid_constant__ cute::TmaDescriptor tensor_map_weights) {
+-    // TODO: consider TMA multicast
+-    // For one block, we process `[q_start:q_end, h, d] @ [kv_start:kv_end, d] -> [q_start:q_end, kv_start:kv_end]`
+-    // Q should be load only at once for a block
+-    const auto& num_q_blocks = ceil_div(seq_len, BLOCK_Q);
+-
+-    // Types
+-    using WGMMA = typename FP8MMASelector<BLOCK_Q * kNumHeads>::type;
+-    using Barrier = cutlass::arch::ClusterTransactionBarrier;
+-
+-    // Prefetch TMA descriptors
+-    DG_STATIC_ASSERT(kNumTMAThreads == 128 and kNumMathThreads % 128 == 0, "Invalid threads");
+-    if (threadIdx.x / 32 == kNumMathThreads / 32 and cute::elect_one_sync()) {
+-        cute::prefetch_tma_descriptor(&tensor_map_q);
+-        cute::prefetch_tma_descriptor(&tensor_map_kv);
+-        cute::prefetch_tma_descriptor(&tensor_map_kv_scales);
+-        cute::prefetch_tma_descriptor(&tensor_map_weights);
+-    }
+-    __syncwarp();
+-
+-    // Shared memory configs
+-    // NOTES: weight may be unaligned
+-    static constexpr uint32_t kSwizzleAlignment = kHeadDim * 8;
+-    static constexpr uint32_t SMEM_Q_SIZE_PER_STAGE = BLOCK_Q * kNumHeads * kHeadDim * sizeof(__nv_fp8_e4m3);
+-    static constexpr uint32_t SMEM_WEIGHT_SIZE_PER_STAGE = BLOCK_Q * kNumHeads * sizeof(float);
+-    static constexpr uint32_t SMEM_KV_SIZE_PER_STAGE = BLOCK_KV * kHeadDim * sizeof(__nv_fp8_e4m3);
+-    static constexpr uint32_t SMEM_KV_SCALE_SIZE_PER_STAGE = BLOCK_KV * sizeof(float);
+-
+-    // Align to swizzling alignment bytes
+-    extern __shared__ __align__(kSwizzleAlignment) uint8_t smem_buffer[];
+-    DG_STATIC_ASSERT(SMEM_Q_SIZE_PER_STAGE % kSwizzleAlignment == 0, "Unaligned TMA swizzling");
+-    DG_STATIC_ASSERT(SMEM_KV_SIZE_PER_STAGE % kSwizzleAlignment == 0, "Unaligned TMA swizzling");
+-
+-    // Data on shared memory
+-    auto smem_q = PatternVisitor([&](const uint32_t& i) {
+-        return reinterpret_cast<__nv_fp8_e4m3*>(smem_buffer +
+-            SMEM_Q_SIZE_PER_STAGE * i);
+-    });
+-    auto smem_kv = PatternVisitor([&](const uint32_t& i) {
+-        return reinterpret_cast<__nv_fp8_e4m3*>(smem_buffer + (
+-            SMEM_Q_SIZE_PER_STAGE * kNumQStages + SMEM_KV_SIZE_PER_STAGE * i));
+-    });
+-    auto smem_weights = PatternVisitor([&](const uint32_t& i) {
+-        return reinterpret_cast<float*>(smem_buffer +
+-            SMEM_Q_SIZE_PER_STAGE * kNumQStages + SMEM_KV_SIZE_PER_STAGE * kNumKVStages + SMEM_WEIGHT_SIZE_PER_STAGE * i);
+-    });
+-    auto smem_kv_scales = PatternVisitor([&](const uint32_t& i) {
+-        return reinterpret_cast<float*>(smem_buffer +
+-            SMEM_Q_SIZE_PER_STAGE * kNumQStages + SMEM_KV_SIZE_PER_STAGE * kNumKVStages +
+-            SMEM_WEIGHT_SIZE_PER_STAGE * kNumQStages + SMEM_KV_SCALE_SIZE_PER_STAGE * i);
+-    });
+-
+-    // TMA barriers
+-    auto barrier_ptr = reinterpret_cast<Barrier*>(smem_kv_scales[kNumKVStages]);
+-    auto full_q_barriers   = PatternVisitor([&](const uint32_t& i) { return barrier_ptr + i; });
+-    auto empty_q_barriers  = PatternVisitor([&](const uint32_t& i) { return barrier_ptr + (kNumQStages + i); });
+-    auto full_kv_barriers  = PatternVisitor([&](const uint32_t& i) { return barrier_ptr + (kNumQStages * 2 + i); });
+-    auto empty_kv_barriers = PatternVisitor([&](const uint32_t& i) { return barrier_ptr + (kNumQStages * 2 + kNumKVStages + i); });
+-
+-    // Initialize barriers
+-    const bool& is_tma_load_warp = kNumMathThreads <= threadIdx.x and threadIdx.x < kNumMathThreads + 32;
+-    if (is_tma_load_warp and cute::elect_one_sync()) {
+-        #pragma unroll
+-        for (uint32_t i = 0; i < kNumQStages; ++ i) {
+-            full_q_barriers[i]->init(1);
+-            empty_q_barriers[i]->init(kNumMathThreads);
+-        }
+-        #pragma unroll
+-        for (uint32_t i = 0; i < kNumKVStages; ++ i) {
+-            full_kv_barriers[i]->init(1);
+-            empty_kv_barriers[i]->init(kNumMathThreads);
+-        }
+-
+-        // Make initialized barrier visible in async proxy
+-        cutlass::arch::fence_barrier_init();
+-    }
+-    __syncthreads();
+-
+-    // Register reconfigurations
+-    constexpr uint32_t kNumTMARegisters = 32;
+-    constexpr uint32_t kNumMathRegisters = 112;
+-
+-    // Block scheduler
+-    uint32_t block_q_idx = blockIdx.x, q_iter_idx = 0;
+-    const auto& get_next_block_q_idx = [&]() -> cute::tuple<uint32_t, uint32_t> {
+-        return {block_q_idx + gridDim.x, q_iter_idx + 1};
+-    };
+-    const auto& load_schedule = [&](const uint32_t& q_iter_offset = 0) -> cute::tuple<uint32_t, uint32_t, uint32_t, uint32_t> {
+-        uint32_t start = cute::numeric_limits<uint32_t>::max();
+-        uint32_t end = cute::numeric_limits<uint32_t>::min();
+-
+-        #pragma unroll
+-        for (uint32_t i = 0; i < BLOCK_Q; ++ i) {
+-            const auto& q_idx = min(block_q_idx * BLOCK_Q + i, seq_len - 1);
+-            start = min(start, min(__ldg(cu_seq_len_k_start + q_idx), seq_len_kv));
+-            end = max(end, min(__ldg(cu_seq_len_k_end + q_idx), seq_len_kv));
+-        }
+-        start = start / 4 * 4;
+-        return {(q_iter_idx + q_iter_offset) % kNumQStages,       // Q pipeline stage
+-                ((q_iter_idx + q_iter_offset) / kNumQStages) & 1, // Q pipeline phase
+-                start, ceil_div(end - start, BLOCK_KV)};          // Task info
+-    };
+-
+-    // KV pipeline
+-    uint32_t num_total_kv_blocks = 0;
+-    const auto& get_kv_pipeline = [&](const uint32_t& kv_block_idx) -> cute::tuple<uint32_t, uint32_t> {
+-        return {
+-            (num_total_kv_blocks + kv_block_idx) % kNumKVStages,         // KV pipeline stage
+-            ((num_total_kv_blocks + kv_block_idx) / kNumKVStages) & 1    // KV pipeline phase
+-        };
+-    };
+-
+-    if (threadIdx.x >= kNumMathThreads) {
+-        // TMA warp-group for loading data
+-        cutlass::arch::warpgroup_reg_dealloc<kNumTMARegisters>();
+-
+-        // Only the first warp remains
+-        if (not is_tma_load_warp)
+-            return;
+-
+-        // Prefetch
+-        const auto& issue_tma_q = [&](const uint32_t& stage_idx, const auto& block_idx) {
+-            tma_copy(&tensor_map_q, reinterpret_cast<uint64_t*>(full_q_barriers[stage_idx]), smem_q[stage_idx], 0, block_idx * BLOCK_Q * kNumHeads);
+-            tma_copy(&tensor_map_weights, reinterpret_cast<uint64_t*>(full_q_barriers[stage_idx]), smem_weights[stage_idx], 0, block_idx * BLOCK_Q);
+-            full_q_barriers[stage_idx]->arrive_and_expect_tx(SMEM_Q_SIZE_PER_STAGE + SMEM_WEIGHT_SIZE_PER_STAGE);
+-        };
+-        if (cute::elect_one_sync() and block_q_idx < num_q_blocks)
+-            issue_tma_q(0, block_q_idx);
+-
+-        // Only the first lane persistently schedules over blocks
+-        if (cute::elect_one_sync()) {
+-            while (block_q_idx < num_q_blocks) {
+-                CUTE_TIE_DECL(load_schedule(1), q_stage_idx, q_phase, kv_start, num_kv_blocks);
+-
+-                // Wait Q consumer release
+-                empty_q_barriers[q_stage_idx]->wait(q_phase ^ 1);
+-
+-                // Issue TMA Q
+-                if (const auto& next_block_q_idx = cute::get<0>(get_next_block_q_idx()); next_block_q_idx < num_q_blocks)
+-                    issue_tma_q(q_stage_idx, next_block_q_idx);
+-
+-                // Issue TMA KV
+-                #pragma unroll
+-                for (uint32_t kv_block_idx = 0; kv_block_idx < num_kv_blocks; ++ kv_block_idx) {
+-                    // Wait consumer release
+-                    CUTE_TIE_DECL(get_kv_pipeline(kv_block_idx), kv_stage_idx, kv_phase);
+-                    empty_kv_barriers[kv_stage_idx]->wait(kv_phase ^ 1);
+-
+-                    // Issue TMA KV
+-                    tma_copy(&tensor_map_kv, reinterpret_cast<uint64_t*>(full_kv_barriers[kv_stage_idx]),
+-                             smem_kv[kv_stage_idx], 0, kv_start + kv_block_idx * BLOCK_KV);
+-                    tma_copy(&tensor_map_kv_scales, reinterpret_cast<uint64_t*>(full_kv_barriers[kv_stage_idx]),
+-                             smem_kv_scales[kv_stage_idx], kv_start + kv_block_idx * BLOCK_KV, 0);
+-                    full_kv_barriers[kv_stage_idx]->arrive_and_expect_tx(SMEM_KV_SIZE_PER_STAGE + SMEM_KV_SCALE_SIZE_PER_STAGE);
+-                }
+-                num_total_kv_blocks += num_kv_blocks;
+-
+-                // Jump to the next block
+-                CUTE_TIE(get_next_block_q_idx(), block_q_idx, q_iter_idx);
+-            }
+-        }
+-    } else {
+-        // Math warp-groups for WGMMA
+-        cutlass::arch::warpgroup_reg_alloc<kNumMathRegisters>();
+-
+-        // NOTES: use `__shfl_sync` to encourage NVCC to use unified registers
+-        const auto& thread_idx = threadIdx.x % kNumMathThreads;
+-        const auto& warp_idx = __shfl_sync(0xffffffff, thread_idx / 32, 0);
+-        const auto& warpgroup_idx = warp_idx / 4;
+-        const auto& lane_idx = get_lane_idx();
+-        float accum[WGMMA::kNumAccum], weights[BLOCK_Q][kNumHeads / 4];
+-
+-        const auto& warp_offset = warp_idx * 16;
+-        const auto& v_0_offset = lane_idx / 4 + 0;
+-        const auto& v_1_offset = lane_idx / 4 + 8;
+-
+-        while (block_q_idx < num_q_blocks) {
+-            CUTE_TIE_DECL(load_schedule(), q_stage_idx, q_phase, kv_start, num_kv_blocks);
+-
+-            // Wait TMA Q arrival
+-            full_q_barriers[q_stage_idx]->wait(q_phase);
+-
+-            // Read weights
+-            #pragma unroll
+-            for (uint32_t i = 0; i < BLOCK_Q; ++ i) {
+-                #pragma unroll
+-                for (uint32_t j = 0; j < kNumHeads / 4; ++ j)
+-                    weights[i][j] = ld_shared(smem_weights[q_stage_idx] + i * kNumHeads + (j / 2) * 8 + (j & 1) + (lane_idx % 4) * 2);
+-            }
+-
+-            // Compute over KV blocks
+-            #pragma unroll
+-            for (uint32_t kv_block_idx = 0; kv_block_idx < num_kv_blocks; ++ kv_block_idx) {
+-                // Compute `[BLOCK_Q * kNumHeads, kHeadDim] @ [BLOCK_KV, kHeadDim] -> [BLOCK_Q, BLOCK_KV]`
+-                // Wait TMA KV arrival
+-                CUTE_TIE_DECL(get_kv_pipeline(kv_block_idx), kv_stage_idx, kv_phase);
+-                full_kv_barriers[kv_stage_idx]->wait(kv_phase);
+-
+-                // Read per-KV scales
+-                float scale_kv_0 = ld_shared(smem_kv_scales[kv_stage_idx] + warp_offset + v_0_offset);
+-                float scale_kv_1 = ld_shared(smem_kv_scales[kv_stage_idx] + warp_offset + v_1_offset);
+-
+-                // Issue WGMMA
+-                DG_STATIC_ASSERT(BLOCK_KV == kNumMathThreads / 2, "Invalid block size");
+-                DG_STATIC_ASSERT(kHeadDim % WGMMA::K == 0, "Invalid head dim");
+-                #pragma unroll
+-                for (uint32_t i = 0; i < WGMMA::kNumAccum; ++ i)
+-                    warpgroup_fence_operand(accum[i]);
+-                warpgroup_arrive();
+-                #pragma unroll
+-                for (uint32_t k = 0; k < kHeadDim / WGMMA::K; ++ k) {
+-                    auto desc_a = make_smem_desc(smem_kv[kv_stage_idx] + (warpgroup_idx * WGMMA::M) * kHeadDim + k * WGMMA::K,
+-                                                 to_swizzle_cute_type<kHeadDim>(), 0, kHeadDim * 8);
+-                    auto desc_b = make_smem_desc(smem_q[q_stage_idx] + k * WGMMA::K,
+-                                                 to_swizzle_cute_type<kHeadDim>(), 0, kHeadDim * 8);
+-                    WGMMA::wgmma(desc_a, desc_b, accum, k);
+-                }
+-                warpgroup_commit_batch();
+-                #pragma unroll
+-                for (uint32_t i = 0; i < WGMMA::kNumAccum; ++ i)
+-                    warpgroup_fence_operand(accum[i]);
+-                warpgroup_wait<0>();
+-
+-                // Release KV empty
+-                empty_kv_barriers[kv_stage_idx]->arrive();
+-
+-                // Reduce over the head dim and store
+-                const auto& kv_offset = kv_start + kv_block_idx * BLOCK_KV + warp_offset;
+-                static constexpr uint32_t kNumAccumPerReduce = kNumHeads / 2;
+-                DG_STATIC_ASSERT(WGMMA::kNumAccum % kNumAccumPerReduce == 0, "Invalid accumulation");
+-                DG_STATIC_ASSERT(WGMMA::kNumAccum / kNumAccumPerReduce == BLOCK_Q, "Invalid accumulation");
+-                DG_STATIC_ASSERT(kNumHeads % 8 == 0, "Invalid head");
+-                #pragma unroll
+-                for (uint32_t i = 0; i < BLOCK_Q; ++ i) {
+-                    auto shifted_accum = accum + i * kNumAccumPerReduce;
+-                    const auto& transform = [&](const uint32_t& j) {
+-                        return fmaxf(shifted_accum[j], 0) * weights[i][(j / 4) * 2 + (j & 1)];
+-                    };
+-
+-                    // Intra-thread reduction
+-                    float sum[4] = {transform(0), transform(1), transform(2), transform(3)};
+-                    #pragma unroll
+-                    for (uint32_t j = 1; j < kNumHeads / 8; ++ j) {
+-                        #pragma unroll
+-                        for (uint32_t k = 0; k < 4; k ++)
+-                            sum[k] += transform(j * 4 + k);
+-                    }
+-                    float v_0 = (sum[0] + sum[1]) * scale_kv_0;
+-                    float v_1 = (sum[2] + sum[3]) * scale_kv_1;
+-
+-                    // Inter-thread reduction
+-                    #pragma unroll
+-                    for (uint32_t j = 0; j < 2; ++ j) {
+-                        const auto& offset = static_cast<int>(1u << j);
+-                        v_0 += __shfl_xor_sync(0xffffffffu, v_0, offset);
+-                        v_1 += __shfl_xor_sync(0xffffffffu, v_1, offset);
+-                    }
+-
+-                    // Store into the global memory
+-                    // NOTES: we have redundant writes here, consider more carefully
+-                    const uint32_t& q_idx = block_q_idx * BLOCK_Q + i;
+-                    logits[q_idx * stride_kv + kv_offset + v_0_offset] = v_0;
+-                    logits[q_idx * stride_kv + kv_offset + v_1_offset] = v_1;
+-                }
+-            }
+-            num_total_kv_blocks += num_kv_blocks;
+-
+-            // Release Q empty
+-            empty_q_barriers[q_stage_idx]->arrive();
+-
+-            // Jump to the next block
+-            CUTE_TIE(get_next_block_q_idx(), block_q_idx, q_iter_idx);
+-        }
+-    }
+-
+-
+-}
+-
+ __device__ __forceinline__ auto convert_to_uint8(float x) -> uint8_t {
+   __half h = __float2half_rn(x);
+   uint16_t bits = __half_as_ushort(h);
+@@ -461,7 +171,11 @@ void sm90_fp8_mqa_logits_fuse_prefetch(const uint32_t seq_len, const uint32_t se
+     __syncthreads();
+ 
+     // Register reconfigurations
+-    constexpr uint32_t kNumTopkRegisters = 32;
++    // Top-k also scans logits and copies host records. A 32-register budget
++    // spills its loop state into local memory and stalls the math pipeline.
++    // The dynamic budgets consume 57344 registers, below this 640-thread
++    // CTA's 61440-register launch allocation (96 registers per thread).
++    constexpr uint32_t kNumTopkRegisters = 96;
+     constexpr uint32_t kNumTMARegisters = 32;
+     constexpr uint32_t kNumMathRegisters = 112;
+ 
+@@ -710,13 +424,6 @@ void sm90_fp8_mqa_logits_fuse_prefetch(const uint32_t seq_len, const uint32_t se
+         volatile uint32_t* vol_recall_counter = recall_counter;
+         // tx is also id in the topk warps
+ 
+-        constexpr auto MAX_EXTEND_BS = 16;
+-        float extend_logits_offsets_val[MAX_EXTEND_BS];
+-        #pragma unroll
+-        for (int i = 0; i < MAX_EXTEND_BS; i++) {
+-            extend_logits_offsets_val[i] = __ldg(extend_logits_offsets + i);
+-        }
+-
+         const auto clear_histogram = [&](int i) {
+             #pragma unroll
+             for (uint32_t s_idx = tx; s_idx < RADIX + 1; s_idx += kNumTopkThreads) {
+@@ -813,6 +520,16 @@ void sm90_fp8_mqa_logits_fuse_prefetch(const uint32_t seq_len, const uint32_t se
+         while (block_q_idx < num_q_blocks) {
+             CUTE_TIE_DECL(load_schedule(), q_stage_idx, q_phase, kv_start, num_kv_blocks);
+             const uint32_t max_recall_tasks = min(max_prefetch_tasks, uint32_t(kMaxPrefetchTasks));
++            // Only this Q block's offsets are needed. Constant indexing keeps
++            // these scalars in registers; the old dynamically indexed array
++            // of 16 offsets forced local loads in every histogram/recall tile.
++            float query_offsets[BLOCK_Q];
++            #pragma unroll
++            for (uint32_t i = 0; i < BLOCK_Q; ++i) {
++                const uint32_t q_idx = min(block_q_idx * BLOCK_Q + i, seq_len - 1);
++                const int req_id = __ldg(extend_seq_to_req + q_idx);
++                query_offsets[i] = __ldg(extend_logits_offsets + req_id);
++            }
+             // Histograms describe this Q block, not every block previously assigned to this CTA.
+             for (uint32_t i = 0; i < BLOCK_Q; ++i) clear_histogram(i);
+             topk_bar.sync();
+@@ -839,12 +556,11 @@ void sm90_fp8_mqa_logits_fuse_prefetch(const uint32_t seq_len, const uint32_t se
+                         if (q_idx >= seq_len) {
+                             break;
+                         }
+-                        const int req_id = __ldg(extend_seq_to_req + q_idx);
+                         for (uint32_t idx = tx; idx < BLOCK_KV; idx += kNumTopkThreads) {
+                             const uint32_t local_kv_idx = idx;
+                             const auto bin = convert_to_uint8(
+                                 smem_logits[topk_stage_idx][local_q_idx * BLOCK_KV + local_kv_idx] -
+-                                extend_logits_offsets_val[req_id]
++                                query_offsets[local_q_idx]
+                             );
+                             const uint32_t global_kv_idx = kv_start + kv_block_idx * BLOCK_KV + local_kv_idx;
+                             if (cu_seq_len_k_start[q_idx] <= global_kv_idx and global_kv_idx < cu_seq_len_k_end[q_idx]) {
+@@ -903,7 +619,7 @@ void sm90_fp8_mqa_logits_fuse_prefetch(const uint32_t seq_len, const uint32_t se
+                     int kv_token_host_loc = 0;
+                     if (kv_idx < total_kv_items and *vol_recall_counter < max_recall_tasks) {
+                         const auto bin = static_cast<int>(convert_to_uint8(
+-                            logits[q_idx * stride_kv + kv_start + kv_idx] - extend_logits_offsets_val[req_id]
++                            logits[q_idx * stride_kv + kv_start + kv_idx] - query_offsets[i]
+                         ));
+                         if (bin > threshold_bin) {
+                             const auto page_table_ptr = page_table_1 + req_id * page_table_1_stride + kv_idx;
+diff --git a/operators/deepseek_v32/indexer/echo.py b/operators/deepseek_v32/indexer/echo.py
+index 3735dac..cca9576 100644
+--- a/operators/deepseek_v32/indexer/echo.py
++++ b/operators/deepseek_v32/indexer/echo.py
+@@ -1,4 +1,4 @@
+-"""Standalone ECHO inter-query prefetch on Hopper, without SGLang.
++"""Official resident indexer and ECHO inter-query prefetch on Hopper.
+ 
+ The index keys remain in HBM. Main-attention BF16 latent/RoPE records live in
+ mapped pinned host memory. While computing later query rows, the fused kernel
+@@ -30,6 +30,8 @@ _FLAGS = [
+ def build_info():
+     """Record source and shared-header versions without initializing CUDA."""
+     files = [Path(__file__), *_SOURCE.glob("echo_*.cu*")]
++    include = _ROOT / "3rdparty/cutlass/include"
++    headers = sorted(path for path in include.rglob("*") if path.is_file())
+     return {
+         "upstream": "https://github.com/sjtu-zhao-lab/ECHO",
+         "upstream_revision": UPSTREAM_REVISION,
+@@ -37,6 +39,10 @@ def build_info():
+             ["git", "-C", str(_ROOT / "3rdparty/cutlass"), "rev-parse", "HEAD"], text=True
+         ).strip(),
+         "cuda_flags": _FLAGS,
++        "shared_header_sha256": {
++            str(path.relative_to(_ROOT)): hashlib.sha256(path.read_bytes()).hexdigest()
++            for path in headers
++        },
+         "source_sha256": {
+             str(path.relative_to(_ROOT)): hashlib.sha256(path.read_bytes()).hexdigest()
+             for path in sorted(files)
+@@ -89,6 +95,8 @@ def logits(q, k, weights, kscale, query_start, prefetch=None):
+     Q/K are E4M3 indexer values, ``weights`` includes the query quantization
+     scales and model head weights, and ``kscale`` is the per-key FP32 scale.
+     This model-specific implementation accepts 64 index heads of dimension 128.
++    Resident execution calls official ``deep_gemm.fp8_fp4_mqa_logits``; only
++    the offload path loads the local fused ECHO prefetch extension.
+ 
+     ``prefetch`` contains ``host`` pinned BF16 ``[capacity,576]``, ``device``
+     BF16 ``[pool,576]``, ``host_to_device`` int32 ``[capacity]`` (INT_MAX misses),
+@@ -118,49 +126,66 @@ def logits(q, k, weights, kscale, query_start, prefetch=None):
+         (kscale, (columns,), torch.float32, "kscale"),
+     ):
+         _check_tensor(tensor, shape, dtype, device, name)
+-    module = _module()
+     starts = torch.zeros(rows, dtype=torch.int32, device=device)
+     ends = torch.arange(query_start + 1, query_start + rows + 1, dtype=torch.int32, device=device)
+     if columns % 4:
+         scales = torch.nn.functional.pad(kscale, (0, 4 - columns % 4))
+     else:
+         scales = kscale
+-    output = torch.empty(((rows + 1) // 2 * 2, (columns + 127) // 128 * 128), device=device)
+-    placeholder = torch.empty(0, dtype=torch.int32, device=device)
+     if prefetch is None:
+-        host = torch.empty(0)
+-        pool = host_to_device = device_to_host = slots = counter = offsets = placeholder
+-        page_table = torch.empty((0, 0), dtype=torch.int32, device=device)
+-        extend_lengths = query_requests = allocations = placeholder
+-        limit = 0
+-    else:
+-        host, pool = prefetch["host"], prefetch["device"]
+-        if host.ndim != 2 or host.shape[1] != 576 or len(host) < columns:
+-            raise ValueError("host must cover all visible 576-element MLA records")
+-        if pool.ndim != 2 or pool.shape[1] != 576 or len(pool) < rows:
+-            raise ValueError("device pool must have room for the current query chunk")
+-        _check_tensor(host, host.shape, torch.bfloat16, torch.device("cpu"), "host")
+-        if not host.is_pinned():
+-            raise ValueError("host MLA records must use pinned, CUDA-mapped storage")
+-        _check_tensor(pool, pool.shape, torch.bfloat16, device, "device")
+-        host_to_device, device_to_host = prefetch["host_to_device"], prefetch["device_to_host"]
+-        slots, counter, offsets = prefetch["free_slots"], prefetch["counter"], prefetch["offset"]
+-        for tensor, shape, dtype, name in (
+-            (host_to_device, (len(host),), torch.int32, "host_to_device"),
+-            (device_to_host, (len(pool),), torch.int64, "device_to_host"),
+-            (slots, (slots.numel(),), torch.int32, "free_slots"),
+-            (counter, (1,), torch.uint32, "counter"),
+-            (offsets, (16,), torch.float32, "offset"),
+-        ):
+-            _check_tensor(tensor, shape, dtype, device, name)
+-        limit = prefetch.get("max_prefetch", min(8192, len(pool) - rows, len(slots)))
+-        if type(limit) is not int or not 0 <= limit <= min(8192, len(slots)):
+-            raise ValueError("max_prefetch must fit the unique eligible free_slots prefix")
+-        counter.zero_()
+-        allocations = torch.empty_like(slots)
+-        page_table = torch.arange(columns, device=device, dtype=torch.int32).unsqueeze(0)
+-        extend_lengths = torch.tensor([rows], dtype=torch.int32, device=device)
+-        query_requests = torch.zeros(rows, dtype=torch.int32, device=device)
++        import deep_gemm
++
++        # The official API requires the logical N shape. Its SM90 TMA scale
++        # descriptor rounds N to four floats, so retain padded backing storage.
++        with torch.cuda.device(device):
++            result = deep_gemm.fp8_fp4_mqa_logits(
++                (q, None),
++                (k, scales[:columns]),
++                weights,
++                starts,
++                ends,
++                max_seqlen_k=columns,
++            )
++            # Mainline exposes compressed logits without initialized tails.
++            # All row starts are zero, so these are logical token positions;
++            # explicitly mask each exclusive endpoint before exact top-k.
++            positions = torch.arange(columns, device=device)
++            result.masked_fill_(positions[None, :] >= ends[:, None], -torch.inf)
++            return result
++
++    module = _module()
++    output = torch.empty(
++        ((rows + 1) // 2 * 2, (columns + 127) // 128 * 128),
++        device=device,
++        dtype=torch.float32,
++    )
++    host, pool = prefetch["host"], prefetch["device"]
++    if host.ndim != 2 or host.shape[1] != 576 or len(host) < columns:
++        raise ValueError("host must cover all visible 576-element MLA records")
++    if pool.ndim != 2 or pool.shape[1] != 576 or len(pool) < rows:
++        raise ValueError("device pool must have room for the current query chunk")
++    _check_tensor(host, host.shape, torch.bfloat16, torch.device("cpu"), "host")
++    if not host.is_pinned():
++        raise ValueError("host MLA records must use pinned, CUDA-mapped storage")
++    _check_tensor(pool, pool.shape, torch.bfloat16, device, "device")
++    host_to_device, device_to_host = prefetch["host_to_device"], prefetch["device_to_host"]
++    slots, counter, offsets = prefetch["free_slots"], prefetch["counter"], prefetch["offset"]
++    for tensor, shape, dtype, name in (
++        (host_to_device, (len(host),), torch.int32, "host_to_device"),
++        (device_to_host, (len(pool),), torch.int64, "device_to_host"),
++        (slots, (slots.numel(),), torch.int32, "free_slots"),
++        (counter, (1,), torch.uint32, "counter"),
++        (offsets, (16,), torch.float32, "offset"),
++    ):
++        _check_tensor(tensor, shape, dtype, device, name)
++    limit = prefetch.get("max_prefetch", min(8192, len(pool) - rows, len(slots)))
++    if type(limit) is not int or not 0 <= limit <= min(8192, len(slots)):
++        raise ValueError("max_prefetch must fit the unique eligible free_slots prefix")
++    counter.zero_()
++    allocations = torch.empty_like(slots)
++    page_table = torch.arange(columns, device=device, dtype=torch.int32).unsqueeze(0)
++    extend_lengths = torch.tensor([rows], dtype=torch.int32, device=device)
++    query_requests = torch.zeros(rows, dtype=torch.int32, device=device)
+     import tvm_ffi
+ 
+     with torch.cuda.device(device), tvm_ffi.use_torch_stream():
+@@ -185,6 +210,5 @@ def logits(q, k, weights, kscale, query_start, prefetch=None):
+             offsets,
+             query_start,
+             limit,
+-            prefetch is not None,
+         )
+     return output[:rows, :columns]
