@@ -11,6 +11,8 @@ from experiments.deepseek_v32_echo_prefill.src.measure import Scopes
 def test_runtime_collectors_include_complete_model_and_shared_operator_sources():
     model_sources = measure.source_manifest()
     replay_sources = kernel_profile.source_manifest()
+    assert "models/attention_contracts.py" in model_sources
+    assert not any(name.startswith("layers/") for name in model_sources)
     assert report.REQUIRED_SOURCES <= model_sources.keys()
     operator_sources = {
         name for name in report.REQUIRED_SOURCES if name.startswith("operators/")

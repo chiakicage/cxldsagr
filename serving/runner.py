@@ -152,7 +152,16 @@ class GRRunner:
                 with torch.inference_mode():
                     result = RequestResult(metadata=metadata, last_hidden=hidden[-1].clone())
                 del hidden
-            finally:
+            except BaseException as execution_error:
+                try:
+                    self.executor.release(cache)
+                except BaseException as release_error:  # noqa: BLE001 -- preserve both failures.
+                    raise BaseExceptionGroup(
+                        "request execution and cache release failed",
+                        [execution_error, release_error],
+                    ) from None
+                raise
+            else:
                 self.executor.release(cache)
             del cache, ids
             yield result

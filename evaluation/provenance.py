@@ -12,6 +12,7 @@ import importlib.metadata
 import json
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 
 import torch
@@ -35,7 +36,6 @@ def source_snapshot(output, *, include_official=False):
     manifest = {}
     for directory in (
         "models",
-        "layers",
         "operators",
         "cache",
         "executor",
@@ -55,7 +55,7 @@ def source_snapshot(output, *, include_official=False):
             destination.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(path, destination)
             manifest[str(relative)] = hashlib.sha256(path.read_bytes()).hexdigest()
-    for experiment in ("deepseek_v32_echo_cache",):
+    for experiment in ("cache_management",):
         for path in sorted((ROOT / "experiments" / experiment).rglob("*")):
             if not path.is_file() or path.suffix not in (".py", ".sh") or "output" in path.parts:
                 continue
@@ -75,6 +75,90 @@ def source_snapshot(output, *, include_official=False):
             manifest[str(relative)] = hashlib.sha256(path.read_bytes()).hexdigest()
     _write(output / "source_manifest.json", manifest)
     return hashlib.sha256(json.dumps(manifest, sort_keys=True).encode()).hexdigest()
+
+
+def snapshot_report_helpers(output) -> dict:
+    """Save current source files for repository Python modules already loaded."""
+    output = Path(output)
+    manifest_path = output / "report_helper_sources.json"
+    if manifest_path.exists():
+        raise FileExistsError(manifest_path)
+    directories = {
+        "GR",
+        "cache",
+        "evaluation",
+        "executor",
+        "experiments",
+        "models",
+        "operators",
+        "scripts",
+        "serving",
+        "tests",
+    }
+    excluded = {
+        ".cache",
+        ".git",
+        ".pytest_cache",
+        ".venv",
+        "3rdparty",
+        "__pycache__",
+        "build",
+        "dist",
+        "generated",
+        "output",
+        "report",
+        "reports",
+        "weights",
+    }
+    loaded = {}
+    for name, module in tuple(sys.modules.items()):
+        filename = getattr(module, "__file__", None)
+        if filename is None:
+            continue
+        path = Path(filename).resolve()
+        if path.suffix != ".py" or not path.is_relative_to(ROOT):
+            continue
+        relative = path.relative_to(ROOT)
+        if relative.parts[0] not in directories or excluded.intersection(relative.parts):
+            continue
+        loaded.setdefault(relative, []).append(name)
+    files = {relative: {"modules": sorted(names)} for relative, names in loaded.items()}
+    for name in ("pyproject.toml", "uv.lock"):
+        files[Path(name)] = {"kind": "environment specification"}
+    snapshot = output / "source" / "report_helpers"
+    snapshot.mkdir(parents=True, exist_ok=False)
+    manifest = {
+        "schema": "report-helper-sources-v1",
+        "boundary": (
+            "Current loaded repository Python modules only, plus pyproject.toml and uv.lock; "
+            "not captured runtime/native identity, not every possible source. Saved bytes are "
+            "the files on disk at report generation, not the loaded Python bytecode."
+        ),
+        "repository_root": str(ROOT),
+        "included_directories": sorted(directories),
+        "excluded_path_components": sorted(excluded),
+        "invocation": {
+            "orig_argv": list(sys.orig_argv),
+            "cwd": str(Path.cwd()),
+            "python": {"executable": sys.executable, "version": sys.version},
+        },
+        "files": {},
+    }
+    for relative, entry in sorted(files.items()):
+        content = (ROOT / relative).read_bytes()
+        destination = snapshot / relative
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        with destination.open("xb") as stream:
+            stream.write(content)
+        manifest["files"][str(relative)] = {
+            **entry,
+            "snapshot_path": str(destination.relative_to(output)),
+            "size_bytes": len(content),
+            "sha256": hashlib.sha256(content).hexdigest(),
+        }
+    with manifest_path.open("x") as stream:
+        stream.write(json.dumps(manifest, indent=2, sort_keys=True) + "\n")
+    return manifest
 
 
 def backend_provenance():

@@ -6,7 +6,7 @@ import pytest
 import torch
 
 from cache.sparse_token_pool import PRIORITY_LIMIT, SharedSparseTokenPool
-from models.deepseek_v32.pool_prefetch import PoolHistoryPrefetch
+from models.deepseek_v32.cache.prefetch import PoolHistoryPrefetch
 from models.deepseek_v32.tests.test_pool_prefetch import make_pool, populate
 from operators.common import kv_transfer
 from operators.deepseek_v32.indexer import cache_ops

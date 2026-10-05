@@ -1,0 +1,118 @@
+{
+  "refactor_final_deepseek_bench_20261005_01": {
+    "schema": "deepseek-final-gpu-observation-audit-v1",
+    "status": "passed_for_recorded_samples",
+    "run_id": "refactor_final_deepseek_bench_20261005_01",
+    "pid": 2948029,
+    "gpu_uuid": "80ff95c3-176e-fd8a-728f-9c5577c4a779",
+    "samples": 65,
+    "compute_process_observations": 63,
+    "observed_owned_pids": [
+      2948029
+    ],
+    "other_device_observations": [],
+    "isolation_scope": "all_recorded_gpus",
+    "first_observation_utc": "2026-10-04T22:02:37.624965+00:00",
+    "last_observation_utc": "2026-10-04T22:08:27.955553+00:00",
+    "duration_seconds": 350.43004298210144,
+    "maximum_sample_gap_seconds": 28.28540802001953,
+    "first_sample_after_start_seconds": 0.09931397438049316,
+    "completion_after_last_sample_seconds": 0.00014090538024902344,
+    "foreign_observations": [],
+    "inputs_sha256": {
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_bench_20261005_01/driver/run.json": "cdeab2808b1972a3e44d727c9b9a19babf66b14fb337a2e0dd94fa64f83e6679",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_bench_20261005_01/driver/gpu_monitor.jsonl": "5eeef27595d60ec7475e1e25e6d639674940fe20eb4723325030d8abb776b17f",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_bench_20261005_01/driver/driver.py": "1e9baab2b361144fdb4efdd2052cd0f6398c4c95b78510f5c73211e8c1ff972e",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_bench_20261005_01/metadata.json": "cda32f5d3a423aa124b6bdc8ee8c13d84a9b6caa92e9badd5ba5c9ddaff9290c"
+    },
+    "auditor_sha256": "8718d6c14623b16dce203ebd5ada575f293fb53614591a4f9e364086c1418d95",
+    "boundary": "Every recorded selected-GPU process belongs to the launched process tree. Other-device work is allowed only for independent numerical checks and is retained explicitly. Discrete observations cannot exclude work between samples or establish absence of unrelated CPU work."
+  },
+  "refactor_final_deepseek_bench_20261005_02": {
+    "schema": "deepseek-final-gpu-observation-audit-v1",
+    "status": "passed_for_recorded_samples",
+    "run_id": "refactor_final_deepseek_bench_20261005_02",
+    "pid": 2949857,
+    "gpu_uuid": "80ff95c3-176e-fd8a-728f-9c5577c4a779",
+    "samples": 65,
+    "compute_process_observations": 63,
+    "observed_owned_pids": [
+      2949857
+    ],
+    "other_device_observations": [],
+    "isolation_scope": "all_recorded_gpus",
+    "first_observation_utc": "2026-10-04T22:08:28.104885+00:00",
+    "last_observation_utc": "2026-10-04T22:14:18.906413+00:00",
+    "duration_seconds": 350.92845582962036,
+    "maximum_sample_gap_seconds": 28.459737062454224,
+    "first_sample_after_start_seconds": 0.1267850399017334,
+    "completion_after_last_sample_seconds": 0.00014281272888183594,
+    "foreign_observations": [],
+    "inputs_sha256": {
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_bench_20261005_02/driver/run.json": "97dc38790a598da4570c7318620bc5ec4a0bbc2cb43ba44251b3052dc38193c6",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_bench_20261005_02/driver/gpu_monitor.jsonl": "1dbbca5145364e0cf602e03049d9dc7d2203890b572ff3eba55a7953ac6a4ce8",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_bench_20261005_02/driver/driver.py": "1e9baab2b361144fdb4efdd2052cd0f6398c4c95b78510f5c73211e8c1ff972e",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_bench_20261005_02/metadata.json": "ccd957027bcad580664f03c893a7cfad10701dd90cfc6d8dcb443a4225c2ba99"
+    },
+    "auditor_sha256": "8718d6c14623b16dce203ebd5ada575f293fb53614591a4f9e364086c1418d95",
+    "boundary": "Every recorded selected-GPU process belongs to the launched process tree. Other-device work is allowed only for independent numerical checks and is retained explicitly. Discrete observations cannot exclude work between samples or establish absence of unrelated CPU work."
+  },
+  "refactor_final_deepseek_bench_20261005_03": {
+    "schema": "deepseek-final-gpu-observation-audit-v1",
+    "status": "passed_for_recorded_samples",
+    "run_id": "refactor_final_deepseek_bench_20261005_03",
+    "pid": 2951607,
+    "gpu_uuid": "80ff95c3-176e-fd8a-728f-9c5577c4a779",
+    "samples": 65,
+    "compute_process_observations": 63,
+    "observed_owned_pids": [
+      2951607
+    ],
+    "other_device_observations": [],
+    "isolation_scope": "all_recorded_gpus",
+    "first_observation_utc": "2026-10-04T22:14:19.044261+00:00",
+    "last_observation_utc": "2026-10-04T22:20:10.554818+00:00",
+    "duration_seconds": 351.6149649620056,
+    "maximum_sample_gap_seconds": 29.234625816345215,
+    "first_sample_after_start_seconds": 0.10428595542907715,
+    "completion_after_last_sample_seconds": 0.0001220703125,
+    "foreign_observations": [],
+    "inputs_sha256": {
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_bench_20261005_03/driver/run.json": "a31f3993d675df9ca60285a924d100463f12a2c0422fa427ea05631aec72a838",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_bench_20261005_03/driver/gpu_monitor.jsonl": "f7298025c158861bf803c492639dbb30918e653fc654b38856b94d25b5ced20b",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_bench_20261005_03/driver/driver.py": "1e9baab2b361144fdb4efdd2052cd0f6398c4c95b78510f5c73211e8c1ff972e",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_bench_20261005_03/metadata.json": "928df76a59b3c71bdddbe764b506e50b7db54ad7451ff91fe4664e3e7d32701e"
+    },
+    "auditor_sha256": "8718d6c14623b16dce203ebd5ada575f293fb53614591a4f9e364086c1418d95",
+    "boundary": "Every recorded selected-GPU process belongs to the launched process tree. Other-device work is allowed only for independent numerical checks and is retained explicitly. Discrete observations cannot exclude work between samples or establish absence of unrelated CPU work."
+  },
+  "refactor_final_deepseek_profile_20261005_01": {
+    "schema": "deepseek-final-gpu-observation-audit-v1",
+    "status": "passed_for_recorded_samples",
+    "run_id": "refactor_final_deepseek_profile_20261005_01",
+    "pid": 2983817,
+    "gpu_uuid": "80ff95c3-176e-fd8a-728f-9c5577c4a779",
+    "samples": 132,
+    "compute_process_observations": 126,
+    "observed_owned_pids": [
+      2983870
+    ],
+    "other_device_observations": [],
+    "isolation_scope": "all_recorded_gpus",
+    "first_observation_utc": "2026-10-04T23:51:53.221374+00:00",
+    "last_observation_utc": "2026-10-05T00:03:26.453060+00:00",
+    "duration_seconds": 696.412605047226,
+    "maximum_sample_gap_seconds": 29.34637188911438,
+    "first_sample_after_start_seconds": 0.10012602806091309,
+    "completion_after_last_sample_seconds": 3.0807931423187256,
+    "foreign_observations": [],
+    "inputs_sha256": {
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_profile_20261005_01/driver/run.json": "c9dc0be6b2e3139339b41c48df55cf895c9842d7a92bbae547f19c407724ca32",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_profile_20261005_01/driver/gpu_monitor.jsonl": "3c5464bc777196c268ba2bdb62a456d4aa4c378154499d2b548f1b6dd9afcaad",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_profile_20261005_01/driver/driver.py": "409686d51ec2838e2ddd6f3ca6eb8d51b51e0b084b2a842b3fbfc30a4e466c40",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_profile_20261005_01/metadata.json": "8b0cdf242ac0f2f93859cbfdf897e35d7212f286c845500e54c8db951015e9ab"
+    },
+    "auditor_sha256": "8718d6c14623b16dce203ebd5ada575f293fb53614591a4f9e364086c1418d95",
+    "boundary": "Every recorded selected-GPU process belongs to the launched process tree. Other-device work is allowed only for independent numerical checks and is retained explicitly. Discrete observations cannot exclude work between samples or establish absence of unrelated CPU work."
+  }
+}

@@ -244,7 +244,7 @@ def snapshot_sources(output):
         "experiments/nosa_motivation/src/validation.py",
         "experiments/nosa_motivation/src/provenance.py",
         "experiments/nosa_motivation/src/cpu_environment.py",
-        "experiments/deepseek_v32_echo_cache/src/capacity_probe.py",
+        "experiments/cache_management/src/capacity_probe.py",
         "experiments/deepseek_v32_echo_prefill/src/backend_provenance.py",
     }
 
@@ -569,6 +569,7 @@ def main(argv=None):
         ),
     }
     backend = None
+    failure = None
     samples = []
     try:
         import torch
@@ -578,9 +579,9 @@ def main(argv=None):
             backend_provenance,
             verify_source_snapshot,
         )
-        from experiments.deepseek_v32_echo_cache.src.capacity_probe import memory_sample
+        from experiments.cache_management.src.capacity_probe import memory_sample
         from GR.workload import WorkloadConfig, build_workload
-        from models.deepseek_v32.serving_backend import DeepSeekServingBackend
+        from models.deepseek_v32.execution.adapter import DeepSeekServingBackend
         from serving.persistent import PersistentGRRunner
 
         runner_type = partial(PersistentGRRunner, native_token_validation=True)
@@ -711,13 +712,22 @@ def main(argv=None):
             f"accepted {args.run_id}: four schemes, {config['requests_per_scheme']} each; {target}"
         )
     except BaseException as error:
+        failure = error
         metadata.update(status="failed", error=repr(error))
         write_json(output / "metadata.json", metadata)
         print(f"failed run retained outside experiments: {output}", flush=True)
         raise
     finally:
         if backend is not None:
-            backend.close()
+            try:
+                backend.close()
+            except BaseException as cleanup_error:
+                if failure is not None:
+                    raise BaseExceptionGroup(
+                        "DeepSeek measurement and resource cleanup both failed",
+                        [failure, cleanup_error],
+                    ) from None
+                raise
 
 
 if __name__ == "__main__":

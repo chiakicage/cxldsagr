@@ -38,7 +38,7 @@ def read_jsonl(path):
     return [json.loads(line) for line in Path(path).read_text().splitlines() if line.strip()]
 
 
-def audit_run(directory):
+def audit_run(directory, *, receipt_override=None):
     """Recheck every saved request and output; no accepted row is trusted by itself."""
     import torch
 
@@ -52,7 +52,13 @@ def audit_run(directory):
     )
     checking = metadata["schema"] == CHECK_SCHEMA
     benchmark = metadata["schema"] == BENCH_SCHEMA
-    receipt_audit = audit_receipt(metadata, directory, RECEIPT_KIND) if benchmark else None
+    if receipt_override is not None and not benchmark:
+        raise ValueError("receipt override requires an independently checked benchmark")
+    receipt_audit = (
+        audit_receipt(metadata, directory, RECEIPT_KIND, receipt_override=receipt_override)
+        if benchmark
+        else None
+    )
     require(metadata.get("status") == "accepted", "run is incomplete or failed")
     config = metadata["config"]
     require(config["schemes"] == list(SCHEMES), "all four schemes must be present")
@@ -444,11 +450,11 @@ def markdown(metadata, summary):
     return "\n".join(lines)
 
 
-def write_report(directory, output):
+def write_report(directory, output, *, receipt_override=None):
     directory, output = Path(directory), Path(output)
     if output.exists():
         raise FileExistsError(output)
-    metadata, rows, audit = audit_run(directory)
+    metadata, rows, audit = audit_run(directory, receipt_override=receipt_override)
     require(metadata["schema"] != CHECK_SCHEMA, "check runs do not publish performance reports")
     summary = summarize(rows)
     output.mkdir(parents=True)
@@ -482,8 +488,9 @@ def main(argv=None):
     command = argparse.ArgumentParser(description=__doc__)
     command.add_argument("--run-dir", type=Path, required=True)
     command.add_argument("--output-dir", type=Path, required=True)
+    command.add_argument("--receipt-override", type=Path)
     args = command.parse_args(argv)
-    write_report(args.run_dir, args.output_dir)
+    write_report(args.run_dir, args.output_dir, receipt_override=args.receipt_override)
     print(f"verified report: {args.output_dir}")
 
 

@@ -1,0 +1,29 @@
+{
+  "kind": "delivered_source_deltas_after_capture",
+  "dense_identity_gate": {
+    "path": "experiments/nosa_mfu/src/dense/capture.py",
+    "before_sha256": "e238d2a2fda19dc8d7bfaa5acd56c61a28d7786e528e75ca0cac0cb27720a4d7",
+    "after_sha256": "f7e087611e405b3d5f9ec4854d4924fe607974bb72c421f29beb087f40e9e1e5",
+    "meaning": "Complete execution identity compared using existing canonical identity_digest; explicit bench mode gate retained. No fields removed and no model arithmetic changed. Fresh dense check02/bench02/profile02 use the repaired source; earlier accepted captures keep original snapshots.",
+    "regression": "21 passed; tuple/list JSON roundtrip acceptance and semantic identity changes rejected."
+  },
+  "checkpoint_test_default_request": {
+    "kind": "navigation_only",
+    "path": "models/nosa/tests/test_offload_checkpoint.py",
+    "before_sha256": "989bb7473d3cda77d1984c6aa40af8ac9f0facba909b67f6b609171d5c1c2352",
+    "after_sha256": "df2b88d44e6b382b0ffa5f3f00ac2ba05f4a6ae63bbfc2f992626d83df1c2a7c",
+    "old_request_path": "experiments/nosa_mfu/output/data/sparse_flags_native_20261004_01/request.json",
+    "new_request_path": "experiments/nosa_mfu/output/data/refactor_mfu_sparse_native_bench_20261005_01/request.json",
+    "byte_equal": true,
+    "request_sha256": "65d62f9ee9662fbe4b1d95d8c5440f16e70336a10b1eb2c860c55d8af3176b6b",
+    "validation_boundary": "The completed checkpoint check used an explicit NOSA_OFFLOAD_REQUEST pointing to the old byte-identical file. No new GPU check is claimed for this default-path edit."
+  },
+  "dense_pattern_request_navigation": {
+    "old": "experiments/nosa_mfu/output/data/dense_wrapper_20261004_01/request.json",
+    "dense_current": "experiments/nosa_mfu/output/data/refactor_mfu_dense_bench_20261005_02/request.json",
+    "pattern_current": "experiments/nosa_indexer_pattern_65536_1024/output/data/refactor_nosa_pattern_capture_20261005_01/request.json",
+    "byte_equal": true,
+    "sha256": "0bbabf07bc72f9804dbc2e9644cf708e21eafe237631f4a56c64b20f9cda7f2f"
+  },
+  "runtime_boundary": "Captured source identity, commands and numerical acceptance were not rewritten. Report-only helper sources are recorded separately."
+}

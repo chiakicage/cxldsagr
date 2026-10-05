@@ -5,21 +5,27 @@ from types import SimpleNamespace
 import pytest
 import torch
 
+from cache.lifecycle import ResourceLifecycle
 from cache.prefix_pool import CacheBudgetExceeded, CacheFootprint
 from cache.sparse_token_pool import SharedSparseTokenPool
-from models.deepseek_v32.cache_resources import (
+from models.deepseek_v32.attention import EchoAttentionRunner
+from models.deepseek_v32.execution.adapter import DeepSeekServingBackend
+from models.deepseek_v32.execution.cache_resources import (
     check_dense_staging_allocation,
     dense_staging_allocation_bytes,
     execution_reservation,
 )
-from models.deepseek_v32.echo_attention import EchoAttentionRunner
-from models.deepseek_v32.serving_backend import DeepSeekServingBackend
+from models.deepseek_v32.execution.pipeline import LocalPipeline
 
 
 def planned_backend(*, host_tokens=256):
     backend = object.__new__(DeepSeekServingBackend)
+    backend.lifecycle = ResourceLifecycle("DeepSeek test")
     # Resource estimation must not initialize CUDA or construct any device pools.
     backend.device = torch.device("cuda:0")
+    backend.pipeline = LocalPipeline()
+    backend._pipeline_resources = None
+    backend.chunk_size = 8
     backend.scheme = "echo"
     backend.max_seq_len = 1024
     backend.num_layers = 3
@@ -31,17 +37,10 @@ def planned_backend(*, host_tokens=256):
         kv_lora_rank=512, qk_rope_head_dim=64, index_head_dim=128, index_topk=16
     )
     backend._shared_pool = None
-    backend._resource_plan = None
-    backend._sessions = []
     backend._dense_staging = None
     backend._dense_lease = None
     backend._dense_sources = []
-    backend._busy = False
-    backend._poisoned = False
-    backend._admission_owner = None
-    backend._admission_initial_plan = None
     backend._allocation_failure = None
-    backend._active_session = None
     backend.synchronize = lambda: None
     return backend
 
@@ -71,8 +70,8 @@ def test_explicit_arena_plan_checks_shared_and_private_bytes_before_allocation(m
         with pytest.raises(CacheBudgetExceeded):
             backend.plan_resources(budget, limits)
     assert backend._shared_pool is None
-    assert backend._resource_plan is None
-    assert backend._sessions == []
+    assert backend.lifecycle.plan is None
+    assert not backend.lifecycle.sessions
 
 
 @pytest.mark.parametrize("scheme", ["echo", "serial_sparse"])
@@ -98,7 +97,7 @@ def test_fixed_pools_plan_preserves_explicit_capacities_without_byte_caps(monkey
     wider_plan = backend.plan_resources(None, limits)
     assert wider_plan.shared.hbm > fixed_plan.shared.hbm
     assert wider_plan.host_pages == fixed_plan.host_pages
-    assert backend._resource_plan is backend._shared_pool is None
+    assert backend.lifecycle.plan is backend._shared_pool is None
 
 
 @pytest.mark.parametrize("scheme", ["hbm", "dense_prefetch"])
@@ -120,7 +119,7 @@ def test_fixed_hbm_and_dense_require_one_history_and_keep_transient_candidates(s
         assert plan.metadata["shared_token_pool"]
         assert plan.metadata["dense_fetch_policy"] == "all_history_cache_misses_next_layer"
         assert plan.metadata.get("dense_staging_bytes", 0) == 0
-    assert backend._resource_plan is backend._shared_pool is None
+    assert backend.lifecycle.plan is backend._shared_pool is None
 
 
 @pytest.mark.parametrize(
@@ -138,7 +137,7 @@ def test_fixed_pools_still_reject_impossible_shapes_without_allocation(attribute
     setattr(backend, attribute, value)
     with pytest.raises(ValueError, match=match):
         backend.plan_resources(None, {"max_session_capacity": 128})
-    assert backend._resource_plan is backend._shared_pool is None
+    assert backend.lifecycle.plan is backend._shared_pool is None
 
 
 def test_auto_arena_preserves_private_cpu_page_metadata_in_dram_budget():
@@ -233,7 +232,7 @@ def test_all_schemes_reserve_observed_cpu_execution_scratch(scheme):
 
 
 def test_standalone_resident_cpu_scratch_has_a_real_dram_budget():
-    from models.deepseek_v32.echo_infer import DeepSeekEchoModel
+    from models.deepseek_v32.model import DeepSeekEchoModel
 
     model = object.__new__(DeepSeekEchoModel)
     model.cfg = planned_backend().cfg
@@ -307,10 +306,9 @@ def test_source_window_is_drained_before_allocating_new_projection():
 
 
 def test_session_construction_failure_returns_reserved_pages(monkeypatch):
-    import models.deepseek_v32.serving_backend as module
 
     backend = planned_backend()
-    backend._resource_plan = SimpleNamespace(metadata={"max_session_capacity": 128})
+    backend.lifecycle.plan = SimpleNamespace(metadata={"max_session_capacity": 128})
     released = []
     sparse_session = SimpleNamespace(
         layer=lambda index: index, release=lambda: released.append(True)
@@ -326,11 +324,12 @@ def test_session_construction_failure_returns_reserved_pages(monkeypatch):
         created.append(object())
         return created[-1]
 
-    monkeypatch.setattr(module, "_ServingAttention", failing_runner)
+    monkeypatch.setattr(backend.pipeline, "layer_cache", lambda session, layer, resources: layer)
+    monkeypatch.setattr(backend.pipeline, "create_runner", failing_runner)
     with pytest.raises(RuntimeError, match="indexer allocation failure"):
         backend.create_session(128)
     assert released == [True]
-    assert backend._sessions == []
+    assert not backend.lifecycle.sessions
 
 
 @pytest.mark.parametrize("scheme", ["hbm", "echo", "serial_sparse", "dense_prefetch"])
@@ -345,18 +344,18 @@ def test_admission_owner_reuse_and_constructor_rollback_keep_the_right_plan(sche
     backend.bind_owner(first)
     with pytest.raises(RuntimeError, match="admission owner"):
         backend.bind_owner(second)
-    with pytest.raises(ValueError, match="foreign"):
+    with pytest.raises(ValueError, match="[Ff]oreign"):
         backend.unbind_owner(second)
-    backend.allocate_shared(plan)
+    backend.allocate_shared(plan, owner=first)
     resource = backend._shared_pool or backend._dense_staging
     with pytest.raises(RuntimeError, match="admission owner"):
         backend.close()
     backend.unbind_owner(first)
-    assert backend._resource_plan is plan
+    assert backend.lifecycle.plan is plan
     backend.bind_owner(second)
-    backend.allocate_shared(plan)
+    backend.allocate_shared(plan, owner=second)
     backend.unbind_owner(second, rollback=True)
-    assert backend._resource_plan is plan
+    assert backend.lifecycle.plan is plan
     assert (backend._shared_pool or backend._dense_staging) is resource
     changed = backend.plan_resources(CacheFootprint(1 << 28, 1 << 28), {"max_session_capacity": 64})
     with pytest.raises(RuntimeError, match="prior shared plan"):
@@ -364,24 +363,28 @@ def test_admission_owner_reuse_and_constructor_rollback_keep_the_right_plan(sche
     backend.close()
     backend.close()
     backend.bind_owner(first)
-    backend.allocate_shared(changed)
+    backend.allocate_shared(changed, owner=first)
     backend.unbind_owner(first, rollback=True)
-    assert backend._resource_plan is backend._shared_pool is backend._dense_staging is None
-    assert backend._admission_owner is None
+    assert backend.lifecycle.plan is backend._shared_pool is backend._dense_staging is None
+    assert backend.lifecycle.admission_owner is None
 
 
 def test_owner_refuses_existing_direct_sessions_and_keeps_binding_until_release():
     backend = planned_backend()
     owner = object()
-    backend._sessions.append(object())
+    backend.lifecycle.register(
+        object(), owner=backend.lifecycle.admission_owner, allow_unplanned=True
+    )
     with pytest.raises(RuntimeError, match="direct sessions"):
         backend.bind_owner(owner)
-    backend._sessions.clear()
+    backend.lifecycle.sessions.clear()
     backend.bind_owner(owner)
-    backend._sessions.append(object())
-    with pytest.raises(RuntimeError, match="release sessions"):
+    backend.lifecycle.register(
+        object(), owner=backend.lifecycle.admission_owner, allow_unplanned=True
+    )
+    with pytest.raises(RuntimeError, match="[Rr]elease sessions"):
         backend.unbind_owner(owner, rollback=True)
-    assert backend._admission_owner is owner
+    assert backend.lifecycle.admission_owner is owner
 
 
 def test_failed_constructor_rollback_drain_retains_owner_storage_and_poison(monkeypatch):
@@ -390,7 +393,7 @@ def test_failed_constructor_rollback_drain_retains_owner_storage_and_poison(monk
     plan = backend.plan_resources(CacheFootprint(1 << 28, 1 << 28), {"max_session_capacity": 128})
     owner = object()
     backend.bind_owner(owner)
-    backend.allocate_shared(plan)
+    backend.allocate_shared(plan, owner=owner)
     staging = backend._dense_staging
     storage = staging.storage_tensors()[0]
 
@@ -398,15 +401,15 @@ def test_failed_constructor_rollback_drain_retains_owner_storage_and_poison(monk
         raise RuntimeError("injected drain failure")
 
     monkeypatch.setattr(backend, "synchronize", fail)
-    with pytest.raises(RuntimeError, match="unable to drain"):
+    with pytest.raises(RuntimeError, match="injected drain failure"):
         backend.unbind_owner(owner, rollback=True)
-    assert backend._poisoned and backend._admission_owner is owner
-    assert backend._resource_plan is plan and backend._dense_staging is staging
+    assert backend.lifecycle.poisoned and backend.lifecycle.admission_owner is owner
+    assert backend.lifecycle.plan is plan and backend._dense_staging is staging
     assert staging.storage_tensors()[0] is storage
 
 
 def test_partial_shared_allocation_failure_drains_before_dropping_traceback(monkeypatch):
-    import models.deepseek_v32.serving_backend as module
+    import models.deepseek_v32.execution.adapter as module
 
     backend = planned_backend()
     backend.scheme, backend.device = "dense_prefetch", torch.device("cpu")
@@ -425,11 +428,102 @@ def test_partial_shared_allocation_failure_drains_before_dropping_traceback(monk
     monkeypatch.setattr(module.DoubleBufferStaging, "__init__", fail)
     monkeypatch.setattr(backend, "synchronize", drain)
     with pytest.raises(RuntimeError, match="allocation failure"):
-        backend.allocate_shared(plan)
+        backend.allocate_shared(plan, owner=owner)
     assert drained == [True]
-    assert backend._resource_plan is backend._allocation_failure is None
+    assert backend.lifecycle.plan is backend._allocation_failure is None
     backend.unbind_owner(owner, rollback=True)
-    assert backend._admission_owner is None
+    assert backend.lifecycle.admission_owner is None
+
+
+def test_pipeline_audit_and_cleanup_failure_retain_provider_and_owner():
+    backend = planned_backend()
+    backend.scheme, backend.device = "hbm", torch.device("cpu")
+    plan = backend.plan_resources(CacheFootprint(1 << 28, 1 << 28), {"max_session_capacity": 128})
+    owner = object()
+    backend.bind_owner(owner)
+
+    class Resource:
+        def close(self):
+            raise RuntimeError("injected official cleanup failure")
+
+    resource = Resource()
+
+    class Pipeline(LocalPipeline):
+        def allocate_resources(self, pool, plan, scheme):
+            return resource
+
+        def audit_resources(self, resources, plan):
+            assert backend._pipeline_resources is resources is resource
+            raise ValueError("injected official reservation failure")
+
+    backend.pipeline = Pipeline()
+    with pytest.raises(ExceptionGroup) as failed:
+        backend.allocate_shared(plan, owner=owner)
+    assert isinstance(failed.value.exceptions[0], ValueError)
+    assert "reservation failure" in str(failed.value.exceptions[0])
+    assert "official cleanup failure" in str(failed.value.exceptions[1])
+    assert backend._pipeline_resources is resource
+    assert backend._allocation_failure is failed.value.exceptions[0]
+    assert backend.lifecycle.poisoned and backend.lifecycle.admission_owner is owner
+    with pytest.raises(RuntimeError, match="poisoned"):
+        backend.unbind_owner(owner, rollback=True)
+
+
+def test_native_session_plan_is_consumed_without_reestimating(monkeypatch):
+    from cache.capacity import SessionPlan
+    from models.deepseek_v32.tests.test_serving_backend import _dense_model
+
+    backend = _dense_model(monkeypatch)
+    storage = backend._plan_session_storage(32, 16)
+    plan = SessionPlan(
+        backend.lifecycle.plan,
+        "history",
+        16,
+        32,
+        storage.reservation,
+        allocations=storage.allocations,
+        model_plan=storage,
+    )
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("creation re-estimated the admitted storage")
+
+    monkeypatch.setattr(backend, "_plan_session_storage", forbidden)
+    session = backend.create_planned_session(plan)
+    assert session.storage_plan is storage
+    assert session.capacity == storage.capacity
+    assert CacheFootprint.from_mapping(backend.session_bytes(session)).fits(plan.reservation)
+    backend.release_session(session)
+    backend.close()
+
+
+@pytest.mark.parametrize("field", ["history_tokens", "host_pages", "hbm_tokens"])
+def test_native_session_plan_rejects_changed_admission_before_allocation(monkeypatch, field):
+    from dataclasses import replace
+
+    from cache.capacity import CapacityPolicy
+    from executor.contracts import ExecutionLimits, RequestShape
+
+    backend = planned_backend()
+    backend.scheme = "hbm" if field == "hbm_tokens" else "echo"
+    limits = {"max_session_capacity": 24, "max_history_tokens": 16, "max_candidate_tokens": 8}
+    native = backend.plan_resources(None, limits)
+    backend.lifecycle.plan = native
+    resources = replace(
+        native,
+        policy=CapacityPolicy.fixed_pools(),
+        limits=ExecutionLimits.from_mapping(limits, context=1024, chunk_size=8),
+    )
+    plan = backend.plan_runtime_session(resources, RequestShape(16, 8), "history")
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("a changed declaration reached allocation")
+
+    monkeypatch.setattr(backend, "_create_session_from_plan", forbidden)
+    assert getattr(plan, field) > 0
+    changed = replace(plan, **{field: getattr(plan, field) - 1})
+    with pytest.raises(ValueError, match="native storage plan"):
+        backend.create_planned_session(changed)
 
 
 def test_dense_staging_is_reserved_once_before_any_session_allocation(monkeypatch):
@@ -503,7 +597,7 @@ def test_dense_staging_native_capacity_observation_rejects_unexpected_block(monk
 
 
 def test_dense_allocator_capacity_failure_drops_new_stage_after_drain(monkeypatch):
-    import models.deepseek_v32.serving_backend as module
+    import models.deepseek_v32.execution.adapter as module
 
     backend = planned_backend()
     backend.device, backend.scheme = torch.device("cpu"), "dense_prefetch"
@@ -518,11 +612,11 @@ def test_dense_allocator_capacity_failure_drops_new_stage_after_drain(monkeypatc
 
     monkeypatch.setattr(module, "check_dense_staging_allocation", unexpected_block)
     with pytest.raises(RuntimeError, match="exceeds its reservation"):
-        backend.allocate_shared(plan)
+        backend.allocate_shared(plan, owner=owner)
     assert staging[0].closed and not staging[0].storage_tensors()
-    assert backend._dense_staging is backend._resource_plan is None
+    assert backend._dense_staging is backend.lifecycle.plan is None
     backend.unbind_owner(owner, rollback=True)
-    assert backend._admission_owner is None
+    assert backend.lifecycle.admission_owner is None
 
 
 def test_direct_staging_lease_blocks_binding_and_close_without_sessions():
@@ -531,7 +625,7 @@ def test_direct_staging_lease_blocks_binding_and_close_without_sessions():
     plan = backend.plan_resources(CacheFootprint(1 << 28, 1 << 28), {"max_session_capacity": 128})
     backend.allocate_shared(plan)
     with backend._dense_staging.lease(object()):
-        with pytest.raises(RuntimeError, match="direct sessions or execution"):
+        with pytest.raises(RuntimeError, match="active execution"):
             backend.bind_owner(object())
         with pytest.raises(RuntimeError, match="execution"):
             backend.close()
@@ -570,7 +664,7 @@ def test_invalid_candidate_plan_rejects_without_allocation(candidate):
             CacheFootprint(1 << 28, 1 << 28),
             {"max_session_capacity": 128, "max_candidate_tokens": candidate},
         )
-    assert backend._resource_plan is backend._shared_pool is None
+    assert backend.lifecycle.plan is backend._shared_pool is None
 
 
 def test_foreign_or_under_reserved_dense_plan_rejects_before_tensor_allocation(monkeypatch):
@@ -583,7 +677,11 @@ def test_foreign_or_under_reserved_dense_plan_rejects_before_tensor_allocation(m
     )
     backend.scheme = "dense_prefetch"
     plan = backend.plan_resources(CacheFootprint(1 << 28, 1 << 28), {"max_session_capacity": 128})
-    under = replace(plan, shared=CacheFootprint(plan.shared.hbm - 1, plan.shared.dram))
+    with pytest.raises(ValueError, match="allocations exceed"):
+        replace(plan, shared=CacheFootprint(plan.shared.hbm - 1, plan.shared.dram))
+    under = replace(
+        plan, shared=CacheFootprint(plan.shared.hbm - 1, plan.shared.dram), allocations=()
+    )
 
     def forbidden(*args, **kwargs):
         raise AssertionError("invalid dense plan reached tensor allocation")
@@ -592,4 +690,4 @@ def test_foreign_or_under_reserved_dense_plan_rejects_before_tensor_allocation(m
     for invalid in (foreign, under):
         with pytest.raises(ValueError, match="does not match"):
             backend.allocate_shared(invalid)
-    assert backend._dense_staging is backend._resource_plan is None
+    assert backend._dense_staging is backend.lifecycle.plan is None

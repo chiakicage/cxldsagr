@@ -10,7 +10,7 @@ C6 formal `motivation_c6_20261004_u16_r2_01` and dense-only profile
 Twenty saved profile outputs match formal HBM byte-for-byte. Independent
 attribution and a second overlap/event review verify all 63,688 physical GPU
 activities and twenty event edges. Details are in the
-[profile checkpoint](../../system/deepseek_motivation_graph_profile_checkpoint.md).
+profile checkpoint（Git `934485b:docs/agents/system/deepseek_motivation_graph_profile_checkpoint.md`）.
 
 In that single profiled revisit, ten mapped-host gather kernels take
 14.708310 ms and account for 720 MiB total. None overlaps any matrix primary or

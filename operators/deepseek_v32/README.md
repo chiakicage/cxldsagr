@@ -1,11 +1,13 @@
 # DeepSeek V3.2 kernels
 
-独立 Hopper / SM90 实现，服务完整 checkpoint 的 ECHO prefill/extend。模型投影语义、
+
+独立 Hopper / SM90 实现，为 checkpoint ECHO prefill/extend 提供算子。模型投影语义、
 精确选块、缓存调度和事务位于 [模型目录](../../models/deepseek_v32/README.md)。
 
 | 功能 | 入口 | 当前实现 |
 | --- | --- | --- |
 | Indexer | [indexer/echo.py](indexer/echo.py) | FP8 causal logits；可在同一 kernel 内预取主 MLA records，仍需精确 top-k 和剩余 miss recall |
+| Official ECHO indexer | [indexer/official.py](indexer/official.py) | 固定上游提交的 resident/fused logits、原始 top-k、预取及 recall helper；模型装配与本地实现分别验收 |
 | Indexer selection | [indexer/selection.py](indexer/selection.py) | FlashInfer deterministic exact top-k，保留 causal padding 与 int32 无效 ID |
 | Indexer quantization | [indexer/quantization.py](indexer/quantization.py) | KDA 验证的 SM90 BF16/D128 单 kernel，FP8 bytes 与 FP32 scales 对齐独立 reference |
 | Attention reference | [attention/reference/torch.py](attention/reference/torch.py) | 独立 FP32 PyTorch oracle，可单独在 CPU 导入运行，不加载 Triton 或 native 扩展 |
@@ -34,8 +36,14 @@ FP32 scales；编译后的上游 `per_token_cast_to_fp8` 仅用于验证和性�
 dense / grouped 路径调用官方公共 API。适配层的 padding、
 route packing、scale layout 转换和 inverse mapping 均计入算子时间。
 CPU FP32 oracle 独立实现，不依赖 DeepGEMM。
-新量化路径已通过生产接口、实际 checkpoint MLP 和四方案 H64K 数值验收；
-motivation 的 C9 端到端补测与配套 profile 已验收。其他实验的旧数字不代表当前实现。
+量化路径已通过生产接口、实际 checkpoint MLP 和四方案 H64K 数值验收。
+当前 C10 本地完整请求验收为 `refactor_final_deepseek_check_20261005_01`，
+96 组 offload/HBM 输出逐位一致；官方路径的
+`refactor_final_official_check_20261005_01` 使用独立固定容差，不能写成相同的 exact
+结论。三次本地正式计时及旧/P0/当前版本对照已完成，仍观察到部分 candidate、
+复访和公共请求阶段的延迟增加；profile 与最终发布状态见
+[motivation](../../experiments/deepseek_v32_motivation/README.md)。这些是模型级路径
+证据，不能替代某个 kernel 的独立性能测量或证明完整 61 层性能。
 
 单元测试随 indexer、linear 和三种 attention 实现存放；通用搬运测试在
 `operators/common/tests/`。从仓库根目录运行全局 CPU 或 Hopper GPU 回归：
@@ -45,6 +53,9 @@ bash scripts/run_tests.sh cpu
 bash scripts/run_tests.sh gpu
 ```
 
-当前非 GR 三层 benchmark、历史完整模型测量及新实现补测状态见
-[ECHO 实验](../../experiments/deepseek_v32_echo_prefill/README.md)。原 run ID 和源码
-快照继续标识原测量实现；切换后端不构成新的测量结果。
+真实 checkpoint 第 0–2 层顺序传播的验收为
+`refactor_three_layers_check_20261005_02`，与 C10 输入重放是不同工作负载。
+三层 benchmark/profile 的已发布结果见
+[ECHO 实验](../../experiments/deepseek_v32_echo_prefill/README.md)，官方适配路径见
+[官方 ECHO 实验](../../experiments/deepseek_v32_echo_official/README.md)。原 run ID、
+源码与测量边界继续标识原结果；切换后端或通过回归测试不构成新的性能结果。

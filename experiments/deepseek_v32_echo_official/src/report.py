@@ -11,10 +11,13 @@ from pathlib import Path
 from types import SimpleNamespace
 
 from experiments.deepseek_v32_echo_official.src.measure import (
+    BENCH_SCHEMA,
+    CHECK_SCHEMA,
     LABELS,
     NUMERICAL_POLICY,
     NUMERICAL_POLICY_BASIS,
     PRECISION_POLICY,
+    RECEIPT_KIND,
     SCHEMA,
     SCHEMES,
     VERIFICATION_STAGES,
@@ -68,7 +71,11 @@ def audit_official(directory, metadata):
         )
     require(
         metadata.get("identity_verifications")
-        == [{"stage": stage, "status": "passed"} for stage in VERIFICATION_STAGES],
+        == [
+            {"stage": stage, "status": "passed"}
+            for stage in VERIFICATION_STAGES
+            if metadata.get("mode") != "bench" or stage != "after_hbm_repeat"
+        ],
         "source/native identity checks are incomplete",
     )
     return {kind: sum(item["kind"] == kind for item in manifest) for kind in ("source", "native")}
@@ -137,7 +144,7 @@ def audit_graph_bank(plan, shared, bank, config, precision):
         )
         return
 
-    from models.deepseek_v32.compute_graphs import GRAPH_POLICY_REVISION
+    from models.deepseek_v32.execution.compute_graphs import GRAPH_POLICY_REVISION
 
     require(isinstance(bank, dict), "missing compute graph bank")
     require(
@@ -382,15 +389,46 @@ def summarize_numerical(groups):
     }
 
 
-def audit_run(directory):
+def audit_run(directory, *, receipt_override=None):
     import torch
 
     from GR.workload import token_sha256
 
     directory = Path(directory)
     metadata = json.loads((directory / "metadata.json").read_text())
-    require(metadata.get("schema") == SCHEMA, "unknown measurement schema")
+    require(
+        metadata.get("schema") in (SCHEMA, CHECK_SCHEMA, BENCH_SCHEMA), "unknown measurement schema"
+    )
+    checking = metadata["schema"] != BENCH_SCHEMA
+    timing = metadata["schema"] != CHECK_SCHEMA
+    if metadata["schema"] != SCHEMA:
+        require(
+            metadata.get("mode") == ("check" if checking else "bench"),
+            "execution mode differs from schema",
+        )
+    receipt = None
+    if checking and receipt_override is not None:
+        raise ValueError("receipt override requires a clean benchmark run")
+    if not checking:
+        from experiments.nosa_motivation.src.validation import audit_receipt
+
+        receipt = audit_receipt(
+            metadata, directory, RECEIPT_KIND, receipt_override=receipt_override
+        )
+        require(not (directory / "numerical").exists(), "clean bench saved numerical outputs")
+        require(
+            not (directory / "validation.jsonl").exists(), "clean bench reran numerical reference"
+        )
     require(metadata.get("status") == "accepted", "run is incomplete or failed")
+    from experiments.nosa_motivation.src.cpu_environment import validate_cpu_environment_record
+
+    if metadata["schema"] != SCHEMA:
+        require(
+            "cpu_environment" in metadata.get("hardware", {})
+            and "cpu_environment_final" in metadata,
+            "new runs require CPU environment start/end evidence",
+        )
+    cpu_audit = validate_cpu_environment_record(metadata)
     precision = metadata.get("precision_settings", {})
     require(metadata.get("precision_policy") == PRECISION_POLICY, "precision policy changed")
     require(
@@ -428,18 +466,22 @@ def audit_run(directory):
     for case in cases:
         audit_case(case, config)
     repeats = metadata.get("validation_repeats", [])
-    require(len(repeats) == 1, "missing independent resident repeat")
-    repeat = repeats[0]
-    require(
-        repeat.get("label") == "hbm_repeat"
-        and repeat.get("scheme") == "hbm"
-        and repeat.get("started_empty") is True
-        and repeat.get("timing_published") is False
-        and repeat.get("requests") == config["requests_per_scheme"]
-        and repeat.get("resource_plan") == cases[0]["resource_plan"]
-        and repeat.get("admission_hbm_token_capacity") == config["sparse_pool_tokens"],
-        "invalid independent resident repeat",
-    )
+    if checking:
+        require(len(repeats) == 1, "missing independent resident repeat")
+        repeat = repeats[0]
+        require(
+            repeat.get("label") == "hbm_repeat"
+            and repeat.get("scheme") == "hbm"
+            and repeat.get("started_empty") is True
+            and repeat.get("timing_published") is False
+            and repeat.get("requests") == config["requests_per_scheme"]
+            and repeat.get("resource_plan") == cases[0]["resource_plan"]
+            and repeat.get("admission_hbm_token_capacity") == config["sparse_pool_tokens"],
+            "invalid independent resident repeat",
+        )
+    else:
+        require(not repeats, "bench includes a resident numerical repeat")
+        repeat = None
     source_manifest = json.loads((directory / "source_manifest.json").read_text())
     require(bool(source_manifest), "missing source snapshot")
     source_id = hashlib.sha256(json.dumps(source_manifest, sort_keys=True).encode()).hexdigest()
@@ -540,15 +582,22 @@ def audit_run(directory):
                         and layer.get("session_host_tokens") == config["padded_history_tokens"],
                         "layer P/NH/history capacity differs",
                     )
-            for name in ("latency_ms", "admission_ms", "prefix_ms", "extend_ms", "cleanup_ms"):
-                require(math.isfinite(row[name]) and row[name] >= 0, f"invalid {name}")
-            require(row["latency_ms"] > 0, "request latency must be positive")
-            stages = sum(
-                row[name] for name in ("admission_ms", "prefix_ms", "extend_ms", "cleanup_ms")
-            )
-            require(
-                math.isclose(stages, row["latency_ms"], abs_tol=1e-5), "timing stages do not sum"
-            )
+            if timing:
+                for name in ("latency_ms", "admission_ms", "prefix_ms", "extend_ms", "cleanup_ms"):
+                    require(math.isfinite(row[name]) and row[name] >= 0, f"invalid {name}")
+                require(row["latency_ms"] > 0, "request latency must be positive")
+                stages = sum(
+                    row[name] for name in ("admission_ms", "prefix_ms", "extend_ms", "cleanup_ms")
+                )
+                require(
+                    math.isclose(stages, row["latency_ms"], abs_tol=1e-5),
+                    "timing stages do not sum",
+                )
+            else:
+                require(
+                    not any(key.endswith("_ms") for key in row),
+                    "check includes performance samples",
+                )
             for boundary in ("before", "after"):
                 sample = row[f"memory_{boundary}"]
                 require(
@@ -561,6 +610,12 @@ def audit_run(directory):
                     and 0 <= sample["cuda_free_bytes"] <= sample["cuda_total_bytes"],
                     "invalid memory observation",
                 )
+            if not checking:
+                require(
+                    not any(key in row for key in ("output_file", "output_sha256", "numerical")),
+                    "bench contains per-sample numerical evidence",
+                )
+                continue
             relative = row["output_file"]
             require(relative == f"numerical/{scheme}/{index:06d}.pt", "unexpected output path")
             path = contained(directory, relative)
@@ -582,83 +637,101 @@ def audit_run(directory):
             comparison = audit_comparisons(payload, reference, row["numerical"])
             if scheme == "echo":
                 numerical_groups[scheme].append(comparison)
-    validation = read_jsonl(directory / "validation.jsonl")
-    require(len(validation) == count, "incomplete resident repeat outputs")
-    repeat_replays = audit_graph_trace(validation, repeat, config, precision)
-    for index, row in enumerate(validation):
-        request = requests[index]
-        require(
-            row.get("validation_label") == "hbm_repeat"
-            and row["request_id"] == index
-            and row["run_id"] == metadata["run_id"]
-            and row["workload_sha256"] == metadata["workload_sha256"]
-            and row["input_sha256"] == request["input_sha256"],
-            "resident repeat request identity differs",
-        )
-        require(not any(key.endswith("_ms") for key in row), "resident validation includes latency")
-        require(row["scheme"] == "hbm", "resident validation used another backend")
-        check_request(request, row, config)
-        diagnostics = row["cache_diagnostics"]
-        require(
-            diagnostics.get("candidate_persistence") == "gpu_transient"
-            and diagnostics.get("retained_length") == config["history_tokens"],
-            "resident repeat candidate lifecycle differs",
-        )
-        relative = row["output_file"]
-        require(relative == f"numerical/hbm_repeat/{index:06d}.pt", "unexpected repeat output path")
-        path = contained(directory, relative)
-        require(digest(path) == row["output_sha256"], "resident repeat output bytes changed")
-        tensor_hashes[relative] = row["output_sha256"]
-        payload = torch.load(path, weights_only=True, map_location="cpu")
-        require(
-            payload["request_id"] == index and payload["input_sha256"] == request["input_sha256"],
-            "resident repeat output identity differs",
-        )
-        reference = torch.load(
-            directory / f"numerical/hbm/{index:06d}.pt", weights_only=True, map_location="cpu"
-        )
-        numerical_groups["hbm_repeat"].append(
-            audit_comparisons(payload, reference, row["numerical"])
-        )
+    repeat_replays = None
+    if checking:
+        validation = read_jsonl(directory / "validation.jsonl")
+        require(len(validation) == count, "incomplete resident repeat outputs")
+        repeat_replays = audit_graph_trace(validation, repeat, config, precision)
+        for index, row in enumerate(validation):
+            request = requests[index]
+            require(
+                row.get("validation_label") == "hbm_repeat"
+                and row["request_id"] == index
+                and row["run_id"] == metadata["run_id"]
+                and row["workload_sha256"] == metadata["workload_sha256"]
+                and row["input_sha256"] == request["input_sha256"],
+                "resident repeat request identity differs",
+            )
+            require(
+                not any(key.endswith("_ms") for key in row), "resident validation includes latency"
+            )
+            require(row["scheme"] == "hbm", "resident validation used another backend")
+            check_request(request, row, config)
+            diagnostics = row["cache_diagnostics"]
+            require(
+                diagnostics.get("candidate_persistence") == "gpu_transient"
+                and diagnostics.get("retained_length") == config["history_tokens"],
+                "resident repeat candidate lifecycle differs",
+            )
+            relative = row["output_file"]
+            require(
+                relative == f"numerical/hbm_repeat/{index:06d}.pt", "unexpected repeat output path"
+            )
+            path = contained(directory, relative)
+            require(digest(path) == row["output_sha256"], "resident repeat output bytes changed")
+            tensor_hashes[relative] = row["output_sha256"]
+            payload = torch.load(path, weights_only=True, map_location="cpu")
+            require(
+                payload["request_id"] == index
+                and payload["input_sha256"] == request["input_sha256"],
+                "resident repeat output identity differs",
+            )
+            reference = torch.load(
+                directory / f"numerical/hbm/{index:06d}.pt", weights_only=True, map_location="cpu"
+            )
+            numerical_groups["hbm_repeat"].append(
+                audit_comparisons(payload, reference, row["numerical"])
+            )
     for case in cases:
         final = by_key[(case["scheme"], count - 1)]["memory_after"]
         for name in ("torch_peak_allocated_bytes", "torch_peak_reserved_bytes"):
             require(case[name] == final[name], "case memory peak differs from final sample")
-    return (
-        metadata,
-        rows,
-        {
-            "status": "passed",
-            "checked_requests": len(rows),
-            "compared_offload_requests": count,
-            "compared_resident_repeat_requests": count,
-            "all_candidate_hidden_and_logits_numerical_pass": True,
-            "all_offload_candidate_hidden_and_logits_bitwise_equal": all(
-                item[name]["bitwise_equal"]
-                for item in numerical_groups["echo"]
-                for name in ("hidden", "logits")
-            ),
-            "numerical_summary": summarize_numerical(numerical_groups),
-            "reference_policy": "fresh_hbm_same_run",
-            "source_sha256": source_id,
-            "official_artifacts": official_counts,
-            "checked_warmup_requests": 3 * len(SCHEMES),
-            "host_recall_warmed_schemes": ["echo"],
-            "numerical_sha256": tensor_hashes,
-            **(
-                {
-                    "compute_graphs": {
-                        "enabled": True,
-                        "measured_replays": graph_replays,
-                        "resident_repeat_replays": repeat_replays,
-                        "warmup_replay_evidence": "not_saved",
-                    },
-                }
-                if normalize_compute_graphs(config)
-                else {}
-            ),
-        },
-    )
+    audit = {
+        "status": "passed",
+        "cpu_environment": cpu_audit,
+        "checked_requests": len(rows),
+        "compared_offload_requests": count,
+        "compared_resident_repeat_requests": count,
+        "all_candidate_hidden_and_logits_numerical_pass": True,
+        "all_offload_candidate_hidden_and_logits_bitwise_equal": all(
+            item[name]["bitwise_equal"]
+            for item in numerical_groups["echo"]
+            for name in ("hidden", "logits")
+        ),
+        "numerical_summary": summarize_numerical(numerical_groups) if checking else {},
+        "reference_policy": "fresh_hbm_same_run",
+        "source_sha256": source_id,
+        "official_artifacts": official_counts,
+        "checked_warmup_requests": 3 * len(SCHEMES),
+        "host_recall_warmed_schemes": ["echo"],
+        "numerical_sha256": tensor_hashes,
+        **(
+            {
+                "compute_graphs": {
+                    "enabled": True,
+                    "measured_replays": graph_replays,
+                    "resident_repeat_replays": repeat_replays,
+                    "warmup_replay_evidence": "not_saved",
+                },
+            }
+            if normalize_compute_graphs(config)
+            else {}
+        ),
+    }
+    if receipt is not None:
+        checked = receipt["checks"]["numerical_and_lifecycle"]
+        for name in (
+            "compared_offload_requests",
+            "compared_resident_repeat_requests",
+            "all_candidate_hidden_and_logits_numerical_pass",
+            "all_offload_candidate_hidden_and_logits_bitwise_equal",
+            "numerical_summary",
+            "numerical_sha256",
+        ):
+            audit[name] = checked[name]
+        audit["reference_policy"] = "independent_check_receipt"
+        audit["correctness_receipt"] = {key: receipt[key] for key in ("kind", "path", "sha256")}
+    return metadata, rows, audit
 
 
 def summarize(rows):
@@ -839,14 +912,29 @@ def markdown(metadata, summary, audit):
             "",
         ]
     )
+    if metadata.get("schema") == BENCH_SCHEMA:
+        lines[2:2] = [
+            "本轮正式计时复用匹配的独立验收收据。数值表来自该验收；计时进程不逐请求保存输出、比较参考或重跑 HBM 数值轨迹。",
+            "",
+        ]
+        lines = [
+            line.replace(
+                "本轮在 HBM 正式轨迹后，从空缓存重新执行完整 resident 轨迹，保存每条请求的全部 hidden/logits，与正式 HBM 输出比较。该重复只用于数值验证，不发布延迟。",
+                "独立验收从空缓存执行完整 HBM 和 ECHO 轨迹，并额外重复一次 HBM；全部候选 hidden/logits 通过预先固定的数值门槛。",
+            )
+            for line in lines
+        ]
     return "\n".join(lines)
 
 
-def write_report(directory, output):
+def write_report(directory, output, *, receipt_override=None):
     directory, output = Path(directory), Path(output)
     if output.exists():
         raise FileExistsError(output)
-    metadata, rows, audit = audit_run(directory)
+    metadata, rows, audit = audit_run(directory, receipt_override=receipt_override)
+    require(
+        metadata["schema"] != CHECK_SCHEMA, "independent checks do not publish performance reports"
+    )
     summary = summarize(rows)
     output.mkdir(parents=True)
     write_csv(
@@ -874,6 +962,7 @@ def write_report(directory, output):
                     "workload/requests.jsonl",
                     "workload/workload.json",
                 )
+                if name != "validation.jsonl" or metadata["schema"] != BENCH_SCHEMA
             },
             "report_generator_sha256": digest(__file__),
         },
@@ -885,8 +974,9 @@ def main(argv=None):
     command = argparse.ArgumentParser(description=__doc__)
     command.add_argument("--run-dir", type=Path, required=True)
     command.add_argument("--output-dir", type=Path, required=True)
+    command.add_argument("--receipt-override", type=Path)
     args = command.parse_args(argv)
-    write_report(args.run_dir, args.output_dir)
+    write_report(args.run_dir, args.output_dir, receipt_override=args.receipt_override)
     print(f"verified report: {args.output_dir}")
 
 

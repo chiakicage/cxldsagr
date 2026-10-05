@@ -5,7 +5,7 @@ from types import SimpleNamespace
 import pytest
 import torch
 
-from models.nosa.fixed_serving import NosaFixedServingBackend
+from models.nosa.execution.fixed import NosaFixedServingBackend
 from models.nosa.tests.test_model import tiny_config
 from models.nosa.tests.test_sparse_model import initialized_sparse_model
 from serving.persistent import PersistentGRRunner
@@ -130,7 +130,7 @@ def test_captured_norm_policy_mutation_rejects_before_replay(model):
 
 
 def test_failed_graph_capacity_audit_releases_its_private_pools(model):
-    from models.nosa.allocation_budget import validate_allocator
+    from cache.allocator.budget import validate_allocator
 
     backend = backend_for(model, "hbm")
     with pytest.raises(RuntimeError, match="capacity|limit"):
@@ -222,7 +222,7 @@ def test_nonfinite_graph_prefix_and_candidate_abort_without_publishing(
     captured = {}
     original_release = backend.release_session
 
-    def release(session):
+    def release(session, *, owner=None):
         if captured.get("session") is session:
             # Inspect the failed transaction before release resets its cursors.
             assert session.length == session.indexer_cache.length == captured["length"]
@@ -239,7 +239,7 @@ def test_nonfinite_graph_prefix_and_candidate_abort_without_publishing(
             assert getattr(session, "_deferred_validation", None) is None
             assert graphs.validation.owner is None
             captured["release_checked"] = True
-        original_release(session)
+        original_release(session, owner=owner)
 
     monkeypatch.setattr(backend, "release_session", release)
     attention = model.model.layers[layer_idx].self_attn

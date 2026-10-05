@@ -23,17 +23,16 @@ fi
 if [[ "$mode" == cpu || "$mode" == all ]]; then
   CUDA_VISIBLE_DEVICES='' .venv/bin/python -m pytest \
     models/nosa/tests operators/nosa operators/deepseek_v32 operators/common \
-    cache/tests executor/tests serving/tests GR/tests \
+    cache/tests cache/allocator/tests executor/tests serving/tests GR/tests \
     models/deepseek_v32/tests \
-    tests/integration evaluation/tests experiments/nosa_baseline_performance/tests \
+    tests/integration evaluation/tests experiments/nosa_mfu/tests \
     experiments/nosa_indexer_pattern_65536_1024/tests \
-    experiments/nosa_kernel_mfu/tests \
     experiments/nosa_offload_overlap/tests \
     experiments/nosa_motivation/tests \
     experiments/deepseek_v32_motivation/tests \
     experiments/deepseek_v32_echo_official/tests \
     experiments/deepseek_v32_echo_prefill/tests \
-    experiments/deepseek_v32_echo_cache/tests \
+    experiments/cache_management/tests \
     --import-mode=importlib -q -rs -p no:cacheprovider
 fi
 if [[ "$mode" == gpu || "$mode" == all ]]; then
@@ -58,6 +57,6 @@ PY
   .venv/bin/python -m pytest models/nosa/tests operators/nosa \
     operators/deepseek_v32 operators/common models/deepseek_v32/tests tests/integration \
     cache/tests/test_sparse_token_cache.py cache/tests/test_sparse_token_pool.py \
-    cache/tests/test_staging.py \
+    cache/tests/test_staging.py cache/allocator/tests \
     -q -rs -p no:cacheprovider
 fi

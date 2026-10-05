@@ -1,0 +1,195 @@
+{
+  "boundary": "Current loaded repository Python modules only, plus pyproject.toml and uv.lock; not captured runtime/native identity, not every possible source. Saved bytes are the files on disk at report generation, not the loaded Python bytecode.",
+  "excluded_path_components": [
+    ".cache",
+    ".git",
+    ".pytest_cache",
+    ".venv",
+    "3rdparty",
+    "__pycache__",
+    "build",
+    "dist",
+    "generated",
+    "output",
+    "report",
+    "reports",
+    "weights"
+  ],
+  "files": {
+    "evaluation/pool_scan_provenance.py": {
+      "modules": [
+        "evaluation.pool_scan_provenance"
+      ],
+      "sha256": "004b86573af85619e56a99259e4208671c9fd94a99e0ec07c4fcfd6401dc3d9d",
+      "size_bytes": 11765,
+      "snapshot_path": "source/report_helpers/evaluation/pool_scan_provenance.py"
+    },
+    "evaluation/provenance.py": {
+      "modules": [
+        "evaluation.provenance"
+      ],
+      "sha256": "0fde027cf65530a75072893c88c522cc85ea990b72e67ce7515b74dbb6d2fa67",
+      "size_bytes": 9629,
+      "snapshot_path": "source/report_helpers/evaluation/provenance.py"
+    },
+    "experiments/deepseek_v32_echo_prefill/src/analyze_nsys.py": {
+      "modules": [
+        "experiments.deepseek_v32_echo_prefill.src.analyze_nsys"
+      ],
+      "sha256": "fd1277d1be4e164ff99027ffe4f7a37dbec272d987ff39c0074b71b908f45089",
+      "size_bytes": 26035,
+      "snapshot_path": "source/report_helpers/experiments/deepseek_v32_echo_prefill/src/analyze_nsys.py"
+    },
+    "experiments/deepseek_v32_echo_prefill/src/operator_flops.py": {
+      "modules": [
+        "experiments.deepseek_v32_echo_prefill.src.operator_flops"
+      ],
+      "sha256": "b0aacab0f5792c3ff4f8771413c37b35712d92c63ff2ba6eac739788857fa96e",
+      "size_bytes": 15203,
+      "snapshot_path": "source/report_helpers/experiments/deepseek_v32_echo_prefill/src/operator_flops.py"
+    },
+    "experiments/deepseek_v32_motivation/src/aggregate_mfu.py": {
+      "modules": [
+        "experiments.deepseek_v32_motivation.src.aggregate_mfu"
+      ],
+      "sha256": "4f02ad11255c3de4de56998617d4af91714432c3bb250d476df56cb393cb1425",
+      "size_bytes": 9425,
+      "snapshot_path": "source/report_helpers/experiments/deepseek_v32_motivation/src/aggregate_mfu.py"
+    },
+    "experiments/deepseek_v32_motivation/src/analyze_pipeline.py": {
+      "modules": [
+        "experiments.deepseek_v32_motivation.src.analyze_pipeline"
+      ],
+      "sha256": "c3f037ccb99b019c868c29ae9168ac21e196ccbeebd22a2d575a1c3a15e4b1fb",
+      "size_bytes": 18735,
+      "snapshot_path": "source/report_helpers/experiments/deepseek_v32_motivation/src/analyze_pipeline.py"
+    },
+    "experiments/deepseek_v32_motivation/src/flops.py": {
+      "modules": [
+        "experiments.deepseek_v32_motivation.src.flops"
+      ],
+      "sha256": "b467df1b7dbc27d791deb86ee43aa1257a6ee74db7b1262ec5140cc3f77e30be",
+      "size_bytes": 19287,
+      "snapshot_path": "source/report_helpers/experiments/deepseek_v32_motivation/src/flops.py"
+    },
+    "experiments/deepseek_v32_motivation/src/graph_attribution.py": {
+      "modules": [
+        "experiments.deepseek_v32_motivation.src.graph_attribution"
+      ],
+      "sha256": "b92aa753f38984d59bef0c9c8cf7b1329e53bda125d707dbeca0bf73e54063de",
+      "size_bytes": 6404,
+      "snapshot_path": "source/report_helpers/experiments/deepseek_v32_motivation/src/graph_attribution.py"
+    },
+    "experiments/deepseek_v32_motivation/src/graph_instrumentation.py": {
+      "modules": [
+        "experiments.deepseek_v32_motivation.src.graph_instrumentation"
+      ],
+      "sha256": "24948b5fbc163b004c2dda72147801ff307ea96363d79e502ac62d50430bdbdf",
+      "size_bytes": 12969,
+      "snapshot_path": "source/report_helpers/experiments/deepseek_v32_motivation/src/graph_instrumentation.py"
+    },
+    "experiments/deepseek_v32_motivation/src/measure.py": {
+      "modules": [
+        "experiments.deepseek_v32_motivation.src.measure"
+      ],
+      "sha256": "f40173938998813fbca017470f6253c7e9ecd4a752fe2a4f6b06b7d4df3f9273",
+      "size_bytes": 33146,
+      "snapshot_path": "source/report_helpers/experiments/deepseek_v32_motivation/src/measure.py"
+    },
+    "experiments/deepseek_v32_motivation/src/operator_mfu.py": {
+      "modules": [
+        "experiments.deepseek_v32_motivation.src.operator_mfu"
+      ],
+      "sha256": "f2643e050a47669d45e3e8423413dba974eacb05fd08adb5a0813882f0afe4af",
+      "size_bytes": 13498,
+      "snapshot_path": "source/report_helpers/experiments/deepseek_v32_motivation/src/operator_mfu.py"
+    },
+    "experiments/deepseek_v32_motivation/src/plot.py": {
+      "modules": [
+        "experiments.deepseek_v32_motivation.src.plot"
+      ],
+      "sha256": "28b7ed4095d4363ebd56414212b041a11c466ca3b6359c56a834bc61bb200078",
+      "size_bytes": 6630,
+      "snapshot_path": "source/report_helpers/experiments/deepseek_v32_motivation/src/plot.py"
+    },
+    "experiments/deepseek_v32_motivation/src/report.py": {
+      "modules": [
+        "experiments.deepseek_v32_motivation.src.report"
+      ],
+      "sha256": "cd640e53a46287e4e39ae9e772901b4c10c7a5d02db7309b8af7d2dced6a26a8",
+      "size_bytes": 22768,
+      "snapshot_path": "source/report_helpers/experiments/deepseek_v32_motivation/src/report.py"
+    },
+    "experiments/deepseek_v32_motivation/src/report_operator_mfu.py": {
+      "modules": [
+        "experiments.deepseek_v32_motivation.src.report_operator_mfu"
+      ],
+      "sha256": "618d16aaf6d1698a80750f56793aafd79111b2b6c24f06acc0eaa917b28c74d1",
+      "size_bytes": 8190,
+      "snapshot_path": "source/report_helpers/experiments/deepseek_v32_motivation/src/report_operator_mfu.py"
+    },
+    "experiments/deepseek_v32_motivation/src/verify_profile_flops.py": {
+      "modules": [
+        "experiments.deepseek_v32_motivation.src.verify_profile_flops"
+      ],
+      "sha256": "64e7af768299a98fd4406ffcd24ed09d3d5751f40170d2ff97b78349d395d1ac",
+      "size_bytes": 8858,
+      "snapshot_path": "source/report_helpers/experiments/deepseek_v32_motivation/src/verify_profile_flops.py"
+    },
+    "experiments/nosa_motivation/src/validation.py": {
+      "modules": [
+        "experiments.nosa_motivation.src.validation"
+      ],
+      "sha256": "b4638f3102877f3b6e2e249b4f8909a8d187e6b2fdc63e834bbf56b6fadd8c22",
+      "size_bytes": 9995,
+      "snapshot_path": "source/report_helpers/experiments/nosa_motivation/src/validation.py"
+    },
+    "operators/deepseek_v32/attention/_config.py": {
+      "modules": [
+        "operators.deepseek_v32.attention._config"
+      ],
+      "sha256": "f17addb344d3d2a4098b4b22f3785c968e84614b7b7895abd39a4a2a1fa3d1cb",
+      "size_bytes": 457,
+      "snapshot_path": "source/report_helpers/operators/deepseek_v32/attention/_config.py"
+    },
+    "pyproject.toml": {
+      "kind": "environment specification",
+      "sha256": "cac6e9271538d74e99b1bdc83c2a12648bb3c76a310af21c98aff3ec2d3761d1",
+      "size_bytes": 3925,
+      "snapshot_path": "source/report_helpers/pyproject.toml"
+    },
+    "uv.lock": {
+      "kind": "environment specification",
+      "sha256": "53339af1728da3661b614d554e928408186b4fac6106a92999bd8fd69b3d2d8f",
+      "size_bytes": 139330,
+      "snapshot_path": "source/report_helpers/uv.lock"
+    }
+  },
+  "included_directories": [
+    "GR",
+    "cache",
+    "evaluation",
+    "executor",
+    "experiments",
+    "layers",
+    "models",
+    "operators",
+    "scripts",
+    "serving",
+    "tests"
+  ],
+  "invocation": {
+    "cwd": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr",
+    "orig_argv": [
+      ".venv/bin/python",
+      "/tmp/cxldsagr_refactor_final_deepseek_20261005/bind_publication_sources.py",
+      "motivation"
+    ],
+    "python": {
+      "executable": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin/python",
+      "version": "3.12.13 (main, Jun 11 2026, 04:03:26) [Clang 22.1.3 ]"
+    }
+  },
+  "repository_root": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr",
+  "schema": "report-helper-sources-v1"
+}

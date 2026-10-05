@@ -1,15 +1,11 @@
-"""CPU predicate semantics, setup fallback, and native cache publication."""
+"""CPU predicate semantics, native setup failures, and verified cache publication."""
 
-import ast
 import gc
-import inspect
 import json
 import os
-import pickle
 import shutil
 import subprocess
 import sys
-import textwrap
 import traceback
 import weakref
 from concurrent.futures import ThreadPoolExecutor
@@ -140,7 +136,7 @@ def test_runner_prepares_before_ownership_and_never_loads_during_request(monkeyp
         backend, hbm_budget_bytes=80, dram_budget_bytes=64, native_token_validation=True
     ) as runner:
         assert runner.token_validation_identity == {**identity, "requested_native": True}
-        assert runner._validate.__func__ is PersistentGRRunner._validate_native
+        assert runner._token_ids_valid is native[0]
 
         def forbidden():
             raise AssertionError("loader must stay outside measured requests")
@@ -169,64 +165,112 @@ def test_default_runner_keeps_original_method_and_never_prepares(monkeypatch):
         }
 
 
-def test_native_wrapper_differs_only_in_token_predicate():
-    original = ast.parse(textwrap.dedent(inspect.getsource(PersistentGRRunner._validate)))
-    native = ast.parse(textwrap.dedent(inspect.getsource(PersistentGRRunner._validate_native)))
-    native.body[0].name = original.body[0].name
-    original_condition = ast.parse(
-        "not ids or not all(map(is_, map(type, ids), repeat(int))) or min(ids) < 0", mode="eval"
-    ).body
-    native_condition = ast.parse("not self._token_ids_valid(ids)", mode="eval").body
-    changed = [
-        node
-        for node in ast.walk(native)
-        if isinstance(node, ast.If) and ast.dump(node.test) == ast.dump(native_condition)
-    ]
-    assert len(changed) == 1
-    changed[0].test = original_condition
-    assert ast.dump(native) == ast.dump(original)
+@pytest.mark.parametrize(
+    "invalid,exception,message",
+    [
+        ({"user_id": True}, TypeError, "user_id"),
+        ({"input_ids": []}, ValueError, "nonempty"),
+        ({"input_ids": [True, 2, 3]}, ValueError, "nonnegative integers"),
+        ({"input_ids": [IntSubclass(1), 2, 3]}, ValueError, "nonnegative integers"),
+        ({"input_ids": [1, -2, 3]}, ValueError, "nonnegative integers"),
+        ({"stable_prefix_tokens": 0}, ValueError, "stable_prefix_tokens"),
+        ({"input_ids": [1] * 101}, ValueError, "context limit"),
+    ],
+)
+def test_shared_validation_wrapper_preserves_provider_errors(
+    native, monkeypatch, invalid, exception, message
+):
+    monkeypatch.setattr(token_validation, "prepare", lambda: native[0])
+    monkeypatch.setattr(token_validation, "runtime_info", lambda: native[1])
+    for use_native in (False, True):
+        backend = Backend()
+        with PersistentGRRunner(
+            backend,
+            hbm_budget_bytes=64,
+            dram_budget_bytes=64,
+            native_token_validation=use_native,
+        ) as runner:
+            with pytest.raises(exception, match=message):
+                runner.execute({**request(), **invalid})
+            assert backend.built == 0 and len(runner.pool) == 0
 
 
-def test_setup_failure_selects_pickleable_reference_once(monkeypatch):
+@pytest.mark.parametrize(
+    "failure",
+    [
+        ImportError("cannot import native predicate"),
+        FileNotFoundError("compiler not found"),
+        RuntimeError("compiler failed"),
+        ValueError("unsupported compiler flags"),
+        subprocess.TimeoutExpired("compiler", 60),
+    ],
+)
+def test_native_setup_failure_propagates_once_before_runner_ownership(monkeypatch, failure):
     monkeypatch.setattr(token_validation, "_predicate", None)
     monkeypatch.setattr(token_validation, "_runtime", None)
+    monkeypatch.setattr(token_validation, "_unsupported_reason", lambda: None)
+    backend = SharedBackend()
+    attempts = []
+
+    def fail():
+        assert backend.owner is None and backend.allocations == 0
+        attempts.append(True)
+        raise failure
+
+    monkeypatch.setattr(token_validation, "_load_native", fail)
+    with pytest.raises(type(failure)) as caught:
+        PersistentGRRunner(
+            backend, hbm_budget_bytes=80, dram_budget_bytes=64, native_token_validation=True
+        )
+    assert caught.value is failure
+    assert attempts == [True]
+    assert backend.owner is None and backend.allocations == 0
+    assert token_validation._predicate is None and token_validation.runtime_info() is None
+
+
+def test_missing_compiler_is_an_error_for_explicit_native(monkeypatch):
+    monkeypatch.setattr(token_validation, "_predicate", None)
+    monkeypatch.setattr(token_validation, "_runtime", None)
+    monkeypatch.setattr(token_validation, "_unsupported_reason", lambda: None)
     monkeypatch.setenv("CXX", "/missing/token-validation-compiler")
-    predicate = token_validation.prepare()
-    info = token_validation.runtime_info()
-    assert predicate is token_validation.reference
-    assert info["backend"] == "python_reference"
-    assert "compiler not found" in info["fallback_reason"]
-    assert pickle.loads(pickle.dumps(predicate)) is predicate
-    info["fallback_reason"] = "changed copy"
-    assert token_validation.runtime_info()["fallback_reason"] != "changed copy"
+    with pytest.raises(FileNotFoundError, match="compiler not found"):
+        token_validation.prepare()
+    assert token_validation._predicate is None and token_validation.runtime_info() is None
 
-    def forbidden():
-        raise AssertionError("setup selection must not be retried")
 
-    monkeypatch.setattr(token_validation, "_load_native", forbidden)
-    assert token_validation.prepare() is predicate
-    assert predicate([0, 2**512])
-    with PersistentGRRunner(
-        Backend(), hbm_budget_bytes=64, dram_budget_bytes=64, native_token_validation=True
-    ) as runner:
-        assert runner._validate.__func__ is PersistentGRRunner._validate
-        assert runner.token_validation_identity["requested_native"] is True
-        assert "compiler not found" in runner.token_validation_identity["fallback_reason"]
-        assert runner.execute(request()).hidden.tolist() == [[6], [10]]
+def test_successful_native_setup_is_reused_and_identity_is_a_defensive_copy(monkeypatch, native):
+    monkeypatch.setattr(token_validation, "_predicate", None)
+    monkeypatch.setattr(token_validation, "_runtime", None)
+    monkeypatch.setattr(token_validation, "_unsupported_reason", lambda: None)
+    calls = []
+
+    def load():
+        calls.append(True)
+        return native
+
+    monkeypatch.setattr(token_validation, "_load_native", load)
+    assert token_validation.prepare() is native[0]
+    identity = token_validation.runtime_info()
+    identity["build_identity"]["schema_version"] = -1
+    assert token_validation.runtime_info() == native[1]
+    assert token_validation.prepare() is native[0]
+    assert calls == [True]
 
 
 @pytest.mark.parametrize("compiler", ["ccache g++", "g++ -wrapper,untracked-wrapper"])
-def test_untracked_compiler_launcher_or_flags_choose_setup_fallback(monkeypatch, compiler):
+def test_untracked_compiler_launcher_or_flags_raise(monkeypatch, compiler):
     monkeypatch.setattr(token_validation, "_predicate", None)
     monkeypatch.setattr(token_validation, "_runtime", None)
     monkeypatch.setenv("CXX", compiler)
+    monkeypatch.setattr(token_validation, "_unsupported_reason", lambda: None)
     monkeypatch.setattr(shutil, "which", lambda name, **kwargs: f"/usr/bin/{name}")
-    assert token_validation.prepare() is token_validation.reference
-    assert "direct GNU/Clang" in token_validation.runtime_info()["fallback_reason"]
+    with pytest.raises(ValueError, match="direct GNU/Clang"):
+        token_validation.prepare()
+    assert token_validation._predicate is None and token_validation.runtime_info() is None
 
 
 @pytest.mark.parametrize("mode", ["non_cpython", "free_threaded"])
-def test_unsupported_runtime_selects_reference_without_loading(monkeypatch, mode):
+def test_unsupported_runtime_raises_without_loading(monkeypatch, mode):
     monkeypatch.setattr(token_validation, "_predicate", None)
     monkeypatch.setattr(token_validation, "_runtime", None)
     if mode == "non_cpython":
@@ -238,8 +282,9 @@ def test_unsupported_runtime_selects_reference_without_loading(monkeypatch, mode
         raise AssertionError("unsupported runtime must not compile")
 
     monkeypatch.setattr(token_validation, "_load_native", forbidden)
-    assert token_validation.prepare() is token_validation.reference
-    assert token_validation.runtime_info()["fallback_reason"]
+    with pytest.raises(NotImplementedError, match="CPython"):
+        token_validation.prepare()
+    assert token_validation._predicate is None and token_validation.runtime_info() is None
 
 
 def test_import_and_reference_need_neither_compiler_nor_torch():
@@ -276,26 +321,33 @@ def test_actual_local_header_content_changes_scoped_fingerprint(tmp_path, monkey
     assert not any("operators/" in path for path in before["source_and_dependency_sha256"])
 
 
-def test_failed_compile_leaves_no_published_or_temporary_binary(tmp_path, monkeypatch, native):
+def test_failed_compile_preserves_error_and_unpublished_artifacts(tmp_path, monkeypatch, native):
     monkeypatch.setattr(token_validation, "_predicate", None)
     monkeypatch.setattr(token_validation, "_runtime", None)
     monkeypatch.setenv("XDG_CACHE_HOME", str(tmp_path))
     run = token_validation._run
+    failure = RuntimeError("test compiler failure")
 
     def fail_compile(command, environment):
         if "-o" in command:
             Path(command[-1]).write_bytes(b"partial binary")
-            raise RuntimeError("test compiler failure")
+            raise failure
         return run(command, environment)
 
     monkeypatch.setattr(token_validation, "_run", fail_compile)
-    assert token_validation.prepare() is token_validation.reference
-    assert "test compiler failure" in token_validation.runtime_info()["fallback_reason"]
+    with pytest.raises(RuntimeError) as caught:
+        token_validation.prepare()
+    assert caught.value is failure
+    assert token_validation._predicate is None and token_validation.runtime_info() is None
     cache = tmp_path / "cxldsagr" / "token-validation"
-    assert all(path.suffix == ".lock" for path in cache.iterdir())
+    staged = [path for path in cache.iterdir() if path.is_dir()]
+    assert len(staged) == 1 and staged[0].name.startswith(".")
+    assert next(staged[0].iterdir()).read_bytes() == b"partial binary"
+    assert str(staged[0]) in failure.__notes__[0]
+    assert not (staged[0] / "manifest.json").exists()
 
 
-def test_concurrent_process_cache_reuse_and_corruption_repair(tmp_path, native):
+def test_concurrent_process_cache_reuse_rejects_and_preserves_corruption(tmp_path, native):
     code = """
 import json
 from serving import token_validation as t
@@ -326,8 +378,45 @@ print(json.dumps(t.runtime_info()))
     assert binary.stat().st_mtime_ns == stamp
     assert token_validation._digest(binary) == identities[0]["loaded_binary_sha256"]
     binary.write_bytes(b"corrupted cached binary")  # No child process still maps it.
-    repaired = initialize()
-    assert repaired["fingerprint"] == identities[0]["fingerprint"]
-    assert token_validation._digest(binary) == repaired["loaded_binary_sha256"]
+    corrupted_stamp = binary.stat().st_mtime_ns
+    with pytest.raises(subprocess.CalledProcessError) as caught:
+        initialize()
+    assert "cached token validation binary differs" in caught.value.stderr
+    assert binary.read_bytes() == b"corrupted cached binary"
+    assert binary.stat().st_mtime_ns == corrupted_stamp
     cache = tmp_path / "cxldsagr" / "token-validation"
     assert len([path for path in cache.iterdir() if path.is_dir()]) == 1
+
+
+def test_only_missing_cache_directory_is_unpublished(tmp_path):
+    identity = {"extension_suffix": ".so"}
+    assert token_validation._verified_manifest(tmp_path / "new", identity) is None
+    with pytest.raises(FileNotFoundError):
+        token_validation._verified_manifest(tmp_path, identity)
+
+
+@pytest.mark.parametrize("corruption", ["json", "identity", "digest", "binary", "manifest_shape"])
+def test_existing_invalid_cache_is_never_treated_as_unpublished(tmp_path, corruption):
+    identity = {"extension_suffix": ".so"}
+    binary = tmp_path / (token_validation._NAME + ".so")
+    binary.write_bytes(b"cached binary")
+    manifest = {"build_identity": identity, "binary_sha256": token_validation._digest(binary)}
+    path = tmp_path / "manifest.json"
+    expected_error = RuntimeError
+    if corruption == "identity":
+        manifest["build_identity"] = {}
+    elif corruption == "digest":
+        manifest["binary_sha256"] = "wrong"
+    elif corruption == "binary":
+        binary.unlink()
+        expected_error = FileNotFoundError
+    elif corruption == "manifest_shape":
+        manifest = []
+        expected_error = TypeError
+    path.write_text("invalid json" if corruption == "json" else json.dumps(manifest))
+    if corruption == "json":
+        expected_error = json.JSONDecodeError
+    before = {item.name: item.read_bytes() for item in tmp_path.iterdir()}
+    with pytest.raises(expected_error):
+        token_validation._verified_manifest(tmp_path, identity)
+    assert {item.name: item.read_bytes() for item in tmp_path.iterdir()} == before

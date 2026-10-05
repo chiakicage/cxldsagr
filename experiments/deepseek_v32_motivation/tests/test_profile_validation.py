@@ -1,6 +1,8 @@
 """Captured requests must observe the validator selected before instrumentation."""
 
+import json
 from contextlib import nullcontext
+from types import SimpleNamespace
 
 import pytest
 import torch
@@ -9,7 +11,247 @@ from experiments.deepseek_v32_echo_prefill.src import operator_instrumentation
 from experiments.deepseek_v32_motivation.src.profile import InstrumentServing, Scopes
 from serving import token_validation
 from serving.persistent import PersistentGRRunner
-from serving.tests.test_persistent import Backend, request
+from serving.tests.test_persistent import Backend, SharedBackend, request
+
+
+@pytest.mark.parametrize("body_failure", [False, True])
+@pytest.mark.parametrize("stop_failure", [False, True])
+def test_capture_completion_preserves_body_and_stop_errors(body_failure, stop_failure):
+    from experiments.deepseek_v32_motivation.src.profile import capture_range
+
+    body, stop = KeyboardInterrupt("profile interrupted"), OSError("capture stop failed")
+    calls = []
+
+    def close():
+        calls.append("stop")
+        if stop_failure:
+            raise stop
+
+    runtime = SimpleNamespace(
+        cudaProfilerStart=lambda: calls.append("start"), cudaProfilerStop=close
+    )
+
+    def execute():
+        with capture_range(runtime):
+            calls.append("body")
+            if body_failure:
+                raise body
+
+    if body_failure and stop_failure:
+        with pytest.raises(BaseExceptionGroup) as failed:
+            execute()
+        assert failed.value.exceptions == (body, stop)
+    elif body_failure or stop_failure:
+        expected = body if body_failure else stop
+        with pytest.raises(type(expected)) as failed:
+            execute()
+        assert failed.value is expected
+    else:
+        execute()
+    assert calls == ["start", "body", "stop"]
+
+
+@pytest.mark.parametrize(
+    ("failure_stage", "cleanup_failure", "reporting_failure", "backend_failure"),
+    [
+        (stage, cleanup, False, False)
+        for stage in ("finalize", "capture_stop", "ledger_write")
+        for cleanup in (False, True)
+    ]
+    + [("ledger_write", False, True, backend) for backend in (False, True)],
+)
+def test_graph_setup_failure_releases_runner_before_backend_close(
+    tmp_path, monkeypatch, failure_stage, cleanup_failure, reporting_failure, backend_failure
+):
+    from evaluation import provenance
+    from experiments.deepseek_v32_motivation.src import graph_instrumentation, profile
+    from experiments.nosa_motivation.src import validation
+    from models.deepseek_v32.execution import adapter
+    from serving import persistent
+
+    setup_error = KeyboardInterrupt(failure_stage)
+    cleanup_error = OSError("runner cleanup failed")
+    reporting_error = OSError("failure metadata write failed")
+    backend_error = OSError("backend close failed")
+    calls = []
+    reference, output = tmp_path / "reference", tmp_path / "temporary"
+    reference.mkdir()
+    output.mkdir()
+    config = {
+        "enable_compute_graphs": True,
+        "layers": 1,
+        "chunk_size": 4,
+        "sparse_pool_tokens": 8,
+        "host_arena_tokens": 16,
+        "workspace_query_tokens": 4,
+    }
+    checkpoint = {
+        "path": str(reference),
+        "files": {},
+        "identity_boundary": "checkpoint path and shard stat inventory, not weights hashes",
+    }
+    workload = SimpleNamespace(manifest={"workload_sha256": "input"}, write=lambda *_: None)
+    metadata = {"run_id": "reference", "config": config, "checkpoint": checkpoint}
+    monkeypatch.setattr(validation, "reference_directory", lambda *_args, **_kwargs: reference)
+    monkeypatch.setattr(profile, "load_reference", lambda *_: (metadata, workload, {}))
+    monkeypatch.setattr(
+        profile, "reference_provenance", lambda *_: {"reference_source_sha256": "reference"}
+    )
+    monkeypatch.setattr(profile.tempfile, "mkdtemp", lambda **_: str(output))
+    monkeypatch.setattr(profile, "snapshot_sources", lambda *_: "profile")
+    monkeypatch.setattr(profile, "precision_settings", dict)
+    monkeypatch.setattr(provenance, "_git", lambda *_: "fixture")
+    monkeypatch.setattr(provenance, "backend_provenance", dict)
+    monkeypatch.setattr(profile.measure, "configure_precision", lambda *_: None)
+    monkeypatch.setattr(profile.measure, "resource_limits", lambda *_: {})
+    monkeypatch.setattr(profile.measure, "warmup", lambda *_: {})
+    monkeypatch.setattr(torch.cuda, "get_device_capability", lambda *_: (9, 0))
+    monkeypatch.setattr(torch.cuda, "set_device", lambda *_: None)
+    monkeypatch.setattr(torch.cuda, "empty_cache", lambda: None)
+    monkeypatch.setattr(
+        torch.cuda,
+        "get_device_properties",
+        lambda *_: SimpleNamespace(
+            name="fixture", uuid="fixture", total_memory=1, multi_processor_count=1
+        ),
+    )
+
+    def stop_capture():
+        calls.append("capture_stop")
+        if failure_stage == "capture_stop":
+            raise setup_error
+
+    monkeypatch.setattr(
+        torch.cuda,
+        "cudart",
+        lambda: SimpleNamespace(
+            cudaProfilerStart=lambda: calls.append("capture_start"),
+            cudaProfilerStop=stop_capture,
+        ),
+    )
+
+    class BackendFixture:
+        owner = None
+
+        def __init__(self, *_args, **_kwargs):
+            pass
+
+        def synchronize(self):
+            pass
+
+        def configure_scheme(self, _scheme):
+            pass
+
+        def close(self):
+            calls.append("backend_close")
+            assert self.owner is None
+            if backend_failure:
+                raise backend_error
+
+    class RunnerFixture:
+        def __init__(self, backend, **_kwargs):
+            self.backend = backend
+            backend.owner = self
+            calls.append("runner_created")
+
+        def close(self):
+            calls.append("runner_close")
+            self.backend.owner = None
+            if cleanup_failure:
+                raise cleanup_error
+
+    class GraphFixture:
+        def __init__(self, _backend):
+            pass
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_):
+            pass
+
+        def finalize(self):
+            calls.append("finalize")
+            if failure_stage == "finalize":
+                raise setup_error
+            return {}
+
+    original_write = profile.measure.write_json
+
+    def write_json(path, value):
+        if path.name == "graph_capture_ledger.json":
+            calls.append("ledger_write")
+            if failure_stage == "ledger_write":
+                raise setup_error
+        if path.name == "metadata.json" and value["status"] == "failed" and reporting_failure:
+            raise reporting_error
+        original_write(path, value)
+
+    monkeypatch.setattr(adapter, "DeepSeekServingBackend", BackendFixture)
+    monkeypatch.setattr(persistent, "PersistentGRRunner", RunnerFixture)
+    monkeypatch.setattr(graph_instrumentation, "CaptureGraphOperators", GraphFixture)
+    monkeypatch.setattr(profile.measure, "write_json", write_json)
+    group_expected = cleanup_failure or reporting_failure or backend_failure
+    with pytest.raises(BaseExceptionGroup if group_expected else KeyboardInterrupt) as failed:
+        profile.main(
+            [
+                "--run-id",
+                "setup_failure",
+                "--reference-run",
+                str(reference),
+                "--output-dir",
+                str(tmp_path / "published"),
+                "--scheme",
+                "echo",
+                "--nsys",
+            ]
+        )
+    propagated = failed.value
+    if backend_failure:
+        propagated, actual_backend_error = propagated.exceptions
+        assert actual_backend_error is backend_error
+    if reporting_failure:
+        propagated, actual_reporting_error = propagated.exceptions
+        assert actual_reporting_error is reporting_error
+    if cleanup_failure:
+        propagated, actual_cleanup_error = propagated.exceptions
+        assert actual_cleanup_error is cleanup_error
+    assert propagated is setup_error
+    assert calls.count("runner_created") == calls.count("runner_close") == 1
+    assert calls[-2:] == ["runner_close", "backend_close"]
+    expected_status = "running" if reporting_failure else "failed"
+    assert json.loads((output / "metadata.json").read_text())["status"] == expected_status
+    assert not (tmp_path / "published").exists()
+
+
+def test_profile_retains_formal_run_and_separate_numerical_reference(tmp_path):
+    from experiments.deepseek_v32_motivation.src.profile import reference_provenance, sha
+
+    formal, numerical = tmp_path / "bench", tmp_path / "check"
+    for path in (formal, numerical):
+        path.mkdir()
+        (path / "metadata.json").write_text(
+            json.dumps(
+                {
+                    "status": "accepted",
+                    "run_id": path.name,
+                    "source_sha256": "frozen_source",
+                    "config": {"history_tokens": 65536},
+                }
+            )
+        )
+    result = reference_provenance(formal, numerical)
+    assert result["reference_run_id"] == "bench"
+    assert result["reference_run"] == str(formal)
+    assert result["reference_metadata_sha256"] == sha(formal / "metadata.json")
+    assert result["numerical_reference_run_id"] == "check"
+    assert result["numerical_reference_run"] == str(numerical)
+    assert result["numerical_reference_metadata_sha256"] == sha(numerical / "metadata.json")
+    metadata = json.loads((numerical / "metadata.json").read_text())
+    metadata["config"]["history_tokens"] = 4096
+    (numerical / "metadata.json").write_text(json.dumps(metadata))
+    with pytest.raises(ValueError, match="configurations differ"):
+        reference_provenance(formal, numerical)
 
 
 @pytest.mark.parametrize("native", [False, True])
@@ -35,7 +277,8 @@ def test_profile_wraps_selected_validator_once_and_restores_it(monkeypatch, nati
     ) as runner:
         original = runner._validate
         original_local = "_validate" in vars(runner)
-        assert original_local is native
+        assert not original_local
+        assert runner.token_validation_identity["requested_native"] is native
         instrument = InstrumentServing(backend, scopes, runner)
         value = request()
         if invalid:
@@ -52,7 +295,94 @@ def test_profile_wraps_selected_validator_once_and_restores_it(monkeypatch, nati
         assert runner._validate.__func__ is original.__func__
         assert runner._validate.__self__ is runner
         assert ("_validate" in vars(runner)) is original_local
-        if native:
-            assert runner._validate is original
+        assert runner._token_ids_valid is token_validation.reference
         runner._validate(request())
         assert len(scopes.calls) == 1
+
+
+def test_late_instrumentation_observes_existing_diagnostics_and_preserves_owner(monkeypatch):
+    from executor.adapters import BackendAdapter
+
+    monkeypatch.setattr(operator_instrumentation, "InstrumentOperators", lambda *_: nullcontext())
+
+    class ProfileBackend(SharedBackend):
+        def __init__(self):
+            super().__init__()
+            self._forward = lambda *args, **kwargs: None
+            self.attentions, self.blocks = (), ()
+            self.head_weight = torch.empty(0)
+            self.metric_reads = 0
+            self.authorized_calls = []
+            self.session_metrics = self.read_metrics
+
+        def runtime_driver(self, policy):
+            return BackendAdapter(
+                self,
+                shared=True,
+                candidate_mode="gpu_transient",
+                session_length=lambda session: len(session["tokens"]),
+                chunk_size=self.max_seq_len,
+                diagnostics=lambda session: self.session_metrics(session),
+                owner_aware=True,
+            )
+
+        def authorize(self, stage, owner):
+            assert owner is self.owner and owner is not None
+            self.authorized_calls.append(stage)
+
+        def allocate_shared(self, plan, *, owner=None):
+            self.authorize("allocate", owner)
+            return super().allocate_shared(plan)
+
+        def create_session(self, capacity, *, owner=None):
+            self.authorize("create", owner)
+            return super().create_session(capacity)
+
+        def prefill(self, session, ids, *, owner=None):
+            self.authorize("prefill", owner)
+            return super().prefill(session, ids)
+
+        def extend_candidate(self, session, ids, *, owner=None):
+            self.authorize("candidate", owner)
+            history = len(session["tokens"])
+            result = super().extend(session, ids)
+            super().truncate(session, history)
+            return result
+
+        def truncate(self, session, history, *, owner=None):
+            self.authorize("truncate", owner)
+            return super().truncate(session, history)
+
+        def release_session(self, session, *, owner=None):
+            self.authorize("release", owner)
+            return super().release_session(session)
+
+        def read_metrics(self, session):
+            self.metric_reads += 1
+            return {"retained_tokens": len(session["tokens"])}
+
+    backend = ProfileBackend()
+    scopes = Scopes("echo", "cold", 1, nvtx=False)
+    with PersistentGRRunner(backend, hbm_budget_bytes=80, dram_budget_bytes=64) as runner:
+        assert backend.metric_reads == 0
+        with InstrumentServing(backend, scopes, runner) as instrument:
+            result = runner.execute(request())
+        assert result.hidden.tolist() == [[6], [10]]
+        assert (
+            backend.metric_reads == 2
+        )  # One diagnostic history read and the existing runner read.
+        assert instrument.segment_counters == {
+            "history": {"retained_tokens": 2},
+            "candidate": {"retained_tokens": 2},
+        }
+        for stage in ("history_prefill", "candidate_extend", "candidate_counters"):
+            assert sum(call["stage"] == stage for call in scopes.calls) == 1
+        assert not scopes.active
+    assert backend.authorized_calls == [
+        "allocate",
+        "create",
+        "prefill",
+        "candidate",
+        "truncate",
+        "release",
+    ]

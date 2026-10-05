@@ -5,8 +5,8 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
-from layers.feed_forward import SwiGLU
-from layers.normalization import RMSNorm
+from models.nosa.feed_forward import SwiGLU
+from models.nosa.normalization import RMSNorm
 from models.nosa.tests.test_model import initialized_model, reference_logits, tiny_config
 from operators import flashinfer
 

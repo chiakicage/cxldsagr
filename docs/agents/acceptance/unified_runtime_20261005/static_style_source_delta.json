@@ -1,0 +1,52 @@
+{
+  "schema": "static-style-source-delta-v1",
+  "boundary": "Post-capture import sorting and whitespace only. Both original and resulting files are preserved. AST outside contiguous import blocks and imported module/alias multisets are identical. Import order changes were checked with CPU regressions, not remeasured on GPU. This does not rewrite any numerical receipt or captured runtime/native source identity.",
+  "files": [
+    {
+      "path": "experiments/cache_management/src/capacity_probe.py",
+      "before_sha256": "45285b6bb590a9f50d640d7dbf88d0bbba10cd47c962b5863dc1ae79205ccc79",
+      "after_sha256": "f71de8f83b29798d9230c33a8d143e91700118d02794d00f0efd0fc5555a07e8",
+      "before_snapshot": "experiments/nosa_motivation/output/data/refactor_final_nosa_publication_20261005_02/source/style_review/before/experiments/cache_management/src/capacity_probe.py",
+      "after_snapshot": "experiments/nosa_motivation/output/data/refactor_final_nosa_publication_20261005_02/source/style_review/after/experiments/cache_management/src/capacity_probe.py",
+      "ast_identical": true,
+      "ast_identical_after_normalizing_only_contiguous_import_blocks": true
+    },
+    {
+      "path": "experiments/nosa_motivation/src/measure.py",
+      "before_sha256": "ca627a4d98581535014a807f322426b6d56e9f515811d0b3ab067612b810e583",
+      "after_sha256": "3d1f71a0ea3ba9be0ecaa2fcf07bc94c95dce6cdbd8aaad00448fdaa134c6135",
+      "before_snapshot": "experiments/nosa_motivation/output/data/refactor_final_nosa_publication_20261005_02/source/style_review/before/experiments/nosa_motivation/src/measure.py",
+      "after_snapshot": "experiments/nosa_motivation/output/data/refactor_final_nosa_publication_20261005_02/source/style_review/after/experiments/nosa_motivation/src/measure.py",
+      "ast_identical": false,
+      "ast_identical_after_normalizing_only_contiguous_import_blocks": true
+    },
+    {
+      "path": "experiments/nosa_motivation/src/profile.py",
+      "before_sha256": "60d2c79b2aa838064c77a4639a9c88bb6eeb1e51278956561694c544ba58283e",
+      "after_sha256": "90bf42902fe38cbfa5d539d23ad44e040030bebf77d656c444554ad6852a8853",
+      "before_snapshot": "experiments/nosa_motivation/output/data/refactor_final_nosa_publication_20261005_02/source/style_review/before/experiments/nosa_motivation/src/profile.py",
+      "after_snapshot": "experiments/nosa_motivation/output/data/refactor_final_nosa_publication_20261005_02/source/style_review/after/experiments/nosa_motivation/src/profile.py",
+      "ast_identical": false,
+      "ast_identical_after_normalizing_only_contiguous_import_blocks": true
+    },
+    {
+      "path": "experiments/nosa_motivation/src/profile_hbm.py",
+      "before_sha256": "3d39b5ed0acd70c5c12c3ec0ea791af4376af191df2acc703c3109623ceb7cbf",
+      "after_sha256": "fa10c3075eb334d3565a21630769306915b3f1a28981c8ad321192cf794aee7a",
+      "before_snapshot": "experiments/nosa_motivation/output/data/refactor_final_nosa_publication_20261005_02/source/style_review/before/experiments/nosa_motivation/src/profile_hbm.py",
+      "after_snapshot": "experiments/nosa_motivation/output/data/refactor_final_nosa_publication_20261005_02/source/style_review/after/experiments/nosa_motivation/src/profile_hbm.py",
+      "ast_identical": false,
+      "ast_identical_after_normalizing_only_contiguous_import_blocks": true
+    },
+    {
+      "path": "models/nosa/tests/test_offload_checkpoint.py",
+      "before_sha256": "df2b88d44e6b382b0ffa5f3f00ac2ba05f4a6ae63bbfc2f992626d83df1c2a7c",
+      "after_sha256": "5711fe80da6c2e600ad1bd3601ca47d91a249cfa808b7a2c28608f532e910c71",
+      "before_snapshot": "experiments/nosa_motivation/output/data/refactor_final_nosa_publication_20261005_02/source/style_review/before/models/nosa/tests/test_offload_checkpoint.py",
+      "after_snapshot": "experiments/nosa_motivation/output/data/refactor_final_nosa_publication_20261005_02/source/style_review/after/models/nosa/tests/test_offload_checkpoint.py",
+      "ast_identical": true,
+      "ast_identical_after_normalizing_only_contiguous_import_blocks": true
+    }
+  ],
+  "gpu_measurement_repeated": false
+}

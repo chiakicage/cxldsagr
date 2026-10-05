@@ -1,0 +1,369 @@
+{
+  "boundary": "Current loaded repository Python modules only, plus pyproject.toml and uv.lock; not captured runtime/native identity, not every possible source. Saved bytes are the files on disk at report generation, not the loaded Python bytecode.",
+  "excluded_path_components": [
+    ".cache",
+    ".git",
+    ".pytest_cache",
+    ".venv",
+    "3rdparty",
+    "__pycache__",
+    "build",
+    "dist",
+    "generated",
+    "output",
+    "report",
+    "reports",
+    "weights"
+  ],
+  "files": {
+    "GR/__init__.py": {
+      "modules": [
+        "GR"
+      ],
+      "sha256": "26c88a81740555c7801e3d3e82b4e08599da112b7e134290e0fc23070f416eff",
+      "size_bytes": 54,
+      "snapshot_path": "source/report_helpers/GR/__init__.py"
+    },
+    "GR/dataset.py": {
+      "modules": [
+        "GR.dataset"
+      ],
+      "sha256": "0ec95750722fefe387c0c62a2064e101622d060ac69d4c933044b1a950c24ce4",
+      "size_bytes": 1067,
+      "snapshot_path": "source/report_helpers/GR/dataset.py"
+    },
+    "GR/heat.py": {
+      "modules": [
+        "GR.heat"
+      ],
+      "sha256": "c6ebe2ebc73db10c4f2706701d3e7a1c7aee2dc40162e00f6b5ce4550a587f4f",
+      "size_bytes": 7759,
+      "snapshot_path": "source/report_helpers/GR/heat.py"
+    },
+    "GR/input_generator.py": {
+      "modules": [
+        "GR.input_generator"
+      ],
+      "sha256": "0b3574c190d11ddb64c6fe05ebb2fde6f618cc3f800b728846cfd4a0141bd3fa",
+      "size_bytes": 27368,
+      "snapshot_path": "source/report_helpers/GR/input_generator.py"
+    },
+    "GR/scheduling.py": {
+      "modules": [
+        "GR.scheduling"
+      ],
+      "sha256": "1573fbab8ae1cab6cb287f3a6606124aa845217864e5d68ea55f8f7d6f7369cb",
+      "size_bytes": 5163,
+      "snapshot_path": "source/report_helpers/GR/scheduling.py"
+    },
+    "GR/workload.py": {
+      "modules": [
+        "GR.workload"
+      ],
+      "sha256": "2c16eb30be6888bf19ed07670dbc37b97e1bb18527545c8d6157dc79b6c644de",
+      "size_bytes": 15695,
+      "snapshot_path": "source/report_helpers/GR/workload.py"
+    },
+    "cache/allocator/budget.py": {
+      "modules": [
+        "cache.allocator.budget"
+      ],
+      "sha256": "3fdc40173b284fbf6d4f4cb01954217657f64168820c0f00c1b1008af816fda4",
+      "size_bytes": 14529,
+      "snapshot_path": "source/report_helpers/cache/allocator/budget.py"
+    },
+    "cache/allocator/pool_referrers.py": {
+      "modules": [
+        "cache.allocator.pool_referrers"
+      ],
+      "sha256": "9417159808a653517a8193a22577a6a6f207cfa874be0d91cc4e4a2ada8ce256",
+      "size_bytes": 20725,
+      "snapshot_path": "source/report_helpers/cache/allocator/pool_referrers.py"
+    },
+    "cache/allocator/snapshot.py": {
+      "modules": [
+        "cache.allocator.snapshot"
+      ],
+      "sha256": "be7aa6b95e620707d1032e912e3e2df7d246f37eaf0a6ddb04cc0284ea99f61f",
+      "size_bytes": 10861,
+      "snapshot_path": "source/report_helpers/cache/allocator/snapshot.py"
+    },
+    "cache/capacity.py": {
+      "modules": [
+        "cache.capacity"
+      ],
+      "sha256": "ba39f57a49124b23c60552240d87fbb9804b5320275b09596eadf2f0ff8c3a96",
+      "size_bytes": 12625,
+      "snapshot_path": "source/report_helpers/cache/capacity.py"
+    },
+    "cache/lifecycle.py": {
+      "modules": [
+        "cache.lifecycle"
+      ],
+      "sha256": "4e699cedce01acd99133e19c662027fb56c9abaf01a9855d09386962d688e68f",
+      "size_bytes": 9978,
+      "snapshot_path": "source/report_helpers/cache/lifecycle.py"
+    },
+    "cache/prefix_pool.py": {
+      "modules": [
+        "cache.prefix_pool"
+      ],
+      "sha256": "1a363205c74cf382c8c4294f6ddf3358c0da31b292dc0edc16f7c80b4d77a695",
+      "size_bytes": 11992,
+      "snapshot_path": "source/report_helpers/cache/prefix_pool.py"
+    },
+    "evaluation/pool_scan_provenance.py": {
+      "modules": [
+        "evaluation.pool_scan_provenance"
+      ],
+      "sha256": "004b86573af85619e56a99259e4208671c9fd94a99e0ec07c4fcfd6401dc3d9d",
+      "size_bytes": 11765,
+      "snapshot_path": "source/report_helpers/evaluation/pool_scan_provenance.py"
+    },
+    "evaluation/provenance.py": {
+      "modules": [
+        "evaluation.provenance"
+      ],
+      "sha256": "0fde027cf65530a75072893c88c522cc85ea990b72e67ce7515b74dbb6d2fa67",
+      "size_bytes": 9629,
+      "snapshot_path": "source/report_helpers/evaluation/provenance.py"
+    },
+    "evaluation/validation.py": {
+      "modules": [
+        "evaluation.validation"
+      ],
+      "sha256": "769add375a8b3b64fe0c391c1a3067f2304c4727f1d4af199b9f5a5480ca2b74",
+      "size_bytes": 4803,
+      "snapshot_path": "source/report_helpers/evaluation/validation.py"
+    },
+    "experiments/cache_management/src/capacity_probe.py": {
+      "modules": [
+        "experiments.cache_management.src.capacity_probe"
+      ],
+      "sha256": "45285b6bb590a9f50d640d7dbf88d0bbba10cd47c962b5863dc1ae79205ccc79",
+      "size_bytes": 26508,
+      "snapshot_path": "source/report_helpers/experiments/cache_management/src/capacity_probe.py"
+    },
+    "experiments/cache_management/src/capacity_report.py": {
+      "modules": [
+        "experiments.cache_management.src.capacity_report"
+      ],
+      "sha256": "64e86d03067ea11b23dae5bda7159690d08f2e6dee133aaa1d5553df1118109a",
+      "size_bytes": 37832,
+      "snapshot_path": "source/report_helpers/experiments/cache_management/src/capacity_report.py"
+    },
+    "experiments/cache_management/src/nosa_plan.py": {
+      "modules": [
+        "experiments.cache_management.src.nosa_plan"
+      ],
+      "sha256": "02bda4b9b4efe65d7a840adf99eba302ac91e154698c60405e0bd557141d98c0",
+      "size_bytes": 13476,
+      "snapshot_path": "source/report_helpers/experiments/cache_management/src/nosa_plan.py"
+    },
+    "experiments/cache_management/src/report.py": {
+      "modules": [
+        "__main__",
+        "__mp_main__"
+      ],
+      "sha256": "384a67c703b7d5178e32baec173ecc7d18a86e9fd10c6ff5ec883c1c1744274c",
+      "size_bytes": 16093,
+      "snapshot_path": "source/report_helpers/experiments/cache_management/src/report.py"
+    },
+    "experiments/deepseek_v32_motivation/src/measure.py": {
+      "modules": [
+        "experiments.deepseek_v32_motivation.src.measure"
+      ],
+      "sha256": "f40173938998813fbca017470f6253c7e9ecd4a752fe2a4f6b06b7d4df3f9273",
+      "size_bytes": 33146,
+      "snapshot_path": "source/report_helpers/experiments/deepseek_v32_motivation/src/measure.py"
+    },
+    "experiments/deepseek_v32_motivation/src/report.py": {
+      "modules": [
+        "experiments.deepseek_v32_motivation.src.report"
+      ],
+      "sha256": "cd640e53a46287e4e39ae9e772901b4c10c7a5d02db7309b8af7d2dced6a26a8",
+      "size_bytes": 22768,
+      "snapshot_path": "source/report_helpers/experiments/deepseek_v32_motivation/src/report.py"
+    },
+    "experiments/nosa_motivation/src/config.py": {
+      "modules": [
+        "experiments.nosa_motivation.src.config"
+      ],
+      "sha256": "5377e349084b72d74e55dff2b65ba6668c3e8c05e141f55905aa01e9ff2945c8",
+      "size_bytes": 5674,
+      "snapshot_path": "source/report_helpers/experiments/nosa_motivation/src/config.py"
+    },
+    "experiments/nosa_motivation/src/cpu_environment.py": {
+      "modules": [
+        "experiments.nosa_motivation.src.cpu_environment"
+      ],
+      "sha256": "c841e489bfb07baf80e06bf7aa9a6a28e395fa40a89809c1a1dd7100b166c936",
+      "size_bytes": 4601,
+      "snapshot_path": "source/report_helpers/experiments/nosa_motivation/src/cpu_environment.py"
+    },
+    "experiments/nosa_motivation/src/flops.py": {
+      "modules": [
+        "experiments.nosa_motivation.src.flops"
+      ],
+      "sha256": "855fe952a7e172e6361320480110f9cad39e729662507f4dd2d0d8d45bc439dd",
+      "size_bytes": 5853,
+      "snapshot_path": "source/report_helpers/experiments/nosa_motivation/src/flops.py"
+    },
+    "experiments/nosa_motivation/src/measure.py": {
+      "modules": [
+        "experiments.nosa_motivation.src.measure"
+      ],
+      "sha256": "ca627a4d98581535014a807f322426b6d56e9f515811d0b3ab067612b810e583",
+      "size_bytes": 26343,
+      "snapshot_path": "source/report_helpers/experiments/nosa_motivation/src/measure.py"
+    },
+    "experiments/nosa_motivation/src/provenance.py": {
+      "modules": [
+        "experiments.nosa_motivation.src.provenance"
+      ],
+      "sha256": "ac157475a603db676426e35a76c6a3b0aea67fce7a8dfefb55942c927971ceb7",
+      "size_bytes": 15308,
+      "snapshot_path": "source/report_helpers/experiments/nosa_motivation/src/provenance.py"
+    },
+    "experiments/nosa_motivation/src/report.py": {
+      "modules": [
+        "experiments.nosa_motivation.src.report"
+      ],
+      "sha256": "1984f7cdcae6c5dcbfbcb787d78ff6973aa0aa7fddecc6dcf7d225ba42503aac",
+      "size_bytes": 27257,
+      "snapshot_path": "source/report_helpers/experiments/nosa_motivation/src/report.py"
+    },
+    "experiments/nosa_motivation/src/validation.py": {
+      "modules": [
+        "experiments.nosa_motivation.src.validation"
+      ],
+      "sha256": "b4638f3102877f3b6e2e249b4f8909a8d187e6b2fdc63e834bbf56b6fadd8c22",
+      "size_bytes": 9995,
+      "snapshot_path": "source/report_helpers/experiments/nosa_motivation/src/validation.py"
+    },
+    "models/deepseek_v32/request_format.py": {
+      "modules": [
+        "models.deepseek_v32.request_format"
+      ],
+      "sha256": "104fb4d7f45c2ff69885383b2ce66a45610321066c77967be2c298ebc884f88d",
+      "size_bytes": 629,
+      "snapshot_path": "source/report_helpers/models/deepseek_v32/request_format.py"
+    },
+    "models/nosa/config.py": {
+      "modules": [
+        "models.nosa.config"
+      ],
+      "sha256": "eaa168a439fada20f13b6d0a44c801de30e3b1c04d3e5ac43d4273a3454db165",
+      "size_bytes": 4162,
+      "snapshot_path": "source/report_helpers/models/nosa/config.py"
+    },
+    "models/nosa/execution/compute_graphs.py": {
+      "modules": [
+        "models.nosa.execution.compute_graphs"
+      ],
+      "sha256": "2b0c61263d7cfaebcef9aec957aa083ccc5c3fcdb5d2a047ef8f73452d958bb1",
+      "size_bytes": 16240,
+      "snapshot_path": "source/report_helpers/models/nosa/execution/compute_graphs.py"
+    },
+    "models/nosa/execution/fixed_resources.py": {
+      "modules": [
+        "models.nosa.execution.fixed_resources"
+      ],
+      "sha256": "8ce76def3724191bd37c277b8c2f7bd56297f5d293c6b9081d33c45e84abefee",
+      "size_bytes": 13453,
+      "snapshot_path": "source/report_helpers/models/nosa/execution/fixed_resources.py"
+    },
+    "models/nosa/execution/resources.py": {
+      "modules": [
+        "models.nosa.execution.resources"
+      ],
+      "sha256": "b9c356f7a082856f90cf9164b806e40de50fd691b008d2d2d16e245b91867d58",
+      "size_bytes": 21608,
+      "snapshot_path": "source/report_helpers/models/nosa/execution/resources.py"
+    },
+    "models/nosa/execution/session_budget.py": {
+      "modules": [
+        "models.nosa.execution.session_budget"
+      ],
+      "sha256": "b920a121eb51d37b20824bbe85e22e282a60bc63f999e3b19cb868ab4e80f9fd",
+      "size_bytes": 12725,
+      "snapshot_path": "source/report_helpers/models/nosa/execution/session_budget.py"
+    },
+    "models/nosa/infer.py": {
+      "modules": [
+        "models.nosa.infer"
+      ],
+      "sha256": "4bc01669b4c2c3896115407a56b19ef496f8be3a18f49692878fa5cb3a69a84f",
+      "size_bytes": 13228,
+      "snapshot_path": "source/report_helpers/models/nosa/infer.py"
+    },
+    "models/nosa/request_format.py": {
+      "modules": [
+        "models.nosa.request_format"
+      ],
+      "sha256": "25c775ba0b76cab91663b827fc8b38fc20511895a5e6eff3054273cbfe418825",
+      "size_bytes": 778,
+      "snapshot_path": "source/report_helpers/models/nosa/request_format.py"
+    },
+    "pyproject.toml": {
+      "kind": "environment specification",
+      "sha256": "cac6e9271538d74e99b1bdc83c2a12648bb3c76a310af21c98aff3ec2d3761d1",
+      "size_bytes": 3925,
+      "snapshot_path": "source/report_helpers/pyproject.toml"
+    },
+    "uv.lock": {
+      "kind": "environment specification",
+      "sha256": "53339af1728da3661b614d554e928408186b4fac6106a92999bd8fd69b3d2d8f",
+      "size_bytes": 139330,
+      "snapshot_path": "source/report_helpers/uv.lock"
+    }
+  },
+  "included_directories": [
+    "GR",
+    "cache",
+    "evaluation",
+    "executor",
+    "experiments",
+    "layers",
+    "models",
+    "operators",
+    "scripts",
+    "serving",
+    "tests"
+  ],
+  "invocation": {
+    "cwd": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr",
+    "orig_argv": [
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin/python",
+      "-B",
+      "-m",
+      "experiments.cache_management.src.report",
+      "--run-id",
+      "cache_unified_20261005_02",
+      "--nosa-plan",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_nosa_fixed_20261005_02",
+      "--deepseek-plans",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_nh_20261005_02",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_base_20261005_02",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_base_headroom_20261005_02",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_nhmax_20261005_02",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_nhmax_headroom_20261005_02",
+      "--nosa-run",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_motivation/output/data/refactor_final_nosa_bench_20261005_01",
+      "--deepseek-run",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_bench_20261005_01",
+      "--nosa-receipt",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/docs/agents/acceptance/unified_runtime_20261005/nosa_final/receipt.json",
+      "--deepseek-receipt",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/docs/agents/acceptance/unified_runtime_20261005/deepseek_final/receipt.json",
+      "--output-dir",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_unified_20261005_02"
+    ],
+    "python": {
+      "executable": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin/python",
+      "version": "3.12.13 (main, Jun 11 2026, 04:03:26) [Clang 22.1.3 ]"
+    }
+  },
+  "repository_root": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr",
+  "schema": "report-helper-sources-v1"
+}

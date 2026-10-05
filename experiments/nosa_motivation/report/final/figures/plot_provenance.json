@@ -1,0 +1,7 @@
+{
+  "run_id": "refactor_final_nosa_bench_20261005_01",
+  "source_sha256": "4665ccce226af23f631e619f748369cea28d4a09b99c1947cbb6b030e58f120c",
+  "workload_sha256": "d8569499b36e8a4ee9f1367e760b875494a7f1a545245c47e35535c6970a8040",
+  "generated_by": "python -m experiments.nosa_motivation.src.plot",
+  "latency_scope": "Synchronized runner wall latency includes token validation/transfer, admission, eviction, independent sparse history construction on miss, all candidate hidden states, and candidate discard. Model loading, request generation, warmup, counters and reports are outside latency. Bench performs no full-output CPU copies, numerical comparison or output saving between requests. Check publishes no timings."
+}

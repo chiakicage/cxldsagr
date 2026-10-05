@@ -1,0 +1,28 @@
+{
+  "status": "passed",
+  "check_run_id": "refactor_final_deepseek_check_20261005_01",
+  "previous_full_source_sha256": "1fc1cbaf7a97579f7094879938330a9933a82109909d2701a177e1653f0dc9f8",
+  "current_full_source_sha256": "d54075bc634c861970f570cff1c79bd6be96d98ededcbb631c1eb5066aa6e878",
+  "changed_sources": {
+    "experiments/deepseek_v32_motivation/src/profile.py": {
+      "previous": "73d632b9f6572855f6963fc32580c9e78d6d8ed69d197e6428d33c228c58242a",
+      "current": "0d074ce1e666ca040fd1ec6d0681a0d1c6b8a8b164739f24961a0f1967a26b37"
+    }
+  },
+  "full_source_files": 1295,
+  "validation_execution_sources": 1281,
+  "actual_bench_begin_validation_passed": true,
+  "verified_receipt_artifacts": 132,
+  "receipt_file_sha256": "a25cc5d08891fd6811db232de0b862831b46702c1b2f3124b2921b611574c1b3",
+  "verified_native_files": 22,
+  "verified_native_bytes": 1557618043,
+  "checkpoint_stat_identity_unchanged": true,
+  "boundary": "Fresh full source collection, actual bench begin_validation and artifact verification; native files rehashed and checkpoint stats re-read. Runtime method identities and device observations remain independently checked by the real benchmark. No GPU execution was performed.",
+  "followup_failure_reporting_fix": {
+    "profile_sha256": "4108978e5826c960301b4745c4f474169a1980f7a53da033ae5f95e3c2b7ce19",
+    "full_source_sha256_derived_from_prior_inventory": "1319a540b7f78da9c363dd09c0f1568b450df3df5e4d3e8b60155a58c348b3dc",
+    "numerical_execution_source_exclusion_unchanged": true,
+    "tests": "18 passed in 1.69s; Ruff check and format check passed",
+    "boundary": "Additional change only preserves original, failure-reporting and backend-close exception objects. Full source collection and native rehash were not repeated for this failure-only change. The full hash here substitutes the new profile hash into the already audited inventory; the preceding actual begin_validation audit remains the source compatibility proof."
+  }
+}

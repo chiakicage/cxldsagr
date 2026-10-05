@@ -3,8 +3,8 @@
 import pytest
 import torch
 
-from layers.attention import AttentionContext
-from models.nosa.cache import NosaKVCache
+from models.attention_contracts import AttentionContext
+from models.nosa.cache.resident import NosaKVCache
 from models.nosa.config import NosaConfig
 from models.nosa.indexer import NosaIndexer
 from operators.nosa.indexer import _indexer_checked_cuda as _nosa_indexer_checked_cuda

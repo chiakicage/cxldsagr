@@ -67,7 +67,7 @@ def test_metadata_includes_actual_fused_build(monkeypatch):
 
 
 def test_source_snapshot_covers_cooperative_runtime_and_planner():
-    from experiments.nosa_baseline_performance.src.dense.sources import source_hashes
+    from experiments.nosa_mfu.src.dense.sources import source_hashes
 
     hashes = source_hashes()
     assert {

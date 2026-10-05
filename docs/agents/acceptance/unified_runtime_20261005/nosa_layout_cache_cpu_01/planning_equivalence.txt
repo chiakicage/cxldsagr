@@ -1,0 +1,33 @@
+import ast
+import hashlib
+import itertools
+import json
+from pathlib import Path
+import torch
+from models.nosa.execution.session_budget import session_allocation_layout
+
+reference = Path('/tmp/cxldsagr_refactor_p0_20261005/checkout/models/nosa/session_budget.py')
+original = reference.read_text()
+assert not torch.cuda.is_initialized()
+namespace = {}
+exec(compile(original.replace('models.nosa.allocation_budget', 'cache.allocator.budget'), str(reference), 'exec'), namespace)
+count = 0
+for device, scheme, capacity, queries, layers in itertools.product(
+    ('cpu', 'cuda:0'), ('hbm','serial_sparse','dense_prefetch','overlap'),
+    (80,144,4097,66560,262144), (1,64,127,128,1024), (1,32),
+):
+    if queries > capacity:
+        continue
+    options = dict(capacity=capacity, queries=queries, layers=layers, kv_heads=2, query_heads=32,
+                   head_dim=128, dtype=torch.bfloat16, device=device, scheme=scheme)
+    expected = namespace['session_budget_breakdown'](**options)
+    allocations, actual = session_allocation_layout(**options)
+    assert actual == expected, (options, {k:(expected[k],actual[k]) for k in actual if expected[k] != actual[k]})
+    count += 1
+assert not torch.cuda.is_initialized()
+result = {'reference': str(reference), 'reference_sha256': hashlib.sha256(reference.read_bytes()).hexdigest(),
+          'current_sha256': hashlib.sha256(Path('models/nosa/execution/session_budget.py').read_bytes()).hexdigest(),
+          'adapter_sha256': hashlib.sha256(Path('models/nosa/execution/adapter.py').read_bytes()).hexdigest(),
+          'configurations': count, 'all_breakdown_keys_identical': True, 'device_execution': False}
+Path('/tmp/nosa_layout_cache_equivalence_20261005_01.json').write_text(json.dumps(result, indent=2)+'\n')
+print(json.dumps(result, indent=2))

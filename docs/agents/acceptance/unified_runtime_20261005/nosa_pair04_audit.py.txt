@@ -1,0 +1,87 @@
+import json,hashlib,statistics,time,sys
+from pathlib import Path
+from datetime import datetime
+sys.path.insert(0,'/mnt/ssd-wlcb/chenkaiqi/cxldsagr')
+import torch
+assert not torch.cuda.is_initialized()
+def forbidden(*a,**kw):raise RuntimeError('CUDA forbidden')
+torch.cuda._lazy_init=forbidden
+from experiments.nosa_motivation.src.report import audit_run
+from evaluation.serving_comparison import matching_contract
+root=Path('/mnt/ssd-wlcb/chenkaiqi/cxldsagr');acc=root/'docs/agents/acceptance/unified_runtime_20261005';exp=root/'experiments/nosa_motivation/output/data'
+ledger=json.loads((acc/'nosa_pair_confirm_04_ledger.json').read_text())
+assert len(ledger)==2 and all(r['exit_code']==0 for r in ledger)
+rows={};metas={};audits={};inputs=[]
+def record(p):
+ p=Path(p);inputs.append({'path':str(p),'bytes':p.stat().st_size,'sha256':hashlib.sha256(p.read_bytes()).hexdigest()})
+for item,role,receipt in zip(ledger,('baseline','current'),('nosa_baseline','nosa_final')):
+ p=Path(item['output']);before=time.monotonic();m,r,a=audit_run(p,receipt_override=acc/receipt/'receipt.json');metas[role]=m;rows[role]=r;audits[role]=a
+ assert len(r)==128 and m['mode']=='bench' and m['status']=='accepted'
+ print('AUDIT',role,'passed',round(time.monotonic()-before,2),flush=True)
+ for n in ('metadata.json','measurements.jsonl','source_manifest.json'):record(p/n)
+assert matching_contract(metas['baseline'])==matching_contract(metas['current'])
+orig={role:[] for role in rows}
+for role,tag in (('baseline','p0'),('current','final')):
+ for i in range(1,4):
+  p=exp/f'refactor_{tag}_nosa_bench_20261005_{i:02d}'/'measurements.jsonl';record(p);orig[role].append([json.loads(s) for s in p.read_text().splitlines() if s.strip()])
+expected=json.loads((exp/'refactor_p0_nosa_bench_20261005_01'/'metadata.json').read_text())
+assert matching_contract(expected)==matching_contract(metas['baseline'])
+def keyed(rs):return {(r['method'],r['request_id']):r for r in rs}
+fields=json.loads((acc/'nosa_final_accounting_review.json').read_text())['fields']
+def value(r,k):
+ for part in k.split('.'):r=r[part]
+ return r
+old=keyed(orig['baseline'][0]);accounting=[]
+for role,rs in rows.items():
+ assert set(keyed(rs))==set(old)
+ for key,r in keyed(rs).items():
+  for field in fields:
+   assert value(r,field)==value(old[key],field),(role,key,field)
+accounting={'status':'exact_match','rows_per_new_run':128,'original_reference':'refactor_p0_nosa_bench_20261005_01','fields':fields,'boundary':'PyTorch/device samples remain separate from exact cache charging.'}
+metrics=('latency_ms','admission_ms','prefix_ms','extend_ms','cleanup_ms')
+def group(rs,method,visit):return [r for r in rs if r['method']==method and ('revisit' if r['is_revisit'] else 'first')==visit]
+def stats(xs):return {'values':xs,'median':statistics.median(xs),'min':min(xs),'max':max(xs),'range':max(xs)-min(xs)}
+phase=[];matched=[]
+for method in ('hbm','dense_prefetch','sync_sparse','async_sparse'):
+ for visit in ('first','revisit'):
+  a=group(rows['baseline'],method,visit);b=group(rows['current'],method,visit)
+  assert len(a)==len(b)==16
+  for metric in metrics:
+   prior={role:stats([statistics.fmean(r[metric] for r in group(rs,method,visit)) for rs in orig[role]]) for role in orig}
+   pv=statistics.fmean(r[metric] for r in a);cv=statistics.fmean(r[metric] for r in b)
+   phase.append({'method':method,'visit':visit,'metric':metric,'pair_baseline':pv,'pair_current':cv,'pair_delta':cv-pv,'original':prior,'original_median_delta':prior['current']['median']-prior['baseline']['median'],'pair_baseline_minus_original_median':pv-prior['baseline']['median'],'pair_current_minus_original_median':cv-prior['current']['median']})
+  for a,b in zip(a,b):
+   assert a['request_id']==b['request_id']
+   matched.append({'method':method,'visit':visit,'request_id':a['request_id'],'phases':{m:{'baseline':a[m],'current':b[m],'delta':b[m]-a[m]} for m in metrics}})
+traces={role:sum(r['latency_ms'] for r in rs) for role,rs in rows.items()}
+original_traces={role:stats([sum(r['latency_ms'] for r in rs) for rs in runs]) for role,runs in orig.items()}
+trace={'pair':traces,'pair_delta':traces['current']-traces['baseline'],'pair_delta_pct':100*(traces['current']/traces['baseline']-1),'original':original_traces,'original_median_delta':original_traces['current']['median']-original_traces['baseline']['median']}
+monitor_path=acc/'nosa_pair_confirm_04_gpu_monitor.jsonl';samples=[json.loads(x) for x in monitor_path.read_text().splitlines() if x.strip()]
+def stamp(x):return datetime.fromisoformat(x).timestamp()
+windows=[(stamp(r['started_utc']),stamp(r['completed_utc']),r) for r in ledger]
+seen={r['run_id']:{'samples':0,'matching_process_rows':0,'empty_samples':0,'pid':r['pid'],'start':r['started_utc'],'finish':r['completed_utc']} for r in ledger}
+unexpected=[];between_runs=[]
+for sample in samples:
+ assert sample['returncode']==0
+ t=stamp(sample['time_utc']);matches=[r for s,e,r in windows if s<=t<=e]
+ if not matches:
+  assert not sample['stdout'].strip(),('unowned outside-window compute row',sample)
+  between_runs.append(sample['time_utc']);continue
+ assert len(matches)==1,(sample['time_utc'],matches)
+ r=matches[0];row=seen[r['run_id']];row['samples']+=1
+ if not sample['stdout'].strip():row['empty_samples']+=1
+ for text in sample['stdout'].splitlines():
+  if not text.strip():continue
+  pid,uuid,memory=[p.strip() for p in text.split(',')]
+  if int(pid)!=r['pid'] or uuid!='GPU-80ff95c3-176e-fd8a-728f-9c5577c4a779':unexpected.append({'time':sample['time_utc'],'run':r['run_id'],'row':text})
+  else:row['matching_process_rows']+=1
+assert not unexpected
+intervals=[stamp(b['time_utc'])-stamp(a['time_utc']) for a,b in zip(samples,samples[1:])]
+monitor={'status':'all_recorded_samples_pass_own_UTC_interval_and_PID_GPU_binding','samples':len(samples),'empty_between_run_samples':between_runs,'runs':seen,'unexpected':unexpected,'interval_seconds':stats(intervals),'boundary':'5-second polling target; no CPU/clocks/utilization telemetry. Short unsampled activity is not excluded.'}
+phase_sum=max(abs(sum(r[k] for k in metrics[1:])-r['latency_ms']) for rs in rows.values() for r in rs)
+for n in ('nosa_pair_confirm_04_ledger.json','nosa_pair_confirm_04_gpu_monitor.jsonl','nosa_pair_confirm_04_gpu_monitor_audit.json','nosa_final_phase_and_monitor_review.json'):record(acc/n)
+record(__file__)
+result={'schema':'nosa-pair04-independent-saved-evidence-review-v1','status':'completed','full_saved_evidence_audit':audits,'source_sha256':{k:m['source_sha256'] for k,m in metas.items()},'contracts_match_original_P0':True,'accounting':accounting,'phase_sum_max_error_ms':phase_sum,'trace':trace,'phases':phase,'matched_requests':matched,'cleanup_positive_matched_requests':sum(r['phases']['cleanup_ms']['delta']>0 for r in matched),'monitor':monitor,'inputs':inputs,'cuda_initialized':torch.cuda.is_initialized(),'boundaries':['Two additional accepted runs, one ordered P0/current pair; original three-run groups are preserved, not replaced.','Saved-evidence audits verify source, numerical receipt artifacts, contract and cache accounting; no new model output or failure injection was computed.','Phase timestamps cannot prove absence of every unexpected device synchronization. Existing source review found no added device sync; planned main profile must audit API/sync reasonableness.','Mock 16-session two-audit overhead was +38.522 us and cleanup +40.205 us. It excludes production storage/allocator/mutation lease/CUDA work; do not assign every production cleanup delta causally to wrappers.']}
+assert not result['cuda_initialized']
+(acc/'nosa_pair04_independent_review.json').write_text(json.dumps(result,indent=2)+'\n')
+print(json.dumps({'trace':trace,'cleanup_positive_requests':result['cleanup_positive_matched_requests'],'monitor':{k:v for k,v in monitor.items() if k!='interval_seconds'},'groups':[{'group':p['method']+'/'+p['visit'],'metric':p['metric'],'p0':p['pair_baseline'],'current':p['pair_current'],'delta':p['pair_delta'],'original_delta':p['original_median_delta']} for p in phase if p['metric'] in ('latency_ms','cleanup_ms','extend_ms')],'saved':str(acc/'nosa_pair04_independent_review.json')},indent=2),flush=True)

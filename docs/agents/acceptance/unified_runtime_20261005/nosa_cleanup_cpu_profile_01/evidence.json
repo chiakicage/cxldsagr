@@ -1,0 +1,239 @@
+{
+  "schema": "unified-runtime-mock-cleanup-cpu-diagnostic-v1",
+  "created_utc": "2026-10-04T21:46:12.785788+00:00",
+  "status": "completed_two_subprocesses_exit_zero",
+  "original_directory": "/tmp/nosa_cleanup_cpu_profile_20261005_01",
+  "unit": "microseconds",
+  "scope": "Existing SharedBackend fixture with host quota widened to 1 or 16 sessions and a local no-compute candidate returning one preallocated CPU tensor. Actual runner/audit source is unmodified. No NOSA model, real cache storage enumeration, allocator/lease audit, or CUDA synchronization is exercised; these values cannot explain full-serving cleanup causally.",
+  "runs": {
+    "baseline": {
+      "checkout": "/tmp/cxldsagr_refactor_p0_20261005/checkout",
+      "exit_code": 0
+    },
+    "current": {
+      "checkout": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr",
+      "exit_code": 0
+    }
+  },
+  "commands": {
+    "baseline": "env CUDA_VISIBLE_DEVICES='' OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 PYTHONDONTWRITEBYTECODE=1 numactl --physcpubind=0-7 --membind=0 .venv/bin/python -B /tmp/nosa_cleanup_cpu_profile_20261005_01/profile_cleanup.py /tmp/cxldsagr_refactor_p0_20261005/checkout baseline > /tmp/nosa_cleanup_cpu_profile_20261005_01/baseline.stdout.log 2> /tmp/nosa_cleanup_cpu_profile_20261005_01/baseline.stderr.log",
+    "current": "env CUDA_VISIBLE_DEVICES='' OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 PYTHONDONTWRITEBYTECODE=1 numactl --physcpubind=0-7 --membind=0 .venv/bin/python -B /tmp/nosa_cleanup_cpu_profile_20261005_01/profile_cleanup.py /mnt/ssd-wlcb/chenkaiqi/cxldsagr current > /tmp/nosa_cleanup_cpu_profile_20261005_01/current.stdout.log 2> /tmp/nosa_cleanup_cpu_profile_20261005_01/current.stderr.log"
+  },
+  "command_cwd": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr",
+  "method": "Sequential P0 then current processes; 20 warmups, 7 batches of 500 calls; separate 300-call cProfile passes. No benchmark interleaving or CPU frequency telemetry. GC remains enabled. All 7 batches, including one high current 16-session cleanup batch, are retained.",
+  "source_note": "Selected imported source SHA256 is embedded in each role JSON. Additional source files observed by cProfile are hashed below after both processes completed. No production or repository test/source edits.",
+  "profile_observed_source_sha256": {
+    "baseline": {
+      "cache/prefix_pool.py": "92080f5fd8eac4081be6bd4128501bf6ba07b74945c550b338016f304664e7e0",
+      "serving/persistent.py": "c4bfb300e4ef98d0d7bb94825d26770c4d2b600eb430549b726a1941b78ae572",
+      "serving/tests/test_persistent.py": "12fc6d53dbf9eb318e36711f11ffd109e65a509b0de54977d81d30375bd8d4a3"
+    },
+    "current": {
+      ".venv/lib/python3.12/site-packages/torch/_jit_internal.py": "62fc56c82e0abf002f4771f308b5a0a1c8c5a7f3d897204b1ca08135c1681c24",
+      ".venv/lib/python3.12/site-packages/torch/_tensor.py": "236ce2fee894d6ffd80f925d89a4815f24e928971f20ccbfae8bc5b1d85ec973",
+      ".venv/lib/python3.12/site-packages/torch/autograd/grad_mode.py": "462fb7096ef9bac949d544aa08ae5c50571d46279a85d4165696941cd80de244",
+      "cache/capacity.py": "ba39f57a49124b23c60552240d87fbb9804b5320275b09596eadf2f0ff8c3a96",
+      "cache/prefix_pool.py": "1a363205c74cf382c8c4294f6ddf3358c0da31b292dc0edc16f7c80b4d77a695",
+      "executor/adapters.py": "7649ee19d5ca3490480a329b9f02286dcc8e6230da0395d097f3e2f9065e4e20",
+      "executor/contracts.py": "8ca7b8af35fcd935f1ce96911bb30d04757e02f0d0b4635508eff12b38705139",
+      "executor/runtime.py": "796d266c4faee012e8277f8c94970e37e688615f5104cb214ee03d154b833b37",
+      "serving/persistent.py": "2aad3a4260244afec3952fa6897f5261926ae3e709f3e662b099bd4d4ad15d2a",
+      "serving/tests/test_persistent.py": "f41892e171d684cf33b32ecc0e09d8dd2c5e1e04939e36d92f59484f8a7bad99",
+      "serving/token_validation.py": "d2f4f9d15dbc0a435f6485efde175d144de82b5b46069db406ca7476055640f2"
+    }
+  },
+  "metrics": {
+    "1": {
+      "pool_audit_us": {
+        "baseline": {
+          "median": 3.1414400000000002,
+          "min": 3.111008,
+          "max": 3.17484,
+          "range": 0.06383200000000011
+        },
+        "current": {
+          "median": 5.954816,
+          "min": 5.92184,
+          "max": 6.04462,
+          "range": 0.12277999999999967
+        },
+        "median_delta": 2.813376
+      },
+      "mock_candidate_cleanup_us": {
+        "baseline": {
+          "median": 7.471354445442557,
+          "min": 7.435341365635395,
+          "max": 7.541161961853504,
+          "range": 0.10582059621810913
+        },
+        "current": {
+          "median": 14.486597152426839,
+          "min": 14.386578230187297,
+          "max": 14.609792502596974,
+          "range": 0.2232142724096775
+        },
+        "median_delta": 7.0152427069842815
+      },
+      "mock_candidate_extend_us": {
+        "baseline": {
+          "median": 3.5734407138079405,
+          "min": 3.500494873151183,
+          "max": 3.624119097366929,
+          "range": 0.12362422421574593
+        },
+        "current": {
+          "median": 12.473033042624593,
+          "min": 12.44525401853025,
+          "max": 12.664040084928274,
+          "range": 0.21878606639802456
+        },
+        "median_delta": 8.899592328816652
+      },
+      "mock_request_wall_us": {
+        "baseline": {
+          "median": 17.334685660898685,
+          "min": 17.202071379870176,
+          "max": 17.511513084173203,
+          "range": 0.3094417043030262
+        },
+        "current": {
+          "median": 40.513468673452735,
+          "min": 40.32619623467326,
+          "max": 40.96888587810099,
+          "range": 0.6426896434277296
+        },
+        "median_delta": 23.17878301255405
+      }
+    },
+    "16": {
+      "pool_audit_us": {
+        "baseline": {
+          "median": 27.685012,
+          "min": 27.50399,
+          "max": 28.002148000000002,
+          "range": 0.4981580000000001
+        },
+        "current": {
+          "median": 46.945924,
+          "min": 46.605684000000004,
+          "max": 47.272211999999996,
+          "range": 0.6665279999999925
+        },
+        "median_delta": 19.260911999999998
+      },
+      "mock_candidate_cleanup_us": {
+        "baseline": {
+          "median": 56.04379600845277,
+          "min": 55.84210460074246,
+          "max": 56.45892024040222,
+          "range": 0.6168156396597624
+        },
+        "current": {
+          "median": 96.24856896698475,
+          "min": 95.53015371784568,
+          "max": 171.3412229437381,
+          "range": 75.81106922589242
+        },
+        "median_delta": 40.204772958531976
+      },
+      "mock_candidate_extend_us": {
+        "baseline": {
+          "median": 3.690664656460285,
+          "min": 3.605205100029707,
+          "max": 3.79117950797081,
+          "range": 0.18597440794110298
+        },
+        "current": {
+          "median": 13.444328214973211,
+          "min": 13.265529880300164,
+          "max": 13.563723536208272,
+          "range": 0.29819365590810776
+        },
+        "median_delta": 9.753663558512926
+      },
+      "mock_request_wall_us": {
+        "baseline": {
+          "median": 66.36505667120218,
+          "min": 65.95105514861643,
+          "max": 66.65575969964266,
+          "range": 0.7047045510262251
+        },
+        "current": {
+          "median": 123.84894699789584,
+          "min": 122.90730467066169,
+          "max": 199.2561612278223,
+          "range": 76.34885655716062
+        },
+        "median_delta": 57.483890326693654
+      }
+    }
+  },
+  "profile_limit": "cProfile inflates absolute timings; call counts identify executed paths. Do not compare profiled cumulative microseconds with unprofiled serving phase timings or sum overlapping cumulative rows.",
+  "claims_limit": "This identifies added generic usage/runtime contract work and quantifies this mock fixture only. It does not isolate real NOSA allocator/storage checks, mutation lease, or CUDA sync; it does not establish that this path explains every production cleanup delta.",
+  "files": {
+    "baseline.json": {
+      "bytes": 50359,
+      "sha256": "18017e3adcdd8e5f3d38ef326dd57d7a0aa3181aa58eb7f9f70920706b46b1e5"
+    },
+    "baseline.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "baseline.stdout.log": {
+      "bytes": 373,
+      "sha256": "68e733935ac89762cf23d376c3c7ca60f806cd84274000e7e6758d7a9e9ba092"
+    },
+    "baseline_16_audit.pstats": {
+      "bytes": 2375,
+      "sha256": "7406425ef806485b0031c6d5676bb6f5e2076e0c49b0927512bc37fd6902177e"
+    },
+    "baseline_16_execute.pstats": {
+      "bytes": 5853,
+      "sha256": "06ccaa30af249b8b0d993a20fb304a6629c97f7c038d40a9d41fb1affffbe481"
+    },
+    "baseline_1_audit.pstats": {
+      "bytes": 2375,
+      "sha256": "35e4b354f65e516a9d756b928cba1561cff48f75d67484f10fd12e5833ca5431"
+    },
+    "baseline_1_execute.pstats": {
+      "bytes": 5853,
+      "sha256": "067de0d7c06857857ff3abbc42ca1621aa9440645612950bafe741f2a1e1a2c9"
+    },
+    "current.json": {
+      "bytes": 77634,
+      "sha256": "b51ccc2fb3169dd16778abcf203c265f96f4456510a7b9b55fcf463cf078c5e6"
+    },
+    "current.stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "current.stdout.log": {
+      "bytes": 365,
+      "sha256": "ff60719cca2f7d8583965b68ec7221651e23159dd9fbf1890c6d55bc4faf5907"
+    },
+    "current_16_audit.pstats": {
+      "bytes": 3751,
+      "sha256": "53c3c0ef2dd0359f09035eac9bcf02ab1831b9852f17582486d995e6601bd201"
+    },
+    "current_16_execute.pstats": {
+      "bytes": 10700,
+      "sha256": "e2acb24cb46f9c3f7658369e30b13936dc101c01c44b52d40479a69806b6f80d"
+    },
+    "current_1_audit.pstats": {
+      "bytes": 3751,
+      "sha256": "9a1ff26973964f298baf60133dee1a030629f455bd764af7f0cb45a4e82dd9f5"
+    },
+    "current_1_execute.pstats": {
+      "bytes": 10700,
+      "sha256": "a5d90aa03c71c644ad6e9370ce03a7762f3997bb7ec57c4472d72f9a484fe6d9"
+    },
+    "findings.md": {
+      "bytes": 4164,
+      "sha256": "4392c6fe863ed3472d80302004365a84faa7980664b11073dfaceff76224d330"
+    },
+    "profile_cleanup.py.txt": {
+      "bytes": 4574,
+      "sha256": "9c2c00bf178c768ea55b62e245ff9687cb28ee91b97800ea5bab92d126445c79"
+    }
+  }
+}

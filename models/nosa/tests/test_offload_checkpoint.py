@@ -29,8 +29,8 @@ TOTAL_TOKENS = PREFIX_TOKENS + EXTEND_TOKENS
 ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_REQUEST = (
     ROOT
-    / "experiments/nosa_baseline_performance/output/data"
-    / "sparse_flags_native_20261004_01/request.json"
+    / "experiments/nosa_mfu/output/data"
+    / "refactor_mfu_sparse_native_bench_20261005_01/request.json"
 )
 
 

@@ -6,7 +6,7 @@ from types import SimpleNamespace
 import pytest
 import torch
 
-from models.deepseek_v32.official_serving import OfficialAttentionRunner
+from models.deepseek_v32.execution.official import OfficialAttentionRunner, OfficialPipeline
 
 
 @pytest.fixture
@@ -77,7 +77,8 @@ def official_runner(monkeypatch):
         indices[:, :2] = torch.tensor([[1, 0], [3, 2]], dtype=torch.int32)
         events.append("official_topk")
 
-    def consume(q, indices, scope):
+    def consume(q, selection, scope):
+        indices = selection.token_ids
         assert q is projection.q
         assert indices[:, :2].tolist() == [[1, 0], [3, 2]]
         assert bool((indices[:, 2:] == -1).all())
@@ -170,3 +171,66 @@ def test_official_callback_failure_exits_cache_operation(official_runner, callba
         runner.forward(hidden, normalized=True, **{callback: fail})
     assert events[0] == "begin" and events[-1] == "end"
     assert runner._diagnostic_state is None
+
+
+def test_official_runner_factory_allocates_private_indexer_once_without_rebinding():
+    attention = SimpleNamespace(
+        cfg=SimpleNamespace(kv_lora_rank=4, qk_rope_head_dim=4, index_head_dim=8),
+        device=torch.device("cpu"),
+    )
+    pipeline = OfficialPipeline()
+    cache = object()
+    first = pipeline.create_runner(
+        attention,
+        16,
+        resources=None,
+        scheme="hbm",
+        slots=16,
+        chunk_size=4,
+        cache=cache,
+        dense_backend=None,
+    )
+    second = pipeline.create_runner(
+        attention,
+        16,
+        resources=None,
+        scheme="hbm",
+        slots=16,
+        chunk_size=4,
+        cache=cache,
+        dense_backend=None,
+    )
+    assert first.cache is cache and second.cache is cache
+    assert first.index_keys.shape == second.index_keys.shape == (16, 8)
+    assert first.index_keys.data_ptr() != second.index_keys.data_ptr()
+    assert first.index_scales.data_ptr() != second.index_scales.data_ptr()
+    assert first.offset.data_ptr() != second.offset.data_ptr()
+
+
+def test_official_metrics_preserve_uninstrumented_selection_boundary():
+    metrics = {
+        "host_to_device_bytes": 100,
+        "device_to_host_bytes": 0,
+        "prefetched_records": 1,
+        "recalled_records": 2,
+        "evicted_records": 3,
+        "selection_records": None,
+        "resident_selection_records": None,
+    }
+    session = SimpleNamespace(
+        scheme="echo",
+        length=128,
+        last_candidate_transient=True,
+        runners=[SimpleNamespace(cache=SimpleNamespace(metrics=lambda: metrics))],
+    )
+    actual = OfficialPipeline().session_metrics(session)
+    assert actual["candidate_device_to_host_bytes"] == 0
+    assert actual["selection_records"] is actual["resident_selection_records"] is None
+    assert actual["hit_ratio_stage"] == "not_instrumented_in_official_implementation"
+
+
+def test_official_factory_rejects_unsupported_scheme_before_model_loading():
+    from models.deepseek_v32.execution.official import build_official_backend
+
+    with pytest.raises(ValueError, match="only hbm and echo"):
+        build_official_backend("/nonexistent", scheme="serial_sparse", num_layers=10)

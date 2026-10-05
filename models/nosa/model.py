@@ -11,8 +11,8 @@ import torch
 from torch import nn
 
 from cache.manager import CacheManager
-from layers.attention import DenseMainAttention
-from models.nosa.cache import NosaKVCache
+from models.nosa.attention import DenseMainAttention
+from models.nosa.cache.resident import NosaKVCache
 from models.nosa.config import NosaConfig
 from models.nosa.layers import (
     NosaAttention,
@@ -119,7 +119,7 @@ class NosaForCausalLM(nn.Module):
         # Read placement now: from_pretrained constructs on meta before loading.
         weight = self.model.embed_tokens.weight
         if self.cache_backend == "offload":
-            from models.nosa.offload_cache import NosaOffloadCache
+            from models.nosa.cache.offload import NosaOffloadCache
 
             return NosaOffloadCache(
                 self.config,
@@ -151,11 +151,14 @@ class NosaForCausalLM(nn.Module):
         logits_to_keep=0,
         return_hidden=False,
         compute_graphs=None,
+        main_attention=None,
     ):
         """Return LM logits, or normalized backbone features for GR forward work.
 
         ``return_hidden=True`` skips the vocabulary projection and returns every
         input token's final hidden state, while updating the same KV cache.
+        ``main_attention`` selects the execution pipeline for this call without
+        changing the model's ordinary owned-cache attention configuration.
         """
         if input_ids.ndim != 1 or input_ids.numel() == 0 or input_ids.dtype != torch.long:
             raise ValueError(
@@ -170,6 +173,7 @@ class NosaForCausalLM(nn.Module):
             raise ValueError("return_hidden returns all input features; do not set logits_to_keep")
         if compute_graphs is not None and compute_graphs.model is not self:
             raise ValueError("Compute graphs must belong to this model")
+        attention = self.main_attention if main_attention is None else main_attention
         start = 0
         if cache is not None:
             if (
@@ -209,14 +213,14 @@ class NosaForCausalLM(nn.Module):
             for idx, layer in enumerate(self.model.layers):
                 if compute_graphs is not None:
                     x, residual = compute_graphs.forward_layer(
-                        idx, x, residual, positions, self.main_attention, cache, self.indexer
+                        idx, x, residual, positions, attention, cache, self.indexer
                     )
                 else:
                     x, residual = layer(
                         x,
                         positions,
                         cos_sin_cache,
-                        self.main_attention,
+                        attention,
                         cache,
                         idx,
                         indexer=self.indexer,
@@ -235,9 +239,14 @@ class NosaForCausalLM(nn.Module):
                 if compute_graphs is not None:
                     compute_graphs.validation.check(cache)
                 cache.commit_step()
-        except BaseException:
+        except BaseException as error:
             if cache is not None:
-                cache.abort_step()
+                try:
+                    cache.abort_step()
+                except BaseException as rollback_error:  # noqa: BLE001 -- retain execution and rollback.
+                    raise BaseExceptionGroup(
+                        "NOSA execution and cache rollback both failed", [error, rollback_error]
+                    ) from None
             raise
         finally:
             if started_validation:

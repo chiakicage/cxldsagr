@@ -22,8 +22,8 @@ from experiments.nosa_motivation.src.attention_reference_audit import (
 )
 from experiments.nosa_motivation.src.profile_attention_reference import combined_comparison
 from experiments.nosa_motivation.src.provenance import digest
-from layers.attention import BlockSelection
-from models.nosa.fixed_cache import NosaFixedAttention
+from models.attention_contracts import BlockSelection
+from models.nosa.attention import NosaFixedAttention
 
 
 @pytest.mark.parametrize("helper_version", ["original", "changed", None])

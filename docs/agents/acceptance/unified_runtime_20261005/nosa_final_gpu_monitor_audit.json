@@ -1,0 +1,11 @@
+{
+  "observations": 186,
+  "foreign_processes": [],
+  "command": [
+    "nvidia-smi",
+    "--query-compute-apps=pid,gpu_uuid,used_memory",
+    "--format=csv,noheader"
+  ],
+  "wait_seconds": 5,
+  "boundary": "Periodic process samples with allowed PIDs across the three runs; independent review must also join UTC activity intervals. Unsampled short-lived activity is not excluded."
+}

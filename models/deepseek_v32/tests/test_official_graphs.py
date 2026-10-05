@@ -85,7 +85,7 @@ class _OfficialCalls:
     """Observe real official entry points without replacing their work."""
 
     def __init__(self, monkeypatch):
-        from models.deepseek_v32.official_cache import OfficialSparseTokenCache
+        from models.deepseek_v32.cache.official import OfficialSparseTokenCache
         from operators.deepseek_v32.indexer import official
 
         self.active = None
@@ -160,8 +160,8 @@ def test_official_callbacks_keep_consumer_dispatch_streams_and_owned_outputs(mon
         collect_backend_provenance,
         collect_flashinfer_runtime_artifacts,
     )
-    from models.deepseek_v32.echo_attention import EchoAttentionRunner
-    from models.deepseek_v32.official_serving import OfficialDeepSeekServingBackend
+    from models.deepseek_v32.attention import EchoAttentionRunner
+    from models.deepseek_v32.execution.official import build_official_backend
     from models.deepseek_v32.tests.test_official_checkpoint import _source_identity
 
     assert torch.cuda.is_available(), "explicit official callback gate requires CUDA"
@@ -180,7 +180,7 @@ def test_official_callbacks_keep_consumer_dispatch_streams_and_owned_outputs(mon
         official_calls = _OfficialCalls(monkeypatch)
         for enabled in (False, True):
             models.append(
-                OfficialDeepSeekServingBackend(
+                build_official_backend(
                     checkpoint,
                     scheme="hbm",
                     device="cuda:0",
@@ -196,7 +196,7 @@ def test_official_callbacks_keep_consumer_dispatch_streams_and_owned_outputs(mon
         assert all(model.parameter_counts["total_parameters"] == 7827793408 for model in models)
         for left, right in zip(models[0].attentions, models[1].attentions, strict=True):
             assert left.wq_a.weight.data_ptr() != right.wq_a.weight.data_ptr()
-        native_before = models[0].official_provenance()["source_files"]
+        native_before = models[0].pipeline.provenance()["source_files"]
         default = torch.cuda.current_stream()
         alternate = torch.cuda.Stream()
         alternate.wait_stream(default)
@@ -361,7 +361,7 @@ def test_official_callbacks_keep_consumer_dispatch_streams_and_owned_outputs(mon
         assert source_after == source_before
         assert collect_backend_provenance() == library_before
         assert precision_settings(torch) == precision
-        assert models[0].official_provenance()["source_files"] == native_before
+        assert models[0].pipeline.provenance()["source_files"] == native_before
         print(
             json.dumps(
                 {

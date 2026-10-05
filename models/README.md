@@ -1,10 +1,20 @@
 # 模型推理
 
 模型结构、权重、稀疏选择语义、KV 布局适配与推理代码，只保留模型推理相关代码及其测试。
-NOSA 复用 [共享层](../layers/README.md)、[执行器](../executor/README.md) 和
+各模型保留自己的普通层与 attention 适配，复用 [执行器](../executor/README.md) 和
 [缓存管理](../cache/README.md)，通过 [本地 serving](../serving/README.md) 执行 GR 请求。
 实验脚本、运行记录与实验文档见 [`experiments/`](../experiments/README.md)，
 本地权重与 tokenizer 见 `weights/`。
+
+[attention_contracts.py](attention_contracts.py) 定义轻量的 `Indexer`、`MainAttention`、
+`BlockSelection`、`TokenSelection` 和 `AttentionContext`，不导入具体模型。
+NOSA 使用逐 query/head 的逻辑块选择与 validity mask；DeepSeek 使用逻辑 token IDs，
+padding 语义由调用模型定义。这些结构不展开、复制或搬运 KV。
+main attention 接收 Q、selection、cache access
+及 layer/query 位置上下文，cache access 可提供 resident view 或 host 来源与
+device append，不要求预先 gather 全部选中 KV。
+NOSA 的 RMSNorm / SwiGLU、`DenseMainAttention` 与 `ResidentLayerView` 由
+[NOSA 模型](nosa/README.md)实现；模型布局、位置编码和稀疏策略仍由各模型管理。
 
 | 模型 | 当前内容 |
 | --- | --- |

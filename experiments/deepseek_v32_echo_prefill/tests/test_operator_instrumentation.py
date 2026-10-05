@@ -103,12 +103,15 @@ def test_causal_sparse_metadata_matches_selection_and_conserves_split_work(monke
 
 
 def test_shape_only_wrappers_keep_stage_names_precision_and_restore_targets(nvtx, monkeypatch):
-    from models.deepseek_v32 import echo_attention, echo_block, echo_infer, echo_model
+    from models.deepseek_v32 import attention as echo_attention
+    from models.deepseek_v32 import checkpoint, projections
+    from models.deepseek_v32 import layers as echo_block
+    from models.deepseek_v32 import model as echo_infer
     from operators.deepseek_v32.attention.offload import mla as offload_mla
     from operators.deepseek_v32.indexer import echo
 
     def checkpoint_linear():
-        linear = object.__new__(echo_model.CheckpointLinear)
+        linear = object.__new__(checkpoint.CheckpointLinear)
         linear.weight = torch.ones((7, 5), dtype=torch.bfloat16)
         linear.scales = None
         return linear
@@ -134,7 +137,7 @@ def test_shape_only_wrappers_keep_stage_names_precision_and_restore_targets(nvtx
         head_weight=torch.ones((13, 5), dtype=torch.bfloat16),
     )
     projected = SimpleNamespace(q=torch.empty((3, 128, 576), dtype=torch.bfloat16))
-    monkeypatch.setattr(echo_model.CheckpointAttention, "project", lambda *a, **k: projected)
+    monkeypatch.setattr(projections.CheckpointAttention, "project", lambda *a, **k: projected)
     monkeypatch.setattr(echo_attention, "sparse_mla", lambda q, *a: q)
     monkeypatch.setattr(echo, "logits", lambda q, *a, **k: q)
     monkeypatch.setattr(torch.backends.cuda.matmul, "allow_tf32", False)
@@ -147,7 +150,7 @@ def test_shape_only_wrappers_keep_stage_names_precision_and_restore_targets(nvtx
         torch.bmm(torch.ones((2, 3, 4), dtype=torch.bfloat16), attn.wk_b)
         F.linear(x.float(), attn.index_head_weight)
         F.linear(x[-1:], model.head_weight)
-        echo_model.CheckpointAttention.project(attn, x, 128)
+        projections.CheckpointAttention.project(attn, x, 128)
         q = torch.empty((3, 64, 128), dtype=torch.float8_e4m3fn)
         k = torch.empty((131, 128), dtype=torch.float8_e4m3fn)
         echo.logits(q, k, None, None, 128)
@@ -156,13 +159,13 @@ def test_shape_only_wrappers_keep_stage_names_precision_and_restore_targets(nvtx
         echo_attention.sparse_mla(projected.q, None, ids, 1.0)
         offload_mla.sparse_mla_from_pool(projected.q[1:], None, ids[1:], 1.0)
         norm_weight = torch.ones(5)
-        echo_model.rms_norm(x, norm_weight, 1e-6)
+        projections.rms_norm(x, norm_weight, 1e-6)
         echo_infer.rms_norm(x, norm_weight, 1e-6)
         echo_block.residual_rms_norm(x, x, norm_weight, 1e-6)
         echo_block.silu_mul(x, x)
         angles = torch.zeros(3, 2)
-        rotary_cache = echo_model.prepare_rotary_cache(angles)
-        echo_model.apply_rope_pair(
+        rotary_cache = projections.prepare_rotary_cache(angles)
+        projections.apply_rope_pair(
             x[:, None, :4], x[:, None, :4], angles, interleaved=True, cache=rotary_cache
         )
     assert torch.bmm is original_bmm and F.linear is original_linear
@@ -188,13 +191,14 @@ def test_shape_only_wrappers_keep_stage_names_precision_and_restore_targets(nvtx
 
 
 def test_old_control_helpers_remain_instrumentable(nvtx, monkeypatch):
-    from models.deepseek_v32 import echo_block, echo_model
+    from models.deepseek_v32 import layers as echo_block
+    from models.deepseek_v32 import projections
 
     for name in ("apply_rope_pair", "prepare_rotary_cache"):
-        monkeypatch.delattr(echo_model, name)
+        monkeypatch.delattr(projections, name)
     for name in ("residual_rms_norm", "silu_mul"):
         monkeypatch.delattr(echo_block, name)
-    original = echo_model.rms_norm
+    original = projections.rms_norm
     monkeypatch.setattr(echo_block, "rms_norm", original, raising=False)
     model = SimpleNamespace(blocks=[], head_weight=torch.ones(2, 3))
     scope = OperatorScopes("resident", "extend_annotated")
@@ -206,8 +210,8 @@ def test_old_control_helpers_remain_instrumentable(nvtx, monkeypatch):
 
 @torch.inference_mode()
 def test_packed_mlp_keeps_three_matrix_scopes_and_quantization_attribution(nvtx, monkeypatch):
-    from models.deepseek_v32.echo_block import CheckpointMLP
-    from models.deepseek_v32.echo_model import CheckpointLinear
+    from models.deepseek_v32.checkpoint import CheckpointLinear
+    from models.deepseek_v32.layers import CheckpointMLP
     from operators.deepseek_v32.linear import fp8
 
     active, _ = nvtx

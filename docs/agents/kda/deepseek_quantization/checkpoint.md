@@ -131,4 +131,4 @@ runtime identity 亦已核验。各 run 四 capture 的原始 SQLite、kernel in
 集成验证另有 40 项 model/quantization 检查通过；最终比较、backend provenance
 与 profile_layers 检查 16 passed，comparison audit 24 passed。完整验证矩阵、
 互斥归因边界及来源索引见
-[系统检查点](../../system/deepseek_nonmatrix_optimization.md)和实验报告。
+系统检查点（Git `934485b:docs/agents/system/deepseek_nonmatrix_optimization.md`）和实验报告。

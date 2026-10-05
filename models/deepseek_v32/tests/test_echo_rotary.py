@@ -1,8 +1,8 @@
 import pytest
 import torch
 
-from models.deepseek_v32.echo_model import (
-    Config,
+from models.deepseek_v32.config import Config
+from models.deepseek_v32.rotary import (
     apply_rope,
     apply_rope_pair,
     prepare_rotary_cache,

@@ -15,7 +15,7 @@ from pathlib import Path
 
 import torch
 
-from layers.attention import BlockSelection
+from models.attention_contracts import BlockSelection
 from operators.nosa.attention.workspace import NosaAttentionWorkspace
 
 
@@ -252,6 +252,9 @@ class NosaFetchWorkspace:
             self.profile_work_intervals = False
             self._trace_storage = torch.empty((0, 4), dtype=torch.int64, device=self.device)
             self.last_work_intervals = self._trace_storage
+            self.failed = False
+            self.failure = self._completion_error = None
+            self._failed_aliases = ()
             self._last_done = None if allocation_only else torch.cuda.Event()
             if self._last_done is not None:
                 self._last_done.record(torch.cuda.current_stream(self.device))
@@ -271,7 +274,7 @@ class NosaFetchWorkspace:
             self.bounded = bounded
 
     @staticmethod
-    def allocation_sizes(
+    def allocation_layout(
         max_seq_len,
         kv_heads,
         head_dim,
@@ -281,7 +284,7 @@ class NosaFetchWorkspace:
         max_queries=None,
         trace_capacity=0,
     ):
-        """Pure independent payload sizes in ``tensors()`` order.
+        """Named independent storage declarations in ``tensors()`` order.
 
         Scratch aliases are counted once. Empty mask/trace buffers contribute
         explicit zero entries; the caller supplies any allocator rounding.
@@ -295,8 +298,7 @@ class NosaFetchWorkspace:
             _positive_integer(name, value)
         if kv_heads > 65535:
             raise ValueError("kv_heads exceeds the CUDA grid limit")
-        sizes = {torch.float16: 2, torch.bfloat16: 2, torch.float32: 4}
-        if dtype not in sizes:
+        if dtype not in (torch.float16, torch.bfloat16, torch.float32):
             raise ValueError("NOSA workspace requires a floating point dtype")
         if (
             isinstance(trace_capacity, bool)
@@ -306,28 +308,60 @@ class NosaFetchWorkspace:
             raise ValueError("trace_capacity must be a nonnegative row count")
         pages = ((max_seq_len + 63) // 64) * kv_heads
         _positive_integer("logical page capacity", pages)
-        kv_bytes = max_seq_len * kv_heads * head_dim * sizes[dtype]
-        scratch_sizes = ()
+        scratch = {}
         if max_queries is not None:
             _positive_integer("max_queries", max_queries)
             if max_queries > max_seq_len:
                 raise ValueError("max_queries exceeds sequence capacity")
             # The fetch workspace exposes its own empty mask. The nested
             # attention mask has no storage and is not a second allocation.
-            scratch_sizes = NosaAttentionWorkspace.allocation_sizes(
+            scratch = NosaAttentionWorkspace.allocation_layout(
                 max_queries, kv_heads, head_dim, dtype=dtype
-            )[:-1]
-        return (
-            kv_bytes,
-            kv_bytes,
-            pages * 4,
-            pages * 4,
-            (pages + 2) * 4,
-            ((max_seq_len + query_tile_size - 1) // query_tile_size) * 8,
-            8,
-            trace_capacity * 4 * 8,
-            *scratch_sizes,
-            0,
+            )
+            scratch = {name: spec for name, spec in scratch.items() if name != "empty_mask"}
+        kv_shape = (max_seq_len, kv_heads, head_dim)
+        page_shape = ((max_seq_len + 63) // 64, kv_heads)
+        return {
+            "keys": (dtype, kv_shape),
+            "values": (dtype, kv_shape),
+            "first_use": (torch.int32, page_shape),
+            "ready_blocks": (torch.int32, page_shape),
+            "fetch_queue": (torch.int32, (pages + 2,)),
+            "tile_bytes": (
+                torch.int64,
+                ((max_seq_len + query_tile_size - 1) // query_tile_size,),
+            ),
+            "last_transfer_bytes": (torch.int64, ()),
+            "trace_storage": (torch.int64, (trace_capacity, 4)),
+            **scratch,
+            "empty_mask": (torch.bool, (0,)),
+        }
+
+    @staticmethod
+    def allocation_sizes(
+        max_seq_len,
+        kv_heads,
+        head_dim,
+        *,
+        dtype,
+        query_tile_size=128,
+        max_queries=None,
+        trace_capacity=0,
+    ):
+        """Pure payload sizes; caller supplies allocator rounding."""
+        from math import prod
+
+        return tuple(
+            prod(shape) * storage_dtype.itemsize
+            for storage_dtype, shape in NosaFetchWorkspace.allocation_layout(
+                max_seq_len,
+                kv_heads,
+                head_dim,
+                dtype=dtype,
+                query_tile_size=query_tile_size,
+                max_queries=max_queries,
+                trace_capacity=trace_capacity,
+            ).values()
         )
 
     @staticmethod
@@ -358,6 +392,8 @@ class NosaFetchWorkspace:
 
     def reserve(self, queries, *, trace_rows=0):
         """Reserve explicit standalone capacity; bounded instances never grow."""
+        if self.failed:
+            raise RuntimeError("NOSA fetch workspace is poisoned") from self.failure
         _positive_integer("queries", queries)
         if queries > self.max_seq_len:
             raise ValueError("queries exceeds sequence capacity")
@@ -511,6 +547,8 @@ class NosaFetchWorkspace:
         them after completion. Profiling may enable ``profile_work_intervals``
         to record device-globaltimer fetch and softmax intervals outside waits.
         """
+        if self.failed:
+            raise RuntimeError("NOSA fetch workspace is poisoned") from self.failure
         self._validate(
             q, selection, host_keys, host_values, suffix_keys, suffix_values, cis_bias, query_start
         )
@@ -553,6 +591,7 @@ class NosaFetchWorkspace:
             fused = fused_module()
             current = torch.cuda.current_stream(self.device)
             current.wait_event(self._last_done)
+            submission_error = output = None
             try:
                 queries = q.shape[0]
                 tiles = (queries + self.query_tile_size - 1) // self.query_tile_size
@@ -666,16 +705,55 @@ class NosaFetchWorkspace:
                             cache_tags, self._first_use, cache_owner, query_start, end
                         )
                 return output
-            except BaseException:
-                # Preparation may already have overwritten another owner's page
-                # zero or suffix. No stale tag may survive a failed submission.
+            except BaseException as error:
+                submission_error = error
+                # Preparation can overwrite another owner's slots before failing.
                 if cache_tags is not None:
-                    cache_tags.zero_()
+                    try:
+                        cache_tags.zero_()
+                    except BaseException as invalidation_error:  # noqa: BLE001 -- retain both.
+                        self.failed, self.failure = True, invalidation_error
+                        self._failed_aliases = (
+                            q,
+                            selection,
+                            host_keys,
+                            host_values,
+                            suffix_keys,
+                            suffix_values,
+                            cis_bias,
+                            cache_tags,
+                            output,
+                        )
+                        submission_error = BaseExceptionGroup(
+                            "NOSA fetch submission and cache invalidation both failed",
+                            [error, invalidation_error],
+                        )
+                        raise submission_error from None
                 raise
             finally:
-                # All producer, consumer and repair work belongs to the caller
-                # stream, including already-enqueued work if a later launch fails.
-                self._last_done.record(current)
+                # Completion is required even when a later submission already failed.
+                try:
+                    self._last_done.record(current)
+                except BaseException as record_error:
+                    self.failed, self.failure = True, record_error
+                    self._completion_error = record_error
+                    self._failed_aliases = (
+                        q,
+                        selection,
+                        host_keys,
+                        host_values,
+                        suffix_keys,
+                        suffix_values,
+                        cis_bias,
+                        cache_tags,
+                        output,
+                    )
+                    if submission_error is not None:
+                        raise BaseExceptionGroup(
+                            "NOSA fetch execution and completion recording both failed",
+                            [submission_error, record_error],
+                        ) from None
+                    raise
 
     __call__ = run
 
@@ -738,5 +816,9 @@ class NosaFetchWorkspace:
 
     def synchronize(self):
         """Wait on the host before cache abort, backing mutation or release."""
+        if self._completion_error is not None:
+            raise RuntimeError("NOSA fetch completion is unknown") from self._completion_error
         if self._last_done is not None:
             self._last_done.synchronize()
+        if self.failed:
+            raise RuntimeError("NOSA fetch workspace is poisoned") from self.failure

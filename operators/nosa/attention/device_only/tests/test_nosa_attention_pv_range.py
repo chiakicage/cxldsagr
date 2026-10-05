@@ -5,7 +5,7 @@ import math
 import pytest
 import torch
 
-from layers.attention import BlockSelection
+from models.attention_contracts import BlockSelection
 from operators.nosa.attention.device_only.api import nosa_block_sparse_attention
 
 

@@ -6,7 +6,7 @@ publication was performed. Published experiment reports were not edited by
 this component work.
 
 The restored C10 implementation subsequently completed its matching profile
-and independent analysis; see [the accepted C10 profile checkpoint](../../system/deepseek_motivation_c10_profile.md).
+and independent analysis; see the accepted C10 profile checkpoint（Git `934485b:docs/agents/system/deepseek_motivation_c10_profile.md`）.
 That acceptance applies to C10 and does not promote this deferred candidate.
 
 Before the scope change, the actual production wrapper passed seven CPU

@@ -1,50 +1,244 @@
 {
-  "schema": "nosa-offload-current-publication-v1",
-  "status": "published_and_superseded_outputs_removed",
-  "date": "2026-10-04",
-  "accepted_run_ids": [
-    "nosa_cached_fetch_20261004_01",
-    "nosa_cached_fetch_confirm40_20261004_01",
-    "nosa_cached_fetch_profile_20261004_01"
-  ],
-  "replacement_manifest_sha256": "04346cb904094e2f9494ab9f73e787ca8d52e48fd931f2b06317e215c898345b",
-  "published_files": [
+  "status": "published",
+  "selected_artifacts": {
+    "fused/report.json": {
+      "sha256": "ba7f9a7358b5ff3ba6d7e9bdaa3408b6df184240d9e5f3bc01b1134616cde9fd",
+      "measurement_run_id": "refactor_nosa_overlap_bench_20261005_01",
+      "profile_run_id": "refactor_nosa_overlap_profile_20261005_01"
+    },
+    "fused/comparison.csv": {
+      "sha256": "d412dc6ea0d533198f80957ddea890f2cf5e8de5cef640b5406937eeb4ec89ed",
+      "measurement_run_id": "refactor_nosa_overlap_bench_20261005_01",
+      "profile_run_id": "refactor_nosa_overlap_profile_20261005_01"
+    },
+    "fused_confirmation/report.json": {
+      "sha256": "9255ccb63c0a768408f6b1acc6ac2fd1e0664374c09e1bf11c8eab4fb939552e",
+      "measurement_run_id": "refactor_nosa_overlap_confirm40_20261005_01",
+      "profile_run_id": "refactor_nosa_overlap_profile_20261005_01"
+    },
+    "fused_confirmation/comparison.csv": {
+      "sha256": "5cfef5bbaedc0fe4293b203d5dcdc42eecb01b04c548ed5189296e9891b2fbc6",
+      "measurement_run_id": "refactor_nosa_overlap_confirm40_20261005_01",
+      "profile_run_id": "refactor_nosa_overlap_profile_20261005_01"
+    }
+  },
+  "profile_run_id": "refactor_nosa_overlap_profile_20261005_01",
+  "historical_static_audit_sha256": "5481c198690e5c5abfb625b8bf944ed154feecd62d28f422922ad05d69986416",
+  "static_selection": "fused/kernel_audit_selection.json",
+  "current_profile_audit": "current_profile_integrity.json",
+  "generator_sha256": "88507301a8d916b5ec2a69bd0bc5fb92d482351c85c750d781214c18177e58b6",
+  "official_generator_sha256": "1be0eda8335784219febbcd4e0ee5e0a4a7606375b7144274b49787b3d968672",
+  "published_at_utc": "2026-10-05T00:33:19.150671+00:00",
+  "delivered_source_deltas": {
+    "overlap": {
+      "experiments/nosa_mfu/src/dense/capture.py": {
+        "captured": "e238d2a2fda19dc8d7bfaa5acd56c61a28d7786e528e75ca0cac0cb27720a4d7",
+        "delivered": "f7e087611e405b3d5f9ec4854d4924fe607974bb72c421f29beb087f40e9e1e5"
+      }
+    }
+  },
+  "source_delta": "source_delta.json",
+  "generation_artifacts": [
     {
-      "path": "experiments/nosa_offload_overlap/README.md",
-      "sha256": "5a9432b0499ee2bceaf39017a5d12c157bd6aef85a86e75e80f21c7d82dc34d0"
+      "path": "experiments/nosa_offload_overlap/output/data/refactor_nosa_overlap_bench_20261005_01/report_generation/audit/audit_overlap.py",
+      "sha256": "88507301a8d916b5ec2a69bd0bc5fb92d482351c85c750d781214c18177e58b6",
+      "bytes": 7808
     },
     {
-      "path": "experiments/nosa_offload_overlap/report/fused/report.json",
-      "sha256": "d8f4a3b2634eef446da1fed2530fda0087b8b61bd54870656d35efaf28d83186"
+      "path": "experiments/nosa_offload_overlap/output/data/refactor_nosa_overlap_bench_20261005_01/report_generation/audit/capture_publication_call.py",
+      "sha256": "90cc9d4c3a3cd36191a9b2c5c3044d10fb881ea2840fb1cf980e071ead643f57",
+      "bytes": 1186
     },
     {
-      "path": "experiments/nosa_offload_overlap/report/fused/comparison.csv",
-      "sha256": "2da43f763feb73fa618a874d7f68b37f6db06735d7418ecf42c1a5de84921c05"
+      "path": "experiments/nosa_offload_overlap/output/data/refactor_nosa_overlap_bench_20261005_01/report_generation/audit/invocation.json",
+      "sha256": "ff51c1d5adff456f7f6500f31131b5068438736bc5e3d11e6b83037d45599b75",
+      "bytes": 776
     },
     {
-      "path": "experiments/nosa_offload_overlap/report/fused/kernel_audit.json",
-      "sha256": "5481c198690e5c5abfb625b8bf944ed154feecd62d28f422922ad05d69986416"
+      "path": "experiments/nosa_offload_overlap/output/data/refactor_nosa_overlap_bench_20261005_01/report_generation/audit/report_helper_sources.json",
+      "sha256": "1eacbdc432f9a002c65318e7eb636855b0720bae5d292ec59957e0f0cc412e6a",
+      "bytes": 2393
     },
     {
-      "path": "experiments/nosa_offload_overlap/report/fused_confirmation/report.json",
-      "sha256": "17cfceb5841ef368ad7c88b99b39f2702685f13a9532798fffdf7fd5e0637134"
+      "path": "experiments/nosa_offload_overlap/output/data/refactor_nosa_overlap_bench_20261005_01/report_generation/audit/source/report_helpers/evaluation/pool_scan_provenance.py",
+      "sha256": "004b86573af85619e56a99259e4208671c9fd94a99e0ec07c4fcfd6401dc3d9d",
+      "bytes": 11765
     },
     {
-      "path": "experiments/nosa_offload_overlap/report/fused_confirmation/comparison.csv",
-      "sha256": "72bed22b43e4fb414339c8d5bee4679514bd3bb7420ed3335c0f2f942087ad9b"
+      "path": "experiments/nosa_offload_overlap/output/data/refactor_nosa_overlap_bench_20261005_01/report_generation/audit/source/report_helpers/evaluation/provenance.py",
+      "sha256": "0fde027cf65530a75072893c88c522cc85ea990b72e67ce7515b74dbb6d2fa67",
+      "bytes": 9629
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/refactor_nosa_overlap_bench_20261005_01/report_generation/audit/source/report_helpers/pyproject.toml",
+      "sha256": "cac6e9271538d74e99b1bdc83c2a12648bb3c76a310af21c98aff3ec2d3761d1",
+      "bytes": 3925
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/refactor_nosa_overlap_bench_20261005_01/report_generation/audit/source/report_helpers/uv.lock",
+      "sha256": "53339af1728da3661b614d554e928408186b4fac6106a92999bd8fd69b3d2d8f",
+      "bytes": 139330
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/refactor_nosa_overlap_bench_20261005_01/report_generation/confirm/capture_publication_call.py",
+      "sha256": "90cc9d4c3a3cd36191a9b2c5c3044d10fb881ea2840fb1cf980e071ead643f57",
+      "bytes": 1186
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/refactor_nosa_overlap_bench_20261005_01/report_generation/confirm/invocation.json",
+      "sha256": "c5b23d0d70818b29539e3b91eebb40e6976885526d979bae406aeb124dce4296",
+      "bytes": 1113
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/refactor_nosa_overlap_bench_20261005_01/report_generation/confirm/report.py",
+      "sha256": "1be0eda8335784219febbcd4e0ee5e0a4a7606375b7144274b49787b3d968672",
+      "bytes": 34908
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/refactor_nosa_overlap_bench_20261005_01/report_generation/confirm/report_helper_sources.json",
+      "sha256": "9994169ef5d0fb7b1c9f685767a61bfc858b11108979b36dcba77e6c86c4a71c",
+      "bytes": 3671
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/refactor_nosa_overlap_bench_20261005_01/report_generation/confirm/source/report_helpers/evaluation/pool_scan_provenance.py",
+      "sha256": "004b86573af85619e56a99259e4208671c9fd94a99e0ec07c4fcfd6401dc3d9d",
+      "bytes": 11765
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/refactor_nosa_overlap_bench_20261005_01/report_generation/confirm/source/report_helpers/evaluation/provenance.py",
+      "sha256": "0fde027cf65530a75072893c88c522cc85ea990b72e67ce7515b74dbb6d2fa67",
+      "bytes": 9629
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/refactor_nosa_overlap_bench_20261005_01/report_generation/confirm/source/report_helpers/evaluation/validation.py",
+      "sha256": "769add375a8b3b64fe0c391c1a3067f2304c4727f1d4af199b9f5a5480ca2b74",
+      "bytes": 4803
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/refactor_nosa_overlap_bench_20261005_01/report_generation/confirm/source/report_helpers/experiments/nosa_mfu/src/phases.py",
+      "sha256": "830412771f461591862856f619dfe4ef755185dae2ca072c9f2e49994e2dfcd7",
+      "bytes": 5383
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/refactor_nosa_overlap_bench_20261005_01/report_generation/confirm/source/report_helpers/experiments/nosa_offload_overlap/src/analyze.py",
+      "sha256": "1c5b3443cac84af910838b6148b5a307f6b2e3cca2d6f21bdf82bdd6701eafdc",
+      "bytes": 29656
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/refactor_nosa_overlap_bench_20261005_01/report_generation/confirm/source/report_helpers/pyproject.toml",
+      "sha256": "cac6e9271538d74e99b1bdc83c2a12648bb3c76a310af21c98aff3ec2d3761d1",
+      "bytes": 3925
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/refactor_nosa_overlap_bench_20261005_01/report_generation/confirm/source/report_helpers/uv.lock",
+      "sha256": "53339af1728da3661b614d554e928408186b4fac6106a92999bd8fd69b3d2d8f",
+      "bytes": 139330
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/refactor_nosa_overlap_bench_20261005_01/report_generation/finalize_readmes.py",
+      "sha256": "20e597cc94a5532f317667d9f208bb7732e89715facc228fcd719fdde6af88df",
+      "bytes": 9784
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/refactor_nosa_overlap_bench_20261005_01/report_generation/main/capture_publication_call.py",
+      "sha256": "90cc9d4c3a3cd36191a9b2c5c3044d10fb881ea2840fb1cf980e071ead643f57",
+      "bytes": 1186
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/refactor_nosa_overlap_bench_20261005_01/report_generation/main/invocation.json",
+      "sha256": "8dc8731a11e51f2f8f3072fc7514c450e8d89cda9dacbba85ca31494393b51f4",
+      "bytes": 1093
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/refactor_nosa_overlap_bench_20261005_01/report_generation/main/report.py",
+      "sha256": "1be0eda8335784219febbcd4e0ee5e0a4a7606375b7144274b49787b3d968672",
+      "bytes": 34908
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/refactor_nosa_overlap_bench_20261005_01/report_generation/main/report_helper_sources.json",
+      "sha256": "2f963d4bc80fbd921d0f84826971bc5939ad37648bb40579e05786e5677b1712",
+      "bytes": 3651
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/refactor_nosa_overlap_bench_20261005_01/report_generation/main/source/report_helpers/evaluation/pool_scan_provenance.py",
+      "sha256": "004b86573af85619e56a99259e4208671c9fd94a99e0ec07c4fcfd6401dc3d9d",
+      "bytes": 11765
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/refactor_nosa_overlap_bench_20261005_01/report_generation/main/source/report_helpers/evaluation/provenance.py",
+      "sha256": "0fde027cf65530a75072893c88c522cc85ea990b72e67ce7515b74dbb6d2fa67",
+      "bytes": 9629
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/refactor_nosa_overlap_bench_20261005_01/report_generation/main/source/report_helpers/evaluation/validation.py",
+      "sha256": "769add375a8b3b64fe0c391c1a3067f2304c4727f1d4af199b9f5a5480ca2b74",
+      "bytes": 4803
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/refactor_nosa_overlap_bench_20261005_01/report_generation/main/source/report_helpers/experiments/nosa_mfu/src/phases.py",
+      "sha256": "830412771f461591862856f619dfe4ef755185dae2ca072c9f2e49994e2dfcd7",
+      "bytes": 5383
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/refactor_nosa_overlap_bench_20261005_01/report_generation/main/source/report_helpers/experiments/nosa_offload_overlap/src/analyze.py",
+      "sha256": "1c5b3443cac84af910838b6148b5a307f6b2e3cca2d6f21bdf82bdd6701eafdc",
+      "bytes": 29656
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/refactor_nosa_overlap_bench_20261005_01/report_generation/main/source/report_helpers/pyproject.toml",
+      "sha256": "cac6e9271538d74e99b1bdc83c2a12648bb3c76a310af21c98aff3ec2d3761d1",
+      "bytes": 3925
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/refactor_nosa_overlap_bench_20261005_01/report_generation/main/source/report_helpers/uv.lock",
+      "sha256": "53339af1728da3661b614d554e928408186b4fac6106a92999bd8fd69b3d2d8f",
+      "bytes": 139330
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/refactor_nosa_overlap_bench_20261005_01/report_generation/navigation_source_delta.json",
+      "sha256": "bd15b663255e02a2c84acf65ababb23f42288a8e10f9aff65fc1d9a1b0410160",
+      "bytes": 786
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/refactor_nosa_overlap_bench_20261005_01/report_generation/publish_nosa.py",
+      "sha256": "754a0ba85351fa2f201e226de3255f96866d94e64449e6778e073ec54dfc197e",
+      "bytes": 8729
     }
   ],
-  "root_review": "Raw 20/40 timing samples and all 27 profile ranges independently recomputed; new README, current source/SASS/resource receipt and replacement scope reviewed. No full-model performance or fixed-P/NH hit claim.",
-  "superseded_directories": [
-    "experiments/nosa_offload_overlap/output/data/nosa_fused_stripe8_head1_20260930_01",
-    "experiments/nosa_offload_overlap/output/data/nosa_fused_stripe8_head1_confirm40_20260930_01",
-    "experiments/nosa_offload_overlap/output/data/nosa_fused_stripe8_head1_nsys_20260930_01",
-    "experiments/nosa_offload_overlap/output/log/nosa_fused_stripe8_head1_20260930_01",
-    "experiments/nosa_offload_overlap/output/log/nosa_fused_stripe8_head1_confirm40_20260930_01",
-    "experiments/nosa_offload_overlap/output/log/nosa_fused_stripe8_head1_nsys_20260930_01",
-    "experiments/nosa_offload_overlap/output/profile/nosa_fused_stripe8_head1_20260930_01",
-    "experiments/nosa_offload_overlap/output/profile/nosa_fused_stripe8_head1_confirm40_20260930_01",
-    "experiments/nosa_offload_overlap/output/profile/nosa_fused_stripe8_head1_nsys_20260930_01"
-  ],
-  "superseded_file_count": 294
+  "retirement": "retirement.json",
+  "readme_sha256": "884c0d024475af6457dbadbcd89a0343f16d479fb152933b7af8f40101deeab9",
+  "published_assets": {
+    "current_profile_integrity.json": "d0a9a2bda3523dd26ca460fbafd61c0e85292db75c6c10f08628d7e9bacbf917",
+    "fused/comparison.csv": "d412dc6ea0d533198f80957ddea890f2cf5e8de5cef640b5406937eeb4ec89ed",
+    "fused/kernel_audit.json": "5481c198690e5c5abfb625b8bf944ed154feecd62d28f422922ad05d69986416",
+    "fused/kernel_audit_selection.json": "ddd6b0b35b7fce6a6c8554082caf1305abbbe49e031c0b9f8a8a83ac7902e8bb",
+    "fused/report.json": "ba7f9a7358b5ff3ba6d7e9bdaa3408b6df184240d9e5f3bc01b1134616cde9fd",
+    "fused_confirmation/comparison.csv": "5cfef5bbaedc0fe4293b203d5dcdc42eecb01b04c548ed5189296e9891b2fbc6",
+    "fused_confirmation/report.json": "9255ccb63c0a768408f6b1acc6ac2fd1e0664374c09e1bf11c8eab4fb939552e",
+    "retirement.json": "778d3ab66f64e94744fbfa78e6e4a52d323038b918ab7d3f99de5711f84ea28a",
+    "source_delta.json": "6e8556e8fb95bcfb59fe6591478f4ff10815b75474b7679aa19d7d547a0efa9d",
+    "verification/overlap_bench.json": "f3e846cfdf0a5d7610203e79db4fc5b33717188505ad3c34c39f39f235cced25",
+    "verification/overlap_confirm40.json": "de04ae32fcf70cf0b19c97e48ef98a7afd59d652985baca9dd2b9a33a0bd2fc4",
+    "verification/overlap_profile.json": "f9fcda2dd63531a308e38549db248d655198cb28b493c7c71c69dbc411ace3ea"
+  },
+  "retirement_completed_at_utc": "2026-10-05T00:33:20.341073+00:00",
+  "readme_sha256_meaning": "Original README at measurement publication; preserved as historical identity.",
+  "current_readme_sha256": "6345bfb7c74559de7e2f2b553529d1f4552b7b3019cd8336dac0805ca8ee3f18",
+  "readme_navigation_revisions": [
+    {
+      "revision_id": "layers_navigation_20261005_01",
+      "recorded_at_utc": "2026-10-05T11:43:10.036877+00:00",
+      "previous_publication_sha256": "01cbbc367b0eb539923f248650050d471502c955a2fa4eec42f2458405194c87",
+      "before_readme_sha256": "884c0d024475af6457dbadbcd89a0343f16d479fb152933b7af8f40101deeab9",
+      "after_readme_sha256": "6345bfb7c74559de7e2f2b553529d1f4552b7b3019cd8336dac0805ca8ee3f18",
+      "changes": [
+        {
+          "old_current_module": "layers.attention.BlockSelection",
+          "new_current_module": "models.attention_contracts.BlockSelection"
+        }
+      ],
+      "scope": "Current module navigation and explicit measurement-boundary note only. Published numbers, original commands, source manifests, hashes, raw captures and output files are unchanged.",
+      "new_gpu_measurement": false
+    }
+  ]
 }

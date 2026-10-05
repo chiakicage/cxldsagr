@@ -488,7 +488,7 @@ def test_native_nonzero_and_unique_pinned_lifetimes_reconcile_all_handouts(tmp_p
 
 def test_workspace_components_match_current_independent_admission_contract():
     from cache.sparse_token_pool import SharedSparseTokenPool
-    from models.deepseek_v32.cache_resources import execution_reservation
+    from models.deepseek_v32.execution.cache_resources import execution_reservation
 
     allowance = WorkspaceAllowance.echo(
         queries=1024, context=66560, topk=2048, width=576, host_tokens=131072, pool_tokens=4096

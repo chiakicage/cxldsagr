@@ -1,0 +1,241 @@
+{
+  "status": "completed",
+  "run_ids": [
+    "refactor_p0_nosa_bench_20261005_04",
+    "refactor_final_nosa_bench_20261005_04"
+  ],
+  "driver_session": 3998,
+  "driver_exit_code": 0,
+  "rows": 256,
+  "accounting_matches_reference": true,
+  "trace_latency_ms": {
+    "p0": 206951.1156640947,
+    "current": 207339.7143414477,
+    "delta_ms": 388.59867735300213,
+    "delta_percent": 0.1877731734404975
+  },
+  "phase_means": {
+    "hbm/first": {
+      "latency_ms": {
+        "p0_mean_ms": 2340.8245501923375,
+        "current_mean_ms": 2343.5749639975256,
+        "delta_ms": 2.7504138051881455
+      },
+      "admission_ms": {
+        "p0_mean_ms": 3.0794208287261426,
+        "current_mean_ms": 3.1867748184595257,
+        "delta_ms": 0.10735398973338306
+      },
+      "prefix_ms": {
+        "p0_mean_ms": 2320.887938985834,
+        "current_mean_ms": 2323.392976592004,
+        "delta_ms": 2.5050376061699353
+      },
+      "extend_ms": {
+        "p0_mean_ms": 16.650242447212804,
+        "current_mean_ms": 16.759616511990316,
+        "delta_ms": 0.1093740647775121
+      },
+      "cleanup_ms": {
+        "p0_mean_ms": 0.20694793056463823,
+        "current_mean_ms": 0.23559607507195324,
+        "delta_ms": 0.02864814450731501
+      }
+    },
+    "hbm/revisit": {
+      "latency_ms": {
+        "p0_mean_ms": 2339.3589116822113,
+        "current_mean_ms": 2341.1629851179896,
+        "delta_ms": 1.804073435778264
+      },
+      "admission_ms": {
+        "p0_mean_ms": 3.061418428842444,
+        "current_mean_ms": 3.1932393976603635,
+        "delta_ms": 0.1318209688179195
+      },
+      "prefix_ms": {
+        "p0_mean_ms": 2319.332391314674,
+        "current_mean_ms": 2320.876387610042,
+        "delta_ms": 1.5439962953678332
+      },
+      "extend_ms": {
+        "p0_mean_ms": 16.763665189500898,
+        "current_mean_ms": 16.857042188348714,
+        "delta_ms": 0.09337699884781614
+      },
+      "cleanup_ms": {
+        "p0_mean_ms": 0.20143674919381738,
+        "current_mean_ms": 0.23631592193851247,
+        "delta_ms": 0.0348791727446951
+      }
+    },
+    "dense_prefetch/first": {
+      "latency_ms": {
+        "p0_mean_ms": 2696.7453479155665,
+        "current_mean_ms": 2717.76287767716,
+        "delta_ms": 21.017529761593323
+      },
+      "admission_ms": {
+        "p0_mean_ms": 234.07338555989554,
+        "current_mean_ms": 249.23806868173415,
+        "delta_ms": 15.164683121838607
+      },
+      "prefix_ms": {
+        "p0_mean_ms": 2436.8756532494444,
+        "current_mean_ms": 2442.4565447625355,
+        "delta_ms": 5.580891513091046
+      },
+      "extend_ms": {
+        "p0_mean_ms": 25.00603548833169,
+        "current_mean_ms": 25.220871801138856,
+        "delta_ms": 0.2148363128071651
+      },
+      "cleanup_ms": {
+        "p0_mean_ms": 0.7902736178948544,
+        "current_mean_ms": 0.8473924317513593,
+        "delta_ms": 0.05711881385650486
+      }
+    },
+    "dense_prefetch/revisit": {
+      "latency_ms": {
+        "p0_mean_ms": 71.75815287337173,
+        "current_mean_ms": 72.50404192018323,
+        "delta_ms": 0.7458890468114987
+      },
+      "admission_ms": {
+        "p0_mean_ms": 1.8397082603769377,
+        "current_mean_ms": 2.131872301106341,
+        "delta_ms": 0.2921640407294035
+      },
+      "prefix_ms": {
+        "p0_mean_ms": 0.00020162406144663692,
+        "current_mean_ms": 0.000196232576854527,
+        "delta_ms": -5.391484592109919e-06
+      },
+      "extend_ms": {
+        "p0_mean_ms": 68.71185723139206,
+        "current_mean_ms": 69.03607615095098,
+        "delta_ms": 0.32421891955891624
+      },
+      "cleanup_ms": {
+        "p0_mean_ms": 1.206385757541284,
+        "current_mean_ms": 1.335897235549055,
+        "delta_ms": 0.12951147800777107
+      }
+    },
+    "sync_sparse/first": {
+      "latency_ms": {
+        "p0_mean_ms": 2672.5120716291713,
+        "current_mean_ms": 2667.497098300373,
+        "delta_ms": -5.014973328798078
+      },
+      "admission_ms": {
+        "p0_mean_ms": 234.46866263839183,
+        "current_mean_ms": 228.26381066988688,
+        "delta_ms": -6.204851968504954
+      },
+      "prefix_ms": {
+        "p0_mean_ms": 2414.6900996784098,
+        "current_mean_ms": 2415.8569825594896,
+        "delta_ms": 1.1668828810798004
+      },
+      "extend_ms": {
+        "p0_mean_ms": 22.55474381672684,
+        "current_mean_ms": 22.51245707157068,
+        "delta_ms": -0.04228674515616149
+      },
+      "cleanup_ms": {
+        "p0_mean_ms": 0.7985654956428334,
+        "current_mean_ms": 0.8638479994260706,
+        "delta_ms": 0.06528250378323719
+      }
+    },
+    "sync_sparse/revisit": {
+      "latency_ms": {
+        "p0_mean_ms": 29.526939753850456,
+        "current_mean_ms": 29.834895198291633,
+        "delta_ms": 0.30795544444117695
+      },
+      "admission_ms": {
+        "p0_mean_ms": 1.8753800613922067,
+        "current_mean_ms": 2.005663380259648,
+        "delta_ms": 0.13028331886744127
+      },
+      "prefix_ms": {
+        "p0_mean_ms": 0.00017788988770917058,
+        "current_mean_ms": 0.00018168793758377433,
+        "delta_ms": 3.7980498746037483e-06
+      },
+      "extend_ms": {
+        "p0_mean_ms": 26.511486736126244,
+        "current_mean_ms": 26.616220449795946,
+        "delta_ms": 0.10473371366970241
+      },
+      "cleanup_ms": {
+        "p0_mean_ms": 1.1398950664442964,
+        "current_mean_ms": 1.212829680298455,
+        "delta_ms": 0.07293461385415867
+      }
+    },
+    "async_sparse/first": {
+      "latency_ms": {
+        "p0_mean_ms": 2751.1294858850306,
+        "current_mean_ms": 2754.244001931511,
+        "delta_ms": 3.1145160464802757
+      },
+      "admission_ms": {
+        "p0_mean_ms": 231.69171643530717,
+        "current_mean_ms": 231.08897568454267,
+        "delta_ms": -0.6027407507644966
+      },
+      "prefix_ms": {
+        "p0_mean_ms": 2496.214147315186,
+        "current_mean_ms": 2499.7274600100354,
+        "delta_ms": 3.5133126948494464
+      },
+      "extend_ms": {
+        "p0_mean_ms": 22.41774493450066,
+        "current_mean_ms": 22.566371226275805,
+        "delta_ms": 0.14862629177514464
+      },
+      "cleanup_ms": {
+        "p0_mean_ms": 0.8058772000367753,
+        "current_mean_ms": 0.8611950106569566,
+        "delta_ms": 0.05531781062018126
+      }
+    },
+    "async_sparse/revisit": {
+      "latency_ms": {
+        "p0_mean_ms": 32.589269074378535,
+        "current_mean_ms": 32.15128219744656,
+        "delta_ms": -0.4379868769319728
+      },
+      "admission_ms": {
+        "p0_mean_ms": 1.9584711917559616,
+        "current_mean_ms": 1.9168712678947486,
+        "delta_ms": -0.04159992386121303
+      },
+      "prefix_ms": {
+        "p0_mean_ms": 0.00019344588508829474,
+        "current_mean_ms": 0.00017517595551908016,
+        "delta_ms": -1.8269929569214582e-05
+      },
+      "extend_ms": {
+        "p0_mean_ms": 29.474237373506185,
+        "current_mean_ms": 28.994006883294787,
+        "delta_ms": -0.4802304902113974
+      },
+      "cleanup_ms": {
+        "p0_mean_ms": 1.1563670632313006,
+        "current_mean_ms": 1.2402288703015074,
+        "delta_ms": 0.08386180707020685
+      }
+    }
+  },
+  "monitor": {
+    "observations": 124,
+    "foreign_processes": [],
+    "boundary": "Periodic samples, pair-wide PID set; independent review must join UTC activity intervals and cannot exclude unsampled short activity."
+  },
+  "boundary": "One sequential P0/current confirmation pair, preserving all prior repeated runs. Descriptive phase comparison only; no significance threshold or causal attribution."
+}

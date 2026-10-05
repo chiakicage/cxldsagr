@@ -8,7 +8,9 @@ import hashlib
 import json
 import math
 from pathlib import Path
+from shlex import quote
 
+from evaluation.validation import require_receipt
 from experiments.deepseek_v32_echo_official.src.measure import normalize_compute_graphs
 
 STEM = "existing_implementation_comparison"
@@ -82,13 +84,66 @@ def display_path(path):
         return str(resolved)
 
 
-def read_report(path, kind):
+def numerical_evidence(metadata, audit, kind, *, receipt_override=None):
+    numerical_key = (
+        "all_candidate_hidden_and_logits_exact"
+        if kind == "motivation"
+        else "all_candidate_hidden_and_logits_numerical_pass"
+    )
+    if metadata["schema"].endswith("-bench-v1"):
+        expected_kind = f"deepseek-v32-{'motivation' if kind == 'motivation' else 'echo-official'}-full-trace-v1"
+        evidence = metadata["correctness_receipt"]
+        path = Path(evidence["path"] if receipt_override is None else receipt_override)
+        require(metadata.get("mode") == "bench", f"{kind} benchmark mode differs")
+        require(evidence["kind"] == expected_kind, f"{kind} receipt kind differs")
+        require(digest(path) == evidence["sha256"], f"{kind} correctness receipt changed")
+        require(
+            evidence["identity"] == metadata["validation_identity"],
+            f"{kind} correctness identity differs",
+        )
+        receipt = require_receipt(
+            path, kind=expected_kind, identity=metadata["validation_identity"]
+        )
+        checked = receipt["checks"]["numerical_and_lifecycle"]
+        require(checked["status"] == "passed", f"{kind} independent numerical audit failed")
+        require(checked[numerical_key] is True, f"{kind} independent numerical audit did not pass")
+        if kind == "motivation":
+            reported = audit["independent_correctness_receipt"]
+            require(reported["checks"] == receipt["checks"], "motivation receipt audit differs")
+        else:
+            reported = audit["correctness_receipt"]
+            require(audit[numerical_key] is True, "official report numerical audit differs")
+            require(
+                audit["numerical_summary"] == checked["numerical_summary"],
+                "official report numerical summary differs",
+            )
+        require(
+            reported["kind"] == expected_kind and reported["sha256"] == evidence["sha256"],
+            f"{kind} report receipt provenance differs",
+        )
+        return {
+            "mode": "independent_check_receipt",
+            "path": display_path(path),
+            "recorded_path": evidence["path"],
+            "sha256": evidence["sha256"],
+            "kind": expected_kind,
+            "checked_requests": checked["checked_requests"],
+        }
+    require(receipt_override is None, "receipt override requires an independent benchmark")
+    require(audit[numerical_key] is True, f"{kind} numerical audit did not pass")
+    return {"mode": "combined_measurement_and_check"}
+
+
+def read_report(path, kind, *, receipt_override=None):
     if path.is_dir():
         path = path / "summary.json"
     report = json.loads(path.read_text())
     metadata, audit = report["metadata"], report["audit"]
     expected_schema = f"deepseek-v32-{'motivation' if kind == 'motivation' else 'echo-official'}-v1"
-    require(metadata["schema"] == expected_schema, f"unexpected {kind} schema")
+    require(
+        metadata["schema"] in {expected_schema, expected_schema.removesuffix("-v1") + "-bench-v1"},
+        f"unexpected {kind} schema",
+    )
     require(metadata["status"] == "accepted", f"{kind} report is not accepted")
     require(audit["status"] == "passed", f"{kind} audit did not pass")
     require(audit["source_sha256"] == metadata["source_sha256"], f"{kind} source mismatch")
@@ -96,12 +151,7 @@ def read_report(path, kind):
     provenance = json.loads(provenance_path.read_text())
     require(provenance["run_id"] == metadata["run_id"], f"{kind} provenance run mismatch")
     require(provenance["audit"] == audit, f"{kind} provenance audit mismatch")
-    numerical_key = (
-        "all_candidate_hidden_and_logits_exact"
-        if kind == "motivation"
-        else "all_candidate_hidden_and_logits_numerical_pass"
-    )
-    require(audit[numerical_key] is True, f"{kind} numerical audit did not pass")
+    numerical = numerical_evidence(metadata, audit, kind, receipt_override=receipt_override)
     source = {
         "summary_path": display_path(path),
         "summary_sha256": digest(path),
@@ -121,6 +171,7 @@ def read_report(path, kind):
         "precision_policy": metadata.get("precision_policy"),
         "precision_settings": metadata.get("precision_settings"),
         "numerical_policy": metadata.get("numerical_policy"),
+        "numerical_evidence": numerical,
         "numerical_audit": {k: v for k, v in audit.items() if k != "numerical_sha256"},
     }
     return report, source
@@ -284,6 +335,15 @@ def render_markdown(result):
     rows, differences = result["rows"], result["observed_our_echo_vs_official_echo"]
     gpu_relation = "同一物理 GPU" if identity["same_physical_gpu"] else "不同物理 GPU"
     graph_mode = "启用" if config["enable_compute_graphs"] else "关闭"
+    independent = all(
+        source["numerical_evidence"]["mode"] == "independent_check_receipt"
+        for source in result["inputs"].values()
+    )
+    numerical_boundary = (
+        "两组数值验收均来自独立 check，正式计时不保存或比较完整输出。"
+        if independent
+        else "数值验收分别对应各来源报告记录的执行边界。"
+    )
     if identity["full_precision_policy_equality_verified"]:
         precision_boundary = "两组记录的全部有效精度设置及 policy ID 一致。"
     elif identity["recorded_common_precision_settings_equality_verified"]:
@@ -368,7 +428,8 @@ def render_markdown(result):
             "两组记录的 FP8 linear 设置一致，checkpoint 身份核对依赖路径和 shard stat 清单，"
             "没有权重内容哈希。"
             f"{precision_boundary}"
-            "本地输出在来源运行内与 HBM 对照逐位一致；官方输出及独立 resident 重跑"
+            f"{numerical_boundary}"
+            "本地输出与其 HBM 对照逐位一致；官方输出及独立 resident 重跑"
             "均通过该实验预先固定的数值门槛，官方 top-k 顺序及并列值可能变化。"
             "本次整理未新增跨运行数值比较。"
         ),
@@ -393,9 +454,14 @@ def render_markdown(result):
         "",
         "```bash",
         "python -m experiments.deepseek_v32_echo_official.src.compare_existing \\",
-        f"  --motivation-report {result['inputs']['motivation']['summary_path']} \\",
-        f"  --official-report {result['inputs']['official']['summary_path']} \\",
-        f"  --output-dir {result['output_directory']}",
+        f"  --motivation-report {quote(result['inputs']['motivation']['summary_path'])} \\",
+        f"  --official-report {quote(result['inputs']['official']['summary_path'])} \\",
+        *[
+            f"  --{kind}-receipt {quote(source['numerical_evidence']['path'])} \\"
+            for kind, source in result["inputs"].items()
+            if source["numerical_evidence"]["mode"] == "independent_check_receipt"
+        ],
+        f"  --output-dir {quote(result['output_directory'])}",
         "```",
         "",
     ]
@@ -406,10 +472,16 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--motivation-report", type=Path, required=True)
     parser.add_argument("--official-report", type=Path, required=True)
+    parser.add_argument("--motivation-receipt", type=Path)
+    parser.add_argument("--official-receipt", type=Path)
     parser.add_argument("--output-dir", type=Path, required=True)
     args = parser.parse_args()
-    motivation, motivation_source = read_report(args.motivation_report, "motivation")
-    official, official_source = read_report(args.official_report, "official")
+    motivation, motivation_source = read_report(
+        args.motivation_report, "motivation", receipt_override=args.motivation_receipt
+    )
+    official, official_source = read_report(
+        args.official_report, "official", receipt_override=args.official_receipt
+    )
     identity = compare_identity(motivation, official)
     for filename in ("workload/requests.jsonl", "workload/workload.json"):
         require(

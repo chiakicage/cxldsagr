@@ -1,0 +1,165 @@
+{
+  "freeze_id": "7c12bfb334dee401bfdb66d904787962e49ef59e70811a3701249b26db06ed21",
+  "started_utc": "2026-10-03T12:47:26.527844+00:00",
+  "scope": "correctness and intrusive allocation validation only; elapsed time is not performance evidence",
+  "jobs": [
+    {
+      "name": "freeze_verify_before",
+      "command": [
+        "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/freeze03-evidence/verify.sh"
+      ],
+      "cwd": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/freeze03",
+      "environment_overrides": {
+        "CUDA_DEVICE_ORDER": "PCI_BUS_ID",
+        "CUDA_VISIBLE_DEVICES": "GPU-f8efa4fd-5a9d-cdde-c13b-0e230e2082af",
+        "OMP_NUM_THREADS": "8",
+        "MKL_NUM_THREADS": "8",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "TMPDIR": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/deepseek-freeze03-validation/tmp"
+      },
+      "stdout": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/deepseek-freeze03-validation/log/freeze_verify_before.stdout.log",
+      "stderr": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/deepseek-freeze03-validation/log/freeze_verify_before.stderr.log",
+      "started_utc": "2026-10-03T12:47:26.531786+00:00",
+      "status": "passed",
+      "pid": 1265943,
+      "exit_code": 0,
+      "finished_utc": "2026-10-03T12:47:28.284050+00:00"
+    },
+    {
+      "name": "checkpoints",
+      "command": [
+        "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/freeze03-evidence/run.sh",
+        ".venv/bin/python",
+        "-m",
+        "pytest",
+        "models/deepseek_v32/tests/test_echo_checkpoint.py",
+        "models/deepseek_v32/tests/test_serving_checkpoint.py",
+        "-s",
+        "-q",
+        "-p",
+        "no:cacheprovider"
+      ],
+      "cwd": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/freeze03",
+      "environment_overrides": {
+        "CUDA_DEVICE_ORDER": "PCI_BUS_ID",
+        "CUDA_VISIBLE_DEVICES": "GPU-f8efa4fd-5a9d-cdde-c13b-0e230e2082af",
+        "OMP_NUM_THREADS": "8",
+        "MKL_NUM_THREADS": "8",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "TMPDIR": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/deepseek-freeze03-validation/tmp",
+        "DEEPSEEK_ECHO_CHECKPOINT": "/preset-models",
+        "DEEPSEEK_SERVING_CHECKPOINT": "/preset-models"
+      },
+      "stdout": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/deepseek-freeze03-validation/log/checkpoints.stdout.log",
+      "stderr": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/deepseek-freeze03-validation/log/checkpoints.stderr.log",
+      "started_utc": "2026-10-03T12:47:28.289755+00:00",
+      "status": "passed",
+      "pid": 1265982,
+      "exit_code": 0,
+      "finished_utc": "2026-10-03T12:48:22.620878+00:00"
+    },
+    {
+      "name": "memory_c1024_c2048",
+      "command": [
+        "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/freeze03-evidence/run.sh",
+        ".venv/bin/python",
+        "-m",
+        "experiments.gr_serving.src.cache_memory_capture",
+        "--model",
+        "/preset-models",
+        "--device",
+        "cuda:0",
+        "--chunks",
+        "1024",
+        "2048",
+        "--run-id",
+        "deepseek_memory_c1024_c2048_freeze03",
+        "--output-dir",
+        "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/deepseek-freeze03-validation/data/memory_c1024_c2048",
+        "--profile-dir",
+        "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/deepseek-freeze03-validation/profile/memory_c1024_c2048"
+      ],
+      "cwd": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/freeze03",
+      "environment_overrides": {
+        "CUDA_DEVICE_ORDER": "PCI_BUS_ID",
+        "CUDA_VISIBLE_DEVICES": "GPU-f8efa4fd-5a9d-cdde-c13b-0e230e2082af",
+        "OMP_NUM_THREADS": "8",
+        "MKL_NUM_THREADS": "8",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "TMPDIR": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/deepseek-freeze03-validation/tmp"
+      },
+      "stdout": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/deepseek-freeze03-validation/log/memory_c1024_c2048.stdout.log",
+      "stderr": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/deepseek-freeze03-validation/log/memory_c1024_c2048.stderr.log",
+      "started_utc": "2026-10-03T12:48:22.627293+00:00",
+      "status": "passed",
+      "pid": 1267214,
+      "exit_code": 0,
+      "finished_utc": "2026-10-03T13:08:24.739853+00:00"
+    },
+    {
+      "name": "memory_c256_hbm_dense",
+      "command": [
+        "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/freeze03-evidence/run.sh",
+        ".venv/bin/python",
+        "-m",
+        "experiments.gr_serving.src.cache_memory_capture",
+        "--model",
+        "/preset-models",
+        "--device",
+        "cuda:0",
+        "--chunks",
+        "256",
+        "--schemes",
+        "hbm",
+        "dense_prefetch",
+        "--run-id",
+        "deepseek_memory_c256_hbm_dense_freeze03",
+        "--output-dir",
+        "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/deepseek-freeze03-validation/data/memory_c256_hbm_dense",
+        "--profile-dir",
+        "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/deepseek-freeze03-validation/profile/memory_c256_hbm_dense"
+      ],
+      "cwd": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/freeze03",
+      "environment_overrides": {
+        "CUDA_DEVICE_ORDER": "PCI_BUS_ID",
+        "CUDA_VISIBLE_DEVICES": "GPU-f8efa4fd-5a9d-cdde-c13b-0e230e2082af",
+        "OMP_NUM_THREADS": "8",
+        "MKL_NUM_THREADS": "8",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "TMPDIR": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/deepseek-freeze03-validation/tmp"
+      },
+      "stdout": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/deepseek-freeze03-validation/log/memory_c256_hbm_dense.stdout.log",
+      "stderr": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/deepseek-freeze03-validation/log/memory_c256_hbm_dense.stderr.log",
+      "started_utc": "2026-10-03T13:08:24.746372+00:00",
+      "status": "passed",
+      "pid": 1295411,
+      "exit_code": 0,
+      "finished_utc": "2026-10-03T13:22:24.351302+00:00"
+    },
+    {
+      "name": "freeze_verify_after",
+      "command": [
+        "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/freeze03-evidence/verify.sh"
+      ],
+      "cwd": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/freeze03",
+      "environment_overrides": {
+        "CUDA_DEVICE_ORDER": "PCI_BUS_ID",
+        "CUDA_VISIBLE_DEVICES": "GPU-f8efa4fd-5a9d-cdde-c13b-0e230e2082af",
+        "OMP_NUM_THREADS": "8",
+        "MKL_NUM_THREADS": "8",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "TMPDIR": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/deepseek-freeze03-validation/tmp"
+      },
+      "stdout": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/deepseek-freeze03-validation/log/freeze_verify_after.stdout.log",
+      "stderr": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/deepseek-freeze03-validation/log/freeze_verify_after.stderr.log",
+      "started_utc": "2026-10-03T13:22:24.358399+00:00",
+      "status": "passed",
+      "pid": 1313066,
+      "exit_code": 0,
+      "finished_utc": "2026-10-03T13:22:26.072229+00:00"
+    }
+  ],
+  "status": "passed",
+  "finished_utc": "2026-10-03T13:22:26.080067+00:00",
+  "exit_code": 0
+}

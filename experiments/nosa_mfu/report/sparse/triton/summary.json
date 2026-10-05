@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "run_id": "refactor_mfu_sparse_triton_bench_20261005_01",
+  "workload": {
+    "prefix_tokens": 65536,
+    "new_tokens": 1024,
+    "total_tokens": 66560,
+    "chunk_size": 1024,
+    "attention_mode": "sparse",
+    "backend": "triton",
+    "kernel_backend": "triton",
+    "selection_backend": "flashinfer",
+    "native_kernel_revision": 5,
+    "attention_execution": "triton_v1",
+    "indexer_execution": "cached_flashinfer_v1",
+    "indexer_preparation": "triton_v1",
+    "dtype": "bfloat16",
+    "block_size": 64,
+    "block_budget": 64,
+    "local_blocks": 17,
+    "query_stage_blocks": 33,
+    "warmup": 2,
+    "repeats": 5,
+    "profile_repeats": 1,
+    "indexer_query_chunk_size": null
+  },
+  "num_layers": 32,
+  "num_layers_source": "provided",
+  "definitions": {
+    "full_prefill": "66560 tokens from an empty cache in 65 chunks of 1024 tokens",
+    "extend": "One 1024-token forward with a 65536-token prefix already cached",
+    "wall_ms": "Synchronized end-to-end benchmark elapsed time",
+    "host_submit_ms": "Host submission interval, reported separately from CUDA time",
+    "cuda_span_ms": "CUDA event span of the measured work, including possible launch gaps",
+    "tokens_per_second": "Processed tokens * 1000 / wall_ms for each repetition",
+    "profile_cuda_elapsed_ms": "Inclusive CUDA event intervals from separate instrumented runs; includes possible launch gaps, not GPU active time or pure kernel duration",
+    "profile_aggregation": "Sum each stage within each run across calls/layers, then compute run statistics; per-layer statistics use the same order; nested stages remain inside indexer_total",
+    "overlap": "Host and CUDA intervals overlap and must not be added"
+  },
+  "timings": {
+    "full_prefill": {
+      "sample_count": 5,
+      "tokens": 66560,
+      "wall_ms": {
+        "count": 5,
+        "median": 3663.1128230364993,
+        "min": 3659.397570998408,
+        "max": 3665.2361899614334
+      },
+      "host_submit_ms": {
+        "count": 5,
+        "median": 3661.8614429607987,
+        "min": 3658.1431130180135,
+        "max": 3663.989936001599
+      },
+      "cuda_span_ms": {
+        "count": 5,
+        "median": 3663.09521484375,
+        "min": 3659.381103515625,
+        "max": 3665.21875
+      },
+      "tokens_per_second": {
+        "count": 5,
+        "median": 18170.338511393646,
+        "min": 18159.811960358376,
+        "max": 18188.786189154125
+      }
+    },
+    "extend": {
+      "sample_count": 5,
+      "tokens": 1024,
+      "wall_ms": {
+        "count": 5,
+        "median": 61.776236980222166,
+        "min": 61.682767001912,
+        "max": 61.808942002244294
+      },
+      "host_submit_ms": {
+        "count": 5,
+        "median": 60.53425301797688,
+        "min": 60.44468202162534,
+        "max": 60.57092291302979
+      },
+      "cuda_span_ms": {
+        "count": 5,
+        "median": 61.761409759521484,
+        "min": 61.66764831542969,
+        "max": 61.79359817504883
+      },
+      "tokens_per_second": {
+        "count": 5,
+        "median": 16575.952988652196,
+        "min": 16567.18213948426,
+        "max": 16601.071089567995
+      }
+    }
+  },
+  "profiles": {}
+}

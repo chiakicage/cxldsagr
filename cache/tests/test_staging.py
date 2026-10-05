@@ -214,7 +214,7 @@ def test_exception_returns_lease_but_unconfirmed_join_poisons_and_retains_storag
     owner = lease.slot_identity(0)
     caller, copy = FakeStream(True), FakeStream(False)
     lease.caller_stream, staging._copy_stream = caller, copy
-    with pytest.raises(RuntimeError, match="confirm completion"):
+    with pytest.raises(RuntimeError, match="injected CUDA failure"):
         lease.close()
     assert caller.calls == copy.calls == 1
     assert lease.closed and staging.poisoned
@@ -223,12 +223,47 @@ def test_exception_returns_lease_but_unconfirmed_join_poisons_and_retains_storag
     assert staging.storage_tensors() and lease._sources
     with pytest.raises(RuntimeError, match="poisoned"):
         staging.lease(object())
-    with pytest.raises(RuntimeError, match="confirm completion"):
+    with pytest.raises(RuntimeError, match="injected CUDA failure"):
         staging.close()
     assert staging.storage_tensors()
     caller.fail = False
     staging.close()
     assert staging.storage_tensors() == ()
+
+
+@pytest.mark.parametrize("body_fails", [False, True])
+def test_all_stream_failures_and_body_failure_survive_with_borrowed_storage(body_fails):
+    staging = make_staging()
+    body_error = ValueError("model failed")
+    caller_error = RuntimeError("caller stream failed")
+    copy_error = KeyboardInterrupt("copy stream interrupted")
+    joined = []
+
+    class FailingStream:
+        def __init__(self, error):
+            self.error = error
+
+        def synchronize(self):
+            joined.append(self.error)
+            raise self.error
+
+    with pytest.raises(BaseExceptionGroup) as caught, staging.lease(object()) as lease:
+        lease.prefetch(0, source_records(staging, 17, 3))
+        lease.caller_stream = FailingStream(caller_error)
+        staging._copy_stream = FailingStream(copy_error)
+        if body_fails:
+            raise body_error
+    group = caught.value
+    if body_fails:
+        assert group.exceptions[0] is body_error
+        group = group.exceptions[1]
+    assert group.exceptions == (caller_error, copy_error)
+    assert joined == [caller_error, copy_error]
+    assert staging.poisoned and lease.closed
+    assert staging.active_lease is lease
+    assert staging.storage_tensors() and lease._sources
+    with pytest.raises(RuntimeError, match="poisoned"):
+        staging.lease(object())
 
 
 @pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA required")

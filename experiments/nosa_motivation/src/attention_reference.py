@@ -185,7 +185,7 @@ def capture_attention_inputs(
     backend, directory, config, request_id, identity, *, mode="full_request", history_reference=None
 ):
     """Use only in a separate replay, and call capture.accept_output inside it."""
-    from models.nosa.fixed_cache import NosaFixedAttention
+    from models.nosa.attention import NosaFixedAttention
 
     capture = AttentionCapture(
         backend, directory, config, request_id, identity, mode, history_reference
@@ -317,7 +317,7 @@ def benchmark_attention_reference(capture_dir, output, *, device="cuda:0"):
     """Run after every serving backend closes; fixed three warmups/seven samples."""
     import torch
 
-    from layers.attention import BlockSelection
+    from models.attention_contracts import BlockSelection
     from operators.nosa.attention.device_only.api import nosa_block_sparse_attention
     from operators.nosa.attention.workspace import NosaAttentionWorkspace
 

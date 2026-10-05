@@ -1,0 +1,404 @@
+{
+  "schema": "model-layers-relocation-acceptance-v1",
+  "completed_utc": "2026-10-05T11:52:47.114239+00:00",
+  "scope": "Remove the top-level layers directory, move imports and source collectors, and remove unused TokenSelection fields. No numerical implementation changes.",
+  "layout": {
+    "top_level_layers_exists": false,
+    "contracts": {
+      "path": "models/attention_contracts.py",
+      "sha256": "2bc7ab80d9f9dd67f0c30e7dea989be7ae8d0f3825f213e9971985bc70f32c63",
+      "classes": [
+        "BlockSelection",
+        "TokenSelection",
+        "AttentionContext",
+        "Indexer",
+        "MainAttention"
+      ]
+    },
+    "nosa_attention_adapters": {
+      "path": "models/nosa/attention.py",
+      "moved_classes": [
+        "DenseMainAttention",
+        "ResidentLayerView"
+      ],
+      "sha256": "82fa3ae04c9e7ee307d1c44f493f8f7b3ab1359ef64004841110569250ebdedf"
+    },
+    "ordinary_layers": [
+      {
+        "from": "layers/normalization.py",
+        "to": "models/nosa/normalization.py",
+        "byte_identical": true,
+        "sha256": "426b2cd0e1da6c944ff661a93d55eee2b064585d5c5f6c6e6a0b80ca3bc98af0"
+      },
+      {
+        "from": "layers/feed_forward.py",
+        "to": "models/nosa/feed_forward.py",
+        "byte_identical": true,
+        "sha256": "95dcebaa67b4f2069f580ac0831ef8335fc15b022e802708e24f58c02408de4a"
+      }
+    ],
+    "token_selection_fields": [
+      "token_ids"
+    ],
+    "removed_unused_fields": [
+      "TokenSelection.valid_mask",
+      "TokenSelection.invalid_id"
+    ],
+    "retained_consumed_field": "BlockSelection.valid_mask"
+  },
+  "verification": {
+    "cpu_regression": {
+      "command": "env CUDA_VISIBLE_DEVICES='' OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 PYTHONDONTWRITEBYTECODE=1 PYTEST_ADDOPTS=--tb=short taskset -c 0-7 bash scripts/run_tests.sh cpu",
+      "exit_code": 0,
+      "passed": 3937,
+      "skipped": 1274,
+      "subtests_passed": 58,
+      "warnings": 1,
+      "warning": "PyTorch profiler warns that only events from the current cycle are reported.",
+      "seconds": 82.34,
+      "log_sha256": "96fed61550336f842e2f65339021a73327a255a9dcb609261ea7ad574891eb77"
+    },
+    "cli": {
+      "commands": 23,
+      "passed": 23,
+      "checks": [
+        {
+          "argv": [
+            ".venv/bin/python",
+            "-B",
+            "-m",
+            "models.nosa.infer",
+            "--help"
+          ],
+          "exit_code": 0
+        },
+        {
+          "argv": [
+            ".venv/bin/python",
+            "-B",
+            "-m",
+            "models.deepseek_v32.infer",
+            "--help"
+          ],
+          "exit_code": 0
+        },
+        {
+          "argv": [
+            ".venv/bin/python",
+            "-B",
+            "-m",
+            "serving.run_gr",
+            "--help"
+          ],
+          "exit_code": 0
+        },
+        {
+          "argv": [
+            ".venv/bin/python",
+            "-B",
+            "-m",
+            "serving.run_multi_user",
+            "--help"
+          ],
+          "exit_code": 0
+        },
+        {
+          "argv": [
+            ".venv/bin/python",
+            "-B",
+            "-m",
+            "experiments.cache_management.src.report",
+            "--help"
+          ],
+          "exit_code": 0
+        },
+        {
+          "argv": [
+            ".venv/bin/python",
+            "-B",
+            "-m",
+            "experiments.nosa_motivation.src.measure",
+            "--help"
+          ],
+          "exit_code": 0
+        },
+        {
+          "argv": [
+            ".venv/bin/python",
+            "-B",
+            "-m",
+            "experiments.nosa_motivation.src.profile",
+            "--help"
+          ],
+          "exit_code": 0
+        },
+        {
+          "argv": [
+            ".venv/bin/python",
+            "-B",
+            "-m",
+            "experiments.nosa_offload_overlap.src.measure",
+            "--help"
+          ],
+          "exit_code": 0
+        },
+        {
+          "argv": [
+            ".venv/bin/python",
+            "-B",
+            "-m",
+            "experiments.nosa_indexer_pattern_65536_1024.src.capture",
+            "--help"
+          ],
+          "exit_code": 0
+        },
+        {
+          "argv": [
+            ".venv/bin/python",
+            "-B",
+            "-m",
+            "experiments.nosa_indexer_pattern_65536_1024.src.sparse_capture",
+            "--help"
+          ],
+          "exit_code": 0
+        },
+        {
+          "argv": [
+            ".venv/bin/python",
+            "-B",
+            "-m",
+            "experiments.nosa_mfu.src.capture_inputs",
+            "--help"
+          ],
+          "exit_code": 0
+        },
+        {
+          "argv": [
+            ".venv/bin/python",
+            "-B",
+            "-m",
+            "experiments.nosa_mfu.src.measure",
+            "--help"
+          ],
+          "exit_code": 0
+        },
+        {
+          "argv": [
+            ".venv/bin/python",
+            "-B",
+            "-m",
+            "experiments.nosa_mfu.src.measure_modules",
+            "--help"
+          ],
+          "exit_code": 0
+        },
+        {
+          "argv": [
+            ".venv/bin/python",
+            "-B",
+            "-m",
+            "experiments.nosa_mfu.src.sparse.capture",
+            "--help"
+          ],
+          "exit_code": 0
+        },
+        {
+          "argv": [
+            ".venv/bin/python",
+            "-B",
+            "-m",
+            "experiments.nosa_mfu.src.dense.capture",
+            "--help"
+          ],
+          "exit_code": 0
+        },
+        {
+          "argv": [
+            ".venv/bin/python",
+            "-B",
+            "-m",
+            "experiments.deepseek_v32_echo_prefill.src.measure",
+            "--help"
+          ],
+          "exit_code": 0
+        },
+        {
+          "argv": [
+            ".venv/bin/python",
+            "-B",
+            "-m",
+            "experiments.deepseek_v32_echo_prefill.src.profile_layers",
+            "--help"
+          ],
+          "exit_code": 0
+        },
+        {
+          "argv": [
+            ".venv/bin/python",
+            "-B",
+            "-m",
+            "experiments.deepseek_v32_motivation.src.measure",
+            "--help"
+          ],
+          "exit_code": 0
+        },
+        {
+          "argv": [
+            ".venv/bin/python",
+            "-B",
+            "models/nosa/infer.py",
+            "--help"
+          ],
+          "exit_code": 0
+        },
+        {
+          "argv": [
+            ".venv/bin/python",
+            "-B",
+            "models/deepseek_v32/infer.py",
+            "--help"
+          ],
+          "exit_code": 0
+        },
+        {
+          "argv": [
+            "bash",
+            "scripts/run_tests.sh",
+            "--help"
+          ],
+          "exit_code": 0
+        },
+        {
+          "argv": [
+            "bash",
+            "experiments/cache_management/scripts/run.sh",
+            "--help"
+          ],
+          "exit_code": 0
+        },
+        {
+          "argv": [
+            "bash",
+            "experiments/deepseek_v32_echo_prefill/scripts/run.sh",
+            "--help"
+          ],
+          "exit_code": 0
+        }
+      ]
+    },
+    "ruff": {
+      "files_checked": 63,
+      "check_exit_code": 0,
+      "format_check_exit_code": 0
+    },
+    "reference_import": {
+      "exit_code": 0,
+      "imports": [
+        "models.attention_contracts",
+        "operators.nosa.attention.reference.torch"
+      ],
+      "triton_loaded": false,
+      "device_only_api_loaded": false,
+      "native_loaded": false
+    },
+    "structural_review": {
+      "class_moves": {
+        "BlockSelection": "identical class AST at new module",
+        "AttentionContext": "identical class AST at new module",
+        "Indexer": "identical class AST at new module",
+        "MainAttention": "identical class AST at new module",
+        "DenseMainAttention": "identical class AST in NOSA attention",
+        "ResidentLayerView": "identical class AST in NOSA attention",
+        "TokenSelection": "Only unused valid_mask/invalid_id removed and corresponding docstring updated; token_ids retained."
+      },
+      "ordinary_layers_byte_identical": true,
+      "existing_files_with_unchanged_nonimport_ast": 48,
+      "historical_mfu_graphs_and_analysis_ast_unchanged": true,
+      "new_mfu_attribution_graph_anchors": 51,
+      "new_changed_or_missing_anchor_rejection_cases": 102
+    },
+    "pickle_module_compatibility": {
+      "archives_checked": 2685,
+      "old_layers_class_references_found": false,
+      "executed_pickle": false,
+      "loaded_tensor_storage": false,
+      "roots": [
+        "experiments",
+        "evaluation"
+      ],
+      "boundary": "Serialization/import-path audit only; does not validate tensor values, model numerics, reports, files outside the stated scope, or GPU performance."
+    },
+    "documentation": {
+      "changed_existing_markdown_files": 8,
+      "deleted_markdown_files": 1,
+      "local_links_checked": 159,
+      "broken_links": 0,
+      "stale_current_root_layers_references": 0
+    },
+    "diff_check": {
+      "exit_code": 0,
+      "files": 78
+    },
+    "python_and_collector_review": {
+      "active_python_files_parsed": 437,
+      "stale_root_layers_imports": 0,
+      "stale_root_layers_scans": 0,
+      "new_init_files": 0,
+      "uv_package_false_retained": true,
+      "pyproject_byte_unchanged": true,
+      "deepseek_old_source_recomputation_still_rejected": true
+    }
+  },
+  "historical_report_navigation": {
+    "selected_assets_verified": 12,
+    "binding_verified": true,
+    "manifest_sha256": "e577cf8cd13fc7e329da44870c35aa96fe44f477c281449082c2cf428e503da7",
+    "current_readme_sha256": "6345bfb7c74559de7e2f2b553529d1f4552b7b3019cd8336dac0805ca8ee3f18",
+    "original_publication_readme_sha256": "884c0d024475af6457dbadbcd89a0343f16d479fb152933b7af8f40101deeab9",
+    "navigation_revision": "layers_navigation_20261005_01",
+    "scope": "Navigation amendment only; original published asset digests retained, no GPU or report recomputation."
+  },
+  "local_evidence": [
+    {
+      "path": "/tmp/cxldsagr_layers_reorg_20261005/before_manifest.json",
+      "sha256": "dff5a59e59bcf97cf9d686bc5f154f9892a41f4fbada261eaa24f66d07b5d6ef"
+    },
+    {
+      "path": "/tmp/cxldsagr_layers_reorg_20261005/structural_audit.json",
+      "sha256": "3d30e41a6ce9d9456316381ac8ed0e58592b551b17078a8e5d9a99349601973e"
+    },
+    {
+      "path": "/tmp/cxldsagr_layers_reorg_20261005/pickle_audit.json",
+      "sha256": "bec27af012b0ea2425e11246bc6150ae6be00d6cfa259884227d4eef0a430253"
+    },
+    {
+      "path": "/tmp/cxldsagr_layers_reorg_20261005/cli.json",
+      "sha256": "37ee61969512e21a3baac924a17ed63ba93fa4f39a0d3406f3f503966f80e18f"
+    },
+    {
+      "path": "/tmp/cxldsagr_layers_reorg_20261005/ruff.json",
+      "sha256": "8c6dd46e395502128667990d630a8484acbb993fc8a37f6c4152ac4a9a20744b"
+    },
+    {
+      "path": "/tmp/cxldsagr_layers_reorg_20261005/doc_navigation_audit.json",
+      "sha256": "9e5cdf00f325829cdd25da07435418dab8fac30d218c16f226cb82829ff79749"
+    },
+    {
+      "path": "/tmp/cxldsagr_layers_reorg_20261005/diff_check.json",
+      "sha256": "5a57fca5daf288a637420dd0069ddd313aa7779dcf6e0d56bd2c808c3ec21257"
+    },
+    {
+      "path": "/tmp/cxldsagr_layers_reorg_20261005/final_source_identity.json",
+      "sha256": "e30071eb44e183b719c5a8065265b82d55802c0cc06ef04b535d64ef03945952"
+    },
+    {
+      "path": "/tmp/cxldsagr_layers_reorg_20261005/publication_binding.json",
+      "sha256": "878dcacf6138cf58a86e0e57c1bbffbc29cf74dcd89a6a2a604f638c5d7aea1e"
+    },
+    {
+      "path": "/tmp/cxldsagr_layers_reorg_20261005/deepseek_python_collector_review.json",
+      "sha256": "88a0223a5888f6699dac06118bfadc343b639f3cfe05adf26bd903652ac898e3"
+    }
+  ],
+  "validation_boundary": "CPU tests, import/CLI checks, structural and path/serialization audits only. Skipped cases are not GPU validation. No new GPU numerical acceptance or performance measurement; existing report numbers, run IDs and captured source/native identities remain historical. The baseline does not cover every report/output byte; separately checked publication hashes cover only the documented selected assets and generation records. DeepSeek motivation analysis retains strict current/saved source equality and rejects old-source recomputation from this changed checkout."
+}

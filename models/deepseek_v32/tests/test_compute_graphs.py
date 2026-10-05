@@ -6,15 +6,15 @@ import pytest
 import torch
 
 from cache.prefix_pool import CacheBudgetExceeded, CacheFootprint
-from models.deepseek_v32.compute_graphs import (
+from models.deepseek_v32.config import Config
+from models.deepseek_v32.execution.adapter import SCHEMES, DeepSeekServingBackend
+from models.deepseek_v32.execution.compute_graphs import (
     DeepSeekComputeGraphs,
     _precision_policy,
     plan_compute_graphs,
 )
-from models.deepseek_v32.echo_block import CheckpointBlock
-from models.deepseek_v32.echo_model import Config
+from models.deepseek_v32.layers import CheckpointBlock
 from models.deepseek_v32.nonmatrix import residual_rms_norm
-from models.deepseek_v32.serving_backend import SCHEMES, DeepSeekServingBackend
 from models.deepseek_v32.tests.test_echo_block import block_checkpoint as block_fixture
 from serving.persistent import PersistentGRRunner, token_digest
 
@@ -132,6 +132,71 @@ def test_graph_failed_close_retains_storage(monkeypatch):
     with pytest.raises(RuntimeError, match="did not drain"):
         bank.close()
     assert bank.failed and not bank.closed and bank.pairs
+
+
+@pytest.mark.parametrize("body_type", [None, ValueError, KeyboardInterrupt])
+@pytest.mark.parametrize("completion", ["success", "construct", "record"])
+def test_graph_completion_preserves_body_errors_and_retains_failed_owner(
+    monkeypatch, body_type, completion
+):
+    from models.deepseek_v32.tests.test_serving_backend import _model
+
+    owner = object()
+    model, session = _model(layers=3, owner=owner)
+    bank = DeepSeekComputeGraphs([object()], [object()], "cuda:0", {})
+    bank.allocated = True
+    bank.precision_policy = _precision_policy()
+    retained = object()
+    bank.pairs = {(0, 1): retained}
+    model._compute_graphs = bank
+    current = object()
+    body = None if body_type is None else body_type("execution failed")
+    cleanup = OSError("completion failed")
+    events = []
+
+    def event():
+        events.append("construct")
+        if completion == "construct":
+            raise cleanup
+
+        def record(stream):
+            assert stream is current
+            events.append("record")
+            if completion == "record":
+                raise cleanup
+
+        return SimpleNamespace(record=record)
+
+    monkeypatch.setattr(torch.cuda, "current_stream", lambda device: current)
+    monkeypatch.setattr(torch.cuda, "Event", event)
+
+    def execute():
+        with model._execution(session, owner=owner):
+            if body is not None:
+                raise body
+
+    if body is not None and completion != "success":
+        with pytest.raises(BaseExceptionGroup) as failed:
+            execute()
+        assert failed.value.exceptions == (body, cleanup)
+    elif body is not None or completion != "success":
+        expected = body if completion == "success" else cleanup
+        with pytest.raises(type(expected)) as failed:
+            execute()
+        assert failed.value is expected
+    else:
+        execute()
+    assert events == (["construct"] if completion == "construct" else ["construct", "record"])
+    assert not bank._active and bank._stream is None
+    assert bank.pairs[(0, 1)] is retained and not bank.closed
+    assert bank.failed is model.lifecycle.poisoned is (completion != "success")
+    assert model.lifecycle.admission_owner is owner
+    if completion != "success":
+        assert model.lifecycle.active_session is session
+        with pytest.raises(RuntimeError, match="poisoned"):
+            model.release_session(session, owner=owner)
+    else:
+        assert model.lifecycle.active_session is None
 
 
 @pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA required")
@@ -532,13 +597,13 @@ def test_checkpoint_graph_runner_packed_admission_audits_and_failure_ownership(m
                 current_request["request"]["input_ids"][:] = [0]
                 return original_acquire(*args, **kwargs)
 
-            def check_input(session, ids, *, prefill):
+            def check_input(session, ids, *, prefill, **kwargs):
                 expected = current_request["expected"]
                 expected = expected[:history] if prefill else expected[history:]
                 assert ids.device == model.device and ids.dtype == torch.long
                 torch.testing.assert_close(ids.cpu(), torch.tensor(expected), rtol=0, atol=0)
                 input_views.append((ids, ids.cpu()))
-                return (original_prefill if prefill else original_candidate)(session, ids)
+                return (original_prefill if prefill else original_candidate)(session, ids, **kwargs)
 
             def audit():
                 measured = []
@@ -555,9 +620,9 @@ def test_checkpoint_graph_runner_packed_admission_audits_and_failure_ownership(m
                 audit_events.append(("audit", tuple(measured), result))
                 return result
 
-            def truncate(session, length):
+            def truncate(session, length, **kwargs):
                 audit_events.append(("truncate", id(session), length))
-                return original_truncate(session, length)
+                return original_truncate(session, length, **kwargs)
 
             def execute(user, history_ids, candidate):
                 request = {
@@ -575,10 +640,14 @@ def test_checkpoint_graph_runner_packed_admission_audits_and_failure_ownership(m
                     patch.setattr(runner.pool, "audit", audit)
                     patch.setattr(model, "truncate", truncate)
                     patch.setattr(
-                        model, "prefill", lambda s, ids: check_input(s, ids, prefill=True)
+                        model,
+                        "prefill",
+                        lambda s, ids, **kwargs: check_input(s, ids, prefill=True, **kwargs),
                     )
                     patch.setattr(
-                        model, "extend_candidate", lambda s, ids: check_input(s, ids, prefill=False)
+                        model,
+                        "extend_candidate",
+                        lambda s, ids, **kwargs: check_input(s, ids, prefill=False, **kwargs),
                     )
                     first = execute("alice", prefix, candidates[0])
                     original = runner.pool._entries["alice"].session
@@ -631,8 +700,8 @@ def test_checkpoint_graph_runner_packed_admission_audits_and_failure_ownership(m
                             execute("alice", other_prefix, candidates[1])
                     assert changed_session.released and list(runner.pool._entries) == ["bob"]
                     assert runner.visits["alice"] == 3
-                    assert not model._execution_active() and not model._poisoned
-                    assert model._admission_owner is runner
+                    assert not model._execution_active() and not model.lifecycle.poisoned
+                    assert model.lifecycle.admission_owner is runner
                     if model._shared_pool is not None:
                         assert not model._shared_pool._transient_owners
 
@@ -651,13 +720,14 @@ def test_checkpoint_graph_runner_packed_admission_audits_and_failure_ownership(m
                         try:
                             with monkeypatch.context() as completion_patch:
                                 completion_patch.setattr(bank, "execution", fail_completion)
-                                with pytest.raises(RuntimeError, match="poisoned") as error:
+                                with pytest.raises(ExceptionGroup, match="cleanup failed") as error:
                                     execute("bob", other_prefix, candidates[1])
-                            assert "graph completion event" in str(error.value.__context__)
-                            assert bank.failed and bank.pairs and model._poisoned
-                            assert model._active_session is other and not other.released
+                            assert "graph completion event" in str(error.value.exceptions[0])
+                            assert "poisoned" in str(error.value.exceptions[1])
+                            assert bank.failed and bank.pairs and model.lifecycle.poisoned
+                            assert model.lifecycle.active_session is other and not other.released
                             assert runner.pool._entries["bob"].session is other
-                            assert model._admission_owner is runner
+                            assert model.lifecycle.admission_owner is runner
                             with pytest.raises(RuntimeError, match="poisoned"):
                                 runner.close()
                             assert runner.closed and runner._owner_bound
@@ -670,8 +740,8 @@ def test_checkpoint_graph_runner_packed_admission_audits_and_failure_ownership(m
                             # error, not a device fault. Drain and reset only the
                             # synthetic fixture state to release its allocations.
                             torch.cuda.synchronize(model.device)
-                            bank.failed = model._poisoned = False
-                            model._active_session = None
+                            bank.failed = model.lifecycle.poisoned = False
+                            model.lifecycle.active_session = None
                 print(
                     f"graph runner {scheme}: packed GPU inputs exact, both full audits retained, "
                     "changed-A reuse and candidate failure release verified",

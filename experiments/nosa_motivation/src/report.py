@@ -250,7 +250,7 @@ def audit_workload(directory, metadata):
     return requests
 
 
-def audit_run(directory):
+def audit_run(directory, *, receipt_override=None):
     import torch
 
     directory = Path(directory)
@@ -260,7 +260,13 @@ def audit_run(directory):
     )
     checking = metadata["schema"] == CHECK_SCHEMA
     benchmark = metadata["schema"] == BENCH_SCHEMA
-    receipt_audit = audit_receipt(metadata, directory, RECEIPT_KIND) if benchmark else None
+    if receipt_override is not None and not benchmark:
+        raise ValueError("receipt override requires an independently checked benchmark")
+    receipt_audit = (
+        audit_receipt(metadata, directory, RECEIPT_KIND, receipt_override=receipt_override)
+        if benchmark
+        else None
+    )
     require(metadata.get("status") == "accepted", "run is incomplete or failed")
     validate_cpu_environment_record(metadata)
     config = metadata["config"]
@@ -276,13 +282,13 @@ def audit_run(directory):
     require(metadata["model_config"]["num_hidden_layers"] == 32, "incomplete NOSA checkpoint")
     source_id = verify_source_snapshot(directory)
     require(source_id == metadata["source_sha256"], "source manifest identity changed")
-    from evaluation.pool_scan_provenance import POOL_SCAN_ABI, requires_provenance
+    from evaluation.pool_scan_provenance import requires_provenance, source_abi_sha256
 
     saved_sources = json.loads((directory / "source_manifest.json").read_text())
     native_id = audit_native_identity(
         metadata,
         require_pool_referrers=requires_provenance(saved_sources),
-        expected_abi_sha256=saved_sources.get(POOL_SCAN_ABI),
+        expected_abi_sha256=source_abi_sha256(saved_sources),
     )
     requests = audit_workload(directory, metadata)
     cases = metadata["cases"]
@@ -490,8 +496,8 @@ def write_csv(path, rows):
         writer.writerows(rows)
 
 
-def write_report(directory, destination):
-    metadata, rows, audit = audit_run(directory)
+def write_report(directory, destination, *, receipt_override=None):
+    metadata, rows, audit = audit_run(directory, receipt_override=receipt_override)
     require(metadata["schema"] != CHECK_SCHEMA, "check runs do not publish performance reports")
     destination = Path(destination)
     if destination.exists():
@@ -500,8 +506,16 @@ def write_report(directory, destination):
     try:
         _write_report(directory, staging, metadata, rows, audit)
         publish_directories({"report": staging}, {"report": destination})
-    finally:
-        shutil.rmtree(staging, ignore_errors=True)
+    except BaseException as error:
+        try:
+            shutil.rmtree(staging)
+        except BaseException as cleanup_error:  # noqa: BLE001 -- preserve both failures.
+            raise BaseExceptionGroup(
+                "report publication and staging cleanup failed", [error, cleanup_error]
+            ) from None
+        raise
+    else:
+        shutil.rmtree(staging)
     return audit
 
 
@@ -600,8 +614,14 @@ def main(argv=None):
     command = argparse.ArgumentParser(description=__doc__)
     command.add_argument("data_dir", type=Path)
     command.add_argument("--output-dir", required=True, type=Path)
+    command.add_argument("--receipt-override", type=Path)
     args = command.parse_args(argv)
-    print(json.dumps(write_report(args.data_dir, args.output_dir), indent=2))
+    print(
+        json.dumps(
+            write_report(args.data_dir, args.output_dir, receipt_override=args.receipt_override),
+            indent=2,
+        )
+    )
 
 
 if __name__ == "__main__":

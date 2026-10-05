@@ -3,8 +3,9 @@
 import pytest
 import torch
 
-from layers.attention import AttentionContext, ResidentLayerView
-from models.nosa.cache import NosaKVCache
+from models.attention_contracts import AttentionContext
+from models.nosa.attention import ResidentLayerView
+from models.nosa.cache.resident import NosaKVCache
 from models.nosa.indexer import NosaIndexer, prepare_indexer_inputs
 from models.nosa.scoring import NosaAttentionState, compress_sequence
 from models.nosa.tests.test_model import tiny_config

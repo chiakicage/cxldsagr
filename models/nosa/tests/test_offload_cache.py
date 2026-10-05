@@ -3,10 +3,11 @@
 import pytest
 import torch
 
-from layers.attention import AttentionContext, ResidentLayerView
+from models.attention_contracts import AttentionContext
+from models.nosa.attention import ResidentLayerView
+from models.nosa.cache.offload import NosaOffloadCache
 from models.nosa.config import NosaConfig
 from models.nosa.indexer import NosaIndexer
-from models.nosa.offload_cache import NosaOffloadCache
 from models.nosa.scoring import NosaAttentionState, compress_sequence
 
 
@@ -199,7 +200,7 @@ def test_unsupported_policy_override_and_invalid_query_rejected():
 @pytest.mark.parametrize("prefix,rows", [(63, 129), (65536, 1024)])
 @torch.inference_mode()
 def test_cuda_offload_compression_selection_and_retry_match_resident(monkeypatch, prefix, rows):
-    from models.nosa.cache import NosaKVCache
+    from models.nosa.cache.resident import NosaKVCache
     from models.nosa.indexer import prepare_indexer_inputs
 
     monkeypatch.setenv("CXLDSAGR_SM90_BACKEND", "native")

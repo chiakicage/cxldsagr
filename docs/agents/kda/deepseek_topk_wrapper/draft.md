@@ -4,7 +4,7 @@ C9 history top-k families cost 180.543–190.132 ms. HBM has 108.164 ms selector
 35.852 ms index finalizer and 46.115 ms stable value sort; ECHO has
 102.469/34.409/43.665 ms. T1 targets the latter two and the existing mask.
 These sums do not predict an API or full-request gain. Evidence:
-[C9 profile note](../../system/deepseek_motivation_c9_profile.md).
+C9 profile note（Git `934485b:docs/agents/system/deepseek_motivation_c9_profile.md`）.
 
 Installed `TopKDispatch` controls index finalization with `deterministic` and
 stable value sorting with `sorted_output`. Its selector computes

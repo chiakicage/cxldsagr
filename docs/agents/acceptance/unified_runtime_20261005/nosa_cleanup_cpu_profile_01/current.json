@@ -1,0 +1,2107 @@
+{
+  "schema": "mock-shared-runner-cleanup-cpu-profile-v1",
+  "role": "current",
+  "checkout": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr",
+  "scope": "Existing SharedBackend fixture with host quota widened to 1 or 16 sessions and a local no-compute candidate returning one preallocated CPU tensor. Actual runner/audit source is unmodified. No NOSA model, real cache storage enumeration, allocator/lease audit, or CUDA synchronization is exercised; these values cannot explain full-serving cleanup causally.",
+  "unit": "microseconds",
+  "command": [
+    ".venv/bin/python",
+    "-B",
+    "/tmp/nosa_cleanup_cpu_profile_20261005_01/profile_cleanup.py",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr",
+    "current"
+  ],
+  "affinity": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "threads": 1,
+  "gc_enabled": true,
+  "cuda_initialized": false,
+  "source_sha256": {
+    "serving/tests/test_persistent.py": "f41892e171d684cf33b32ecc0e09d8dd2c5e1e04939e36d92f59484f8a7bad99",
+    "serving/persistent.py": "2aad3a4260244afec3952fa6897f5261926ae3e709f3e662b099bd4d4ad15d2a",
+    "cache/prefix_pool.py": "1a363205c74cf382c8c4294f6ddf3358c0da31b292dc0edc16f7c80b4d77a695",
+    "executor/runtime.py": "796d266c4faee012e8277f8c94970e37e688615f5104cb214ee03d154b833b37",
+    "executor/adapters.py": "7649ee19d5ca3490480a329b9f02286dcc8e6230da0395d097f3e2f9065e4e20",
+    "cache/capacity.py": "ba39f57a49124b23c60552240d87fbb9804b5320275b09596eadf2f0ff8c3a96"
+  },
+  "script_sha256": "9c2c00bf178c768ea55b62e245ff9687cb28ee91b97800ea5bab92d126445c79",
+  "timing": "20 warmup calls then 7 batches \u00d7 500; cProfile is a separate 300-iteration pass; all unprofiled samples retained.",
+  "cases": {
+    "1": {
+      "pool_audit_us": {
+        "values": [
+          6.04462,
+          5.9424719999999995,
+          5.9360420000000005,
+          5.977908,
+          5.954816,
+          5.92184,
+          5.984302
+        ],
+        "median": 5.954816,
+        "min": 5.92184,
+        "max": 6.04462,
+        "range": 0.12277999999999967
+      },
+      "mock_candidate_cleanup_us": {
+        "values": [
+          14.609792502596974,
+          14.386578230187297,
+          14.45052307099104,
+          14.486597152426839,
+          14.436001656576991,
+          14.518354320898652,
+          14.487097039818764
+        ],
+        "median": 14.486597152426839,
+        "min": 14.386578230187297,
+        "max": 14.609792502596974,
+        "range": 0.2232142724096775
+      },
+      "mock_candidate_extend_us": {
+        "values": [
+          12.664040084928274,
+          12.588479788973927,
+          12.473033042624593,
+          12.463142862543464,
+          12.44525401853025,
+          12.47839955613017,
+          12.462703743949533
+        ],
+        "median": 12.473033042624593,
+        "min": 12.44525401853025,
+        "max": 12.664040084928274,
+        "range": 0.21878606639802456
+      },
+      "mock_request_wall_us": {
+        "values": [
+          40.96888587810099,
+          40.55026778951287,
+          40.32619623467326,
+          40.46981921419501,
+          40.51099205389619,
+          40.513468673452735,
+          40.52859195508063
+        ],
+        "median": 40.513468673452735,
+        "min": 40.32619623467326,
+        "max": 40.96888587810099,
+        "range": 0.6426896434277296
+      },
+      "profile_pool_audit": [
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/prefix_pool.py",
+          "line": 239,
+          "function": "audit",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 2.5302766666666665,
+          "cumulative_us_per_iteration": 21.21239333333333
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/prefix_pool.py",
+          "line": 114,
+          "function": "shared_bytes",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.7010466666666667,
+          "cumulative_us_per_iteration": 7.685860000000001
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/executor/runtime.py",
+          "line": 76,
+          "function": "session_usage",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.5014533333333334,
+          "cumulative_us_per_iteration": 6.37682
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/serving/persistent.py",
+          "line": 143,
+          "function": "<lambda>",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.5160266666666667,
+          "cumulative_us_per_iteration": 5.379516666666667
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/executor/adapters.py",
+          "line": 228,
+          "function": "session_usage",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 1.1848266666666667,
+          "cumulative_us_per_iteration": 5.1114733333333335
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/executor/runtime.py",
+          "line": 80,
+          "function": "shared_usage",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.26769,
+          "cumulative_us_per_iteration": 4.672623333333333
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 92,
+          "function": "from_mapping",
+          "calls_per_iteration": 3.0,
+          "self_us_per_iteration": 1.2899200000000002,
+          "cumulative_us_per_iteration": 4.5420300000000005
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/executor/adapters.py",
+          "line": 235,
+          "function": "shared_usage",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.8740100000000001,
+          "cumulative_us_per_iteration": 4.404933333333333
+        },
+        {
+          "file": "<string>",
+          "line": 2,
+          "function": "__init__",
+          "calls_per_iteration": 2.0,
+          "self_us_per_iteration": 1.6722800000000002,
+          "cumulative_us_per_iteration": 3.6789
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 88,
+          "function": "__post_init__",
+          "calls_per_iteration": 4.0,
+          "self_us_per_iteration": 1.4374366666666667,
+          "cumulative_us_per_iteration": 2.436336666666667
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 304,
+          "function": "__post_init__",
+          "calls_per_iteration": 2.0,
+          "self_us_per_iteration": 1.3048133333333334,
+          "cumulative_us_per_iteration": 2.00662
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 78,
+          "function": "nonnegative",
+          "calls_per_iteration": 12.0,
+          "self_us_per_iteration": 1.5265666666666668,
+          "cumulative_us_per_iteration": 1.5265666666666668
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 99,
+          "function": "__add__",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.3794666666666667,
+          "cumulative_us_per_iteration": 1.40585
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/prefix_pool.py",
+          "line": 98,
+          "function": "reserved_host_pages",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.5658566666666667,
+          "cumulative_us_per_iteration": 1.3722266666666667
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.sum>",
+          "calls_per_iteration": 2.0,
+          "self_us_per_iteration": 0.81001,
+          "cumulative_us_per_iteration": 1.3129066666666667
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/prefix_pool.py",
+          "line": 106,
+          "function": "reserved_hbm_tokens",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.4894166666666667,
+          "cumulative_us_per_iteration": 1.2468433333333333
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/executor/runtime.py",
+          "line": 62,
+          "function": "_check",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.47587000000000007,
+          "cumulative_us_per_iteration": 0.7638933333333334
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.isinstance>",
+          "calls_per_iteration": 5.0,
+          "self_us_per_iteration": 0.4665700000000001,
+          "cumulative_us_per_iteration": 0.4665700000000001
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/serving/tests/test_persistent.py",
+          "line": 194,
+          "function": "session_host_pages",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.25612000000000007,
+          "cumulative_us_per_iteration": 0.3723233333333334
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 96,
+          "function": "fits",
+          "calls_per_iteration": 2.0,
+          "self_us_per_iteration": 0.31462666666666667,
+          "cumulative_us_per_iteration": 0.31462666666666667
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/prefix_pool.py",
+          "line": 100,
+          "function": "<genexpr>",
+          "calls_per_iteration": 2.0,
+          "self_us_per_iteration": 0.2525,
+          "cumulative_us_per_iteration": 0.2525
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'values' of 'collections.OrderedDict' objects>",
+          "calls_per_iteration": 2.0,
+          "self_us_per_iteration": 0.25089000000000006,
+          "cumulative_us_per_iteration": 0.25089000000000006
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/prefix_pool.py",
+          "line": 108,
+          "function": "<genexpr>",
+          "calls_per_iteration": 2.0,
+          "self_us_per_iteration": 0.2503966666666667,
+          "cumulative_us_per_iteration": 0.2503966666666667
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 316,
+          "function": "as_mapping",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.19086666666666668,
+          "cumulative_us_per_iteration": 0.19086666666666668
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'get' of 'dict' objects>",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.16364,
+          "cumulative_us_per_iteration": 0.16364
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/serving/tests/test_persistent.py",
+          "line": 53,
+          "function": "session_bytes",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.15885666666666667,
+          "cumulative_us_per_iteration": 0.15885666666666667
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'items' of 'collections.OrderedDict' objects>",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.15144333333333335,
+          "cumulative_us_per_iteration": 0.15144333333333335
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/serving/tests/test_persistent.py",
+          "line": 188,
+          "function": "shared_bytes",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.14677333333333334,
+          "cumulative_us_per_iteration": 0.14677333333333334
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.id>",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.12438333333333335,
+          "cumulative_us_per_iteration": 0.12438333333333335
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/serving/tests/test_persistent.py",
+          "line": 191,
+          "function": "estimate_session_host_pages",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.11620333333333335,
+          "cumulative_us_per_iteration": 0.11620333333333335
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'disable' of '_lsprof.Profiler' objects>",
+          "calls_per_iteration": 0.0033333333333333335,
+          "self_us_per_iteration": 0.03956,
+          "cumulative_us_per_iteration": 0.03956
+        }
+      ],
+      "profile_mock_execute": [
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/executor/runtime.py",
+          "line": 115,
+          "function": "candidate",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 3.5974266666666668,
+          "cumulative_us_per_iteration": 123.62947333333335
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/lib/python3.12/site-packages/torch/autograd/grad_mode.py",
+          "line": 293,
+          "function": "__exit__",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 8.708066666666667,
+          "cumulative_us_per_iteration": 64.81668
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/serving/persistent.py",
+          "line": 207,
+          "function": "observe",
+          "calls_per_iteration": 2.0,
+          "self_us_per_iteration": 1.6288966666666669,
+          "cumulative_us_per_iteration": 50.07950666666667
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/prefix_pool.py",
+          "line": 239,
+          "function": "audit",
+          "calls_per_iteration": 2.0,
+          "self_us_per_iteration": 6.328473333333333,
+          "cumulative_us_per_iteration": 48.16026333333334
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/prefix_pool.py",
+          "line": 114,
+          "function": "shared_bytes",
+          "calls_per_iteration": 3.0,
+          "self_us_per_iteration": 2.4451400000000003,
+          "cumulative_us_per_iteration": 25.509220000000003
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/lib/python3.12/site-packages/torch/autograd/grad_mode.py",
+          "line": 289,
+          "function": "__enter__",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 5.4297233333333335,
+          "cumulative_us_per_iteration": 18.302400000000002
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/serving/persistent.py",
+          "line": 143,
+          "function": "<lambda>",
+          "calls_per_iteration": 3.0,
+          "self_us_per_iteration": 1.7979366666666665,
+          "cumulative_us_per_iteration": 17.979690000000005
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/executor/runtime.py",
+          "line": 80,
+          "function": "shared_usage",
+          "calls_per_iteration": 3.0,
+          "self_us_per_iteration": 0.9267966666666666,
+          "cumulative_us_per_iteration": 15.587683333333334
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/executor/adapters.py",
+          "line": 235,
+          "function": "shared_usage",
+          "calls_per_iteration": 3.0,
+          "self_us_per_iteration": 2.9601266666666666,
+          "cumulative_us_per_iteration": 14.660886666666668
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 92,
+          "function": "from_mapping",
+          "calls_per_iteration": 9.0,
+          "self_us_per_iteration": 4.14679,
+          "cumulative_us_per_iteration": 14.539106666666667
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/executor/runtime.py",
+          "line": 76,
+          "function": "session_usage",
+          "calls_per_iteration": 2.0,
+          "self_us_per_iteration": 1.3445166666666668,
+          "cumulative_us_per_iteration": 14.362253333333335
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 88,
+          "function": "__post_init__",
+          "calls_per_iteration": 22.0,
+          "self_us_per_iteration": 8.00516,
+          "cumulative_us_per_iteration": 13.709060000000003
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/prefix_pool.py",
+          "line": 91,
+          "function": "session_reserved",
+          "calls_per_iteration": 4.0,
+          "self_us_per_iteration": 3.43708,
+          "cumulative_us_per_iteration": 13.640250000000002
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/executor/runtime.py",
+          "line": 49,
+          "function": "plan_session",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.8240033333333333,
+          "cumulative_us_per_iteration": 12.459610000000001
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/executor/adapters.py",
+          "line": 228,
+          "function": "session_usage",
+          "calls_per_iteration": 2.0,
+          "self_us_per_iteration": 2.7710500000000002,
+          "cumulative_us_per_iteration": 11.291820000000001
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 99,
+          "function": "__add__",
+          "calls_per_iteration": 8.0,
+          "self_us_per_iteration": 3.023076666666667,
+          "cumulative_us_per_iteration": 11.265923333333333
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/executor/adapters.py",
+          "line": 194,
+          "function": "plan_session",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 2.438606666666667,
+          "cumulative_us_per_iteration": 10.97696
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/prefix_pool.py",
+          "line": 86,
+          "function": "reserved",
+          "calls_per_iteration": 2.0,
+          "self_us_per_iteration": 1.0628266666666668,
+          "cumulative_us_per_iteration": 10.921566666666667
+        },
+        {
+          "file": "<string>",
+          "line": 2,
+          "function": "__init__",
+          "calls_per_iteration": 5.0,
+          "self_us_per_iteration": 4.452366666666667,
+          "cumulative_us_per_iteration": 10.19824
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.len>",
+          "calls_per_iteration": 12.0,
+          "self_us_per_iteration": 2.8447433333333336,
+          "cumulative_us_per_iteration": 9.044056666666666
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/serving/persistent.py",
+          "line": 160,
+          "function": "_validate",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 2.8964800000000004,
+          "cumulative_us_per_iteration": 7.735156666666667
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 78,
+          "function": "nonnegative",
+          "calls_per_iteration": 56.0,
+          "self_us_per_iteration": 7.415373333333334,
+          "cumulative_us_per_iteration": 7.415373333333334
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/prefix_pool.py",
+          "line": 134,
+          "function": "acquire",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 3.6361133333333338,
+          "cumulative_us_per_iteration": 6.533793333333334
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/lib/python3.12/site-packages/torch/_tensor.py",
+          "line": 1187,
+          "function": "__len__",
+          "calls_per_iteration": 4.0,
+          "self_us_per_iteration": 3.3598700000000004,
+          "cumulative_us_per_iteration": 5.924926666666667
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 304,
+          "function": "__post_init__",
+          "calls_per_iteration": 5.0,
+          "self_us_per_iteration": 3.767086666666667,
+          "cumulative_us_per_iteration": 5.745873333333334
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/prefix_pool.py",
+          "line": 98,
+          "function": "reserved_host_pages",
+          "calls_per_iteration": 3.0,
+          "self_us_per_iteration": 1.90206,
+          "cumulative_us_per_iteration": 4.665563333333334
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.sum>",
+          "calls_per_iteration": 6.0,
+          "self_us_per_iteration": 2.7256,
+          "cumulative_us_per_iteration": 4.42384
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/serving/persistent.py",
+          "line": 37,
+          "function": "_prepare_token_input",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 1.2311233333333336,
+          "cumulative_us_per_iteration": 4.1682733333333335
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/prefix_pool.py",
+          "line": 106,
+          "function": "reserved_hbm_tokens",
+          "calls_per_iteration": 3.0,
+          "self_us_per_iteration": 1.6356033333333337,
+          "cumulative_us_per_iteration": 4.124206666666667
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/executor/adapters.py",
+          "line": 266,
+          "function": "candidate",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 1.4225800000000002,
+          "cumulative_us_per_iteration": 3.6656500000000007
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/executor/runtime.py",
+          "line": 70,
+          "function": "_tokens",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 1.3229833333333334,
+          "cumulative_us_per_iteration": 3.591746666666667
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 276,
+          "function": "__post_init__",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 2.13231,
+          "cumulative_us_per_iteration": 3.4169433333333337
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/executor/runtime.py",
+          "line": 62,
+          "function": "_check",
+          "calls_per_iteration": 3.0,
+          "self_us_per_iteration": 1.7090466666666668,
+          "cumulative_us_per_iteration": 2.69426
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/executor/contracts.py",
+          "line": 66,
+          "function": "validate",
+          "calls_per_iteration": 4.0,
+          "self_us_per_iteration": 1.8139766666666666,
+          "cumulative_us_per_iteration": 2.6704733333333337
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/executor/contracts.py",
+          "line": 20,
+          "function": "__post_init__",
+          "calls_per_iteration": 3.0,
+          "self_us_per_iteration": 1.920826666666667,
+          "cumulative_us_per_iteration": 2.6011200000000003
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.isinstance>",
+          "calls_per_iteration": 18.0,
+          "self_us_per_iteration": 2.144203333333333,
+          "cumulative_us_per_iteration": 2.144203333333333
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/serving/persistent.py",
+          "line": 28,
+          "function": "_packed_prefix_digest",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 1.1042333333333334,
+          "cumulative_us_per_iteration": 1.9285833333333335
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/serving/token_validation.py",
+          "line": 29,
+          "function": "reference",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 1.3177400000000001,
+          "cumulative_us_per_iteration": 1.8988866666666668
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'values' of 'collections.OrderedDict' objects>",
+          "calls_per_iteration": 10.0,
+          "self_us_per_iteration": 1.3739166666666667,
+          "cumulative_us_per_iteration": 1.3739166666666667
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method torch._C._get_tracing_state>",
+          "calls_per_iteration": 4.0,
+          "self_us_per_iteration": 1.2938733333333332,
+          "cumulative_us_per_iteration": 1.2938733333333332
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/executor/adapters.py",
+          "line": 274,
+          "function": "finish_candidate",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.80223,
+          "cumulative_us_per_iteration": 1.2488566666666667
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/executor/adapters.py",
+          "line": 253,
+          "function": "_result",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.6795599999999999,
+          "cumulative_us_per_iteration": 1.2398433333333334
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/lib/python3.12/site-packages/torch/autograd/grad_mode.py",
+          "line": 284,
+          "function": "__new__",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.7351066666666667,
+          "cumulative_us_per_iteration": 1.0724200000000002
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method torch.frombuffer>",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 1.0085666666666666,
+          "cumulative_us_per_iteration": 1.0085666666666666
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 96,
+          "function": "fits",
+          "calls_per_iteration": 6.0,
+          "self_us_per_iteration": 1.00736,
+          "cumulative_us_per_iteration": 1.00736
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'to' of 'torch._C.TensorBase' objects>",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.9812366666666668,
+          "cumulative_us_per_iteration": 0.9812366666666668
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/executor/contracts.py",
+          "line": 26,
+          "function": "total_tokens",
+          "calls_per_iteration": 9.0,
+          "self_us_per_iteration": 0.9611300000000002,
+          "cumulative_us_per_iteration": 0.9611300000000002
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'get' of 'dict' objects>",
+          "calls_per_iteration": 5.0,
+          "self_us_per_iteration": 0.9494900000000002,
+          "cumulative_us_per_iteration": 0.9494900000000002
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/lib/python3.12/site-packages/torch/autograd/grad_mode.py",
+          "line": 279,
+          "function": "__init__",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.81047,
+          "cumulative_us_per_iteration": 0.9242133333333333
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/serving/tests/test_persistent.py",
+          "line": 194,
+          "function": "session_host_pages",
+          "calls_per_iteration": 2.0,
+          "self_us_per_iteration": 0.6198366666666667,
+          "cumulative_us_per_iteration": 0.9212666666666667
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/executor/adapters.py",
+          "line": 177,
+          "function": "_quota",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.7462000000000001,
+          "cumulative_us_per_iteration": 0.90956
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/serving/tests/test_persistent.py",
+          "line": 146,
+          "function": "<lambda>",
+          "calls_per_iteration": 2.0,
+          "self_us_per_iteration": 0.5901866666666667,
+          "cumulative_us_per_iteration": 0.8923833333333334
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/prefix_pool.py",
+          "line": 100,
+          "function": "<genexpr>",
+          "calls_per_iteration": 6.0,
+          "self_us_per_iteration": 0.8854600000000001,
+          "cumulative_us_per_iteration": 0.8854600000000001
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/executor/runtime.py",
+          "line": 101,
+          "function": "_check_result",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.8482299999999999,
+          "cumulative_us_per_iteration": 0.8482299999999999
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/prefix_pool.py",
+          "line": 108,
+          "function": "<genexpr>",
+          "calls_per_iteration": 6.0,
+          "self_us_per_iteration": 0.8127800000000001,
+          "cumulative_us_per_iteration": 0.8127800000000001
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/executor/adapters.py",
+          "line": 288,
+          "function": "synchronize",
+          "calls_per_iteration": 2.0,
+          "self_us_per_iteration": 0.6082133333333334,
+          "cumulative_us_per_iteration": 0.8020433333333333
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method time.perf_counter>",
+          "calls_per_iteration": 5.0,
+          "self_us_per_iteration": 0.7761233333333334,
+          "cumulative_us_per_iteration": 0.7761233333333334
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'update' of 'dict' objects>",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.7729833333333334,
+          "cumulative_us_per_iteration": 0.7729833333333334
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'dim' of 'torch._C.TensorBase' objects>",
+          "calls_per_iteration": 4.0,
+          "self_us_per_iteration": 0.7639733333333335,
+          "cumulative_us_per_iteration": 0.7639733333333335
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.getattr>",
+          "calls_per_iteration": 6.0,
+          "self_us_per_iteration": 0.6802933333333333,
+          "cumulative_us_per_iteration": 0.6802933333333333
+        },
+        {
+          "file": "/tmp/nosa_cleanup_cpu_profile_20261005_01/profile_cleanup.py",
+          "line": 55,
+          "function": "no_compute",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.43053333333333343,
+          "cumulative_us_per_iteration": 0.61171
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 316,
+          "function": "as_mapping",
+          "calls_per_iteration": 3.0,
+          "self_us_per_iteration": 0.59407,
+          "cumulative_us_per_iteration": 0.59407
+        },
+        {
+          "file": "<string>",
+          "line": 2,
+          "function": "__eq__",
+          "calls_per_iteration": 2.0,
+          "self_us_per_iteration": 0.58372,
+          "cumulative_us_per_iteration": 0.58372
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/executor/adapters.py",
+          "line": 282,
+          "function": "diagnostics",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.4051366666666667,
+          "cumulative_us_per_iteration": 0.5423266666666667
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/executor/adapters.py",
+          "line": 243,
+          "function": "validate_output",
+          "calls_per_iteration": 2.0,
+          "self_us_per_iteration": 0.5349766666666668,
+          "cumulative_us_per_iteration": 0.5349766666666668
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.any>",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.3950366666666667,
+          "cumulative_us_per_iteration": 0.53107
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method torch._C._has_torch_function_unary>",
+          "calls_per_iteration": 4.0,
+          "self_us_per_iteration": 0.50721,
+          "cumulative_us_per_iteration": 0.50721
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/serving/tests/test_persistent.py",
+          "line": 188,
+          "function": "shared_bytes",
+          "calls_per_iteration": 3.0,
+          "self_us_per_iteration": 0.4941633333333334,
+          "cumulative_us_per_iteration": 0.4941633333333334
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/serving/tests/test_persistent.py",
+          "line": 191,
+          "function": "estimate_session_host_pages",
+          "calls_per_iteration": 3.0,
+          "self_us_per_iteration": 0.46479000000000004,
+          "cumulative_us_per_iteration": 0.46479000000000004
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'hexdigest' of '_hashlib.HASH' objects>",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.4538633333333334,
+          "cumulative_us_per_iteration": 0.4538633333333334
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.id>",
+          "calls_per_iteration": 3.0,
+          "self_us_per_iteration": 0.4517933333333334,
+          "cumulative_us_per_iteration": 0.4517933333333334
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/prefix_pool.py",
+          "line": 125,
+          "function": "__len__",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.27438666666666667,
+          "cumulative_us_per_iteration": 0.43746666666666667
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/serving/tests/test_persistent.py",
+          "line": 60,
+          "function": "synchronize",
+          "calls_per_iteration": 4.0,
+          "self_us_per_iteration": 0.40089,
+          "cumulative_us_per_iteration": 0.40089
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/serving/tests/test_persistent.py",
+          "line": 53,
+          "function": "session_bytes",
+          "calls_per_iteration": 2.0,
+          "self_us_per_iteration": 0.39841000000000004,
+          "cumulative_us_per_iteration": 0.39841000000000004
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method _hashlib.openssl_sha256>",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.37048666666666674,
+          "cumulative_us_per_iteration": 0.37048666666666674
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'items' of 'collections.OrderedDict' objects>",
+          "calls_per_iteration": 2.0,
+          "self_us_per_iteration": 0.35304,
+          "cumulative_us_per_iteration": 0.35304
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/executor/adapters.py",
+          "line": 164,
+          "function": "_owner_options",
+          "calls_per_iteration": 2.0,
+          "self_us_per_iteration": 0.31609000000000004,
+          "cumulative_us_per_iteration": 0.31609000000000004
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/serving/tests/test_persistent.py",
+          "line": 50,
+          "function": "truncate",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.29899000000000003,
+          "cumulative_us_per_iteration": 0.29899000000000003
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.all>",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.2933966666666667,
+          "cumulative_us_per_iteration": 0.2933966666666667
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.min>",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.28775000000000006,
+          "cumulative_us_per_iteration": 0.28775000000000006
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'items' of 'dict' objects>",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.23047333333333336,
+          "cumulative_us_per_iteration": 0.23047333333333336
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'move_to_end' of 'collections.OrderedDict' objects>",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.21382,
+          "cumulative_us_per_iteration": 0.21382
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.hash>",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.21167,
+          "cumulative_us_per_iteration": 0.21167
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method __new__ of type object at 0x14484b0>",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.21040999999999999,
+          "cumulative_us_per_iteration": 0.21040999999999999
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/serving/tests/test_persistent.py",
+          "line": 31,
+          "function": "estimate_session_bytes",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.20129,
+          "cumulative_us_per_iteration": 0.20129
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'extend' of 'list' objects>",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.1811766666666667,
+          "cumulative_us_per_iteration": 0.1811766666666667
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/serving/tests/test_persistent.py",
+          "line": 17,
+          "function": "<lambda>",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.13719,
+          "cumulative_us_per_iteration": 0.13719
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 288,
+          "function": "<genexpr>",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.13603333333333334,
+          "cumulative_us_per_iteration": 0.13603333333333334
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/lib/python3.12/site-packages/torch/_jit_internal.py",
+          "line": 104,
+          "function": "is_scripting",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.11374333333333335,
+          "cumulative_us_per_iteration": 0.11374333333333335
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'disable' of '_lsprof.Profiler' objects>",
+          "calls_per_iteration": 0.0033333333333333335,
+          "self_us_per_iteration": 0.04637,
+          "cumulative_us_per_iteration": 0.04637
+        }
+      ]
+    },
+    "16": {
+      "pool_audit_us": {
+        "values": [
+          46.733565999999996,
+          46.945924,
+          46.605684000000004,
+          46.975374,
+          46.646752,
+          47.272211999999996,
+          47.08433
+        ],
+        "median": 46.945924,
+        "min": 46.605684000000004,
+        "max": 47.272211999999996,
+        "range": 0.6665279999999925
+      },
+      "mock_candidate_cleanup_us": {
+        "values": [
+          96.24856896698475,
+          95.65992909483612,
+          95.76015290804207,
+          95.53015371784568,
+          171.3412229437381,
+          98.10671326704323,
+          98.04648719727993
+        ],
+        "median": 96.24856896698475,
+        "min": 95.53015371784568,
+        "max": 171.3412229437381,
+        "range": 75.81106922589242
+      },
+      "mock_candidate_extend_us": {
+        "values": [
+          13.444328214973211,
+          13.272368581965566,
+          13.30300490371883,
+          13.265529880300164,
+          13.506239978596568,
+          13.563723536208272,
+          13.521355111151934
+        ],
+        "median": 13.444328214973211,
+        "min": 13.265529880300164,
+        "max": 13.563723536208272,
+        "range": 0.29819365590810776
+      },
+      "mock_request_wall_us": {
+        "values": [
+          123.84894699789584,
+          122.98536510206759,
+          123.10927454382181,
+          122.90730467066169,
+          199.2561612278223,
+          126.14391767419875,
+          126.05074467137456
+        ],
+        "median": 123.84894699789584,
+        "min": 122.90730467066169,
+        "max": 199.2561612278223,
+        "range": 76.34885655716062
+      },
+      "profile_pool_audit": [
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/prefix_pool.py",
+          "line": 239,
+          "function": "audit",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 24.863866666666667,
+          "cumulative_us_per_iteration": 168.50606333333334
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/executor/runtime.py",
+          "line": 76,
+          "function": "session_usage",
+          "calls_per_iteration": 16.0,
+          "self_us_per_iteration": 7.193620000000001,
+          "cumulative_us_per_iteration": 96.42599000000001
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/executor/adapters.py",
+          "line": 228,
+          "function": "session_usage",
+          "calls_per_iteration": 16.0,
+          "self_us_per_iteration": 18.14271666666667,
+          "cumulative_us_per_iteration": 78.24834333333334
+        },
+        {
+          "file": "<string>",
+          "line": 2,
+          "function": "__init__",
+          "calls_per_iteration": 17.0,
+          "self_us_per_iteration": 14.00034,
+          "cumulative_us_per_iteration": 30.108469999999997
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 92,
+          "function": "from_mapping",
+          "calls_per_iteration": 18.0,
+          "self_us_per_iteration": 7.878653333333335,
+          "cumulative_us_per_iteration": 27.14825666666667
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 99,
+          "function": "__add__",
+          "calls_per_iteration": 16.0,
+          "self_us_per_iteration": 6.322736666666668,
+          "cumulative_us_per_iteration": 23.218086666666668
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 88,
+          "function": "__post_init__",
+          "calls_per_iteration": 34.0,
+          "self_us_per_iteration": 12.27312,
+          "cumulative_us_per_iteration": 20.807986666666668
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 304,
+          "function": "__post_init__",
+          "calls_per_iteration": 17.0,
+          "self_us_per_iteration": 10.406316666666669,
+          "cumulative_us_per_iteration": 16.108130000000003
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 78,
+          "function": "nonnegative",
+          "calls_per_iteration": 102.0,
+          "self_us_per_iteration": 12.897936666666668,
+          "cumulative_us_per_iteration": 12.897936666666668
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/executor/runtime.py",
+          "line": 62,
+          "function": "_check",
+          "calls_per_iteration": 16.0,
+          "self_us_per_iteration": 6.906330000000001,
+          "cumulative_us_per_iteration": 10.984026666666667
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/prefix_pool.py",
+          "line": 114,
+          "function": "shared_bytes",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.7839066666666668,
+          "cumulative_us_per_iteration": 8.181626666666668
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.sum>",
+          "calls_per_iteration": 2.0,
+          "self_us_per_iteration": 3.5786333333333338,
+          "cumulative_us_per_iteration": 7.23294
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.isinstance>",
+          "calls_per_iteration": 65.0,
+          "self_us_per_iteration": 5.78099,
+          "cumulative_us_per_iteration": 5.78099
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/serving/persistent.py",
+          "line": 143,
+          "function": "<lambda>",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.5818033333333333,
+          "cumulative_us_per_iteration": 5.7118400000000005
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/serving/tests/test_persistent.py",
+          "line": 194,
+          "function": "session_host_pages",
+          "calls_per_iteration": 16.0,
+          "self_us_per_iteration": 3.6996,
+          "cumulative_us_per_iteration": 5.410823333333334
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/executor/runtime.py",
+          "line": 80,
+          "function": "shared_usage",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.28759333333333337,
+          "cumulative_us_per_iteration": 4.923706666666667
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/prefix_pool.py",
+          "line": 98,
+          "function": "reserved_host_pages",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.6830733333333334,
+          "cumulative_us_per_iteration": 4.715876666666667
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/executor/adapters.py",
+          "line": 235,
+          "function": "shared_usage",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.9893466666666668,
+          "cumulative_us_per_iteration": 4.636113333333333
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/prefix_pool.py",
+          "line": 106,
+          "function": "reserved_hbm_tokens",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.5737033333333333,
+          "cumulative_us_per_iteration": 4.116646666666667
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 96,
+          "function": "fits",
+          "calls_per_iteration": 17.0,
+          "self_us_per_iteration": 2.5207033333333335,
+          "cumulative_us_per_iteration": 2.5207033333333335
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/serving/tests/test_persistent.py",
+          "line": 53,
+          "function": "session_bytes",
+          "calls_per_iteration": 16.0,
+          "self_us_per_iteration": 2.4421333333333335,
+          "cumulative_us_per_iteration": 2.4421333333333335
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'get' of 'dict' objects>",
+          "calls_per_iteration": 16.0,
+          "self_us_per_iteration": 2.26805,
+          "cumulative_us_per_iteration": 2.26805
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/prefix_pool.py",
+          "line": 100,
+          "function": "<genexpr>",
+          "calls_per_iteration": 17.0,
+          "self_us_per_iteration": 1.9532466666666668,
+          "cumulative_us_per_iteration": 1.9532466666666668
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.id>",
+          "calls_per_iteration": 16.0,
+          "self_us_per_iteration": 1.8096466666666666,
+          "cumulative_us_per_iteration": 1.8096466666666666
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/serving/tests/test_persistent.py",
+          "line": 191,
+          "function": "estimate_session_host_pages",
+          "calls_per_iteration": 16.0,
+          "self_us_per_iteration": 1.7112233333333335,
+          "cumulative_us_per_iteration": 1.7112233333333335
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/prefix_pool.py",
+          "line": 108,
+          "function": "<genexpr>",
+          "calls_per_iteration": 17.0,
+          "self_us_per_iteration": 1.7010600000000002,
+          "cumulative_us_per_iteration": 1.7010600000000002
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'values' of 'collections.OrderedDict' objects>",
+          "calls_per_iteration": 2.0,
+          "self_us_per_iteration": 0.34280666666666665,
+          "cumulative_us_per_iteration": 0.34280666666666665
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 316,
+          "function": "as_mapping",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.20633,
+          "cumulative_us_per_iteration": 0.20633
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'items' of 'collections.OrderedDict' objects>",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.18863000000000002,
+          "cumulative_us_per_iteration": 0.18863000000000002
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/serving/tests/test_persistent.py",
+          "line": 188,
+          "function": "shared_bytes",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.16098,
+          "cumulative_us_per_iteration": 0.16098
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'disable' of '_lsprof.Profiler' objects>",
+          "calls_per_iteration": 0.0033333333333333335,
+          "self_us_per_iteration": 0.042243333333333334,
+          "cumulative_us_per_iteration": 0.042243333333333334
+        }
+      ],
+      "profile_mock_execute": [
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/executor/runtime.py",
+          "line": 115,
+          "function": "candidate",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 3.857733333333334,
+          "cumulative_us_per_iteration": 435.8249333333333
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/serving/persistent.py",
+          "line": 207,
+          "function": "observe",
+          "calls_per_iteration": 2.0,
+          "self_us_per_iteration": 1.7599300000000002,
+          "cumulative_us_per_iteration": 355.1739366666667
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/prefix_pool.py",
+          "line": 239,
+          "function": "audit",
+          "calls_per_iteration": 2.0,
+          "self_us_per_iteration": 51.15666333333334,
+          "cumulative_us_per_iteration": 353.10726
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/executor/runtime.py",
+          "line": 76,
+          "function": "session_usage",
+          "calls_per_iteration": 32.0,
+          "self_us_per_iteration": 15.779363333333334,
+          "cumulative_us_per_iteration": 203.3276266666667
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/executor/adapters.py",
+          "line": 228,
+          "function": "session_usage",
+          "calls_per_iteration": 32.0,
+          "self_us_per_iteration": 38.39409666666667,
+          "cumulative_us_per_iteration": 163.24820333333335
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 99,
+          "function": "__add__",
+          "calls_per_iteration": 98.0,
+          "self_us_per_iteration": 34.393903333333334,
+          "cumulative_us_per_iteration": 132.45874666666666
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/prefix_pool.py",
+          "line": 91,
+          "function": "session_reserved",
+          "calls_per_iteration": 4.0,
+          "self_us_per_iteration": 16.7681,
+          "cumulative_us_per_iteration": 103.84076666666668
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 88,
+          "function": "__post_init__",
+          "calls_per_iteration": 142.0,
+          "self_us_per_iteration": 49.23674333333334,
+          "cumulative_us_per_iteration": 84.44155666666667
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/lib/python3.12/site-packages/torch/autograd/grad_mode.py",
+          "line": 293,
+          "function": "__exit__",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 9.589103333333332,
+          "cumulative_us_per_iteration": 71.23610666666667
+        },
+        {
+          "file": "<string>",
+          "line": 2,
+          "function": "__init__",
+          "calls_per_iteration": 35.0,
+          "self_us_per_iteration": 29.720340000000004,
+          "cumulative_us_per_iteration": 64.94613666666667
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 92,
+          "function": "from_mapping",
+          "calls_per_iteration": 39.0,
+          "self_us_per_iteration": 17.435773333333334,
+          "cumulative_us_per_iteration": 60.64261666666667
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/prefix_pool.py",
+          "line": 86,
+          "function": "reserved",
+          "calls_per_iteration": 2.0,
+          "self_us_per_iteration": 1.1297133333333333,
+          "cumulative_us_per_iteration": 57.183383333333346
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 78,
+          "function": "nonnegative",
+          "calls_per_iteration": 356.0,
+          "self_us_per_iteration": 44.82679666666667,
+          "cumulative_us_per_iteration": 44.82679666666667
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 304,
+          "function": "__post_init__",
+          "calls_per_iteration": 35.0,
+          "self_us_per_iteration": 22.81933666666667,
+          "cumulative_us_per_iteration": 35.225796666666675
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/prefix_pool.py",
+          "line": 114,
+          "function": "shared_bytes",
+          "calls_per_iteration": 3.0,
+          "self_us_per_iteration": 2.566866666666667,
+          "cumulative_us_per_iteration": 26.278383333333334
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/executor/runtime.py",
+          "line": 62,
+          "function": "_check",
+          "calls_per_iteration": 33.0,
+          "self_us_per_iteration": 16.22558666666667,
+          "cumulative_us_per_iteration": 25.383480000000002
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.sum>",
+          "calls_per_iteration": 6.0,
+          "self_us_per_iteration": 11.236116666666668,
+          "cumulative_us_per_iteration": 22.457510000000003
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/lib/python3.12/site-packages/torch/autograd/grad_mode.py",
+          "line": 289,
+          "function": "__enter__",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 6.086190000000001,
+          "cumulative_us_per_iteration": 20.29089666666667
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/serving/persistent.py",
+          "line": 143,
+          "function": "<lambda>",
+          "calls_per_iteration": 3.0,
+          "self_us_per_iteration": 1.8741099999999997,
+          "cumulative_us_per_iteration": 18.490573333333334
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/executor/runtime.py",
+          "line": 80,
+          "function": "shared_usage",
+          "calls_per_iteration": 3.0,
+          "self_us_per_iteration": 0.9474666666666667,
+          "cumulative_us_per_iteration": 15.965243333333335
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/executor/adapters.py",
+          "line": 235,
+          "function": "shared_usage",
+          "calls_per_iteration": 3.0,
+          "self_us_per_iteration": 3.240013333333333,
+          "cumulative_us_per_iteration": 15.017776666666668
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/prefix_pool.py",
+          "line": 98,
+          "function": "reserved_host_pages",
+          "calls_per_iteration": 3.0,
+          "self_us_per_iteration": 2.18059,
+          "cumulative_us_per_iteration": 14.798120000000003
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/executor/runtime.py",
+          "line": 49,
+          "function": "plan_session",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.9093366666666668,
+          "cumulative_us_per_iteration": 13.476710000000002
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.isinstance>",
+          "calls_per_iteration": 138.0,
+          "self_us_per_iteration": 13.222800000000001,
+          "cumulative_us_per_iteration": 13.222800000000001
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/prefix_pool.py",
+          "line": 106,
+          "function": "reserved_hbm_tokens",
+          "calls_per_iteration": 3.0,
+          "self_us_per_iteration": 1.8867233333333335,
+          "cumulative_us_per_iteration": 12.743826666666667
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/executor/adapters.py",
+          "line": 194,
+          "function": "plan_session",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 2.7392433333333335,
+          "cumulative_us_per_iteration": 11.803526666666667
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/serving/tests/test_persistent.py",
+          "line": 194,
+          "function": "session_host_pages",
+          "calls_per_iteration": 32.0,
+          "self_us_per_iteration": 8.021730000000002,
+          "cumulative_us_per_iteration": 11.727350000000001
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.len>",
+          "calls_per_iteration": 12.0,
+          "self_us_per_iteration": 3.12515,
+          "cumulative_us_per_iteration": 10.052796666666667
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/serving/persistent.py",
+          "line": 160,
+          "function": "_validate",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 3.233566666666667,
+          "cumulative_us_per_iteration": 8.662263333333334
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/prefix_pool.py",
+          "line": 134,
+          "function": "acquire",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 4.091419999999999,
+          "cumulative_us_per_iteration": 7.167590000000001
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/lib/python3.12/site-packages/torch/_tensor.py",
+          "line": 1187,
+          "function": "__len__",
+          "calls_per_iteration": 4.0,
+          "self_us_per_iteration": 3.7356800000000008,
+          "cumulative_us_per_iteration": 6.624683333333334
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/prefix_pool.py",
+          "line": 100,
+          "function": "<genexpr>",
+          "calls_per_iteration": 51.0,
+          "self_us_per_iteration": 6.0573966666666665,
+          "cumulative_us_per_iteration": 6.0573966666666665
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'get' of 'dict' objects>",
+          "calls_per_iteration": 35.0,
+          "self_us_per_iteration": 5.644690000000001,
+          "cumulative_us_per_iteration": 5.644690000000001
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 96,
+          "function": "fits",
+          "calls_per_iteration": 36.0,
+          "self_us_per_iteration": 5.5854800000000004,
+          "cumulative_us_per_iteration": 5.5854800000000004
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/serving/tests/test_persistent.py",
+          "line": 53,
+          "function": "session_bytes",
+          "calls_per_iteration": 32.0,
+          "self_us_per_iteration": 5.223936666666668,
+          "cumulative_us_per_iteration": 5.223936666666668
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/prefix_pool.py",
+          "line": 108,
+          "function": "<genexpr>",
+          "calls_per_iteration": 51.0,
+          "self_us_per_iteration": 5.163996666666667,
+          "cumulative_us_per_iteration": 5.163996666666667
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/serving/persistent.py",
+          "line": 37,
+          "function": "_prepare_token_input",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 1.3026900000000001,
+          "cumulative_us_per_iteration": 4.609983333333334
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/executor/runtime.py",
+          "line": 70,
+          "function": "_tokens",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 1.45293,
+          "cumulative_us_per_iteration": 4.20801
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.id>",
+          "calls_per_iteration": 33.0,
+          "self_us_per_iteration": 4.005450000000001,
+          "cumulative_us_per_iteration": 4.005450000000001
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/executor/adapters.py",
+          "line": 266,
+          "function": "candidate",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 1.50495,
+          "cumulative_us_per_iteration": 3.9169300000000007
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/serving/tests/test_persistent.py",
+          "line": 191,
+          "function": "estimate_session_host_pages",
+          "calls_per_iteration": 33.0,
+          "self_us_per_iteration": 3.86481,
+          "cumulative_us_per_iteration": 3.86481
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 276,
+          "function": "__post_init__",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 2.30884,
+          "cumulative_us_per_iteration": 3.649623333333334
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/executor/contracts.py",
+          "line": 66,
+          "function": "validate",
+          "calls_per_iteration": 4.0,
+          "self_us_per_iteration": 2.034426666666667,
+          "cumulative_us_per_iteration": 3.0167433333333333
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/executor/contracts.py",
+          "line": 20,
+          "function": "__post_init__",
+          "calls_per_iteration": 3.0,
+          "self_us_per_iteration": 2.14622,
+          "cumulative_us_per_iteration": 2.8621966666666667
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/serving/token_validation.py",
+          "line": 29,
+          "function": "reference",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 1.4863533333333336,
+          "cumulative_us_per_iteration": 2.1201466666666664
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/serving/persistent.py",
+          "line": 28,
+          "function": "_packed_prefix_digest",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 1.1716133333333332,
+          "cumulative_us_per_iteration": 2.054816666666667
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'values' of 'collections.OrderedDict' objects>",
+          "calls_per_iteration": 10.0,
+          "self_us_per_iteration": 1.6863633333333334,
+          "cumulative_us_per_iteration": 1.6863633333333334
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method torch._C._get_tracing_state>",
+          "calls_per_iteration": 4.0,
+          "self_us_per_iteration": 1.513636666666667,
+          "cumulative_us_per_iteration": 1.513636666666667
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/executor/adapters.py",
+          "line": 274,
+          "function": "finish_candidate",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.8862233333333334,
+          "cumulative_us_per_iteration": 1.3617066666666668
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/executor/adapters.py",
+          "line": 253,
+          "function": "_result",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.75192,
+          "cumulative_us_per_iteration": 1.3216666666666668
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method torch.frombuffer>",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 1.2524766666666667,
+          "cumulative_us_per_iteration": 1.2524766666666667
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/lib/python3.12/site-packages/torch/autograd/grad_mode.py",
+          "line": 284,
+          "function": "__new__",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.7867500000000001,
+          "cumulative_us_per_iteration": 1.1100433333333333
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'update' of 'dict' objects>",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 1.09066,
+          "cumulative_us_per_iteration": 1.09066
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/executor/contracts.py",
+          "line": 26,
+          "function": "total_tokens",
+          "calls_per_iteration": 9.0,
+          "self_us_per_iteration": 1.08612,
+          "cumulative_us_per_iteration": 1.08612
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'to' of 'torch._C.TensorBase' objects>",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 1.074906666666667,
+          "cumulative_us_per_iteration": 1.074906666666667
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/lib/python3.12/site-packages/torch/autograd/grad_mode.py",
+          "line": 279,
+          "function": "__init__",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.9120966666666668,
+          "cumulative_us_per_iteration": 1.0379833333333333
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/serving/tests/test_persistent.py",
+          "line": 146,
+          "function": "<lambda>",
+          "calls_per_iteration": 2.0,
+          "self_us_per_iteration": 0.6489233333333333,
+          "cumulative_us_per_iteration": 0.9745333333333334
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/executor/adapters.py",
+          "line": 177,
+          "function": "_quota",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.8139233333333333,
+          "cumulative_us_per_iteration": 0.9731133333333334
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/executor/runtime.py",
+          "line": 101,
+          "function": "_check_result",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.94625,
+          "cumulative_us_per_iteration": 0.94625
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/executor/adapters.py",
+          "line": 288,
+          "function": "synchronize",
+          "calls_per_iteration": 2.0,
+          "self_us_per_iteration": 0.6406733333333334,
+          "cumulative_us_per_iteration": 0.8653266666666667
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'dim' of 'torch._C.TensorBase' objects>",
+          "calls_per_iteration": 4.0,
+          "self_us_per_iteration": 0.8347566666666666,
+          "cumulative_us_per_iteration": 0.8347566666666666
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method time.perf_counter>",
+          "calls_per_iteration": 5.0,
+          "self_us_per_iteration": 0.82104,
+          "cumulative_us_per_iteration": 0.82104
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.getattr>",
+          "calls_per_iteration": 6.0,
+          "self_us_per_iteration": 0.7159766666666667,
+          "cumulative_us_per_iteration": 0.7159766666666667
+        },
+        {
+          "file": "/tmp/nosa_cleanup_cpu_profile_20261005_01/profile_cleanup.py",
+          "line": 55,
+          "function": "no_compute",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.48317666666666675,
+          "cumulative_us_per_iteration": 0.67234
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 316,
+          "function": "as_mapping",
+          "calls_per_iteration": 3.0,
+          "self_us_per_iteration": 0.65122,
+          "cumulative_us_per_iteration": 0.65122
+        },
+        {
+          "file": "<string>",
+          "line": 2,
+          "function": "__eq__",
+          "calls_per_iteration": 2.0,
+          "self_us_per_iteration": 0.6469266666666666,
+          "cumulative_us_per_iteration": 0.6469266666666666
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/executor/adapters.py",
+          "line": 243,
+          "function": "validate_output",
+          "calls_per_iteration": 2.0,
+          "self_us_per_iteration": 0.62722,
+          "cumulative_us_per_iteration": 0.62722
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/executor/adapters.py",
+          "line": 282,
+          "function": "diagnostics",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.4379466666666667,
+          "cumulative_us_per_iteration": 0.5987433333333334
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/serving/tests/test_persistent.py",
+          "line": 188,
+          "function": "shared_bytes",
+          "calls_per_iteration": 3.0,
+          "self_us_per_iteration": 0.5867800000000001,
+          "cumulative_us_per_iteration": 0.5867800000000001
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.any>",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.4061133333333334,
+          "cumulative_us_per_iteration": 0.54473
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method torch._C._has_torch_function_unary>",
+          "calls_per_iteration": 4.0,
+          "self_us_per_iteration": 0.54061,
+          "cumulative_us_per_iteration": 0.54061
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'hexdigest' of '_hashlib.HASH' objects>",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.49992333333333333,
+          "cumulative_us_per_iteration": 0.49992333333333333
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/prefix_pool.py",
+          "line": 125,
+          "function": "__len__",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.30296333333333336,
+          "cumulative_us_per_iteration": 0.4766833333333333
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/serving/tests/test_persistent.py",
+          "line": 60,
+          "function": "synchronize",
+          "calls_per_iteration": 4.0,
+          "self_us_per_iteration": 0.4578,
+          "cumulative_us_per_iteration": 0.4578
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'items' of 'collections.OrderedDict' objects>",
+          "calls_per_iteration": 2.0,
+          "self_us_per_iteration": 0.39932,
+          "cumulative_us_per_iteration": 0.39932
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method _hashlib.openssl_sha256>",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.38328,
+          "cumulative_us_per_iteration": 0.38328
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/executor/adapters.py",
+          "line": 164,
+          "function": "_owner_options",
+          "calls_per_iteration": 2.0,
+          "self_us_per_iteration": 0.33238,
+          "cumulative_us_per_iteration": 0.33238
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.all>",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.3235733333333333,
+          "cumulative_us_per_iteration": 0.3235733333333333
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/serving/tests/test_persistent.py",
+          "line": 50,
+          "function": "truncate",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.31305,
+          "cumulative_us_per_iteration": 0.31305
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.min>",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.31022,
+          "cumulative_us_per_iteration": 0.31022
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'items' of 'dict' objects>",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.25631000000000004,
+          "cumulative_us_per_iteration": 0.25631000000000004
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.hash>",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.24316666666666667,
+          "cumulative_us_per_iteration": 0.24316666666666667
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'move_to_end' of 'collections.OrderedDict' objects>",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.23137333333333335,
+          "cumulative_us_per_iteration": 0.23137333333333335
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/serving/tests/test_persistent.py",
+          "line": 31,
+          "function": "estimate_session_bytes",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.22562666666666667,
+          "cumulative_us_per_iteration": 0.22562666666666667
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method __new__ of type object at 0x14484b0>",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.20667333333333338,
+          "cumulative_us_per_iteration": 0.20667333333333338
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'extend' of 'list' objects>",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.18916333333333335,
+          "cumulative_us_per_iteration": 0.18916333333333335
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/serving/tests/test_persistent.py",
+          "line": 17,
+          "function": "<lambda>",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.16079666666666667,
+          "cumulative_us_per_iteration": 0.16079666666666667
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 288,
+          "function": "<genexpr>",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.13861666666666667,
+          "cumulative_us_per_iteration": 0.13861666666666667
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/lib/python3.12/site-packages/torch/_jit_internal.py",
+          "line": 104,
+          "function": "is_scripting",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.12588666666666667,
+          "cumulative_us_per_iteration": 0.12588666666666667
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'disable' of '_lsprof.Profiler' objects>",
+          "calls_per_iteration": 0.0033333333333333335,
+          "self_us_per_iteration": 0.04796,
+          "cumulative_us_per_iteration": 0.04796
+        }
+      ]
+    }
+  }
+}

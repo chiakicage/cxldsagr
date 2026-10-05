@@ -3,8 +3,9 @@
   "scope": "Independent CPU byte comparison of all saved profile candidate hidden/logit payloads",
   "project_validation_code_imported": false,
   "cuda_initialized": false,
-  "profile_run": "motivation_c10_profile_20261004_01",
-  "formal_hbm_run": "motivation_c10_20261004_u16_r2_01",
+  "profile_run": "refactor_final_deepseek_profile_20261005_01",
+  "formal_run": "refactor_final_deepseek_bench_20261005_01",
+  "independent_hbm_check": "refactor_final_deepseek_check_20261005_01",
   "payloads": 80,
   "phase_counts": {
     "cold": 4,
@@ -2176,13 +2177,14 @@
     }
   ],
   "input_sha256": {
-    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/motivation_c10_profile_20261004_01/metadata.json": "8e932a52b895f20512eb39a1d89de4354d1968ed116295f696cd7a881a2d7a0e",
-    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/motivation_c10_profile_20261004_01/result.json": "c5673e64b98f247054c74f7a9191d36534a166b2265a3f9b8c5002d7fa405d16",
-    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/motivation_c10_profile_20261004_01/correctness.jsonl": "3fe2ac7845f46c11602d9ac08cbcc8708bbf3a40d491e691e5d104275fb50bcc",
-    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/motivation_c10_20261004_u16_r2_01/metadata.json": "bd7661384311bd3e204c28ac719ab25ae362cb38b62bcf1be0a4d4d9095466b2",
-    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/motivation_c10_20261004_u16_r2_01/measurements.jsonl": "60491aa18476c284718c85fe8f41a17686cdc12c171480333ca8d5caf8012272"
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_profile_20261005_01/metadata.json": "8b0cdf242ac0f2f93859cbfdf897e35d7212f286c845500e54c8db951015e9ab",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_profile_20261005_01/result.json": "83d2c5141975336aeff97720370952cbfd3894aa16b687414038dcc8b3143341",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_profile_20261005_01/correctness.jsonl": "01999d0280ba08afd291f50d35f2110546f864c4deaa5161dd7f6bc745a142be",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_bench_20261005_01/metadata.json": "cda32f5d3a423aa124b6bdc8ee8c13d84a9b6caa92e9badd5ba5c9ddaff9290c",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/docs/agents/acceptance/unified_runtime_20261005/deepseek_final/metadata.json": "877980d0861683ed291a03e0d352d4bcc635af16059fcadf65357c59fe17577d",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/docs/agents/acceptance/unified_runtime_20261005/deepseek_final/measurements.jsonl": "2371d24f8461cc93a928823bdbf4dbed1e0063686ba1d6c7712acdb4eff5e95e"
   },
-  "script_sha256": "5deb275c577c7a6a2bcf4482e2bf4258692f21e06a03c7b2f2641753f29f410d",
+  "script_sha256": "807e749deb386e87c8c6b4301c81980eee74a813f109d8252ceccf0c3de7c43b",
   "torch": "2.12.1+cu130",
   "boundary": "Includes twelve saved warmup outputs and sixty-eight trajectory outputs; no new GPU execution or serving latency measurement."
 }

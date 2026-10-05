@@ -1,0 +1,351 @@
+{
+  "boundary": "Current loaded repository Python modules only, plus pyproject.toml and uv.lock; not captured runtime/native identity, not every possible source. Saved bytes are the files on disk at report generation, not the loaded Python bytecode.",
+  "excluded_path_components": [
+    ".cache",
+    ".git",
+    ".pytest_cache",
+    ".venv",
+    "3rdparty",
+    "__pycache__",
+    "build",
+    "dist",
+    "generated",
+    "output",
+    "report",
+    "reports",
+    "weights"
+  ],
+  "files": {
+    "GR/__init__.py": {
+      "modules": [
+        "GR"
+      ],
+      "sha256": "26c88a81740555c7801e3d3e82b4e08599da112b7e134290e0fc23070f416eff",
+      "size_bytes": 54,
+      "snapshot_path": "source/report_helpers/GR/__init__.py"
+    },
+    "GR/dataset.py": {
+      "modules": [
+        "GR.dataset"
+      ],
+      "sha256": "0ec95750722fefe387c0c62a2064e101622d060ac69d4c933044b1a950c24ce4",
+      "size_bytes": 1067,
+      "snapshot_path": "source/report_helpers/GR/dataset.py"
+    },
+    "GR/heat.py": {
+      "modules": [
+        "GR.heat"
+      ],
+      "sha256": "c6ebe2ebc73db10c4f2706701d3e7a1c7aee2dc40162e00f6b5ce4550a587f4f",
+      "size_bytes": 7759,
+      "snapshot_path": "source/report_helpers/GR/heat.py"
+    },
+    "GR/input_generator.py": {
+      "modules": [
+        "GR.input_generator"
+      ],
+      "sha256": "0b3574c190d11ddb64c6fe05ebb2fde6f618cc3f800b728846cfd4a0141bd3fa",
+      "size_bytes": 27368,
+      "snapshot_path": "source/report_helpers/GR/input_generator.py"
+    },
+    "GR/scheduling.py": {
+      "modules": [
+        "GR.scheduling"
+      ],
+      "sha256": "1573fbab8ae1cab6cb287f3a6606124aa845217864e5d68ea55f8f7d6f7369cb",
+      "size_bytes": 5163,
+      "snapshot_path": "source/report_helpers/GR/scheduling.py"
+    },
+    "GR/workload.py": {
+      "modules": [
+        "GR.workload"
+      ],
+      "sha256": "2c16eb30be6888bf19ed07670dbc37b97e1bb18527545c8d6157dc79b6c644de",
+      "size_bytes": 15695,
+      "snapshot_path": "source/report_helpers/GR/workload.py"
+    },
+    "cache/allocator/snapshot.py": {
+      "modules": [
+        "cache.allocator.snapshot"
+      ],
+      "sha256": "be7aa6b95e620707d1032e912e3e2df7d246f37eaf0a6ddb04cc0284ea99f61f",
+      "size_bytes": 10861,
+      "snapshot_path": "source/report_helpers/cache/allocator/snapshot.py"
+    },
+    "cache/contracts.py": {
+      "modules": [
+        "cache.contracts"
+      ],
+      "sha256": "58575f1c9aee3f2843b7f2bce07f1589ea8cb9a712b050991199a95639f97f73",
+      "size_bytes": 878,
+      "snapshot_path": "source/report_helpers/cache/contracts.py"
+    },
+    "evaluation/pool_scan_provenance.py": {
+      "modules": [
+        "evaluation.pool_scan_provenance"
+      ],
+      "sha256": "004b86573af85619e56a99259e4208671c9fd94a99e0ec07c4fcfd6401dc3d9d",
+      "size_bytes": 11765,
+      "snapshot_path": "source/report_helpers/evaluation/pool_scan_provenance.py"
+    },
+    "evaluation/provenance.py": {
+      "modules": [
+        "evaluation.provenance"
+      ],
+      "sha256": "0fde027cf65530a75072893c88c522cc85ea990b72e67ce7515b74dbb6d2fa67",
+      "size_bytes": 9629,
+      "snapshot_path": "source/report_helpers/evaluation/provenance.py"
+    },
+    "evaluation/validation.py": {
+      "modules": [
+        "evaluation.validation"
+      ],
+      "sha256": "769add375a8b3b64fe0c391c1a3067f2304c4727f1d4af199b9f5a5480ca2b74",
+      "size_bytes": 4803,
+      "snapshot_path": "source/report_helpers/evaluation/validation.py"
+    },
+    "experiments/cache_management/src/report.py": {
+      "modules": [
+        "experiments.cache_management.src.report"
+      ],
+      "sha256": "384a67c703b7d5178e32baec173ecc7d18a86e9fd10c6ff5ec883c1c1744274c",
+      "size_bytes": 16093,
+      "snapshot_path": "source/report_helpers/experiments/cache_management/src/report.py"
+    },
+    "experiments/nosa_motivation/src/attention_reference.py": {
+      "modules": [
+        "experiments.nosa_motivation.src.attention_reference"
+      ],
+      "sha256": "0f284e9ccaaa132ea869e04583507134917bea5016a9b29f89241149e9fc747a",
+      "size_bytes": 19396,
+      "snapshot_path": "source/report_helpers/experiments/nosa_motivation/src/attention_reference.py"
+    },
+    "experiments/nosa_motivation/src/attention_reference_audit.py": {
+      "modules": [
+        "experiments.nosa_motivation.src.attention_reference_audit"
+      ],
+      "sha256": "fd159ec9956a175d8770e8ffa9c4797518908c6d4da01ee1d4672cd3ef644361",
+      "size_bytes": 17479,
+      "snapshot_path": "source/report_helpers/experiments/nosa_motivation/src/attention_reference_audit.py"
+    },
+    "experiments/nosa_motivation/src/config.py": {
+      "modules": [
+        "experiments.nosa_motivation.src.config"
+      ],
+      "sha256": "5377e349084b72d74e55dff2b65ba6668c3e8c05e141f55905aa01e9ff2945c8",
+      "size_bytes": 5674,
+      "snapshot_path": "source/report_helpers/experiments/nosa_motivation/src/config.py"
+    },
+    "experiments/nosa_motivation/src/cpu_environment.py": {
+      "modules": [
+        "experiments.nosa_motivation.src.cpu_environment"
+      ],
+      "sha256": "c841e489bfb07baf80e06bf7aa9a6a28e395fa40a89809c1a1dd7100b166c936",
+      "size_bytes": 4601,
+      "snapshot_path": "source/report_helpers/experiments/nosa_motivation/src/cpu_environment.py"
+    },
+    "experiments/nosa_motivation/src/flops.py": {
+      "modules": [
+        "experiments.nosa_motivation.src.flops"
+      ],
+      "sha256": "855fe952a7e172e6361320480110f9cad39e729662507f4dd2d0d8d45bc439dd",
+      "size_bytes": 5853,
+      "snapshot_path": "source/report_helpers/experiments/nosa_motivation/src/flops.py"
+    },
+    "experiments/nosa_motivation/src/matrix_baseline.py": {
+      "modules": [
+        "experiments.nosa_motivation.src.matrix_baseline"
+      ],
+      "sha256": "64d0949fdf8cb0938dd2a4a29aa88f36621783d9eef231bdef0d21d7fb57579b",
+      "size_bytes": 9247,
+      "snapshot_path": "source/report_helpers/experiments/nosa_motivation/src/matrix_baseline.py"
+    },
+    "experiments/nosa_motivation/src/matrix_comparison.py": {
+      "modules": [
+        "experiments.nosa_motivation.src.matrix_comparison"
+      ],
+      "sha256": "6909342f1989ba3d6913a6cc4d89754e7c96986caf167967dc3ac25f7138460f",
+      "size_bytes": 13213,
+      "snapshot_path": "source/report_helpers/experiments/nosa_motivation/src/matrix_comparison.py"
+    },
+    "experiments/nosa_motivation/src/measure.py": {
+      "modules": [
+        "experiments.nosa_motivation.src.measure"
+      ],
+      "sha256": "ca627a4d98581535014a807f322426b6d56e9f515811d0b3ab067612b810e583",
+      "size_bytes": 26343,
+      "snapshot_path": "source/report_helpers/experiments/nosa_motivation/src/measure.py"
+    },
+    "experiments/nosa_motivation/src/profile.py": {
+      "modules": [
+        "experiments.nosa_motivation.src.profile"
+      ],
+      "sha256": "60d2c79b2aa838064c77a4639a9c88bb6eeb1e51278956561694c544ba58283e",
+      "size_bytes": 20261,
+      "snapshot_path": "source/report_helpers/experiments/nosa_motivation/src/profile.py"
+    },
+    "experiments/nosa_motivation/src/profile_attention_reference.py": {
+      "modules": [
+        "experiments.nosa_motivation.src.profile_attention_reference"
+      ],
+      "sha256": "7b37ce290ee8c3bb2649254321158bba2c4eff0766c54a991496fb85e406b945",
+      "size_bytes": 28461,
+      "snapshot_path": "source/report_helpers/experiments/nosa_motivation/src/profile_attention_reference.py"
+    },
+    "experiments/nosa_motivation/src/profile_audit.py": {
+      "modules": [
+        "experiments.nosa_motivation.src.profile_audit"
+      ],
+      "sha256": "baec0c3481cb2c8f8ffe961465e79e7ca68b56a7a3a364309cfa96c7c4600c2f",
+      "size_bytes": 16479,
+      "snapshot_path": "source/report_helpers/experiments/nosa_motivation/src/profile_audit.py"
+    },
+    "experiments/nosa_motivation/src/profile_hbm.py": {
+      "modules": [
+        "experiments.nosa_motivation.src.profile_hbm"
+      ],
+      "sha256": "3d39b5ed0acd70c5c12c3ec0ea791af4376af191df2acc703c3109623ceb7cbf",
+      "size_bytes": 26929,
+      "snapshot_path": "source/report_helpers/experiments/nosa_motivation/src/profile_hbm.py"
+    },
+    "experiments/nosa_motivation/src/provenance.py": {
+      "modules": [
+        "experiments.nosa_motivation.src.provenance"
+      ],
+      "sha256": "ac157475a603db676426e35a76c6a3b0aea67fce7a8dfefb55942c927971ceb7",
+      "size_bytes": 15308,
+      "snapshot_path": "source/report_helpers/experiments/nosa_motivation/src/provenance.py"
+    },
+    "experiments/nosa_motivation/src/publish.py": {
+      "modules": [
+        "__main__",
+        "__mp_main__"
+      ],
+      "sha256": "fc9908287f1455461172ee640bcaf69289f5d71cc5dc4adf54172454315b3286",
+      "size_bytes": 14362,
+      "snapshot_path": "source/report_helpers/experiments/nosa_motivation/src/publish.py"
+    },
+    "experiments/nosa_motivation/src/report.py": {
+      "modules": [
+        "experiments.nosa_motivation.src.report"
+      ],
+      "sha256": "1984f7cdcae6c5dcbfbcb787d78ff6973aa0aa7fddecc6dcf7d225ba42503aac",
+      "size_bytes": 27257,
+      "snapshot_path": "source/report_helpers/experiments/nosa_motivation/src/report.py"
+    },
+    "experiments/nosa_motivation/src/timeline.py": {
+      "modules": [
+        "experiments.nosa_motivation.src.timeline"
+      ],
+      "sha256": "929da0cab1ca477fe3c0566f16a88ec9bc57822f8c3434ad3dff6a3b9f039750",
+      "size_bytes": 6819,
+      "snapshot_path": "source/report_helpers/experiments/nosa_motivation/src/timeline.py"
+    },
+    "experiments/nosa_motivation/src/validation.py": {
+      "modules": [
+        "experiments.nosa_motivation.src.validation"
+      ],
+      "sha256": "b4638f3102877f3b6e2e249b4f8909a8d187e6b2fdc63e834bbf56b6fadd8c22",
+      "size_bytes": 9995,
+      "snapshot_path": "source/report_helpers/experiments/nosa_motivation/src/validation.py"
+    },
+    "experiments/nosa_motivation/src/work_intervals.py": {
+      "modules": [
+        "experiments.nosa_motivation.src.work_intervals"
+      ],
+      "sha256": "df8588808934bdc7fc2a5b076e7575cf69e4097575f00663d27dd64e0c8f11ce",
+      "size_bytes": 5400,
+      "snapshot_path": "source/report_helpers/experiments/nosa_motivation/src/work_intervals.py"
+    },
+    "experiments/nosa_offload_overlap/src/analyze.py": {
+      "modules": [
+        "experiments.nosa_offload_overlap.src.analyze"
+      ],
+      "sha256": "1c5b3443cac84af910838b6148b5a307f6b2e3cca2d6f21bdf82bdd6701eafdc",
+      "size_bytes": 29656,
+      "snapshot_path": "source/report_helpers/experiments/nosa_offload_overlap/src/analyze.py"
+    },
+    "layers/attention.py": {
+      "modules": [
+        "layers.attention"
+      ],
+      "sha256": "744be3135ab18ed9bddfbdd5945949b1dea5cb0130f4a7bea250927eeac26e5a",
+      "size_bytes": 3794,
+      "snapshot_path": "source/report_helpers/layers/attention.py"
+    },
+    "models/deepseek_v32/request_format.py": {
+      "modules": [
+        "models.deepseek_v32.request_format"
+      ],
+      "sha256": "104fb4d7f45c2ff69885383b2ce66a45610321066c77967be2c298ebc884f88d",
+      "size_bytes": 629,
+      "snapshot_path": "source/report_helpers/models/deepseek_v32/request_format.py"
+    },
+    "models/nosa/infer.py": {
+      "modules": [
+        "models.nosa.infer"
+      ],
+      "sha256": "4bc01669b4c2c3896115407a56b19ef496f8be3a18f49692878fa5cb3a69a84f",
+      "size_bytes": 13228,
+      "snapshot_path": "source/report_helpers/models/nosa/infer.py"
+    },
+    "models/nosa/request_format.py": {
+      "modules": [
+        "models.nosa.request_format"
+      ],
+      "sha256": "25c775ba0b76cab91663b827fc8b38fc20511895a5e6eff3054273cbfe418825",
+      "size_bytes": 778,
+      "snapshot_path": "source/report_helpers/models/nosa/request_format.py"
+    },
+    "pyproject.toml": {
+      "kind": "environment specification",
+      "sha256": "cac6e9271538d74e99b1bdc83c2a12648bb3c76a310af21c98aff3ec2d3761d1",
+      "size_bytes": 3925,
+      "snapshot_path": "source/report_helpers/pyproject.toml"
+    },
+    "uv.lock": {
+      "kind": "environment specification",
+      "sha256": "53339af1728da3661b614d554e928408186b4fac6106a92999bd8fd69b3d2d8f",
+      "size_bytes": 139330,
+      "snapshot_path": "source/report_helpers/uv.lock"
+    }
+  },
+  "included_directories": [
+    "GR",
+    "cache",
+    "evaluation",
+    "executor",
+    "experiments",
+    "layers",
+    "models",
+    "operators",
+    "scripts",
+    "serving",
+    "tests"
+  ],
+  "invocation": {
+    "cwd": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr",
+    "orig_argv": [
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin/python",
+      "-B",
+      "-m",
+      "experiments.nosa_motivation.src.publish",
+      "--bench",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_motivation/output/data/refactor_final_nosa_bench_20261005_01",
+      "--profile-data",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_motivation/output/data/refactor_final_nosa_profile_20261005_02",
+      "--profile-dir",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_motivation/output/profile/refactor_final_nosa_profile_20261005_02",
+      "--attention-data",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_motivation/output/data/refactor_final_nosa_attention_reference_20261005_01",
+      "--output-dir",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_motivation/output/data/refactor_final_nosa_publication_20261005_02"
+    ],
+    "python": {
+      "executable": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin/python",
+      "version": "3.12.13 (main, Jun 11 2026, 04:03:26) [Clang 22.1.3 ]"
+    }
+  },
+  "repository_root": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr",
+  "schema": "report-helper-sources-v1"
+}

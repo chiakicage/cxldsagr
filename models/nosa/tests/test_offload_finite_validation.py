@@ -3,10 +3,10 @@
 import pytest
 import torch
 
-from layers.attention import AttentionContext
+from models.attention_contracts import AttentionContext
+from models.nosa.cache.offload import NosaOffloadCache
 from models.nosa.config import NosaConfig
 from models.nosa.indexer import NosaIndexer
-from models.nosa.offload_cache import NosaOffloadCache
 
 DEVICES = [
     "cpu",
@@ -159,8 +159,8 @@ def test_cuda_combines_unvalidated_inputs_and_only_rechecks_q_when_prepared(monk
 @pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA required")
 @pytest.mark.parametrize("queries", [1, 128, 1024])
 def test_cuda_actual_finite_scratch_fits_existing_session_reservation(monkeypatch, queries):
-    from models.nosa.allocation_budget import allocation_bytes
-    from models.nosa.session_budget import session_budget_breakdown
+    from cache.allocator.budget import allocation_bytes
+    from models.nosa.execution.session_budget import session_budget_breakdown
     from operators.nosa.indexer.validation import all_finite
 
     q = torch.zeros((queries, 32, 128), device="cuda", dtype=torch.bfloat16)

@@ -1,0 +1,115 @@
+"""Three serial clean benches; failed logs stay outside experiment outputs."""
+import json
+import math
+import statistics
+from collections import defaultdict
+import os
+import shutil
+import subprocess
+import tempfile
+from datetime import datetime, timezone
+from pathlib import Path
+
+root = Path('/mnt/ssd-wlcb/chenkaiqi/cxldsagr')
+receipt = root / 'docs/agents/acceptance/unified_runtime_20261005/nosa_current_02/receipt.json'
+if not receipt.is_file():
+    raise FileNotFoundError(receipt)
+variables = {
+    'CUDA_VISIBLE_DEVICES': '3',
+    'CXLDSAGR_SM90_BACKEND': 'native',
+    'TRITON_PTXAS_BLACKWELL_PATH': '/usr/local/cuda/bin/ptxas',
+    'OMP_NUM_THREADS': '8', 'MKL_NUM_THREADS': '8', 'OPENBLAS_NUM_THREADS': '8',
+    'PYTHONDONTWRITEBYTECODE': '1',
+    'PYTORCH_ALLOC_CONF': 'backend:native,pinned_use_cuda_host_register:True,pinned_num_register_threads:8',
+    'PATH': str(root / '.venv/bin') + ':/usr/local/cuda/bin:/usr/local/bin:/usr/bin:/bin',
+}
+env = {**os.environ, **variables}
+for name in ('PYTORCH_CUDA_ALLOC_CONF', 'PYTORCH_HIP_ALLOC_CONF', 'FLASHINFER_DISABLE_JIT'):
+    env.pop(name, None)
+ledger_path = root / 'docs/agents/acceptance/unified_runtime_20261005/nosa_bench_ledger.json'
+if ledger_path.exists():
+    raise FileExistsError(ledger_path)
+def summarize(path):
+    metadata = json.loads((path / 'metadata.json').read_text())
+    if metadata['status'] != 'accepted' or metadata['schema'] != 'nosa-motivation-bench-v1':
+        raise ValueError('Benchmark did not publish an accepted clean run')
+    rows = [json.loads(line) for line in (path / 'measurements.jsonl').read_text().splitlines()]
+    groups = defaultdict(list)
+    identities = {}
+    for row in rows:
+        if any(not math.isfinite(row[key]) or row[key] < 0 for key in
+               ('latency_ms', 'admission_ms', 'prefix_ms', 'extend_ms', 'cleanup_ms')):
+            raise ValueError('Invalid wall timing')
+        group = row['method'] + ('/revisit' if row['is_revisit'] else '/first')
+        groups[group].append(row)
+        key = (row['method'], row['request_id'])
+        if key in identities:
+            raise ValueError('Duplicate request measurement')
+        identities[key] = {field: row[field] for field in
+                           ('input_sha256', 'prefix_sha256', 'candidate_sha256', 'prefix_cache_hit',
+                            'is_revisit', 'session_host_pages', 'host_page_capacity',
+                            'session_hbm_tokens', 'hbm_token_capacity')}
+        identities[key]['candidate_host_to_device_bytes'] = row['cache_diagnostics']['candidate_host_to_device_bytes']
+    if len(rows) != 128 or len(groups) != 8 or any(len(group) != 16 for group in groups.values()):
+        raise ValueError('Incomplete four-method / two-visit trace')
+    return identities, {key: {'mean_ms': statistics.mean(row['latency_ms'] for row in group),
+                              'median_ms': statistics.median(row['latency_ms'] for row in group),
+                              'candidate_mean_ms': statistics.mean(row['extend_ms'] for row in group),
+                              'prefix_hits': sum(row['prefix_cache_hit'] for row in group)}
+                        for key, group in groups.items()}
+
+frozen = [summarize(Path(f'/tmp/cxldsagr_refactor_p0_20261005/nosa_bench_{index:02d}'))
+          for index in range(1, 4)]
+ledger = []
+for index in range(1, 4):
+    run_id = f'refactor_nosa_bench_20261005_{index:02d}'
+    output = root / 'experiments/nosa_motivation/output/data' / run_id
+    log_target = root / 'experiments/nosa_motivation/output/log' / run_id
+    if output.exists() or log_target.exists():
+        raise FileExistsError(run_id)
+    staging = Path(tempfile.mkdtemp(prefix=f'nosa-final-{run_id}-logs-'))
+    command = [
+        'numactl', '--physcpubind=24-31', '--membind=0', str(root / '.venv/bin/python'), '-B',
+        '-m', 'experiments.nosa_motivation.src.measure', '--mode', 'bench',
+        '--validation-receipt', str(receipt), '--device', 'cuda:0',
+        '--model-path', '/mnt/ssd-wlcb/chenkaiqi/NOSA-8B', '--history-tokens', '65536',
+        '--candidate-tokens', '128', '--chunk-size', '1024', '--num-users', '16', '--rounds', '2',
+        '--sparse-pool-tokens', '65536', '--host-arena-tokens', '16777216', '--seed', '42',
+        '--compute-graphs', '--run-id', run_id, '--output-dir', str(output),
+    ]
+    row = {'run_id': run_id, 'command': command, 'cwd': str(root), 'environment': variables,
+           'started_utc': datetime.now(timezone.utc).isoformat(), 'temporary_logs': str(staging)}
+    ledger.append(row)
+    with (staging / 'stdout.log').open('w') as stdout, (staging / 'stderr.log').open('w') as stderr:
+        process = subprocess.Popen(command, cwd=root, env=env, stdout=stdout, stderr=stderr)
+        row['pid'] = process.pid
+        ledger_path.write_text(json.dumps(ledger, indent=2) + '\n')
+        print(json.dumps({'started': run_id, 'pid': process.pid, 'logs': str(staging)}), flush=True)
+        status = process.wait()
+    row.update(exit_code=status, completed_utc=datetime.now(timezone.utc).isoformat())
+    ledger_path.write_text(json.dumps(ledger, indent=2) + '\n')
+    if status:
+        raise SystemExit(status)
+    log_target.mkdir(parents=True, exist_ok=False)
+    try:
+        shutil.copytree(staging, log_target, dirs_exist_ok=True)
+    except BaseException as copy_error:
+        try:
+            shutil.rmtree(log_target)
+        except BaseException as cleanup_error:
+            raise BaseExceptionGroup('Log publication and cleanup failed', [copy_error, cleanup_error]) from None
+        raise
+    shutil.rmtree(staging)
+    identity, summary = summarize(output)
+    if any(identity != expected for expected, _ in frozen):
+        raise ValueError('Current workload, cache admission or candidate transfer accounting differs from P0')
+    comparison = {}
+    for group, metrics in summary.items():
+        old = [values[group]['mean_ms'] for _, values in frozen]
+        comparison[group] = {**metrics, 'p0_mean_ms_min': min(old), 'p0_mean_ms_max': max(old),
+                             'ratio_to_p0_median': metrics['mean_ms'] / statistics.median(old),
+                             'above_p0_max_by_over_10pct': metrics['mean_ms'] > max(old) * 1.1}
+    row['lightweight_audit'] = {'accounting_matches_all_p0_runs': True, 'groups': comparison}
+    row['log_directory'] = str(log_target)
+    ledger_path.write_text(json.dumps(ledger, indent=2) + '\n')
+    print(json.dumps({'completed': run_id, 'exit_code': status, 'lightweight_audit': row['lightweight_audit']}), flush=True)

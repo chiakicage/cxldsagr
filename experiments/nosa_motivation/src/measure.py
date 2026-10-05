@@ -11,6 +11,7 @@ import time
 from dataclasses import asdict, replace
 from pathlib import Path
 
+from cache.allocator.snapshot import runtime_info as allocator_snapshot_runtime_info
 from evaluation import pool_scan_provenance as pool_scan
 from experiments.nosa_motivation.src.config import (
     BACKEND_SCHEMES,
@@ -47,7 +48,6 @@ from experiments.nosa_motivation.src.validation import (
     validate_mode_arguments,
     without_performance,
 )
-from models.nosa._allocator_snapshot import runtime_info as allocator_snapshot_runtime_info
 
 RECEIPT_KIND = "nosa-motivation-full-trace-v1"
 
@@ -180,7 +180,7 @@ def validate_warmup(method, rows, config, requests):
 
 
 def backend_factory(model, method, config):
-    from models.nosa.fixed_serving import NosaFixedServingBackend
+    from models.nosa.execution.fixed import NosaFixedServingBackend
 
     backend = NosaFixedServingBackend(
         model,

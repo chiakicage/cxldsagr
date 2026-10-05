@@ -121,13 +121,16 @@ def _build_identity() -> tuple[dict, list[str], dict[str, str]]:
 
 def _verified_manifest(directory: Path, identity: dict) -> dict | None:
     try:
-        manifest = json.loads((directory / "manifest.json").read_text())
-        binary = directory / (_NAME + identity["extension_suffix"])
-        if manifest["build_identity"] == identity and manifest["binary_sha256"] == _digest(binary):
-            return manifest
-    except (OSError, ValueError, KeyError, TypeError):
-        pass
-    return None
+        directory.lstat()
+    except FileNotFoundError:
+        return None
+    manifest = json.loads((directory / "manifest.json").read_text())
+    binary = directory / (_NAME + identity["extension_suffix"])
+    if manifest["build_identity"] != identity:
+        raise RuntimeError("cached token validation build identity differs from expected identity")
+    if manifest["binary_sha256"] != _digest(binary):
+        raise RuntimeError("cached token validation binary differs from its verified digest")
+    return manifest
 
 
 def _load_native() -> tuple[object, dict]:
@@ -139,13 +142,13 @@ def _load_native() -> tuple[object, dict]:
     cache = cache / "cxldsagr" / "token-validation"
     cache.mkdir(parents=True, exist_ok=True)
     directory = cache / key
-    # Keep the lock outside the published directory so repair uses the same lock.
+    # Serialize first publication and verified reuse without repairing bad artifacts.
     with (cache / f"{key}.lock").open("a") as lock:
         fcntl.flock(lock, fcntl.LOCK_EX)
         manifest = _verified_manifest(directory, identity)
         if manifest is None:
-            with tempfile.TemporaryDirectory(prefix=f".{key}-", dir=cache) as temporary:
-                staging = Path(temporary)
+            staging = Path(tempfile.mkdtemp(prefix=f".{key}-", dir=cache))
+            try:
                 binary = staging / (_NAME + identity["extension_suffix"])
                 _run([*command, "-o", str(binary)], environment)
                 if any(
@@ -155,9 +158,10 @@ def _load_native() -> tuple[object, dict]:
                     raise RuntimeError("token validation dependency changed during compilation")
                 manifest = {"build_identity": identity, "binary_sha256": _digest(binary)}
                 (staging / "manifest.json").write_text(json.dumps(manifest, sort_keys=True))
-                if directory.exists():
-                    shutil.rmtree(directory)
                 staging.rename(directory)
+            except BaseException as error:
+                error.add_note(f"token validation build artifacts retained at {staging}")
+                raise
         binary = (directory / (_NAME + identity["extension_suffix"])).resolve()
         spec = importlib.util.spec_from_file_location(_NAME, binary)
         if spec is None or spec.loader is None:
@@ -179,25 +183,14 @@ def _load_native() -> tuple[object, dict]:
 
 
 def prepare():
-    """Select once per process; runner construction calls this before ownership."""
+    """Prepare native once; setup errors propagate before runner ownership."""
     global _predicate, _runtime
     with _LOCK:
         if _predicate is None:
             reason = _unsupported_reason()
-            if reason is None:
-                try:
-                    _predicate, _runtime = _load_native()
-                except (
-                    ImportError,
-                    OSError,
-                    RuntimeError,
-                    ValueError,
-                    subprocess.SubprocessError,
-                ) as error:
-                    reason = f"{type(error).__name__}: {error}"
             if reason is not None:
-                _predicate = reference
-                _runtime = {"backend": "python_reference", "fallback_reason": reason}
+                raise NotImplementedError(reason)
+            _predicate, _runtime = _load_native()
         return _predicate
 
 

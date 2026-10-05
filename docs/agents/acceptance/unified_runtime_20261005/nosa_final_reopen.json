@@ -1,0 +1,27 @@
+{
+  "run_id": "refactor_final_nosa_check_20261005_01",
+  "source_snapshot_sha256": "4665ccce226af23f631e619f748369cea28d4a09b99c1947cbb6b030e58f120c",
+  "receipt_sha256": "93953f9389f7fcaa5c46a53f1047bc098da9e58b26fb420dc25d8faea145d2e1",
+  "rows": 128,
+  "audit": {
+    "passed": true,
+    "checked_requests": 128,
+    "offload_requests_compared_to_independent_hbm": 96,
+    "checked_warmup_requests": 12,
+    "all_candidate_hidden_checked": true,
+    "exact_requests": 128,
+    "hidden_max_abs": 0.0,
+    "numerical_atol": 0.016,
+    "numerical_rtol": 0.016,
+    "source_sha256": "4665ccce226af23f631e619f748369cea28d4a09b99c1947cbb6b030e58f120c",
+    "native_build_sha256": "e6a0cf778f9cb360f595d69d211051f3eeabc99ae212a7cfe7545cf7b387e74f",
+    "observations": {
+      "samples_checked": 146,
+      "device_observations_are_peaks": false
+    },
+    "scope": "latency, declared capacities, workload, and full hidden numerical validation",
+    "does_not_establish": "matrix API MFU proximity, internal overlap, or compute/IO dominance"
+  },
+  "artifacts_reopened": true,
+  "current_source_inventory_verified": true
+}

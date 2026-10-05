@@ -202,14 +202,17 @@ class InstrumentOperators:
         self.float_linears[model.head_weight.data_ptr()] = "lm_head"
 
     def __enter__(self):
-        from models.deepseek_v32 import echo_attention, echo_block, echo_infer, echo_model
+        from models.deepseek_v32 import attention as echo_attention
+        from models.deepseek_v32 import checkpoint, projections, rotary
+        from models.deepseek_v32 import layers as echo_block
+        from models.deepseek_v32 import model as echo_infer
         from operators.deepseek_v32.attention.offload import mla as offload_mla
         from operators.deepseek_v32.indexer import echo
 
         self.stack = ExitStack()
-        original_linear = echo_model.CheckpointLinear.__call__
+        original_linear = checkpoint.CheckpointLinear.__call__
         original_bmm, original_functional = torch.bmm, F.linear
-        original_project = echo_model.CheckpointAttention.project
+        original_project = projections.CheckpointAttention.project
         original_logits, original_mla = echo.logits, echo_attention.sparse_mla
 
         def linear(instance, x, *args, **kwargs):
@@ -296,24 +299,25 @@ class InstrumentOperators:
             return wrapped
 
         targets = [
-            (echo_model.CheckpointLinear, "__call__", linear),
-            (echo_model.CheckpointAttention, "project", project),
+            (checkpoint.CheckpointLinear, "__call__", linear),
+            (projections.CheckpointAttention, "project", project),
             (torch, "bmm", bmm),
             (F, "linear", functional),
             (echo, "logits", logits),
             (echo_attention, "sparse_mla", mla),
             (offload_mla, "sparse_mla", mla),
         ]
-        for name in (
-            "apply_rope",
-            "apply_rope_pair",
-            "prepare_rotary_cache",
-            "normalized_hadamard",
-            "quantize_index",
+        for module, names in (
+            (projections, ("apply_rope_pair", "prepare_rotary_cache", "quantize_index")),
+            (
+                rotary,
+                ("apply_rope", "apply_rope_pair", "prepare_rotary_cache", "normalized_hadamard"),
+            ),
         ):
-            if hasattr(echo_model, name):
-                targets.append((echo_model, name, wrap(getattr(echo_model, name), name)))
-        for module in (echo_model, echo_block, echo_infer):
+            for name in names:
+                if hasattr(module, name):
+                    targets.append((module, name, wrap(getattr(module, name), name)))
+        for module in (projections, echo_block, echo_infer):
             if hasattr(module, "rms_norm"):
                 targets.append((module, "rms_norm", wrap(module.rms_norm, "rms_norm")))
         # Wrap the model adapters, so packing, FP32 copies and output casts

@@ -32,13 +32,12 @@ TOPK = 2048
 
 
 def _source_identity():
-    paths = {Path(__file__).resolve()}
+    paths = {Path(__file__).resolve(), ROOT / "models/attention_contracts.py"}
     for directory in (
         "models/deepseek_v32",
         "cache",
         "operators/deepseek_v32",
         "operators/common",
-        "layers",
         "executor",
     ):
         paths.update(
@@ -138,9 +137,9 @@ def _attach(model, session, *, user, totals):
         mirror = _ProjectionMirror(runner, user=user, layer=layer, totals=totals)
         runner.capture_hook = mirror.capture
 
-        def consume_bound(self, q, indices, scope, mirror=mirror):
+        def consume_bound(self, q, selection, scope, mirror=mirror):
             assert self is mirror.runner
-            return mirror.consume(q, indices, scope)
+            return mirror.consume(q, selection.token_ids, scope)
 
         runner._consume = MethodType(consume_bound, runner)
         mirrors.append(mirror)
@@ -157,7 +156,7 @@ def _attach(model, session, *, user, totals):
 def test_official_full_checkpoint_selected_records_and_same_order_attention(compute_graphs):
     from cache.prefix_pool import CacheFootprint
     from GR.workload import WorkloadConfig, build_workload
-    from models.deepseek_v32.official_serving import OfficialDeepSeekServingBackend
+    from models.deepseek_v32.execution.official import build_official_backend
 
     start = time.perf_counter()
     source_before = _source_identity()
@@ -172,7 +171,7 @@ def test_official_full_checkpoint_selected_records_and_same_order_attention(comp
         f"A={CANDIDATE}, compute_graphs={compute_graphs}",
         flush=True,
     )
-    model = OfficialDeepSeekServingBackend(
+    model = build_official_backend(
         checkpoint,
         scheme="echo",
         device="cuda:0",
@@ -218,7 +217,7 @@ def test_official_full_checkpoint_selected_records_and_same_order_attention(comp
     try:
         model.allocate_shared(plan)
         assert CacheFootprint.from_mapping(model.shared_bytes()).fits(plan.shared)
-        native_before = model.official_provenance()["source_files"]
+        native_before = model.pipeline.provenance()["source_files"]
         # Use requests 0, 1, and 16 from the same sixteen-user cyclic workload.
         workload = build_workload(
             WorkloadConfig(
@@ -298,7 +297,7 @@ def test_official_full_checkpoint_selected_records_and_same_order_attention(comp
         else:
             assert not graph_state["enabled"] and not graph_state["allocated"]
         assert _source_identity() == source_before, "production sources changed during validation"
-        assert model.official_provenance()["source_files"] == native_before
+        assert model.pipeline.provenance()["source_files"] == native_before
         print(
             json.dumps(
                 {

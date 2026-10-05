@@ -1,0 +1,68 @@
+[
+  {
+    "case": "layer_00",
+    "operator": "block_sparse_attention",
+    "native_actual_backend": "cuda_tvm_ffi",
+    "native_graph_us": 170.30879855155945,
+    "triton_graph_us": 574.5343923568727,
+    "graph_speedup": 3.3734862628541036,
+    "native_graph_mfu_pct": 40.48495370713731,
+    "native_eager_us": 229.63200509548187,
+    "triton_eager_us": 622.048020362854
+  },
+  {
+    "case": "layer_00",
+    "operator": "pooled_scores",
+    "native_actual_backend": "cuda_tvm_ffi",
+    "native_graph_us": 170.7311987876892,
+    "triton_graph_us": 284.7872018814087,
+    "graph_speedup": 1.6680442936241109,
+    "native_graph_mfu_pct": 20.500721515559253,
+    "native_eager_us": 198.35200160741806,
+    "triton_eager_us": 308.0960065126419
+  },
+  {
+    "case": "layer_15",
+    "operator": "block_sparse_attention",
+    "native_actual_backend": "cuda_tvm_ffi",
+    "native_graph_us": 168.7279999256134,
+    "triton_graph_us": 580.3551912307738,
+    "graph_speedup": 3.4395902961371747,
+    "native_graph_mfu_pct": 40.86425387794444,
+    "native_eager_us": 227.24799811840057,
+    "triton_eager_us": 625.9520053863525
+  },
+  {
+    "case": "layer_15",
+    "operator": "pooled_scores",
+    "native_actual_backend": "cuda_tvm_ffi",
+    "native_graph_us": 171.32159471511844,
+    "triton_graph_us": 282.4400067329407,
+    "graph_speedup": 1.6485954803455756,
+    "native_graph_mfu_pct": 20.43007343110573,
+    "native_eager_us": 197.9680061340332,
+    "triton_eager_us": 304.3520003557205
+  },
+  {
+    "case": "layer_31",
+    "operator": "block_sparse_attention",
+    "native_actual_backend": "cuda_tvm_ffi",
+    "native_graph_us": 165.15679955482483,
+    "triton_graph_us": 579.7120094299316,
+    "graph_speedup": 3.5100704965979475,
+    "native_graph_mfu_pct": 41.747865324728814,
+    "native_eager_us": 223.4879955649376,
+    "triton_eager_us": 626.1599957942963
+  },
+  {
+    "case": "layer_31",
+    "operator": "pooled_scores",
+    "native_actual_backend": "cuda_tvm_ffi",
+    "native_graph_us": 170.37280201911926,
+    "triton_graph_us": 282.0448040962219,
+    "graph_speedup": 1.6554567439970307,
+    "native_graph_mfu_pct": 20.543846898586672,
+    "native_eager_us": 197.23200052976608,
+    "triton_eager_us": 302.95999348163605
+  }
+]

@@ -17,7 +17,7 @@ def script_repo(tmp_path):
     experiment = root / "experiments" / "deepseek_v32_echo_prefill"
     scripts = experiment / "scripts"
     scripts.mkdir(parents=True)
-    for name in ("run.sh", "ncu.sh"):
+    for name in ("run.sh", "ncu.sh", "profile_layers.sh"):
         shutil.copyfile(SCRIPTS / name, scripts / name)
     binaries = root / ".venv" / "bin"
     binaries.mkdir(parents=True)
@@ -51,15 +51,30 @@ if name == "python":
         sys.exit(0)
     print("mock stdout")
     print("mock stderr", file=sys.stderr)
-    if args[1].endswith(".measure"):
+    if args[1].endswith(".measure") or args[1].endswith(".profile_layers"):
         output = Path(value("--output"))
         output.mkdir()
         (output / "request.json").write_text("{}\n")
         if phase == "measure":
             sys.exit(37)
+        mode = "profile" if args[1].endswith(".profile_layers") else value("--mode")
         (output / "result.json").write_text(json.dumps({
             "run_id": value("--run-id"), "accepted": True,
-            "num_layers": 3, "correctness": {str(i): {} for i in range(8)},
+            "schema_version": 2, "mode": mode, "num_layers": 3,
+            "correctness": {str(i): {} for i in range({"check": 5, "profile": 8, "bench": 0}[mode])},
+            "validation_receipt": {"fixture": True},
+        }))
+        if mode == "check":
+            (output / "receipt.json").write_text("{}")
+    elif args[1].endswith(".operator_report"):
+        output = Path(value("--output-dir"))
+        output.mkdir()
+        if phase == "analysis":
+            sys.exit(39)
+        (output / "analysis.json").write_text(json.dumps({
+            "captures": [{"audit": {"kernel_count_and_time_conserved": True,
+                                     "metadata_call_counts_match": True}}] * 4,
+            "calls_outside_selected_captures": 0,
         }))
     else:
         Path(value("--metadata")).write_text(json.dumps({
@@ -67,10 +82,16 @@ if name == "python":
             "input": str(Path(value("--input")).resolve()),
         }))
 elif name == "nsys":
-    status = subprocess.call(args[args.index("python"):])
-    if status:
-        sys.exit(status)
-    Path(value("--output") + ".nsys-rep").write_text("trace\n")
+    if args == ["--version"]:
+        print("NSYS fixture")
+    elif args[0] == "export":
+        Path(value("--output")).write_text("sqlite fixture")
+    else:
+        status = subprocess.call(args[args.index("python"):])
+        if status:
+            sys.exit(status)
+        for capture in range(1, 5):
+            Path(value("--output") + f".{capture}.nsys-rep").write_text("trace\n")
 elif name == "ncu":
     if args == ["--version"]:
         if phase == "ncu_version":
@@ -140,10 +161,9 @@ def assert_unpublished(fixture):
         assert not (experiment / "output" / category / RUN_ID).exists()
 
 
-@pytest.mark.parametrize("nsys", ["0", "1"])
-def test_measure_success_publishes_relocatable_run(script_repo, nsys):
+def test_measure_success_publishes_relocatable_run(script_repo):
     _, experiment, _, temp, _, env = script_repo
-    completed = invoke(script_repo, "run.sh", "--physical-device", "2", ECHO_NSYS=nsys)
+    completed = invoke(script_repo, "run.sh", "--physical-device", "2", ECHO_NSYS="0")
     assert completed.returncode == 0, completed.stderr
     assert not list(temp.iterdir())
     output = experiment / "output"
@@ -152,16 +172,16 @@ def test_measure_success_publishes_relocatable_run(script_repo, nsys):
     assert result["accepted"] and result["run_id"] == result_path.parent.name
     assert (output / "log" / RUN_ID / "stdout.log").read_text() == "mock stdout\n"
     assert (output / "log" / RUN_ID / "stderr.log").read_text() == "mock stderr\n"
-    assert (output / "profile" / RUN_ID / "layers3.nsys-rep").exists() == (nsys == "1")
+    assert not list((output / "profile" / RUN_ID).iterdir())
     calls = [json.loads(line) for line in Path(env["MOCK_CALLS"]).read_text().splitlines()]
     measure = next(call for call in calls if call[0] == "python")
-    assert measure[-2:] == (["2", "--nsys"] if nsys == "1" else ["--physical-device", "2"])
+    assert measure[-2:] == ["--physical-device", "2"]
+    assert "nsys" not in {call[0] for call in calls}
 
 
-@pytest.mark.parametrize("nsys", ["0", "1"])
-def test_measure_failure_keeps_diagnostics_only_in_temporary_directory(script_repo, nsys):
+def test_measure_failure_keeps_diagnostics_only_in_temporary_directory(script_repo):
     _, _, _, temp, _, _ = script_repo
-    failed = invoke(script_repo, ECHO_NSYS=nsys, MOCK_FAILURE="measure")
+    failed = invoke(script_repo, ECHO_NSYS="0", MOCK_FAILURE="measure")
     assert failed.returncode == 37
     assert_unpublished(script_repo)
     (staging,) = temp.iterdir()
@@ -260,3 +280,38 @@ def test_help_leaves_no_outputs(script_repo, script):
     assert completed.stdout
     assert_unpublished(script_repo)
     assert not list(temp.iterdir())
+
+
+def test_check_outputs_stay_outside_experiments(script_repo):
+    _, _, _, temp, _, _ = script_repo
+    completed = invoke(script_repo, "run.sh", "--mode", "check")
+    assert completed.returncode == 0, completed.stderr
+    assert_unpublished(script_repo)
+    check = temp / "cxldsagr-checks/deepseek_v32_echo_prefill/data" / RUN_ID
+    assert (check / "receipt.json").is_file()
+
+
+def test_combined_profile_is_rejected(script_repo):
+    failed = invoke(script_repo, ECHO_NSYS="1")
+    assert failed.returncode == 2
+    assert "independent profiling" in failed.stderr
+    assert_unpublished(script_repo)
+
+
+def test_profile_success_publishes_four_captures(script_repo):
+    _, experiment, _, _, _, env = script_repo
+    completed = invoke(
+        script_repo, "profile_layers.sh", "--validation-receipt", "/tmp/check/receipt.json"
+    )
+    assert completed.returncode == 0, completed.stderr
+    assert len(list((experiment / "output/profile" / RUN_ID).glob("*.nsys-rep"))) == 4
+    assert len(list((experiment / "output/data" / RUN_ID).glob("capture_*.sqlite"))) == 4
+    calls = [json.loads(line) for line in Path(env["MOCK_CALLS"]).read_text().splitlines()]
+    assert not any("experiments.deepseek_v32_echo_prefill.src.measure" in call for call in calls)
+
+
+@pytest.mark.parametrize("phase,status", [("measure", 37), ("analysis", 39)])
+def test_profile_failure_stays_in_temporary_directory(script_repo, phase, status):
+    failed = invoke(script_repo, "profile_layers.sh", MOCK_FAILURE=phase)
+    assert failed.returncode == status
+    assert_unpublished(script_repo)

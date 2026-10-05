@@ -1,5 +1,6 @@
 """Admission ownership and rollback around bounded NOSA shared allocation."""
 
+import gc
 import weakref
 
 import pytest
@@ -21,7 +22,7 @@ def test_owner_release_preserves_prior_plan_and_rolls_back_only_new_storage(
         backend.allocate_shared(plan)
     backend.bind_owner(owner)
     try:
-        backend.allocate_shared(plan)
+        backend.allocate_shared(plan, owner=owner)
         before = storages(backend.resources, stop=(backend, backend.model))
         assert before
         backend.unbind_owner(owner, rollback=rollback)
@@ -81,7 +82,7 @@ def test_failed_initial_allocation_drains_before_owner_rollback(monkeypatch, sch
         with monkeypatch.context() as patch:
             patch.setattr(torch, "empty", fail_second_allocation)
             with pytest.raises(RuntimeError, match="injected allocation failure"):
-                backend.allocate_shared(plan)
+                backend.allocate_shared(plan, owner=owner)
         assert backend.resources._admission_owner is owner
         assert not backend.resources.poisoned
         assert backend.resources._allocation_failure is None
@@ -89,7 +90,7 @@ def test_failed_initial_allocation_drains_before_owner_rollback(monkeypatch, sch
         assert not storages(backend.resources, stop=(backend, backend.model))
         backend.unbind_owner(owner, rollback=True)
         backend.bind_owner(owner)
-        backend.allocate_shared(plan)
+        backend.allocate_shared(plan, owner=owner)
         backend.unbind_owner(owner)
     finally:
         if backend.resources._admission_owner is owner:
@@ -103,7 +104,7 @@ def test_rollback_failed_device_drain_retains_owner_plan_and_storage(monkeypatch
     plan = backend.plan_resources(BUDGET, limits())
     owner = object()
     backend.bind_owner(owner)
-    backend.allocate_shared(plan)
+    backend.allocate_shared(plan, owner=owner)
     before = storages(backend.resources, stop=(backend, backend.model))
     observed = []
 
@@ -128,7 +129,7 @@ def test_rollback_failed_device_drain_retains_owner_plan_and_storage(monkeypatch
         with pytest.raises(RuntimeError, match="poisoned"):
             backend.unbind_owner(owner)
         with pytest.raises(RuntimeError, match="poisoned"):
-            backend.allocate_shared(plan)
+            backend.allocate_shared(plan, owner=owner)
     finally:
         backend.resources.poisoned = False
         backend.unbind_owner(owner, rollback=True)
@@ -140,7 +141,7 @@ def test_rollback_failed_staging_release_retains_owner_and_all_storage(monkeypat
     plan = backend.plan_resources(BUDGET, limits())
     owner = object()
     backend.bind_owner(owner)
-    backend.allocate_shared(plan)
+    backend.allocate_shared(plan, owner=owner)
     before = storages(backend.resources, stop=(backend, backend.model))
 
     def fail_close():
@@ -186,8 +187,10 @@ def test_failed_constructor_drain_retains_partial_object_until_safe_disposal(mon
             patch.setattr(backend.resources, "plan_resources", lambda *args: plan)
             patch.setattr(NosaFetchWorkspace, "__init__", fail_constructor)
             patch.setattr(torch.cuda, "synchronize", fail_drain)
-            with pytest.raises(RuntimeError, match="Unable to drain"):
-                backend.allocate_shared(plan)
+            with pytest.raises(BaseExceptionGroup, match="operation and cleanup") as caught:
+                backend.allocate_shared(plan, owner=owner)
+            assert str(caught.value.exceptions[0]) == "injected partial constructor failure"
+            assert "Unable to drain" in str(caught.value.exceptions[1])
         assert drains == [torch.device("cuda:0")]
         assert partial[0]() is not None
         assert backend.resources.fetch_workspace is None
@@ -200,4 +203,8 @@ def test_failed_constructor_drain_retains_partial_object_until_safe_disposal(mon
         backend.resources.poisoned = False
         backend.unbind_owner(owner, rollback=True)
         backend.close()
+    # The error group intentionally retains both original tracebacks. Release
+    # the test's own observation before checking provider disposal.
+    del caught
+    gc.collect()
     assert partial[0]() is None

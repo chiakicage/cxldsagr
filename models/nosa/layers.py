@@ -3,9 +3,10 @@
 import torch
 from torch import nn
 
-from layers.attention import AttentionContext, ResidentLayerView
-from layers.feed_forward import SwiGLU
-from layers.normalization import RMSNorm
+from models.attention_contracts import AttentionContext
+from models.nosa.attention import ResidentLayerView
+from models.nosa.feed_forward import SwiGLU
+from models.nosa.normalization import RMSNorm
 from models.nosa.rotary import NosaRotaryEmbedding, apply_rotary_qk
 
 # Aliasing keeps both the old import and profiler isinstance checks meaningful.

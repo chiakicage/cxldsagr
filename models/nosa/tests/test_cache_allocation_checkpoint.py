@@ -34,9 +34,9 @@ from evaluation.cache_memory_audit import (
     audit_trace,
     storage_inventory,
 )
-from models.nosa.attention import NosaSparseAttention
+from models.nosa.attention import NosaDensePrefetchAttention, NosaSparseAttention
+from models.nosa.execution.adapter import NosaServingBackend
 from models.nosa.indexer import NosaIndexer
-from models.nosa.serving import NosaServingBackend, _DensePrefetchAttention
 from models.nosa.tests.cache_allocation_join import CudaGenerationJoin
 
 
@@ -167,7 +167,7 @@ class _AllocationScopes:
             for cls, category, name, output in (
                 (NosaIndexer, "indexer", "indexer", False),
                 (NosaSparseAttention, "offload_prepare", "attention", True),
-                (_DensePrefetchAttention, "offload_prepare", "attention", True),
+                (NosaDensePrefetchAttention, "offload_prepare", "attention", True),
             ):
                 stack.enter_context(
                     patch.object(
@@ -650,7 +650,7 @@ def test_allocation_wrappers_cover_layers_phases_and_restore(scheme):
     originals = (
         NosaIndexer.__call__,
         NosaSparseAttention.__call__,
-        _DensePrefetchAttention.__call__,
+        NosaDensePrefetchAttention.__call__,
     )
     with allocated_backend(scheme) as (backend, _):
         expected = {}
@@ -688,7 +688,7 @@ def test_allocation_wrappers_cover_layers_phases_and_restore(scheme):
     assert originals == (
         NosaIndexer.__call__,
         NosaSparseAttention.__call__,
-        _DensePrefetchAttention.__call__,
+        NosaDensePrefetchAttention.__call__,
     )
 
 

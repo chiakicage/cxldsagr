@@ -149,7 +149,7 @@ def test_discovery_and_runtime_snapshots_never_prepare_or_import_extension(monke
         runtime_info=lambda: None,
         prepare=lambda *args: pytest.fail("provenance prepared native provider"),
     )
-    monkeypatch.setitem(sys.modules, "models.nosa._pool_referrers", loader)
+    monkeypatch.setitem(sys.modules, "cache.allocator.pool_referrers", loader)
     assert pool.build_info() == {"available": False}
     assert pool.snapshot(maps_path=tmp_path / "absent") == {"runtime": None, "artifacts": {}}
     assert calls == ["discover"]
@@ -185,10 +185,23 @@ def test_old_metadata_compatibility_does_not_weaken_current_source_gate():
     assert pool.audit_gr({"cases": []}) is None
     with pytest.raises(ValueError, match="requires"):
         pool.audit_gr({"cases": []}, required=True)
-    assert not pool.requires_provenance({"models/nosa/allocation_budget.py": "old"})
+    assert not pool.requires_provenance({"cache/allocator/budget.py": "old"})
     assert pool.requires_provenance(dict.fromkeys(pool.POOL_SCAN_SOURCES, "new"))
     with pytest.raises(ValueError, match="coverage"):
         pool.requires_provenance({pool.POOL_SCAN_ABI: "new"})
+
+
+def test_pre_migration_provider_sources_keep_their_saved_abi_binding():
+    historical = {
+        "models/nosa/_pool_referrers.py": "loader",
+        "models/nosa/csrc/pool_referrers.c": "source",
+        "models/nosa/csrc/pool_referrers_abi.json": "saved-abi",
+    }
+    assert pool.requires_provenance(historical)
+    assert pool.source_abi_sha256(historical) == "saved-abi"
+    del historical["models/nosa/csrc/pool_referrers.c"]
+    with pytest.raises(ValueError, match="coverage"):
+        pool.source_abi_sha256(historical)
 
 
 def test_gr_profile_requires_each_actual_case_and_matching_build():
@@ -241,7 +254,7 @@ def test_all_gr_source_inventories_include_c_and_only_whitelisted_json(tmp_path,
     for name in (
         *pool.POOL_SCAN_SOURCES,
         "evaluation/pool_scan_provenance.py",
-        "models/nosa/csrc/ignored.json",
+        "cache/allocator/csrc/ignored.json",
     ):
         path = repo / name
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -252,7 +265,7 @@ def test_all_gr_source_inventories_include_c_and_only_whitelisted_json(tmp_path,
     provenance.source_snapshot(output)
     manifest = json.loads((output / "source_manifest.json").read_text())
     assert set(pool.POOL_SCAN_SOURCES) <= set(manifest)
-    assert "models/nosa/csrc/ignored.json" not in manifest
+    assert "cache/allocator/csrc/ignored.json" not in manifest
     provenance.verify_source_snapshot(output)
 
 
@@ -290,7 +303,7 @@ def test_fixed_source_inventory_whitelists_exact_abi_file(tmp_path, monkeypatch)
     for name in (
         *pool.POOL_SCAN_SOURCES,
         "evaluation/pool_scan_provenance.py",
-        "models/nosa/csrc/ignored.json",
+        "cache/allocator/csrc/ignored.json",
     ):
         path = tmp_path / name
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -298,5 +311,5 @@ def test_fixed_source_inventory_whitelists_exact_abi_file(tmp_path, monkeypatch)
     monkeypatch.setattr(provenance, "ROOT", tmp_path)
     paths = {str(path.relative_to(tmp_path)) for path in provenance.source_paths()}
     assert set(pool.POOL_SCAN_SOURCES) <= paths
-    assert "models/nosa/csrc/ignored.json" not in paths
+    assert "cache/allocator/csrc/ignored.json" not in paths
     assert "evaluation/pool_scan_provenance.py" in paths

@@ -3,8 +3,8 @@
 import pytest
 import torch
 
-from models.deepseek_v32.echo_block import CheckpointMLP
-from models.deepseek_v32.echo_model import CheckpointLinear
+from models.deepseek_v32.checkpoint import CheckpointLinear
+from models.deepseek_v32.layers import CheckpointMLP
 
 
 def make_mlp(columns, channels, device):

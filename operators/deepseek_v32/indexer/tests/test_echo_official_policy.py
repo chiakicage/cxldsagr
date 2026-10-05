@@ -237,7 +237,7 @@ def _hint_statements(path, *, official):
 def test_cuda_finite_hint_update_matches_pinned_official_last_four_row_mean(rows):
     require_reference_gpu()
     reference_path = OFFICIAL / "sglang/python/sglang/srt/layers/attention/nsa/nsa_indexer.py"
-    local_path = ROOT / "models/deepseek_v32/echo_attention.py"
+    local_path = ROOT / "models/deepseek_v32/attention.py"
     scores = torch.arange(rows * 13, device="cuda", dtype=torch.float32).reshape(rows, 13)
     scores = (scores.remainder(19) - 7) * 0.25
     official_self = SimpleNamespace(

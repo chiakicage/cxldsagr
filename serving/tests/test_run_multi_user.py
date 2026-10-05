@@ -98,6 +98,8 @@ def fake_resources(monkeypatch, backend):
             [request(candidate=(3 + visit, 4 + visit)) for visit in range(count)]
         ),
     )
+    # Match the CLI model context while keeping the generated tokens tiny.
+    backend.max_seq_len = 262144
     backend.describe = lambda: {"scope": "CPU fixture"}
     backend.close_calls = 0
 
@@ -141,17 +143,36 @@ def test_cli_supports_legacy_backend_without_shared_resource_close(monkeypatch, 
     assert backend.built == backend.released == 1
 
 
-def test_model_failure_closes_session_and_exits_nonzero(monkeypatch, capsys):
+def test_model_failure_closes_session_and_propagates(monkeypatch, capsys):
     backend = Backend()
     backend.fail = True
     fake_resources(monkeypatch, backend)
-    with pytest.raises(SystemExit) as error:
+    with pytest.raises(RuntimeError, match="model failure"):
         run_multi_user.main(["--count", "2"])
-    assert error.value.code == 1
     output = capsys.readouterr()
-    assert "model failure" in output.err
     assert '"status": "finished"' not in output.out
     assert backend.released == 1
+    assert backend.close_calls == 1
+
+
+def test_cli_preserves_request_and_backend_close_errors(monkeypatch):
+    backend = Backend()
+    fake_resources(monkeypatch, backend)
+    execution_error = ValueError("request failed")
+    close_error = KeyboardInterrupt("close interrupted")
+
+    def fail_emit(value):
+        raise execution_error
+
+    def fail_close():
+        backend.close_calls += 1
+        raise close_error
+
+    monkeypatch.setattr(run_multi_user, "_emit", fail_emit)
+    backend.close = fail_close
+    with pytest.raises(BaseExceptionGroup) as caught:
+        run_multi_user.main(["--count", "2"])
+    assert caught.value.exceptions == (execution_error, close_error)
     assert backend.close_calls == 1
 
 
@@ -221,9 +242,8 @@ def test_output_failure_closes_backend(monkeypatch, fail_at):
             raise OSError("broken output")
 
     monkeypatch.setattr(run_multi_user, "_emit", emit)
-    with pytest.raises(SystemExit) as error:
+    with pytest.raises(OSError, match="broken output"):
         run_multi_user.main(["--count", "1"])
-    assert error.value.code == 1
     assert backend.close_calls == 1
 
 
@@ -243,7 +263,7 @@ def test_runtime_builds_deepseek_with_shared_pool_options(monkeypatch):
 
     monkeypatch.setitem(
         sys.modules,
-        "models.deepseek_v32.serving_backend",
+        "models.deepseek_v32.execution.adapter",
         SimpleNamespace(DeepSeekServingBackend=backend),
     )
     parser = run_multi_user._build_parser()

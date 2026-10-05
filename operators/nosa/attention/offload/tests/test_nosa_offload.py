@@ -3,7 +3,7 @@
 import pytest
 import torch
 
-from layers.attention import BlockSelection
+from models.attention_contracts import BlockSelection
 from operators.nosa.attention.device_only.api import nosa_block_sparse_attention
 from operators.nosa.attention.offload.api import NosaFetchWorkspace
 from operators.nosa.attention.reference.torch import reference_nosa_block_sparse_attention

@@ -1,0 +1,252 @@
+{
+  "schema": "unified-framework-final-validation-v1",
+  "recorded_utc": "2026-10-05T01:11:21.416817+00:00",
+  "status": "passed",
+  "source_stage": "After the five-file post-capture import/format normalization, whose original and resulting bytes are preserved separately.",
+  "static_source_delta": {
+    "path": "docs/agents/acceptance/unified_runtime_20261005/static_style_source_delta.json",
+    "sha256": "87a2766d6147fbf60dd1e00124c5019d38c84c91e32b89a49277d578a4c957e0",
+    "size_bytes": 4121
+  },
+  "cpu": {
+    "argv": [
+      "taskset",
+      "-c",
+      "0-7",
+      "bash",
+      "scripts/run_tests.sh",
+      "cpu"
+    ],
+    "environment_overrides": {
+      "CUDA_VISIBLE_DEVICES": "",
+      "OMP_NUM_THREADS": "1",
+      "MKL_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1",
+      "PYTHONDONTWRITEBYTECODE": "1",
+      "PYTEST_ADDOPTS": "--tb=short"
+    },
+    "exit_code": 0,
+    "passed": 3834,
+    "skipped": 1274,
+    "warnings": 1,
+    "subtests_passed": 58,
+    "duration_seconds": 81.7,
+    "log": {
+      "path": "/tmp/unified_global_cpu_poststyle_20261005.log",
+      "sha256": "fafcc19823341b0972a3ea8f20e2c2a876f3883d12cd74a6f20829d15e0b77e5",
+      "size_bytes": 28303
+    },
+    "boundary": "Hardware/opt-in skips are not GPU validation. The separate accepted GPU receipts and performance captures retain their original runtime/native identities."
+  },
+  "cli": {
+    "record": {
+      "path": "/tmp/unified_poststyle_cli_check.json",
+      "sha256": "357379eb44a83dd90cd87635c6087c9e78581192a0a14db7c702ed04fd0aaa23",
+      "size_bytes": 2259
+    },
+    "commands": [
+      {
+        "argv": [
+          ".venv/bin/python",
+          "-B",
+          "-m",
+          "models.nosa.infer",
+          "--help"
+        ],
+        "exit_code": 0,
+        "stdout_bytes": 1975,
+        "stderr": ""
+      },
+      {
+        "argv": [
+          ".venv/bin/python",
+          "-B",
+          "-m",
+          "models.deepseek_v32.infer",
+          "--help"
+        ],
+        "exit_code": 0,
+        "stdout_bytes": 1006,
+        "stderr": ""
+      },
+      {
+        "argv": [
+          ".venv/bin/python",
+          "-B",
+          "-m",
+          "serving.run_gr",
+          "--help"
+        ],
+        "exit_code": 0,
+        "stdout_bytes": 1691,
+        "stderr": ""
+      },
+      {
+        "argv": [
+          ".venv/bin/python",
+          "-B",
+          "-m",
+          "serving.run_multi_user",
+          "--help"
+        ],
+        "exit_code": 0,
+        "stdout_bytes": 2833,
+        "stderr": ""
+      },
+      {
+        "argv": [
+          ".venv/bin/python",
+          "-B",
+          "-m",
+          "experiments.cache_management.src.report",
+          "--help"
+        ],
+        "exit_code": 0,
+        "stdout_bytes": 850,
+        "stderr": ""
+      },
+      {
+        "argv": [
+          ".venv/bin/python",
+          "-B",
+          "-m",
+          "experiments.nosa_motivation.src.publish",
+          "--help"
+        ],
+        "exit_code": 0,
+        "stdout_bytes": 604,
+        "stderr": ""
+      },
+      {
+        "argv": [
+          ".venv/bin/python",
+          "-B",
+          "-m",
+          "experiments.nosa_motivation.src.render_motivation_summary",
+          "--help"
+        ],
+        "exit_code": 0,
+        "stdout_bytes": 573,
+        "stderr": ""
+      },
+      {
+        "argv": [
+          ".venv/bin/python",
+          "-B",
+          "models/nosa/infer.py",
+          "--help"
+        ],
+        "exit_code": 0,
+        "stdout_bytes": 1975,
+        "stderr": ""
+      },
+      {
+        "argv": [
+          ".venv/bin/python",
+          "-B",
+          "models/deepseek_v32/infer.py",
+          "--help"
+        ],
+        "exit_code": 0,
+        "stdout_bytes": 1006,
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "bash",
+          "scripts/run_tests.sh",
+          "--help"
+        ],
+        "exit_code": 0,
+        "stdout_bytes": 256,
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "bash",
+          "experiments/cache_management/scripts/run.sh",
+          "--help"
+        ],
+        "exit_code": 0,
+        "stdout_bytes": 1480,
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "bash",
+          "experiments/deepseek_v32_echo_prefill/scripts/run.sh",
+          "--help"
+        ],
+        "exit_code": 0,
+        "stdout_bytes": 1814,
+        "stderr": ""
+      }
+    ],
+    "passed": 12,
+    "exit_code": 0,
+    "boundary": "Help/parsing/import checks only, on CPU40-47/NUMA0 with CUDA hidden; no model execution."
+  },
+  "ruff": {
+    "record": {
+      "path": "/tmp/unified_final_ruff_poststyle.json",
+      "sha256": "30586e97fc3c21d34707cd9eab6be96a8e3d8e2513037169a98de5470bb87538",
+      "size_bytes": 392
+    },
+    "files": 236,
+    "check_exit_code": 0,
+    "format_check_exit_code": 0
+  },
+  "source_document_diff_check": {
+    "record": {
+      "path": "/tmp/unified_final_source_doc_diff_check.json",
+      "sha256": "a3f6560f6ae86d2fdbbc37673ebd3bbda2507698e71275ac2fb1f2c976571905",
+      "size_bytes": 316
+    },
+    "exit_code": 0,
+    "boundary": "Generated CSV/SVG report bytes excluded to preserve accepted hashes; those generated outputs are not claimed whitespace-clean."
+  },
+  "navigation": {
+    "markdown_files": 173,
+    "local_links_checked": 884,
+    "missing": [],
+    "retiring_process_links": [],
+    "ignored_output_links": [],
+    "private_markers": []
+  },
+  "retired_process_file_runtime_references": 0,
+  "process_cleanup": {
+    "removed": "docs/agents/system/refactor",
+    "removed_files": 15,
+    "archive_created": false,
+    "remaining_system_files": [
+      "docs/agents/system/README.md",
+      "docs/agents/system/nosa/nosa_copy_descriptor_result.md",
+      "docs/agents/system/nosa/nosa_guarded_copy_control.md",
+      "docs/agents/system/nosa/nosa_hbm_prequeue_diagnostic.md",
+      "docs/agents/system/nosa/nosa_indexer_dispatch_plan.md"
+    ]
+  },
+  "t007_reference": {
+    "index": {
+      "path": "docs/agents/acceptance/unified_runtime_20261005/t007_reference/evidence.json",
+      "sha256": "8d1ed1a52a2296a3af556e59b81d81b7eef6cf7f5220ed57298c28c061cdb93c",
+      "size_bytes": 5495
+    },
+    "retained_files_rehashed": 6,
+    "retained_bytes": 26548253,
+    "diagnostic_reviewers_rerun": false
+  },
+  "limits": [
+    "CPU regression, static source equivalence and report integrity do not establish zero performance regression.",
+    "A128 NOSA async speedup and every-sample overlap targets remain failed; A1024 operator acceptance is a separate scope.",
+    "No new GPU timing or fault injection followed the post-capture formatting changes.",
+    "No NH-fill, maximum physical capacity or real-GR task-quality validation."
+  ],
+  "final_publication_recheck": {
+    "manifests": 8,
+    "selected_asset_hashes": 263,
+    "readme_hashes": 8,
+    "status": "passed",
+    "boundary": "Final selected-file and README rehash only; original raw numerical/GPU/native audits are not repeated."
+  }
+}

@@ -183,9 +183,8 @@ def api_scopes(backend):
     import torch
 
     from models.nosa import scoring
-    from models.nosa.attention import NosaSparseAttention
-    from models.nosa.fixed_cache import NosaFixedAttention
-    from models.nosa.fixed_serving import NosaFixedServingBackend
+    from models.nosa.attention import NosaFixedAttention, NosaSparseAttention
+    from models.nosa.execution.fixed import NosaFixedServingBackend
     from models.nosa.indexer import NosaIndexer
 
     def wrapper(original, name):
@@ -365,9 +364,9 @@ def main(argv=None):
     import torch
 
     from cache.prefix_pool import CacheFootprint
-    from models.nosa.fixed_serving import NosaFixedServingBackend
+    from models.nosa.execution.adapter import NosaServingBackend
+    from models.nosa.execution.fixed import NosaFixedServingBackend
     from models.nosa.indexer import NosaIndexer
-    from models.nosa.serving import NosaServingBackend
 
     output = args.output_dir or EXPERIMENT / "output/data" / args.run_id
     profile = args.profile_dir or EXPERIMENT / "output/profile" / args.run_id

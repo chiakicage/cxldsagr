@@ -1,0 +1,142 @@
+"""Bounded pure-CPU diagnostic; no serving/GPU performance claim."""
+import cProfile
+from dataclasses import fields, replace
+import gc
+import hashlib
+import json
+import os
+from pathlib import Path
+import platform
+import pstats
+import statistics
+import sys
+import time
+
+ROOT = Path('/mnt/ssd-wlcb/chenkaiqi/cxldsagr')
+sys.path.insert(0, str(ROOT))
+OUT = Path(__file__).resolve().parent
+assert os.environ.get('CUDA_VISIBLE_DEVICES') == ''
+assert all(os.environ.get(k) == '1' for k in ('OMP_NUM_THREADS','MKL_NUM_THREADS','OPENBLAS_NUM_THREADS'))
+import torch
+assert not torch.cuda.is_initialized()
+def no_cuda(*args, **kwargs):
+    raise RuntimeError('CUDA initialization is prohibited in the CPU diagnostic')
+torch.cuda._lazy_init = no_cuda
+
+from cache.capacity import AllocationSpec, SessionPlan, allocation_footprint
+from executor.contracts import ExecutionLimits, RequestShape
+from experiments.cache_management.src.nosa_plan import OfflineNosaFixedResources
+from models.nosa.config import NosaConfig
+from models.nosa.execution.fixed import NosaFixedServingBackend
+from models.nosa.execution import session_budget
+
+SOURCES = ('cache/capacity.py','cache/lifecycle.py','cache/allocator/budget.py',
+           'executor/contracts.py','models/nosa/config.py',
+           'models/nosa/execution/adapter.py','models/nosa/execution/fixed.py',
+           'models/nosa/execution/resources.py','models/nosa/execution/fixed_resources.py',
+           'models/nosa/execution/session_budget.py',
+           'experiments/cache_management/src/nosa_plan.py')
+source_hashes = {p:hashlib.sha256((ROOT/p).read_bytes()).hexdigest() for p in SOURCES}
+config_path = Path('/mnt/ssd-wlcb/chenkaiqi/NOSA-8B/config.json')
+config = replace(NosaConfig.from_pretrained(config_path.parent), max_position_embeddings=65664)
+assert config.num_hidden_layers == 32
+shape = RequestShape(65536,128)
+limits_dict = {'max_session_capacity':65664,'max_history_tokens':65536,'max_candidate_tokens':128}
+identity = ('cpu-profile-history',65536)
+
+def measure(fn, repeats=7, iterations=100):
+    for _ in range(10): fn()
+    samples=[]
+    for _ in range(repeats):
+        start=time.perf_counter_ns()
+        for _ in range(iterations): fn()
+        samples.append((time.perf_counter_ns()-start)/iterations/1000)
+    return {'unit':'microseconds_per_call','batch_means':samples,
+            'median':statistics.median(samples),'min':min(samples),'max':max(samples),
+            'repeats':repeats,'iterations_per_repeat':iterations}
+
+cases={}
+for scheme in session_budget.SCHEMES:
+    resources=OfflineNosaFixedResources(scheme=scheme,layers=32,
+        kv_heads=config.num_key_value_heads,query_heads=config.num_attention_heads,
+        head_dim=config.head_dim,max_seq_len=65664,chunk_size=1024,
+        sparse_pool_tokens=65536,host_arena_tokens=16777216,
+        device='cuda:0',dtype=torch.bfloat16)
+    resource_plan=resources.plan_resources(None,limits_dict)
+    resource_plan=replace(resource_plan, limits=ExecutionLimits.from_mapping(
+        limits_dict,context=65664,chunk_size=1024))
+    backend=object.__new__(NosaFixedServingBackend)
+    backend.config=config;backend.resources=resources;backend.scheme=scheme
+    backend.device=torch.device('cuda:0');backend.dtype=torch.bfloat16
+    backend.chunk_size=1024;backend.max_seq_len=65664
+    backend._session_layout_cache=None
+    def plan(): return backend.plan_runtime_session(resource_plan,shape,identity)
+    def cold_plan():
+        backend._session_layout_cache=None
+        return plan()
+    options=dict(capacity=65664,queries=1024,layers=32,
+        kv_heads=config.num_key_value_heads,query_heads=config.num_attention_heads,
+        head_dim=config.head_dim,dtype=torch.bfloat16,device='cuda:0',scheme=scheme,
+        host_capacity=65536,dense_counter=True)
+    def layout(): return session_budget.session_allocation_layout(**options)
+    established=plan();allocations,breakdown=layout()
+    assert established.allocations==allocations
+    assert (established.reservation.hbm,established.reservation.dram)==(breakdown['hbm'],breakdown['dram'])
+    spec_values=[{f.name:getattr(item,f.name) for f in fields(AllocationSpec)} for item in allocations]
+    plan_values={f.name:getattr(established,f.name) for f in fields(SessionPlan)}
+    original=session_budget.allocation_footprint;internal=[]
+    def record_scan(items):
+        internal.append(items)
+        return original(items)
+    session_budget.allocation_footprint=record_scan
+    try: layout()
+    finally: session_budget.allocation_footprint=original
+    funcs={
+        'plan_runtime_session':plan,
+        'plan_runtime_session_forced_cold_miss':cold_plan,
+        'session_allocation_layout':layout,
+        'all_internal_layout_footprint_scans':lambda:[allocation_footprint(items) for items in internal],
+        'one_full_allocation_footprint':lambda:allocation_footprint(allocations),
+        'construct_all_AllocationSpec_from_prebuilt_kwargs':lambda:tuple(AllocationSpec(**values) for values in spec_values),
+        'validate_all_existing_AllocationSpec':lambda:[AllocationSpec.__post_init__(item) for item in allocations],
+        'construct_SessionPlan_from_prebuilt_kwargs':lambda:SessionPlan(**plan_values),
+        'validate_existing_SessionPlan':lambda:SessionPlan.__post_init__(established),
+    }
+    timing={name:measure(fn) for name,fn in funcs.items()}
+    profiler=cProfile.Profile();profiler.enable()
+    for _ in range(200): plan()
+    profiler.disable();profiler.dump_stats(OUT/f'{scheme}.pstats')
+    stats=pstats.Stats(profiler)
+    profile_rows=[]
+    for (filename,line,function),(primitive,total,self_time,cumulative,callers) in stats.stats.items():
+        profile_rows.append({'file':filename,'line':line,'function':function,
+            'primitive_calls_per_plan':primitive/200,'total_calls_per_plan':total/200,
+            'self_us_per_plan':self_time*1e6/200,'cumulative_us_per_plan':cumulative*1e6/200,
+            'callers':[{'file':key[0],'line':key[1],'function':key[2],'stats':value} for key,value in callers.items()]})
+    cases[scheme]={'allocation_count':len(allocations),
+        'internal_footprint_scan_lengths':[len(items) for items in internal],
+        'warm_hit_full_footprint_scans_per_plan':1,
+        'timed_plan_mode':'plan_runtime_session uses an established matching cache; forced_cold_miss clears the local diagnostic backend field before each call.',
+        'reservation_bytes':{'hbm':established.reservation.hbm,'dram':established.reservation.dram},
+        'timing':timing,'profile_sorted_cumulative':sorted(profile_rows,key=lambda r:r['cumulative_us_per_plan'],reverse=True)}
+    print(json.dumps({'scheme':scheme,'allocation_count':len(allocations),
+        'timing_median_us':{k:v['median'] for k,v in timing.items()}}),flush=True)
+
+assert not torch.cuda.is_initialized()
+assert source_hashes == {p:hashlib.sha256((ROOT/p).read_bytes()).hexdigest() for p in SOURCES}
+result={'schema':'nosa-offline-plan-cpu-profile-v1','scope':'Microdiagnostic of unmodified production pure planning functions with an offline resource constructor. No weights, CUDA initialization, sessions, tensor allocation, serving execution or complete-request causal attribution.',
+    'parameters':{'H':65536,'A':128,'C':1024,'layers':32,'P':65536,'NH':16777216},
+    'environment':{'python':sys.version,'platform':platform.platform(),'affinity':sorted(os.sched_getaffinity(0)),
+        'gc_enabled':gc.isenabled(),'gc_thresholds':gc.get_threshold(),'CUDA_initialized':torch.cuda.is_initialized(),
+        'env':{k:os.environ.get(k) for k in ('CUDA_VISIBLE_DEVICES','OMP_NUM_THREADS','MKL_NUM_THREADS','OPENBLAS_NUM_THREADS','PYTHONDONTWRITEBYTECODE')},
+        'torch_num_threads':torch.get_num_threads()},
+    'command':sys.orig_argv,'cwd':str(Path.cwd()),
+    'script_sha256':hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+    'source_sha256':source_hashes,'config':{'path':str(config_path),'sha256':hashlib.sha256(config_path.read_bytes()).hexdigest()},
+    'measurement_notes':['Unprofiled timings and cProfile are separate; profiler overhead is not subtracted from serving time.',
+        'All samples are retained. Timing calls execute serially with GC enabled; isolated cost estimates are not additive.',
+        'AllocationSpec reconstruction uses prebuilt kwargs and includes a Python loop/tuple; existing-object validation excludes construction.',
+        'Internal scan inputs were observed in one untimed call via a temporary local-process wrapper, restored before all timing.',
+        'The optimized warm hit rebuilds geometry and SessionPlan; its SessionPlan validation retains one full footprint scan. Cold misses additionally execute the complete original layout scans.'],
+    'cases':cases}
+(OUT/'result.json').write_text(json.dumps(result,indent=2,allow_nan=False)+'\n')

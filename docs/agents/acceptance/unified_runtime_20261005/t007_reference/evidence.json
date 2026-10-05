@@ -1,0 +1,90 @@
+{
+  "schema": "t007-independent-numerical-reference-v1",
+  "status": "copied_exact",
+  "purpose": "Only the original reference files consumed by the retained T-007 diagnostic reviewers. This is not a retained performance report or a new acceptance of the refactored runtime.",
+  "original_run_id": "nosa_motivation_poolscan_sm90_20261004_01",
+  "original_source_sha256": "93061ceb297bfd27ec0bbf6ac21de13c75cc612ece1cb8b5855ec86d3548bb79",
+  "original_root": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_motivation/output/data/nosa_motivation_poolscan_sm90_20261004_01",
+  "evidence_root": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/docs/agents/acceptance/unified_runtime_20261005/t007_reference",
+  "files": [
+    {
+      "relative_path": "metadata.json",
+      "original_path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_motivation/output/data/nosa_motivation_poolscan_sm90_20261004_01/metadata.json",
+      "evidence_path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/docs/agents/acceptance/unified_runtime_20261005/t007_reference/metadata.json",
+      "bytes": 2146050,
+      "sha256": "abd72b53122e00f11889c66758d8c7bdc84e7bfcf0cfc6e7be44a5869447b0de",
+      "state": "copied_exact"
+    },
+    {
+      "relative_path": "measurements.jsonl",
+      "original_path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_motivation/output/data/nosa_motivation_poolscan_sm90_20261004_01/measurements.jsonl",
+      "evidence_path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/docs/agents/acceptance/unified_runtime_20261005/t007_reference/measurements.jsonl",
+      "bytes": 755814,
+      "sha256": "df82a34ba905d1d98d997e43da17340ef62699ec158d2c5d942e086bed49edb5",
+      "state": "copied_exact"
+    },
+    {
+      "relative_path": "source_manifest.json",
+      "original_path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_motivation/output/data/nosa_motivation_poolscan_sm90_20261004_01/source_manifest.json",
+      "evidence_path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/docs/agents/acceptance/unified_runtime_20261005/t007_reference/source_manifest.json",
+      "bytes": 12882,
+      "sha256": "29aa2ba3cb3b23f9b1b9b8e94ae5f6f141d1c943d0d9e683e4c830baf8cef3d9",
+      "state": "copied_exact"
+    },
+    {
+      "relative_path": "workload/requests.jsonl",
+      "original_path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_motivation/output/data/nosa_motivation_poolscan_sm90_20261004_01/workload/requests.jsonl",
+      "evidence_path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/docs/agents/acceptance/unified_runtime_20261005/t007_reference/workload/requests.jsonl",
+      "bytes": 21533087,
+      "sha256": "26de5e8861ef23b3cd2abde468a9b92284618e9ba2537472ff95488f4a45dfc2",
+      "state": "copied_exact"
+    },
+    {
+      "relative_path": "numerical/hbm/000000.pt",
+      "original_path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_motivation/output/data/nosa_motivation_poolscan_sm90_20261004_01/numerical/hbm/000000.pt",
+      "evidence_path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/docs/agents/acceptance/unified_runtime_20261005/t007_reference/numerical/hbm/000000.pt",
+      "bytes": 1050210,
+      "sha256": "e5553d91682f8d6bfc0e7815c0bd9aa608f5388792bd7bea7ac570ae187a57ae",
+      "state": "copied_exact"
+    },
+    {
+      "relative_path": "numerical/hbm/000016.pt",
+      "original_path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_motivation/output/data/nosa_motivation_poolscan_sm90_20261004_01/numerical/hbm/000016.pt",
+      "evidence_path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/docs/agents/acceptance/unified_runtime_20261005/t007_reference/numerical/hbm/000016.pt",
+      "bytes": 1050210,
+      "sha256": "2e49851decaf1bcefa87d3b87c2d55f5ec413a4559f7b5ad0821a8b06d76655e",
+      "state": "copied_exact"
+    }
+  ],
+  "reviewers": [
+    "/mnt/ssd-wlcb/chenkaiqi/.cxldsagr-tmp/nosa_hbm_prequeue_review_20261004_01/analyze.py",
+    "/mnt/ssd-wlcb/chenkaiqi/.cxldsagr-tmp/nosa_guarded_copy_control_review_20261005_01/analyze.py",
+    "/mnt/ssd-wlcb/chenkaiqi/.cxldsagr-tmp/nosa_copy_descriptor_results_review_20261005_02/analyze.py"
+  ],
+  "scope": "Only HBM request 0 and 16 payloads are retained. Original 32-row workload and 128-row measurement records remain byte-identical because the frozen descriptor reviewer checks their full row counts; their timing fields are historical context, not current performance results. Frozen reviewer source and original commands are not modified. No diagnostics or numerical audits rerun by relocation.",
+  "reviewer_identity_at_relocation": [
+    {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/.cxldsagr-tmp/nosa_hbm_prequeue_review_20261004_01/analyze.py",
+      "bytes": 34121,
+      "sha256": "ecb7de9ccab109f1093ba64922628fd4ec16e08037ea533c01277d9726ddd420"
+    },
+    {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/.cxldsagr-tmp/nosa_guarded_copy_control_review_20261005_01/analyze.py",
+      "bytes": 21812,
+      "sha256": "462c39051ac49ed89714254cb80e77e7e72b06e55d02ce82fd299eda8f62e4f2"
+    },
+    {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/.cxldsagr-tmp/nosa_copy_descriptor_results_review_20261005_02/analyze.py",
+      "bytes": 32861,
+      "sha256": "d913cd5c63c2d7204f7114245fac298a43894c7f8e0275813d07bd857950be6d"
+    }
+  ],
+  "relocation_instructions": "docs/agents/acceptance/unified_runtime_20261005/t007_reference.md",
+  "copied_and_rehashed_utc": "2026-10-04T20:38:05.954212+00:00",
+  "verification": {
+    "files": 6,
+    "bytes": 26548253,
+    "source_and_destination_sha256_equal": true,
+    "diagnostic_reviewers_rerun": false
+  }
+}

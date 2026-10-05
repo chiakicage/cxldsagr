@@ -1,0 +1,71 @@
+{
+  "rows": [
+    {
+      "phase": "full_prefill",
+      "boundary": "standalone_bench_wall",
+      "module": "end_to_end",
+      "native_ms": 2374.5391860138625,
+      "triton_ms": 3663.1128230364993,
+      "speedup": 1.54266261201853,
+      "native_mfu_pct": 50.37987699321855,
+      "triton_mfu_pct": 32.657741621998554
+    },
+    {
+      "phase": "full_prefill",
+      "boundary": "independent_profile_correlated_kernel_sum",
+      "module": "indexer_total",
+      "native_ms": 290.297427,
+      "triton_ms": 676.637008,
+      "speedup": 2.330840527911396,
+      "native_mfu_pct": 12.584804363262538,
+      "triton_mfu_pct": 5.3992558532262365
+    },
+    {
+      "phase": "full_prefill",
+      "boundary": "independent_profile_correlated_kernel_sum",
+      "module": "block_sparse_attention",
+      "native_ms": 365.083198,
+      "triton_ms": 1192.128199,
+      "speedup": 3.265360349451086,
+      "native_mfu_pct": 38.08374447816727,
+      "triton_mfu_pct": 11.66295305955106
+    },
+    {
+      "phase": "extend",
+      "boundary": "standalone_bench_wall",
+      "module": "end_to_end",
+      "native_ms": 36.207892931997776,
+      "triton_ms": 61.776236980222166,
+      "speedup": 1.7061538791070894,
+      "native_mfu_pct": 52.55702268076581,
+      "triton_mfu_pct": 30.80438600782679
+    },
+    {
+      "phase": "extend",
+      "boundary": "independent_profile_correlated_kernel_sum",
+      "module": "indexer_total",
+      "native_ms": 4.858148,
+      "triton_ms": 15.797165,
+      "speedup": 3.2516845925649034,
+      "native_mfu_pct": 23.05479543473112,
+      "triton_mfu_pct": 7.090108151155486
+    },
+    {
+      "phase": "extend",
+      "boundary": "independent_profile_correlated_kernel_sum",
+      "module": "block_sparse_attention",
+      "native_ms": 5.801953,
+      "triton_ms": 18.56395,
+      "speedup": 3.199603650701755,
+      "native_mfu_pct": 38.02826434631544,
+      "triton_mfu_pct": 11.885304712030461
+    }
+  ],
+  "source_runs": {
+    "('native', 'bench')": "refactor_mfu_sparse_native_bench_20261005_01",
+    "('native', 'profile')": "refactor_mfu_sparse_native_profile_20261005_01",
+    "('triton', 'bench')": "refactor_mfu_sparse_triton_bench_20261005_01",
+    "('triton', 'profile')": "refactor_mfu_sparse_triton_profile_20261005_01"
+  },
+  "boundary": "Main end-to-end denominators use standalone bench; modules use separate profiles. Profile wrappers extra benchmarks remain independently preserved."
+}

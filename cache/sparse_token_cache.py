@@ -38,6 +38,10 @@ class SparseTokenCache:
     ``operation()`` lease must include the attention consumer.
     """
 
+    # Subclasses must opt in on their own class when they preserve these maps,
+    # counters and FIFO semantics. Inherited opt-in does not authorize a new layout.
+    native_metadata_compatible = True
+
     def __init__(
         self, capacity, width, *, device="cuda", dtype=torch.bfloat16, slots=None, candidate_slots=0
     ):
@@ -527,7 +531,7 @@ class SparseTokenCache:
         """Private exact-top-k consumer; arbitrary public IDs still use ensure."""
         native = self._pool.native_metadata if self._shared else None
         if (
-            type(self) is not SparseTokenCache
+            type(self).__dict__.get("native_metadata_compatible") is not True
             or not hasattr(native, "resident_selection")
             or indices.ndim != 2
             or indices.dtype != torch.int32

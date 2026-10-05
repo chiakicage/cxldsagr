@@ -1,0 +1,53 @@
+{
+  "observed_utc": "2026-10-04T18:31:17.804394+00:00",
+  "head": "934485bcade30b138a87e65ff87fbbbd04844fbf",
+  "source_manifest_sha256": "0af64a9e7a54cac8c0ea054fc90febc005590f8c6705d4f76b1e30ceed743498",
+  "baseline_archive_sha256": "f4f24b44ea81370fa4c2350d7d7bbf121f0f51472caa9d9e56058f0fc56269fa",
+  "gpu_query": "index, name, uuid, compute_cap, memory.total [MiB], memory.used [MiB], utilization.gpu [%]\n0, NVIDIA M403, GPU-1bdee8b4-22ac-536c-208b-bfb4ed38b878, 9.0, 143771 MiB, 1 MiB, 0 %\n1, NVIDIA M403, GPU-a2226185-cb05-a411-80da-f365154128fe, 9.0, 143771 MiB, 1 MiB, 0 %\n2, NVIDIA M403, GPU-72f87cfe-1a24-f69c-8b5d-71f1d8414a34, 9.0, 143771 MiB, 1 MiB, 0 %\n3, NVIDIA M403, GPU-80ff95c3-176e-fd8a-728f-9c5577c4a779, 9.0, 143771 MiB, 25402 MiB, 0 %\n4, NVIDIA M403, GPU-f8efa4fd-5a9d-cdde-c13b-0e230e2082af, 9.0, 143771 MiB, 1 MiB, 0 %\n5, NVIDIA M403, GPU-a5cd5bab-33a4-a7e2-4a3c-78c2b08a8872, 9.0, 143771 MiB, 1 MiB, 0 %\n6, NVIDIA M403, GPU-62334366-b9c1-a3c1-6f89-49f5cf38fb00, 9.0, 143771 MiB, 1 MiB, 0 %\n7, NVIDIA M403, GPU-5c6220cc-a8ef-ca97-91bb-cb61a278faf8, 9.0, 143771 MiB, 1 MiB, 0 %\n",
+  "checkpoints": {
+    "nosa": {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/NOSA-8B",
+      "exists": true,
+      "shards": 1,
+      "total_shard_bytes": 16370581512,
+      "config_sha256": "1dcc43c82877f1f0dfce453f49d6cdab8e538f437279c5a83000102b671bcb17",
+      "identity_boundary": "Presence, config hash and aggregate shard stat inventory only; no weight-content verification."
+    },
+    "deepseek_v32": {
+      "path": "/preset-models",
+      "exists": true,
+      "shards": 163,
+      "total_shard_bytes": 689483049129,
+      "config_sha256": "c7fa8b191e9936d8e6a57d864baab82b792fae16a116416cdd3a75ba76bc5af1",
+      "identity_boundary": "Presence, config hash and aggregate shard stat inventory only; no weight-content verification."
+    }
+  },
+  "validation_state": "Frozen NOSA full32 fixed H64K/A128 graph check02 accepted and receipt verified; three independent bench traces in progress. This does not validate the refactored working tree.",
+  "dependencies": {
+    "ECHO": "bc1b75c1000010d0ac6f032ebaac283255c050b1",
+    "DeepGEMM": "057ca5964aae0879ff2e0eb71ee05a3cb0ba3df7",
+    "FlashMLA": "ba89a3466e9470ad08ab39738d4e7bb66989e1e7",
+    "cutlass": "f3fde58372d33e9a5650ba7b80fc48b3b49d40c8",
+    "DeepJIT": "2efdab421e1cfb17fe8bc20e11ca72aa6d0e6c43"
+  },
+  "installed_packages": {
+    "torch": "2.12.1+cu130",
+    "flashinfer-python": "0.6.18",
+    "triton": "3.7.1",
+    "apache-tvm-ffi": "0.1.13.post3",
+    "deep-gemm": "2.8.1+057ca59",
+    "flash-mla": "1.0.0+ba89a34"
+  },
+  "available_tools": {
+    "numactl": "/usr/bin/numactl",
+    "nvcc": "/usr/local/cuda/bin/nvcc",
+    "nsys": "/usr/local/bin/nsys",
+    "ncu": "/usr/local/cuda/bin/ncu"
+  },
+  "baseline_placement": {
+    "gpu_index": 3,
+    "gpu_uuid": "GPU-80ff95c3-176e-fd8a-728f-9c5577c4a779",
+    "cpu_affinity": "24-31",
+    "numa_memory_node": 0
+  }
+}

@@ -354,11 +354,11 @@ def test_rejects_fake_history_or_inconsistent_cache_accounting(valid_run, field,
 
 def test_rejects_unverified_or_tampered_sources(valid_run):
     path, result = valid_run
-    source = path.parent / "source" / "models/deepseek_v32/echo_infer.py"
+    source = path.parent / "source" / "models/deepseek_v32/model.py"
     source.write_text("# Changed after measurement\n")
     with pytest.raises(report.InvalidResult, match="snapshot SHA256 mismatch"):
         report.make_summary(path)
-    result["source_sha256"].pop("models/deepseek_v32/echo_infer.py")
+    result["source_sha256"].pop("models/deepseek_v32/model.py")
     rewrite(path, result)
     with pytest.raises(report.InvalidResult, match="Required implementation snapshots"):
         report.make_summary(path)

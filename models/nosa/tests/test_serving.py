@@ -6,7 +6,8 @@ import pytest
 import torch
 
 from cache.prefix_pool import CacheFootprint
-from models.nosa.serving import NosaDensePrefetchCache, NosaServingBackend
+from models.nosa.cache.dense_prefetch import NosaDensePrefetchCache
+from models.nosa.execution.adapter import NosaServingBackend
 from models.nosa.tests.test_model import tiny_config
 from models.nosa.tests.test_sparse_model import initialized_sparse_model
 
@@ -98,6 +99,36 @@ def test_dense_prefetch_failure_restores_attention_and_prefix(monkeypatch):
         assert session.length == session.indexer_cache.length == 79
         actual = backend.extend(session, tokens[79:111])
         torch.testing.assert_close(actual, expected)
+    finally:
+        backend.release_session(session)
+        backend.close()
+
+
+@pytest.mark.parametrize("scheme", NosaServingBackend.schemes)
+def test_execution_pipeline_is_passed_without_reconfiguring_model(monkeypatch, scheme):
+    model = initialized_sparse_model(tiny_config(max_position_embeddings=96))
+    backend = NosaServingBackend(model, scheme, chunk_size=32)
+    allocate(backend, 96)
+    session = backend.create_session(96)
+    original_attention = model.main_attention
+    original_forward = model.forward
+    calls = []
+
+    def observe(*args, **kwargs):
+        assert model.main_attention is original_attention
+        assert kwargs["main_attention"] is not original_attention
+        calls.append(kwargs["main_attention"])
+        return original_forward(*args, **kwargs)
+
+    monkeypatch.setattr(model, "forward", observe)
+    try:
+        ids = torch.arange(72) % model.config.vocab_size
+        backend.prefill(session, ids[:64])
+        backend.extend(session, ids[64:])
+        assert session.length == 72  # Direct extend retains its append contract.
+        assert len(calls) == 3
+        assert calls[0] is calls[1]  # One pipeline per history execution.
+        assert model.main_attention is original_attention
     finally:
         backend.release_session(session)
         backend.close()

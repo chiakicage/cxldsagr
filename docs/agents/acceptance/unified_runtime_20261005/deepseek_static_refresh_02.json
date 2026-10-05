@@ -1,0 +1,243 @@
+{
+  "status": "passed",
+  "started_utc": "2026-10-04T22:22:29.624216+00:00",
+  "environment": {
+    "CUDA_VISIBLE_DEVICES": "",
+    "OMP_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "jobs": [
+    {
+      "old_run": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_nh_20261005_01",
+      "new_run": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_nh_20261005_02",
+      "argv": [
+        "numactl",
+        "--physcpubind=8-15",
+        "--membind=0",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin/python",
+        "-B",
+        "-m",
+        "experiments.cache_management.src.capacity_plan",
+        "--run-id",
+        "cache_deepseek_nh_20261005_02",
+        "--model-path",
+        "/preset-models",
+        "--dram-budget-gib",
+        "512.0",
+        "--hbm-fraction",
+        "0.9",
+        "--total-hbm-gib",
+        "139.81158447265625",
+        "--model-hbm-gib",
+        "9.34375",
+        "--noncache-headroom-gib",
+        "0.0",
+        "--fixed-p",
+        "32768",
+        "--history-tokens",
+        "65536",
+        "--candidate-tokens",
+        "128",
+        "--chunk-size",
+        "1024"
+      ],
+      "log": "/tmp/cache_deepseek_nh_20261005_02.log",
+      "returncode": 0,
+      "plan_byte_values_unchanged": true,
+      "changed_sources": {
+        "cache/sparse_token_pool.py": {
+          "old": "e96f8f045e2d29c1567ca086eb569e7d197ef6ea78d6b0e3d0661dc601dfeb8f",
+          "new": "46efe6b59a76e39075899076a3621caf5255542c67a4fd0e03ff6567d91eb2f3"
+        }
+      },
+      "plan_sha256": "25684e9c4f14fe82b6064d57c8669e3bcb89d271e2ce9031061d3a57113dc527"
+    },
+    {
+      "old_run": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_base_20261005_01",
+      "new_run": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_base_20261005_02",
+      "argv": [
+        "numactl",
+        "--physcpubind=8-15",
+        "--membind=0",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin/python",
+        "-B",
+        "-m",
+        "experiments.cache_management.src.capacity_plan",
+        "--run-id",
+        "cache_deepseek_p_base_20261005_02",
+        "--model-path",
+        "/preset-models",
+        "--dram-budget-gib",
+        "512.0",
+        "--hbm-fraction",
+        "0.9",
+        "--total-hbm-gib",
+        "139.81158447265625",
+        "--model-hbm-gib",
+        "9.34375",
+        "--noncache-headroom-gib",
+        "0.0",
+        "--fixed-nh",
+        "1048576",
+        "--history-tokens",
+        "65536",
+        "--candidate-tokens",
+        "128",
+        "--chunk-size",
+        "1024"
+      ],
+      "log": "/tmp/cache_deepseek_p_base_20261005_02.log",
+      "returncode": 0,
+      "plan_byte_values_unchanged": true,
+      "changed_sources": {
+        "cache/sparse_token_pool.py": {
+          "old": "e96f8f045e2d29c1567ca086eb569e7d197ef6ea78d6b0e3d0661dc601dfeb8f",
+          "new": "46efe6b59a76e39075899076a3621caf5255542c67a4fd0e03ff6567d91eb2f3"
+        }
+      },
+      "plan_sha256": "62556fee8dfa475bcf2c333cdc8abc13d21e02368992df02410c2ba42e401e72"
+    },
+    {
+      "old_run": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_base_headroom_20261005_01",
+      "new_run": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_base_headroom_20261005_02",
+      "argv": [
+        "numactl",
+        "--physcpubind=8-15",
+        "--membind=0",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin/python",
+        "-B",
+        "-m",
+        "experiments.cache_management.src.capacity_plan",
+        "--run-id",
+        "cache_deepseek_p_base_headroom_20261005_02",
+        "--model-path",
+        "/preset-models",
+        "--dram-budget-gib",
+        "512.0",
+        "--hbm-fraction",
+        "0.9",
+        "--total-hbm-gib",
+        "139.81158447265625",
+        "--model-hbm-gib",
+        "9.34375",
+        "--noncache-headroom-gib",
+        "14.5",
+        "--noncache-headroom-note",
+        "Conditional reuse of an old observed allocator/device difference; not preallocated storage or a validated current requirement.",
+        "--fixed-nh",
+        "1048576",
+        "--history-tokens",
+        "65536",
+        "--candidate-tokens",
+        "128",
+        "--chunk-size",
+        "1024"
+      ],
+      "log": "/tmp/cache_deepseek_p_base_headroom_20261005_02.log",
+      "returncode": 0,
+      "plan_byte_values_unchanged": true,
+      "changed_sources": {
+        "cache/sparse_token_pool.py": {
+          "old": "e96f8f045e2d29c1567ca086eb569e7d197ef6ea78d6b0e3d0661dc601dfeb8f",
+          "new": "46efe6b59a76e39075899076a3621caf5255542c67a4fd0e03ff6567d91eb2f3"
+        }
+      },
+      "plan_sha256": "4a74c6e319d8cbe93313602102f453e061adb24610a379b006d5db15b3e629fe"
+    },
+    {
+      "old_run": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_nhmax_20261005_01",
+      "new_run": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_nhmax_20261005_02",
+      "argv": [
+        "numactl",
+        "--physcpubind=8-15",
+        "--membind=0",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin/python",
+        "-B",
+        "-m",
+        "experiments.cache_management.src.capacity_plan",
+        "--run-id",
+        "cache_deepseek_p_nhmax_20261005_02",
+        "--model-path",
+        "/preset-models",
+        "--dram-budget-gib",
+        "512.0",
+        "--hbm-fraction",
+        "0.9",
+        "--total-hbm-gib",
+        "139.81158447265625",
+        "--model-hbm-gib",
+        "9.34375",
+        "--noncache-headroom-gib",
+        "0.0",
+        "--fixed-nh",
+        "29818880",
+        "--history-tokens",
+        "65536",
+        "--candidate-tokens",
+        "128",
+        "--chunk-size",
+        "1024"
+      ],
+      "log": "/tmp/cache_deepseek_p_nhmax_20261005_02.log",
+      "returncode": 0,
+      "plan_byte_values_unchanged": true,
+      "changed_sources": {
+        "cache/sparse_token_pool.py": {
+          "old": "e96f8f045e2d29c1567ca086eb569e7d197ef6ea78d6b0e3d0661dc601dfeb8f",
+          "new": "46efe6b59a76e39075899076a3621caf5255542c67a4fd0e03ff6567d91eb2f3"
+        }
+      },
+      "plan_sha256": "10598d6986296c7e24835fdad8581c47c6a82590daa58df065e5ec73750a2347"
+    },
+    {
+      "old_run": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_nhmax_headroom_20261005_01",
+      "new_run": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_nhmax_headroom_20261005_02",
+      "argv": [
+        "numactl",
+        "--physcpubind=8-15",
+        "--membind=0",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin/python",
+        "-B",
+        "-m",
+        "experiments.cache_management.src.capacity_plan",
+        "--run-id",
+        "cache_deepseek_p_nhmax_headroom_20261005_02",
+        "--model-path",
+        "/preset-models",
+        "--dram-budget-gib",
+        "512.0",
+        "--hbm-fraction",
+        "0.9",
+        "--total-hbm-gib",
+        "139.81158447265625",
+        "--model-hbm-gib",
+        "9.34375",
+        "--noncache-headroom-gib",
+        "14.5",
+        "--noncache-headroom-note",
+        "Conditional reuse of an old observed allocator/device difference; not preallocated storage or a validated current requirement.",
+        "--fixed-nh",
+        "29818880",
+        "--history-tokens",
+        "65536",
+        "--candidate-tokens",
+        "128",
+        "--chunk-size",
+        "1024"
+      ],
+      "log": "/tmp/cache_deepseek_p_nhmax_headroom_20261005_02.log",
+      "returncode": 0,
+      "plan_byte_values_unchanged": true,
+      "changed_sources": {
+        "cache/sparse_token_pool.py": {
+          "old": "e96f8f045e2d29c1567ca086eb569e7d197ef6ea78d6b0e3d0661dc601dfeb8f",
+          "new": "46efe6b59a76e39075899076a3621caf5255542c67a4fd0e03ff6567d91eb2f3"
+        }
+      },
+      "plan_sha256": "3c3823ef74aea1430815d25ff14e80ab5455fa5d1e08bbebee072e115d0d4e1a"
+    }
+  ],
+  "finished_utc": "2026-10-04T22:22:37.305877+00:00"
+}

@@ -6,8 +6,8 @@ import pytest
 import torch
 
 from cache.prefix_pool import CacheFootprint
-from models.deepseek_v32.cache_resources import padded_tokens
-from models.deepseek_v32.serving_backend import SCHEMES, DeepSeekServingBackend
+from models.deepseek_v32.execution.adapter import SCHEMES, DeepSeekServingBackend
+from models.deepseek_v32.execution.cache_resources import padded_tokens
 
 
 @pytest.mark.skipif(

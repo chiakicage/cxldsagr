@@ -22,7 +22,7 @@ from dataclasses import dataclass
 import torch
 
 from cache.contracts import CacheAccess
-from layers.attention import AttentionContext, BlockSelection
+from models.attention_contracts import AttentionContext, BlockSelection
 from models.nosa.scoring import NosaAttentionState, compress_sequence
 
 
@@ -111,7 +111,7 @@ class NosaIndexer:
 
     @torch.no_grad()
     def __call__(self, q, cache_access: CacheAccess, context: AttentionContext) -> BlockSelection:
-        from models.nosa.offload_cache import NosaOffloadCache
+        from models.nosa.cache.offload import NosaOffloadCache
 
         if isinstance(cache_access, NosaOffloadCache):
             return self._select_offloaded(q, cache_access, context)
@@ -152,7 +152,7 @@ class NosaIndexer:
             if len(keys) > 262144:
                 raise ValueError("Full NOSA supports at most 262144 tokens")
             if q.is_cuda and self.backend in ("auto", "triton"):
-                from models.nosa.cache import NosaKVCache
+                from models.nosa.cache.resident import NosaKVCache
 
                 # Only the owning request can vouch for an immutable validated
                 # prefix. External CIS overrides and borrowed offline views use
@@ -482,7 +482,7 @@ def prepare_native_indexer_inputs(
 
     if not supports(q, keys, cis):
         return None
-    from models.nosa.deferred_validation import finite_flag
+    from models.nosa.execution.deferred_validation import finite_flag
 
     deferred = finite_flag(cache_owner, layer_idx)
     length, heads, _ = keys.shape

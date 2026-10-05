@@ -1,0 +1,32 @@
+{
+  "schema": "nosa-final-request-accounting-v1",
+  "all_six_runs_match_per_request": true,
+  "requests_per_run": 128,
+  "fields": [
+    "input_sha256",
+    "prefix_sha256",
+    "candidate_sha256",
+    "prefix_cache_hit",
+    "is_revisit",
+    "session_host_pages",
+    "host_page_capacity",
+    "session_hbm_tokens",
+    "hbm_token_capacity",
+    "cache_hbm_bytes",
+    "cache_dram_bytes",
+    "reserved_hbm_bytes",
+    "reserved_dram_bytes",
+    "request_cache_hbm_bytes",
+    "request_cache_dram_bytes",
+    "cache_diagnostics.candidate_host_to_device_bytes"
+  ],
+  "input_sha256": {
+    "experiments/nosa_motivation/output/data/refactor_p0_nosa_bench_20261005_01/measurements.jsonl": "b49decdaf99611583af3f09f9582448dc80417e7b8230306679e255e0283d297",
+    "experiments/nosa_motivation/output/data/refactor_p0_nosa_bench_20261005_02/measurements.jsonl": "9a9a426abd05e04f944081ba9aa0373089531a56c9f55459fff0b3d964c37b88",
+    "experiments/nosa_motivation/output/data/refactor_p0_nosa_bench_20261005_03/measurements.jsonl": "329683f47738de76c3446907cc5a4878ad4121f6e858a6ae28b6a768dc316ea8",
+    "experiments/nosa_motivation/output/data/refactor_final_nosa_bench_20261005_01/measurements.jsonl": "66ada308e333d7a26029ad451e5711d922ab5ee311158c5a7b22b443211c84eb",
+    "experiments/nosa_motivation/output/data/refactor_final_nosa_bench_20261005_02/measurements.jsonl": "d7932c20aa9170cca26bc552275e7294ec81a989ed4db1224dfbe75cfc2d64b4",
+    "experiments/nosa_motivation/output/data/refactor_final_nosa_bench_20261005_03/measurements.jsonl": "3855d07d11c280da82732a9bbf6fa480cf1412807454caddbde395375d03b30e"
+  },
+  "boundary": "Identity, first/revisit and cache hit classification, fixed quotas, per-request cache charging and candidate H2D bytes match exactly. PyTorch/device occupancy remains separately reported, not included in this cache-accounting equality."
+}

@@ -39,13 +39,14 @@ NOSA offload 的单主 kernel 融合 fetch 和 attention；HBM staging 仍覆盖
 
 本次目录迁移保持 CUDA 计算源码和 Triton 计算语义，更新导入、JIT 依赖、源码采集及测试入口。
 已有性能报告仍对应各自 run ID 与源码快照；迁移和回归测试不产生新的性能结果。
-NOSA 完整模型 offload 性能尚未测量；DeepSeek KV gather 对齐修复后的完整模型性能仍待补测。
+NOSA 完整模型 offload 性能尚未测量。DeepSeek 已完成真实前三层的独立数值、计时与 profile，
+以及十 block GR 工作负载的本地四方案和官方路径补测；本轮未执行完整 61 层性能测量。
 见 [NOSA overlap](../experiments/nosa_offload_overlap/README.md) 和
 [ECHO 实验](../experiments/deepseek_v32_echo_prefill/README.md)。
 
-SM120 扩展、旧 synthetic 模型及依赖它们的测量入口已移除。有效历史报告与可独立使用的
-CPU 重建工具见 [legacy](../experiments/legacy/deepseek_v32/README.md)，历史执行环境使用
-该页记录的整理前 Git revision。共享第三方源码保留，见 [依赖说明](../3rdparty/README.md)。
+SM120 扩展、旧 synthetic 模型及依赖它们的测量入口已移除。有效历史报告与 CPU 重建工具
+保存在不进 Git 的 `local/experiments/legacy/deepseek_v32/`；历史执行环境使用本地 README
+记录的整理前 Git revision。共享第三方源码保留，见 [依赖说明](../3rdparty/README.md)。
 
 从仓库根目录执行 `bash scripts/run_tests.sh [cpu|gpu|all]`。GPU 模式检查 Hopper 和
 构建依赖，并收集全部相关功能测试；完整 checkpoint 检查需显式设置模型路径，见

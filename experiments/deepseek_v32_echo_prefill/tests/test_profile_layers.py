@@ -1,13 +1,15 @@
 import json
-import sys
 from contextlib import contextmanager
 from types import SimpleNamespace
 
 import pytest
 import torch
 
-from experiments.deepseek_v32_echo_prefill.src import backend_provenance, profile_layers
-from models.deepseek_v32.echo_model import rms_norm
+from experiments.deepseek_v32_echo_prefill.src import backend_provenance, measure, profile_layers
+from experiments.deepseek_v32_echo_prefill.src.compare_backends import compare
+from experiments.deepseek_v32_echo_prefill.src.postrun_audit import audit_saved_outputs
+from experiments.deepseek_v32_echo_prefill.src.run_contract import benchmark_view
+from models.deepseek_v32.nonmatrix import rms_norm
 
 
 class FakeBlock:
@@ -30,7 +32,7 @@ class FakeModel:
 
     def __init__(self, *_args, **kwargs):
         self.num_layers = kwargs.get("num_layers", 3)
-        self.cfg = SimpleNamespace(num_hidden_layers=61, norm_eps=1e-6)
+        self.cfg = SimpleNamespace(num_hidden_layers=61, norm_eps=1e-6, attention_scale=1.0)
         self.final_norm = torch.tensor([0.75, 1.25])
         self.head_weight = torch.tensor([[1.0, 0.5], [0.25, -1.0]]).bfloat16()
         self.chunk_size = kwargs.get("chunk_size", 2)
@@ -70,6 +72,15 @@ class FakeModel:
             residual = None
             for block in self.blocks:
                 hidden, residual = block.forward(hidden, residual, scope=scope)
+                if block.attention.capture_hook is not None:
+                    block.attention.capture_hook(
+                        SimpleNamespace(q=hidden, index_q=hidden, index_weights=hidden),
+                        hidden,
+                        hidden,
+                        torch.tensor([[0]] * len(hidden)),
+                        SimpleNamespace(host_records=lambda hidden=hidden: hidden),
+                        self.length + start,
+                    )
             outputs.append(
                 rms_norm(
                     hidden.float() + residual.float(), self.final_norm, self.cfg.norm_eps
@@ -174,22 +185,28 @@ def test_annotated_hidden_norm_keeps_inference_mode_after_capture(cpu_annotation
     assert norm_modes == [(True, False), (True, False)]
 
 
-def test_driver_uses_independent_prefixes_and_restores_each_extend(
-    tmp_path, monkeypatch, cpu_annotation
-):
+@pytest.fixture
+def driver(tmp_path, monkeypatch, cpu_annotation):
     request = tmp_path / "request.json"
     request.write_text(
         json.dumps(
-            {
-                "stable_prefix_tokens": 3,
-                "candidate_suffix_tokens": 2,
-                "input_ids": [1, 2, 3, 4, 5],
-            }
+            {"stable_prefix_tokens": 3, "candidate_suffix_tokens": 2, "input_ids": [1, 2, 3, 4, 5]}
         )
     )
-    output = tmp_path / "output"
-    model = FakeModel(num_layers=3, chunk_size=2)
-    monkeypatch.setattr(profile_layers, "DeepSeekEchoModel", lambda *_args, **_kwargs: model)
+    for name in ("config.json", "tokenizer.json"):
+        (tmp_path / name).write_text("{}")
+    (tmp_path / "model.safetensors.index.json").write_text(
+        json.dumps({"weight_map": {"weight": "fixture.safetensors"}})
+    )
+    (tmp_path / "fixture.safetensors").write_bytes(b"weight fixture")
+    models = []
+
+    def create(*args, **kwargs):
+        model = FakeModel(num_layers=3, chunk_size=2)
+        models.append(model)
+        return model
+
+    monkeypatch.setattr(profile_layers, "DeepSeekEchoModel", create)
     monkeypatch.setattr(profile_layers, "sources", dict)
     monkeypatch.setattr(
         profile_layers,
@@ -205,67 +222,132 @@ def test_driver_uses_independent_prefixes_and_restores_each_extend(
     )
     monkeypatch.setattr(profile_layers, "build_info", dict)
     monkeypatch.setattr(backend_provenance, "collect_backend_provenance", lambda: {"fixture": True})
-
-    def runtime_identity():
-        assert not model.instrumented
-        assert cpu_annotation == ["start", "stop"] * 4
-        return {"fixture": True, "after_execution": True}
-
     monkeypatch.setattr(
-        backend_provenance, "collect_flashinfer_runtime_artifacts", runtime_identity
+        backend_provenance, "collect_flashinfer_runtime_artifacts", lambda: {"fixture": True}
     )
     monkeypatch.setattr(profile_layers.importlib.metadata, "version", lambda _: "test")
-    monkeypatch.setattr(
-        sys,
-        "argv",
-        [
-            "profile_layers",
-            "--model",
-            str(tmp_path),
-            "--request",
-            str(request),
-            "--prefix",
-            "3",
-            "--extend",
-            "2",
-            "--chunk-size",
-            "2",
-            "--slots",
-            "4",
-            "--warmups",
-            "1",
-            "--prefill-repeats",
-            "2",
-            "--repeats",
-            "2",
-            "--run-id",
-            "cpu-lifecycle",
-            "--output",
-            str(output),
-            "--nsys",
-        ],
-    )
-    profile_layers.main()
-    result = json.loads((output / "result.json").read_text())
-    assert result["accepted"] and len(result["correctness"]) == 8
-    assert result["backend_provenance"] == {"fixture": True}
-    assert result["compute_precision"] == {"fixture": "CPU FP32"}
-    assert result["flashinfer_runtime_artifacts"] == {"fixture": True, "after_execution": True}
-    assert cpu_annotation == ["start", "stop"] * 4
+    arguments = [
+        "--model",
+        str(tmp_path),
+        "--request",
+        str(request),
+        "--prefix",
+        "3",
+        "--extend",
+        "2",
+        "--chunk-size",
+        "2",
+        "--slots",
+        "4",
+        "--warmups",
+        "1",
+        "--prefill-repeats",
+        "2",
+        "--repeats",
+        "2",
+    ]
+
+    def execute(mode, *extra):
+        output = tmp_path / mode
+        argv = [*arguments, "--run-id", mode, "--output", str(output), *extra]
+        if mode == "profile":
+            profile_layers.main(argv)
+        else:
+            measure.main(["--mode", mode, *argv])
+        return output, json.loads((output / "result.json").read_text()), models[-1]
+
+    return execute, models, cpu_annotation
+
+
+def test_separate_check_bench_profile_preserve_prefix_and_extend_semantics(driver, monkeypatch):
+    execute, _models, profiler = driver
+    check_dir, check, checked_model = execute("check")
+    assert check["accepted"] and len(check["correctness"]) == 5
+    assert check["measurements"] == {} and profiler == []
+    receipt = check_dir / "receipt.json"
+    assert receipt.is_file()
     for offload in (False, True):
-        calls = [event for event in model.events if event[0] == "forward" and event[1] == offload]
-        prefix_calls = [event for event in calls if event[3] == 3]
-        extend_calls = [event for event in calls if event[3] == 2]
-        assert len(prefix_calls) == 4
-        assert all(event[2] == 0 and not event[4] for event in prefix_calls)
-        assert sum(event[5] for event in prefix_calls) == 1
-        assert all(event[2] == 3 for event in extend_calls)
-        assert sum(event[4] for event in extend_calls) == 1
-        assert sum(event[5] for event in extend_calls) == 1
-        assert ("snapshot", offload, 3, False) in model.events
-        mode = "offload" if offload else "resident"
-        assert len(result["measurements"][mode]["prefix_samples_ms"]) == 2
-        assert len(result["measurements"][mode]["extend_samples_ms"]) == 2
+        forwards = [
+            event for event in checked_model.events if event[0] == "forward" and event[1] == offload
+        ]
+        assert all(event[2] == 0 for event in forwards if event[3] == 3)
+        assert all(event[2] == 3 for event in forwards if event[3] == 2)
+        assert sum(event[4] for event in forwards) == 1
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("Clean bench invoked a diagnostic/output-copy operation")
+
+    with monkeypatch.context() as clean:
+        for name in ("annotate", "comparison", "capture_kernel_inputs"):
+            clean.setattr(profile_layers, name, forbidden)
+        clean.setattr(torch, "save", forbidden)
+        clean.setattr(torch.Tensor, "cpu", forbidden)
+        bench_dir, bench, bench_model = execute("bench", "--validation-receipt", str(receipt))
+    assert bench["correctness"] == {} and profiler == []
+    assert not list(bench_dir.glob("*.pt"))
+    for offload in (False, True):
+        forwards = [
+            event for event in bench_model.events if event[0] == "forward" and event[1] == offload
+        ]
+        assert len(forwards) == 6  # independent warmup prefix/extend, then two of each sample
+        assert all(not event[4] and not event[5] for event in forwards)
+        assert all(event[2] == 0 for event in forwards if event[3] == 3)
+        assert all(event[2] == 3 for event in forwards if event[3] == 2)
+    profile_dir, profile, profiled_model = execute(
+        "profile", "--nsys", "--validation-receipt", str(receipt), "--benchmark-run", str(bench_dir)
+    )
+    assert profiler == ["start", "stop"] * 4
+    assert len(profile["correctness"]) == 8
+    assert profile["mode"] == "profile" and profile["benchmark"]["run_id"] == "bench"
+    assert all("prefix_samples_ms" not in row for row in profile["measurements"].values())
+    view = benchmark_view(profile_dir, profile)
+    assert view["measurements"] == bench["measurements"]
+    assert view["wall_time_denominator"]["run_id"] == "bench"
+    assert len(list(profile_dir.glob("kernel_inputs_layer_*.pt"))) == 3
+    assert len(audit_saved_outputs(profile_dir, profile)["tensor_checks"]) == 8
+    cross = compare(profile_dir, profile_dir, profile_dir.parent / "comparison")
+    assert all(row["speedup"] == 1 for row in cross["latencies"])
+    assert cross["runs"]["official"]["wall_time_denominator"]["run_id"] == "bench"
+    for offload in (False, True):
+        calls = [
+            event
+            for event in profiled_model.events
+            if event[0] == "forward" and event[1] == offload
+        ]
+        assert all(not event[4] for event in calls)
+        assert sum(event[5] for event in calls) == 2
+        assert all(event[2] == 0 for event in calls if event[3] == 3)
+        assert all(event[2] == 3 for event in calls if event[3] == 2)
+
+
+def test_profile_without_bench_stays_diagnostic(driver):
+    execute, _, _ = driver
+    check_dir, _, _ = execute("check")
+    directory, result, _ = execute(
+        "profile", "--validation-receipt", str(check_dir / "receipt.json")
+    )
+    assert result["accepted"] and "benchmark" not in result
+    assert benchmark_view(directory, result, required=False) == result
+    with pytest.raises(ValueError, match="no matching independent bench"):
+        benchmark_view(directory, result)
+
+
+def test_changed_check_artifact_rejected_before_benchmark(driver, monkeypatch):
+    execute, _, _ = driver
+    check_dir, _, _ = execute("check")
+    (check_dir / "resident_control.pt").write_bytes(b"changed")
+    monkeypatch.setattr(profile_layers, "run_benchmark", lambda *_: pytest.fail("samples began"))
+    with pytest.raises(ValueError, match="evidence changed"):
+        execute("bench", "--validation-receipt", str(check_dir / "receipt.json"))
+
+
+def test_changed_checkpoint_rejected_before_benchmark(driver, monkeypatch):
+    execute, _, _ = driver
+    check_dir, _, _ = execute("check")
+    (check_dir.parent / "fixture.safetensors").write_bytes(b"changed checkpoint")
+    monkeypatch.setattr(profile_layers, "run_benchmark", lambda *_: pytest.fail("samples began"))
+    with pytest.raises(ValueError, match="does not cover"):
+        execute("bench", "--validation-receipt", str(check_dir / "receipt.json"))
 
 
 def test_snapshot_bytes_include_pool_dataclass_tensors_once():
@@ -275,3 +357,17 @@ def test_snapshot_bytes_include_pool_dataclass_tensors_once():
     pool_type = make_dataclass("PoolSnapshotFixture", [("records", object), ("alias", object)])
     snapshot = {"pool": pool_type(record, record[:1]), "offset": torch.zeros(16)}
     assert profile_layers.tensor_storage_bytes(snapshot) == record.nbytes + 64
+
+
+def test_bound_benchmark_cannot_be_replaced(driver):
+    execute, _, _ = driver
+    check_dir, _, _ = execute("check")
+    receipt = str(check_dir / "receipt.json")
+    bench_dir, bench, _ = execute("bench", "--validation-receipt", receipt)
+    profile_dir, profile, _ = execute(
+        "profile", "--validation-receipt", receipt, "--benchmark-run", str(bench_dir)
+    )
+    bench["run_id"] = "substituted"
+    (bench_dir / "result.json").write_text(json.dumps(bench))
+    with pytest.raises(ValueError, match="bench changed"):
+        benchmark_view(profile_dir, profile)

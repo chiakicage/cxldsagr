@@ -1,0 +1,159 @@
+{
+  "schema": "deepseek-final-three-version-comparison-preparation-v1",
+  "prepared_utc": "2026-10-04T21:49:14.046974+00:00",
+  "status": "prepared_only_not_executed",
+  "scope": "Light text/stdlib-only preparation during NOSA pair04. No benchmark, receipt audit, bulk hashing, tensor loading, test or analysis executed.",
+  "requires_before_launch": [
+    "All three final DeepSeek bench01\u201303 finish successfully with accepted metadata and no driver errors.",
+    "Root opens a CPU comparison window after all final GPU benches finish.",
+    "Reopen receipt bindings and verify the actual final benchmark source/validation identities; preparation values below are observations, not a fresh integrity audit.",
+    "Retain all seven original run inputs, receipt dependencies and per-run monitor records; do not delete old published/P0 data before accepted comparison/publication."
+  ],
+  "cwd": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr",
+  "environment_overrides": {
+    "CUDA_VISIBLE_DEVICES": "",
+    "OMP_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "command": [
+    "numactl",
+    "--physcpubind=0-7",
+    "--membind=0",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin/python",
+    "-B",
+    "-m",
+    "experiments.deepseek_v32_motivation.src.compare_versions",
+    "--run-id",
+    "refactor_final_deepseek_three_version_20261005_01",
+    "--published",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/motivation_c10_20261004_u16_r2_01",
+    "--baseline",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_p0_deepseek_bench_20261005_01",
+    "--baseline",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_p0_deepseek_bench_20261005_02",
+    "--baseline",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_p0_deepseek_bench_20261005_03",
+    "--current",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_bench_20261005_01",
+    "--current",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_bench_20261005_02",
+    "--current",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_bench_20261005_03",
+    "--baseline-receipt",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/docs/agents/acceptance/unified_runtime_20261005/deepseek_baseline/receipt.json",
+    "--current-receipt",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/docs/agents/acceptance/unified_runtime_20261005/deepseek_final/receipt.json",
+    "--output-dir",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_three_version_20261005_01"
+  ],
+  "shell_command": "env CUDA_VISIBLE_DEVICES= OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 PYTHONDONTWRITEBYTECODE=1 numactl --physcpubind=0-7 --membind=0 /mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin/python -B -m experiments.deepseek_v32_motivation.src.compare_versions --run-id refactor_final_deepseek_three_version_20261005_01 --published /mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/motivation_c10_20261004_u16_r2_01 --baseline /mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_p0_deepseek_bench_20261005_01 --baseline /mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_p0_deepseek_bench_20261005_02 --baseline /mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_p0_deepseek_bench_20261005_03 --current /mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_bench_20261005_01 --current /mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_bench_20261005_02 --current /mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_bench_20261005_03 --baseline-receipt /mnt/ssd-wlcb/chenkaiqi/cxldsagr/docs/agents/acceptance/unified_runtime_20261005/deepseek_baseline/receipt.json --current-receipt /mnt/ssd-wlcb/chenkaiqi/cxldsagr/docs/agents/acceptance/unified_runtime_20261005/deepseek_final/receipt.json --output-dir /mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_three_version_20261005_01",
+  "owner_benchmark_plan": "/tmp/cxldsagr_refactor_final_deepseek_20261005/plan.json",
+  "owner_final_bench_jobs": [
+    {
+      "run_id": "refactor_final_deepseek_bench_20261005_01",
+      "target": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_bench_20261005_01"
+    },
+    {
+      "run_id": "refactor_final_deepseek_bench_20261005_02",
+      "target": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_bench_20261005_02"
+    },
+    {
+      "run_id": "refactor_final_deepseek_bench_20261005_03",
+      "target": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_bench_20261005_03"
+    }
+  ],
+  "source_distinctions": {
+    "published": {
+      "run_id": "motivation_c10_20261004_u16_r2_01",
+      "source_sha256_recorded": "11fc11b18b2e70baf450a82ab4fad66f2f8d4e22cda2e9f36bf74453a400df8f",
+      "schema": "deepseek-v32-motivation-v1",
+      "interpretation": "Historical C10 combined validation/timing path; descriptive comparison only. Original placement/output-copy boundary remains attached to its metadata."
+    },
+    "p0": {
+      "source_sha256_recorded": "d31a0ff6bde97acab24bb2f2c648e9d91ae46ba18f6c074b5f572cf49aaaab7a",
+      "schema": "deepseek-v32-motivation-bench-v1",
+      "interpretation": "Three frozen same-placement controls with independent check; exact original receipt relocated by explicit override."
+    },
+    "final_check": {
+      "run_id": "refactor_final_deepseek_check_20261005_01",
+      "full_source_sha256_recorded": "1fc1cbaf7a97579f7094879938330a9933a82109909d2701a177e1653f0dc9f8"
+    },
+    "final_bench_expected": {
+      "full_source_sha256_recorded": "1319a540b7f78da9c363dd09c0f1568b450df3df5e4d3e8b60155a58c348b3dc",
+      "status": "Expected from owner compatibility record; not independently recollected in this preparation. Must agree across actual bench01\u201303.",
+      "explanation": "Profile-only cleanup/failure-report changes alter full snapshot identity after the final check, while profile.py is excluded from the numerical execution source identity. Keep full snapshot and validation execution identity distinct."
+    },
+    "profile_only_compatibility": {
+      "status": "passed",
+      "check_run_id": "refactor_final_deepseek_check_20261005_01",
+      "previous_full_source_sha256": "1fc1cbaf7a97579f7094879938330a9933a82109909d2701a177e1653f0dc9f8",
+      "current_full_source_sha256": "d54075bc634c861970f570cff1c79bd6be96d98ededcbb631c1eb5066aa6e878",
+      "changed_sources": {
+        "experiments/deepseek_v32_motivation/src/profile.py": {
+          "previous": "73d632b9f6572855f6963fc32580c9e78d6d8ed69d197e6428d33c228c58242a",
+          "current": "0d074ce1e666ca040fd1ec6d0681a0d1c6b8a8b164739f24961a0f1967a26b37"
+        }
+      },
+      "full_source_files": 1295,
+      "validation_execution_sources": 1281,
+      "actual_bench_begin_validation_passed": true,
+      "verified_receipt_artifacts": 132,
+      "receipt_file_sha256": "a25cc5d08891fd6811db232de0b862831b46702c1b2f3124b2921b611574c1b3",
+      "verified_native_files": 22,
+      "verified_native_bytes": 1557618043,
+      "checkpoint_stat_identity_unchanged": true,
+      "boundary": "Fresh full source collection, actual bench begin_validation and artifact verification; native files rehashed and checkpoint stats re-read. Runtime method identities and device observations remain independently checked by the real benchmark. No GPU execution was performed.",
+      "followup_failure_reporting_fix": {
+        "profile_sha256": "4108978e5826c960301b4745c4f474169a1980f7a53da033ae5f95e3c2b7ce19",
+        "full_source_sha256_derived_from_prior_inventory": "1319a540b7f78da9c363dd09c0f1568b450df3df5e4d3e8b60155a58c348b3dc",
+        "numerical_execution_source_exclusion_unchanged": true,
+        "tests": "18 passed in 1.69s; Ruff check and format check passed",
+        "boundary": "Additional change only preserves original, failure-reporting and backend-close exception objects. Full source collection and native rehash were not repeated for this failure-only change. The full hash here substitutes the new profile hash into the already audited inventory; the preceding actual begin_validation audit remains the source compatibility proof."
+      }
+    }
+  },
+  "receipts": {
+    "baseline": {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/docs/agents/acceptance/unified_runtime_20261005/deepseek_baseline/receipt.json",
+      "kind": "deepseek-v32-motivation-full-trace-v1",
+      "recorded_file_sha256": "07d368adc96baadaed44cbeaedbc8eccf734ba73943349d75c08710f5ff9ed88",
+      "recorded_internal_receipt_sha256": "77164ea213e1af542bcee4cf9763db0a25dcb426f9b0d796f53e6f6b42b9738a"
+    },
+    "current": {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/docs/agents/acceptance/unified_runtime_20261005/deepseek_final/receipt.json",
+      "kind": "deepseek-v32-motivation-full-trace-v1",
+      "recorded_file_sha256": "a25cc5d08891fd6811db232de0b862831b46702c1b2f3124b2921b611574c1b3",
+      "recorded_internal_receipt_sha256": "e7ade48c00d4085b3b410bbb26d27cecd1791fb33bdf795c45065fe1d9910332"
+    },
+    "hash_boundary": "Raw file hashes copied from existing accepted records; internal digests read from receipt JSON. No hash verification or artifact audit was run during preparation."
+  },
+  "comparison_contract": "The existing CLI audits each original run and relocated receipt, requires three repeats per current/control family, identical P0/current workload/precision/placement/timing contract, one source and validation identity per repeat family, and three distinct published/P0/current full source identities. It writes comparison.json, request_samples.csv and results.md under its new output run ID.",
+  "monitor_inputs": [
+    {
+      "run_id": "refactor_final_deepseek_bench_20261005_01",
+      "ledger": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_bench_20261005_01/driver/run.json",
+      "samples": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_bench_20261005_01/driver/gpu_monitor.jsonl",
+      "owner_audit": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_bench_20261005_01/driver/gpu_observation_audit.json"
+    },
+    {
+      "run_id": "refactor_final_deepseek_bench_20261005_02",
+      "ledger": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_bench_20261005_02/driver/run.json",
+      "samples": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_bench_20261005_02/driver/gpu_monitor.jsonl",
+      "owner_audit": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_bench_20261005_02/driver/gpu_observation_audit.json"
+    },
+    {
+      "run_id": "refactor_final_deepseek_bench_20261005_03",
+      "ledger": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_bench_20261005_03/driver/run.json",
+      "samples": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_bench_20261005_03/driver/gpu_monitor.jsonl",
+      "owner_audit": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_bench_20261005_03/driver/gpu_observation_audit.json"
+    }
+  ],
+  "independent_review_after_cli": [
+    "Join every GPU observation with its own run UTC interval and process-tree ownership, require successful query return codes; periodic samples do not rule out unsampled activity or CPU contention.",
+    "Compare all method/visit/phase groups against both P0 and current repetition ranges and matched request IDs; do not use an arbitrary percentage tolerance.",
+    "Reopen all original P0/current rows for exact workload identity, first/revisit/hit classification, fixed quotas, cache charges and H2D comparison; keep sampled process memory separate.",
+    "Preserve cleanup overhead and any repeated group-specific latency finding; three aggregate points alone do not establish causality or tail latency."
+  ]
+}

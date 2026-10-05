@@ -1,9 +1,0 @@
-run_id,phase,iteration,kernel_family,kernel_symbol,kernel_count,kernel_ns,kernel_ms
-sparse_flags_native_20261004_01,full_prefill,0,prepare,nosa_fa3::prepare,2080,6609984,6.609984
-sparse_flags_native_20261004_01,full_prefill,0,sort_work_by_union_size,nosa_fa3::sort_work_by_union_size,2080,3425390,3.42539
-sparse_flags_native_20261004_01,full_prefill,0,PrefillWithKVCacheKernel,flashinfer::PrefillWithKVCacheKernel,2080,349682529,349.682529
-sparse_flags_native_20261004_01,full_prefill,0,attention_kernel,nosa_attention::attention_kernel,2080,7992497,7.992497
-sparse_flags_native_20261004_01,extend,0,prepare,nosa_fa3::prepare,32,102081,0.102081
-sparse_flags_native_20261004_01,extend,0,sort_work_by_union_size,nosa_fa3::sort_work_by_union_size,32,50976,0.050976
-sparse_flags_native_20261004_01,extend,0,PrefillWithKVCacheKernel,flashinfer::PrefillWithKVCacheKernel,32,5540260,5.54026
-sparse_flags_native_20261004_01,extend,0,attention_kernel,nosa_attention::attention_kernel,32,94946,0.094946

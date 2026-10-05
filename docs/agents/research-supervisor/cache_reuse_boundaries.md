@@ -3,7 +3,7 @@
 日期：2026-10-03。主研究条目 3.2，关联 2.1、2.4、2.5、4.1、4.2。
 研究者说明另一 agent 正在修改 ECHO cache，本轮仅核对工作区并讨论其他方案如何复用。
 以下为设计建议，未选定或实施 NOSA 改造，没有新增 GPU 验证或性能结果。
-后续已按研究者要求制定[修改计划](../system/nosa_shared_cache_implementation_plan.md)，
+后续已按研究者要求制定修改计划（Git `934485b:docs/agents/system/nosa_shared_cache_implementation_plan.md`），
 包括文件分工、资源上限、异步验收和补测范围；当前仍未实施。
 
 ## 判断与当前依据
@@ -15,10 +15,10 @@
 
 | 当前材料 | 本轮核实的边界 |
 |---|---|
-| [ECHO 实施计划](../system/echo_cache_implementation_plan.md) | backend/device 拥有 host arena 和每层有限 HBM pool；session 保留页表、独立 indexer 与事务。实施中，完整验收以执行 agent 的交付为准 |
-| [共享 serving 契约](../../../executor/serving_backend.py)与 [PrefixSessionPool](../../../cache/prefix_pool.py) | 工作区已出现 `SharedCachePlan`、先规划后分配、shared/session 分开计费和 host-page 准入；NOSA 尚未接入这一可选接口 |
-| [NOSA offload cache](../../../models/nosa/offload_cache.py)与 [fetch workspace](../../../operators/nosa/attention/offload/api.py) | 每 session 一份跨层复用的完整逻辑地址 staging；串行与 overlap 使用同一 workspace 类型。不保留跨调用的 HBM 热块，没有有限 slots/eviction |
-| [NOSA serving](../../../models/nosa/serving.py) | dense prefetch 每 session 分配两份完整层 K/V staging，copy stream 提前搬下一层；仍执行完整 NOSA sparse attention |
+| ECHO 实施计划（Git `934485b:docs/agents/system/echo_cache_implementation_plan.md`） | backend/device 拥有 host arena 和每层有限 HBM pool；session 保留页表、独立 indexer 与事务。实施中，完整验收以执行 agent 的交付为准 |
+| [共享 serving 契约（现入口）](../../../executor/contracts.py)与 [PrefixSessionPool](../../../cache/prefix_pool.py) | 工作区已出现 `SharedCachePlan`、先规划后分配、shared/session 分开计费和 host-page 准入；NOSA 尚未接入这一可选接口 |
+| [NOSA offload cache](../../../models/nosa/cache/offload.py)与 [fetch workspace](../../../operators/nosa/attention/offload/api.py) | 每 session 一份跨层复用的完整逻辑地址 staging；串行与 overlap 使用同一 workspace 类型。不保留跨调用的 HBM 热块，没有有限 slots/eviction |
+| [NOSA serving](../../../models/nosa/execution/adapter.py) | dense prefetch 每 session 分配两份完整层 K/V staging，copy stream 提前搬下一层；仍执行完整 NOSA sparse attention |
 | [ECHO 共享池](../../../cache/sparse_token_pool.py) | width/dtype 参数化，但现有预取接口、token 映射和事件 priority 仍带 ECHO 策略语义，不能只改 width 就用于 NOSA |
 
 ## 建议先复用的部分

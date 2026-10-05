@@ -10,17 +10,17 @@
   "graph_matrix_calls": 36080,
   "verified_planned_chunk_layer_operator_groups": 45933,
   "schema": "deepseek-v32-motivation-profile-flops-verification-v2",
-  "profile_run_id": "motivation_c10_profile_20261004_01",
-  "reference_run_id": "motivation_c10_20261004_u16_r2_01",
+  "profile_run_id": "refactor_final_deepseek_profile_20261005_01",
+  "reference_run_id": "refactor_final_deepseek_bench_20261005_01",
   "input_sha256": {
-    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/motivation_c10_profile_20261004_01/metadata.json": "8e932a52b895f20512eb39a1d89de4354d1968ed116295f696cd7a881a2d7a0e",
-    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/motivation_c10_profile_20261004_01/result.json": "c5673e64b98f247054c74f7a9191d36534a166b2265a3f9b8c5002d7fa405d16",
-    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/motivation_c10_profile_20261004_01/source_manifest.json": "3ca224dff33e43480445c20734eb49a1e85069ea7e131806405d00cd5e369701",
-    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/motivation_c10_profile_20261004_01/operator_calls.json": "d6348a1b8caba356f3b625589dc428347459472b51532b877f141a6806ff37ba",
-    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/motivation_c10_flops_20261004_01/flops.json": "ee955382fc54dc38f823c5402d124b0d51237555a3ba30c991746a3adb41135a"
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_profile_20261005_01/metadata.json": "8b0cdf242ac0f2f93859cbfdf897e35d7212f286c845500e54c8db951015e9ab",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_profile_20261005_01/result.json": "83d2c5141975336aeff97720370952cbfd3894aa16b687414038dcc8b3143341",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_profile_20261005_01/source_manifest.json": "509fdc64dd3f6ec5a8dacfeaffe7b1d041e2d460ba84f5a2e01c3aaeb7c2ade9",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_profile_20261005_01/operator_calls.json": "b14ad51f01b071a2a25a01a3c95e32468a86c15b25cccea911e1ad5e61310cc7",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_flops_20261005_01/flops.json": "9aeeecf4f5281bf4eb06254f6284bf605badd41b38d6528f4a147db365a3110f"
   },
   "analysis_source_sha256": {
-    "/tmp/deepseek-motivation-c10_host_rope_v2-frozen-6mdyfgj0/experiments/deepseek_v32_motivation/src/verify_profile_flops.py": "64e7af768299a98fd4406ffcd24ed09d3d5751f40170d2ff97b78349d395d1ac"
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/src/verify_profile_flops.py": "64e7af768299a98fd4406ffcd24ed09d3d5751f40170d2ff97b78349d395d1ac"
   },
   "boundaries": [
     "Useful work and API counts are checked by chunk, independent layer, operator and precision against an expanded workload.",

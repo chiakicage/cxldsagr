@@ -2,7 +2,7 @@
 
 Status: executed after root's exclusive GPU 2 grant, with the integrated exact
 ECHO hint and its targeted test module. The combined command passed 176 tests
-with no failures or skips. See [the combined checkpoint](../../system/deepseek_motivation_c7_hint_validation.md)
+with no failures or skips. See the combined checkpoint（Git `934485b:docs/agents/system/deepseek_motivation_c7_hint_validation.md`）
 for source identity and the actual coverage. This plan's command below now
 includes the hint suite as executed. CUDA was released after completion.
 

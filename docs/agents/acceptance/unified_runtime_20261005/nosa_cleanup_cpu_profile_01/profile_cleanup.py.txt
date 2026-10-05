@@ -1,0 +1,89 @@
+"""Existing shared-runner fixture only; no production edits, tests or GPU."""
+import cProfile
+from dataclasses import replace
+import gc
+import hashlib
+import json
+import os
+from pathlib import Path
+import pstats
+import statistics
+import sys
+import time
+
+checkout=Path(sys.argv[1]).resolve()
+role=sys.argv[2]
+out=Path(__file__).resolve().parent
+sys.path.insert(0,str(checkout))
+os.chdir(checkout)
+assert os.environ.get('CUDA_VISIBLE_DEVICES')==''
+import torch
+assert not torch.cuda.is_initialized()
+def forbidden(*args,**kwargs):raise RuntimeError('CUDA disabled')
+torch.cuda._lazy_init=forbidden
+from serving.tests.test_persistent import SharedBackend,request
+from serving.persistent import PersistentGRRunner
+
+def summary(values):
+    median=statistics.median(values)
+    return {'values':values,'median':median,'min':min(values),'max':max(values),'range':max(values)-min(values)}
+def timed(fn):
+    for _ in range(20):fn()
+    samples=[]
+    for _ in range(7):
+        begin=time.perf_counter_ns()
+        for _ in range(500):fn()
+        samples.append((time.perf_counter_ns()-begin)/500/1000)
+    return summary(samples)
+def profile(fn,name):
+    p=cProfile.Profile();p.enable()
+    for _ in range(300):fn()
+    p.disable();p.dump_stats(out/f'{role}_{name}.pstats')
+    rows=[]
+    for (file,line,function),(primitive,total,self_seconds,cumulative,callers) in pstats.Stats(p).stats.items():
+        rows.append({'file':file,'line':line,'function':function,'calls_per_iteration':total/300,
+                     'self_us_per_iteration':self_seconds*1e6/300,'cumulative_us_per_iteration':cumulative*1e6/300})
+    return sorted(rows,key=lambda r:r['cumulative_us_per_iteration'],reverse=True)
+
+cases={}
+for count in (1,16):
+    backend=SharedBackend()
+    original_plan=backend.plan_resources
+    def planning(budgets,limits):return replace(original_plan(budgets,limits),host_pages=count)
+    backend.plan_resources=planning
+    output=torch.tensor([[6],[10]])
+    def no_compute(session,ids):
+        session['tokens'].extend((3,4))
+        return output
+    backend.extend=no_compute
+    with PersistentGRRunner(backend,resource_limits={'max_session_capacity':4}) as runner:
+        for user in range(count):runner.execute(request(user))
+        assert len(runner.pool)==count
+        req=request(0)
+        def execute():return runner.execute(req)
+        audit=timed(runner.pool.audit)
+        for _ in range(20):execute()
+        cleanup=[];candidate=[];wall=[]
+        for _ in range(7):
+            results=[execute().metrics for _ in range(500)]
+            cleanup.append(statistics.fmean(r['cleanup_ms'] for r in results)*1000)
+            candidate.append(statistics.fmean(r['extend_ms'] for r in results)*1000)
+            wall.append(statistics.fmean(r['latency_ms'] for r in results)*1000)
+        cases[str(count)]={'pool_audit_us':audit,'mock_candidate_cleanup_us':summary(cleanup),
+            'mock_candidate_extend_us':summary(candidate),'mock_request_wall_us':summary(wall),
+            'profile_pool_audit':profile(runner.pool.audit,f'{count}_audit'),
+            'profile_mock_execute':profile(execute,f'{count}_execute')}
+    backend.close()
+assert not torch.cuda.is_initialized()
+paths=['serving/tests/test_persistent.py','serving/persistent.py','cache/prefix_pool.py']
+if role=='current':paths+=['executor/runtime.py','executor/adapters.py','cache/capacity.py']
+result={'schema':'mock-shared-runner-cleanup-cpu-profile-v1','role':role,'checkout':str(checkout),
+    'scope':'Existing SharedBackend fixture with host quota widened to 1 or 16 sessions and a local no-compute candidate returning one preallocated CPU tensor. Actual runner/audit source is unmodified. No NOSA model, real cache storage enumeration, allocator/lease audit, or CUDA synchronization is exercised; these values cannot explain full-serving cleanup causally.',
+    'unit':'microseconds','command':sys.orig_argv,'affinity':sorted(os.sched_getaffinity(0)),
+    'threads':torch.get_num_threads(),'gc_enabled':gc.isenabled(),'cuda_initialized':torch.cuda.is_initialized(),
+    'source_sha256':{name:hashlib.sha256((checkout/name).read_bytes()).hexdigest() for name in paths},
+    'script_sha256':hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+    'timing':'20 warmup calls then 7 batches × 500; cProfile is a separate 300-iteration pass; all unprofiled samples retained.',
+    'cases':cases}
+(out/f'{role}.json').write_text(json.dumps(result,indent=2)+'\n')
+print(json.dumps({role:{n:{k:v['median'] for k,v in c.items() if k.endswith('_us')} for n,c in cases.items()}}))

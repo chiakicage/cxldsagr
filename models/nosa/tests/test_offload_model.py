@@ -3,8 +3,8 @@
 import pytest
 import torch
 
+from models.nosa.cache.offload import NosaOffloadCache
 from models.nosa.model import NosaForCausalLM
-from models.nosa.offload_cache import NosaOffloadCache
 from models.nosa.tests.test_model import tiny_config, write_checkpoint
 from models.nosa.tests.test_sparse_model import initialized_sparse_model
 

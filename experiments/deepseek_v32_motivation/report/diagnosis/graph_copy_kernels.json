@@ -5,50 +5,50 @@
       "scheme": "dense_prefetch",
       "phase": "cold",
       "kernels": 2600,
-      "gpu_union_ms": 20.431925,
-      "gpu_duration_sum_ms": 20.431925
+      "gpu_union_ms": 20.563024,
+      "gpu_duration_sum_ms": 20.563024
     },
     {
       "scheme": "dense_prefetch",
       "phase": "revisit",
       "kernels": 40,
-      "gpu_union_ms": 0.1008,
-      "gpu_duration_sum_ms": 0.1008
+      "gpu_union_ms": 0.101217,
+      "gpu_duration_sum_ms": 0.101217
     },
     {
       "scheme": "echo",
       "phase": "cold",
       "kernels": 2600,
-      "gpu_union_ms": 19.913362,
-      "gpu_duration_sum_ms": 19.913362
+      "gpu_union_ms": 20.003442,
+      "gpu_duration_sum_ms": 20.003442
     },
     {
       "scheme": "echo",
       "phase": "revisit",
       "kernels": 40,
-      "gpu_union_ms": 0.100896,
-      "gpu_duration_sum_ms": 0.100896
+      "gpu_union_ms": 0.100608,
+      "gpu_duration_sum_ms": 0.100608
     },
     {
       "scheme": "hbm",
       "phase": "cold",
       "kernels": 2600,
-      "gpu_union_ms": 20.639978,
-      "gpu_duration_sum_ms": 20.639978
+      "gpu_union_ms": 20.773077,
+      "gpu_duration_sum_ms": 20.773077
     },
     {
       "scheme": "hbm",
       "phase": "revisit",
       "kernels": 2600,
-      "gpu_union_ms": 20.749707,
-      "gpu_duration_sum_ms": 20.749707
+      "gpu_union_ms": 20.854466,
+      "gpu_duration_sum_ms": 20.854466
     },
     {
       "scheme": "serial_sparse",
       "phase": "cold",
       "kernels": 2600,
-      "gpu_union_ms": 20.431797,
-      "gpu_duration_sum_ms": 20.431797
+      "gpu_union_ms": 20.538318,
+      "gpu_duration_sum_ms": 20.538318
     },
     {
       "scheme": "serial_sparse",
@@ -63,7 +63,7 @@
     "void at::native::unrolled_elementwise_kernel<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase &)::[lambda() (instance 3)]::operator ()() const::[lambda() (instance 7)]::operator ()() const::[lambda(float) (instance 1)], std::array<char *, (unsigned long)2>, (int)4, TrivialOffsetCalculator<(int)1, unsigned int>, TrivialOffsetCalculator<(int)1, unsigned int>, at::native::memory::LoadWithCast<(int)1>, at::native::memory::StoreWithCast<(int)1>>(int, T1, T2, T4, T5, T6, T7)"
   ],
   "input_sha256": {
-    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/motivation_c10_profile_20261004_01/analysis/independent_gpu_activities.jsonl": "bd48ad80dae98ac22037fce4db979895a4242abbe5a1b78758ae1c050f667521"
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_profile_20261005_01/analysis/independent_gpu_activities.jsonl": "18ee0cfcb9a481eebf6fa7d0728367a645ee5d76c43b72620beea0b45254fc13"
   },
   "source_sha256": "add09b832db8f92259a9d6fdfa283b444e54cd3cf1b51facea3a6e86320d88e8",
   "boundary": "Only actual unowned KERNEL rows with graph-node identity and direct_copy_kernel in the demangled name. This complements explicit CUPTI MEMCPY records; it does not classify all elementwise kernels as copies."

@@ -2,7 +2,7 @@
 
 import torch
 
-from layers.attention import BlockSelection
+from models.attention_contracts import BlockSelection
 
 
 def _validate_inputs(q, keys, values, selection, query_start, cis_bias):

@@ -12,11 +12,18 @@ import json
 import os
 from pathlib import Path
 
-POOL_SCAN_ABI = "models/nosa/csrc/pool_referrers_abi.json"
+POOL_SCAN_ABI = "cache/allocator/csrc/pool_referrers_abi.json"
 POOL_SCAN_SOURCES = (
+    "cache/allocator/pool_referrers.py",
+    "cache/allocator/csrc/pool_referrers.c",
+    POOL_SCAN_ABI,
+)
+# Saved pre-migration reports retain their exact source paths and hashes.
+# Current discovery emits only POOL_SCAN_SOURCES; audits recognize both layouts.
+_LEGACY_POOL_SCAN_SOURCES = (
     "models/nosa/_pool_referrers.py",
     "models/nosa/csrc/pool_referrers.c",
-    POOL_SCAN_ABI,
+    "models/nosa/csrc/pool_referrers_abi.json",
 )
 COUNTERS = ("filtered_calls", "unfiltered_calls", "fallback_calls", "audit_errors")
 CASE_SCOPE = (
@@ -30,14 +37,31 @@ def _digest(value):
 
 
 def requires_provenance(manifest):
-    present = set(POOL_SCAN_SOURCES).intersection(manifest)
-    if present and present != set(POOL_SCAN_SOURCES):
-        raise ValueError("incomplete pool-referrer source coverage")
-    return bool(present)
+    required = False
+    for sources in (POOL_SCAN_SOURCES, _LEGACY_POOL_SCAN_SOURCES):
+        present = set(sources).intersection(manifest)
+        if present and present != set(sources):
+            raise ValueError("incomplete pool-referrer source coverage")
+        required |= bool(present)
+    return required
+
+
+def source_abi_sha256(manifest):
+    """Bind provider authentication to the ABI in the saved source layout."""
+    if not requires_provenance(manifest):
+        return None
+    identities = {
+        manifest[sources[-1]]
+        for sources in (POOL_SCAN_SOURCES, _LEGACY_POOL_SCAN_SOURCES)
+        if sources[-1] in manifest
+    }
+    if len(identities) != 1:
+        raise ValueError("conflicting pool-referrer ABI source identities")
+    return identities.pop()
 
 
 def build_info():
-    from models.nosa._pool_referrers import build_info as discover
+    from cache.allocator.pool_referrers import build_info as discover
 
     return discover()
 
@@ -90,7 +114,7 @@ def _mapped_artifact(runtime, maps_path):
 
 
 def snapshot(*, maps_path=Path("/proc/self/maps")):
-    from models.nosa._pool_referrers import runtime_info
+    from cache.allocator.pool_referrers import runtime_info
 
     runtime = runtime_info()
     return {"runtime": runtime, "artifacts": _mapped_artifact(runtime, maps_path)}

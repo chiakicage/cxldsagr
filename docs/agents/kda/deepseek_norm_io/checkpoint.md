@@ -7,7 +7,7 @@ component validation. The complete-API benchmark and its independent audits
 passed. The production BF16 adapter passed focused GPU correctness and live
 runtime identity checks. The combined C8 checkpoint/output, graph-memory and
 lifecycle gate also passed; its scope and independent saved-record audit are
-in the [C8 validation record](../../system/deepseek_motivation_c8_validation.md).
+in the C8 validation record（Git `934485b:docs/agents/system/deepseek_motivation_c8_validation.md`）.
 Formal C8 serving/profile measurements remain deferred.
 The separate packed norm candidate remains unimplemented.
 The plans are

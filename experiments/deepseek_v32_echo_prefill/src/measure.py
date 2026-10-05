@@ -104,9 +104,14 @@ def source_manifest():
     root = Path(__file__).resolve().parents[3]
     paths = [
         *source_files(),
-        *root.glob("models/deepseek_v32/echo_*.py"),
+        *(
+            path
+            for path in (root / "models/deepseek_v32").rglob("*.py")
+            if "tests" not in path.relative_to(root / "models/deepseek_v32").parts
+        ),
         root / "models/deepseek_v32/nonmatrix.py",
         root / "operators/flashinfer.py",
+        root / "models/attention_contracts.py",
         root / "models/deepseek_v32/request_format.py",
         *(
             path
@@ -116,8 +121,15 @@ def source_manifest():
             and "tests" not in path.relative_to(root / directory).parts
             and path.suffix in {".py", ".cu", ".cuh", ".cpp", ".h", ".hpp"}
         ),
-        *root.glob("cache/*.py"),
-        root / "models/deepseek_v32/cache_resources.py",
+        *(
+            path
+            for directory in ("cache", "executor", "evaluation", "GR")
+            for path in (root / directory).rglob("*")
+            if path.is_file()
+            and "tests" not in path.relative_to(root / directory).parts
+            and path.suffix in {".py", ".c", ".cu", ".cuh", ".cpp", ".h", ".hpp", ".json"}
+        ),
+        root / "models/deepseek_v32/execution/cache_resources.py",
         Path(__file__).resolve(),
     ]
     return {str(p.relative_to(root)): hashlib.sha256(p.read_bytes()).hexdigest() for p in paths}
@@ -134,11 +146,11 @@ def timed(model, ids, label, *, annotate=False):
     return output, {"wall_ms": elapsed, **(scopes.summary() if scopes else {})}
 
 
-def main():
-    """Use the same real three-layer workload and controls as the profile entry."""
-    from experiments.deepseek_v32_echo_prefill.src.profile_layers import main as profile_main
+def main(argv=None):
+    """Independent numerical check or clean three-layer benchmark."""
+    from experiments.deepseek_v32_echo_prefill.src.profile_layers import run
 
-    profile_main()
+    run(argv=argv)
 
 
 if __name__ == "__main__":

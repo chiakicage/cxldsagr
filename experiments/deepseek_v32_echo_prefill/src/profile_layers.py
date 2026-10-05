@@ -4,6 +4,7 @@ import argparse
 import hashlib
 import importlib.metadata
 import json
+import os
 import shutil
 import statistics
 import time
@@ -13,14 +14,22 @@ from unittest.mock import patch
 
 import torch
 
+from evaluation.validation import require_receipt, write_receipt
 from experiments.deepseek_v32_echo_prefill.src.measure import make_request, source_manifest
 from experiments.deepseek_v32_echo_prefill.src.operator_instrumentation import (
     InstrumentOperators,
     OperatorScopes,
 )
 from experiments.deepseek_v32_echo_prefill.src.profile_hardware import gather_hardware
-from models.deepseek_v32.echo_infer import DeepSeekEchoModel
-from models.deepseek_v32.echo_model import rms_norm
+from experiments.deepseek_v32_echo_prefill.src.run_contract import (
+    RECEIPT_KIND,
+    bind_benchmark,
+    checkpoint_identity,
+    execution_identity,
+    receipt_binding,
+)
+from models.deepseek_v32.model import DeepSeekEchoModel
+from models.deepseek_v32.nonmatrix import rms_norm
 from operators.deepseek_v32.indexer.echo import build_info
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -37,6 +46,7 @@ def sources():
         "operator_instrumentation.py",
         "operator_flops.py",
         "profile_hardware.py",
+        "run_contract.py",
     ):
         path = Path(__file__).with_name(name)
         result[str(path.relative_to(ROOT))] = hashlib.sha256(path.read_bytes()).hexdigest()
@@ -126,8 +136,169 @@ def annotate(model, ids, mode, phase, nsys):
     return output.cpu(), normalized, scopes.calls, wall
 
 
-def main():
-    parser = argparse.ArgumentParser(description=__doc__, allow_abbrev=False)
+def cache_metrics(model, snapshot, prefix_metrics):
+    return {
+        "snapshot_cpu_tensor_bytes": tensor_storage_bytes(snapshot),
+        "cache_resource_plan": getattr(model, "_cache_resource_plan", None),
+        "prefix_cache_per_layer": prefix_metrics,
+        "extend_cache_per_layer": [block.cache.metrics() for block in model.blocks],
+    }
+
+
+def run_benchmark(model, ids, args, result):
+    """Only default model outputs and wall timers; no output copies or comparisons."""
+    for offload in (False, True):
+        mode = "offload" if offload else "resident"
+        prefix_times = []
+        for _ in range(args.prefill_repeats):
+            model.set_cache_mode(offload)
+            _, elapsed = timed(model, ids[: args.prefix])
+            prefix_times.append(elapsed)
+        prefix_metrics = [block.cache.metrics() for block in model.blocks]
+        snapshot = model.snapshot_prefix()
+        extend_times = []
+        for _ in range(args.repeats):
+            model.restore_prefix(snapshot)
+            _, elapsed = timed(model, ids[args.prefix :])
+            extend_times.append(elapsed)
+        result["measurements"][mode] = {
+            **cache_metrics(model, snapshot, prefix_metrics),
+            "prefix_samples_ms": prefix_times,
+            "extend_samples_ms": extend_times,
+            "prefix_median_ms": statistics.median(prefix_times),
+            "extend_median_ms": statistics.median(extend_times),
+        }
+        del snapshot
+
+
+def run_check(model, ids, args, result):
+    controls, prefixes = {}, {}
+    for offload in (False, True):
+        mode = "offload" if offload else "resident"
+        model.set_cache_mode(offload)
+        prefixes[mode] = model.forward(ids[: args.prefix]).cpu()
+        snapshot = model.snapshot_prefix()
+        model.restore_prefix(snapshot)
+        default = model.forward(ids[args.prefix :]).cpu()
+        model.restore_prefix(snapshot)
+        control = {
+            key: value.cpu()
+            for key, value in model.forward(ids[args.prefix :], return_hidden=True).items()
+        }
+        if control["hidden"].ndim != 2 or control["hidden"].shape[0] != args.extend:
+            raise ValueError("Check must cover every extend hidden row")
+        if control["logits"].ndim != 2 or control["logits"].shape[0] != 1:
+            raise ValueError("Check must cover the last-token logits")
+        result["correctness"][mode + "_default_extend_logits"] = comparison(
+            control["logits"], default
+        )
+        controls[mode] = control
+        torch.save(control, args.output / f"{mode}_control.pt")
+        torch.save(prefixes[mode], args.output / f"{mode}_prefix_logits.pt")
+        del snapshot
+    for key in ("hidden", "logits"):
+        result["correctness"]["resident_vs_offload_" + key] = comparison(
+            controls["offload"][key], controls["resident"][key]
+        )
+    result["correctness"]["resident_vs_offload_prefix_logits"] = comparison(
+        prefixes["offload"], prefixes["resident"]
+    )
+
+
+def run_profile(model, ids, args, result, receipt):
+    calls = []
+    for key in ("hidden", "logits"):
+        result["correctness"]["resident_vs_offload_" + key] = receipt["checks"]["comparisons"][
+            "resident_vs_offload_" + key
+        ]
+    for offload in (False, True):
+        mode = "offload" if offload else "resident"
+        control = torch.load(
+            receipt["artifact_paths"][mode + "_control.pt"], map_location="cpu", weights_only=True
+        )
+        prefix_control = torch.load(
+            receipt["artifact_paths"][mode + "_prefix_logits.pt"],
+            map_location="cpu",
+            weights_only=True,
+        )
+        model.set_cache_mode(offload)
+        annotated_prefix, _, records, prefix_wall = annotate(
+            model, ids[: args.prefix], mode, "prefill_annotated", args.nsys
+        )
+        calls.extend(records)
+        result["correctness"][mode + "_profile_prefix_logits"] = comparison(
+            annotated_prefix, prefix_control
+        )
+        prefix_metrics = [block.cache.metrics() for block in model.blocks]
+        snapshot = model.snapshot_prefix()
+        model.restore_prefix(snapshot)
+        annotated, hidden, records, extend_wall = annotate(
+            model, ids[args.prefix :], mode, "extend_annotated", args.nsys
+        )
+        calls.extend(records)
+        for key, actual in (("logits", annotated), ("hidden", hidden)):
+            result["correctness"][mode + "_profile_extend_" + key] = comparison(
+                actual, control[key]
+            )
+        torch.save(
+            {"hidden": hidden, "logits": annotated}, args.output / f"{mode}_profile_output.pt"
+        )
+        result["measurements"][mode] = {
+            **cache_metrics(model, snapshot, prefix_metrics),
+            "annotated_prefix_wall_ms": prefix_wall,
+            "annotated_extend_wall_ms": extend_wall,
+        }
+        write_json(
+            args.output / "operator_calls.json",
+            {"schema_version": 2, "run_id": args.run_id, "calls": calls},
+        )
+        if offload:
+            capture_kernel_inputs(model, ids[args.prefix :], snapshot, args)
+        del snapshot
+
+
+def capture_kernel_inputs(model, ids, snapshot, args):
+    model.restore_prefix(snapshot)
+    for layer, block in enumerate(model.blocks):
+
+        def capture(p, keys, scales, indices, cache, position, layer=layer):
+            torch.save(
+                {
+                    "layer": layer,
+                    "query_start": position,
+                    "attention_scale": model.cfg.attention_scale,
+                    "q": p.q.cpu(),
+                    "index_q": p.index_q.cpu(),
+                    "index_weights": p.index_weights.cpu(),
+                    "index_keys": keys.cpu(),
+                    "index_scales": scales.cpu(),
+                    "indices": indices.cpu(),
+                    "kv": cache.host_records(),
+                    "source_run_id": args.run_id,
+                },
+                args.output / f"kernel_inputs_layer_{layer}.pt",
+            )
+
+        block.attention.capture_hook = capture
+    try:
+        model.forward(ids)
+    finally:
+        for block in model.blocks:
+            block.attention.capture_hook = None
+    if not all(
+        (args.output / f"kernel_inputs_layer_{layer}.pt").is_file()
+        for layer in range(model.num_layers)
+    ):
+        raise RuntimeError("Profile did not capture every checkpoint layer's kernel inputs")
+
+
+def run(mode=None, argv=None):
+    parser = argparse.ArgumentParser(
+        description=__doc__
+        if mode == "profile"
+        else "Independent numerical check or clean three-layer checkpoint benchmark.",
+        allow_abbrev=False,
+    )
     parser.add_argument("--model", type=Path, default=Path("/preset-models"))
     parser.add_argument("--request", type=Path)
     parser.add_argument("--prefix", type=int, default=65536)
@@ -159,8 +330,20 @@ def main():
     )
     parser.add_argument("--run-id", required=True)
     parser.add_argument("--output", type=Path, required=True)
-    parser.add_argument("--nsys", action="store_true")
-    args = parser.parse_args()
+    if mode == "profile":
+        parser.add_argument("--nsys", action="store_true")
+        parser.add_argument("--benchmark-run", type=Path)
+    else:
+        parser.add_argument("--mode", choices=("check", "bench"), default="bench")
+    parser.add_argument("--validation-receipt", type=Path)
+    args = parser.parse_args(argv)
+    mode = mode or args.mode
+    if mode != "check" and args.validation_receipt is None:
+        parser.error("--validation-receipt is required for bench/profile")
+    if mode == "check" and args.validation_receipt is not None:
+        parser.error("check writes its own receipt; do not supply --validation-receipt")
+    if (ROOT / "experiments").resolve() in args.output.resolve().parents:
+        parser.error("Execute outside experiments; scripts publish accepted bench/profile staging")
     if args.hbm_cache_budget_gib <= 0 or args.dram_cache_budget_gib <= 0:
         parser.error("cache budgets must be positive")
     required_queries = max(args.chunk_size, args.extend_chunk_size or args.extend)
@@ -246,13 +429,15 @@ def main():
     backend_identity = collect_backend_provenance()
     ids = request["input_ids"]
     result = {
-        "schema_version": 1,
+        "schema_version": 2,
+        "mode": mode,
         "run_id": args.run_id,
         "accepted": False,
         "scope": "checkpoint_layers_0_1_2_embedding_final_norm_last_token_lm_head",
         "model": str(args.model.resolve()),
         "num_layers": model.num_layers,
         "checkpoint_num_layers": model.cfg.num_hidden_layers,
+        "seed": args.seed,
         "prefix_tokens": args.prefix,
         "extend_tokens": args.extend,
         "chunk_size": args.chunk_size,
@@ -272,17 +457,25 @@ def main():
         "warmups": args.warmups,
         "repeats": args.repeats,
         "prefill_repeats": args.prefill_repeats,
-        "timed_output": "last-token logits; all extend hidden verified outside timed ranges",
+        "timed_output": "last-token logits; all extend hidden verified by independent check",
         "nsys_capture_order": [
             "resident/prefill_annotated",
             "resident/extend_annotated",
             "offload/prefill_annotated",
             "offload/extend_annotated",
-        ],
-        "timing": "synchronized wall; no wrappers in formal timings; separate NVTX captures",
+        ]
+        if mode == "profile"
+        else [],
+        "timing": "synchronized wall; independent check, clean bench, and NVTX profile processes",
         "source_sha256": manifest,
         "backend_provenance": backend_identity,
         "compute_precision": dict(model.blocks[0].attention.attention.precision),
+        "torch_precision": {
+            "matmul_fp32_precision": torch.backends.cuda.matmul.fp32_precision,
+            "bf16_reduced_precision_reduction": torch.backends.cuda.matmul.allow_bf16_reduced_precision_reduction,
+            "fp16_reduced_precision_reduction": torch.backends.cuda.matmul.allow_fp16_reduced_precision_reduction,
+            "deterministic_algorithms": torch.are_deterministic_algorithms_enabled(),
+        },
         "indexer_build": build_info(),
         "request_sha256": hashlib.sha256((args.output / "request.json").read_bytes()).hexdigest(),
         "checkpoint_metadata_sha256": {
@@ -298,109 +491,58 @@ def main():
         "measurements": {},
         "correctness": {},
     }
-    calls, controls = [], {}
+    result["checkpoint_identity"] = checkpoint_identity(args.model)
+    result["execution_environment"] = {
+        "cpu_affinity": sorted(os.sched_getaffinity(0)),
+        "torch_num_threads": torch.get_num_threads(),
+        "variables": {
+            key: value
+            for key, value in sorted(os.environ.items())
+            if key.startswith(
+                (
+                    "CXLDSAGR_",
+                    "DG_",
+                    "DJ_",
+                    "FLASHINFER_",
+                    "CUTE_DSL_",
+                    "TRITON_",
+                    "PYTORCH_",
+                    "OMP_",
+                    "MKL_",
+                    "OPENBLAS_",
+                )
+            )
+            or key in {"CUDA_VISIBLE_DEVICES", "CUDA_MODULE_LOADING", "CUDA_LAUNCH_BLOCKING"}
+        },
+    }
+    # Exercise exactly the default execution path before binding loaded JIT identities.
+    # This also completes compilation before any formal sample or profiler capture.
     for offload in (False, True):
-        mode = "offload" if offload else "resident"
-        print(f"{mode}: prefix warmup", flush=True)
         for _ in range(args.warmups):
             model.set_cache_mode(offload)
-            timed(model, ids[: args.prefix])
-        prefix_times = []
-        for iteration in range(args.prefill_repeats):
-            model.set_cache_mode(offload)
-            prefix_output, elapsed = timed(model, ids[: args.prefix])
-            prefix_times.append(elapsed)
-            print(f"{mode} prefix {iteration}: {elapsed:.3f} ms", flush=True)
-        prefix_control = prefix_output.cpu()
-        model.set_cache_mode(offload)
-        annotated_prefix, _, records, prefix_wall = annotate(
-            model, ids[: args.prefix], mode, "prefill_annotated", args.nsys
-        )
-        calls.extend(records)
-        result["correctness"][mode + "_profile_prefix_logits"] = comparison(
-            annotated_prefix, prefix_control
-        )
-        prefix_metrics = [block.cache.metrics() for block in model.blocks]
-        snapshot = model.snapshot_prefix()
-        snapshot_bytes = tensor_storage_bytes(snapshot)
-        for _ in range(args.warmups):
+            model.forward(ids[: args.prefix])
+            snapshot = model.snapshot_prefix()
             model.restore_prefix(snapshot)
-            timed(model, ids[args.prefix :])
-        extend_times = []
-        for iteration in range(args.repeats):
-            model.restore_prefix(snapshot)
-            output, elapsed = timed(model, ids[args.prefix :])
-            extend_times.append(elapsed)
-            print(f"{mode} extend {iteration}: {elapsed:.3f} ms", flush=True)
-        extend_control = output.cpu()
-        model.restore_prefix(snapshot)
-        control = {
-            key: value.cpu()
-            for key, value in model.forward(ids[args.prefix :], return_hidden=True).items()
-        }
-        comparison(control["logits"], extend_control)
-        controls[mode] = control
-        torch.save(control, args.output / f"{mode}_control.pt")
-        model.restore_prefix(snapshot)
-        annotated, hidden, records, extend_wall = annotate(
-            model, ids[args.prefix :], mode, "extend_annotated", args.nsys
-        )
-        calls.extend(records)
-        result["correctness"][mode + "_profile_extend_logits"] = comparison(
-            annotated, extend_control
-        )
-        result["correctness"][mode + "_profile_extend_hidden"] = comparison(
-            hidden, control["hidden"]
-        )
-        torch.save(
-            {"hidden": hidden, "logits": annotated}, args.output / f"{mode}_profile_output.pt"
-        )
-        result["measurements"][mode] = {
-            "snapshot_cpu_tensor_bytes": snapshot_bytes,
-            "cache_resource_plan": getattr(model, "_cache_resource_plan", None),
-            "prefix_samples_ms": prefix_times,
-            "extend_samples_ms": extend_times,
-            "prefix_median_ms": statistics.median(prefix_times),
-            "extend_median_ms": statistics.median(extend_times),
-            "annotated_prefix_wall_ms": prefix_wall,
-            "annotated_extend_wall_ms": extend_wall,
-            "prefix_cache_per_layer": prefix_metrics,
-            "extend_cache_per_layer": [block.cache.metrics() for block in model.blocks],
-        }
-        write_json(
-            args.output / "operator_calls.json",
-            {"schema_version": 1, "run_id": args.run_id, "calls": calls},
-        )
-        if offload:
-            model.restore_prefix(snapshot)
-            for layer, block in enumerate(model.blocks):
-
-                def capture(p, keys, scales, indices, cache, position, layer=layer):
-                    torch.save(
-                        {
-                            "layer": layer,
-                            "query_start": position,
-                            "attention_scale": model.cfg.attention_scale,
-                            "q": p.q.cpu(),
-                            "index_q": p.index_q.cpu(),
-                            "index_weights": p.index_weights.cpu(),
-                            "index_keys": keys.cpu(),
-                            "index_scales": scales.cpu(),
-                            "indices": indices.cpu(),
-                            "kv": cache.host_records(),
-                            "source_run_id": args.run_id,
-                        },
-                        args.output / f"kernel_inputs_layer_{layer}.pt",
-                    )
-
-                block.attention.capture_hook = capture
             model.forward(ids[args.prefix :])
-            for block in model.blocks:
-                block.attention.capture_hook = None
-    for key in ("hidden", "logits"):
-        result["correctness"]["resident_vs_offload_" + key] = comparison(
-            controls["offload"][key], controls["resident"][key]
+            del snapshot
+    result["execution_runtime_artifacts"] = collect_flashinfer_runtime_artifacts()
+    result["execution_identity"] = execution_identity(result)
+    receipt = None
+    if mode != "check":
+        receipt = require_receipt(
+            args.validation_receipt, kind=RECEIPT_KIND, identity=result["execution_identity"]
         )
+        result["validation_receipt"] = receipt_binding(receipt)
+    if mode == "profile" and args.benchmark_run is not None:
+        result["benchmark"] = bind_benchmark(args.benchmark_run, result)
+    if mode == "bench":
+        run_benchmark(model, ids, args, result)
+    elif mode == "check":
+        run_check(model, ids, args, result)
+    else:
+        run_profile(model, ids, args, result, receipt)
+    if checkpoint_identity(args.model) != result["checkpoint_identity"]:
+        raise RuntimeError("Checkpoint identity changed during execution")
     if sources() != manifest:
         raise RuntimeError("Implementation changed during measurement")
     if collect_backend_provenance() != backend_identity:
@@ -408,10 +550,22 @@ def main():
     result["flashinfer_runtime_artifacts"] = collect_flashinfer_runtime_artifacts()
     result["accepted"] = True
     write_json(args.output / "result.json", result)
+    if mode == "check":
+        write_receipt(
+            args.output / "receipt.json",
+            kind=RECEIPT_KIND,
+            identity=result["execution_identity"],
+            checks={"passed": True, "comparisons": result["correctness"]},
+            artifacts={path.name: path for path in args.output.iterdir() if path.is_file()},
+        )
     print(
         json.dumps({"run_id": args.run_id, "accepted": True, "correctness": result["correctness"]}),
         flush=True,
     )
+
+
+def main(argv=None):
+    run("profile", argv)
 
 
 if __name__ == "__main__":

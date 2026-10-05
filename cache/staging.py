@@ -164,8 +164,13 @@ class DoubleBufferStaging:
                 except BaseException as exc:  # noqa: BLE001 -- still join the other stream.
                     errors.append(exc)
         if errors:
-            self._poison(errors[0])
-            raise RuntimeError("unable to confirm completion of staging streams") from errors[0]
+            error = (
+                errors[0]
+                if len(errors) == 1
+                else BaseExceptionGroup("unable to confirm completion of staging streams", errors)
+            )
+            self._poison(error)
+            raise error
         lease._sources.clear()
 
     def _clear_slots(self):
@@ -230,7 +235,9 @@ class StagingLease:
             self.close()
         except BaseException as join_error:
             if exc is not None:
-                raise join_error from exc
+                raise BaseExceptionGroup(
+                    "staging execution and stream completion failed", [exc, join_error]
+                ) from None
             raise
         return False
 

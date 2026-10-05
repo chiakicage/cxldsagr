@@ -31,18 +31,19 @@ headers；准备脚本检查消费者、原 pin 和共享 pin 的确切组合，
 `uv sync` 在基础环境安装两个官方库；FlashMLA 通过 `pyproject.toml` 的 build
 variables 只生成 SM90a 代码（`FLASH_MLA_DISABLE_SM100=1`），不引入 SM120 后端。
 
-DeepGEMM 2.8.1 使用 DeepJIT 和 C++20，不再依赖 fmt。需要运行保留的
-[legacy DeepGEMM 基准](../experiments/legacy/deepseek_v32/README.md)时，显式执行
+DeepGEMM 2.8.1 使用 DeepJIT 和 C++20，不再依赖 fmt。若本地保留了
+`local/experiments/legacy/deepseek_v32/` 中的独立基准，运行时显式执行
 `uv sync --group legacy`（保留组名，DeepGEMM 已进入基础环境）。DeepGEMM main 已通过 Hopper FP8 linear / grouped GEMM 与 resident indexer 数值检查；
 旧性能记录仍对应旧版本。FP4 路径不在本次验证范围内。
-项目自有 SM120 扩展及其安装组已删除；复现其历史结果须使用归档 README 指定的旧 revision。
+项目自有 SM120 扩展及其安装组已删除；复现其历史结果须使用本地归档 README 指定的旧 revision。
 
 `EzKernelKit/` 是由 Git 忽略的本地参考 checkout，不是子模块或自动构建依赖。
 
 被 Git 忽略的本地 `ECHO/` checkout 固定为
 `bc1b75c1000010d0ac6f032ebaac283255c050b1`，供 DeepSeek GPU policy 差分测试和
-可选的 `OfficialDeepSeekServingBackend` 使用。该 backend 运行官方 ECHO 的原始
-logits、top-k、allocator 和 recall 实现，实验入口与适配边界见
+可选的 [build_official_backend](../models/deepseek_v32/execution/official.py) 装配入口使用。
+该入口为共享 DeepSeek backend 配置官方 attention、cache 和资源 factory，运行
+原始 logits、top-k、allocator 和 recall 实现。实验入口与适配边界见
 [官方 ECHO 实验](../experiments/deepseek_v32_echo_official/README.md)。
 普通模型入口不加载这套可选依赖。运行上述测试或 backend 时，独立项目 checkout
 也须提供这个目录；缺少依赖导致的失败不能计为通过。

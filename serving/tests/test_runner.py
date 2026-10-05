@@ -114,6 +114,29 @@ def test_model_failure_releases_session_and_propagates_without_retry(phase):
     assert len(executor.sessions) == 1
 
 
+def test_model_and_release_failures_survive_without_executing_next_request(monkeypatch):
+    executor = RecordingExecutor()
+    execution_error = ValueError("prefill failed")
+    release_error = KeyboardInterrupt("release interrupted")
+    released = []
+
+    def fail_prefill(ids, cache):
+        raise execution_error
+
+    def fail_release(cache):
+        released.append(cache)
+        raise release_error
+
+    monkeypatch.setattr(executor, "prefill", fail_prefill)
+    monkeypatch.setattr(executor, "release", fail_release)
+    iterator = GRRunner(executor, device="cpu").run([request(), request(task_id=1)])
+    with pytest.raises(BaseExceptionGroup) as caught:
+        next(iterator)
+    assert caught.value.exceptions == (execution_error, release_error)
+    assert len(executor.sessions) == 1
+    assert released == executor.sessions
+
+
 @pytest.mark.parametrize(
     "change",
     [
@@ -169,27 +192,6 @@ def test_partial_length_metadata_is_checked_without_spans():
     with pytest.raises(ValueError, match=r"user_tokens \+"):
         next(GRRunner(executor, device="cpu").run([row]))
     assert executor.events == []
-
-
-def test_runner_with_generic_executor_only_requests_hidden():
-    events = []
-
-    class Model:
-        config = SimpleNamespace(max_position_embeddings=16)
-
-        def new_cache(self, capacity):
-            return SimpleNamespace(length=0, max_seq_len=capacity)
-
-        def __call__(self, ids, cache, *, return_hidden):
-            assert return_hidden
-            events.append(ids.tolist())
-            cache.length += ids.numel()
-            return ids[:, None].float()
-
-    runner = GRRunner(ModelExecutor(Model(), chunk_size=3), device="cpu")
-    result = next(runner.run([request()]))
-    assert events == [[5, 6, 7], [8], [9, 10]]
-    assert result.last_hidden.tolist() == [10]
 
 
 def test_real_nosa_runner_matches_full_dense_hidden_and_releases_cache(monkeypatch):

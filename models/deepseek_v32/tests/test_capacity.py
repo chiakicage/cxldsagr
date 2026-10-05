@@ -6,12 +6,12 @@ import pytest
 import torch
 
 from cache.sparse_token_pool import SharedSparseTokenPool
-from models.deepseek_v32.capacity import (
+from models.deepseek_v32.execution.capacity import (
     MAX_DEVICE_SLOTS,
     MAX_HOST_TOKENS,
     EchoCapacityPlanner,
 )
-from models.deepseek_v32.serving_backend import DeepSeekServingBackend
+from models.deepseek_v32.tests.test_cache_resources import planned_backend
 
 
 def planner(**changes):
@@ -40,7 +40,7 @@ def planner(**changes):
 def test_full_population_matches_shared_candidate_and_history_private_reservations():
     plan = planner()
     ledger = plan.estimate(sparse_pool_tokens=32, host_arena_tokens=384)
-    backend = object.__new__(DeepSeekServingBackend)
+    backend = planned_backend()
     backend.device = torch.device("cuda")
     backend.scheme, backend.num_layers, backend.max_seq_len = "echo", 3, 4096
     backend.cfg = SimpleNamespace(kv_lora_rank=512, qk_rope_head_dim=64, index_head_dim=128)
@@ -314,7 +314,7 @@ def test_counter_allocator_allowance_uses_one_combined_slab_per_session(monkeypa
         return size + (13 if size == 3 * 56 else 0)
 
     monkeypatch.setattr(
-        "models.deepseek_v32.capacity.dense_staging_allocation_bytes", allocation_bytes
+        "models.deepseek_v32.execution.capacity.dense_staging_allocation_bytes", allocation_bytes
     )
     ledger = plan.estimate(sparse_pool_tokens=32, host_arena_tokens=384)
     assert ledger["hbm"]["persistent_allocator_allowance_bytes"] == 3 * 13

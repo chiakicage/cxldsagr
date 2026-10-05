@@ -238,6 +238,69 @@ def test_consumer_lease_excludes_other_layer_and_pending_prefetch_owns_workspace
         pass
 
 
+@pytest.mark.parametrize("body_fails", [False, True])
+@pytest.mark.parametrize("failure_point", ["create", "record"])
+def test_operation_retains_body_and_completion_errors_and_poisoned_owner(
+    monkeypatch, body_fails, failure_point
+):
+    pool = make_pool()
+    session = pool.allocate_session(64)
+    body_error = ValueError("attention failed")
+    completion_error = KeyboardInterrupt("event failed")
+    stream = object()
+
+    class Event:
+        def __init__(self):
+            if failure_point == "create":
+                raise completion_error
+
+        def record(self, actual_stream):
+            assert actual_stream is stream
+            raise completion_error
+
+    monkeypatch.setattr(torch.cuda, "current_stream", lambda device: stream)
+    monkeypatch.setattr(torch.cuda, "Event", Event)
+    expected = BaseExceptionGroup if body_fails else KeyboardInterrupt
+    with pytest.raises(expected) as caught, pool.operation(session, 0):
+        pool.device = torch.device("cuda:0")
+        if body_fails:
+            raise body_error
+    if body_fails:
+        assert caught.value.exceptions == (body_error, completion_error)
+    else:
+        assert caught.value is completion_error
+    assert pool.poisoned
+    assert pool._active == (session.owner, 0)
+    assert pool._sessions[session.owner] is session
+    assert pool.layers
+    with pytest.raises(RuntimeError, match="poisoned"), pool.operation(session, 0):
+        pass
+
+
+def test_failed_previous_stream_dependency_poison_retains_pool(monkeypatch):
+    pool = make_pool()
+    session = pool.allocate_session(64)
+    pool.device = torch.device("cuda:0")
+    previous = object()
+    pool._last_stream = previous
+    failure = KeyboardInterrupt("dependency interrupted")
+
+    class Event:
+        def record(self, stream):
+            assert stream is previous
+            raise failure
+
+    monkeypatch.setattr(torch.cuda, "Event", Event)
+    monkeypatch.setattr(torch.cuda, "current_stream", lambda device: object())
+    monkeypatch.setattr(torch.cuda, "is_current_stream_capturing", lambda: False)
+    with pytest.raises(KeyboardInterrupt) as caught, pool.operation(session, 0):
+        pytest.fail("dependency failure must prevent model execution")
+    assert caught.value is failure
+    assert pool.poisoned and pool.layers
+    assert pool._sessions[session.owner] is session
+    assert pool._last_stream is previous
+
+
 def test_cold_append_plan_matches_original_fifo_with_old_sessions(monkeypatch):
     optimized, reference = make_pool(slots=12), make_pool(slots=12)
     # Keep the pre-optimization allocator as an independent state-machine oracle.

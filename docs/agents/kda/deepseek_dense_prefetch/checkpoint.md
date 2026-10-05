@@ -173,7 +173,7 @@ private-ticket tests and all 43 hint tests. All 109 recorded source/test/config
 hashes and the full native/shared-header build identity remained unchanged.
 CUDA was released after verification.
 
-The [combined validation checkpoint](../../system/deepseek_motivation_c7_hint_validation.md)
+The combined validation checkpoint（Git `934485b:docs/agents/system/deepseek_motivation_c7_hint_validation.md`）
 contains the exact command, source identities, coverage boundaries and temporary
 evidence paths. This correctness run supplies no latency/MFU result.
 
@@ -181,7 +181,7 @@ evidence paths. This correctness run supplies no latency/MFU result.
 
 Root accepted `motivation_c7_hint_20261004_u16_r2_01` using the combined C7a
 helper and exact ECHO hint. The independent C7b capped transport is absent.
-The [combined integration record](../../system/deepseek_motivation_c7_hint_integration.md)
+The combined integration record（Git `934485b:docs/agents/system/deepseek_motivation_c7_hint_integration.md`）
 records frozen source identity, full numerical checks, arithmetic audit and
 publication/replacement scope. Dense-prefetch first-request latency is
 2375.510656 ms; revisit latency is 34.536917 ms, compared with 40.261614 ms in

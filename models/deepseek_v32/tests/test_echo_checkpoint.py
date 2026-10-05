@@ -24,12 +24,17 @@ def _sources():
     from experiments.deepseek_v32_echo_prefill.src.backend_provenance import source_files
 
     paths = set(source_files())
-    paths.update((ROOT / "models/deepseek_v32").glob("echo_*.py"))
+    paths.update(
+        path
+        for path in (ROOT / "models/deepseek_v32").rglob("*.py")
+        if "tests" not in path.relative_to(ROOT / "models/deepseek_v32").parts
+    )
     for relative in (
-        "models/deepseek_v32/cache_resources.py",
+        "models/deepseek_v32/execution/cache_resources.py",
         "models/deepseek_v32/nonmatrix.py",
         "models/deepseek_v32/request_format.py",
         "operators/flashinfer.py",
+        "models/attention_contracts.py",
         "cache/sparse_token_cache.py",
         "cache/sparse_token_pool.py",
         "cache/host_allocation.py",
@@ -109,8 +114,8 @@ def test_checkpoint_three_layers_64k_1k_independent_resident_and_offload_sparse_
     # Once opted in, missing files, GPUs, dependencies or memory must fail.
     from experiments.deepseek_v32_echo_prefill.src.measure import make_request
     from experiments.deepseek_v32_echo_prefill.src.profile_layers import comparison
-    from models.deepseek_v32.echo_infer import DeepSeekEchoModel
-    from models.deepseek_v32.echo_model import Config
+    from models.deepseek_v32.config import Config
+    from models.deepseek_v32.model import DeepSeekEchoModel
 
     checkpoint = Path(os.environ["DEEPSEEK_ECHO_CHECKPOINT"])
     assert checkpoint.is_dir(), f"checkpoint directory is absent: {checkpoint}"

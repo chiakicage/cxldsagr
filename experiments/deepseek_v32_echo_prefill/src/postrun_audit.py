@@ -19,6 +19,7 @@ from experiments.deepseek_v32_echo_prefill.src.execution_utilization import (
     precision_normalized_utilization,
 )
 from experiments.deepseek_v32_echo_prefill.src.operator_report import read_calls
+from experiments.deepseek_v32_echo_prefill.src.run_contract import benchmark_view, control_directory
 
 KEY = ("mode", "phase", "layer", "stage")
 CAPTURES = {
@@ -191,18 +192,33 @@ def audit_analysis(result, analysis, calls):
         )
         close(capture["capture_gpu_envelope"]["span_ms"], device["span_ms"], "capture envelope")
         phase = "prefix" if capture["phase"] == "prefill_annotated" else "extend"
-        utilization.append(
-            {
-                "mode": capture["mode"],
-                "phase": phase,
-                **precision_normalized_utilization(
-                    selected_calls,
-                    result["measurements"][capture["mode"]][phase + "_samples_ms"],
-                    peaks_tflops=analysis["dense_peaks_tflops"],
-                    scope=result["scope"],
-                ),
-            }
-        )
+        if phase + "_samples_ms" in result["measurements"][capture["mode"]]:
+            utilization.append(
+                {
+                    "mode": capture["mode"],
+                    "phase": phase,
+                    **(
+                        {"wall_time_denominator": result["wall_time_denominator"]}
+                        if "wall_time_denominator" in result
+                        else {}
+                    ),
+                    **precision_normalized_utilization(
+                        selected_calls,
+                        result["measurements"][capture["mode"]][phase + "_samples_ms"],
+                        peaks_tflops=analysis["dense_peaks_tflops"],
+                        scope=result["scope"],
+                    ),
+                }
+            )
+        else:
+            utilization.append(
+                {
+                    "mode": capture["mode"],
+                    "phase": phase,
+                    "status": "pending_independent_bench",
+                    "value": None,
+                }
+            )
         work = Counter()
         for call in selected_calls:
             if call["useful_flops"] is not None:
@@ -259,9 +275,14 @@ def audit_saved_outputs(directory, result):
         "resident_profile_output",
         "offload_profile_output",
     )
-    saved = {
-        name: torch.load(directory / (name + ".pt"), map_location="cpu", weights_only=True)
+    controls = control_directory(directory, result)
+    paths = {
+        name: (controls if name.endswith("_control") else directory) / (name + ".pt")
         for name in names
+    }
+    saved = {
+        name: torch.load(path, map_location="cpu", weights_only=True)
+        for name, path in paths.items()
     }
     checks = []
     for name, values in saved.items():
@@ -282,7 +303,7 @@ def audit_saved_outputs(directory, result):
             )
     return {
         "tensor_checks": checks,
-        "file_sha256": {name + ".pt": digest(directory / (name + ".pt")) for name in names},
+        "file_sha256": {name + ".pt": digest(paths[name]) for name in names},
         "runtime_only_prefix_checks": [
             mode + "_profile_prefix_logits" for mode in ("resident", "offload")
         ],
@@ -295,7 +316,8 @@ def audit_run(directory, analysis_path=None):
     result = json.loads((directory / "result.json").read_text())
     analysis = json.loads(analysis_path.read_text())
     calls, metadata = read_calls(directory / "operator_calls.json")
-    validate_result(directory, result)
+    validate_result(directory, result, require_benchmark=False)
+    result = benchmark_view(directory, result, required=False)
     require(
         result["run_id"] == metadata["run_id"] == analysis["ledger_metadata"]["run_id"],
         "Run ID mismatch",
@@ -304,7 +326,10 @@ def audit_run(directory, analysis_path=None):
         analysis["calls_sha256"] == digest(directory / "operator_calls.json"), "Ledger SHA mismatch"
     )
     return {
-        "schema_version": 1,
+        "schema_version": result.get("schema_version", 1),
+        "mode": result.get("mode", "historical_combined"),
+        "wall_time_denominator": result.get("wall_time_denominator"),
+        "validation_receipt": result.get("validation_receipt"),
         "run_id": result["run_id"],
         "accepted": True,
         "auditor_sha256": digest(Path(__file__)),

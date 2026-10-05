@@ -199,10 +199,11 @@ def _build_backend(args):
         raise ValueError("persistent GR serving requires an SM90/Hopper GPU")
     torch.cuda.set_device(device)
     if args.model == "deepseek_v32":
-        from models.deepseek_v32.serving_backend import DeepSeekServingBackend
+        from models.deepseek_v32.execution.adapter import DeepSeekServingBackend
 
         return DeepSeekServingBackend(
             args.model_path,
+            num_layers=10,
             scheme=args.scheme,
             device=device,
             chunk_size=args.chunk_size,
@@ -211,7 +212,7 @@ def _build_backend(args):
             workspace_query_tokens=args.workspace_query_tokens,
             extend_chunk_size=args.extend_chunk_size,
         )
-    from models.nosa.serving import NosaServingBackend
+    from models.nosa.execution.adapter import NosaServingBackend
 
     return NosaServingBackend.from_pretrained(
         args.model_path,
@@ -230,88 +231,93 @@ def main(argv: list[str] | None = None) -> None:
     parser = _build_parser()
     args = parser.parse_args(argv)
     _validate_args(args, parser)
-    try:
-        from serving.persistent import PersistentGRRunner
+    from serving.persistent import PersistentGRRunner
 
-        generator = _build_generator(args)
-        backend = _build_backend(args)
-        try:
-            _emit(
-                {
-                    "status": "started",
-                    "model": args.model,
-                    "scheme": args.scheme,
-                    "model_path": str(args.model_path),
-                    "num_users": args.num_users,
-                    "count": args.count,
-                    "max_revisits": args.max_revisits,
-                    "context_limit": args.context_limit,
-                    "seed": args.seed,
-                    "history_tokens": args.history_tokens,
-                    "candidate_tokens": args.candidate_tokens,
-                    "resource_mode": args.resource_mode.replace("-", "_"),
-                    "hbm_budget_bytes": args.hbm_budget_bytes,
-                    "dram_budget_bytes": args.dram_budget_bytes,
-                    "timing": "no separate warmup; request latency includes first-use JIT compilation, excludes weight loading and GR generation",
-                    "heat": generator.population.metadata,
-                    "backend": backend.describe(),
-                }
-            )
-            completed = revisits = hits = evictions = 0
-            visits_per_user = Counter()
-            total_ms = revisit_ms = 0.0
-            with PersistentGRRunner(
-                backend,
-                hbm_budget_bytes=args.hbm_budget_bytes,
-                dram_budget_bytes=args.dram_budget_bytes,
-                resource_limits={
-                    "max_session_capacity": args.history_tokens + args.candidate_tokens,
-                    "max_history_tokens": args.history_tokens,
-                    "max_candidate_tokens": args.candidate_tokens,
-                },
-            ) as runner:
-                for result in runner.run(generator.iter_generate(args.count)):
-                    metrics = result.metrics
-                    _emit(
-                        {
-                            "status": "completed",
-                            "metrics": metrics,
-                            "hidden_shape": list(result.hidden.shape),
-                            "hidden_dtype": str(result.hidden.dtype),
-                            "hidden_device": str(result.hidden.device),
-                        }
-                    )
-                    completed += 1
-                    visits_per_user[metrics["user_id"]] += 1
-                    revisits += metrics["is_revisit"]
-                    hits += metrics["prefix_cache_hit"]
-                    evictions += len(metrics["evicted_users"])
-                    total_ms += metrics["latency_ms"]
-                    if metrics["is_revisit"]:
-                        revisit_ms += metrics["latency_ms"]
-                    del result
-            _emit(
-                {
-                    "status": "finished",
-                    "requests": completed,
-                    "first_visits": completed - revisits,
-                    "revisits": revisits,
-                    "returning_users": sum(count > 1 for count in visits_per_user.values()),
-                    "prefix_cache_hits": hits,
-                    "evicted_users": evictions,
-                    "mean_latency_ms": total_ms / completed if completed else None,
-                    "revisit_mean_latency_ms": revisit_ms / revisits if revisits else None,
-                    "separate_warmup": False,
-                }
-            )
-        finally:
-            close = getattr(backend, "close", None)
-            if close is not None:
+    generator = _build_generator(args)
+    backend = _build_backend(args)
+    try:
+        _emit(
+            {
+                "status": "started",
+                "model": args.model,
+                "scheme": args.scheme,
+                "model_path": str(args.model_path),
+                "num_users": args.num_users,
+                "count": args.count,
+                "max_revisits": args.max_revisits,
+                "context_limit": args.context_limit,
+                "seed": args.seed,
+                "history_tokens": args.history_tokens,
+                "candidate_tokens": args.candidate_tokens,
+                "resource_mode": args.resource_mode.replace("-", "_"),
+                "hbm_budget_bytes": args.hbm_budget_bytes,
+                "dram_budget_bytes": args.dram_budget_bytes,
+                "timing": "no separate warmup; request latency includes first-use JIT compilation, excludes weight loading and GR generation",
+                "heat": generator.population.metadata,
+                "backend": backend.describe(),
+            }
+        )
+        completed = revisits = hits = evictions = 0
+        visits_per_user = Counter()
+        total_ms = revisit_ms = 0.0
+        with PersistentGRRunner(
+            backend,
+            hbm_budget_bytes=args.hbm_budget_bytes,
+            dram_budget_bytes=args.dram_budget_bytes,
+            resource_limits={
+                "max_session_capacity": args.history_tokens + args.candidate_tokens,
+                "max_history_tokens": args.history_tokens,
+                "max_candidate_tokens": args.candidate_tokens,
+            },
+        ) as runner:
+            for result in runner.run(generator.iter_generate(args.count)):
+                metrics = result.metrics
+                _emit(
+                    {
+                        "status": "completed",
+                        "metrics": metrics,
+                        "hidden_shape": list(result.hidden.shape),
+                        "hidden_dtype": str(result.hidden.dtype),
+                        "hidden_device": str(result.hidden.device),
+                    }
+                )
+                completed += 1
+                visits_per_user[metrics["user_id"]] += 1
+                revisits += metrics["is_revisit"]
+                hits += metrics["prefix_cache_hit"]
+                evictions += len(metrics["evicted_users"])
+                total_ms += metrics["latency_ms"]
+                if metrics["is_revisit"]:
+                    revisit_ms += metrics["latency_ms"]
+                del result
+        _emit(
+            {
+                "status": "finished",
+                "requests": completed,
+                "first_visits": completed - revisits,
+                "revisits": revisits,
+                "returning_users": sum(count > 1 for count in visits_per_user.values()),
+                "prefix_cache_hits": hits,
+                "evicted_users": evictions,
+                "mean_latency_ms": total_ms / completed if completed else None,
+                "revisit_mean_latency_ms": revisit_ms / revisits if revisits else None,
+                "separate_warmup": False,
+            }
+        )
+    except BaseException as execution_error:
+        close = getattr(backend, "close", None)
+        if close is not None:
+            try:
                 close()
-    except ImportError as exc:
-        parser.exit(1, f"error: missing or incompatible dependency: {exc}. Run uv sync.\n")
-    except (OSError, TypeError, ValueError, RuntimeError) as exc:
-        parser.exit(1, f"error: {exc}\n")
+            except BaseException as close_error:  # noqa: BLE001 -- preserve both failures.
+                raise BaseExceptionGroup(
+                    "serving execution and backend close failed", [execution_error, close_error]
+                ) from None
+        raise
+    else:
+        close = getattr(backend, "close", None)
+        if close is not None:
+            close()
 
 
 if __name__ == "__main__":

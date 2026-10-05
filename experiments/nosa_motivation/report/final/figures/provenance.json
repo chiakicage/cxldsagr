@@ -1,0 +1,140 @@
+{
+  "schema": "nosa-motivation-summary-render-v1",
+  "render_id": "refactor_final_nosa_summary_20261005_02",
+  "created_at_utc": "2026-10-05T00:48:57.505924+00:00",
+  "measurement_run_id": "refactor_final_nosa_bench_20261005_01",
+  "profile_run_id": "refactor_final_nosa_profile_20261005_02",
+  "accepted_runtime_source_sha256": "4665ccce226af23f631e619f748369cea28d4a09b99c1947cbb6b030e58f120c",
+  "renderer": {
+    "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_motivation/src/render_motivation_summary.py",
+    "sha256": "e0262da849a1c5d866167b7d4a08b5537d892d00513ae0fdd05f78a03c6e62eb"
+  },
+  "command_argv": [
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_motivation/src/render_motivation_summary.py",
+    "--input-dir",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_motivation/output/data/refactor_final_nosa_publication_20261005_02",
+    "--output-dir",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_motivation/output/data/refactor_final_nosa_summary_20261005_02"
+  ],
+  "python_version": "3.12.13",
+  "matplotlib_version": "3.11.1",
+  "input_directory": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_motivation/output/data/refactor_final_nosa_publication_20261005_02",
+  "inputs_sha256": {
+    "summary.csv": "730f151a4bdad6d01d7d9dbafdd39b478e79ba5a9fdac72a1c23b4465440a74b",
+    "async_overlap.csv": "63d9d93cc799aba093b15ec34a6c36670ba0f46e29f26f12b9ef2b51613ce454",
+    "report_provenance.json": "57791140db4a0c50c3cfa59b1c73b031641e6bedfd512af8e1a3fc52ed3de676",
+    "publication.json": "8e58d31d2509308ed0bcdb09a06463e3656b89ac0250a5437d29d0c3bc37b4dc"
+  },
+  "published_input_hashes_verified": true,
+  "output_directory": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_motivation/output/data/refactor_final_nosa_summary_20261005_02",
+  "outputs": [
+    {
+      "path": "captions.json",
+      "bytes": 1544,
+      "sha256": "35e0e344c59b492275b1a82b3196ce74b6159bc5f5fd1454907031aff0cb4a03"
+    },
+    {
+      "path": "latency_focus.pdf",
+      "bytes": 19320,
+      "sha256": "f6fb8613a8cb64509446c67e2608442278ec38534f942b9b715e217db51bb9b9"
+    },
+    {
+      "path": "latency_focus.png",
+      "bytes": 156791,
+      "sha256": "abc032bcfc1acebf6d756ded13e7e964cd50575169eebe94d79c7bed008c5ecd"
+    },
+    {
+      "path": "latency_focus.svg",
+      "bytes": 16012,
+      "sha256": "d8fe767b06fd2d519ce77db27eae2ab6e3f64fa5c48ab390ff77572ee0e2ac8e"
+    },
+    {
+      "path": "latency_plot_data.csv",
+      "bytes": 665,
+      "sha256": "4513930f50b28dd4870780b5059f8381df6b9dcda2af09f1a4ddf0b7c93a0d92"
+    },
+    {
+      "path": "overlap_plot_data.csv",
+      "bytes": 8855,
+      "sha256": "53e59e5262d300c2815f9497ed87330d6854678048b250c8a0732e7058a7714a"
+    },
+    {
+      "path": "payload_plot_data.csv",
+      "bytes": 244,
+      "sha256": "2d321450a37917f48daf2985b28048d8b5eb31f082016652f3dfc1c1039402f7"
+    },
+    {
+      "path": "plot_data.json",
+      "bytes": 57029,
+      "sha256": "c8ebf2d72c7ffec07d603eb26ab38af37f926b1169fd2ade1f1b834160b8a1bd"
+    },
+    {
+      "path": "transfer_overlap.pdf",
+      "bytes": 21479,
+      "sha256": "8e6a778f136273cde09b4b96340247f79d097eb7f728fac6deda85e6ba2f9898"
+    },
+    {
+      "path": "transfer_overlap.png",
+      "bytes": 187551,
+      "sha256": "78a7e47a0b53d280cb41e9f55f525dbf70f3b34a3f679936aba0bd645385b6a2"
+    },
+    {
+      "path": "transfer_overlap.svg",
+      "bytes": 31532,
+      "sha256": "029c0af88ceff42f1403a715f2bd85d738566302c3e1f73aa234c351f61c3c37"
+    }
+  ],
+  "captions": {
+    "latency_focus": "Retaining histories reduces revisit latency in this 16-user trace, while async sparse fetch is slower than sync sparse fetch. Bars show synchronized mean request latency from one measured trace, with 16 first visits and 16 revisits per method; the left axis uses seconds and the right axis uses milliseconds, both starting at zero. The right panel includes only offload methods; the HBM-only revisit mean is printed separately because its history must be rebuilt. Full 32-layer BF16 NOSA uses H=P=65,536, A=128, chunk=1,024 and NH=16,777,216; candidates return normalized hidden states without an LM head. Measurement run: refactor_final_nosa_bench_20261005_01.",
+    "transfer_overlap": "Sparse fetch reduces candidate logical H2D payload, but every applicable async profile sample remains below the 90% overlap target. The left panel sums main-KV host-to-device logical payload over 16 formal revisits (GiB = 2^30 bytes), not measured PCIe traffic; sync and async have identical payloads. The right panel plots all 96 applicable layer/sample pairs from profile request 16, with small horizontal offsets distinguishing the three samples; page-envelope and nonempty stripe-copy ratios are verified equal for every plotted pair and share one marker. The 96 request-0 samples have no fetch and null ratios and are excluded; overlap uses actual copy and softmax-update windows, not the full fused-kernel duration. Measurement run: refactor_final_nosa_bench_20261005_01; profile run: refactor_final_nosa_profile_20261005_02."
+  },
+  "derived": {
+    "sparse_payload_reduction_pct": 86.26857530818992,
+    "async_revisit_latency_increase_vs_sync_pct": 7.9690749690763285,
+    "applicable_overlap_samples": 96,
+    "excluded_no_fetch_samples": 96,
+    "samples_meeting_both_90pct_targets": 0,
+    "page_and_stripe_ratios_identical_for_every_applicable_sample": true,
+    "overlap_ratio_min_median_max": [
+      0.6233842538190364,
+      0.7110086163489989,
+      0.8029016975917884
+    ]
+  },
+  "design": {
+    "figure_size_inches": [
+      6.8,
+      3.4
+    ],
+    "minimum_font_points_at_native_size": 8.5,
+    "bar_y_axes_start_at_zero": true,
+    "overlap_y_axis_limits": [
+      0,
+      1
+    ],
+    "method_color_encoding": {
+      "hbm": "#586172",
+      "dense_prefetch": "#d58531",
+      "sync_sparse": "#4084b5",
+      "async_sparse": "#39997a"
+    },
+    "method_text_labels": {
+      "hbm": "HBM-only",
+      "dense_prefetch": "Dense\nprefetch",
+      "sync_sparse": "Sync\nsparse",
+      "async_sparse": "Async\nsparse"
+    },
+    "overlap_sample_markers": [
+      "o",
+      "s",
+      "^"
+    ],
+    "confidence_intervals": null,
+    "png_dpi": 300,
+    "vector_formats": [
+      "svg",
+      "pdf"
+    ]
+  },
+  "boundary": "CPU rendering of accepted report assets only; no GPU execution or new performance measurement. Latency and payload use the formal trace; internal overlap uses a separate instrumented profile and does not establish end-to-end speedup. Null no-fetch ratios remain in plot_data.json and overlap_plot_data.csv."
+}

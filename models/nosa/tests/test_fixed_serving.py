@@ -4,7 +4,7 @@ import pytest
 import torch
 
 from cache.prefix_pool import CacheBudgetExceeded
-from models.nosa.fixed_serving import NosaFixedServingBackend
+from models.nosa.execution.fixed import NosaFixedServingBackend
 from models.nosa.tests.test_model import tiny_config
 from models.nosa.tests.test_sparse_model import initialized_sparse_model
 from serving.persistent import PersistentGRRunner
@@ -174,3 +174,64 @@ def test_fixed_plan_rejects_unsupported_history(history, pool, candidate):
     )
     with pytest.raises(ValueError, match="page-aligned"):
         backend.plan_resources(None, limits)
+
+
+@pytest.mark.parametrize("scheme", ["serial_sparse", "overlap"])
+def test_fixed_storage_plan_uses_named_pool_aliases(monkeypatch, scheme):
+    from operators.nosa.attention.offload.api import NosaFetchWorkspace
+
+    backend, limits = backend_for(
+        initialized_sparse_model(tiny_config(max_position_embeddings=160)), scheme
+    )
+    expected = backend.plan_resources(None, limits)
+    original_layout = NosaFetchWorkspace.allocation_layout
+
+    def reordered(*args, **kwargs):
+        return dict(reversed(tuple(original_layout(*args, **kwargs).items())))
+
+    monkeypatch.setattr(NosaFetchWorkspace, "allocation_layout", reordered)
+    plan = backend.plan_resources(None, limits)
+    assert plan.shared == expected.shared
+    assert plan.metadata == expected.metadata
+    assert plan.policy.mode == "fixed_pools"
+    allocations = {item.name: item for item in plan.allocations}
+    for name in ("keys", "values"):
+        view, pool = allocations[f"fetch.{name}"], allocations[f"pool.{name}"]
+        assert view.alias_of == pool.name
+        assert view.charged_bytes == 0
+        assert view.shape == pool.shape[1:]
+    backend.allocate_shared(plan)
+    try:
+        assert backend.shared_bytes()["hbm"] == sum(
+            item.storage_bytes for item in plan.allocations if item.alias_of is None
+        )
+    finally:
+        backend.close()
+
+
+@pytest.mark.parametrize("scheme", NosaFixedServingBackend.schemes)
+def test_fixed_execution_keeps_owned_model_pipeline(monkeypatch, scheme):
+    model = initialized_sparse_model(tiny_config(max_position_embeddings=80))
+    backend, limits = backend_for(model, scheme, history=64)
+    original_attention = model.main_attention
+    calls = []
+    original_forward = model.forward
+
+    def observe(*args, **kwargs):
+        assert model.main_attention is original_attention
+        assert kwargs["main_attention"] is backend._fixed_attention
+        calls.append(len(args[0]))
+        return original_forward(*args, **kwargs)
+
+    monkeypatch.setattr(model, "forward", observe)
+    with PersistentGRRunner(backend, resource_limits=limits) as runner:
+        runner.execute(
+            {
+                "user_id": 0,
+                "input_ids": (torch.arange(72) % model.config.vocab_size).tolist(),
+                "stable_prefix_tokens": 64,
+            }
+        )
+    assert calls == [64, 8]
+    assert model.main_attention is original_attention
+    backend.close()

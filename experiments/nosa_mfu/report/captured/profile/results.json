@@ -1,0 +1,125 @@
+{
+  "run_id": "refactor_mfu_real_profile_20261005_01",
+  "results": [
+    {
+      "case": "layer_00",
+      "backend": "native",
+      "operator": "block_sparse_attention",
+      "actual_backend": "cuda_tvm_ffi",
+      "profile": {
+        "trace_file": "layer_00_native_block_sparse_attention.trace.json",
+        "sha256": "4621eeaa622bef62037a0c54783a2e5b6ab5501eced82e142337dad52b4d9cbe"
+      }
+    },
+    {
+      "case": "layer_00",
+      "backend": "native",
+      "operator": "pooled_scores",
+      "actual_backend": "cuda_tvm_ffi",
+      "profile": {
+        "trace_file": "layer_00_native_pooled_scores.trace.json",
+        "sha256": "fa721d08bd410e33f9c25ff9d28316804818c148f64e4560dbdc5797bf582000"
+      }
+    },
+    {
+      "case": "layer_00",
+      "backend": "triton",
+      "operator": "block_sparse_attention",
+      "actual_backend": "triton",
+      "profile": {
+        "trace_file": "layer_00_triton_block_sparse_attention.trace.json",
+        "sha256": "8cca072330b86e7ee048b9a98ae5c3ec72551257d0a996ecc1023340622bc69a"
+      }
+    },
+    {
+      "case": "layer_00",
+      "backend": "triton",
+      "operator": "pooled_scores",
+      "actual_backend": "triton",
+      "profile": {
+        "trace_file": "layer_00_triton_pooled_scores.trace.json",
+        "sha256": "e941742080c6e721752d68a27c890ecf1f67c22dba64952cb5f6b705106fe591"
+      }
+    },
+    {
+      "case": "layer_15",
+      "backend": "native",
+      "operator": "block_sparse_attention",
+      "actual_backend": "cuda_tvm_ffi",
+      "profile": {
+        "trace_file": "layer_15_native_block_sparse_attention.trace.json",
+        "sha256": "22f8a420a64a5751edb1eabfcffcda029b88d50399e912b387e775455a7cc3cd"
+      }
+    },
+    {
+      "case": "layer_15",
+      "backend": "native",
+      "operator": "pooled_scores",
+      "actual_backend": "cuda_tvm_ffi",
+      "profile": {
+        "trace_file": "layer_15_native_pooled_scores.trace.json",
+        "sha256": "f26bd9626b6745c9eb3d175d5328675c133d1352e2db6f1d36ed986dac580d22"
+      }
+    },
+    {
+      "case": "layer_15",
+      "backend": "triton",
+      "operator": "block_sparse_attention",
+      "actual_backend": "triton",
+      "profile": {
+        "trace_file": "layer_15_triton_block_sparse_attention.trace.json",
+        "sha256": "c1bb0b3897b446069b6d4f13486a45a1751647cae0fca9b528d3d15380be0fd2"
+      }
+    },
+    {
+      "case": "layer_15",
+      "backend": "triton",
+      "operator": "pooled_scores",
+      "actual_backend": "triton",
+      "profile": {
+        "trace_file": "layer_15_triton_pooled_scores.trace.json",
+        "sha256": "dd1f990dcec07605c48a3b05616be272949388633c1102189c89acea27dfaaef"
+      }
+    },
+    {
+      "case": "layer_31",
+      "backend": "native",
+      "operator": "block_sparse_attention",
+      "actual_backend": "cuda_tvm_ffi",
+      "profile": {
+        "trace_file": "layer_31_native_block_sparse_attention.trace.json",
+        "sha256": "9407d7a55ca9258ae46fac697c003a1163946573528cad44327c90a6518f2215"
+      }
+    },
+    {
+      "case": "layer_31",
+      "backend": "native",
+      "operator": "pooled_scores",
+      "actual_backend": "cuda_tvm_ffi",
+      "profile": {
+        "trace_file": "layer_31_native_pooled_scores.trace.json",
+        "sha256": "c1a15451c21543375f0384c51a13eaa3d7c2f59f6aeb887977dec8475c42f748"
+      }
+    },
+    {
+      "case": "layer_31",
+      "backend": "triton",
+      "operator": "block_sparse_attention",
+      "actual_backend": "triton",
+      "profile": {
+        "trace_file": "layer_31_triton_block_sparse_attention.trace.json",
+        "sha256": "79cd6175a2d6cb86f8660e4a3fcb9c46dbe0301fa820178ce033ab3571325b37"
+      }
+    },
+    {
+      "case": "layer_31",
+      "backend": "triton",
+      "operator": "pooled_scores",
+      "actual_backend": "triton",
+      "profile": {
+        "trace_file": "layer_31_triton_pooled_scores.trace.json",
+        "sha256": "2b4f7bdd89d6155745e8fc6c0af7fee518857f937457863a09a023db710cc695"
+      }
+    }
+  ]
+}

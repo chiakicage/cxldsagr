@@ -2,9 +2,38 @@
 
 > **2026-10-03 撤回说明：** 本文涉及的旧 DeepSeek 4 GiB / W / chunk 对照已按用户要求撤回，
 > 相关实验源码与运行产物已清理；下文仅保留当时的工程过程，不再证明当前容量或性能。
-> 当前入口为[固定 P/NH 容量实验](../../../experiments/deepseek_v32_echo_cache/README.md)。
+> 当前入口为[固定 P/NH 容量实验](../../../experiments/cache_management/README.md)。
 
 这里只记影响研究解释或任务选择的变化。文档维护和具体工具输出不逐条记录。
+
+## 2026-10-05：统一框架补测不等于方法收益或物理容量证明
+
+- **原判断的更新：**最初入口整理只有 CPU 验证；统一框架重构后，各受影响路径
+  已分别补独立数值、正式计时和 profile，最终覆盖范围见 S-031。旧数字仍属于其
+  冻结来源，不将报告生成器或发布清理的后续修改写成此前捕获已执行的代码。
+- **重构成本：**NOSA 三轮完整 trace 中位总耗时比 P0 增加 406.132 ms（0.19664%）；
+  两模型的准入、清理及部分 candidate／复访阶段仍有残余开销。两模型各自全部
+  128 个匹配请求的 cleanup 中位数增加，不因完整 trace 的较小变化而宣称没有代价。
+- **适用范围：**A128 固定 serving 的 96 个适用内部样本全部未过双重 90% 门槛；
+  A1024 冷并集单层回放的 9 个样本全部通过，最低 ratio 为 0.91081246。
+  这支持局部设计的输入依赖，不能把单层收益改写为 serving 目标完成。
+- **容量理解：**相同 P/NH 不等于相同物理分配。NOSA 随 session 分配 host backing，
+  DeepSeek 使用全局 arena；逻辑 payload、cache 计费/预留与进程占用分开。
+  本轮没有跑满 NH，没有新增真实 GR 代表性、质量或物理容量上限的证明。
+- **任务边界：**T-007 的 indexer workspace 方案仍未实施，重构不代表完成这项
+  优化。四个活动任务 T-006/T-003/T-007/T-002 保留，已完成的重构和报告工作移出
+  待办；H64K-only、4K/16K 暂停、不跑满容量、固定 loop 及旧预算撤回等修正不变。
+- **依据：**[S-031](sources.md#s-031统一框架补测与研究边界)绑定最终报告与独立复核。
+  最终 API/profile 数值只取新验收来源；历史记录按原日期解释。
+
+## 2026-10-05：NOSA 统一维护一份 MFU 报告
+
+- **研究者选择：**每组实验保留一个算子 MFU 入口，将 NOSA resident baseline 与
+  kernel MFU 合并，后续新增算子也加入同一报告。此前分别保留两个入口的建议被此选择替代。
+- **当前组织：**统一入口为 `experiments/nosa_mfu/`。算子、完整模块和完整模型的
+  已有数据保留原 run ID、冻结源码与计时边界，不把它们换算成同一种 MFU 或 serving 结论。
+- **影响：**关联 4.2–4.3；这是实验维护范围的调整，未新增 GPU 结果，也不改变
+  H64K motivation 的效率缺口和 T-007。后续维护约定见[实验规则](../../../experiments/AGENTS.md)。
 
 ## 2026-10-05：完成实验整理与独立验收入口
 
@@ -19,7 +48,7 @@
   新入口未运行 GPU，数值检查的时间占比及拆分后的性能变化仍未测量。退出旧短轨迹
   不否定其曾有的局部负结果，也不证明固定 P/NH 已覆盖通用 budget 的语义。
 - **影响：**4.2–4.3；T-008 已完成并移出 roadmap。已有 H64K 优化任务及其未决判断
-  保持不变。具体迁移、验收和提交范围见[整理记录](../system/experiment_organization.md)。
+  保持不变。具体迁移、验收和提交范围见整理记录（Git `934485b:docs/agents/system/experiment_organization.md`）。
 
 ## 2026-10-05：按实验目的分类，区分数值验收与性能路径
 
@@ -70,7 +99,7 @@
 - **影响与下一步：**主条目 4.1，关联 2.1/4.2。T-007 移除已完成的诊断，准备
   indexer 选择输出与 normalizer 的 workspace 复用，以完整 candidate 对照
   检验收益并保持 cache 生命周期；该原型尚未运行 GPU。依据见
-  [元数据复用结果](../system/nosa_copy_descriptor_result.md)和 [S-028](sources.md#s-028h64k-恢复优化与元数据复用诊断)。
+  [元数据复用结果](../system/nosa/nosa_copy_descriptor_result.md)和 [S-028](sources.md#s-028h64k-恢复优化与元数据复用诊断)。
 
 ## 2026-10-05：NOSA motivation 报告整理完成
 
@@ -103,7 +132,7 @@
 - **影响与下一步：**主条目 4.1，关联 2.1/4.2。T-007 移除已完成的匹配对照，
   下一步只准备单次输入校验内的元数据复用，保留全部检查与检查位置，不跨
   attention 复用。该候选未测量，原实现和正式结果不变，4K/16K 继续暂停。
-  依据见[匹配拷贝对照](../system/nosa_guarded_copy_control.md)。
+  依据见[匹配拷贝对照](../system/nosa/nosa_guarded_copy_control.md)。
 
 ## 2026-10-05：图内拷贝原型未取得一致的普通 candidate 收益
 
@@ -118,7 +147,7 @@
 - **影响与下一步：**主条目 4.1，关联 2.1/4.2。T-007 移除已完成的原型测试，
   转向 H64K 中匹配 guard/setup 的图内、图外拷贝对照，区分新增检查与提交位置的
   影响，并保留未改动基线与全部长尾。暂不扩大 GPU 测量矩阵，4K/16K 继续暂停。
-  依据见[图内拷贝诊断](../system/nosa_captured_copy_pilot.md)及
+  依据见图内拷贝诊断（Git `934485b:docs/agents/system/nosa_captured_copy_pilot.md`）及
   [S-026](sources.md#s-026nosa-固定-pnh-当前实现的完整测量与效率边界)。
 
 ## 2026-10-04：64K 预提交对照支持继续优化提交开销
@@ -134,7 +163,7 @@
 - **边界与下一步：**诊断使用独立重建的 history 和额外的检查副本，条件不同于
   正式完整用户轨迹。T-007 移除已完成的预提交诊断，转向具体提交与拷贝优化的
   完整 candidate 对照，同时保留长尾问题；后续只测 64K。依据见
-  [诊断记录](../system/nosa_hbm_prequeue_diagnostic.md)。
+  [诊断记录](../system/nosa/nosa_hbm_prequeue_diagnostic.md)。
 
 ## 2026-10-04：扫描实现完成补测，效率与重叠问题仍未解决
 
@@ -155,7 +184,7 @@
 - **影响与任务：**主关联 2.1、3.1、4.1、4.2。T-007 移除已完成的接入与补测，
   继续用 H64K 的完整 candidate 检查提交、依赖和必要非矩阵工作。新结果验收后，旧报告已替换；
   诊断输入的保留与清理范围见
-  [发布记录](../system/nosa_pool_scan_publication.md)。场景代表性和 DeepSeek
+  发布记录（Git `934485b:docs/agents/system/nosa_pool_scan_publication.md`）。场景代表性和 DeepSeek
   用户修正保持原有边界。
 
 
@@ -327,7 +356,7 @@ Q128 serving 的重叠失败与完整请求待补测状态不变。依据见 [S-
 - **新增依据：**官方是逐层共享 pool，按实际 prefetch claim 驱逐，主 KV append 在
   indexer/top-k 之后；本地的资源归属和调用顺序不同。priority 是时间戳而非频率，
   关闭的 early-evict 不能算默认策略。官方部分容量/异步边界不能当作已验证通用能力。
-- **行动：**交付 [实现计划](../system/echo_cache_implementation_plan.md)，明确共享
+- **行动：**交付 实现计划（Git `934485b:docs/agents/system/echo_cache_implementation_plan.md`），明确共享
   资源、硬预算、调用顺序、必要安全补足、模型级 chunk 和逐阶段验收。2048 为参考起点，
   保留 1024 并按固定预算扫描；不预先宣布最优 chunk。
 - **边界：**未改 cache 执行路径或新增测量；广泛 GR 策略暂不展开，现有 MFU 并行工作
@@ -386,7 +415,7 @@ Q128 serving 的重叠失败与完整请求待补测状态不变。依据见 [S-
   真实数据采样不强制 25% 首访；筛用户及封顶对复用距离的影响必须披露。具体数据集和
   事件映射仍是建议，未记录为研究者已采纳。
 - **影响：**1.3、1.4、2.2、4.1、4.3，更新 T-006 的下一步；没有新 GPU 结果。
-  依据见 [S-012](sources.md) 和 [数据轨迹协议](../system/gr_serving_dataset_trace.md)。
+  依据见 [S-012](sources.md) 和 数据轨迹协议（Git `934485b:docs/agents/system/gr_serving_dataset_trace.md`）。
 
 ## 2026-10-02：研究者否定名义用户规模，要求有效的复访 miss
 
@@ -405,8 +434,8 @@ Q128 serving 的重叠失败与完整请求待补测状态不变。依据见 [S-
 - **时长约束：**减少完整 GPU 实验点，不再通过削减请求数破坏用户覆盖。现有模型成本下，
   原七档全覆盖与两模型八方案不能在约 30 分钟内完成；成本仅作规划估计，非新实测或严格下界。
 - **影响：**1.4、2.2、4.1、4.3；T-006 提到当前优先位置，主条目改为 1.4。
-  依据见 [S-011](sources.md)、[新负载协议](../system/gr_serving_workload_redesign.md)和
-  [可行性分析](../system/gr_serving_workload_feasibility.md)。
+  依据见 [S-011](sources.md)、新负载协议（Git `934485b:docs/agents/system/gr_serving_workload_redesign.md`）和
+  可行性分析（Git `934485b:docs/agents/system/gr_serving_workload_feasibility.md`）。
 
 ## 2026-10-02：完成有界 GR serving，对容量与重叠分别判断
 
@@ -428,7 +457,7 @@ Q128 serving 的重叠失败与完整请求待补测状态不变。依据见 [S-
   新的 T-006 针对复访覆盖、重用距离和预算敏感性，T-007 针对请求开销及 candidate 长度；
   保留 T-002 场景依据与 T-003 ECHO 可比性。后续任务仅建议，未自动执行。
 - **依据：**[S-008–S-010](sources.md)、
-  [旧 GR 实验（已结束）](../system/experiment_organization.md#retired-gr-serving)、[验收记录](../system/gr_serving_review.md)。
+  旧 GR 实验（已结束）（Git `934485b:docs/agents/system/experiment_organization.md`）、验收记录（Git `934485b:docs/agents/system/gr_serving_review.md`）。
 
 ## 2026-10-02：缩小 Supervisor 的产物职责
 

@@ -1,0 +1,1817 @@
+{
+  "schema": "nosa-three-version-phase-review-v1",
+  "created_utc": "2026-10-04T20:40:26.615373+00:00",
+  "complete_saved_evidence_comparison_status": "accepted",
+  "comparison_run_id": "refactor_nosa_three_version_20261005_01",
+  "inputs": [
+    {
+      "path": "experiments/nosa_motivation/output/data/refactor_nosa_three_version_20261005_01/comparison.json",
+      "bytes": 430401,
+      "sha256": "42a8c8772ac6d06387f357fceecd02498d81ca677dec2274e2f5b4b83d68b943"
+    },
+    {
+      "path": "experiments/nosa_motivation/output/data/refactor_nosa_three_version_20261005_01/request_samples.csv",
+      "bytes": 237154,
+      "sha256": "515c93ddf60f89946677b8b009180e7dc35ab559b01803cd3ca770730759b77b"
+    },
+    {
+      "path": "experiments/nosa_motivation/output/data/refactor_nosa_three_version_20261005_01/results.md",
+      "bytes": 4890,
+      "sha256": "65ebdebbe7bb6826600f05c3eac4bd8af612a100c9b069ab12e4c1bb00cc5784"
+    },
+    {
+      "path": "docs/agents/acceptance/unified_runtime_20261005/nosa_bench_ledger.json",
+      "bytes": 15861,
+      "sha256": "99ad6a866b3baae42a43d9f992b59655c1b9f58ec00e8f58adaf94c9b2aa6e08"
+    }
+  ],
+  "current_numerical_receipt": {
+    "file": {
+      "path": "docs/agents/acceptance/unified_runtime_20261005/nosa_current_02/receipt.json",
+      "bytes": 1216793,
+      "sha256": "729f72ad853f5f83e729d9c9f1ce97a7aa6d809bbf68b4d99f96223634a0e71a"
+    },
+    "self_digest_sha256": "91e128931f3b5ee4afec645da4258b46b08aebf21313a4640e84ca1f7f16da62"
+  },
+  "calculation": "For each method/visit/run, take the arithmetic mean of all 16 measured requests per phase, then the median across the three independent run means. Baseline range is max minus min of its three means. No trimming or percentage tolerance. Phase deltas need not sum to the latency delta because phase medians can select different runs.",
+  "request_rows": {
+    "all": 896,
+    "baseline_current": 768,
+    "per_method_visit_run": 16,
+    "maximum_phase_sum_residual_ms": 0.0
+  },
+  "groups": [
+    {
+      "method": "async_sparse",
+      "visit_kind": "first",
+      "metric": "latency_ms",
+      "baseline": [
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_01",
+          "mean_ms": 2748.5800777503755
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_02",
+          "mean_ms": 2744.2945862567285
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_03",
+          "mean_ms": 2744.3048191125854
+        }
+      ],
+      "current": [
+        {
+          "run_id": "refactor_nosa_bench_20261005_01",
+          "mean_ms": 2754.981391313777
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_02",
+          "mean_ms": 2749.4829954521265
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_03",
+          "mean_ms": 2759.555441814882
+        }
+      ],
+      "baseline_median_ms": 2744.3048191125854,
+      "current_median_ms": 2754.981391313777,
+      "delta_ms": 10.676572201191448,
+      "delta_pct": 0.3890446909117001,
+      "baseline_range_ms": 4.285491493646987,
+      "baseline_mad_ms": 0.010232855856884271,
+      "current_range_ms": 10.072446362755727,
+      "all_current_above_all_baseline": true,
+      "positive_delta_exceeds_baseline_range": true,
+      "status": "investigate_slowdown"
+    },
+    {
+      "method": "async_sparse",
+      "visit_kind": "first",
+      "metric": "admission_ms",
+      "baseline": [
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_01",
+          "mean_ms": 227.02419981942512
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_02",
+          "mean_ms": 224.39327249594498
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_03",
+          "mean_ms": 223.77063573367195
+        }
+      ],
+      "current": [
+        {
+          "run_id": "refactor_nosa_bench_20261005_01",
+          "mean_ms": 235.1969396986533
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_02",
+          "mean_ms": 225.79029282496776
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_03",
+          "mean_ms": 232.8725948027568
+        }
+      ],
+      "baseline_median_ms": 224.39327249594498,
+      "current_median_ms": 232.8725948027568,
+      "delta_ms": 8.47932230681181,
+      "delta_pct": 3.778777417208459,
+      "baseline_range_ms": 3.253564085753169,
+      "baseline_mad_ms": 0.6226367622730322,
+      "current_range_ms": 9.406646873685531,
+      "all_current_above_all_baseline": false,
+      "positive_delta_exceeds_baseline_range": true,
+      "status": "investigate_slowdown"
+    },
+    {
+      "method": "async_sparse",
+      "visit_kind": "first",
+      "metric": "prefix_ms",
+      "baseline": [
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_01",
+          "mean_ms": 2498.106681421632
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_02",
+          "mean_ms": 2496.761817506922
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_03",
+          "mean_ms": 2497.131059571984
+        }
+      ],
+      "current": [
+        {
+          "run_id": "refactor_nosa_bench_20261005_01",
+          "mean_ms": 2496.22063919378
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_02",
+          "mean_ms": 2500.167855003383
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_03",
+          "mean_ms": 2502.843902897439
+        }
+      ],
+      "baseline_median_ms": 2497.131059571984,
+      "current_median_ms": 2500.167855003383,
+      "delta_ms": 3.0367954313987866,
+      "delta_pct": 0.12161137557270632,
+      "baseline_range_ms": 1.3448639147100039,
+      "baseline_mad_ms": 0.36924206506228074,
+      "current_range_ms": 6.623263703659177,
+      "all_current_above_all_baseline": false,
+      "positive_delta_exceeds_baseline_range": true,
+      "status": "investigate_slowdown"
+    },
+    {
+      "method": "async_sparse",
+      "visit_kind": "first",
+      "metric": "extend_ms",
+      "baseline": [
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_01",
+          "mean_ms": 22.646606383204926
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_02",
+          "mean_ms": 22.35201286384836
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_03",
+          "mean_ms": 22.609741376072634
+        }
+      ],
+      "current": [
+        {
+          "run_id": "refactor_nosa_bench_20261005_01",
+          "mean_ms": 22.677409564494155
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_02",
+          "mean_ms": 22.640961360593792
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_03",
+          "mean_ms": 22.943093797948677
+        }
+      ],
+      "baseline_median_ms": 22.609741376072634,
+      "current_median_ms": 22.677409564494155,
+      "delta_ms": 0.06766818842152134,
+      "delta_pct": 0.2992877596252959,
+      "baseline_range_ms": 0.2945935193565674,
+      "baseline_mad_ms": 0.036865007132291794,
+      "current_range_ms": 0.30213243735488504,
+      "all_current_above_all_baseline": false,
+      "positive_delta_exceeds_baseline_range": false,
+      "status": "increase_within_observed_repeat_range"
+    },
+    {
+      "method": "async_sparse",
+      "visit_kind": "first",
+      "metric": "cleanup_ms",
+      "baseline": [
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_01",
+          "mean_ms": 0.8025901261135004
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_02",
+          "mean_ms": 0.7874833900132217
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_03",
+          "mean_ms": 0.7933824308565818
+        }
+      ],
+      "current": [
+        {
+          "run_id": "refactor_nosa_bench_20261005_01",
+          "mean_ms": 0.8864028568495996
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_02",
+          "mean_ms": 0.8838862631819211
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_03",
+          "mean_ms": 0.8958503167377785
+        }
+      ],
+      "baseline_median_ms": 0.7933824308565818,
+      "current_median_ms": 0.8864028568495996,
+      "delta_ms": 0.09302042599301785,
+      "delta_pct": 11.724538176700937,
+      "baseline_range_ms": 0.015106736100278795,
+      "baseline_mad_ms": 0.005899040843360126,
+      "current_range_ms": 0.01196405355585739,
+      "all_current_above_all_baseline": true,
+      "positive_delta_exceeds_baseline_range": true,
+      "status": "investigate_slowdown"
+    },
+    {
+      "method": "async_sparse",
+      "visit_kind": "revisit",
+      "metric": "latency_ms",
+      "baseline": [
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_01",
+          "mean_ms": 31.985172689019237
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_02",
+          "mean_ms": 31.9404644324095
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_03",
+          "mean_ms": 31.971031938155647
+        }
+      ],
+      "current": [
+        {
+          "run_id": "refactor_nosa_bench_20261005_01",
+          "mean_ms": 32.524544425541535
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_02",
+          "mean_ms": 31.952672550687566
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_03",
+          "mean_ms": 32.09323199553182
+        }
+      ],
+      "baseline_median_ms": 31.971031938155647,
+      "current_median_ms": 32.09323199553182,
+      "delta_ms": 0.12220005737617612,
+      "delta_pct": 0.38222118576766095,
+      "baseline_range_ms": 0.04470825660973787,
+      "baseline_mad_ms": 0.014140750863589346,
+      "current_range_ms": 0.5718718748539686,
+      "all_current_above_all_baseline": false,
+      "positive_delta_exceeds_baseline_range": true,
+      "status": "investigate_slowdown"
+    },
+    {
+      "method": "async_sparse",
+      "visit_kind": "revisit",
+      "metric": "admission_ms",
+      "baseline": [
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_01",
+          "mean_ms": 1.8363355484325439
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_02",
+          "mean_ms": 1.8397746607661247
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_03",
+          "mean_ms": 1.8644528827280737
+        }
+      ],
+      "current": [
+        {
+          "run_id": "refactor_nosa_bench_20261005_01",
+          "mean_ms": 3.3451091730967164
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_02",
+          "mean_ms": 3.0840910330880433
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_03",
+          "mean_ms": 3.0951575536164455
+        }
+      ],
+      "baseline_median_ms": 1.8397746607661247,
+      "current_median_ms": 3.0951575536164455,
+      "delta_ms": 1.2553828928503208,
+      "delta_pct": 68.23568775143094,
+      "baseline_range_ms": 0.028117334295529872,
+      "baseline_mad_ms": 0.0034391123335808516,
+      "current_range_ms": 0.26101814000867307,
+      "all_current_above_all_baseline": true,
+      "positive_delta_exceeds_baseline_range": true,
+      "status": "investigate_slowdown"
+    },
+    {
+      "method": "async_sparse",
+      "visit_kind": "revisit",
+      "metric": "prefix_ms",
+      "baseline": [
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_01",
+          "mean_ms": 0.0001914886524900794
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_02",
+          "mean_ms": 0.00019749131752178073
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_03",
+          "mean_ms": 0.00019783328752964735
+        }
+      ],
+      "current": [
+        {
+          "run_id": "refactor_nosa_bench_20261005_01",
+          "mean_ms": 0.00020195875549688935
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_02",
+          "mean_ms": 0.0001710795913822949
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_03",
+          "mean_ms": 0.00017543061403557658
+        }
+      ],
+      "baseline_median_ms": 0.00019749131752178073,
+      "current_median_ms": 0.00017543061403557658,
+      "delta_ms": -2.2060703486204147e-05,
+      "delta_pct": -11.170467523855137,
+      "baseline_range_ms": 6.344635039567947e-06,
+      "baseline_mad_ms": 3.41970007866621e-07,
+      "current_range_ms": 3.087916411459446e-05,
+      "all_current_above_all_baseline": false,
+      "positive_delta_exceeds_baseline_range": false,
+      "status": "no_observed_slowdown"
+    },
+    {
+      "method": "async_sparse",
+      "visit_kind": "revisit",
+      "metric": "extend_ms",
+      "baseline": [
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_01",
+          "mean_ms": 29.008976824115962
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_02",
+          "mean_ms": 28.984474323806353
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_03",
+          "mean_ms": 28.978832357097417
+        }
+      ],
+      "current": [
+        {
+          "run_id": "refactor_nosa_bench_20261005_01",
+          "mean_ms": 27.901543748157565
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_02",
+          "mean_ms": 27.623655565548688
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_03",
+          "mean_ms": 27.72778031794587
+        }
+      ],
+      "baseline_median_ms": 28.984474323806353,
+      "current_median_ms": 27.72778031794587,
+      "delta_ms": -1.2566940058604814,
+      "delta_pct": -4.3357488282211065,
+      "baseline_range_ms": 0.030144467018544674,
+      "baseline_mad_ms": 0.005641966708935797,
+      "current_range_ms": 0.2778881826088764,
+      "all_current_above_all_baseline": false,
+      "positive_delta_exceeds_baseline_range": false,
+      "status": "no_observed_slowdown"
+    },
+    {
+      "method": "async_sparse",
+      "visit_kind": "revisit",
+      "metric": "cleanup_ms",
+      "baseline": [
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_01",
+          "mean_ms": 1.139668827818241
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_02",
+          "mean_ms": 1.1160179565194994
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_03",
+          "mean_ms": 1.1275488650426269
+        }
+      ],
+      "current": [
+        {
+          "run_id": "refactor_nosa_bench_20261005_01",
+          "mean_ms": 1.2776895455317572
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_02",
+          "mean_ms": 1.2447548724594526
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_03",
+          "mean_ms": 1.270118693355471
+        }
+      ],
+      "baseline_median_ms": 1.1275488650426269,
+      "current_median_ms": 1.270118693355471,
+      "delta_ms": 0.14256982831284404,
+      "delta_pct": 12.644226138035641,
+      "baseline_range_ms": 0.02365087129874155,
+      "baseline_mad_ms": 0.011530908523127437,
+      "current_range_ms": 0.03293467307230458,
+      "all_current_above_all_baseline": true,
+      "positive_delta_exceeds_baseline_range": true,
+      "status": "investigate_slowdown"
+    },
+    {
+      "method": "dense_prefetch",
+      "visit_kind": "first",
+      "metric": "latency_ms",
+      "baseline": [
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_01",
+          "mean_ms": 2697.4625114307855
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_02",
+          "mean_ms": 2682.484926757752
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_03",
+          "mean_ms": 2687.3749358710484
+        }
+      ],
+      "current": [
+        {
+          "run_id": "refactor_nosa_bench_20261005_01",
+          "mean_ms": 2682.786513600149
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_02",
+          "mean_ms": 2695.364530183724
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_03",
+          "mean_ms": 2694.3813525067526
+        }
+      ],
+      "baseline_median_ms": 2687.3749358710484,
+      "current_median_ms": 2694.3813525067526,
+      "delta_ms": 7.006416635704227,
+      "delta_pct": 0.2607160073640139,
+      "baseline_range_ms": 14.977584673033562,
+      "baseline_mad_ms": 4.890009113296401,
+      "current_range_ms": 12.578016583574936,
+      "all_current_above_all_baseline": false,
+      "positive_delta_exceeds_baseline_range": false,
+      "status": "increase_within_observed_repeat_range"
+    },
+    {
+      "method": "dense_prefetch",
+      "visit_kind": "first",
+      "metric": "admission_ms",
+      "baseline": [
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_01",
+          "mean_ms": 230.7833053127979
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_02",
+          "mean_ms": 222.0714236900676
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_03",
+          "mean_ms": 221.63367918255972
+        }
+      ],
+      "current": [
+        {
+          "run_id": "refactor_nosa_bench_20261005_01",
+          "mean_ms": 222.48012566706166
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_02",
+          "mean_ms": 229.35979456815403
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_03",
+          "mean_ms": 227.93328794796253
+        }
+      ],
+      "baseline_median_ms": 222.0714236900676,
+      "current_median_ms": 227.93328794796253,
+      "delta_ms": 5.861864257894922,
+      "delta_pct": 2.6396301516380563,
+      "baseline_range_ms": 9.149626130238175,
+      "baseline_mad_ms": 0.43774450750788674,
+      "current_range_ms": 6.879668901092373,
+      "all_current_above_all_baseline": false,
+      "positive_delta_exceeds_baseline_range": false,
+      "status": "increase_within_observed_repeat_range"
+    },
+    {
+      "method": "dense_prefetch",
+      "visit_kind": "first",
+      "metric": "prefix_ms",
+      "baseline": [
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_01",
+          "mean_ms": 2439.965284043865
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_02",
+          "mean_ms": 2434.7545915006776
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_03",
+          "mean_ms": 2439.765193434141
+        }
+      ],
+      "current": [
+        {
+          "run_id": "refactor_nosa_bench_20261005_01",
+          "mean_ms": 2434.2335142500815
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_02",
+          "mean_ms": 2439.69241794548
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_03",
+          "mean_ms": 2440.07487584895
+        }
+      ],
+      "baseline_median_ms": 2439.765193434141,
+      "current_median_ms": 2439.69241794548,
+      "delta_ms": -0.07277548866113648,
+      "delta_pct": -0.0029828890442813415,
+      "baseline_range_ms": 5.210692543187179,
+      "baseline_mad_ms": 0.20009060972370207,
+      "current_range_ms": 5.841361598868389,
+      "all_current_above_all_baseline": false,
+      "positive_delta_exceeds_baseline_range": false,
+      "status": "no_observed_slowdown"
+    },
+    {
+      "method": "dense_prefetch",
+      "visit_kind": "first",
+      "metric": "extend_ms",
+      "baseline": [
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_01",
+          "mean_ms": 25.889909760735463
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_02",
+          "mean_ms": 24.875653485651128
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_03",
+          "mean_ms": 25.187604609527625
+        }
+      ],
+      "current": [
+        {
+          "run_id": "refactor_nosa_bench_20261005_01",
+          "mean_ms": 25.216893693141174
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_02",
+          "mean_ms": 25.44724868494086
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_03",
+          "mean_ms": 25.5016149385483
+        }
+      ],
+      "baseline_median_ms": 25.187604609527625,
+      "current_median_ms": 25.44724868494086,
+      "delta_ms": 0.25964407541323453,
+      "delta_pct": 1.030840683099416,
+      "baseline_range_ms": 1.0142562750843354,
+      "baseline_mad_ms": 0.31195112387649715,
+      "current_range_ms": 0.28472124540712684,
+      "all_current_above_all_baseline": false,
+      "positive_delta_exceeds_baseline_range": false,
+      "status": "increase_within_observed_repeat_range"
+    },
+    {
+      "method": "dense_prefetch",
+      "visit_kind": "first",
+      "metric": "cleanup_ms",
+      "baseline": [
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_01",
+          "mean_ms": 0.8240123133873567
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_02",
+          "mean_ms": 0.7832580813555978
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_03",
+          "mean_ms": 0.7884586448199116
+        }
+      ],
+      "current": [
+        {
+          "run_id": "refactor_nosa_bench_20261005_01",
+          "mean_ms": 0.8559799898648635
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_02",
+          "mean_ms": 0.8650689851492643
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_03",
+          "mean_ms": 0.8715737712918781
+        }
+      ],
+      "baseline_median_ms": 0.7884586448199116,
+      "current_median_ms": 0.8650689851492643,
+      "delta_ms": 0.07661034032935277,
+      "delta_pct": 9.716469066916122,
+      "baseline_range_ms": 0.040754232031758875,
+      "baseline_mad_ms": 0.0052005634643137455,
+      "current_range_ms": 0.015593781427014619,
+      "all_current_above_all_baseline": true,
+      "positive_delta_exceeds_baseline_range": true,
+      "status": "investigate_slowdown"
+    },
+    {
+      "method": "dense_prefetch",
+      "visit_kind": "revisit",
+      "metric": "latency_ms",
+      "baseline": [
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_01",
+          "mean_ms": 71.78592906711856
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_02",
+          "mean_ms": 71.84163031342905
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_03",
+          "mean_ms": 71.72374070069054
+        }
+      ],
+      "current": [
+        {
+          "run_id": "refactor_nosa_bench_20261005_01",
+          "mean_ms": 71.6731077482109
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_02",
+          "mean_ms": 71.78385469887871
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_03",
+          "mean_ms": 71.61011326388689
+        }
+      ],
+      "baseline_median_ms": 71.78592906711856,
+      "current_median_ms": 71.6731077482109,
+      "delta_ms": -0.11282131890766323,
+      "delta_pct": -0.1571635561088543,
+      "baseline_range_ms": 0.11788961273850873,
+      "baseline_mad_ms": 0.055701246310491115,
+      "current_range_ms": 0.17374143499182537,
+      "all_current_above_all_baseline": false,
+      "positive_delta_exceeds_baseline_range": false,
+      "status": "no_observed_slowdown"
+    },
+    {
+      "method": "dense_prefetch",
+      "visit_kind": "revisit",
+      "metric": "admission_ms",
+      "baseline": [
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_01",
+          "mean_ms": 1.8480570142855868
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_02",
+          "mean_ms": 1.8552396868471988
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_03",
+          "mean_ms": 1.8958089422085322
+        }
+      ],
+      "current": [
+        {
+          "run_id": "refactor_nosa_bench_20261005_01",
+          "mean_ms": 3.0854666183586232
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_02",
+          "mean_ms": 3.0824465065961704
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_03",
+          "mean_ms": 3.0229152107494883
+        }
+      ],
+      "baseline_median_ms": 1.8552396868471988,
+      "current_median_ms": 3.0824465065961704,
+      "delta_ms": 1.2272068197489716,
+      "delta_pct": 66.14815478826304,
+      "baseline_range_ms": 0.04775192792294547,
+      "baseline_mad_ms": 0.00718267256161198,
+      "current_range_ms": 0.06255140760913491,
+      "all_current_above_all_baseline": true,
+      "positive_delta_exceeds_baseline_range": true,
+      "status": "investigate_slowdown"
+    },
+    {
+      "method": "dense_prefetch",
+      "visit_kind": "revisit",
+      "metric": "prefix_ms",
+      "baseline": [
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_01",
+          "mean_ms": 0.00019966682884842157
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_02",
+          "mean_ms": 0.00022106542019173503
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_03",
+          "mean_ms": 0.00021233427105471492
+        }
+      ],
+      "current": [
+        {
+          "run_id": "refactor_nosa_bench_20261005_01",
+          "mean_ms": 0.00018908758647739887
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_02",
+          "mean_ms": 0.00020025618141517043
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_03",
+          "mean_ms": 0.0001828011590987444
+        }
+      ],
+      "baseline_median_ms": 0.00021233427105471492,
+      "current_median_ms": 0.00018908758647739887,
+      "delta_ms": -2.3246684577316046e-05,
+      "delta_pct": -10.948154747627044,
+      "baseline_range_ms": 2.1398591343313456e-05,
+      "baseline_mad_ms": 8.731149137020111e-06,
+      "current_range_ms": 1.745502231642604e-05,
+      "all_current_above_all_baseline": false,
+      "positive_delta_exceeds_baseline_range": false,
+      "status": "no_observed_slowdown"
+    },
+    {
+      "method": "dense_prefetch",
+      "visit_kind": "revisit",
+      "metric": "extend_ms",
+      "baseline": [
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_01",
+          "mean_ms": 68.74593096290482
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_02",
+          "mean_ms": 68.80644943157677
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_03",
+          "mean_ms": 68.68274861335522
+        }
+      ],
+      "current": [
+        {
+          "run_id": "refactor_nosa_bench_20261005_01",
+          "mean_ms": 67.26618554239394
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_02",
+          "mean_ms": 67.42470624158159
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_03",
+          "mean_ms": 67.32739706785651
+        }
+      ],
+      "baseline_median_ms": 68.74593096290482,
+      "current_median_ms": 67.32739706785651,
+      "delta_ms": -1.4185338950483128,
+      "delta_pct": -2.0634441561548584,
+      "baseline_range_ms": 0.12370081822155043,
+      "baseline_mad_ms": 0.06051846867194399,
+      "current_range_ms": 0.15852069918764755,
+      "all_current_above_all_baseline": false,
+      "positive_delta_exceeds_baseline_range": false,
+      "status": "no_observed_slowdown"
+    },
+    {
+      "method": "dense_prefetch",
+      "visit_kind": "revisit",
+      "metric": "cleanup_ms",
+      "baseline": [
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_01",
+          "mean_ms": 1.1917414230993018
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_02",
+          "mean_ms": 1.1797201295848936
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_03",
+          "mean_ms": 1.1449708108557388
+        }
+      ],
+      "current": [
+        {
+          "run_id": "refactor_nosa_bench_20261005_01",
+          "mean_ms": 1.3212664998718537
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_02",
+          "mean_ms": 1.2765016945195384
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_03",
+          "mean_ms": 1.2596181841217913
+        }
+      ],
+      "baseline_median_ms": 1.1797201295848936,
+      "current_median_ms": 1.2765016945195384,
+      "delta_ms": 0.09678156493464485,
+      "delta_pct": 8.2037732939845,
+      "baseline_range_ms": 0.04677061224356294,
+      "baseline_mad_ms": 0.012021293514408171,
+      "current_range_ms": 0.061648315750062466,
+      "all_current_above_all_baseline": true,
+      "positive_delta_exceeds_baseline_range": true,
+      "status": "investigate_slowdown"
+    },
+    {
+      "method": "hbm",
+      "visit_kind": "first",
+      "metric": "latency_ms",
+      "baseline": [
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_01",
+          "mean_ms": 2334.346887670108
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_02",
+          "mean_ms": 2343.901039144839
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_03",
+          "mean_ms": 2341.024136330816
+        }
+      ],
+      "current": [
+        {
+          "run_id": "refactor_nosa_bench_20261005_01",
+          "mean_ms": 2340.107737320068
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_02",
+          "mean_ms": 2341.7753087123856
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_03",
+          "mean_ms": 2340.8261808071984
+        }
+      ],
+      "baseline_median_ms": 2341.024136330816,
+      "current_median_ms": 2340.8261808071984,
+      "delta_ms": -0.19795552361756563,
+      "delta_pct": -0.008455936892980074,
+      "baseline_range_ms": 9.554151474731043,
+      "baseline_mad_ms": 2.8769028140231967,
+      "current_range_ms": 1.6675713923177682,
+      "all_current_above_all_baseline": false,
+      "positive_delta_exceeds_baseline_range": false,
+      "status": "no_observed_slowdown"
+    },
+    {
+      "method": "hbm",
+      "visit_kind": "first",
+      "metric": "admission_ms",
+      "baseline": [
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_01",
+          "mean_ms": 3.1716978119220585
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_02",
+          "mean_ms": 3.131380377453752
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_03",
+          "mean_ms": 3.1754926312714815
+        }
+      ],
+      "current": [
+        {
+          "run_id": "refactor_nosa_bench_20261005_01",
+          "mean_ms": 3.785126391449012
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_02",
+          "mean_ms": 3.8872688164701685
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_03",
+          "mean_ms": 3.9434530553990044
+        }
+      ],
+      "baseline_median_ms": 3.1716978119220585,
+      "current_median_ms": 3.8872688164701685,
+      "delta_ms": 0.7155710045481101,
+      "delta_pct": 22.561134350768175,
+      "baseline_range_ms": 0.04411225381772965,
+      "baseline_mad_ms": 0.003794819349423051,
+      "current_range_ms": 0.1583266639499925,
+      "all_current_above_all_baseline": true,
+      "positive_delta_exceeds_baseline_range": true,
+      "status": "investigate_slowdown"
+    },
+    {
+      "method": "hbm",
+      "visit_kind": "first",
+      "metric": "prefix_ms",
+      "baseline": [
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_01",
+          "mean_ms": 2314.3502604289097
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_02",
+          "mean_ms": 2323.8830506743398
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_03",
+          "mean_ms": 2321.0056245006854
+        }
+      ],
+      "current": [
+        {
+          "run_id": "refactor_nosa_bench_20261005_01",
+          "mean_ms": 2319.3820978631265
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_02",
+          "mean_ms": 2320.8961890632054
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_03",
+          "mean_ms": 2319.9642001854954
+        }
+      ],
+      "baseline_median_ms": 2321.0056245006854,
+      "current_median_ms": 2319.9642001854954,
+      "delta_ms": -1.0414243151899427,
+      "delta_pct": -0.044869530008742775,
+      "baseline_range_ms": 9.532790245430078,
+      "baseline_mad_ms": 2.877426173654385,
+      "current_range_ms": 1.5140912000788376,
+      "all_current_above_all_baseline": false,
+      "positive_delta_exceeds_baseline_range": false,
+      "status": "no_observed_slowdown"
+    },
+    {
+      "method": "hbm",
+      "visit_kind": "first",
+      "metric": "extend_ms",
+      "baseline": [
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_01",
+          "mean_ms": 16.619156253000256
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_02",
+          "mean_ms": 16.686735310941003
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_03",
+          "mean_ms": 16.64253450144315
+        }
+      ],
+      "current": [
+        {
+          "run_id": "refactor_nosa_bench_20261005_01",
+          "mean_ms": 16.701686938176863
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_02",
+          "mean_ms": 16.75872242776677
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_03",
+          "mean_ms": 16.683021560311317
+        }
+      ],
+      "baseline_median_ms": 16.64253450144315,
+      "current_median_ms": 16.701686938176863,
+      "delta_ms": 0.05915243673371151,
+      "delta_pct": 0.35542925705566136,
+      "baseline_range_ms": 0.06757905794074759,
+      "baseline_mad_ms": 0.02337824844289571,
+      "current_range_ms": 0.07570086745545268,
+      "all_current_above_all_baseline": false,
+      "positive_delta_exceeds_baseline_range": false,
+      "status": "increase_within_observed_repeat_range"
+    },
+    {
+      "method": "hbm",
+      "visit_kind": "first",
+      "metric": "cleanup_ms",
+      "baseline": [
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_01",
+          "mean_ms": 0.205773176276125
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_02",
+          "mean_ms": 0.19987278210464865
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_03",
+          "mean_ms": 0.2004846974159591
+        }
+      ],
+      "current": [
+        {
+          "run_id": "refactor_nosa_bench_20261005_01",
+          "mean_ms": 0.23882612731540576
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_02",
+          "mean_ms": 0.23312840494327247
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_03",
+          "mean_ms": 0.23550600599264726
+        }
+      ],
+      "baseline_median_ms": 0.2004846974159591,
+      "current_median_ms": 0.23550600599264726,
+      "delta_ms": 0.03502130857668817,
+      "delta_pct": 17.468320040420394,
+      "baseline_range_ms": 0.005900394171476364,
+      "baseline_mad_ms": 0.0006119153113104403,
+      "current_range_ms": 0.005697722372133285,
+      "all_current_above_all_baseline": true,
+      "positive_delta_exceeds_baseline_range": true,
+      "status": "investigate_slowdown"
+    },
+    {
+      "method": "hbm",
+      "visit_kind": "revisit",
+      "metric": "latency_ms",
+      "baseline": [
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_01",
+          "mean_ms": 2333.598928002175
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_02",
+          "mean_ms": 2339.1010299965274
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_03",
+          "mean_ms": 2343.63979070622
+        }
+      ],
+      "current": [
+        {
+          "run_id": "refactor_nosa_bench_20261005_01",
+          "mean_ms": 2341.2112279547728
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_02",
+          "mean_ms": 2344.3096521805273
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_03",
+          "mean_ms": 2340.3725616517477
+        }
+      ],
+      "baseline_median_ms": 2339.1010299965274,
+      "current_median_ms": 2341.2112279547728,
+      "delta_ms": 2.110197958245408,
+      "delta_pct": 0.09021405793013312,
+      "baseline_range_ms": 10.04086270404514,
+      "baseline_mad_ms": 4.538760709692724,
+      "current_range_ms": 3.937090528779663,
+      "all_current_above_all_baseline": false,
+      "positive_delta_exceeds_baseline_range": false,
+      "status": "increase_within_observed_repeat_range"
+    },
+    {
+      "method": "hbm",
+      "visit_kind": "revisit",
+      "metric": "admission_ms",
+      "baseline": [
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_01",
+          "mean_ms": 3.1407265123561956
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_02",
+          "mean_ms": 3.10157191415783
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_03",
+          "mean_ms": 3.0822536355117336
+        }
+      ],
+      "current": [
+        {
+          "run_id": "refactor_nosa_bench_20261005_01",
+          "mean_ms": 3.8910103830858134
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_02",
+          "mean_ms": 3.9810703019611537
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_03",
+          "mean_ms": 3.9565701517858543
+        }
+      ],
+      "baseline_median_ms": 3.10157191415783,
+      "current_median_ms": 3.9565701517858543,
+      "delta_ms": 0.8549982376280241,
+      "delta_pct": 27.56661013485421,
+      "baseline_range_ms": 0.05847287684446201,
+      "baseline_mad_ms": 0.019318278646096587,
+      "current_range_ms": 0.09005991887534037,
+      "all_current_above_all_baseline": true,
+      "positive_delta_exceeds_baseline_range": true,
+      "status": "investigate_slowdown"
+    },
+    {
+      "method": "hbm",
+      "visit_kind": "revisit",
+      "metric": "prefix_ms",
+      "baseline": [
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_01",
+          "mean_ms": 2313.769009160751
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_02",
+          "mean_ms": 2318.9927488856483
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_03",
+          "mean_ms": 2323.4776528770453
+        }
+      ],
+      "current": [
+        {
+          "run_id": "refactor_nosa_bench_20261005_01",
+          "mean_ms": 2320.2843421822763
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_02",
+          "mean_ms": 2323.212608076574
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_03",
+          "mean_ms": 2319.2921390073025
+        }
+      ],
+      "baseline_median_ms": 2318.9927488856483,
+      "current_median_ms": 2320.2843421822763,
+      "delta_ms": 1.2915932966279797,
+      "delta_pct": 0.05569630596079408,
+      "baseline_range_ms": 9.708643716294318,
+      "baseline_mad_ms": 4.484903991397005,
+      "current_range_ms": 3.9204690692713484,
+      "all_current_above_all_baseline": false,
+      "positive_delta_exceeds_baseline_range": false,
+      "status": "increase_within_observed_repeat_range"
+    },
+    {
+      "method": "hbm",
+      "visit_kind": "revisit",
+      "metric": "extend_ms",
+      "baseline": [
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_01",
+          "mean_ms": 16.487666900502518
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_02",
+          "mean_ms": 16.80319737351965
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_03",
+          "mean_ms": 16.878879934665747
+        }
+      ],
+      "current": [
+        {
+          "run_id": "refactor_nosa_bench_20261005_01",
+          "mean_ms": 16.805091821879614
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_02",
+          "mean_ms": 16.881866729818285
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_03",
+          "mean_ms": 16.887469064386096
+        }
+      ],
+      "baseline_median_ms": 16.80319737351965,
+      "current_median_ms": 16.881866729818285,
+      "delta_ms": 0.07866935629863292,
+      "delta_pct": 0.46818087385326346,
+      "baseline_range_ms": 0.39121303416322917,
+      "baseline_mad_ms": 0.0756825611460954,
+      "current_range_ms": 0.08237724250648171,
+      "all_current_above_all_baseline": false,
+      "positive_delta_exceeds_baseline_range": false,
+      "status": "increase_within_observed_repeat_range"
+    },
+    {
+      "method": "hbm",
+      "visit_kind": "revisit",
+      "metric": "cleanup_ms",
+      "baseline": [
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_01",
+          "mean_ms": 0.20152542856521904
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_02",
+          "mean_ms": 0.20351182320155203
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_03",
+          "mean_ms": 0.2010042589972727
+        }
+      ],
+      "current": [
+        {
+          "run_id": "refactor_nosa_bench_20261005_01",
+          "mean_ms": 0.23078356753103435
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_02",
+          "mean_ms": 0.23410707217408344
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_03",
+          "mean_ms": 0.23638342827325687
+        }
+      ],
+      "baseline_median_ms": 0.20152542856521904,
+      "current_median_ms": 0.23410707217408344,
+      "delta_ms": 0.0325816436088644,
+      "delta_pct": 16.16750989730316,
+      "baseline_range_ms": 0.0025075642042793334,
+      "baseline_mad_ms": 0.0005211695679463446,
+      "current_range_ms": 0.005599860742222518,
+      "all_current_above_all_baseline": true,
+      "positive_delta_exceeds_baseline_range": true,
+      "status": "investigate_slowdown"
+    },
+    {
+      "method": "sync_sparse",
+      "visit_kind": "first",
+      "metric": "latency_ms",
+      "baseline": [
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_01",
+          "mean_ms": 2672.9961277524126
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_02",
+          "mean_ms": 2663.7823978817323
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_03",
+          "mean_ms": 2659.5468932646327
+        }
+      ],
+      "current": [
+        {
+          "run_id": "refactor_nosa_bench_20261005_01",
+          "mean_ms": 2668.6233856817125
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_02",
+          "mean_ms": 2663.245780066063
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_03",
+          "mean_ms": 2672.763532951649
+        }
+      ],
+      "baseline_median_ms": 2663.7823978817323,
+      "current_median_ms": 2668.6233856817125,
+      "delta_ms": 4.840987799980212,
+      "delta_pct": 0.18173360571155572,
+      "baseline_range_ms": 13.449234487779904,
+      "baseline_mad_ms": 4.23550461709965,
+      "current_range_ms": 9.51775288558565,
+      "all_current_above_all_baseline": false,
+      "positive_delta_exceeds_baseline_range": false,
+      "status": "increase_within_observed_repeat_range"
+    },
+    {
+      "method": "sync_sparse",
+      "visit_kind": "first",
+      "metric": "admission_ms",
+      "baseline": [
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_01",
+          "mean_ms": 233.0583798175212
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_02",
+          "mean_ms": 226.80782988027204
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_03",
+          "mean_ms": 221.91778842534404
+        }
+      ],
+      "current": [
+        {
+          "run_id": "refactor_nosa_bench_20261005_01",
+          "mean_ms": 230.62599110562587
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_02",
+          "mean_ms": 220.4854421361233
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_03",
+          "mean_ms": 231.62396313273348
+        }
+      ],
+      "baseline_median_ms": 226.80782988027204,
+      "current_median_ms": 230.62599110562587,
+      "delta_ms": 3.8181612253538333,
+      "delta_pct": 1.6834344860886747,
+      "baseline_range_ms": 11.140591392177157,
+      "baseline_mad_ms": 4.890041454927996,
+      "current_range_ms": 11.138520996610168,
+      "all_current_above_all_baseline": false,
+      "positive_delta_exceeds_baseline_range": false,
+      "status": "increase_within_observed_repeat_range"
+    },
+    {
+      "method": "sync_sparse",
+      "visit_kind": "first",
+      "metric": "prefix_ms",
+      "baseline": [
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_01",
+          "mean_ms": 2416.3278245541733
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_02",
+          "mean_ms": 2413.9405679816264
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_03",
+          "mean_ms": 2414.4905044377083
+        }
+      ],
+      "current": [
+        {
+          "run_id": "refactor_nosa_bench_20261005_01",
+          "mean_ms": 2414.343044256384
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_02",
+          "mean_ms": 2419.3463253614027
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_03",
+          "mean_ms": 2417.3324105722713
+        }
+      ],
+      "baseline_median_ms": 2414.4905044377083,
+      "current_median_ms": 2417.3324105722713,
+      "delta_ms": 2.8419061345630325,
+      "delta_pct": 0.11770210441249433,
+      "baseline_range_ms": 2.387256572546903,
+      "baseline_mad_ms": 0.5499364560819231,
+      "current_range_ms": 5.0032811050186865,
+      "all_current_above_all_baseline": false,
+      "positive_delta_exceeds_baseline_range": true,
+      "status": "investigate_slowdown"
+    },
+    {
+      "method": "sync_sparse",
+      "visit_kind": "first",
+      "metric": "extend_ms",
+      "baseline": [
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_01",
+          "mean_ms": 22.790839888330083
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_02",
+          "mean_ms": 22.237227807636373
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_03",
+          "mean_ms": 22.335450754326303
+        }
+      ],
+      "current": [
+        {
+          "run_id": "refactor_nosa_bench_20261005_01",
+          "mean_ms": 22.77741405850975
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_02",
+          "mean_ms": 22.536750380822923
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_03",
+          "mean_ms": 22.923862932657357
+        }
+      ],
+      "baseline_median_ms": 22.335450754326303,
+      "current_median_ms": 22.77741405850975,
+      "delta_ms": 0.44196330418344587,
+      "delta_pct": 1.9787525626624707,
+      "baseline_range_ms": 0.5536120806937106,
+      "baseline_mad_ms": 0.09822294668992981,
+      "current_range_ms": 0.38711255183443427,
+      "all_current_above_all_baseline": false,
+      "positive_delta_exceeds_baseline_range": false,
+      "status": "increase_within_observed_repeat_range"
+    },
+    {
+      "method": "sync_sparse",
+      "visit_kind": "first",
+      "metric": "cleanup_ms",
+      "baseline": [
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_01",
+          "mean_ms": 0.8190834923880175
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_02",
+          "mean_ms": 0.7967722121975385
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_03",
+          "mean_ms": 0.8031496472540312
+        }
+      ],
+      "current": [
+        {
+          "run_id": "refactor_nosa_bench_20261005_01",
+          "mean_ms": 0.8769362611928955
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_02",
+          "mean_ms": 0.8772621877142228
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_03",
+          "mean_ms": 0.8832963139866479
+        }
+      ],
+      "baseline_median_ms": 0.8031496472540312,
+      "current_median_ms": 0.8772621877142228,
+      "delta_ms": 0.07411254046019167,
+      "delta_pct": 9.227737410279948,
+      "baseline_range_ms": 0.02231128019047901,
+      "baseline_mad_ms": 0.006377435056492686,
+      "current_range_ms": 0.006360052793752402,
+      "all_current_above_all_baseline": true,
+      "positive_delta_exceeds_baseline_range": true,
+      "status": "investigate_slowdown"
+    },
+    {
+      "method": "sync_sparse",
+      "visit_kind": "revisit",
+      "metric": "latency_ms",
+      "baseline": [
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_01",
+          "mean_ms": 29.649809810507577
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_02",
+          "mean_ms": 29.120881990820635
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_03",
+          "mean_ms": 29.06654438265832
+        }
+      ],
+      "current": [
+        {
+          "run_id": "refactor_nosa_bench_20261005_01",
+          "mean_ms": 29.400482133496553
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_02",
+          "mean_ms": 29.234585002996027
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_03",
+          "mean_ms": 29.343987509491853
+        }
+      ],
+      "baseline_median_ms": 29.120881990820635,
+      "current_median_ms": 29.343987509491853,
+      "delta_ms": 0.2231055186712183,
+      "delta_pct": 0.7661358565360236,
+      "baseline_range_ms": 0.5832654278492555,
+      "baseline_mad_ms": 0.0543376081623137,
+      "current_range_ms": 0.16589713050052524,
+      "all_current_above_all_baseline": false,
+      "positive_delta_exceeds_baseline_range": false,
+      "status": "increase_within_observed_repeat_range"
+    },
+    {
+      "method": "sync_sparse",
+      "visit_kind": "revisit",
+      "metric": "admission_ms",
+      "baseline": [
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_01",
+          "mean_ms": 2.0097063170396723
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_02",
+          "mean_ms": 1.8902268639067188
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_03",
+          "mean_ms": 1.8523773178458214
+        }
+      ],
+      "current": [
+        {
+          "run_id": "refactor_nosa_bench_20261005_01",
+          "mean_ms": 3.2255588157568127
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_02",
+          "mean_ms": 3.0068134001339786
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_03",
+          "mean_ms": 3.002197881869506
+        }
+      ],
+      "baseline_median_ms": 1.8902268639067188,
+      "current_median_ms": 3.0068134001339786,
+      "delta_ms": 1.1165865362272598,
+      "delta_pct": 59.071562125590575,
+      "baseline_range_ms": 0.1573289991938509,
+      "baseline_mad_ms": 0.03784954606089741,
+      "current_range_ms": 0.2233609338873066,
+      "all_current_above_all_baseline": true,
+      "positive_delta_exceeds_baseline_range": true,
+      "status": "investigate_slowdown"
+    },
+    {
+      "method": "sync_sparse",
+      "visit_kind": "revisit",
+      "metric": "prefix_ms",
+      "baseline": [
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_01",
+          "mean_ms": 0.00018350692698732018
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_02",
+          "mean_ms": 0.00020070001482963562
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_03",
+          "mean_ms": 0.0001849475665949285
+        }
+      ],
+      "current": [
+        {
+          "run_id": "refactor_nosa_bench_20261005_01",
+          "mean_ms": 0.00019887374946847558
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_02",
+          "mean_ms": 0.00018048012861981988
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_03",
+          "mean_ms": 0.00022887979866936803
+        }
+      ],
+      "baseline_median_ms": 0.0001849475665949285,
+      "current_median_ms": 0.00019887374946847558,
+      "delta_ms": 1.3926182873547077e-05,
+      "delta_pct": 7.52980054290098,
+      "baseline_range_ms": 1.7193087842315435e-05,
+      "baseline_mad_ms": 1.4406396076083183e-06,
+      "current_range_ms": 4.839967004954815e-05,
+      "all_current_above_all_baseline": false,
+      "positive_delta_exceeds_baseline_range": false,
+      "status": "increase_within_observed_repeat_range"
+    },
+    {
+      "method": "sync_sparse",
+      "visit_kind": "revisit",
+      "metric": "extend_ms",
+      "baseline": [
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_01",
+          "mean_ms": 26.483273875783198
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_02",
+          "mean_ms": 26.116650748008396
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_03",
+          "mean_ms": 26.077000416989904
+        }
+      ],
+      "current": [
+        {
+          "run_id": "refactor_nosa_bench_20261005_01",
+          "mean_ms": 24.904452438931912
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_02",
+          "mean_ms": 24.97531395056285
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_03",
+          "mean_ms": 25.08768191182753
+        }
+      ],
+      "baseline_median_ms": 26.116650748008396,
+      "current_median_ms": 24.97531395056285,
+      "delta_ms": -1.1413367974455468,
+      "delta_pct": -4.3701499417285845,
+      "baseline_range_ms": 0.4062734587932937,
+      "baseline_mad_ms": 0.03965033101849258,
+      "current_range_ms": 0.18322947289561853,
+      "all_current_above_all_baseline": false,
+      "positive_delta_exceeds_baseline_range": false,
+      "status": "no_observed_slowdown"
+    },
+    {
+      "method": "sync_sparse",
+      "visit_kind": "revisit",
+      "metric": "cleanup_ms",
+      "baseline": [
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_01",
+          "mean_ms": 1.1566461107577197
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_02",
+          "mean_ms": 1.1138036788906902
+        },
+        {
+          "run_id": "refactor_p0_nosa_bench_20261005_03",
+          "mean_ms": 1.1369817002560012
+        }
+      ],
+      "current": [
+        {
+          "run_id": "refactor_nosa_bench_20261005_01",
+          "mean_ms": 1.2702720050583594
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_02",
+          "mean_ms": 1.2522771721705794
+        },
+        {
+          "run_id": "refactor_nosa_bench_20261005_03",
+          "mean_ms": 1.2538788359961472
+        }
+      ],
+      "baseline_median_ms": 1.1369817002560012,
+      "current_median_ms": 1.2538788359961472,
+      "delta_ms": 0.11689713574014604,
+      "delta_pct": 10.281355954438462,
+      "baseline_range_ms": 0.04284243186702952,
+      "baseline_mad_ms": 0.01966441050171852,
+      "current_range_ms": 0.01799483288777992,
+      "all_current_above_all_baseline": true,
+      "positive_delta_exceeds_baseline_range": true,
+      "status": "investigate_slowdown"
+    }
+  ],
+  "accounting_comparisons_increased": 0,
+  "trace_latency": {
+    "baseline": {
+      "values": [
+        206726.48710676003,
+        206503.47130838782,
+        206538.4302769089
+      ],
+      "median": 206538.4302769089,
+      "min": 206503.47130838782,
+      "max": 206726.48710676003,
+      "range": 223.01579837221652,
+      "mad": 34.95896852109581
+    },
+    "current": {
+      "values": [
+        206740.93424284365,
+        206834.39006155822,
+        207055.14244001824
+      ],
+      "median": 206834.39006155822,
+      "min": 206740.93424284365,
+      "max": 207055.14244001824,
+      "range": 314.2081971745938,
+      "mad": 93.45581871457398
+    },
+    "delta": 295.9597846493125,
+    "delta_pct": 0.14329526192898587,
+    "status": "investigate_slowdown"
+  },
+  "monitor_review": {
+    "current_continuous_gpu_monitor_available": false,
+    "recorded_evidence": "Original driver/ledger retain per-run command, environment, PID, UTC start/end and exit status. Each accepted run retains hardware and post-request memory observations. The driver does not collect GPU-process telemetry. Coordinated quiet windows are operational records, not continuous process-attribution evidence.",
+    "scope_limit": "No current trace-wide PID/UUID/clock/utilization or co-tenant exclusion audit is claimed. Hardware snapshots do not reconstruct missing time-series samples.",
+    "original_driver": {
+      "path": "/tmp/run_nosa_current_benches.py",
+      "bytes": 6559,
+      "sha256": "a97e4986e033da73cd33460a602ce791aac4c51dc8b1844e0d5c77f8d6c3672e"
+    },
+    "saved_original_driver": {
+      "path": "docs/agents/acceptance/unified_runtime_20261005/nosa_bench_driver.txt",
+      "bytes": 6559,
+      "sha256": "a97e4986e033da73cd33460a602ce791aac4c51dc8b1844e0d5c77f8d6c3672e"
+    }
+  },
+  "interpretation": [
+    "Async first and revisit latency increases exceed the observed P0 three-run mean ranges and require investigation.",
+    "All three offload revisit admission ranges and all eight cleanup ranges lie above their corresponding P0 ranges. Offload revisit extend means decrease; those phase movements do not by themselves identify a causal code change.",
+    "Static review found additional per-request SessionPlan/allocation declaration work in admission. It also found small output-validation boundary changes and added Python ownership checks. No newly added device-wide synchronization was found in the reviewed candidate chain. These findings are not measured causal attribution.",
+    "Original published controls use different measurement, execution-environment and hardware contracts; only the matched P0/current pair isolates the refactor within the recorded controls.",
+    "No old performance data has been removed."
+  ]
+}

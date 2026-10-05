@@ -1,0 +1,74 @@
+[
+  {
+    "layer": 0,
+    "module": "indexer_total",
+    "native_eager_api_us": 273.8559991121292,
+    "native_wall_api_us": 279.665,
+    "native_kernel_us": 143.329,
+    "native_kernel_mfu_pct": 24.420129634365715,
+    "triton_eager_api_us": 734.2880070209503,
+    "triton_wall_api_us": 740.5155,
+    "triton_kernel_us": 499.134,
+    "triton_kernel_mfu_pct": 7.012370947208574
+  },
+  {
+    "layer": 0,
+    "module": "block_sparse_attention_total",
+    "native_eager_api_us": 243.29599738121033,
+    "native_wall_api_us": 249.0215,
+    "native_kernel_us": 173.983,
+    "native_kernel_mfu_pct": 39.629985833547295,
+    "triton_eager_api_us": 635.7440054416656,
+    "triton_wall_api_us": 641.7085,
+    "triton_kernel_us": 575.042,
+    "triton_kernel_mfu_pct": 11.990330837187646
+  },
+  {
+    "layer": 15,
+    "module": "indexer_total",
+    "native_eager_api_us": 265.53601026535034,
+    "native_wall_api_us": 271.26649999999995,
+    "native_kernel_us": 137.855,
+    "native_kernel_mfu_pct": 25.38981364741217,
+    "triton_eager_api_us": 722.6080000400543,
+    "triton_wall_api_us": 728.6455000000001,
+    "triton_kernel_us": 488.413,
+    "triton_kernel_mfu_pct": 7.166297294224363
+  },
+  {
+    "layer": 15,
+    "module": "block_sparse_attention_total",
+    "native_eager_api_us": 243.72799694538116,
+    "native_wall_api_us": 249.7595,
+    "native_kernel_us": 172.45,
+    "native_kernel_mfu_pct": 39.98227790825201,
+    "triton_eager_api_us": 636.0479891300201,
+    "triton_wall_api_us": 642.0269999999999,
+    "triton_kernel_us": 576.257,
+    "triton_kernel_mfu_pct": 11.965050012890185
+  },
+  {
+    "layer": 31,
+    "module": "indexer_total",
+    "native_eager_api_us": 264.5760029554367,
+    "native_wall_api_us": 270.673,
+    "native_kernel_us": 137.638,
+    "native_kernel_mfu_pct": 25.429843214548338,
+    "triton_eager_api_us": 723.1520116329193,
+    "triton_wall_api_us": 729.48,
+    "triton_kernel_us": 490.882,
+    "triton_kernel_mfu_pct": 7.130252810989207
+  },
+  {
+    "layer": 31,
+    "module": "block_sparse_attention_total",
+    "native_eager_api_us": 239.3600046634674,
+    "native_wall_api_us": 245.24400000000003,
+    "native_kernel_us": 169.632,
+    "native_kernel_mfu_pct": 40.64648076588178,
+    "triton_eager_api_us": 638.7520134449005,
+    "triton_wall_api_us": 644.7629999999999,
+    "triton_kernel_us": 577.857,
+    "triton_kernel_mfu_pct": 11.9319205707953
+  }
+]

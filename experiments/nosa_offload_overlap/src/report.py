@@ -17,7 +17,7 @@ from pathlib import Path
 from types import SimpleNamespace
 
 from evaluation.validation import require_receipt
-from experiments.nosa_kernel_mfu.src.phases import offload_config, validation_identity
+from experiments.nosa_mfu.src.phases import offload_config, validation_identity
 
 MODES = ("resident", "serialized", "overlap")
 TRAFFIC_CHECKS = (

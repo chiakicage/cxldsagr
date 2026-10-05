@@ -7,27 +7,7 @@ from collections.abc import Callable, Hashable, Mapping
 from dataclasses import dataclass
 from typing import Any
 
-
-@dataclass(frozen=True)
-class CacheFootprint:
-    hbm: int = 0
-    dram: int = 0
-
-    def __post_init__(self):
-        for name in ("hbm", "dram"):
-            value = getattr(self, name)
-            if type(value) is not int or value < 0:
-                raise ValueError(f"{name} must be a nonnegative integer byte count")
-
-    @classmethod
-    def from_mapping(cls, value: Mapping[str, int]) -> CacheFootprint:
-        return cls(hbm=value["hbm"], dram=value["dram"])
-
-    def fits(self, budget: CacheFootprint) -> bool:
-        return self.hbm <= budget.hbm and self.dram <= budget.dram
-
-    def __add__(self, other: CacheFootprint) -> CacheFootprint:
-        return CacheFootprint(self.hbm + other.hbm, self.dram + other.dram)
+from cache.capacity import CacheFootprint, ResourceUsage, SessionPlan
 
 
 class CacheBudgetExceeded(ValueError):
@@ -43,6 +23,7 @@ class PrefixEntry:
     host_pages: int = 0
     ready: bool = False
     hbm_tokens: int = 0
+    plan: SessionPlan | None = None
 
 
 @dataclass(frozen=True)
@@ -68,9 +49,9 @@ class PrefixSessionPool:
         self,
         budget: CacheFootprint | None,
         *,
-        allocate: Callable[[int], Any],
+        allocate: Callable[[int | SessionPlan], Any],
         release: Callable[[Any], None],
-        measure: Callable[[Any], Mapping[str, int]],
+        measure: Callable[[Any], Mapping[str, int] | ResourceUsage],
         shared: CacheFootprint | None = None,
         measure_shared: Callable[[], Mapping[str, int]] | None = None,
         host_page_capacity: int = 0,
@@ -159,7 +140,16 @@ class PrefixSessionPool:
         *,
         host_pages: int = 0,
         hbm_tokens: int = 0,
+        plan: SessionPlan | None = None,
     ) -> PrefixLease:
+        if plan is not None and (
+            plan.retained_capacity != capacity
+            or plan.history_identity != signature
+            or plan.reservation != reservation
+            or plan.host_pages != host_pages
+            or plan.hbm_tokens != hbm_tokens
+        ):
+            raise ValueError("admission arguments must match the session allocation plan")
         if type(capacity) is not int or capacity <= 0:
             raise ValueError("capacity must be a positive integer")
         if type(host_pages) is not int or host_pages < 0:
@@ -193,6 +183,11 @@ class PrefixSessionPool:
             prior is not None
             and prior.ready
             and prior.signature == signature
+            and (
+                plan is None
+                or prior.plan is not None
+                and prior.plan.resource_identity is plan.resource_identity
+            )
             and prior.capacity >= capacity
             and reservation.fits(prior.reservation)
             and prior.host_pages >= host_pages
@@ -214,15 +209,27 @@ class PrefixSessionPool:
             self.discard(victim)
             evicted.append(victim)
         self.evictions += len(evicted)
-        session = self._allocate(capacity)
+        session = self._allocate(capacity if plan is None else plan)
         entry = PrefixEntry(
-            session, signature, capacity, reservation, host_pages, hbm_tokens=hbm_tokens
+            session,
+            signature,
+            capacity,
+            reservation,
+            host_pages,
+            hbm_tokens=hbm_tokens,
+            plan=plan,
         )
         self._entries[key] = entry
         try:
             self.audit()
-        except BaseException:
-            self.discard(key)
+        except BaseException as audit_error:
+            try:
+                self.discard(key)
+            except BaseException as cleanup_error:  # noqa: BLE001 - preserve both original failures
+                raise BaseExceptionGroup(
+                    "Session allocation audit and release failed; session retained",
+                    [audit_error, cleanup_error],
+                ) from None
             raise
         return PrefixLease(entry, False, tuple(evicted))
 
@@ -235,7 +242,12 @@ class PrefixSessionPool:
         actual_host_pages = 0
         actual_hbm_tokens = 0
         for key, entry in self._entries.items():
-            measured = CacheFootprint.from_mapping(self._measure(entry.session))
+            usage = self._measure(entry.session)
+            measured = (
+                usage.charged
+                if isinstance(usage, ResourceUsage)
+                else CacheFootprint.from_mapping(usage)
+            )
             if not measured.fits(entry.reservation):
                 raise RuntimeError(
                     f"cache allocation for {key!r} exceeded reservation: "
@@ -243,7 +255,9 @@ class PrefixSessionPool:
                 )
             actual += measured
             pages = (
-                entry.host_pages
+                usage.host_pages
+                if isinstance(usage, ResourceUsage)
+                else entry.host_pages
                 if self._measure_host_pages is None
                 else self._measure_host_pages(entry.session)
             )
@@ -254,7 +268,9 @@ class PrefixSessionPool:
                 )
             actual_host_pages += pages
             tokens = (
-                entry.hbm_tokens
+                usage.hbm_tokens
+                if isinstance(usage, ResourceUsage)
+                else entry.hbm_tokens
                 if self._measure_hbm_tokens is None
                 else self._measure_hbm_tokens(entry.session)
             )

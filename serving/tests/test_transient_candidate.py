@@ -3,8 +3,8 @@
 import pytest
 import torch
 
+from cache.capacity import ResourcePlan
 from cache.prefix_pool import CacheFootprint
-from executor.serving_backend import SharedCachePlan
 from serving.persistent import PersistentGRRunner
 from serving.tests.test_persistent import SharedBackend
 
@@ -22,9 +22,20 @@ class TransientBackend(SharedBackend):
         self.estimate_calls = []
         self.candidate_calls = 0
 
+    def runtime_driver(self, policy):
+        from executor.adapters import BackendAdapter
+
+        return BackendAdapter(
+            self,
+            shared=True,
+            candidate_mode="gpu_transient",
+            session_length=lambda session: len(session["tokens"]),
+            chunk_size=self.max_seq_len,
+        )
+
     def plan_resources(self, budgets, limits):
         self.planned_budget, self.planned_limits = budgets, dict(limits)
-        return SharedCachePlan(
+        return ResourcePlan(
             shared=CacheFootprint(16, 64),
             host_pages=self.host_pages,
             page_size=64,

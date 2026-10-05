@@ -1,0 +1,71 @@
+{
+  "status": "passed",
+  "stages": [
+    {
+      "stage": "publication",
+      "run_id": "refactor_final_nosa_publication_20261005_02",
+      "command": [
+        "numactl",
+        "--physcpubind=8-15",
+        "--membind=0",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin/python",
+        "-B",
+        "-m",
+        "experiments.nosa_motivation.src.publish",
+        "--bench",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_motivation/output/data/refactor_final_nosa_bench_20261005_01",
+        "--profile-data",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_motivation/output/data/refactor_final_nosa_profile_20261005_02",
+        "--profile-dir",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_motivation/output/profile/refactor_final_nosa_profile_20261005_02",
+        "--attention-data",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_motivation/output/data/refactor_final_nosa_attention_reference_20261005_01",
+        "--output-dir",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_motivation/output/data/refactor_final_nosa_publication_20261005_02"
+      ],
+      "started_utc": "2026-10-05T00:44:08.791935+00:00",
+      "cwd": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr",
+      "returncode": 0,
+      "finished_utc": "2026-10-05T00:48:56.374534+00:00"
+    },
+    {
+      "stage": "figures",
+      "run_id": "refactor_final_nosa_summary_20261005_02",
+      "command": [
+        "numactl",
+        "--physcpubind=8-15",
+        "--membind=0",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin/python",
+        "-B",
+        "-m",
+        "experiments.nosa_motivation.src.render_motivation_summary",
+        "--input-dir",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_motivation/output/data/refactor_final_nosa_publication_20261005_02",
+        "--output-dir",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_motivation/output/data/refactor_final_nosa_summary_20261005_02"
+      ],
+      "started_utc": "2026-10-05T00:48:56.377676+00:00",
+      "cwd": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr",
+      "returncode": 0,
+      "finished_utc": "2026-10-05T00:48:57.597269+00:00"
+    }
+  ],
+  "trajectory_plot": {
+    "command": [
+      "numactl",
+      "--physcpubind=8-15",
+      "--membind=0",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin/python",
+      "-B",
+      "-m",
+      "experiments.nosa_motivation.src.plot",
+      "experiments/nosa_motivation/output/data/refactor_final_nosa_bench_20261005_01",
+      "--output-dir",
+      "experiments/nosa_motivation/output/data/refactor_final_nosa_plots_20261005_01"
+    ],
+    "returncode": 0,
+    "session_id": 92529,
+    "cwd": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr",
+    "boundary": "Root observed the actual tool session exit 0; exact start/end UTC was not recorded here. CPU-only rendering and data audit, no new GPU measurement."
+  }
+}

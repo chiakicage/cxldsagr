@@ -1,0 +1,75 @@
+{
+  "schema": "nosa-plan-cache-cpu-comparison-v1",
+  "baseline_result": {
+    "path": "/tmp/nosa_plan_cpu_profile_20261005_01/result.json",
+    "sha256": "c812e8f13d5fa032c087df367e8eec39a0d3b8bd0093715c9a8ba7807306f45f"
+  },
+  "current_result": {
+    "path": "/tmp/nosa_plan_cpu_profile_20261005_02/result.json",
+    "sha256": "252efe6419262f9dfe2cdd9e55bfdc6c846f852dbff0247b0996ae17d03c70cb"
+  },
+  "parameters_and_recorded_environment_equal": true,
+  "changed_source_paths": [
+    "models/nosa/execution/adapter.py"
+  ],
+  "reservation_bytes_equal_all_schemes": true,
+  "comparisons": [
+    {
+      "scheme": "hbm",
+      "old_plan_us": 552.7734499999999,
+      "warm_hit_plan_us": 31.46089,
+      "forced_cold_miss_plan_us": 545.5292099999999,
+      "warm_hit_delta_us": -521.31256,
+      "warm_hit_speedup": 17.5701784024546,
+      "cprofile_calls_per_plan": {
+        "adapter.py:233:plan_runtime_session": 1.0,
+        "capacity.py:276:__post_init__": 1.0,
+        "capacity.py:192:allocation_footprint": 1.0,
+        "capacity.py:88:__post_init__": 1.0
+      }
+    },
+    {
+      "scheme": "serial_sparse",
+      "old_plan_us": 1027.3056,
+      "warm_hit_plan_us": 54.05504,
+      "forced_cold_miss_plan_us": 994.03872,
+      "warm_hit_delta_us": -973.25056,
+      "warm_hit_speedup": 19.00480695232119,
+      "cprofile_calls_per_plan": {
+        "adapter.py:233:plan_runtime_session": 1.0,
+        "capacity.py:276:__post_init__": 1.0,
+        "capacity.py:192:allocation_footprint": 1.0,
+        "capacity.py:88:__post_init__": 1.0
+      }
+    },
+    {
+      "scheme": "dense_prefetch",
+      "old_plan_us": 1026.67227,
+      "warm_hit_plan_us": 53.59006,
+      "forced_cold_miss_plan_us": 996.27704,
+      "warm_hit_delta_us": -973.08221,
+      "warm_hit_speedup": 19.157886182624164,
+      "cprofile_calls_per_plan": {
+        "adapter.py:233:plan_runtime_session": 1.0,
+        "capacity.py:276:__post_init__": 1.0,
+        "capacity.py:192:allocation_footprint": 1.0,
+        "capacity.py:88:__post_init__": 1.0
+      }
+    },
+    {
+      "scheme": "overlap",
+      "old_plan_us": 1033.76394,
+      "warm_hit_plan_us": 53.8266,
+      "forced_cold_miss_plan_us": 1002.6648399999999,
+      "warm_hit_delta_us": -979.9373400000001,
+      "warm_hit_speedup": 19.20544749250371,
+      "cprofile_calls_per_plan": {
+        "adapter.py:233:plan_runtime_session": 1.0,
+        "capacity.py:276:__post_init__": 1.0,
+        "capacity.py:192:allocation_footprint": 1.0,
+        "capacity.py:88:__post_init__": 1.0
+      }
+    }
+  ],
+  "scope": "Isolated CPU planning only; warm-hit versus original repeated planning, not a serving latency claim. Cold-miss test clears the local diagnostic cache. No GPU or model weights."
+}

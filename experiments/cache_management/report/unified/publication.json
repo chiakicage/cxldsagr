@@ -1,0 +1,54 @@
+{
+  "schema": "unified-cache-selected-publication-v1",
+  "run_id": "cache_unified_20261005_02",
+  "published_utc": "2026-10-05T00:32:11.653999+00:00",
+  "source_output": "experiments/cache_management/output/data/cache_unified_20261005_02",
+  "execution_record": "docs/agents/acceptance/unified_runtime_20261005/unified_cache_report_02_execution.json",
+  "generator_sha256": "384a67c703b7d5178e32baec173ecc7d18a86e9fd10c6ff5ec883c1c1744274c",
+  "report_helper_sources": {
+    "file": "report_helper_sources.json",
+    "sha256": "ac8cb5959f7a9da42994c336c0bfeb36b65e5a3b60c35e1e1a3c349338c230b0",
+    "snapshot_base": "experiments/cache_management/output/data/cache_unified_20261005_02",
+    "boundary": "Loaded project-module source files on disk at report generation; separate from original captured execution/native identities."
+  },
+  "acceptance": {
+    "memory_rows": 8,
+    "deepseek_static_plans": 5,
+    "nosa_static_schemes": 4,
+    "loaded_helper_files_verified": 38,
+    "both_formal_bench01_sources_verified": true,
+    "physical_capacity_fill_run": false
+  },
+  "assets": {
+    "summary.json": "d33abac8de143d38ced9088545e8237e203206a2fa120638b0571546ce8736dd",
+    "memory.csv": "fca0a78ea498aca470e93bd90997acc03325cbb5c33cc4d0fa5494add0b5ed39",
+    "deepseek_plans.csv": "9958a0e29502f2656ba84de080c6012e7756d8528d69a905534999bbf04be01d",
+    "results.md": "bd13c667131aa8babf4869a1d077b4d3f8d3e8f546d119f42e40458d9d0dce5d",
+    "report_helper_sources.json": "ac8cb5959f7a9da42994c336c0bfeb36b65e5a3b60c35e1e1a3c349338c230b0"
+  },
+  "readme_sha256": "069b7a7f5dc69d0a89c4c40ae8e213ec54cb1193faa4f0adde8cacb19c3d7f82",
+  "retirement": {
+    "source": "experiments/cache_management/output/data/cache_unified_20261005_02/retirement.json",
+    "sha256": "29455ab5654981a6ceda3960a35288315eea3219553c10955e19155091503eb7",
+    "retired_paths": [
+      "experiments/cache_management/output/data/20261003_echo_gpu_candidate_capacity_report_01",
+      "experiments/cache_management/output/data/20261003_echo_gpu_candidate_nh_plan_01",
+      "experiments/cache_management/output/data/20261003_echo_gpu_candidate_p_plan_base_01",
+      "experiments/cache_management/output/data/20261003_echo_gpu_candidate_p_plan_base_headroom_01",
+      "experiments/cache_management/output/data/20261003_echo_gpu_candidate_p_plan_nhmax_01",
+      "experiments/cache_management/output/data/20261003_echo_gpu_candidate_p_plan_nhmax_headroom_01",
+      "experiments/cache_management/output/data/cache_deepseek_nh_20261005_01",
+      "experiments/cache_management/output/data/cache_deepseek_p_base_20261005_01",
+      "experiments/cache_management/output/data/cache_deepseek_p_base_headroom_20261005_01",
+      "experiments/cache_management/output/data/cache_deepseek_p_nhmax_20261005_01",
+      "experiments/cache_management/output/data/cache_deepseek_p_nhmax_headroom_20261005_01",
+      "experiments/cache_management/output/data/cache_unified_20261005_01",
+      "experiments/cache_management/output/log/cache_deepseek_nh_20261005_01",
+      "experiments/cache_management/output/log/cache_deepseek_p_base_20261005_01",
+      "experiments/cache_management/output/log/cache_deepseek_p_base_headroom_20261005_01",
+      "experiments/cache_management/output/log/cache_deepseek_p_nhmax_20261005_01",
+      "experiments/cache_management/output/log/cache_deepseek_p_nhmax_headroom_20261005_01",
+      "experiments/cache_management/report/capacity"
+    ]
+  }
+}

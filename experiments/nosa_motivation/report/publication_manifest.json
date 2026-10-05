@@ -1,0 +1,388 @@
+{
+  "schema": "nosa-motivation-final-bundle-v1",
+  "status": "published",
+  "published_utc": "2026-10-05T01:05:55.875178+00:00",
+  "measurement_run_id": "refactor_final_nosa_bench_20261005_01",
+  "profile_run_id": "refactor_final_nosa_profile_20261005_02",
+  "attention_reference_run_id": "refactor_final_nosa_attention_reference_20261005_01",
+  "execution_source_sha256": "4665ccce226af23f631e619f748369cea28d4a09b99c1947cbb6b030e58f120c",
+  "numerical_receipt": {
+    "path": "docs/agents/acceptance/unified_runtime_20261005/nosa_final/receipt.json",
+    "sha256": "34ee0a120712d353bd57dc350c3667f5ce2f2fc2b8a1607aa1f1a9f00c405bc5",
+    "size_bytes": 1216793
+  },
+  "original_generator_publication": {
+    "path": "experiments/nosa_motivation/output/data/refactor_final_nosa_publication_20261005_02/publication.json",
+    "sha256": "8e58d31d2509308ed0bcdb09a06463e3656b89ac0250a5437d29d0c3bc37b4dc",
+    "size_bytes": 19469
+  },
+  "copied_provenance_snapshot_base": "experiments/nosa_motivation/output/data/refactor_final_nosa_publication_20261005_02",
+  "copied_provenance_boundary": "Copied original publication/report/helper manifests are byte-identical. Their source/ paths resolve under the original output directory above, not under report/final. GPU runtime/native identity remains the original captured identity; later report-only files are recorded separately.",
+  "loaded_report_helpers": {
+    "manifest": {
+      "path": "experiments/nosa_motivation/output/data/refactor_final_nosa_publication_20261005_02/report_helper_sources.json",
+      "sha256": "a58cfbdd7b7b13d9aafb279e5dc235ccaf06398c7e4933e01796261803c24a54",
+      "size_bytes": 13572
+    },
+    "files_verified": 37,
+    "boundary": "Current loaded repository Python modules only, plus pyproject.toml and uv.lock; not captured runtime/native identity, not every possible source. Saved bytes are the files on disk at report generation, not the loaded Python bytecode."
+  },
+  "render_sources": [
+    {
+      "source": "experiments/nosa_motivation/src/plot.py",
+      "snapshot": "experiments/nosa_motivation/output/data/refactor_final_nosa_publication_20261005_02/source/render_selection/plot.py",
+      "sha256": "c64694d6ffba3f410aa85fa7300bb7f94a57b58710b9241988edc7d6091cfaa8"
+    },
+    {
+      "source": "experiments/nosa_motivation/src/render_motivation_summary.py",
+      "snapshot": "experiments/nosa_motivation/output/data/refactor_final_nosa_publication_20261005_02/source/render_selection/render_motivation_summary.py",
+      "sha256": "e0262da849a1c5d866167b7d4a08b5537d892d00513ae0fdd05f78a03c6e62eb"
+    }
+  ],
+  "render_source_boundary": "Exact current disk bytes copied at final selection after rendering. Summary renderer hash also matches its actual render provenance. The trajectory plot did not capture a complete loaded-module inventory; these copies do not claim one.",
+  "generation_execution": {
+    "path": "docs/agents/acceptance/unified_runtime_20261005/nosa_final_publication_execution.json",
+    "sha256": "4e09bcab2960c4ea3f40b672d59f8cc3e253434cdea2f56e4726210aca60c8e9",
+    "size_bytes": 2874
+  },
+  "selected_assets": [
+    {
+      "path": "experiments/nosa_motivation/report/final/acceptance.json",
+      "sha256": "a765294bc1910c7fe623bd031fa2c71deba1d0d455621020eac27ad137d842c9",
+      "size_bytes": 18749,
+      "source": "experiments/nosa_motivation/output/data/refactor_final_nosa_publication_20261005_02/acceptance.json"
+    },
+    {
+      "path": "experiments/nosa_motivation/report/final/api_comparison.json",
+      "sha256": "67228b0cb1dec8d6361bb1c5d4563be56ebeff5807c0eab0e20c1e0dae9ebba9",
+      "size_bytes": 61236,
+      "source": "experiments/nosa_motivation/output/data/refactor_final_nosa_publication_20261005_02/api_comparison.json"
+    },
+    {
+      "path": "experiments/nosa_motivation/report/final/async_overlap.csv",
+      "sha256": "63d9d93cc799aba093b15ec34a6c36670ba0f46e29f26f12b9ef2b51613ce454",
+      "size_bytes": 6724,
+      "source": "experiments/nosa_motivation/output/data/refactor_final_nosa_publication_20261005_02/async_overlap.csv"
+    },
+    {
+      "path": "experiments/nosa_motivation/report/final/audit.json",
+      "sha256": "90e8cbdae76166a12448731ab851f8719dca098c10b760d3fd8ff981aaaff4ea",
+      "size_bytes": 16499,
+      "source": "experiments/nosa_motivation/output/data/refactor_final_nosa_publication_20261005_02/audit.json"
+    },
+    {
+      "path": "experiments/nosa_motivation/report/final/command.json",
+      "sha256": "9005b4ec1360c55e248c18fef4c06bed91083bfa6289308b53f611aca618d105",
+      "size_bytes": 907,
+      "source": "experiments/nosa_motivation/output/data/refactor_final_nosa_publication_20261005_02/command.json"
+    },
+    {
+      "path": "experiments/nosa_motivation/report/final/memory.csv",
+      "sha256": "e6b3e13bd2219273774132825d10bd98b8b08f5771d6e409164f0ce8e26b5f11",
+      "size_bytes": 1403,
+      "source": "experiments/nosa_motivation/output/data/refactor_final_nosa_publication_20261005_02/memory.csv"
+    },
+    {
+      "path": "experiments/nosa_motivation/report/final/per_request.csv",
+      "sha256": "216c13761483d95fe56b7e86b4b51e9c3b33a401297b4257f91dfdeb182bf47e",
+      "size_bytes": 16097,
+      "source": "experiments/nosa_motivation/output/data/refactor_final_nosa_publication_20261005_02/per_request.csv"
+    },
+    {
+      "path": "experiments/nosa_motivation/report/final/profile_review.json",
+      "sha256": "2215a1517dccdcb2df78c6944a0ae4b73fead5554a464c9eb5201660e057cf79",
+      "size_bytes": 55449,
+      "source": "experiments/nosa_motivation/output/data/refactor_final_nosa_publication_20261005_02/profile_review.json"
+    },
+    {
+      "path": "experiments/nosa_motivation/report/final/profile_summary.json",
+      "sha256": "793a8fbf553413699846642a81c32981aec1f337489d01fbb6a733d3ba7ccf03",
+      "size_bytes": 1493523,
+      "source": "experiments/nosa_motivation/output/data/refactor_final_nosa_publication_20261005_02/profile_summary.json"
+    },
+    {
+      "path": "experiments/nosa_motivation/report/final/publication.json",
+      "sha256": "8e58d31d2509308ed0bcdb09a06463e3656b89ac0250a5437d29d0c3bc37b4dc",
+      "size_bytes": 19469,
+      "source": "experiments/nosa_motivation/output/data/refactor_final_nosa_publication_20261005_02/publication.json"
+    },
+    {
+      "path": "experiments/nosa_motivation/report/final/report_helper_sources.json",
+      "sha256": "a58cfbdd7b7b13d9aafb279e5dc235ccaf06398c7e4933e01796261803c24a54",
+      "size_bytes": 13572,
+      "source": "experiments/nosa_motivation/output/data/refactor_final_nosa_publication_20261005_02/report_helper_sources.json"
+    },
+    {
+      "path": "experiments/nosa_motivation/report/final/report_provenance.json",
+      "sha256": "57791140db4a0c50c3cfa59b1c73b031641e6bedfd512af8e1a3fc52ed3de676",
+      "size_bytes": 484,
+      "source": "experiments/nosa_motivation/output/data/refactor_final_nosa_publication_20261005_02/report_provenance.json"
+    },
+    {
+      "path": "experiments/nosa_motivation/report/final/results.md",
+      "sha256": "cb6b068edf33a43d8b7b7d7ff05a8f9de57789cfab2cfcb5583343cd7c483924",
+      "size_bytes": 2576,
+      "source": "experiments/nosa_motivation/output/data/refactor_final_nosa_publication_20261005_02/results.md"
+    },
+    {
+      "path": "experiments/nosa_motivation/report/final/summary.csv",
+      "sha256": "730f151a4bdad6d01d7d9dbafdd39b478e79ba5a9fdac72a1c23b4465440a74b",
+      "size_bytes": 2743,
+      "source": "experiments/nosa_motivation/output/data/refactor_final_nosa_publication_20261005_02/summary.csv"
+    },
+    {
+      "path": "experiments/nosa_motivation/report/final/summary.json",
+      "sha256": "4e5c46afc94e103810985cdf92c7cb087f5469ae9319d817d749fddc87ca7260",
+      "size_bytes": 7406,
+      "source": "experiments/nosa_motivation/output/data/refactor_final_nosa_publication_20261005_02/summary.json"
+    },
+    {
+      "path": "experiments/nosa_motivation/report/final/figures/captions.json",
+      "sha256": "35e0e344c59b492275b1a82b3196ce74b6159bc5f5fd1454907031aff0cb4a03",
+      "size_bytes": 1544,
+      "source": "experiments/nosa_motivation/output/data/refactor_final_nosa_summary_20261005_02/captions.json"
+    },
+    {
+      "path": "experiments/nosa_motivation/report/final/figures/latency_focus.pdf",
+      "sha256": "f6fb8613a8cb64509446c67e2608442278ec38534f942b9b715e217db51bb9b9",
+      "size_bytes": 19320,
+      "source": "experiments/nosa_motivation/output/data/refactor_final_nosa_summary_20261005_02/latency_focus.pdf"
+    },
+    {
+      "path": "experiments/nosa_motivation/report/final/figures/latency_focus.png",
+      "sha256": "abc032bcfc1acebf6d756ded13e7e964cd50575169eebe94d79c7bed008c5ecd",
+      "size_bytes": 156791,
+      "source": "experiments/nosa_motivation/output/data/refactor_final_nosa_summary_20261005_02/latency_focus.png"
+    },
+    {
+      "path": "experiments/nosa_motivation/report/final/figures/latency_focus.svg",
+      "sha256": "d8fe767b06fd2d519ce77db27eae2ab6e3f64fa5c48ab390ff77572ee0e2ac8e",
+      "size_bytes": 16012,
+      "source": "experiments/nosa_motivation/output/data/refactor_final_nosa_summary_20261005_02/latency_focus.svg"
+    },
+    {
+      "path": "experiments/nosa_motivation/report/final/figures/latency_plot_data.csv",
+      "sha256": "4513930f50b28dd4870780b5059f8381df6b9dcda2af09f1a4ddf0b7c93a0d92",
+      "size_bytes": 665,
+      "source": "experiments/nosa_motivation/output/data/refactor_final_nosa_summary_20261005_02/latency_plot_data.csv"
+    },
+    {
+      "path": "experiments/nosa_motivation/report/final/figures/overlap_plot_data.csv",
+      "sha256": "53e59e5262d300c2815f9497ed87330d6854678048b250c8a0732e7058a7714a",
+      "size_bytes": 8855,
+      "source": "experiments/nosa_motivation/output/data/refactor_final_nosa_summary_20261005_02/overlap_plot_data.csv"
+    },
+    {
+      "path": "experiments/nosa_motivation/report/final/figures/payload_plot_data.csv",
+      "sha256": "2d321450a37917f48daf2985b28048d8b5eb31f082016652f3dfc1c1039402f7",
+      "size_bytes": 244,
+      "source": "experiments/nosa_motivation/output/data/refactor_final_nosa_summary_20261005_02/payload_plot_data.csv"
+    },
+    {
+      "path": "experiments/nosa_motivation/report/final/figures/plot_data.json",
+      "sha256": "c8ebf2d72c7ffec07d603eb26ab38af37f926b1169fd2ade1f1b834160b8a1bd",
+      "size_bytes": 57029,
+      "source": "experiments/nosa_motivation/output/data/refactor_final_nosa_summary_20261005_02/plot_data.json"
+    },
+    {
+      "path": "experiments/nosa_motivation/report/final/figures/provenance.json",
+      "sha256": "2daffc0a6e7f52cacc2b983b18a9b49fb48155b134ac017668a3c959cacf173b",
+      "size_bytes": 6594,
+      "source": "experiments/nosa_motivation/output/data/refactor_final_nosa_summary_20261005_02/provenance.json"
+    },
+    {
+      "path": "experiments/nosa_motivation/report/final/figures/transfer_overlap.pdf",
+      "sha256": "8e6a778f136273cde09b4b96340247f79d097eb7f728fac6deda85e6ba2f9898",
+      "size_bytes": 21479,
+      "source": "experiments/nosa_motivation/output/data/refactor_final_nosa_summary_20261005_02/transfer_overlap.pdf"
+    },
+    {
+      "path": "experiments/nosa_motivation/report/final/figures/transfer_overlap.png",
+      "sha256": "78a7e47a0b53d280cb41e9f55f525dbf70f3b34a3f679936aba0bd645385b6a2",
+      "size_bytes": 187551,
+      "source": "experiments/nosa_motivation/output/data/refactor_final_nosa_summary_20261005_02/transfer_overlap.png"
+    },
+    {
+      "path": "experiments/nosa_motivation/report/final/figures/transfer_overlap.svg",
+      "sha256": "029c0af88ceff42f1403a715f2bd85d738566302c3e1f73aa234c351f61c3c37",
+      "size_bytes": 31532,
+      "source": "experiments/nosa_motivation/output/data/refactor_final_nosa_summary_20261005_02/transfer_overlap.svg"
+    },
+    {
+      "path": "experiments/nosa_motivation/report/final/figures/latency_per_request.png",
+      "sha256": "007317e4bcbddfe1d8cd72a5a1736f0a65f3cf2cb6eda95d7186186b442c5df6",
+      "size_bytes": 95407,
+      "source": "experiments/nosa_motivation/output/data/refactor_final_nosa_plots_20261005_01/latency_per_request.png"
+    },
+    {
+      "path": "experiments/nosa_motivation/report/final/figures/latency_per_request.svg",
+      "sha256": "29081af7ace33670db8b9f5bee2a53ce3a1ec5199df89e6770bed0a7c4a76b08",
+      "size_bytes": 64108,
+      "source": "experiments/nosa_motivation/output/data/refactor_final_nosa_plots_20261005_01/latency_per_request.svg"
+    },
+    {
+      "path": "experiments/nosa_motivation/report/final/figures/plot_provenance.json",
+      "sha256": "f06b0b41c8d659a31c19b9c60d3c905a167b29752e1c349975e62deb5b864dcb",
+      "size_bytes": 724,
+      "source": "experiments/nosa_motivation/output/data/refactor_final_nosa_plots_20261005_01/plot_provenance.json"
+    },
+    {
+      "path": "experiments/nosa_motivation/report/three_version/comparison.json",
+      "sha256": "0f4275d537c67c307241da5cae3f8e47a800f62450b76168b37190000ca0b057",
+      "size_bytes": 430591,
+      "source": "preserved byte-identical accepted three-version selection"
+    },
+    {
+      "path": "experiments/nosa_motivation/report/three_version/request_samples.csv",
+      "sha256": "8db2a5c36b75d93db83997c8c0d033daa8501773f2b663f49000eed949fac77a",
+      "size_bytes": 239485,
+      "source": "preserved byte-identical accepted three-version selection"
+    },
+    {
+      "path": "experiments/nosa_motivation/report/three_version/results.md",
+      "sha256": "18b9a381795b2f432a6567ac52a61bc26806b1b1977546623fa47809465b000e",
+      "size_bytes": 4897,
+      "source": "preserved byte-identical accepted three-version selection"
+    }
+  ],
+  "readme": {
+    "path": "experiments/nosa_motivation/README.md",
+    "sha256": "215aa0c305cb458dcfe7cc790e35ab6f7c1e1af2298834dd3cdc986ac6f4d4e6",
+    "size_bytes": 18338
+  },
+  "figures_visually_reviewed": [
+    "latency_focus.png",
+    "transfer_overlap.png",
+    "latency_per_request.png"
+  ],
+  "acceptance_boundary": "Numerical, measurement, profile and independent attention integrity passed. Async end-to-end speedup and every-sample page/stripe 90% targets remain failed; retained controls show residual refactor overhead. No physical-capacity, GR representativeness or task-quality claim.",
+  "retirement": {
+    "status": "completed",
+    "paths": [
+      {
+        "path": "experiments/nosa_motivation/output/data/nosa_motivation_poolscan_sm90_20261004_01",
+        "existed": true,
+        "file_entries": 259,
+        "apparent_bytes": 160463149
+      },
+      {
+        "path": "experiments/nosa_motivation/output/data/nosa_motivation_poolscan_profile_sm90_20261004_01",
+        "existed": true,
+        "file_entries": 577,
+        "apparent_bytes": 312946461
+      },
+      {
+        "path": "experiments/nosa_motivation/output/data/nosa_attention_poolscan_sm90_20261004_01",
+        "existed": true,
+        "file_entries": 2301,
+        "apparent_bytes": 24019250739
+      },
+      {
+        "path": "experiments/nosa_motivation/output/log/nosa_motivation_poolscan_sm90_20261004_01",
+        "existed": true,
+        "file_entries": 2,
+        "apparent_bytes": 10150
+      },
+      {
+        "path": "experiments/nosa_motivation/output/log/nosa_motivation_poolscan_profile_sm90_20261004_01",
+        "existed": true,
+        "file_entries": 2,
+        "apparent_bytes": 6313
+      },
+      {
+        "path": "experiments/nosa_motivation/output/log/nosa_attention_poolscan_sm90_20261004_01",
+        "existed": true,
+        "file_entries": 2,
+        "apparent_bytes": 147
+      },
+      {
+        "path": "experiments/nosa_motivation/output/profile/nosa_motivation_poolscan_profile_sm90_20261004_01",
+        "existed": true,
+        "file_entries": 24,
+        "apparent_bytes": 3183383626
+      },
+      {
+        "path": "experiments/nosa_motivation/report/nosa_motivation_poolscan_sm90_20261004_01",
+        "existed": true,
+        "file_entries": 19,
+        "apparent_bytes": 1703006
+      },
+      {
+        "path": "experiments/nosa_motivation/report/summary_20261005_01",
+        "existed": true,
+        "file_entries": 12,
+        "apparent_bytes": 506092
+      },
+      {
+        "path": "experiments/nosa_motivation/output/data/report_render_20261005_01",
+        "existed": true,
+        "file_entries": 12,
+        "apparent_bytes": 506092
+      },
+      {
+        "path": "experiments/nosa_motivation/output/data/refactor_nosa_bench_20261005_01",
+        "existed": true,
+        "file_entries": 143,
+        "apparent_bytes": 28568019
+      },
+      {
+        "path": "experiments/nosa_motivation/output/log/refactor_nosa_bench_20261005_01",
+        "existed": true,
+        "file_entries": 2,
+        "apparent_bytes": 7909
+      },
+      {
+        "path": "experiments/nosa_motivation/output/data/refactor_nosa_bench_20261005_02",
+        "existed": true,
+        "file_entries": 143,
+        "apparent_bytes": 28568100
+      },
+      {
+        "path": "experiments/nosa_motivation/output/log/refactor_nosa_bench_20261005_02",
+        "existed": true,
+        "file_entries": 2,
+        "apparent_bytes": 7909
+      },
+      {
+        "path": "experiments/nosa_motivation/output/data/refactor_nosa_bench_20261005_03",
+        "existed": true,
+        "file_entries": 143,
+        "apparent_bytes": 28568019
+      },
+      {
+        "path": "experiments/nosa_motivation/output/log/refactor_nosa_bench_20261005_03",
+        "existed": true,
+        "file_entries": 2,
+        "apparent_bytes": 7909
+      },
+      {
+        "path": "experiments/nosa_motivation/output/data/refactor_nosa_three_version_20261005_01",
+        "existed": true,
+        "file_entries": 3,
+        "apparent_bytes": 672445
+      }
+    ],
+    "file_entries": 3648,
+    "apparent_bytes": 27765176085
+  },
+  "retained_controls": [
+    "refactor_p0_nosa_bench_20261005_01",
+    "refactor_p0_nosa_bench_20261005_02",
+    "refactor_p0_nosa_bench_20261005_03",
+    "refactor_p0_nosa_bench_20261005_04",
+    "refactor_final_nosa_bench_20261005_01",
+    "refactor_final_nosa_bench_20261005_02",
+    "refactor_final_nosa_bench_20261005_03",
+    "refactor_final_nosa_bench_20261005_04"
+  ],
+  "t007_numerical_reference": {
+    "path": "docs/agents/acceptance/unified_runtime_20261005/t007_reference/evidence.json",
+    "sha256": "8d1ed1a52a2296a3af556e59b81d81b7eef6cf7f5220ed57298c28c061cdb93c",
+    "size_bytes": 5495
+  },
+  "post_capture_style_source_delta": {
+    "path": "docs/agents/acceptance/unified_runtime_20261005/static_style_source_delta.json",
+    "sha256": "87a2766d6147fbf60dd1e00124c5019d38c84c91e32b89a49277d578a4c957e0",
+    "size_bytes": 4121
+  }
+}

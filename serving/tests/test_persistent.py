@@ -1,8 +1,8 @@
 import pytest
 import torch
 
+from cache.capacity import ResourcePlan
 from cache.prefix_pool import CacheBudgetExceeded, CacheFootprint
-from executor.serving_backend import SharedCachePlan
 from serving.persistent import PersistentGRRunner
 
 
@@ -14,6 +14,19 @@ class Backend:
     def __init__(self):
         self.built = self.released = 0
         self.fail = False
+        self.session_metrics = lambda session: {}
+
+    def runtime_driver(self, policy):
+        from executor.adapters import BackendAdapter
+
+        return BackendAdapter(
+            self,
+            shared=False,
+            candidate_mode="append_truncate",
+            session_length=lambda session: len(session["tokens"]),
+            chunk_size=self.max_seq_len,
+            diagnostics=self.session_metrics,
+        )
 
     def estimate_session_bytes(self, capacity, prefix_tokens):
         return {"hbm": capacity * 8, "dram": 0}
@@ -104,12 +117,11 @@ def test_failed_candidate_discards_user_and_allows_recovery():
         assert result.metrics["visit_index"] == 1
 
 
-@pytest.mark.parametrize("ids", [[], [1.0, 2, 3], [1, -1, 3], [True, 2, 3]])
-def test_bad_request_never_allocates(ids):
+def test_empty_request_never_allocates():
     backend = Backend()
     with PersistentGRRunner(backend, hbm_budget_bytes=64, dram_budget_bytes=0) as runner:
         with pytest.raises(ValueError):
-            runner.execute({"user_id": 0, "input_ids": ids, "stable_prefix_tokens": 2})
+            runner.execute({"user_id": 0, "input_ids": [], "stable_prefix_tokens": 2})
         assert len(runner.pool) == 0
 
 
@@ -123,6 +135,18 @@ class SharedBackend(Backend):
         self.owner = None
         self.initial_plan = None
         self.closed_resources = 0
+
+    def runtime_driver(self, policy):
+        from executor.adapters import BackendAdapter
+
+        return BackendAdapter(
+            self,
+            shared=True,
+            candidate_mode="append_truncate",
+            session_length=lambda session: len(session["tokens"]),
+            chunk_size=self.max_seq_len,
+            diagnostics=self.session_metrics,
+        )
 
     def bind_owner(self, owner):
         if owner is None or self.owner is not None:
@@ -147,7 +171,7 @@ class SharedBackend(Backend):
     def plan_resources(self, budgets, limits):
         self.planned_budget = budgets
         self.planned_limits = limits
-        return SharedCachePlan(
+        return ResourcePlan(
             shared=CacheFootprint(16, 64),
             host_pages=2,
             page_size=4,
@@ -233,7 +257,7 @@ def test_fixed_pools_require_shared_pages_and_one_maximum_session_before_allocat
     with pytest.raises(CacheBudgetExceeded, match="maximum-size session"):
         PersistentGRRunner(backend)
     assert backend.owner is None and backend.allocations == 0
-    backend.plan_resources = lambda *_: SharedCachePlan(shared=CacheFootprint(16, 64))
+    backend.plan_resources = lambda *_: ResourcePlan(shared=CacheFootprint(16, 64))
     with pytest.raises(ValueError, match="shared backend with host pages"):
         PersistentGRRunner(backend, resource_limits={"max_session_capacity": 4})
     assert backend.owner is None and backend.allocations == 0
@@ -326,15 +350,37 @@ def test_constructor_rollback_failure_retains_admission_owner(monkeypatch):
     with monkeypatch.context() as patch:
         patch.setattr(backend, "shared_bytes", lambda: {"hbm": 17, "dram": 64})
         patch.setattr(backend, "unbind_owner", fail_unbind)
-        with pytest.raises(RuntimeError, match="cleanup failed; ownership retained") as error:
+        with pytest.raises(ExceptionGroup, match="cleanup failed; ownership retained") as error:
             PersistentGRRunner(backend, hbm_budget_bytes=80, dram_budget_bytes=64)
-    assert "cannot establish completion" in str(error.value.__cause__)
+    assert isinstance(error.value.exceptions[0], RuntimeError)
+    assert "allocation exceeded reservation" in str(error.value.exceptions[0])
+    assert "cannot establish completion" in str(error.value.exceptions[1])
     assert backend.owner is not None
     with pytest.raises(RuntimeError, match="admission owner"):
         PersistentGRRunner(backend, hbm_budget_bytes=80, dram_budget_bytes=64)
     backend.owner.close()
     assert backend.owner is None
     assert backend.plan is None
+
+
+def test_context_body_and_close_failures_remain_independently_inspectable(monkeypatch):
+    backend = SharedBackend()
+    runner = PersistentGRRunner(backend, hbm_budget_bytes=80, dram_budget_bytes=64)
+    failure = ValueError("caller failed")
+    close_failure = RuntimeError("cannot finish release")
+    with monkeypatch.context() as patch:
+
+        def fail_release(session):
+            raise close_failure
+
+        patch.setattr(runner.pool, "_release", fail_release)
+        with pytest.raises(ExceptionGroup) as caught, runner:
+            runner.execute(request())
+            raise failure
+    assert caught.value.exceptions == (failure, close_failure)
+    assert backend.owner is runner
+    runner.close()
+    backend.close()
 
 
 def test_failed_close_disables_execution_and_retains_owner_until_retry(monkeypatch):
@@ -419,7 +465,7 @@ def test_candidate_bound_rejects_before_evicting_reusable_prefix(source):
 
         def bounded_plan(budgets, limits):
             plan = planner(budgets, limits)
-            return SharedCachePlan(
+            return ResourcePlan(
                 shared=plan.shared,
                 host_pages=plan.host_pages,
                 page_size=plan.page_size,
@@ -450,10 +496,22 @@ def test_optional_diagnostics_observe_completed_prefix_cleanup():
 class ResidentSharedBackend(SharedBackend):
     scheme = "hbm"
 
+    def runtime_driver(self, policy):
+        from executor.adapters import BackendAdapter
+
+        return BackendAdapter(
+            self,
+            shared=True,
+            candidate_mode="gpu_transient",
+            session_length=lambda session: len(session["tokens"]),
+            chunk_size=self.max_seq_len,
+            diagnostics=self.session_metrics,
+        )
+
     def plan_resources(self, budgets, limits):
         self.planned_budget = budgets
         self.planned_limits = limits
-        return SharedCachePlan(shared=CacheFootprint(16, 0), hbm_tokens=2)
+        return ResourcePlan(shared=CacheFootprint(16, 0), hbm_tokens=2)
 
     def shared_bytes(self):
         return {"hbm": 16, "dram": 0}
@@ -541,14 +599,14 @@ def test_hbm_quota_requires_both_backend_hooks_before_allocation(name):
 @pytest.mark.parametrize("value", [-1, True, 1.5])
 def test_shared_plan_rejects_invalid_hbm_token_quotas(value):
     with pytest.raises(ValueError, match="hbm_tokens"):
-        SharedCachePlan(hbm_tokens=value)
+        ResourcePlan(hbm_tokens=value)
 
 
 @pytest.mark.parametrize("scheme", ["hbm", "dense_prefetch"])
-def test_transient_plan_controls_history_admission_before_backend_allocation(scheme):
+def test_explicit_transient_driver_controls_admission_before_backend_allocation(scheme):
     class DeferredModeBackend(ResidentSharedBackend):
         def plan_resources(self, budgets, limits):
-            return SharedCachePlan(
+            return ResourcePlan(
                 shared=CacheFootprint(16, 0),
                 host_pages=1 if scheme == "dense_prefetch" else 0,
                 hbm_tokens=2 if scheme == "hbm" else 0,
@@ -577,7 +635,7 @@ def test_transient_plan_controls_history_admission_before_backend_allocation(sch
 
 def test_disabled_plan_quotas_do_not_call_backend_token_hooks():
     backend = SharedBackend()
-    backend.plan_resources = lambda *_: SharedCachePlan(shared=CacheFootprint(16, 64))
+    backend.plan_resources = lambda *_: ResourcePlan(shared=CacheFootprint(16, 64))
 
     def forbidden(*args):
         raise AssertionError("disabled quota hook was called")

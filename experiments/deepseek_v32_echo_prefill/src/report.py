@@ -43,7 +43,7 @@ LEGACY_REQUIRED_SOURCES = frozenset(
         f"experiments/{EXPERIMENT}/src/measure.py",
     }
 )
-REQUIRED_SOURCES = frozenset(
+PRE_REFACTOR_REQUIRED_SOURCES = frozenset(
     {
         "models/deepseek_v32/echo_model.py",
         "models/deepseek_v32/echo_block.py",
@@ -63,6 +63,25 @@ REQUIRED_SOURCES = frozenset(
         f"experiments/{EXPERIMENT}/src/measure.py",
     }
 )
+
+
+REQUIRED_SOURCES = (
+    PRE_REFACTOR_REQUIRED_SOURCES
+    - {
+        "models/deepseek_v32/echo_model.py",
+        "models/deepseek_v32/echo_block.py",
+        "models/deepseek_v32/echo_attention.py",
+        "models/deepseek_v32/echo_infer.py",
+    }
+) | {
+    "models/deepseek_v32/config.py",
+    "models/deepseek_v32/checkpoint.py",
+    "models/deepseek_v32/rotary.py",
+    "models/deepseek_v32/projections.py",
+    "models/deepseek_v32/layers.py",
+    "models/deepseek_v32/attention.py",
+    "models/deepseek_v32/model.py",
+}
 
 
 class InvalidResult(ValueError):
@@ -105,7 +124,12 @@ def validate_sources_and_request(result, directory):
     require(
         isinstance(sources, dict)
         and any(
-            required <= sources.keys() for required in (LEGACY_REQUIRED_SOURCES, REQUIRED_SOURCES)
+            required <= sources.keys()
+            for required in (
+                LEGACY_REQUIRED_SOURCES,
+                PRE_REFACTOR_REQUIRED_SOURCES,
+                REQUIRED_SOURCES,
+            )
         ),
         "Required implementation snapshots are missing",
     )

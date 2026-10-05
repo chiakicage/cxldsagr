@@ -5,7 +5,8 @@ import math
 import pytest
 import torch
 
-from layers.attention import AttentionContext, ResidentLayerView
+from models.attention_contracts import AttentionContext
+from models.nosa.attention import ResidentLayerView
 from models.nosa.indexer import NosaIndexer
 from models.nosa.scoring import NosaAttentionState, cis_scores, compress_sequence
 

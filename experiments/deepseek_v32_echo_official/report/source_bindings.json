@@ -1,0 +1,55 @@
+{
+  "schema": "deepseek-publication-source-bindings-v1",
+  "kind": "official",
+  "created_utc": "2026-10-05T00:44:33.876636+00:00",
+  "publication_output": "experiments/deepseek_v32_echo_official/output/data/refactor_final_official_publication_20261005_01",
+  "binding_stage": "Later CPU-only publication source selection and verification",
+  "helper_boundary": "Loaded module files were collected now from current on-disk bytes, not at prior analysis execution. Importing these modules does not rerun the earlier analyses or establish complete historical loaded-code identity. Runtime/native identities remain in the original accepted runs.",
+  "helper_manifest_sha256": "7cc11f7f901f318f40927b111141407a1a06663618a6c8515016dd7857388653",
+  "helper_file_count": 19,
+  "generators": [
+    {
+      "module": "experiments.deepseek_v32_echo_official.src.report",
+      "path": "experiments/deepseek_v32_echo_official/src/report.py",
+      "sha256": "130799c8e78190b50fca40a97535284257e9169f4dd153622c2bd9abdfd5cf13",
+      "snapshot_path": "source/generators/experiments/deepseek_v32_echo_official/src/report.py",
+      "captured_profile_copy_exists": true,
+      "captured_profile_sha256": "130799c8e78190b50fca40a97535284257e9169f4dd153622c2bd9abdfd5cf13",
+      "matches_captured_profile_copy": true
+    },
+    {
+      "module": "experiments.deepseek_v32_echo_official.src.profile_report",
+      "path": "experiments/deepseek_v32_echo_official/src/profile_report.py",
+      "sha256": "00429b1b2ee449620581ce21c0c83360777ce723e2d103ea6dcd5ac0dde98960",
+      "snapshot_path": "source/generators/experiments/deepseek_v32_echo_official/src/profile_report.py",
+      "captured_profile_copy_exists": true,
+      "captured_profile_sha256": "00429b1b2ee449620581ce21c0c83360777ce723e2d103ea6dcd5ac0dde98960",
+      "matches_captured_profile_copy": true
+    },
+    {
+      "module": "experiments.deepseek_v32_echo_official.src.compare_existing",
+      "path": "experiments/deepseek_v32_echo_official/src/compare_existing.py",
+      "sha256": "5f97f1a4aa908c9ccde6a3216c695a3a91eaee6d1dca323b4a4a0e2a071ee3e8",
+      "snapshot_path": "source/generators/experiments/deepseek_v32_echo_official/src/compare_existing.py",
+      "captured_profile_copy_exists": true,
+      "captured_profile_sha256": "a7517e7c3522d2a900050837d4115eda9b798f539844151b183cf4b5e552ff5d",
+      "matches_captured_profile_copy": false,
+      "delta_path": "source/deltas/compare_existing.patch",
+      "delta_sha256": "8a331e94bbfe537162afa51f384d803849324f42bc89db0e30fbd46fc71a9964"
+    }
+  ],
+  "source_snapshots_location": "experiments/deepseek_v32_echo_official/output/data/refactor_final_official_publication_20261005_01/source",
+  "later_provenance_helper_delta": {
+    "captured_sha256": "910fca0ee93420721b53b362960798104b58c44000c178e29ba5d9cad5c1bd1b",
+    "publication_sha256": "0fde027cf65530a75072893c88c522cc85ea990b72e67ce7515b74dbb6d2fa67",
+    "all_preexisting_functions_ast_equal": true,
+    "only_added_function": "snapshot_report_helpers",
+    "only_added_import": "sys",
+    "boundary": "The new function was not called by the completed earlier analysis commands. The full current module hash must not be substituted for the captured helper hash. The AST audit confirms the existing functions and other module statements are unchanged."
+  },
+  "comparison_generator": {
+    "path": "experiments/deepseek_v32_echo_official/src/compare_existing.py",
+    "sha256": "5f97f1a4aa908c9ccde6a3216c695a3a91eaee6d1dca323b4a4a0e2a071ee3e8"
+  },
+  "binding_driver_sha256": "2a8c640dd717ca8204d9a31ac3c2b516d75c33f9b21d5a79d4ea4a6422acb984"
+}

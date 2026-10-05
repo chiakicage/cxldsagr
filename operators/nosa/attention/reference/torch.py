@@ -2,7 +2,7 @@
 
 import torch
 
-from layers.attention import BlockSelection
+from models.attention_contracts import BlockSelection
 from operators.nosa.attention.common import _validate_inputs
 
 

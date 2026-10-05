@@ -3,7 +3,8 @@
 import pytest
 import torch
 
-from layers.attention import AttentionContext, ResidentLayerView
+from models.attention_contracts import AttentionContext
+from models.nosa.attention import ResidentLayerView
 from models.nosa.indexer import NosaIndexer, compressed_scores_reference
 
 requires_cuda = pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA unavailable")

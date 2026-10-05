@@ -1,96 +1,355 @@
 {
   "status": "published",
-  "published_at_utc": "2026-10-04T08:28:12.479406+00:00",
-  "run_id": "nosa_pattern_flags_20261004_01",
-  "new_analysis_runs": [
-    "qa64_environment_compare_flags_20261004_01",
-    "estimate32_denseflags_20261004_01",
-    "estimate64_denseflags_20261004_01",
-    "overlap32_64_full_denseflags_20261004_01",
-    "overlap32_64_half_denseflags_20261004_01",
-    "threshold32_64_half_denseflags_20261004_01"
-  ],
-  "readme_sha256": "4933bf5d3f008f9646543433a79ddaae75271987c4a530cfca16aac0fb3fb227",
-  "root_audit_sha256": "874897e2940a37ff52a1fc99f4ed7c8af43f7026a1b503301c9576676ab5ddf6",
-  "removed_directories": [
-    "experiments/nosa_indexer_pattern_65536_1024/output/data/nosa_sparse_pattern_h200_gpu1_20260928_01",
-    "experiments/nosa_indexer_pattern_65536_1024/output/log/nosa_sparse_pattern_h200_gpu1_20260928_01",
-    "experiments/nosa_indexer_pattern_65536_1024/output/profile/nosa_sparse_pattern_h200_gpu1_20260928_01",
-    "experiments/nosa_indexer_pattern_65536_1024/output/data/qa64_environment_compare_20260928_01",
-    "experiments/nosa_indexer_pattern_65536_1024/output/log/qa64_environment_compare_20260928_01",
-    "experiments/nosa_indexer_pattern_65536_1024/output/profile/qa64_environment_compare_20260928_01",
-    "experiments/nosa_indexer_pattern_65536_1024/output/data/estimate32_h200_pcie50_20260928_01",
-    "experiments/nosa_indexer_pattern_65536_1024/output/log/estimate32_h200_pcie50_20260928_01",
-    "experiments/nosa_indexer_pattern_65536_1024/output/profile/estimate32_h200_pcie50_20260928_01",
-    "experiments/nosa_indexer_pattern_65536_1024/output/data/estimate64_h200_pcie50_20260928_01",
-    "experiments/nosa_indexer_pattern_65536_1024/output/log/estimate64_h200_pcie50_20260928_01",
-    "experiments/nosa_indexer_pattern_65536_1024/output/profile/estimate64_h200_pcie50_20260928_01",
-    "experiments/nosa_indexer_pattern_65536_1024/output/data/overlap32_64_full_mfu_20260928_01",
-    "experiments/nosa_indexer_pattern_65536_1024/output/log/overlap32_64_full_mfu_20260928_01",
-    "experiments/nosa_indexer_pattern_65536_1024/output/profile/overlap32_64_full_mfu_20260928_01",
-    "experiments/nosa_indexer_pattern_65536_1024/output/data/overlap32_64_half_mfu_20260928_01",
-    "experiments/nosa_indexer_pattern_65536_1024/output/log/overlap32_64_half_mfu_20260928_01",
-    "experiments/nosa_indexer_pattern_65536_1024/output/profile/overlap32_64_half_mfu_20260928_01",
-    "experiments/nosa_indexer_pattern_65536_1024/output/data/threshold32_64_half_mfu_20260928_01",
-    "experiments/nosa_indexer_pattern_65536_1024/output/log/threshold32_64_half_mfu_20260928_01",
-    "experiments/nosa_indexer_pattern_65536_1024/output/profile/threshold32_64_half_mfu_20260928_01",
-    "experiments/nosa_gr_65536_1024/output/data/dense_h200_gpu1_20260928_01",
-    "experiments/nosa_gr_65536_1024/output/log/dense_h200_gpu1_20260928_01",
-    "experiments/nosa_gr_65536_1024/output/profile/dense_h200_gpu1_20260928_01"
-  ],
-  "removed_old_only_report_files": [],
-  "retained_inputs_verified": [
-    "qa32_h200_gpu1_20260928_01",
-    "query_aware_fp32_65536_1024_20260925_01",
-    "qa64_reanalysis_20260928_01",
-    "components32_pcie50_20260928_01",
-    "components64_pcie50_20260928_01",
-    "distribution32_64_20260928_01"
-  ],
-  "dense_request_migration": {
-    "old_run": "dense_h200_gpu1_20260928_01",
-    "new_run": "dense_wrapper_20261004_01",
-    "sha256": "0bbabf07bc72f9804dbc2e9644cf708e21eafe237631f4a56c64b20f9cda7f2f",
-    "bytes_equal": true
+  "current_capture": "refactor_nosa_pattern_capture_20261005_01",
+  "capture_metadata_sha256": "b7cecf8a98966e1ba86a300fc4393c87a7477124cefd396bdd4ea11d980d9a17",
+  "independent_observer_check": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-run-tmp/refactor_nosa_pattern_check_20261005_01",
+  "selected_artifacts": {
+    "qa32/capacity_by_layer.png": {
+      "source": "experiments/nosa_indexer_pattern_65536_1024/report/qa32/capacity_by_layer.png",
+      "sha256": "19519b1f430e79df94b8ffc59e8083a9c56befea4a651762dc3df33af912674a"
+    },
+    "qa32/capacity_by_layer.svg": {
+      "source": "experiments/nosa_indexer_pattern_65536_1024/report/qa32/capacity_by_layer.svg",
+      "sha256": "8273c7aeffa9ed039eddf5e35f8cdaabd21986d3f4afb69c251345b0ad3c00f5"
+    },
+    "qa32/head_stats.csv": {
+      "source": "experiments/nosa_indexer_pattern_65536_1024/report/qa32/head_stats.csv",
+      "sha256": "88aaac87c61e2c9c8897be75652daec653d6480913c50404e2e92a05f82b1f3d"
+    },
+    "qa32/layer_stats.csv": {
+      "source": "experiments/nosa_indexer_pattern_65536_1024/report/qa32/layer_stats.csv",
+      "sha256": "ff680ab0c0843207e445450470f0b77b334f07e4772da2d6858ca27c73949aae"
+    },
+    "qa32/metadata.json": {
+      "source": "experiments/nosa_indexer_pattern_65536_1024/report/qa32/metadata.json",
+      "sha256": "f3713330c17a67a498e2c31a5653c1a0aef1e546ee3073086ba92d3c71ed2343"
+    },
+    "qa32/summary.json": {
+      "source": "experiments/nosa_indexer_pattern_65536_1024/report/qa32/summary.json",
+      "sha256": "4e9b4f46fa4cff7f9bff1908515ddf2b4047094efbb7fdbb784e561a6eb792d3"
+    },
+    "qa32/union_heatmap.png": {
+      "source": "experiments/nosa_indexer_pattern_65536_1024/report/qa32/union_heatmap.png",
+      "sha256": "ab0ce2737072fdbbfab4986832c08b3906021125fb3c8e0ef8525d172d79860a"
+    },
+    "qa32/union_heatmap.svg": {
+      "source": "experiments/nosa_indexer_pattern_65536_1024/report/qa32/union_heatmap.svg",
+      "sha256": "e3cd52bbbaa6aab813ae9ea8129a74b291b916f25947102c2a81e3e7e271e592"
+    },
+    "qa64/analysis_provenance.json": {
+      "source": "experiments/nosa_indexer_pattern_65536_1024/report/qa64/analysis_provenance.json",
+      "sha256": "d63ebccefa24cd179bbfa3e500c964ebe986d3fb9f3aed27b7fe95b26caaa9c9"
+    },
+    "qa64/capacity_by_layer.png": {
+      "source": "experiments/nosa_indexer_pattern_65536_1024/report/qa64/capacity_by_layer.png",
+      "sha256": "74cef85a973250afb806cc3bca7be824e52039b7800130743056b8d5633f7a2c"
+    },
+    "qa64/capacity_by_layer.svg": {
+      "source": "experiments/nosa_indexer_pattern_65536_1024/report/qa64/capacity_by_layer.svg",
+      "sha256": "623072669babe830114d1bbf7e76ec61f70b34e8961b6dc6ef1de25ebd9de9da"
+    },
+    "qa64/head_stats.csv": {
+      "source": "experiments/nosa_indexer_pattern_65536_1024/report/qa64/head_stats.csv",
+      "sha256": "5010f47d257df1771c913b9c4cf9f5022047062b56b8c724763e16d9f44c9b40"
+    },
+    "qa64/layer_stats.csv": {
+      "source": "experiments/nosa_indexer_pattern_65536_1024/report/qa64/layer_stats.csv",
+      "sha256": "f3d3545362e5af65a8c14fed391dc847460820d293a98497e0b71fb446dcd4ca"
+    },
+    "qa64/metadata.json": {
+      "source": "experiments/nosa_indexer_pattern_65536_1024/report/qa64/metadata.json",
+      "sha256": "05c244ed62897a4f2d3e03642b79f053af3f74a3fa5e33380fcb124e78f17dc8"
+    },
+    "qa64/summary.json": {
+      "source": "experiments/nosa_indexer_pattern_65536_1024/report/qa64/summary.json",
+      "sha256": "fab10a3cd4f28a5abfa0fec7e5850842f97fbb7512c8eebead27f9d781c39d28"
+    },
+    "qa64/union_heatmap.png": {
+      "source": "experiments/nosa_indexer_pattern_65536_1024/report/qa64/union_heatmap.png",
+      "sha256": "1a6701b1cf237e6cc512db145835933f3ffd1ba163c3788aceadec8637f0e0db"
+    },
+    "qa64/union_heatmap.svg": {
+      "source": "experiments/nosa_indexer_pattern_65536_1024/report/qa64/union_heatmap.svg",
+      "sha256": "3fb6c70e1dbf11393c7a3acb7c52119c620041bea34837ff9c43cef5e3500bc2"
+    },
+    "components32/component_capacity_fetch.png": {
+      "source": "experiments/nosa_indexer_pattern_65536_1024/report/components32/component_capacity_fetch.png",
+      "sha256": "6ebf041fe863caa123b24c524c5a6caf69a0609b3b7920a2cd5684a9c740b610"
+    },
+    "components32/component_capacity_fetch.svg": {
+      "source": "experiments/nosa_indexer_pattern_65536_1024/report/components32/component_capacity_fetch.svg",
+      "sha256": "bfcb1ddd7f1f05353cbd64932b249cc4fc6b9746eaa00eb37898588b74454e2b"
+    },
+    "components32/decomposition.json": {
+      "source": "experiments/nosa_indexer_pattern_65536_1024/report/components32/decomposition.json",
+      "sha256": "a26231df63ba1f23f50be36d43501175719e8294074a5deb58b246f67f454b0a"
+    },
+    "components32/head_components.csv": {
+      "source": "experiments/nosa_indexer_pattern_65536_1024/report/components32/head_components.csv",
+      "sha256": "22af8c402a4e934ab4c3d8b96395759647385edec9fd7fff9466bcb6d66547d3"
+    },
+    "components32/layer_components.csv": {
+      "source": "experiments/nosa_indexer_pattern_65536_1024/report/components32/layer_components.csv",
+      "sha256": "d3f027cecb3adc23ffbaa4a9cf3d1748bc4d805dcec53204431db29b95966bd4"
+    },
+    "components32/model_components.csv": {
+      "source": "experiments/nosa_indexer_pattern_65536_1024/report/components32/model_components.csv",
+      "sha256": "5301e89edadd1a5fad5d4c8e65cddbce74e259b7d64c34adfa527d5e63ff27d1"
+    },
+    "components64/component_capacity_fetch.png": {
+      "source": "experiments/nosa_indexer_pattern_65536_1024/report/components64/component_capacity_fetch.png",
+      "sha256": "01fa6ad0c912f2f70ef80a85012ebafa0287cbccf3251903ddf24ec361e684cc"
+    },
+    "components64/component_capacity_fetch.svg": {
+      "source": "experiments/nosa_indexer_pattern_65536_1024/report/components64/component_capacity_fetch.svg",
+      "sha256": "ed196373e1bac058a9a560e84c771eb44552d9b68d496ae98d008fd87ca8f8da"
+    },
+    "components64/decomposition.json": {
+      "source": "experiments/nosa_indexer_pattern_65536_1024/report/components64/decomposition.json",
+      "sha256": "4e3098c4531d5175f5a03bebaff7580a8944e5dc1680fa0515b46aa2a77013be"
+    },
+    "components64/head_components.csv": {
+      "source": "experiments/nosa_indexer_pattern_65536_1024/report/components64/head_components.csv",
+      "sha256": "94ff7ec45ac41338888df7431acdf78c169b2ad4c334168a9f1c44686a739c31"
+    },
+    "components64/layer_components.csv": {
+      "source": "experiments/nosa_indexer_pattern_65536_1024/report/components64/layer_components.csv",
+      "sha256": "95dece3702125b18ee933dea10573c7a2a533cc5a2834f3b9e008a75fcb265ae"
+    },
+    "components64/model_components.csv": {
+      "source": "experiments/nosa_indexer_pattern_65536_1024/report/components64/model_components.csv",
+      "sha256": "7eacf0893632bb542a29910519232ddb515537f8e9566414b32809df86aa5568"
+    },
+    "distribution/distribution.json": {
+      "source": "experiments/nosa_indexer_pattern_65536_1024/report/distribution/distribution.json",
+      "sha256": "de2e906e4743b14990f36999b6b5583a1df64e51adfbeb1ff7cb4c0f2b51f650"
+    },
+    "distribution/head_coverage.csv": {
+      "source": "experiments/nosa_indexer_pattern_65536_1024/report/distribution/head_coverage.csv",
+      "sha256": "e0dd5be56eed2a7b3283faf9f95a2114428c11ca1c4bbe72079a6542679340f6"
+    },
+    "distribution/head_coverage_distribution.png": {
+      "source": "experiments/nosa_indexer_pattern_65536_1024/report/distribution/head_coverage_distribution.png",
+      "sha256": "8c0acd56858d112d38aba9201f0ed1eb7e51269293cd6bc9b9f3338d201c5283"
+    },
+    "distribution/head_coverage_distribution.svg": {
+      "source": "experiments/nosa_indexer_pattern_65536_1024/report/distribution/head_coverage_distribution.svg",
+      "sha256": "9241aa6110099cb2e2828cc04dc0e13cfb4c6d3c013b1270b8af2baf6cd84af9"
+    },
+    "distribution/histogram.csv": {
+      "source": "experiments/nosa_indexer_pattern_65536_1024/report/distribution/histogram.csv",
+      "sha256": "c9593dec97fb5bdf2cfc0d899414fc378a4fb5d1418eb6f3673a4935e7add984"
+    },
+    "sparse_compare/metadata.json": {
+      "source": "experiments/nosa_indexer_pattern_65536_1024/output/data/refactor_nosa_pattern_capture_20261005_01/metadata.json",
+      "sha256": "b7cecf8a98966e1ba86a300fc4393c87a7477124cefd396bdd4ea11d980d9a17"
+    },
+    "sparse_compare/comparison.json": {
+      "source": "experiments/nosa_indexer_pattern_65536_1024/output/data/refactor_nosa_pattern_capture_20261005_01/comparison.json",
+      "sha256": "4da24ca1c92a3a4da9cf69f186aa27facabe8100f9e07d21d404a3386fc17ea1"
+    },
+    "sparse_compare/comparison.png": {
+      "source": "experiments/nosa_indexer_pattern_65536_1024/output/data/refactor_nosa_pattern_capture_20261005_01/comparison.png",
+      "sha256": "7b6b9bfa0a07bab6026dc27fee12f2ac749d4864e5e468906784eee95d20389d"
+    },
+    "sparse_compare/comparison.svg": {
+      "source": "experiments/nosa_indexer_pattern_65536_1024/output/data/refactor_nosa_pattern_capture_20261005_01/comparison.svg",
+      "sha256": "5215b8ba9ac1f97b90b3cb2fc102aeab140dd52448649e6e61578c0f43457a16"
+    },
+    "sparse_compare/union_heatmap.png": {
+      "source": "experiments/nosa_indexer_pattern_65536_1024/output/data/refactor_nosa_pattern_capture_20261005_01/union_heatmap.png",
+      "sha256": "eae20d011839e9eb5e0847f23fb99e3e6e0668884e656a67f343f7e4d9df0939"
+    },
+    "sparse_compare/union_heatmap.svg": {
+      "source": "experiments/nosa_indexer_pattern_65536_1024/output/data/refactor_nosa_pattern_capture_20261005_01/union_heatmap.svg",
+      "sha256": "ffa7eff691c8aed9054a2252dc5e05c48080b9083cac8475d7d23e3d4e96f600"
+    },
+    "sparse_compare/head_comparison.csv": {
+      "source": "experiments/nosa_indexer_pattern_65536_1024/output/data/refactor_nosa_pattern_capture_20261005_01/head_comparison.csv",
+      "sha256": "ebf42b91a55d7bf2402bff3b6b98ee9a6250766e95eb09ede03699b7346b8001"
+    },
+    "sparse_compare/layer_comparison.csv": {
+      "source": "experiments/nosa_indexer_pattern_65536_1024/output/data/refactor_nosa_pattern_capture_20261005_01/layer_comparison.csv",
+      "sha256": "0d996ace073193e7a54435788c33b233ec028b677c784b2be9af3ed6f184d77e"
+    },
+    "sparse_compare/dense_qa64/summary.json": {
+      "source": "experiments/nosa_indexer_pattern_65536_1024/output/data/refactor_nosa_pattern_capture_20261005_01/arms/dense_qa64/summary.json",
+      "sha256": "5d8389f9a30fe7709a0ac075ddbda05a1a32fd9ed9a93e1b16683802e76f3e5f"
+    },
+    "sparse_compare/dense_qa64/head_stats.csv": {
+      "source": "experiments/nosa_indexer_pattern_65536_1024/output/data/refactor_nosa_pattern_capture_20261005_01/arms/dense_qa64/head_stats.csv",
+      "sha256": "5010f47d257df1771c913b9c4cf9f5022047062b56b8c724763e16d9f44c9b40"
+    },
+    "sparse_compare/dense_qa64/layer_stats.csv": {
+      "source": "experiments/nosa_indexer_pattern_65536_1024/output/data/refactor_nosa_pattern_capture_20261005_01/arms/dense_qa64/layer_stats.csv",
+      "sha256": "f3d3545362e5af65a8c14fed391dc847460820d293a98497e0b71fb446dcd4ca"
+    },
+    "sparse_compare/dense_nosa64/summary.json": {
+      "source": "experiments/nosa_indexer_pattern_65536_1024/output/data/refactor_nosa_pattern_capture_20261005_01/arms/dense_nosa64/summary.json",
+      "sha256": "ddd2552c796cd65754ec2e9c0c3ea02059d4a8e573f207a4cff0797df6a883a3"
+    },
+    "sparse_compare/dense_nosa64/head_stats.csv": {
+      "source": "experiments/nosa_indexer_pattern_65536_1024/output/data/refactor_nosa_pattern_capture_20261005_01/arms/dense_nosa64/head_stats.csv",
+      "sha256": "c2a3408fd7ebaf4b594c30fdc5f65bc9487ad70c4b11e3760edef496682143b2"
+    },
+    "sparse_compare/dense_nosa64/layer_stats.csv": {
+      "source": "experiments/nosa_indexer_pattern_65536_1024/output/data/refactor_nosa_pattern_capture_20261005_01/arms/dense_nosa64/layer_stats.csv",
+      "sha256": "3e3e8b8b5a7906a42cecb18e6df2f4f90b389b2b32bd463aacc8889b088cb513"
+    },
+    "sparse_compare/sparse_nosa64/summary.json": {
+      "source": "experiments/nosa_indexer_pattern_65536_1024/output/data/refactor_nosa_pattern_capture_20261005_01/arms/sparse_nosa64/summary.json",
+      "sha256": "8f2466be3d5a7242fd48d0abcb9e278e7e0a28871f97c61b297f3706564803e3"
+    },
+    "sparse_compare/sparse_nosa64/head_stats.csv": {
+      "source": "experiments/nosa_indexer_pattern_65536_1024/output/data/refactor_nosa_pattern_capture_20261005_01/arms/sparse_nosa64/head_stats.csv",
+      "sha256": "a9084f8e29b1223a73d6f79056f5ad0fe69123e4cc6975ce03b3bde75eda4459"
+    },
+    "sparse_compare/sparse_nosa64/layer_stats.csv": {
+      "source": "experiments/nosa_indexer_pattern_65536_1024/output/data/refactor_nosa_pattern_capture_20261005_01/arms/sparse_nosa64/layer_stats.csv",
+      "sha256": "8d05daae9a66649fef9a3559a087462490e9590137de3ea3619a3662f58a2de2"
+    }
   },
-  "report_rebuild_check": "README and all80 report assets exact; figures reused from separately recorded current-array rendering",
-  "scope_update_20261005": {
-    "new_measurements": false,
-    "purpose": "Selection-pattern design exploration; modeled dense-MFU overlap and threshold branch retired",
-    "historical_record": true,
-    "removed_paths": [
-      "experiments/nosa_indexer_pattern_65536_1024/src/estimate.py",
-      "experiments/nosa_indexer_pattern_65536_1024/src/dense_timing.py",
-      "experiments/nosa_indexer_pattern_65536_1024/src/overlap.py",
-      "experiments/nosa_indexer_pattern_65536_1024/src/threshold_sweep.py",
-      "experiments/nosa_indexer_pattern_65536_1024/scripts/estimate.sh",
-      "experiments/nosa_indexer_pattern_65536_1024/scripts/overlap.sh",
-      "experiments/nosa_indexer_pattern_65536_1024/scripts/threshold_sweep.sh",
-      "experiments/nosa_indexer_pattern_65536_1024/tests/test_time_estimate.py",
-      "experiments/nosa_indexer_pattern_65536_1024/tests/test_dense_timing.py",
-      "experiments/nosa_indexer_pattern_65536_1024/tests/test_overlap.py",
-      "experiments/nosa_indexer_pattern_65536_1024/tests/test_threshold_sweep.py",
-      "experiments/nosa_indexer_pattern_65536_1024/report/estimate32",
-      "experiments/nosa_indexer_pattern_65536_1024/report/estimate64",
-      "experiments/nosa_indexer_pattern_65536_1024/report/overlap_full_mfu",
-      "experiments/nosa_indexer_pattern_65536_1024/report/overlap_half_mfu",
-      "experiments/nosa_indexer_pattern_65536_1024/report/threshold",
-      "experiments/nosa_indexer_pattern_65536_1024/report/offline_integrity.json",
-      "experiments/nosa_indexer_pattern_65536_1024/output/data/estimate32_denseflags_20261004_01",
-      "experiments/nosa_indexer_pattern_65536_1024/output/data/estimate64_denseflags_20261004_01",
-      "experiments/nosa_indexer_pattern_65536_1024/output/data/overlap32_64_full_denseflags_20261004_01",
-      "experiments/nosa_indexer_pattern_65536_1024/output/data/overlap32_64_half_denseflags_20261004_01",
-      "experiments/nosa_indexer_pattern_65536_1024/output/data/threshold32_64_half_denseflags_20261004_01",
-      "experiments/nosa_indexer_pattern_65536_1024/output/log/estimate32_denseflags_20261004_01",
-      "experiments/nosa_indexer_pattern_65536_1024/output/log/estimate64_denseflags_20261004_01",
-      "experiments/nosa_indexer_pattern_65536_1024/output/log/overlap32_64_full_denseflags_20261004_01",
-      "experiments/nosa_indexer_pattern_65536_1024/output/log/overlap32_64_half_denseflags_20261004_01",
-      "experiments/nosa_indexer_pattern_65536_1024/output/log/threshold32_64_half_denseflags_20261004_01",
-      "experiments/nosa_indexer_pattern_65536_1024/output/profile/estimate32_denseflags_20261004_01",
-      "experiments/nosa_indexer_pattern_65536_1024/output/profile/estimate64_denseflags_20261004_01",
-      "experiments/nosa_indexer_pattern_65536_1024/output/profile/overlap32_64_full_denseflags_20261004_01",
-      "experiments/nosa_indexer_pattern_65536_1024/output/profile/overlap32_64_half_denseflags_20261004_01",
-      "experiments/nosa_indexer_pattern_65536_1024/output/profile/threshold32_64_half_denseflags_20261004_01"
-    ]
-  }
+  "generator_sha256": "f89980bf5c9cd96897c41a0e0471978022874d12408d452e7c1fe3a7ef692208",
+  "qa64_comparison_run_id": "refactor_qa64_environment_compare_20261005_01",
+  "source_boundary": "Original metadata and snapshots retained; publication/navigation deltas recorded separately.",
+  "published_at_utc": "2026-10-05T00:33:17.351976+00:00",
+  "delivered_source_deltas": {
+    "pattern": {
+      "experiments/nosa_mfu/src/dense/capture.py": {
+        "captured": "e238d2a2fda19dc8d7bfaa5acd56c61a28d7786e528e75ca0cac0cb27720a4d7",
+        "delivered": "f7e087611e405b3d5f9ec4854d4924fe607974bb72c421f29beb087f40e9e1e5"
+      }
+    }
+  },
+  "source_delta": "source_delta.json",
+  "generation_artifacts": [
+    {
+      "path": "experiments/nosa_indexer_pattern_65536_1024/output/data/refactor_nosa_pattern_capture_20261005_01/report_generation/finalize_readmes.py",
+      "sha256": "20e597cc94a5532f317667d9f208bb7732e89715facc228fcd719fdde6af88df",
+      "bytes": 9784
+    },
+    {
+      "path": "experiments/nosa_indexer_pattern_65536_1024/output/data/refactor_nosa_pattern_capture_20261005_01/report_generation/navigation_source_delta.json",
+      "sha256": "bd15b663255e02a2c84acf65ababb23f42288a8e10f9aff65fc1d9a1b0410160",
+      "bytes": 786
+    },
+    {
+      "path": "experiments/nosa_indexer_pattern_65536_1024/output/data/refactor_nosa_pattern_capture_20261005_01/report_generation/publish_nosa.py",
+      "sha256": "754a0ba85351fa2f201e226de3255f96866d94e64449e6778e073ec54dfc197e",
+      "bytes": 8729
+    },
+    {
+      "path": "experiments/nosa_indexer_pattern_65536_1024/output/data/refactor_nosa_pattern_capture_20261005_01/report_generation/stage/capture_publication_call.py",
+      "sha256": "90cc9d4c3a3cd36191a9b2c5c3044d10fb881ea2840fb1cf980e071ead643f57",
+      "bytes": 1186
+    },
+    {
+      "path": "experiments/nosa_indexer_pattern_65536_1024/output/data/refactor_nosa_pattern_capture_20261005_01/report_generation/stage/invocation.json",
+      "sha256": "7d736e8cacbf62b2569c489f250f053e2c71af18654e5d10b1c227cbdec99638",
+      "bytes": 776
+    },
+    {
+      "path": "experiments/nosa_indexer_pattern_65536_1024/output/data/refactor_nosa_pattern_capture_20261005_01/report_generation/stage/report_helper_sources.json",
+      "sha256": "b88df54042d07bcd68d1b5f5de0d82436ffbe76b4c43d7e3076286c031e507c5",
+      "bytes": 3186
+    },
+    {
+      "path": "experiments/nosa_indexer_pattern_65536_1024/output/data/refactor_nosa_pattern_capture_20261005_01/report_generation/stage/source/report_helpers/evaluation/pool_scan_provenance.py",
+      "sha256": "004b86573af85619e56a99259e4208671c9fd94a99e0ec07c4fcfd6401dc3d9d",
+      "bytes": 11765
+    },
+    {
+      "path": "experiments/nosa_indexer_pattern_65536_1024/output/data/refactor_nosa_pattern_capture_20261005_01/report_generation/stage/source/report_helpers/evaluation/provenance.py",
+      "sha256": "0fde027cf65530a75072893c88c522cc85ea990b72e67ce7515b74dbb6d2fa67",
+      "bytes": 9629
+    },
+    {
+      "path": "experiments/nosa_indexer_pattern_65536_1024/output/data/refactor_nosa_pattern_capture_20261005_01/report_generation/stage/source/report_helpers/experiments/nosa_indexer_pattern_65536_1024/src/analyze.py",
+      "sha256": "f9c8fd15ad747ad6136126da606e42bb18a7d6701e552d19986987961412893f",
+      "bytes": 14336
+    },
+    {
+      "path": "experiments/nosa_indexer_pattern_65536_1024/output/data/refactor_nosa_pattern_capture_20261005_01/report_generation/stage/source/report_helpers/experiments/nosa_indexer_pattern_65536_1024/src/sparse_compare.py",
+      "sha256": "3902c0a95c2b75e03405f81caa461b98e4f71218d5c8583748a5357d784e29eb",
+      "bytes": 23351
+    },
+    {
+      "path": "experiments/nosa_indexer_pattern_65536_1024/output/data/refactor_nosa_pattern_capture_20261005_01/report_generation/stage/source/report_helpers/pyproject.toml",
+      "sha256": "cac6e9271538d74e99b1bdc83c2a12648bb3c76a310af21c98aff3ec2d3761d1",
+      "bytes": 3925
+    },
+    {
+      "path": "experiments/nosa_indexer_pattern_65536_1024/output/data/refactor_nosa_pattern_capture_20261005_01/report_generation/stage/source/report_helpers/uv.lock",
+      "sha256": "53339af1728da3661b614d554e928408186b4fac6106a92999bd8fd69b3d2d8f",
+      "bytes": 139330
+    },
+    {
+      "path": "experiments/nosa_indexer_pattern_65536_1024/output/data/refactor_nosa_pattern_capture_20261005_01/report_generation/stage/stage_pattern.py",
+      "sha256": "f89980bf5c9cd96897c41a0e0471978022874d12408d452e7c1fe3a7ef692208",
+      "bytes": 8302
+    }
+  ],
+  "retirement": "retirement.json",
+  "readme_sha256": "779f16183a912b4326685e9f65740ace59961988ebdffe28e14d21c34c88a1ea",
+  "published_assets": {
+    "components32/component_capacity_fetch.png": "6ebf041fe863caa123b24c524c5a6caf69a0609b3b7920a2cd5684a9c740b610",
+    "components32/component_capacity_fetch.svg": "bfcb1ddd7f1f05353cbd64932b249cc4fc6b9746eaa00eb37898588b74454e2b",
+    "components32/decomposition.json": "a26231df63ba1f23f50be36d43501175719e8294074a5deb58b246f67f454b0a",
+    "components32/head_components.csv": "22af8c402a4e934ab4c3d8b96395759647385edec9fd7fff9466bcb6d66547d3",
+    "components32/layer_components.csv": "d3f027cecb3adc23ffbaa4a9cf3d1748bc4d805dcec53204431db29b95966bd4",
+    "components32/model_components.csv": "5301e89edadd1a5fad5d4c8e65cddbce74e259b7d64c34adfa527d5e63ff27d1",
+    "components64/component_capacity_fetch.png": "01fa6ad0c912f2f70ef80a85012ebafa0287cbccf3251903ddf24ec361e684cc",
+    "components64/component_capacity_fetch.svg": "ed196373e1bac058a9a560e84c771eb44552d9b68d496ae98d008fd87ca8f8da",
+    "components64/decomposition.json": "4e3098c4531d5175f5a03bebaff7580a8944e5dc1680fa0515b46aa2a77013be",
+    "components64/head_components.csv": "94ff7ec45ac41338888df7431acdf78c169b2ad4c334168a9f1c44686a739c31",
+    "components64/layer_components.csv": "95dece3702125b18ee933dea10573c7a2a533cc5a2834f3b9e008a75fcb265ae",
+    "components64/model_components.csv": "7eacf0893632bb542a29910519232ddb515537f8e9566414b32809df86aa5568",
+    "distribution/distribution.json": "de2e906e4743b14990f36999b6b5583a1df64e51adfbeb1ff7cb4c0f2b51f650",
+    "distribution/head_coverage.csv": "e0dd5be56eed2a7b3283faf9f95a2114428c11ca1c4bbe72079a6542679340f6",
+    "distribution/head_coverage_distribution.png": "8c0acd56858d112d38aba9201f0ed1eb7e51269293cd6bc9b9f3338d201c5283",
+    "distribution/head_coverage_distribution.svg": "9241aa6110099cb2e2828cc04dc0e13cfb4c6d3c013b1270b8af2baf6cd84af9",
+    "distribution/histogram.csv": "c9593dec97fb5bdf2cfc0d899414fc378a4fb5d1418eb6f3673a4935e7add984",
+    "pattern_integrity.json": "9663e05480dad89878dd047888b8fd730f929b024e474d6cb3cb283d5f4236e8",
+    "qa32/capacity_by_layer.png": "19519b1f430e79df94b8ffc59e8083a9c56befea4a651762dc3df33af912674a",
+    "qa32/capacity_by_layer.svg": "8273c7aeffa9ed039eddf5e35f8cdaabd21986d3f4afb69c251345b0ad3c00f5",
+    "qa32/head_stats.csv": "88aaac87c61e2c9c8897be75652daec653d6480913c50404e2e92a05f82b1f3d",
+    "qa32/layer_stats.csv": "ff680ab0c0843207e445450470f0b77b334f07e4772da2d6858ca27c73949aae",
+    "qa32/metadata.json": "f3713330c17a67a498e2c31a5653c1a0aef1e546ee3073086ba92d3c71ed2343",
+    "qa32/summary.json": "4e9b4f46fa4cff7f9bff1908515ddf2b4047094efbb7fdbb784e561a6eb792d3",
+    "qa32/union_heatmap.png": "ab0ce2737072fdbbfab4986832c08b3906021125fb3c8e0ef8525d172d79860a",
+    "qa32/union_heatmap.svg": "e3cd52bbbaa6aab813ae9ea8129a74b291b916f25947102c2a81e3e7e271e592",
+    "qa64/analysis_provenance.json": "d63ebccefa24cd179bbfa3e500c964ebe986d3fb9f3aed27b7fe95b26caaa9c9",
+    "qa64/capacity_by_layer.png": "74cef85a973250afb806cc3bca7be824e52039b7800130743056b8d5633f7a2c",
+    "qa64/capacity_by_layer.svg": "623072669babe830114d1bbf7e76ec61f70b34e8961b6dc6ef1de25ebd9de9da",
+    "qa64/environment_comparison.json": "8dddb21ca89389b2952488342a16895406eb961dc64ab36a690e68ff0ab013d1",
+    "qa64/head_stats.csv": "5010f47d257df1771c913b9c4cf9f5022047062b56b8c724763e16d9f44c9b40",
+    "qa64/layer_stats.csv": "f3d3545362e5af65a8c14fed391dc847460820d293a98497e0b71fb446dcd4ca",
+    "qa64/metadata.json": "05c244ed62897a4f2d3e03642b79f053af3f74a3fa5e33380fcb124e78f17dc8",
+    "qa64/summary.json": "fab10a3cd4f28a5abfa0fec7e5850842f97fbb7512c8eebead27f9d781c39d28",
+    "qa64/union_heatmap.png": "1a6701b1cf237e6cc512db145835933f3ffd1ba163c3788aceadec8637f0e0db",
+    "qa64/union_heatmap.svg": "3fb6c70e1dbf11393c7a3acb7c52119c620041bea34837ff9c43cef5e3500bc2",
+    "retirement.json": "1c5b0a33b93d04b74b1e720557473c7236b772f65c566632a76e0b0733ad400a",
+    "scope_manifest.json": "51b5997b0a468f8499179945803ac93f7a654e671f68f2e635ad43e095b89a97",
+    "source_delta.json": "6e8556e8fb95bcfb59fe6591478f4ff10815b75474b7679aa19d7d547a0efa9d",
+    "sparse_compare/comparison.json": "4da24ca1c92a3a4da9cf69f186aa27facabe8100f9e07d21d404a3386fc17ea1",
+    "sparse_compare/comparison.png": "7b6b9bfa0a07bab6026dc27fee12f2ac749d4864e5e468906784eee95d20389d",
+    "sparse_compare/comparison.svg": "5215b8ba9ac1f97b90b3cb2fc102aeab140dd52448649e6e61578c0f43457a16",
+    "sparse_compare/dense_nosa64/head_stats.csv": "c2a3408fd7ebaf4b594c30fdc5f65bc9487ad70c4b11e3760edef496682143b2",
+    "sparse_compare/dense_nosa64/layer_stats.csv": "3e3e8b8b5a7906a42cecb18e6df2f4f90b389b2b32bd463aacc8889b088cb513",
+    "sparse_compare/dense_nosa64/summary.json": "ddd2552c796cd65754ec2e9c0c3ea02059d4a8e573f207a4cff0797df6a883a3",
+    "sparse_compare/dense_qa64/head_stats.csv": "5010f47d257df1771c913b9c4cf9f5022047062b56b8c724763e16d9f44c9b40",
+    "sparse_compare/dense_qa64/layer_stats.csv": "f3d3545362e5af65a8c14fed391dc847460820d293a98497e0b71fb446dcd4ca",
+    "sparse_compare/dense_qa64/summary.json": "5d8389f9a30fe7709a0ac075ddbda05a1a32fd9ed9a93e1b16683802e76f3e5f",
+    "sparse_compare/execution_provenance.json": "611e6ec087d123f248c259e071d5cd3b7cc0151310f2ead65444fe59bd6693df",
+    "sparse_compare/figure_provenance.json": "e977404cb37efac88e3449b6434b9f0dfbaa09c49595bbf41c3f3c0754555f06",
+    "sparse_compare/head_comparison.csv": "ebf42b91a55d7bf2402bff3b6b98ee9a6250766e95eb09ede03699b7346b8001",
+    "sparse_compare/layer_comparison.csv": "0d996ace073193e7a54435788c33b233ec028b677c784b2be9af3ed6f184d77e",
+    "sparse_compare/metadata.json": "b7cecf8a98966e1ba86a300fc4393c87a7477124cefd396bdd4ea11d980d9a17",
+    "sparse_compare/sparse_nosa64/head_stats.csv": "a9084f8e29b1223a73d6f79056f5ad0fe69123e4cc6975ce03b3bde75eda4459",
+    "sparse_compare/sparse_nosa64/layer_stats.csv": "8d05daae9a66649fef9a3559a087462490e9590137de3ea3619a3662f58a2de2",
+    "sparse_compare/sparse_nosa64/summary.json": "8f2466be3d5a7242fd48d0abcb9e278e7e0a28871f97c61b297f3706564803e3",
+    "sparse_compare/union_heatmap.png": "eae20d011839e9eb5e0847f23fb99e3e6e0668884e656a67f343f7e4d9df0939",
+    "sparse_compare/union_heatmap.svg": "ffa7eff691c8aed9054a2252dc5e05c48080b9083cac8475d7d23e3d4e96f600"
+  },
+  "retirement_completed_at_utc": "2026-10-05T00:33:18.539392+00:00"
 }

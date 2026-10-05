@@ -1,0 +1,45 @@
+{
+  "passed": true,
+  "selected_byte_copies_verified": 46,
+  "full_model_raw_sample_checks": [
+    {
+      "run_id": "refactor_mfu_sparse_native_bench_20261005_01",
+      "phase": "full_prefill",
+      "count": 5,
+      "wall_median_ms": 2374.5391860138625
+    },
+    {
+      "run_id": "refactor_mfu_sparse_native_bench_20261005_01",
+      "phase": "extend",
+      "count": 5,
+      "wall_median_ms": 36.207892931997776
+    },
+    {
+      "run_id": "refactor_mfu_sparse_triton_bench_20261005_01",
+      "phase": "full_prefill",
+      "count": 5,
+      "wall_median_ms": 3663.1128230364993
+    },
+    {
+      "run_id": "refactor_mfu_sparse_triton_bench_20261005_01",
+      "phase": "extend",
+      "count": 5,
+      "wall_median_ms": 61.776236980222166
+    },
+    {
+      "run_id": "refactor_mfu_dense_bench_20261005_02",
+      "phase": "full_prefill",
+      "count": 5,
+      "wall_median_ms": 3506.117727025412
+    },
+    {
+      "run_id": "refactor_mfu_dense_bench_20261005_02",
+      "phase": "extend",
+      "count": 5,
+      "wall_median_ms": 81.80667192209512
+    }
+  ],
+  "standalone_bench_profile_boundaries_separated": true,
+  "capture_source_and_receipt_validation": "stage_mfu.py reopened all 12 runs and every captured source snapshot; separate inspection evidence is selected under verification/.",
+  "generator_sha256": "94ca7ec3b2a8fe09243b931f1942b558d7ff9e0ed59feb70b70417d6778ff04b"
+}

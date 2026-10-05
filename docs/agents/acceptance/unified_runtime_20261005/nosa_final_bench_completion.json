@@ -1,0 +1,58 @@
+{
+  "runs": [
+    {
+      "run_id": "refactor_final_nosa_bench_20261005_01",
+      "exit_code": 0,
+      "rows": 128,
+      "accounting_matches_all_p0_runs": true,
+      "trace_latency_ms": 206944.56251955125,
+      "revisit_mean_ms": {
+        "hbm/revisit": 2342.510885820957,
+        "dense_prefetch/revisit": 71.90337413339876,
+        "sync_sparse/revisit": 29.568324374849908,
+        "async_sparse/revisit": 31.924646311381366
+      }
+    },
+    {
+      "run_id": "refactor_final_nosa_bench_20261005_02",
+      "exit_code": 0,
+      "rows": 128,
+      "accounting_matches_all_p0_runs": true,
+      "trace_latency_ms": 207154.62663816288,
+      "revisit_mean_ms": {
+        "hbm/revisit": 2341.34964455734,
+        "dense_prefetch/revisit": 72.00142418878386,
+        "sync_sparse/revisit": 29.473208989656996,
+        "async_sparse/revisit": 32.13513706577942
+      }
+    },
+    {
+      "run_id": "refactor_final_nosa_bench_20261005_03",
+      "exit_code": 0,
+      "rows": 128,
+      "accounting_matches_all_p0_runs": true,
+      "trace_latency_ms": 206745.58321526274,
+      "revisit_mean_ms": {
+        "hbm/revisit": 2343.1195933080744,
+        "dense_prefetch/revisit": 71.98044913093327,
+        "sync_sparse/revisit": 29.599447880173102,
+        "async_sparse/revisit": 31.951728706189897
+      }
+    }
+  ],
+  "gpu_monitor_audit": {
+    "observations": 186,
+    "foreign_processes": [],
+    "command": [
+      "nvidia-smi",
+      "--query-compute-apps=pid,gpu_uuid,used_memory",
+      "--format=csv,noheader"
+    ],
+    "wait_seconds": 5,
+    "boundary": "Periodic process samples with allowed PIDs across the three runs; independent review must also join UTC activity intervals. Unsampled short-lived activity is not excluded."
+  },
+  "driver_session": 66593,
+  "driver_exited": true,
+  "profile_started": false,
+  "boundary": "Lightweight row, finite latency, accounting and sampled-process checks only; repeated-run comparison remains independent work."
+}

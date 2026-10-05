@@ -1,0 +1,68 @@
+import json,csv,hashlib,math,shutil
+from decimal import Decimal
+from pathlib import Path
+from datetime import datetime,timezone
+root=Path('/mnt/ssd-wlcb/chenkaiqi/cxldsagr');base=root/'experiments/cache_management/output/data';acc=root/'docs/agents/acceptance/unified_runtime_20261005';readme=Path('/tmp/unified_cache_readme.md');text=readme.read_text();report=base/'cache_unified_20261005_01';summary=json.loads((report/'summary.json').read_text());inputs=[]
+def record(p):
+ p=Path(p);inputs.append({'path':str(p),'bytes':p.stat().st_size,'sha256':hashlib.sha256(p.read_bytes()).hexdigest()})
+def load(p):record(p);return json.loads(Path(p).read_text())
+static=[];formulas=[]
+benchmanifest=load(root/'experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_bench_20261005_01/source_manifest.json')
+for kind in ('nh','p_base','p_base_headroom','p_nhmax','p_nhmax_headroom'):
+ oldp=base/f'cache_deepseek_{kind}_20261005_01';newp=base/f'cache_deepseek_{kind}_20261005_02';old=load(oldp/'plan.json');new=load(newp/'plan.json');assert old['plan']==new['plan'];assert (oldp/'checkpoint_config.json').read_bytes()==(newp/'checkpoint_config.json').read_bytes()
+ changed=[k for k in old['sources'].keys()|new['sources'].keys() if old['sources'].get(k)!=new['sources'].get(k)];assert changed==['cache/sparse_token_pool.py']
+ shared={k:v for k,v in new['sources'].items() if k in benchmanifest};assert all(benchmanifest[k]==v for k,v in shared.items());absent=[k for k in new['sources'] if k not in benchmanifest];assert absent==['experiments/cache_management/src/capacity_plan.py']
+ plan=new['plan'];sel=plan['selected'];P,NH,U=sel['sparse_pool_tokens'],sel['host_arena_tokens'],sel['full_sessions'];extra=plan['budgets']['noncache_headroom_bytes']/2**30
+ assert f"| `{new['run_id']}` | {extra:g} | {P:,} | {NH:,} | {U} | {min(P,NH):,} |" in text
+ static.append({'run_id':new['run_id'],'plan01_entire_plan_equal':True,'checkpoint_config_equal':True,'changed_source_keys':changed,'shared_source_entries_match_final_bench':len(shared),'planner_only_sources':absent,'P':P,'NH':NH,'U':U,'extra_headroom_gib':extra})
+ for name,v in plan.items():
+  if not isinstance(v,dict) or not {'hbm','dram','sparse_pool_tokens','host_arena_tokens'}<=v.keys():continue
+  P,NH,U=v['sparse_pool_tokens'],v['host_arena_tokens'],v['full_sessions'];assert U==NH//65536
+  E=16*1024*65664+64*1024*2048+32*65664+2*1024*576*2;assert E==1184000*1024+2101248==1214517248
+  bitmap=4*((P+129+31)//32);hbm=E+11854*P+104*NH+11874+86514096*U+10142208+bitmap
+  dram=10*(1<<(1152*NH-1).bit_length())+NH//16+4096*U+40
+  assert hbm==v['hbm']['reservation_bytes']==sum(v['hbm']['components'].values())
+  assert dram==v['dram']['total_bytes']==sum(v['dram']['components'].values())
+  h=v['hbm'];assert h['cache_total_bytes']==hbm+h['allocator_allowance_bytes'];assert h['allocator_allowance_bytes']==h['persistent_allocator_allowance_bytes']+67108864;assert h['total_bytes']==h['cache_total_bytes']+h['noncache_headroom_bytes'];assert h['remaining_bytes']==h['budget_bytes']-h['total_bytes']
+  assert v['dram']['remaining_bytes']==v['dram']['budget_bytes']-dram
+  budget=v['budgets'];assert int(Decimal('0.9')*150121545728)-10032775168==125076615987==budget['hbm_envelope_bytes'];assert budget['cache_hbm_budget_bytes']==125076615987-budget['noncache_headroom_bytes']
+  assert (not v['violated_constraints'])==v['feasible']
+  if name=='selected':assert v['feasible']
+  if name=='next_candidate':assert not v['feasible'] and any(k in v['violated_constraints'] for k in ('hbm_budget','dram_budget'))
+  formulas.append({'run_id':new['run_id'],'candidate':name,'P':P,'NH':NH,'U':U,'hbm_base_bytes':hbm,'dram_bytes':dram,'feasible':v['feasible'],'violated_constraints':v['violated_constraints']})
+nosa=load(base/'cache_nosa_fixed_20261005_02/plan.json');nosa_checks=[]
+for scheme,c in nosa['cases'].items():
+ for name,pop in c['populations'].items():
+  count=pop['sessions'];assert pop['physical_fit_validated'] is False
+  for field in ('storage_payload_bound','allocator_reservation_bound'):
+   for tier in ('hbm','dram'):assert pop[field+'_excluding_graphs'][tier]==c['shared'][field][tier]+count*c['one_session'][field][tier]
+ label={'hbm':'HBM-only','dense_prefetch':'Dense prefetch','serial_sparse':'Sync sparse','overlap':'Async sparse'}[scheme]
+ vals=[c['shared']['allocator_reservation_bound']['hbm']/2**30,c['one_session']['allocator_reservation_bound']['hbm']/2**30]
+ assert f"| {label} | {c['quota']['full_history_sessions']} | {vals[0]:.9f} | {vals[1]:.9f} |" in text
+ nosa_checks.append({'scheme':scheme,'shared_hbm_gib':vals[0],'session_hbm_gib':vals[1],'quota_users':c['quota']['full_history_sessions'],'population_formulas_exact':True})
+assert 32*65536*1024==2*2**30;assert 16*2==32 and 256*2==512
+assert abs(nosa['cases']['serial_sparse']['populations']['admissible_requested_users']['allocator_reservation_bound_excluding_graphs']['hbm']/2**30-4.69175)<0.000005
+assert abs(nosa['cases']['serial_sparse']['populations']['full_token_quota']['allocator_reservation_bound_excluding_graphs']['hbm']/2**30-44.95768)<0.000005
+csvrows=list(csv.DictReader((report/'memory.csv').open()));assert len(csvrows)==8
+memorychecks=[]
+for model,experiment in (('nosa','nosa_motivation'),('deepseek','deepseek_v32_motivation')):
+ run_id='refactor_final_'+model+'_bench_20261005_01';p=root/'experiments'/experiment/'output/data'/run_id;m=load(p/'metadata.json');record(p/'measurements.jsonl');rs=[json.loads(s) for s in (p/'measurements.jsonl').read_text().splitlines() if s.strip()]
+ assert summary['observed'][model]['run_id']==run_id;assert summary['observed'][model]['ordinary_activation_peak_bytes'] is None;assert summary['observed'][model]['model_loaded_memory']==m['model_loaded_memory']
+ for scheme in dict.fromkeys(r['scheme'] for r in rs):
+  selected=[r for r in rs if r['scheme']==scheme];samples=[r['memory_after'] for r in selected];row=next(x for x in csvrows if x['model']==model and x['scheme']==scheme)
+  device=lambda s:s['device_used_bytes'] if model=='nosa' else s['cuda_total_bytes']-s['cuda_free_bytes']
+  values={'requests':len(selected),'max_retained_users':max(r['cached_users'] for r in selected),'revisit_requests':sum(r['is_revisit'] for r in selected),'revisit_history_hits':sum(r['is_revisit'] and r['prefix_cache_hit'] for r in selected),'torch_peak_allocated_bytes':max(s['torch_peak_allocated_bytes'] for s in samples),'torch_peak_reserved_bytes':max(s['torch_peak_reserved_bytes'] for s in samples),'maximum_after_request_device_used_bytes':max(device(s) for s in samples),'maximum_after_request_reserved_minus_allocated_bytes':max(s['torch_reserved_bytes']-s['torch_allocated_bytes'] for s in samples),'maximum_after_request_device_used_minus_reserved_bytes':max(device(s)-s['torch_reserved_bytes'] for s in samples)}
+  for k in ('cache_hbm_bytes','cache_dram_bytes','reserved_hbm_bytes','reserved_dram_bytes','shared_cache_hbm_bytes','shared_cache_dram_bytes','session_reserved_hbm_bytes','session_reserved_dram_bytes','cache_host_pages','cache_hbm_tokens'):values['maximum_'+k]=max(r[k] for r in selected)
+  assert all(int(row[k])==v for k,v in values.items())
+  stored=next(x for x in summary['observed'][model]['memory'] if x['scheme']==scheme);assert all(stored[k]==v for k,v in values.items())
+  peak=[values[k]/2**30 for k in ('torch_peak_allocated_bytes','torch_peak_reserved_bytes','maximum_after_request_device_used_bytes')];charges=[values[k]/2**30 for k in ('maximum_cache_hbm_bytes','maximum_reserved_hbm_bytes','maximum_cache_dram_bytes','maximum_reserved_dram_bytes')]
+  assert f"| {model} | {scheme} | {values['max_retained_users']} | "+' | '.join(f'{v:.6f}' for v in peak)+' |' in text
+  assert f"| {model} | {scheme} | "+' | '.join(f'{v:.6f}' for v in charges)+' |' in text
+  assert values['revisit_history_hits']==(0 if scheme=='hbm' else 16)
+  memorychecks.append({'model':model,'scheme':scheme,'raw_rows':len(selected),'all_csv_and_summary_byte_fields_exact':True,'readme_6decimal_peak_and_charge_rows_match':True})
+ loaded=m['model_loaded_memory'];print('LOADED',model,loaded)
+assert 10*16777216*1152==180*2**30;assert 10*(1<<(16777216*1152-1).bit_length())==320*2**30;assert 16*65536*11520==int(11.25*2**30)
+assert 10*(1<<(455*65536*1152-1).bit_length())==320*2**30;assert 10*(1<<(456*65536*1152-1).bit_length())==640*2**30
+for p in (readme,report/'summary.json',report/'memory.csv',report/'deepseek_plans.csv',report/'results.md'):record(p)
+output={'schema':'unified-cache-independent-arithmetic-review-v1','status':'arithmetic_and_draft_numbers_pass_final_publication_pending','created_utc':datetime.now(timezone.utc).isoformat(),'scope':'Bounded stdlib-only arithmetic/source-inventory review. No model/cache allocation, GPU work, benchmark, full capacity sweep, native binary rescan or repeated seven-run audit. Source hashes are compared as saved identity entries; raw table JSON/CSV and selected README are re-opened.','deepseek_plan_refresh':static,'deepseek_formula_checks':formulas,'nosa_population_checks':nosa_checks,'memory_checks':memorychecks,'nosa_logical_payload_and_headroom_boundary':'32-layer 2 GiB main KV per history; 16 histories32 GiB, quota256 gives512 GiB logical KV and1024 GiB conservative host reservation plus small counters. Graph excluded from static sums and already included in observed cache charges.','deepseek_pinned_boundary':'NH455 histories gives320 GiB pinned bins;456 crosses to640 GiB. At measured NH16777216 arena logical capacity180 GiB, bins320 GiB, written16 histories11.25 GiB. Static boundary, not measured OOM or maximum capacity.','known_publication_gates':['Five plan02 records equal plan01 arithmetic and checkpoint config; final report02 must be regenerated with these new IDs/source inventories, rather than relabeling report01 provenance.','Confirmed report.py emits the NOSA source paragraph inside the shared model loop, splitting the eight-row table before DeepSeek rows. Root will fix after source-capture thaw and regenerate report02.','The draft currently names cache_unified_20261005_02 and final report/unified links, which are future publication targets. This is a staged draft, not a claim that report02 exists or has been audited.','No README/reports are published by this audit. Source joins/full numerical/native evidence are covered by preceding accepted reports and independently audited motivation runs.'],'inputs':inputs}
+out=acc/'cache_unified_independent_arithmetic_review.json';out.write_text(json.dumps(output,indent=2)+'\n');shutil.copyfile(__file__,acc/'cache_unified_independent_arithmetic_review.py.txt');print(json.dumps({'saved':str(out),'plan_refreshes':len(static),'formula_estimates':len(formulas),'memory_rows':len(memorychecks),'status':output['status']},indent=2))

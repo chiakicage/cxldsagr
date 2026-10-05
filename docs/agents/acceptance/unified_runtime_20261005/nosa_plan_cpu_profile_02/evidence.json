@@ -1,0 +1,78 @@
+{
+  "cwd": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr",
+  "environment": {
+    "CUDA_VISIBLE_DEVICES": "",
+    "OMP_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "argv": [
+    "numactl",
+    "--physcpubind=0-7",
+    "--membind=0",
+    ".venv/bin/python",
+    "-B",
+    "/tmp/nosa_plan_cpu_profile_20261005_02/profile_plan.py"
+  ],
+  "stdout": "/tmp/nosa_plan_cpu_profile_20261005_02/stdout.log",
+  "stderr": "/tmp/nosa_plan_cpu_profile_20261005_02/stderr.log",
+  "exit_code": 0,
+  "files": [
+    {
+      "original_path": "/tmp/nosa_plan_cpu_profile_20261005_02/serial_sparse.pstats",
+      "retained_path": "docs/agents/acceptance/unified_runtime_20261005/nosa_plan_cpu_profile_02/serial_sparse.pstats",
+      "bytes": 4376,
+      "sha256": "a382ba46b7651c0c2379086041d9d203a133d1d14ba4e3d7072d0fe0a9fbf85e"
+    },
+    {
+      "original_path": "/tmp/nosa_plan_cpu_profile_20261005_02/dense_prefetch.pstats",
+      "retained_path": "docs/agents/acceptance/unified_runtime_20261005/nosa_plan_cpu_profile_02/dense_prefetch.pstats",
+      "bytes": 4376,
+      "sha256": "82c93c9dcf923206ca75945de483f8207003fc7596f903e0af5843aa0d6e7006"
+    },
+    {
+      "original_path": "/tmp/nosa_plan_cpu_profile_20261005_02/hbm.pstats",
+      "retained_path": "docs/agents/acceptance/unified_runtime_20261005/nosa_plan_cpu_profile_02/hbm.pstats",
+      "bytes": 4376,
+      "sha256": "27699041fecf905affb509b614fa11cf0e298954090767c254d3bf25bbe781d4"
+    },
+    {
+      "original_path": "/tmp/nosa_plan_cpu_profile_20261005_02/result.json",
+      "retained_path": "docs/agents/acceptance/unified_runtime_20261005/nosa_plan_cpu_profile_02/result.json",
+      "bytes": 127920,
+      "sha256": "252efe6419262f9dfe2cdd9e55bfdc6c846f852dbff0247b0996ae17d03c70cb"
+    },
+    {
+      "original_path": "/tmp/nosa_plan_cpu_profile_20261005_02/profile_plan.py",
+      "retained_path": "docs/agents/acceptance/unified_runtime_20261005/nosa_plan_cpu_profile_02/profile_plan.txt",
+      "bytes": 8821,
+      "sha256": "e9cdfc8bbd6466464a540927860ee42f65d8c813dcc05dfefa33fd2859394032"
+    },
+    {
+      "original_path": "/tmp/nosa_plan_cpu_profile_20261005_02/stdout.log",
+      "retained_path": "docs/agents/acceptance/unified_runtime_20261005/nosa_plan_cpu_profile_02/stdout.log",
+      "bytes": 2117,
+      "sha256": "cc471e53c62a8d90082e05a95e2e5b0de058518b0964b18c978c495e170e1597"
+    },
+    {
+      "original_path": "/tmp/nosa_plan_cpu_profile_20261005_02/overlap.pstats",
+      "retained_path": "docs/agents/acceptance/unified_runtime_20261005/nosa_plan_cpu_profile_02/overlap.pstats",
+      "bytes": 4376,
+      "sha256": "fd29da0d4ec3addd89c2d543e2f2d0f462008c8a72d49f0a26bbc9adf07edd15"
+    },
+    {
+      "original_path": "/tmp/nosa_plan_cpu_profile_20261005_02/comparison.json",
+      "retained_path": "docs/agents/acceptance/unified_runtime_20261005/nosa_plan_cpu_profile_02/comparison.json",
+      "bytes": 2729,
+      "sha256": "7f28dc5e3eba527949cc45df0d19d12c5baf9273b4d1478a25ca0b6216096847"
+    },
+    {
+      "original_path": "/tmp/nosa_plan_cpu_profile_20261005_02/stderr.log",
+      "retained_path": "docs/agents/acceptance/unified_runtime_20261005/nosa_plan_cpu_profile_02/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "scope": "Isolated CPU planning only; warm-hit versus original repeated planning, not a serving latency claim. Cold-miss test clears the local diagnostic cache. No GPU or model weights."
+}

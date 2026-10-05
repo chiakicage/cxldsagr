@@ -22,10 +22,10 @@ from pathlib import Path
 
 import torch
 
-from experiments.nosa_baseline_performance.src.dense.sources import source_hashes
-from experiments.nosa_kernel_mfu.src.capture_inputs import sha256_file, tensor_metadata
-from experiments.nosa_kernel_mfu.src.measure import copy_to_device
-from experiments.nosa_kernel_mfu.src.phases import (
+from experiments.nosa_mfu.src.capture_inputs import sha256_file, tensor_metadata
+from experiments.nosa_mfu.src.dense.sources import source_hashes
+from experiments.nosa_mfu.src.measure import copy_to_device
+from experiments.nosa_mfu.src.phases import (
     add_phase_arguments,
     check_case_identity,
     finish_validation,
@@ -38,7 +38,7 @@ from experiments.nosa_offload_overlap.src.analyze import (
     STRIPE_COPY_DEFINITION,
     validate_fetch_stripes,
 )
-from layers.attention import BlockSelection
+from models.attention_contracts import BlockSelection
 from operators.nosa._native import build_info
 from operators.nosa.attention.device_only.api import nosa_block_sparse_attention
 from operators.nosa.attention.reference.torch import reference_nosa_block_sparse_attention
@@ -426,7 +426,7 @@ def parser():
     result.add_argument("--output-dir", type=Path, required=True)
     inputs = result.add_mutually_exclusive_group(required=True)
     inputs.add_argument(
-        "--input-dir", type=Path, help="Completed nosa_kernel_mfu capture_inputs directory"
+        "--input-dir", type=Path, help="Completed nosa_mfu capture_inputs directory"
     )
     inputs.add_argument(
         "--synthetic",
@@ -492,9 +492,9 @@ def main(argv=None):
     sources = source_hashes(
         *sorted((EXPERIMENT / "src").glob("*.py")),
         *sorted((EXPERIMENT / "scripts").glob("*.sh")),
-        ROOT / "experiments/nosa_kernel_mfu/src/capture_inputs.py",
-        ROOT / "experiments/nosa_kernel_mfu/src/measure.py",
-        ROOT / "experiments/nosa_kernel_mfu/src/phases.py",
+        ROOT / "experiments/nosa_mfu/src/capture_inputs.py",
+        ROOT / "experiments/nosa_mfu/src/measure.py",
+        ROOT / "experiments/nosa_mfu/src/phases.py",
         ROOT / "evaluation/validation.py",
         ROOT / "pyproject.toml",
         ROOT / "uv.lock",

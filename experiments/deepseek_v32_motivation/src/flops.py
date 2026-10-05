@@ -36,10 +36,14 @@ LINEARS = {
     "mlp_down": "mlp.down_proj",
 }
 SOURCE_FILES = (
-    "models/deepseek_v32/serving_backend.py",
-    "models/deepseek_v32/echo_model.py",
-    "models/deepseek_v32/echo_block.py",
-    "models/deepseek_v32/echo_attention.py",
+    "models/deepseek_v32/execution/adapter.py",
+    "models/deepseek_v32/config.py",
+    "models/deepseek_v32/checkpoint.py",
+    "models/deepseek_v32/rotary.py",
+    "models/deepseek_v32/projections.py",
+    "models/deepseek_v32/layers.py",
+    "models/deepseek_v32/attention.py",
+    "models/attention_contracts.py",
     "operators/deepseek_v32/indexer/echo.py",
     "operators/deepseek_v32/attention/_config.py",
     "experiments/deepseek_v32_echo_prefill/src/operator_flops.py",

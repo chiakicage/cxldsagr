@@ -67,6 +67,17 @@ class NosaAttentionWorkspace:
         self.empty_mask = torch.empty(0, dtype=torch.bool, device=self.device)
 
     @staticmethod
+    def allocation_layout(max_queries, kv_heads, head_dim=128, *, dtype):
+        """Named independent storage declarations in ``tensors()`` order."""
+        return {
+            **{
+                name: (torch.int32, shape)
+                for name, shape in _layout(max_queries, kv_heads, head_dim, dtype).items()
+            },
+            "empty_mask": (torch.bool, (0,)),
+        }
+
+    @staticmethod
     def allocation_sizes(max_queries, kv_heads, head_dim=128, *, dtype):
         """Pure payload sizes in ``tensors()`` order, including the empty mask.
 
@@ -75,12 +86,11 @@ class NosaAttentionWorkspace:
         """
         from math import prod
 
-        return (
-            *(
-                prod(shape) * 4
-                for shape in _layout(max_queries, kv_heads, head_dim, dtype).values()
-            ),
-            0,
+        return tuple(
+            prod(shape) * storage_dtype.itemsize
+            for storage_dtype, shape in NosaAttentionWorkspace.allocation_layout(
+                max_queries, kv_heads, head_dim, dtype=dtype
+            ).values()
         )
 
     @staticmethod

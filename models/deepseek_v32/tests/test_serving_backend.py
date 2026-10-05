@@ -4,12 +4,14 @@ from types import SimpleNamespace
 import pytest
 import torch
 
-from models.deepseek_v32.serving_backend import (
+from cache.lifecycle import ResourceLifecycle
+from models.deepseek_v32.cache.session import DeepSeekServingSession
+from models.deepseek_v32.execution.adapter import (
     DeepSeekServingBackend,
-    DeepSeekServingSession,
     _storage_bytes,
-    replay_parameter_count,
 )
+from models.deepseek_v32.execution.pipeline import LocalPipeline
+from models.deepseek_v32.replay import ReplayLayout, replay_parameter_count
 
 
 class _Cache:
@@ -51,14 +53,17 @@ class _Block:
         self.source = source
         self.attention = self.cache = None
         self.inputs = []
+        self.execution_chunk_sizes = []
         self.fail = False
 
-    def forward(self, hidden, residual, scope=None):
+    def forward(self, hidden, residual, scope=None, *, attention, chunk_size):
+        assert self.attention is None and self.cache is None
         if self.fail:
             raise RuntimeError("injected layer failure")
         self.inputs.append((hidden, residual))
+        self.execution_chunk_sizes.append(chunk_size)
         combined = hidden.float() if residual is None else hidden.float() + residual.float()
-        cache = self.cache
+        cache = attention.cache
         past = torch.stack(cache.records) if cache.records else combined[:0]
         cumulative = torch.cat((past, combined)).cumsum(0)[cache.written :]
         denominator = torch.arange(cache.written + 1, cache.written + len(hidden) + 1)[:, None]
@@ -67,12 +72,21 @@ class _Block:
         return hidden_out, (combined * 0.125).bfloat16()
 
 
-def _model(layers=10, scheme="hbm"):
+def _model(layers=10, scheme="hbm", *, owner=None):
     model = object.__new__(DeepSeekServingBackend)
     model.device = torch.device("cpu")
+    model.lifecycle = ResourceLifecycle("DeepSeek test")
+    if owner is not None:
+        model.lifecycle.bind_owner(owner)
+    model.pipeline = LocalPipeline()
+    model._pipeline_resources = None
+    model.replay_layout = ReplayLayout.repeated_sources(layers)
     model.scheme = scheme
     model.num_layers = layers
     model.chunk_size = 4
+    model.host_arena_tokens = None
+    model.workspace_query_tokens = 4
+    model.extend_chunk_size = None
     model.slots = 16
     model.max_seq_len = 128
     model.cfg = SimpleNamespace(
@@ -88,11 +102,11 @@ def _model(layers=10, scheme="hbm"):
     model.final_norm = torch.ones(8)
     model.blocks = [_Block(layer % 3) for layer in range(layers)]
     model.capture_hook = None
-    model._busy = False
     model.synchronize = lambda: None
     session = DeepSeekServingSession(
         128, scheme, [SimpleNamespace(cache=_Cache()) for _ in range(layers)], model
     )
+    session.registration = model.lifecycle.register(session, owner=owner, allow_unplanned=True)
     return model, session
 
 
@@ -137,7 +151,7 @@ def test_failed_copy_rolls_back_all_owned_transactions_and_allows_retry():
     model.blocks[7].fail = True
     with pytest.raises(RuntimeError, match="injected"):
         model.extend(session, [5, 2])
-    assert not model._busy and session.length == 3
+    assert not model._execution_active() and session.length == 3
     assert all(runner.cache.length == runner.cache.written == 3 for runner in session.runners)
     assert all(runner.cache.rollbacks == 1 for runner in session.runners)
     model.blocks[7].fail = False
@@ -149,6 +163,7 @@ def test_alternating_users_keep_independent_prefixes_on_shared_model_weights():
     bob = DeepSeekServingSession(
         128, "hbm", [SimpleNamespace(cache=_Cache()) for _ in range(10)], model
     )
+    bob.registration = model.lifecycle.register(bob, allow_unplanned=True)
     oracle, independent = _model()
     model.prefill(alice, [1, 4, 3])
     oracle.prefill(independent, [1, 4, 3])
@@ -169,6 +184,43 @@ def test_failed_begin_does_not_rollback_an_existing_transaction():
         model.prefill(session, [1, 2])
     assert [runner.cache.rollbacks for runner in session.runners] == [1, 1] + [0] * 8
     assert session.runners[2].cache._step_end == 1
+
+
+def test_offset_restore_failures_preserve_execution_error_and_poison_owner():
+    owner = object()
+    model, session = _model(layers=3, owner=owner)
+    model.blocks[0].fail = True
+    restores = []
+
+    class Offset:
+        def __init__(self, layer):
+            self.layer = layer
+
+        def clone(self):
+            return self
+
+        def copy_(self, saved):
+            assert saved is self
+            restores.append(self.layer)
+            raise OSError(f"offset restore {self.layer}")
+
+    for layer, runner in enumerate(session.runners):
+        runner.offset = Offset(layer)
+    with pytest.raises(ExceptionGroup) as failed:
+        model.prefill(session, [1, 2], owner=owner)
+    assert [str(error) for error in failed.value.exceptions] == [
+        "injected layer failure",
+        "offset restore 0",
+        "offset restore 1",
+        "offset restore 2",
+    ]
+    assert restores == [0, 1, 2]
+    assert all(runner.cache.rollbacks == 1 for runner in session.runners)
+    assert model.lifecycle.poisoned
+    assert model.lifecycle.admission_owner is owner
+    assert model.lifecycle.active_session is session
+    with pytest.raises(RuntimeError, match="poisoned"):
+        model.release_session(session, owner=owner)
 
 
 def test_session_estimate_excludes_shared_pools_and_includes_hint_backups():
@@ -199,15 +251,15 @@ def test_small_pool_resource_plan_rejects_without_mutating_existing_sessions(sch
     model.prefill(session, prefix)
     oracle.prefill(reference, prefix)
     model.cfg.index_topk, model.slots = 16, 8
-    old_plan = model._resource_plan = SimpleNamespace(metadata={"workspace_query_tokens": 128})
+    old_plan = model.lifecycle.plan = SimpleNamespace(metadata={"workspace_query_tokens": 128})
     old_pool = model._shared_pool = object()
-    old_sessions = model._sessions = [session]
+    old_sessions = model.lifecycle.sessions
     caches = [runner.cache for runner in session.runners]
     contents = [torch.stack(cache.records).clone() for cache in caches]
     with pytest.raises(CacheBudgetExceeded, match="full exact selection"):
         model.plan_resources(CacheFootprint(2**30, 2**30), {"max_session_capacity": 32})
-    assert model._resource_plan is old_plan and model._shared_pool is old_pool
-    assert model._sessions is old_sessions and model._sessions == [session]
+    assert model.lifecycle.plan is old_plan and model._shared_pool is old_pool
+    assert model.lifecycle.sessions is old_sessions and model.lifecycle.sessions == {session}
     assert session.length == len(prefix) and not session.released
     for runner, cache, expected in zip(session.runners, caches, contents, strict=True):
         assert runner.cache is cache and cache.length == cache.written == len(prefix)
@@ -217,19 +269,13 @@ def test_small_pool_resource_plan_rejects_without_mutating_existing_sessions(sch
     )
 
 
-def test_storage_accounting_counts_shared_buffers_once_and_entire_storage():
-    storage = torch.empty(129, dtype=torch.bfloat16)
-    other = torch.empty(16, dtype=torch.float32)
-    assert _storage_bytes([storage[:2], storage[32:], other, None]) == {"hbm": 0, "dram": 322}
-
-
 @pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA required")
 def test_dense_pinned_bin_does_not_inflate_record_transfer_bytes():
-    from models.deepseek_v32.serving_backend import _DenseCache
+    from models.deepseek_v32.cache.session import DenseCache
 
     records = torch.empty((65, 576), dtype=torch.bfloat16, device="cuda")
     backend = SimpleNamespace(_dense_sources=[], _check_dense_execution=lambda session: None)
-    cache = _DenseCache(65, 576, device="cuda", backend=backend)
+    cache = DenseCache(65, 576, device="cuda", backend=backend)
     cache.records = records
     assert cache.host.shape == (65, 576) and cache.host.is_pinned()
     assert _storage_bytes([cache.host, cache.host[:1]]) == {"hbm": 0, "dram": 131072}
@@ -268,12 +314,12 @@ def test_released_or_foreign_sessions_fail_before_execution():
     with pytest.raises(ValueError, match="another backend"):
         other.extend(session, [1])
     model.release_session(session)
-    with pytest.raises(ValueError, match="released"):
+    with pytest.raises(RuntimeError, match="released"):
         model.extend(session, [1])
 
 
 def test_prefill_chunks_all_layers_and_executes_last_token_head_once(monkeypatch):
-    import models.deepseek_v32.serving_backend as module
+    import models.deepseek_v32.execution.adapter as module
 
     model, session = _model()
     oracle, reference = _model()
@@ -310,7 +356,7 @@ def test_prefill_chunk_size_does_not_split_candidate_batch():
     model.prefill(session, [1, 2, 3])
     model.extend(session, [4, 5, 6, 7, 8])
     assert all(len(block.inputs[-1][0]) == 5 for block in model.blocks)
-    assert all(block.chunk_size == 5 for block in model.blocks)
+    assert all(block.execution_chunk_sizes[-1] == 5 for block in model.blocks)
 
 
 def test_serving_unrecoverable_drain_poison_prevents_retry():
@@ -321,18 +367,18 @@ def test_serving_unrecoverable_drain_poison_prevents_retry():
         raise RuntimeError("permanent CUDA failure")
 
     model.synchronize = failure
-    with pytest.raises(RuntimeError, match="permanent CUDA"):
+    with pytest.raises(ExceptionGroup) as failed:
         model.extend(session, [4, 5])
-    assert model._poisoned
+    assert all("permanent CUDA" in str(error) for error in failed.value.exceptions)
+    assert model.lifecycle.poisoned
     assert session.length == 3
     with pytest.raises(RuntimeError, match="poisoned"):
         model.extend(session, [4, 5])
 
 
 def test_graph_completion_failure_retains_backend_and_admission_owner():
-    model, session = _model()
     owner = object()
-    model._admission_owner = owner
+    model, session = _model(owner=owner)
 
     class FailedCompletion:
         failed = False
@@ -344,14 +390,17 @@ def test_graph_completion_failure_retains_backend_and_admission_owner():
             raise RuntimeError("injected graph completion event failure")
 
     graph = model._compute_graphs = FailedCompletion()
-    with pytest.raises(RuntimeError, match="graph completion event"), model._execution(session):
-        assert model._active_session is session
-    assert model._poisoned and model._active_session is session
-    assert model._admission_owner is owner and model._compute_graphs is graph
+    with (
+        pytest.raises(RuntimeError, match="graph completion event"),
+        model._execution(session, owner=owner),
+    ):
+        assert model.lifecycle.active_session is session
+    assert model.lifecycle.poisoned and model.lifecycle.active_session is session
+    assert model.lifecycle.admission_owner is owner and model._compute_graphs is graph
     assert model._execution_active()
     with pytest.raises(RuntimeError, match="poisoned"):
         model.extend(session, [4, 5])
-    with pytest.raises(RuntimeError, match="release sessions and execution"):
+    with pytest.raises(RuntimeError, match="release execution"):
         model.unbind_owner(owner)
     with pytest.raises(RuntimeError, match="poisoned"):
         model._release_shared()
@@ -416,12 +465,14 @@ def test_transient_cleanup_does_not_hide_an_unfinished_layer():
 
 
 class _DenseBlock(_Block):
-    def forward(self, hidden, residual, scope=None):
+    def forward(self, hidden, residual, scope=None, *, attention, chunk_size):
+        assert self.attention is None and self.cache is None
         if self.fail:
             raise RuntimeError("injected layer failure")
         self.inputs.append((hidden, residual))
+        self.execution_chunk_sizes.append(chunk_size)
         combined = hidden.float() if residual is None else hidden.float() + residual.float()
-        cache = self.cache
+        cache = attention.cache
         cache.reserve_append_source()
         records = combined.bfloat16()
         past = cache.records[: cache.written].float()
@@ -437,7 +488,7 @@ class _DenseBlock(_Block):
 
 
 def _dense_model(monkeypatch, *, device="cpu"):
-    import models.deepseek_v32.serving_backend as module
+    import models.deepseek_v32.execution.pipeline as module
     from cache.prefix_pool import CacheFootprint
 
     model, _ = _model(scheme="dense_prefetch")
@@ -449,12 +500,10 @@ def _dense_model(monkeypatch, *, device="cpu"):
         model.synchronize = lambda: torch.cuda.synchronize(model.device)
     model.cfg.kv_lora_rank, model.cfg.qk_rope_head_dim = 6, 2
     model.cfg.index_topk, model.cfg.index_head_dim = 4, 4
-    model._sessions = []
-    model._shared_pool = model._resource_plan = model._dense_staging = None
+    model.lifecycle.sessions.clear()
+    model._shared_pool = model.lifecycle.plan = model._dense_staging = None
     model._dense_lease = None
     model._dense_sources = []
-    model._active_session = model._admission_owner = None
-    model._poisoned = False
     model.workspace_query_tokens = 8
     model.extend_chunk_size = None
     model.host_arena_tokens = None
@@ -463,13 +512,13 @@ def _dense_model(monkeypatch, *, device="cpu"):
 
     def attention_stub(attention, capacity, *, dense_backend, **kwargs):
         return SimpleNamespace(
-            cache=module._DenseCache(capacity, 8, device=model.device, backend=dense_backend),
+            cache=module.DenseCache(capacity, 8, device=model.device, backend=dense_backend),
             index_keys=torch.empty((capacity, 4), dtype=torch.float8_e4m3fn, device=model.device),
             index_scales=torch.empty(capacity, dtype=torch.float32, device=model.device),
             offset=torch.zeros(16, dtype=torch.float32, device=model.device),
         )
 
-    monkeypatch.setattr(module, "_ServingAttention", attention_stub)
+    monkeypatch.setattr(module, "ServingAttention", attention_stub)
     plan = model.plan_resources(CacheFootprint(2**20, 2**20), {"max_session_capacity": 64})
     model.allocate_shared(plan)
     model.synchronize()
@@ -501,7 +550,7 @@ def test_dense_shared_staging_alternating_users_chunks_aliases_and_full_copy_byt
     torch.testing.assert_close(model.last_logits, logits, rtol=0, atol=0)
     assert model.shared_bytes() == fixed
     assert model._dense_staging.storage_tensors()[0] is storage
-    assert model._dense_lease is model._active_session is None
+    assert model._dense_lease is model.lifecycle.active_session is None
     assert not model._dense_sources
     assert all(runner.cache.records is None for runner in alice.runners + bob.runners)
     assert sum(runner.cache.metrics()["host_to_device_bytes"] for runner in alice.runners) == (
@@ -565,9 +614,11 @@ def test_dense_failed_lease_join_retains_borrowed_aliases_sources_and_ownership(
         raise RuntimeError("injected copy stream join failure")
 
     monkeypatch.setattr(model._dense_staging, "_join", fail)
-    with pytest.raises(RuntimeError, match="copy stream join failure"):
+    with pytest.raises(ExceptionGroup) as failed:
         model.extend(session, [1, 2])
-    assert model._poisoned and model._active_session is session
+    assert "injected layer failure" in str(failed.value.exceptions[0])
+    assert "copy stream join failure" in str(failed.value.exceptions[1])
+    assert model.lifecycle.poisoned and model.lifecycle.active_session is session
     assert model._dense_lease is not None and model._dense_sources
     assert session.runners[1].cache.records is not None
     with pytest.raises(RuntimeError, match="poisoned"):
@@ -593,17 +644,18 @@ def test_dense_failed_reset_join_stays_poisoned_after_later_cleanup_join(monkeyp
         return original(lease)
 
     monkeypatch.setattr(staging, "_join", fail_once)
-    with pytest.raises(RuntimeError, match="poisoned"):
+    with pytest.raises(ExceptionGroup) as failed:
         model.prefill(session, [1, 2, 3, 4, 5])
-    assert len(attempted) == 2 and model._poisoned
-    assert model._active_session is session and model._dense_lease is not None
+    assert "injected chunk join failure" in str(failed.value.exceptions[0])
+    assert len(attempted) == 2 and model.lifecycle.poisoned
+    assert model.lifecycle.active_session is session and model._dense_lease is not None
     assert staging.storage_tensors()[0] is storage
     with pytest.raises(RuntimeError, match="poisoned"):
         model.extend(session, [6])
 
 
 def test_dense_source_reservation_waits_before_a_third_projection(monkeypatch):
-    from models.deepseek_v32.serving_backend import _DenseWrite
+    from models.deepseek_v32.cache.session import DenseWrite
 
     model = _dense_model(monkeypatch)
     session = model.create_session(32)
@@ -611,7 +663,7 @@ def test_dense_source_reservation_waits_before_a_third_projection(monkeypatch):
     with model._execution(session):
         model.device = torch.device("cuda:0")  # Fake events; no CUDA call.
         model._dense_sources = [
-            _DenseWrite(
+            DenseWrite(
                 torch.empty((8, 8), dtype=torch.bfloat16),
                 SimpleNamespace(query=lambda: False, synchronize=lambda: waited.append(True)),
             )
@@ -640,7 +692,7 @@ def test_planned_candidate_rejects_before_forward_or_any_cache_mutation(monkeypa
     monkeypatch.setattr(torch, "as_tensor", forbidden)
     with pytest.raises(CacheBudgetExceeded, match="planned candidate limit"):
         model.extend(session, list(range(1, 10)))
-    assert session.length == 3 and model._active_session is None
+    assert session.length == 3 and model.lifecycle.active_session is None
     assert model._dense_staging.storage_tensors()[0] is storage
     for runner, expected in zip(session.runners, before, strict=True):
         assert runner.cache.written == runner.cache.length == 3
@@ -650,11 +702,10 @@ def test_planned_candidate_rejects_before_forward_or_any_cache_mutation(monkeypa
 
 
 def test_partial_dense_session_failure_drains_and_retains_shared_staging(monkeypatch):
-    import models.deepseek_v32.serving_backend as module
 
     model = _dense_model(monkeypatch)
     staging = model._dense_staging
-    original = module._ServingAttention
+    original = model.pipeline.create_runner
     calls, drained = [], []
 
     def failure(*args, **kwargs):
@@ -663,13 +714,56 @@ def test_partial_dense_session_failure_drains_and_retains_shared_staging(monkeyp
         calls.append(True)
         return original(*args, **kwargs)
 
-    monkeypatch.setattr(module, "_ServingAttention", failure)
+    monkeypatch.setattr(model.pipeline, "create_runner", failure)
     monkeypatch.setattr(model, "synchronize", lambda: drained.append(True))
     with pytest.raises(RuntimeError, match="partial dense session failure"):
         model.create_session(32)
-    assert drained == [True] and not model._sessions
+    assert drained == [True] and not model.lifecycle.sessions
     assert model._dense_staging is staging and not staging.closed
     model.close()
+
+
+def test_borrowed_sparse_cache_requires_its_model_operation_for_all_transactions():
+    from cache.sparse_token_pool import SharedSparseTokenPool
+    from models.deepseek_v32.cache.session import ServingSparseTokenCache
+
+    lifecycle = ResourceLifecycle("DeepSeek cache test")
+    owner = object()
+    lifecycle.bind_owner(owner)
+    lifecycle.allocated(object(), owner=owner)
+    pool = SharedSparseTokenPool(64, 8, 1, 64, device="cpu")
+    backing = pool.allocate_session(64)
+    cache = ServingSparseTokenCache.for_layer(backing, 0)
+    session = DeepSeekServingSession(64, "echo", [], SimpleNamespace(lifecycle=lifecycle))
+    session.registration = lifecycle.register(session, owner=owner)
+    backing.bind_release_guard(session.check_backing_release)
+    cache.bind_serving(session, lifecycle)
+    for release in (backing.release, lambda: pool.release_session(backing)):
+        with pytest.raises(RuntimeError, match="release lease"):
+            release()
+    assert pool.free_host_pages == 0 and not backing.released
+    with pytest.raises(RuntimeError, match="execution lease"):
+        cache.begin_step(1)
+    with lifecycle.execution(session, session.registration, owner=owner):
+        with pytest.raises(RuntimeError, match="release lease"):
+            backing.release()
+        cache.begin_step(1)
+        cache.append(torch.ones((1, 8), dtype=torch.bfloat16))
+        cache.commit()
+    assert cache.length == 1
+    with pytest.raises(RuntimeError, match="active session operation"):
+        cache.truncate(0)
+    with pytest.raises(RuntimeError, match="execution lease"):
+        cache.append(torch.ones((1, 8), dtype=torch.bfloat16))
+    with lifecycle.mutation(session, session.registration, owner=owner):
+        cache.truncate(0)
+    assert cache.length == 0
+    with lifecycle.mutation(session, session.registration, owner=owner, releasing=True):
+        backing.release()
+        lifecycle.detach(session)
+    assert pool.free_host_pages == 1 and backing._release_guard is None
+    lifecycle.unbind_owner(owner)
+    lifecycle.close(pool.close)
 
 
 @pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA required")

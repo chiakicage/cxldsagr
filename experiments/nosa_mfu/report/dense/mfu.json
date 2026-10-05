@@ -1,0 +1,76 @@
+{
+  "schema": "selected-dense-bench-profile-v1",
+  "bench_run_id": "refactor_mfu_dense_bench_20261005_02",
+  "profile_run_id": "refactor_mfu_dense_profile_20261005_02",
+  "peak_tflops": 989,
+  "phases": {
+    "full_prefill": {
+      "end_to_end": {
+        "flops": 2170865718394880,
+        "wall_ms": 3506.117727025412,
+        "mfu_pct": 62.60516641210506
+      },
+      "profile_modules": {
+        "qkv_proj": {
+          "flops": 80401787781120,
+          "gpu_ms": 120.80536500000014,
+          "mfu_pct": 67.29506116559365
+        },
+        "o_proj": {
+          "flops": 71468255805440,
+          "gpu_ms": 110.51247599999994,
+          "mfu_pct": 65.38913349521334
+        },
+        "gate_up_proj": {
+          "flops": 571746046443520,
+          "gpu_ms": 817.3483429999725,
+          "mfu_pct": 70.72935409181639
+        },
+        "down_proj": {
+          "flops": 285873023221760,
+          "gpu_ms": 401.7976149999996,
+          "mfu_pct": 71.9398500765174
+        },
+        "attention_core": {
+          "flops": 1161376605143040,
+          "gpu_ms": 1921.1119880000022,
+          "mfu_pct": 61.12573575559469
+        }
+      }
+    },
+    "extend": {
+      "end_to_end": {
+        "flops": 50990120173568,
+        "wall_ms": 81.80667192209512,
+        "mfu_pct": 63.023282467493736
+      },
+      "profile_modules": {
+        "qkv_proj": {
+          "flops": 1236950581248,
+          "gpu_ms": 1.8478739999999998,
+          "mfu_pct": 67.68363932578218
+        },
+        "o_proj": {
+          "flops": 1099511627776,
+          "gpu_ms": 1.689538,
+          "mfu_pct": 65.80146621830762
+        },
+        "gate_up_proj": {
+          "flops": 8796093022208,
+          "gpu_ms": 12.496844000000001,
+          "mfu_pct": 71.16937852888107
+        },
+        "down_proj": {
+          "flops": 4398046511104,
+          "gpu_ms": 6.141541999999999,
+          "mfu_pct": 72.40792467529947
+        },
+        "attention_core": {
+          "flops": 35459518431232,
+          "gpu_ms": 57.653321000000005,
+          "mfu_pct": 62.18880514664866
+        }
+      }
+    }
+  }
+}

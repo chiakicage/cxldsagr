@@ -3,8 +3,12 @@
 import pytest
 import torch
 
-from models.nosa.allocation_budget import allocation_bytes
-from models.nosa.session_budget import SCHEMES, estimate_session_bytes, session_budget_breakdown
+from cache.allocator.budget import allocation_bytes
+from models.nosa.execution.session_budget import (
+    SCHEMES,
+    estimate_session_bytes,
+    session_budget_breakdown,
+)
 
 
 def options(**changes):

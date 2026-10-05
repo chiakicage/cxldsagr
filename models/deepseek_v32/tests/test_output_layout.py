@@ -4,7 +4,7 @@ import pytest
 import torch
 import torch.nn.functional as F
 
-from models.deepseek_v32.echo_model import CheckpointAttention
+from models.deepseek_v32.projections import CheckpointAttention
 
 
 class _CudaLayoutOnCPU(torch.Tensor):

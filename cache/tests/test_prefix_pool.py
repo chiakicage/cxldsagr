@@ -79,6 +79,26 @@ def test_allocation_underestimate_fails_and_releases():
     assert len(released) == 1
 
 
+def test_audit_and_release_failure_preserves_both_errors_and_session(monkeypatch):
+    cache, _ = pool()
+    audit_error = RuntimeError("audit failed")
+    release_error = RuntimeError("drain failed")
+
+    def failed_audit():
+        raise audit_error
+
+    def failed_release(session):
+        raise release_error
+
+    monkeypatch.setattr(cache, "audit", failed_audit)
+    monkeypatch.setattr(cache, "_release", failed_release)
+    with pytest.raises(ExceptionGroup) as caught:
+        admit(cache, "a")
+    assert caught.value.exceptions == (audit_error, release_error)
+    assert len(cache) == 1
+    assert not cache._entries["a"].ready
+
+
 def test_lazy_growth_is_audited():
     cache, _ = pool()
     entry = admit(cache, "a").entry

@@ -79,7 +79,7 @@ def selection_geometry(ids, valid, query_start, queries, kv_heads, query_heads, 
     """Validate exact causal work and count unique logical KV without expansion."""
     import torch
 
-    from layers.attention import BlockSelection
+    from models.attention_contracts import BlockSelection
 
     require(ids.device.type == "cpu" and valid.device.type == "cpu", "selection audit runs on CPU")
     require(

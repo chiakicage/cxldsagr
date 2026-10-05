@@ -15,10 +15,20 @@ from pathlib import Path
 from types import SimpleNamespace
 
 from experiments.deepseek_v32_motivation.src import measure as motivation
+from experiments.nosa_motivation.src.validation import (
+    begin_validation,
+    execution_environment,
+    record_runtime,
+    validate_mode_arguments,
+    without_performance,
+)
 
 ROOT = motivation.ROOT
 EXPERIMENT = ROOT / "experiments/deepseek_v32_echo_official"
 SCHEMA = "deepseek-v32-echo-official-v1"
+CHECK_SCHEMA = "deepseek-v32-echo-official-check-v1"
+BENCH_SCHEMA = "deepseek-v32-echo-official-bench-v1"
+RECEIPT_KIND = "deepseek-v32-echo-official-full-trace-v1"
 SCHEMES = ("hbm", "echo")
 LABELS = {"hbm": "HBM-only", "echo": "Official ECHO (adapted offload pipeline)"}
 INDEXER_DISPATCH_POLICY = "official_fused_every_offload_call_v1"
@@ -201,10 +211,12 @@ def append_row(path, row):
 
 
 def run_case(backend, workload, config, output, metadata, observe, runner_type):
-    """Preserve motivation's timing boundary; compare saved output outside that interval."""
+    """Execute a fresh trace with either independent checks or clean samples."""
     import torch
 
     scheme = backend.scheme
+    checking = metadata.get("mode", "check") == "check"
+    native_before = None
     torch.cuda.reset_peak_memory_stats(backend.device)
     before_allocation = observe(f"{scheme}/before_cache_allocation")
     rows = []
@@ -220,6 +232,13 @@ def run_case(backend, workload, config, output, metadata, observe, runner_type):
         ):
             raise AssertionError("backend did not apply the requested NH capacity")
         observe(f"{scheme}/after_cache_allocation")
+        if "validation_identity" in metadata:
+            from experiments.nosa_motivation.src.provenance import loaded_native_artifacts
+
+            native_before = loaded_native_artifacts()
+            record_runtime(
+                metadata, scheme, backend, native_before, runner.token_validation_identity
+            )
         for request in workload.requests:
             request_id = request["request_id"]
             metadata.update(stage="measuring", active_scheme=scheme, active_request=request_id)
@@ -233,7 +252,6 @@ def run_case(backend, workload, config, output, metadata, observe, runner_type):
             motivation.check_compute_graph_replays(
                 graphs_before, graphs_after, config, result.metrics
             )
-            evidence = save_comparison(backend, result, request, config, output, scheme)
             row = {
                 **result.metrics,
                 "run_id": metadata["run_id"],
@@ -243,15 +261,24 @@ def run_case(backend, workload, config, output, metadata, observe, runner_type):
                 "memory_before": before,
                 "memory_after": after,
                 "compute_graphs": {"before": graphs_before, "after": graphs_after},
-                **evidence,
             }
+            if checking:
+                row.update(save_comparison(backend, result, request, config, output, scheme))
+                require_numerical(row)
+                row = without_performance(row)
+                detail = "numerical=passed"
+            else:
+                if result.hidden.shape != (config["candidate_tokens"], backend.cfg.dim):
+                    raise AssertionError("missing candidate hidden states")
+                if backend.last_logits.shape != (1, backend.cfg.vocab_size):
+                    raise AssertionError("missing last-token vocabulary logits")
+                detail = f"latency_ms={row['latency_ms']:.3f}"
             append_row(output / "measurements.jsonl", row)
-            require_numerical(row)
             rows.append(row)
             print(
                 f"{scheme} {request_id + 1}/{config['requests_per_scheme']}: "
                 f"user={request['user_id']} revisit={row['is_revisit']} "
-                f"hit={row['prefix_cache_hit']} latency_ms={row['latency_ms']:.3f}",
+                f"hit={row['prefix_cache_hit']} {detail}",
                 flush=True,
             )
             del result
@@ -272,6 +299,11 @@ def run_case(backend, workload, config, output, metadata, observe, runner_type):
             "before_cache_allocation": before_allocation,
         }
     backend.close()
+    if native_before is not None:
+        from experiments.nosa_motivation.src.provenance import verify_native_artifacts
+
+        case["native_artifacts_before"] = native_before
+        case["native_artifacts_after"] = verify_native_artifacts(native_before)
     observe(f"{scheme}/after_cleanup")
     return case
 
@@ -332,7 +364,10 @@ def snapshot_sources(output):
     """Include the reused harness and the new experiment in the production snapshot."""
     motivation.snapshot_sources(output)
     manifest = json.loads((output / "source_manifest.json").read_text())
-    paths = [Path(motivation.__file__)]
+    paths = [
+        Path(motivation.__file__),
+        ROOT / "experiments/deepseek_v32_echo_prefill/src/analyze_nsys.py",
+    ]
     for directory in (EXPERIMENT / "src", EXPERIMENT / "scripts"):
         paths.extend(path for path in directory.rglob("*") if path.suffix in (".py", ".sh"))
     for path in sorted(paths):
@@ -416,7 +451,7 @@ def verify_identities(backend, output, metadata, stage):
     verify_source_snapshot(output)
     if backend_provenance() != metadata["backend_provenance"]:
         raise RuntimeError("installed baseline backend identity changed during measurement")
-    current = backend.official_provenance()
+    current = backend.pipeline.provenance()
     reconcile_official(
         metadata["official_provenance"], current, allow_new_native=stage.endswith("_warmup")
     )
@@ -432,16 +467,48 @@ def verify_identities(backend, output, metadata, stage):
     write_json(output / "metadata.json", metadata)
 
 
+def publish_receipt(metadata, directory, audit):
+    from evaluation.validation import write_receipt
+
+    directory = Path(directory)
+    artifacts = {
+        str(path.relative_to(directory)): path
+        for path in directory.rglob("*")
+        if path.is_file() and path.name != "receipt.json"
+    }
+    artifacts["metadata"] = artifacts.pop("metadata.json")
+    if set(metadata["validation_identity"]["methods"]) != set(SCHEMES):
+        raise ValueError("official receipt lacks complete runtime method identities")
+    return write_receipt(
+        directory / "receipt.json",
+        kind=RECEIPT_KIND,
+        identity=metadata["validation_identity"],
+        checks={
+            "passed": True,
+            "coverage": "complete HBM and official ECHO traces plus independent HBM repeat",
+            "numerical_and_lifecycle": audit,
+            "does_not_establish": "failure injection, task quality, or performance",
+        },
+        artifacts=artifacts,
+    )
+
+
 def main(argv=None):
     args = parser().parse_args(argv)
+    validate_mode_arguments(args)
     config = configuration(args)
-    target = args.output_dir or EXPERIMENT / "output/data" / args.run_id
+    target = args.output_dir or (
+        Path(tempfile.gettempdir()) / "cxldsagr-checks/deepseek_v32_echo_official" / args.run_id
+        if args.mode == "check"
+        else EXPERIMENT / "output/data" / args.run_id
+    )
     if target.exists():
         raise FileExistsError(target)
     output = Path(tempfile.mkdtemp(prefix=f"deepseek-echo-official-{args.run_id}-"))
     print(f"temporary output: {output}", flush=True)
     metadata = {
-        "schema": SCHEMA,
+        "schema": CHECK_SCHEMA if args.mode == "check" else BENCH_SCHEMA,
+        "mode": args.mode,
         "run_id": args.run_id,
         "status": "running",
         "config": config,
@@ -468,8 +535,9 @@ def main(argv=None):
             "history cleanup. GPU counter accumulation and reductions inside forward are included. "
             "Loading, generation, compute-graph preparation, three warmup requests, host counter readout, output copies, "
             "numerical comparison and reporting are outside latency. Each request "
-            "is measured once. The HBM reference is executed afresh in this same run. A separate "
-            "full resident validation repeat publishes outputs and errors, without latency."
+            "is measured once in bench mode, which requires a matching independent receipt and "
+            "does not save outputs or perform per-sample reference comparisons. Check mode "
+            "compares both schemes plus a fresh full resident repeat and publishes no latency."
         ),
         "diagnostics_boundary": (
             "Cache transfer counters cover candidate forward only; history prefill counters "
@@ -490,6 +558,7 @@ def main(argv=None):
         ),
     }
     backend = None
+    failure = None
     samples = []
     try:
         import torch
@@ -497,9 +566,9 @@ def main(argv=None):
         metadata["precision_settings"] = configure_precision(torch)
 
         from evaluation.provenance import _git, backend_provenance
-        from experiments.deepseek_v32_echo_cache.src.capacity_probe import memory_sample
+        from experiments.cache_management.src.capacity_probe import memory_sample
         from GR.workload import WorkloadConfig, build_workload
-        from models.deepseek_v32.official_serving import OfficialDeepSeekServingBackend
+        from models.deepseek_v32.execution.official import build_official_backend
         from serving.persistent import PersistentGRRunner
 
         runner_type = partial(PersistentGRRunner, native_token_validation=True)
@@ -509,6 +578,7 @@ def main(argv=None):
             raise RuntimeError("this experiment requires one SM90/Hopper GPU")
         torch.cuda.set_device(device)
         os.environ.setdefault("CXLDSAGR_SM90_BACKEND", "native")
+        metadata["execution_environment"] = execution_environment()
         metadata.update(
             source_sha256=snapshot_sources(output),
             git_revision=_git("rev-parse", "HEAD"),
@@ -527,6 +597,9 @@ def main(argv=None):
             "total_memory": props.total_memory,
             "sm_count": props.multi_processor_count,
         }
+        from experiments.nosa_motivation.src.cpu_environment import cpu_environment
+
+        metadata["hardware"]["cpu_environment"] = cpu_environment(torch)
         metadata["checkpoint"] = {
             "path": str(args.model_path.resolve()),
             "files": {
@@ -560,7 +633,7 @@ def main(argv=None):
         workload.write(output / "workload")
         metadata["workload_sha256"] = workload.manifest["workload_sha256"]
         observe("before_model_loading")
-        backend = OfficialDeepSeekServingBackend(
+        backend = build_official_backend(
             args.model_path,
             scheme="hbm",
             device=device,
@@ -577,10 +650,11 @@ def main(argv=None):
             "vocabulary": backend.cfg.vocab_size,
         }
         metadata["model_loaded_memory"] = observe("after_model_loading")
-        metadata["official_provenance"] = backend.official_provenance()
+        metadata["official_provenance"] = backend.pipeline.provenance()
         metadata["official_artifact_manifest_sha256"] = snapshot_official(
             metadata["official_provenance"], output
         )
+        begin_validation(metadata, output, args.validation_receipt, RECEIPT_KIND)
         for scheme in SCHEMES:
             backend.configure_scheme(scheme)
             metadata.update(stage="warmup", active_scheme=scheme)
@@ -595,7 +669,7 @@ def main(argv=None):
             case = run_case(backend, workload, config, output, metadata, observe, runner_type)
             metadata["cases"].append(case)
             write_json(output / "metadata.json", metadata)
-            if scheme == "hbm":
+            if args.mode == "check" and scheme == "hbm":
                 gc.collect()
                 torch.cuda.empty_cache()
                 metadata["validation_repeats"].append(
@@ -603,11 +677,16 @@ def main(argv=None):
                 )
                 verify_identities(backend, output, metadata, "after_hbm_repeat")
         verify_identities(backend, output, metadata, "final")
-        from experiments.deepseek_v32_echo_official.src.report import write_report
+        from experiments.deepseek_v32_echo_official.src.report import audit_run, write_report
         from experiments.deepseek_v32_echo_prefill.src.backend_provenance import (
             collect_flashinfer_runtime_artifacts,
         )
 
+        if execution_environment() != metadata["execution_environment"]:
+            raise RuntimeError("execution environment changed during the run")
+        from experiments.nosa_motivation.src.cpu_environment import finish_cpu_environment
+
+        finish_cpu_environment(metadata, torch)
         metadata.update(
             status="accepted",
             stage="complete",
@@ -615,20 +694,32 @@ def main(argv=None):
             flashinfer_runtime_artifacts=collect_flashinfer_runtime_artifacts(),
         )
         write_json(output / "metadata.json", metadata)
-        write_report(output, output / "report")
+        if args.mode == "check":
+            _, _, audit = audit_run(output)
+            publish_receipt(metadata, output, audit)
+        else:
+            write_report(output, output / "report")
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.move(str(output), str(target))
         print(
             f"accepted {args.run_id}: two schemes, {config['requests_per_scheme']} each; {target}"
         )
     except BaseException as error:
+        failure = error
         metadata.update(status="failed", error=repr(error))
         write_json(output / "metadata.json", metadata)
         print(f"failed run retained outside experiments: {output}", flush=True)
         raise
     finally:
         if backend is not None:
-            backend.close()
+            try:
+                backend.close()
+            except BaseException as cleanup_error:
+                if failure is not None:
+                    raise BaseExceptionGroup(
+                        "official measurement and resource cleanup failed", [failure, cleanup_error]
+                    ) from None
+                raise
 
 
 if __name__ == "__main__":

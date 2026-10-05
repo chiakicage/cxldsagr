@@ -6,7 +6,8 @@ import pytest
 import torch
 
 from cache.sparse_token_pool import SharedSparseTokenPool
-from models.deepseek_v32.echo_attention import EchoAttentionRunner
+from models.attention_contracts import TokenSelection
+from models.deepseek_v32.attention import EchoAttentionRunner
 
 
 @pytest.mark.parametrize("compute_callbacks", [False, True])
@@ -52,7 +53,8 @@ def test_one_outer_batch_preserves_prefetch_topk_append_recall_order(
             cache.prefetch_reference(range(start))
         return torch.arange(len(k)).float().expand(len(q), -1).clone()
 
-    def consume(q, indices, scope):
+    def consume(q, selection, scope):
+        indices = selection.token_ids
         assert cache.written == cache.indexer_visible_end
         physical = cache.ensure(indices)
         valid = indices >= 0
@@ -114,14 +116,16 @@ def test_exact_union_capacity_split_keeps_every_query_selection():
     from contextlib import nullcontext
     from unittest.mock import patch
 
-    import models.deepseek_v32.echo_attention as module
+    import models.deepseek_v32.attention as module
 
     indices = torch.tensor([[0, 1, 2], [2, 3, 4], [4, 5, 6], [6, 7, 8]], dtype=torch.int32)
     q = torch.arange(4).reshape(4, 1, 1)
     with patch.object(module, "sparse_mla_from_pool", lambda q, *args: q):
-        output = runner._consume(q, indices, lambda _: nullcontext())
+        output = runner._consume(q, TokenSelection(indices), lambda _: nullcontext())
     torch.testing.assert_close(torch.cat(consumed), indices)
     torch.testing.assert_close(output, q)
     assert runner.cache.stats.capacity_splits == 3
     with pytest.raises(ValueError, match="one query"):
-        runner._consume(q[:1], torch.arange(4).reshape(1, -1), lambda _: nullcontext())
+        runner._consume(
+            q[:1], TokenSelection(torch.arange(4).reshape(1, -1)), lambda _: nullcontext()
+        )

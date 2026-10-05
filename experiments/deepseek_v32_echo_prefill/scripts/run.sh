@@ -9,11 +9,28 @@ if [[ "${1:-}" == --help || "${1:-}" == -h ]]; then
   python -m experiments.deepseek_v32_echo_prefill.src.measure --help
   exit 0
 fi
+if [[ "${ECHO_NSYS:-0}" != 0 ]]; then
+  echo "Use scripts/profile_layers.sh for independent profiling" >&2
+  exit 2
+fi
+mode="${ECHO_MODE:-bench}"
+forward=()
+while (($#)); do
+  case "$1" in
+    --mode) mode="$2"; shift 2 ;;
+    --mode=*) mode="${1#*=}"; shift ;;
+    *) forward+=("$1"); shift ;;
+  esac
+done
+if [[ "$mode" != check && "$mode" != bench ]]; then
+  echo "Mode must be check or bench" >&2; exit 2
+fi
+set -- "${forward[@]}"
 for argument in "$@"; do
   option="${argument%%=*}"
   # argparse accepts unambiguous option prefixes as well as --option=value.
   if [[ "$option" == --* && ( --run-id == "$option"* || --output == "$option"* || --profile-dir == "$option"* || --nsys == "$option"* ) ]]; then
-    echo "The script owns --run-id, --output, --profile-dir and --nsys; use ECHO_RUN_ID/ECHO_NSYS" >&2
+    echo "The script owns --run-id, --output, --profile-dir and --nsys; use ECHO_RUN_ID" >&2
     exit 2
   fi
 done
@@ -23,6 +40,9 @@ if [[ ! "$run_id" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]]; then
   exit 2
 fi
 base="experiments/deepseek_v32_echo_prefill/output"
+if [[ "$mode" == check ]]; then
+  base="${TMPDIR:-/tmp}/cxldsagr-checks/deepseek_v32_echo_prefill"
+fi
 for category in data log profile; do
   if [[ -e "$base/$category/$run_id" || -L "$base/$category/$run_id" ]]; then
     echo "Run output already exists: $base/$category/$run_id" >&2
@@ -44,18 +64,19 @@ trap finish EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
 command=(python -m experiments.deepseek_v32_echo_prefill.src.measure
-  --run-id "$run_id" --output "$staging/data" "$@")
-if [[ "${ECHO_NSYS:-0}" == 1 ]]; then
-  command=(nsys profile --trace=cuda,nvtx,osrt --sample=none --cpuctxsw=none
-    --capture-range=cudaProfilerApi --capture-range-end=repeat:4
-    --output "$staging/profile/layers3" "${command[@]}" --nsys)
-fi
+  --mode "$mode" --run-id "$run_id" --output "$staging/data" "$@")
 "${command[@]}" >"$staging/log/stdout.log" 2>"$staging/log/stderr.log"
 python - "$staging/data/result.json" <<'PY'
 import json, sys
 result = json.load(open(sys.argv[1]))
 assert result['accepted'] and result['num_layers'] == 3
-assert len(result['correctness']) == 8
+assert result['schema_version'] == 2 and result['mode'] in ('check', 'bench')
+if result['mode'] == 'check':
+    assert len(result['correctness']) == 5
+    from pathlib import Path
+    assert Path(sys.argv[1]).with_name('receipt.json').is_file()
+else:
+    assert not result['correctness'] and result['validation_receipt']
 PY
 for category in data log profile; do
   mkdir -p "$base/$category"

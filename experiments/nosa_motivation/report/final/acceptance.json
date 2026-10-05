@@ -1,0 +1,725 @@
+{
+  "measurement_integrity": "passed",
+  "profile_integrity": "passed",
+  "denominator": {
+    "run_id": "refactor_final_nosa_bench_20261005_01",
+    "source_sha256": "4665ccce226af23f631e619f748369cea28d4a09b99c1947cbb6b030e58f120c",
+    "metadata_sha256": "b3ae1d3749e66b00dbd0a3962b9e9a9e3e68c3f1446d1e2e03193317dec50323",
+    "measurements_sha256": "66ada308e333d7a26029ad451e5711d922ab5ee311158c5a7b22b443211c84eb",
+    "boundary": "Synchronized runner wall latency includes token validation/transfer, admission, eviction, independent sparse history construction on miss, all candidate hidden states, and candidate discard. Model loading, request generation, warmup, counters and reports are outside latency. Bench performs no full-output CPU copies, numerical comparison or output saving between requests. Check publishes no timings."
+  },
+  "async_end_to_end_speedup": {
+    "status": "failed",
+    "groups": {
+      "first": {
+        "sync_over_async": 0.9699560944221219,
+        "passed": false,
+        "total_request_ms": {
+          "sync_sparse": 42747.22345371265,
+          "async_sparse": 44071.297349990346
+        }
+      },
+      "revisit": {
+        "sync_over_async": 0.9261911341617146,
+        "passed": false,
+        "total_request_ms": {
+          "sync_sparse": 473.09318999759853,
+          "async_sparse": 510.79434098210186
+        }
+      }
+    },
+    "total_request_ms": {
+      "sync_sparse": 43220.31664371025,
+      "async_sparse": 44582.09169097245
+    },
+    "sync_over_async": 0.9694546622733282,
+    "rule": "strictly lower total uninstrumented request latency over the complete trace; visit groups reported separately",
+    "boundary": "Observed trace comparison; no statistical-confidence or repeatability claim"
+  },
+  "async_every_sample_page_and_stripe_90pct": {
+    "status": "failed",
+    "rule": "both page-envelope and nonempty-stripe-copy ratios >= 0.9 for every applicable layer/sample",
+    "checked_layer_samples": 96,
+    "no_fetch_layer_samples": 96,
+    "failed_layer_samples": [
+      {
+        "request_id": 16,
+        "sample": 0,
+        "layer": 0,
+        "page_ratio": 0.7051776226690281,
+        "stripe_ratio": 0.7051776226690281
+      },
+      {
+        "request_id": 16,
+        "sample": 0,
+        "layer": 1,
+        "page_ratio": 0.6878151260504202,
+        "stripe_ratio": 0.6878151260504202
+      },
+      {
+        "request_id": 16,
+        "sample": 0,
+        "layer": 2,
+        "page_ratio": 0.720575984767345,
+        "stripe_ratio": 0.720575984767345
+      },
+      {
+        "request_id": 16,
+        "sample": 0,
+        "layer": 3,
+        "page_ratio": 0.732095228687148,
+        "stripe_ratio": 0.732095228687148
+      },
+      {
+        "request_id": 16,
+        "sample": 0,
+        "layer": 4,
+        "page_ratio": 0.6641618497109827,
+        "stripe_ratio": 0.6641618497109827
+      },
+      {
+        "request_id": 16,
+        "sample": 0,
+        "layer": 5,
+        "page_ratio": 0.6982730880617827,
+        "stripe_ratio": 0.6982730880617827
+      },
+      {
+        "request_id": 16,
+        "sample": 0,
+        "layer": 6,
+        "page_ratio": 0.7730275942479595,
+        "stripe_ratio": 0.7730275942479595
+      },
+      {
+        "request_id": 16,
+        "sample": 0,
+        "layer": 7,
+        "page_ratio": 0.7105263157894737,
+        "stripe_ratio": 0.7105263157894737
+      },
+      {
+        "request_id": 16,
+        "sample": 0,
+        "layer": 8,
+        "page_ratio": 0.7689792581996526,
+        "stripe_ratio": 0.7689792581996526
+      },
+      {
+        "request_id": 16,
+        "sample": 0,
+        "layer": 9,
+        "page_ratio": 0.691601538270686,
+        "stripe_ratio": 0.691601538270686
+      },
+      {
+        "request_id": 16,
+        "sample": 0,
+        "layer": 10,
+        "page_ratio": 0.7121017851859158,
+        "stripe_ratio": 0.7121017851859158
+      },
+      {
+        "request_id": 16,
+        "sample": 0,
+        "layer": 11,
+        "page_ratio": 0.6877260873222848,
+        "stripe_ratio": 0.6877260873222848
+      },
+      {
+        "request_id": 16,
+        "sample": 0,
+        "layer": 12,
+        "page_ratio": 0.7024873479056746,
+        "stripe_ratio": 0.7024873479056746
+      },
+      {
+        "request_id": 16,
+        "sample": 0,
+        "layer": 13,
+        "page_ratio": 0.6993498049414825,
+        "stripe_ratio": 0.6993498049414825
+      },
+      {
+        "request_id": 16,
+        "sample": 0,
+        "layer": 14,
+        "page_ratio": 0.7433958459366807,
+        "stripe_ratio": 0.7433958459366807
+      },
+      {
+        "request_id": 16,
+        "sample": 0,
+        "layer": 15,
+        "page_ratio": 0.7347040622816648,
+        "stripe_ratio": 0.7347040622816648
+      },
+      {
+        "request_id": 16,
+        "sample": 0,
+        "layer": 16,
+        "page_ratio": 0.6233842538190364,
+        "stripe_ratio": 0.6233842538190364
+      },
+      {
+        "request_id": 16,
+        "sample": 0,
+        "layer": 17,
+        "page_ratio": 0.7219351389878831,
+        "stripe_ratio": 0.7219351389878831
+      },
+      {
+        "request_id": 16,
+        "sample": 0,
+        "layer": 18,
+        "page_ratio": 0.7270729026743192,
+        "stripe_ratio": 0.7270729026743192
+      },
+      {
+        "request_id": 16,
+        "sample": 0,
+        "layer": 19,
+        "page_ratio": 0.7182346326836582,
+        "stripe_ratio": 0.7182346326836582
+      },
+      {
+        "request_id": 16,
+        "sample": 0,
+        "layer": 20,
+        "page_ratio": 0.7792365669827377,
+        "stripe_ratio": 0.7792365669827377
+      },
+      {
+        "request_id": 16,
+        "sample": 0,
+        "layer": 21,
+        "page_ratio": 0.6423561151079137,
+        "stripe_ratio": 0.6423561151079137
+      },
+      {
+        "request_id": 16,
+        "sample": 0,
+        "layer": 22,
+        "page_ratio": 0.6634351268379383,
+        "stripe_ratio": 0.6634351268379383
+      },
+      {
+        "request_id": 16,
+        "sample": 0,
+        "layer": 23,
+        "page_ratio": 0.678374815848647,
+        "stripe_ratio": 0.678374815848647
+      },
+      {
+        "request_id": 16,
+        "sample": 0,
+        "layer": 24,
+        "page_ratio": 0.7020083741395217,
+        "stripe_ratio": 0.7020083741395217
+      },
+      {
+        "request_id": 16,
+        "sample": 0,
+        "layer": 25,
+        "page_ratio": 0.7335375191424196,
+        "stripe_ratio": 0.7335375191424196
+      },
+      {
+        "request_id": 16,
+        "sample": 0,
+        "layer": 26,
+        "page_ratio": 0.6912219996357676,
+        "stripe_ratio": 0.6912219996357676
+      },
+      {
+        "request_id": 16,
+        "sample": 0,
+        "layer": 27,
+        "page_ratio": 0.7523629489603024,
+        "stripe_ratio": 0.7523629489603024
+      },
+      {
+        "request_id": 16,
+        "sample": 0,
+        "layer": 28,
+        "page_ratio": 0.7248080614203455,
+        "stripe_ratio": 0.7248080614203455
+      },
+      {
+        "request_id": 16,
+        "sample": 0,
+        "layer": 29,
+        "page_ratio": 0.6937161271422294,
+        "stripe_ratio": 0.6937161271422294
+      },
+      {
+        "request_id": 16,
+        "sample": 0,
+        "layer": 30,
+        "page_ratio": 0.7833632067785563,
+        "stripe_ratio": 0.7833632067785563
+      },
+      {
+        "request_id": 16,
+        "sample": 0,
+        "layer": 31,
+        "page_ratio": 0.7618040196172708,
+        "stripe_ratio": 0.7618040196172708
+      },
+      {
+        "request_id": 16,
+        "sample": 1,
+        "layer": 0,
+        "page_ratio": 0.7274702534919814,
+        "stripe_ratio": 0.7274702534919814
+      },
+      {
+        "request_id": 16,
+        "sample": 1,
+        "layer": 1,
+        "page_ratio": 0.6750370841279932,
+        "stripe_ratio": 0.6750370841279932
+      },
+      {
+        "request_id": 16,
+        "sample": 1,
+        "layer": 2,
+        "page_ratio": 0.6787016347171586,
+        "stripe_ratio": 0.6787016347171586
+      },
+      {
+        "request_id": 16,
+        "sample": 1,
+        "layer": 3,
+        "page_ratio": 0.7433480608738341,
+        "stripe_ratio": 0.7433480608738341
+      },
+      {
+        "request_id": 16,
+        "sample": 1,
+        "layer": 4,
+        "page_ratio": 0.7033414832925835,
+        "stripe_ratio": 0.7033414832925835
+      },
+      {
+        "request_id": 16,
+        "sample": 1,
+        "layer": 5,
+        "page_ratio": 0.7114909169085242,
+        "stripe_ratio": 0.7114909169085242
+      },
+      {
+        "request_id": 16,
+        "sample": 1,
+        "layer": 6,
+        "page_ratio": 0.7932612717888792,
+        "stripe_ratio": 0.7932612717888792
+      },
+      {
+        "request_id": 16,
+        "sample": 1,
+        "layer": 7,
+        "page_ratio": 0.7422426706612455,
+        "stripe_ratio": 0.7422426706612455
+      },
+      {
+        "request_id": 16,
+        "sample": 1,
+        "layer": 8,
+        "page_ratio": 0.7545371590793876,
+        "stripe_ratio": 0.7545371590793876
+      },
+      {
+        "request_id": 16,
+        "sample": 1,
+        "layer": 9,
+        "page_ratio": 0.6815911306042886,
+        "stripe_ratio": 0.6815911306042886
+      },
+      {
+        "request_id": 16,
+        "sample": 1,
+        "layer": 10,
+        "page_ratio": 0.6919161676646707,
+        "stripe_ratio": 0.6919161676646707
+      },
+      {
+        "request_id": 16,
+        "sample": 1,
+        "layer": 11,
+        "page_ratio": 0.7220985963711057,
+        "stripe_ratio": 0.7220985963711057
+      },
+      {
+        "request_id": 16,
+        "sample": 1,
+        "layer": 12,
+        "page_ratio": 0.6999235891278245,
+        "stripe_ratio": 0.6999235891278245
+      },
+      {
+        "request_id": 16,
+        "sample": 1,
+        "layer": 13,
+        "page_ratio": 0.7199765670767428,
+        "stripe_ratio": 0.7199765670767428
+      },
+      {
+        "request_id": 16,
+        "sample": 1,
+        "layer": 14,
+        "page_ratio": 0.7489870340356564,
+        "stripe_ratio": 0.7489870340356564
+      },
+      {
+        "request_id": 16,
+        "sample": 1,
+        "layer": 15,
+        "page_ratio": 0.7078740939330752,
+        "stripe_ratio": 0.7078740939330752
+      },
+      {
+        "request_id": 16,
+        "sample": 1,
+        "layer": 16,
+        "page_ratio": 0.656957928802589,
+        "stripe_ratio": 0.656957928802589
+      },
+      {
+        "request_id": 16,
+        "sample": 1,
+        "layer": 17,
+        "page_ratio": 0.733184855233853,
+        "stripe_ratio": 0.733184855233853
+      },
+      {
+        "request_id": 16,
+        "sample": 1,
+        "layer": 18,
+        "page_ratio": 0.72791802975125,
+        "stripe_ratio": 0.72791802975125
+      },
+      {
+        "request_id": 16,
+        "sample": 1,
+        "layer": 19,
+        "page_ratio": 0.6984533723803422,
+        "stripe_ratio": 0.6984533723803422
+      },
+      {
+        "request_id": 16,
+        "sample": 1,
+        "layer": 20,
+        "page_ratio": 0.7242194505584088,
+        "stripe_ratio": 0.7242194505584088
+      },
+      {
+        "request_id": 16,
+        "sample": 1,
+        "layer": 21,
+        "page_ratio": 0.6688082526468193,
+        "stripe_ratio": 0.6688082526468193
+      },
+      {
+        "request_id": 16,
+        "sample": 1,
+        "layer": 22,
+        "page_ratio": 0.6579146407347379,
+        "stripe_ratio": 0.6579146407347379
+      },
+      {
+        "request_id": 16,
+        "sample": 1,
+        "layer": 23,
+        "page_ratio": 0.6595785587941244,
+        "stripe_ratio": 0.6595785587941244
+      },
+      {
+        "request_id": 16,
+        "sample": 1,
+        "layer": 24,
+        "page_ratio": 0.6871692175654412,
+        "stripe_ratio": 0.6871692175654412
+      },
+      {
+        "request_id": 16,
+        "sample": 1,
+        "layer": 25,
+        "page_ratio": 0.7739289637495423,
+        "stripe_ratio": 0.7739289637495423
+      },
+      {
+        "request_id": 16,
+        "sample": 1,
+        "layer": 26,
+        "page_ratio": 0.6827454891649288,
+        "stripe_ratio": 0.6827454891649288
+      },
+      {
+        "request_id": 16,
+        "sample": 1,
+        "layer": 27,
+        "page_ratio": 0.8029016975917884,
+        "stripe_ratio": 0.8029016975917884
+      },
+      {
+        "request_id": 16,
+        "sample": 1,
+        "layer": 28,
+        "page_ratio": 0.7182508303020718,
+        "stripe_ratio": 0.7182508303020718
+      },
+      {
+        "request_id": 16,
+        "sample": 1,
+        "layer": 29,
+        "page_ratio": 0.6723913043478261,
+        "stripe_ratio": 0.6723913043478261
+      },
+      {
+        "request_id": 16,
+        "sample": 1,
+        "layer": 30,
+        "page_ratio": 0.7509572301425662,
+        "stripe_ratio": 0.7509572301425662
+      },
+      {
+        "request_id": 16,
+        "sample": 1,
+        "layer": 31,
+        "page_ratio": 0.7645484949832776,
+        "stripe_ratio": 0.7645484949832776
+      },
+      {
+        "request_id": 16,
+        "sample": 2,
+        "layer": 0,
+        "page_ratio": 0.7197336561743342,
+        "stripe_ratio": 0.7197336561743342
+      },
+      {
+        "request_id": 16,
+        "sample": 2,
+        "layer": 1,
+        "page_ratio": 0.6999467802022352,
+        "stripe_ratio": 0.6999467802022352
+      },
+      {
+        "request_id": 16,
+        "sample": 2,
+        "layer": 2,
+        "page_ratio": 0.7034039514401333,
+        "stripe_ratio": 0.7034039514401333
+      },
+      {
+        "request_id": 16,
+        "sample": 2,
+        "layer": 3,
+        "page_ratio": 0.7559008654602675,
+        "stripe_ratio": 0.7559008654602675
+      },
+      {
+        "request_id": 16,
+        "sample": 2,
+        "layer": 4,
+        "page_ratio": 0.6972884525479196,
+        "stripe_ratio": 0.6972884525479196
+      },
+      {
+        "request_id": 16,
+        "sample": 2,
+        "layer": 5,
+        "page_ratio": 0.7032105658756577,
+        "stripe_ratio": 0.7032105658756577
+      },
+      {
+        "request_id": 16,
+        "sample": 2,
+        "layer": 6,
+        "page_ratio": 0.7636151829919425,
+        "stripe_ratio": 0.7636151829919425
+      },
+      {
+        "request_id": 16,
+        "sample": 2,
+        "layer": 7,
+        "page_ratio": 0.7304979928393186,
+        "stripe_ratio": 0.7304979928393186
+      },
+      {
+        "request_id": 16,
+        "sample": 2,
+        "layer": 8,
+        "page_ratio": 0.7141148325358851,
+        "stripe_ratio": 0.7141148325358851
+      },
+      {
+        "request_id": 16,
+        "sample": 2,
+        "layer": 9,
+        "page_ratio": 0.7016273745436544,
+        "stripe_ratio": 0.7016273745436544
+      },
+      {
+        "request_id": 16,
+        "sample": 2,
+        "layer": 10,
+        "page_ratio": 0.7008453505718548,
+        "stripe_ratio": 0.7008453505718548
+      },
+      {
+        "request_id": 16,
+        "sample": 2,
+        "layer": 11,
+        "page_ratio": 0.7263068423289418,
+        "stripe_ratio": 0.7263068423289418
+      },
+      {
+        "request_id": 16,
+        "sample": 2,
+        "layer": 12,
+        "page_ratio": 0.7011693373754873,
+        "stripe_ratio": 0.7011693373754873
+      },
+      {
+        "request_id": 16,
+        "sample": 2,
+        "layer": 13,
+        "page_ratio": 0.719489273446108,
+        "stripe_ratio": 0.719489273446108
+      },
+      {
+        "request_id": 16,
+        "sample": 2,
+        "layer": 14,
+        "page_ratio": 0.7522759457819138,
+        "stripe_ratio": 0.7522759457819138
+      },
+      {
+        "request_id": 16,
+        "sample": 2,
+        "layer": 15,
+        "page_ratio": 0.7082214931901779,
+        "stripe_ratio": 0.7082214931901779
+      },
+      {
+        "request_id": 16,
+        "sample": 2,
+        "layer": 16,
+        "page_ratio": 0.6477564736113857,
+        "stripe_ratio": 0.6477564736113857
+      },
+      {
+        "request_id": 16,
+        "sample": 2,
+        "layer": 17,
+        "page_ratio": 0.7003987594151528,
+        "stripe_ratio": 0.7003987594151528
+      },
+      {
+        "request_id": 16,
+        "sample": 2,
+        "layer": 18,
+        "page_ratio": 0.6967412451361867,
+        "stripe_ratio": 0.6967412451361867
+      },
+      {
+        "request_id": 16,
+        "sample": 2,
+        "layer": 19,
+        "page_ratio": 0.7358825729244577,
+        "stripe_ratio": 0.7358825729244577
+      },
+      {
+        "request_id": 16,
+        "sample": 2,
+        "layer": 20,
+        "page_ratio": 0.7264548549197601,
+        "stripe_ratio": 0.7264548549197601
+      },
+      {
+        "request_id": 16,
+        "sample": 2,
+        "layer": 21,
+        "page_ratio": 0.6832807570977918,
+        "stripe_ratio": 0.6832807570977918
+      },
+      {
+        "request_id": 16,
+        "sample": 2,
+        "layer": 22,
+        "page_ratio": 0.6292839903459373,
+        "stripe_ratio": 0.6292839903459373
+      },
+      {
+        "request_id": 16,
+        "sample": 2,
+        "layer": 23,
+        "page_ratio": 0.6578401229823213,
+        "stripe_ratio": 0.6578401229823213
+      },
+      {
+        "request_id": 16,
+        "sample": 2,
+        "layer": 24,
+        "page_ratio": 0.6980069324090121,
+        "stripe_ratio": 0.6980069324090121
+      },
+      {
+        "request_id": 16,
+        "sample": 2,
+        "layer": 25,
+        "page_ratio": 0.7233132835712733,
+        "stripe_ratio": 0.7233132835712733
+      },
+      {
+        "request_id": 16,
+        "sample": 2,
+        "layer": 26,
+        "page_ratio": 0.6780895362344741,
+        "stripe_ratio": 0.6780895362344741
+      },
+      {
+        "request_id": 16,
+        "sample": 2,
+        "layer": 27,
+        "page_ratio": 0.7629276054097056,
+        "stripe_ratio": 0.7629276054097056
+      },
+      {
+        "request_id": 16,
+        "sample": 2,
+        "layer": 28,
+        "page_ratio": 0.7309539052496798,
+        "stripe_ratio": 0.7309539052496798
+      },
+      {
+        "request_id": 16,
+        "sample": 2,
+        "layer": 29,
+        "page_ratio": 0.6845064252336449,
+        "stripe_ratio": 0.6845064252336449
+      },
+      {
+        "request_id": 16,
+        "sample": 2,
+        "layer": 30,
+        "page_ratio": 0.7681206685690991,
+        "stripe_ratio": 0.7681206685690991
+      },
+      {
+        "request_id": 16,
+        "sample": 2,
+        "layer": 31,
+        "page_ratio": 0.7574590952839269,
+        "stripe_ratio": 0.7574590952839269
+      }
+    ],
+    "minimum_page_ratio": 0.6233842538190364,
+    "minimum_stripe_ratio": 0.6233842538190364,
+    "boundary": "Actual device copy intervals intersect softmax-only work; separate intrusive replay"
+  },
+  "raw_matrix_api_mfu_proximity": "requires interpretation of separately reported API compositions",
+  "compute_io_dominance": "requires interpretation of separate complete timelines",
+  "independent_attention_integrity": "passed"
+}

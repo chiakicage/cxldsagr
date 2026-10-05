@@ -91,7 +91,7 @@ temporary engineering artifacts outside `experiments/`.
    source/full-model/serving acceptance before publication changes.
 
 The C6 diagnostic and independent overlap review are complete in the
-[profile checkpoint](../../system/deepseek_motivation_graph_profile_checkpoint.md).
+profile checkpoint（Git `934485b:docs/agents/system/deepseek_motivation_graph_profile_checkpoint.md`）.
 They establish zero observed matrix overlap, not the hardware cause.
 
 ## Real source-0 pair harness prepared

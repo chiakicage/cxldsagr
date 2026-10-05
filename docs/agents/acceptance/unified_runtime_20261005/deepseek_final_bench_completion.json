@@ -1,0 +1,47 @@
+{
+  "status": "completed_and_sampled_gpu_isolation_passed",
+  "driver_session": 1534,
+  "driver_exit_code": 0,
+  "runs": [
+    {
+      "run_id": "refactor_final_deepseek_bench_20261005_01",
+      "exit_code": 0,
+      "driver_errors": [],
+      "measurement_rows": 128,
+      "trace_latency_sum_ms": 179488.92563581467,
+      "source_sha256": "1319a540b7f78da9c363dd09c0f1568b450df3df5e4d3e8b60155a58c348b3dc",
+      "receipt_sha256": "a25cc5d08891fd6811db232de0b862831b46702c1b2f3124b2921b611574c1b3",
+      "gpu_observation_samples": 65,
+      "maximum_sample_gap_seconds": 28.28540802001953,
+      "foreign_observation_count": 0,
+      "other_device_observation_count": 0
+    },
+    {
+      "run_id": "refactor_final_deepseek_bench_20261005_02",
+      "exit_code": 0,
+      "driver_errors": [],
+      "measurement_rows": 128,
+      "trace_latency_sum_ms": 179239.00722712278,
+      "source_sha256": "1319a540b7f78da9c363dd09c0f1568b450df3df5e4d3e8b60155a58c348b3dc",
+      "receipt_sha256": "a25cc5d08891fd6811db232de0b862831b46702c1b2f3124b2921b611574c1b3",
+      "gpu_observation_samples": 65,
+      "maximum_sample_gap_seconds": 28.459737062454224,
+      "foreign_observation_count": 0,
+      "other_device_observation_count": 0
+    },
+    {
+      "run_id": "refactor_final_deepseek_bench_20261005_03",
+      "exit_code": 0,
+      "driver_errors": [],
+      "measurement_rows": 128,
+      "trace_latency_sum_ms": 179330.89263283182,
+      "source_sha256": "1319a540b7f78da9c363dd09c0f1568b450df3df5e4d3e8b60155a58c348b3dc",
+      "receipt_sha256": "a25cc5d08891fd6811db232de0b862831b46702c1b2f3124b2921b611574c1b3",
+      "gpu_observation_samples": 65,
+      "maximum_sample_gap_seconds": 29.234625816345215,
+      "foreign_observation_count": 0,
+      "other_device_observation_count": 0
+    }
+  ],
+  "boundary": "Runtime completion, row count and sampled all-GPU process isolation only. Independent report, numerical receipt, and P0/current behavioral comparison are separate audits."
+}

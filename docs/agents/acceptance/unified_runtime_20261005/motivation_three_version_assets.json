@@ -1,0 +1,59 @@
+{
+  "schema": "prepared-motivation-three-version-report-assets-v1",
+  "status": "prepared_not_published",
+  "boundary": "Three self-contained table files copied byte-for-byte from accepted saved-evidence comparison outputs. Main READMEs and publication manifests are unchanged; no old input/report/output is removed. Recomputing tables uses the CSV/JSON; rerunning full historical numerical/source audits still requires original raw dependencies.",
+  "models": {
+    "nosa": {
+      "comparison_run_id": "refactor_final_nosa_three_version_20261005_01",
+      "files": [
+        {
+          "source": "experiments/nosa_motivation/output/data/refactor_final_nosa_three_version_20261005_01/comparison.json",
+          "destination": "experiments/nosa_motivation/report/three_version/comparison.json",
+          "bytes": 430591,
+          "sha256": "0f4275d537c67c307241da5cae3f8e47a800f62450b76168b37190000ca0b057",
+          "byte_identical": true
+        },
+        {
+          "source": "experiments/nosa_motivation/output/data/refactor_final_nosa_three_version_20261005_01/request_samples.csv",
+          "destination": "experiments/nosa_motivation/report/three_version/request_samples.csv",
+          "bytes": 239485,
+          "sha256": "8db2a5c36b75d93db83997c8c0d033daa8501773f2b663f49000eed949fac77a",
+          "byte_identical": true
+        },
+        {
+          "source": "experiments/nosa_motivation/output/data/refactor_final_nosa_three_version_20261005_01/results.md",
+          "destination": "experiments/nosa_motivation/report/three_version/results.md",
+          "bytes": 4897,
+          "sha256": "18b9a381795b2f432a6567ac52a61bc26806b1b1977546623fa47809465b000e",
+          "byte_identical": true
+        }
+      ]
+    },
+    "deepseek_v32": {
+      "comparison_run_id": "refactor_final_deepseek_three_version_20261005_01",
+      "files": [
+        {
+          "source": "experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_three_version_20261005_01/comparison.json",
+          "destination": "experiments/deepseek_v32_motivation/report/three_version/comparison.json",
+          "bytes": 583882,
+          "sha256": "567e3015cf25c923a9ec8a00a3d6fcc1823b1009765d2e5d1bf51738a6fee0bb",
+          "byte_identical": true
+        },
+        {
+          "source": "experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_three_version_20261005_01/request_samples.csv",
+          "destination": "experiments/deepseek_v32_motivation/report/three_version/request_samples.csv",
+          "bytes": 242174,
+          "sha256": "fa9cc11f9865624eb052ea43ad1732d487cb1569f7af67ac85b5e425318cc67e",
+          "byte_identical": true
+        },
+        {
+          "source": "experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_three_version_20261005_01/results.md",
+          "destination": "experiments/deepseek_v32_motivation/report/three_version/results.md",
+          "bytes": 4881,
+          "sha256": "3fe82975cbfcdc796bc60a59a70d67577dcb7430de62366363b8ddab37a56c3b",
+          "byte_identical": true
+        }
+      ]
+    }
+  }
+}

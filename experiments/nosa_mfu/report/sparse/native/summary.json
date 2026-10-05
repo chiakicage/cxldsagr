@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "run_id": "refactor_mfu_sparse_native_bench_20261005_01",
+  "workload": {
+    "prefix_tokens": 65536,
+    "new_tokens": 1024,
+    "total_tokens": 66560,
+    "chunk_size": 1024,
+    "attention_mode": "sparse",
+    "backend": "triton",
+    "kernel_backend": "cuda_tvm_ffi",
+    "selection_backend": "cuda_tvm_ffi",
+    "native_kernel_revision": 5,
+    "attention_execution": "native_fa3_v3",
+    "indexer_execution": "cached_native_v5",
+    "indexer_preparation": "native_guarded_ranked_checked_v1",
+    "dtype": "bfloat16",
+    "block_size": 64,
+    "block_budget": 64,
+    "local_blocks": 17,
+    "query_stage_blocks": 33,
+    "warmup": 2,
+    "repeats": 5,
+    "profile_repeats": 1,
+    "indexer_query_chunk_size": null
+  },
+  "num_layers": 32,
+  "num_layers_source": "provided",
+  "definitions": {
+    "full_prefill": "66560 tokens from an empty cache in 65 chunks of 1024 tokens",
+    "extend": "One 1024-token forward with a 65536-token prefix already cached",
+    "wall_ms": "Synchronized end-to-end benchmark elapsed time",
+    "host_submit_ms": "Host submission interval, reported separately from CUDA time",
+    "cuda_span_ms": "CUDA event span of the measured work, including possible launch gaps",
+    "tokens_per_second": "Processed tokens * 1000 / wall_ms for each repetition",
+    "profile_cuda_elapsed_ms": "Inclusive CUDA event intervals from separate instrumented runs; includes possible launch gaps, not GPU active time or pure kernel duration",
+    "profile_aggregation": "Sum each stage within each run across calls/layers, then compute run statistics; per-layer statistics use the same order; nested stages remain inside indexer_total",
+    "overlap": "Host and CUDA intervals overlap and must not be added"
+  },
+  "timings": {
+    "full_prefill": {
+      "sample_count": 5,
+      "tokens": 66560,
+      "wall_ms": {
+        "count": 5,
+        "median": 2374.5391860138625,
+        "min": 2369.9904939858243,
+        "max": 2379.861709079705
+      },
+      "host_submit_ms": {
+        "count": 5,
+        "median": 2373.850460979156,
+        "min": 2369.3235310493037,
+        "max": 2379.181492025964
+      },
+      "cuda_span_ms": {
+        "count": 5,
+        "median": 2374.5234375,
+        "min": 2369.976318359375,
+        "max": 2379.84716796875
+      },
+      "tokens_per_second": {
+        "count": 5,
+        "median": 28030.701869247412,
+        "min": 27968.011647928408,
+        "max": 28084.50083192533
+      }
+    },
+    "extend": {
+      "sample_count": 5,
+      "tokens": 1024,
+      "wall_ms": {
+        "count": 5,
+        "median": 36.207892931997776,
+        "min": 36.12657799385488,
+        "max": 36.611639079637825
+      },
+      "host_submit_ms": {
+        "count": 5,
+        "median": 35.52014194428921,
+        "min": 35.444919019937515,
+        "max": 35.90897598769516
+      },
+      "cuda_span_ms": {
+        "count": 5,
+        "median": 36.193790435791016,
+        "min": 36.11257553100586,
+        "max": 36.59689712524414
+      },
+      "tokens_per_second": {
+        "count": 5,
+        "median": 28281.126491485695,
+        "min": 27969.24764205694,
+        "max": 28344.782618884692
+      }
+    }
+  },
+  "profiles": {}
+}

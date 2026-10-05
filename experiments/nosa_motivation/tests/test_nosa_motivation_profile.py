@@ -150,7 +150,7 @@ def saved_layer(tmp_path):
         stripe_interval_metrics,
         work_interval_metrics,
     )
-    from layers.attention import BlockSelection
+    from models.attention_contracts import BlockSelection
 
     ids = torch.full((1, 2, 64), -1, dtype=torch.int32)
     ids[:, :, :2] = torch.tensor([0, 1])

@@ -54,7 +54,7 @@ def evidence_path(directory, filename):
 def recompute_layer(data, layer, config, method):
     import torch
 
-    from layers.attention import BlockSelection
+    from models.attention_contracts import BlockSelection
 
     path = evidence_path(data, layer["selection_file"])
     require(digest(path) == layer["selection_sha256"], "saved selection evidence changed")
@@ -206,13 +206,13 @@ def audit_profile(data, profiles, reference_dir):
         == runtime_sources(json.loads((Path(reference_dir) / "source_manifest.json").read_text())),
         "profile runtime/orchestration source differs from reference",
     )
-    from evaluation.pool_scan_provenance import POOL_SCAN_ABI, requires_provenance
+    from evaluation.pool_scan_provenance import requires_provenance, source_abi_sha256
 
     saved_sources = json.loads((data / "source_manifest.json").read_text())
     native_id = audit_native_identity(
         metadata,
         require_pool_referrers=requires_provenance(saved_sources),
-        expected_abi_sha256=saved_sources.get(POOL_SCAN_ABI),
+        expected_abi_sha256=source_abi_sha256(saved_sources),
     )
     require(
         native_id == reference["native_provenance"]["build_after"]["sha256"],

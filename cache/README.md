@@ -1,9 +1,23 @@
 # KV cache 管理
 
+[capacity.py](capacity.py) 定义共享资源和 session 的容量计划；
+[lifecycle.py](lifecycle.py) 管理准入 owner、session 注册、执行 lease 和故障状态。
+模型负责实际分配、事务提交、异步完成检查和释放，公共状态机不重复执行这些操作。
+
+`allocator/` 保存 [allocation bounds](allocator/budget.py)、
+[fresh snapshot provider](allocator/snapshot.py) 和
+[Python MemPool provider](allocator/pool_referrers.py)。当前由 NOSA 显式调用，
+迁移到公共目录没有给 DeepSeek 增加 allocator 扫描。原有 rounding、每次调用的新 snapshot、
+CPython/头文件认证、动态 getter 和 GC 变化后的重新扫描保持不变；native 源码及 ABI
+白名单位于 `allocator/csrc/`。按 let it crash 要求，provider 初始化、编译或认证
+失败会直接报错，不再自动切换实现。错误传播、双故障和资源保留的验收见
+[错误处理证据](../docs/agents/acceptance/unified_runtime_20261005/let_it_crash_summary.md)；
+完整请求结果见两个模型的 motivation 报告。
+
 [prefix_pool.py](prefix_pool.py) 提供 serving 使用的 `PrefixSessionPool`：以用户固定
 历史的 token 身份管理跨请求 session，按 LRU 整用户淘汰。分配前同时检查 HBM / DRAM
-峰值预留，执行后核验实际 cache tensor 容量；省略字节预算的固定 P/NH 模式按 host
-页配额准入。模型提供布局、分配、统计与同步释放。
+峰值预留，执行后核验实际 cache tensor 容量；固定 P/NH 模式按对应的 host 页或
+HBM history-token 配额准入。模型提供布局、分配、统计与同步释放。
 预算包含 KV、索引派生记录、映射、cache scratch、staging 和待提交 append，模型权重及
 普通计算 activation 另计。DeepSeek GR 的 `echo/serial_sparse` 只为 history 准入，
 候选使用共享 GPU 临时空间，正常结束后 discard，失败直接报错终止；该公共入口的其他后端
@@ -18,22 +32,21 @@
 后续复用。NOSA 与 DeepSeek dense backend 均已接入；两者的模型布局和资源计划分别由
 对应 backend 提供。
 完整生命周期与预算入口的早期集成验收见
-[共享资源 checkpoint](../docs/agents/system/nosa_shared_cache_checkpoint.md)。旧热度短轨迹
+[原始验收索引](../docs/agents/acceptance/unified_runtime_20261005/shared_cache_integration_evidence.json)，
+其结论只适用于记录中的冻结源码。旧热度短轨迹
 已结束独立实验维护，通用预算实现和回归保留；当前性能对照见
 [固定容量 motivation](../experiments/nosa_motivation/README.md)。
 
-DeepSeek 已将共享 pool、session 私有状态和执行 workspace 分别预留；此前持久 append
-路径的 11 个直接采样配置已通过分配/释放轨迹与 pinned 档位核验。具体配置和未直接采样范围见
-[内存验收](../docs/agents/system/echo_cache_memory_audit.md)，不能把执行后 tensor 统计
-单独当作瞬时峰值证明。实现与验收进度见
-[ECHO cache checkpoint](../docs/agents/system/echo_cache_implementation_checkpoint.md)。
-这些记录不构成当前 GR GPU candidate 的容量验收；新路径已通过短 GPU 正确性检查，
-完整多用户容量与实际峰值尚未实测。
+DeepSeek 分别预留共享 pool、session 私有状态和执行 workspace。分配后 tensor 统计
+不能单独证明执行峰值；PyTorch allocated、reserved 与设备已用量分别报告。
+当前容量声明、静态规划和完整请求观测见
+[两模型 cache 管理报告](../experiments/cache_management/README.md)。固定用户轨迹
+成功执行，不代表用满 NH 配额或采用离线最大 P/NH 时仍能装入机器。
 
 [manager.py](manager.py) 提供 `CacheManager` 与 `ResidentCache`。
 模型通过 `CacheSpec` 声明层数、上下文容量上限、命名 record shape 和兼容信息；
 共享管理器不假设 NOSA GQA 或 DeepSeek packed MLA 布局。
-[NOSA 适配](../models/nosa/cache.py) 保留独立 K/V，形状仍为
+[NOSA 适配](../models/nosa/cache/resident.py) 保留独立 K/V，形状仍为
 `[layer, capacity, kv_head, head_dim]`，K 为 post-RoPE，V 保留原值。
 NOSA sparse 模式额外声明 `[layer, capacity, kv_head]` 的 `cis_scores`，与 K/V
 使用同一层写入、提交、重置和释放边界。dense 与 sparse cache 布局不能混用。
@@ -44,7 +57,7 @@ manager 通过 `allocate` / `release` 管理请求 session。一次模型 forwar
 `reset` 重用分配好的存储，`release` 使 session 失效并放弃其 buffer 所有权。
 `stats` 返回容量、resident/host 字节数和有效长度。
 
-辅助状态归请求 session 按 layer 保存；CIS 的模型语义由 NOSA 声明，管理器仅管理命名 record。
+辅助状态由请求 session 按 layer 保存；CIS 的模型语义由 NOSA 声明，管理器仅管理命名 record。
 manager 通过弱引用记录 session，兼容既有 `model.new_cache()` 使用方式。
 
 [indexer_cache.py](indexer_cache.py) 提供 `IndexerCache`：接受显式 record spec，惰性分配
@@ -57,7 +70,7 @@ manager 通过弱引用记录 session，兼容既有 `model.new_cache()` 使用�
 `CacheManager` 接受模型提供的 session allocator；默认 NOSA 使用 `ResidentCache`，
 显式 `cache_backend="offload"` 使用下述 host backing 适配。CPU placement 用于独立
 数学测试。`layer_view` 的连续张量保证仅属于 resident 后端，main sparse attention
-通过 cache access 获取实际布局。
+遵循[模型 attention 契约](../models/attention_contracts.py)，通过 cache access 获取实际布局。
 
 `PrefixSessionPool` 还支持与 host pages 独立的 HBM history token 配额，用于固定
 P 的 HBM-only serving。准入、LRU 和实际占用审计分别检查两种配额。resident
@@ -71,7 +84,7 @@ shape 分配 pinned CPU backing，持有本次 append 的独立 device 副本，
 transfer stream 写回主存。它不提供完整 resident `layer_view`；提交、回滚、截短、
 重置和释放先等待 GPU 使用结束，全部层成功后才发布新长度。
 
-[NosaOffloadCache](../models/nosa/offload_cache.py) 保存 pinned 历史 K/V，CIS 与
+[NosaOffloadCache](../models/nosa/cache/offload.py) 保存 pinned 历史 K/V，CIS 与
 压缩 K/CIS、稳定 CIS pool 留在 HBM。增量压缩只读取本次 device append 和最多
 31 个历史边界 token，不为 indexer 重载整个 K prefix。KV、CIS 和派生记录统一
 commit/abort/truncate；CPU reference 保留相同事务语义。
@@ -90,15 +103,15 @@ append、CIS、派生记录与已分配 staging / queue / scratch，不能将它
 历史/派生/append/indexer scratch，共享 staging/queue/FA3 scratch 单列计费；跨用户
 和跨层借用都在同一执行 lease 内，不跨用户共享历史数值。
 
-独立的 [NOSA fixed cache](../models/nosa/fixed_cache.py) 与
-[fixed resources](../models/nosa/fixed_resources.py) 为固定 P/NH 入口保留逐层有限 P 槽，
+独立的 [NOSA fixed cache](../models/nosa/cache/fixed.py) 与
+[fixed resources](../models/nosa/execution/fixed_resources.py) 为固定 P/NH 入口保留逐层有限 P 槽，
 以逻辑页偏移和 session tag 直接映射。HBM-only 按 P 个 history token 做 session LRU，
 offload 按 NH 准入并随 session 分配 host backing；当前要求 H<=P，history 与 prefill
 chunk 按 64 token 对齐。候选整批在 GPU 执行后 discard，主 K/V 不写回 host history，
 CIS/indexer 候选尾部仍按实际 session storage 计费。该路径复用已取回的历史块，
-不提供任意容量下的 token LRU。正式测量、匹配 profile 和独立 API 对照已验收发布，
-见[固定容量实验](../experiments/nosa_motivation/README.md)及
-[发布回执](../docs/agents/system/nosa_motivation_publication.md)；cache 账本不等于进程物理峰值。
+不提供任意容量下的 token LRU。当前正式测量、匹配 profile、独立 API 对照及重构前后比较
+见[固定容量实验](../experiments/nosa_motivation/README.md)。报告分别说明数值验收和未达到的
+性能门槛；cache 账本不等于进程物理峰值。
 
 CUDA offload 当前要求 SM90、BF16、D128、GQA16 和 native attention。融合版本中
 `offload_query_tile_size=128` 仅控制首次读取流量的 query 分组，attention 处理完整
@@ -106,18 +119,17 @@ query batch；`offload_fetch_ctas=96` 限制同时参与 fetch 的 attention CTA
 数量不超过 cooperative grid 大小，不单独保留 fetch CTA。串行与融合共用 native
 initialization，合并 metadata reset、page-0 padding 与 strided suffix staging；
 首用规划仍为后续独立 launch。
-完整 32 层 checkpoint 检查 1 passed：resident/offload 分别从独立空 cache
-构建 64K sparse prefix，再执行 1K extend，全部 normalized hidden 逐位相同，max_abs=0。
-提交后的 cache 分配为 resident HBM `2262627840 B`、offload HBM
-`150825168 B`、offload pinned host `2181038080 B`；不包含模型权重，也不是进程峰值显存。
-单层性能与 stripe / page-envelope overlap 结果见 [NOSA 模型](../models/nosa/README.md)及
-[offload 实验](../experiments/nosa_offload_overlap/README.md)。此实现使用本机 pinned
+原 owned 路径的完整 32 层 64K+1K 数值检查、cache 分配观测和单层
+stripe / page-envelope overlap 结果见 [NOSA 模型](../models/nosa/README.md)及
+[offload 实验](../experiments/nosa_offload_overlap/README.md)，按各自源码与 run ID 解读。
+固定 P/NH 的当前验收与请求观测另见[固定容量实验](../experiments/nosa_motivation/README.md)，
+两种路径的记录不互相替代。此实现使用本机 pinned
 DRAM，未验证 CXL/RDMA；上述 owned/普通 budget 路径不复用跨请求已取回的 HBM 块。
 用户固定 history 的跨请求保留由 `serving.persistent` / `prefix_pool` 管理。
 
 ## DeepSeek ECHO token cache
 
-[sparse_token_pool.py](sparse_token_pool.py) 提供模型/backend 所有的共享 host arena 和
+[sparse_token_pool.py](sparse_token_pool.py) 提供由模型/backend 持有的共享 host arena 和
 逐层有限 HBM pool，host 按 64-token page 分配。各 session 持有独立 page table、
 history indexer 状态与长度；持久 token 经 page table 映射为全局 host ID，逐层双向映射维护
 其 HBM residency。[sparse_token_cache.py](sparse_token_cache.py) 提供 session/layer
@@ -126,8 +138,8 @@ view、完整 resident 存储、工作集保护、精确 recall 与缓存事务�
 [host_allocation.py](host_allocation.py) 按 PyTorch pinned allocator 的 2 的幂次
 档位逐层预留 host backing，并让逻辑视图的 storage 显式保留完整档位以便分配后核验。
 普通 CPU reference 不做该取整；传输字节始终按实际 record 计算。DeepSeek dense
-backing 使用同一规则。修正与验证边界见
-[pinned 容量记录](../docs/agents/system/echo_pinned_allocation_checkpoint.md)。
+backing 使用同一规则。当前容量与验证范围见
+[cache 管理报告](../experiments/cache_management/README.md)。
 [DeepSeek SM90](../models/deepseek_v32/README.md) 为主 KV 使用 BF16 512 latent + 64 RoPE
 record，indexer K/scales 仍常驻 GPU。每个外层 query batch 先写 index-K，再执行
 融合历史预取与精确 top-k；实际 miss 领取槽位时才淘汰。当前主 KV 直接写 HBM，并
@@ -159,7 +171,10 @@ workspace，不另存逐层候选 indexer。这份 workspace 和每层候选 KV 
 及 prefix 内容不变，其额外诊断存储单独披露。
 这条路径使用本地 DRAM，不包含 CXL/RDMA，也未接入 NOSA 的 `CacheManager`。
 当前非 GR 验收限定真实 checkpoint 第 0–2 层的 64K + 1K；模型保留完整层数能力。
-直接 `backend.extend` 和非 GR 模型保持上述持久事务；`hbm/dense_prefetch` serving
-对照尚未改为 GPU transient。GR 候选路径已通过短 GPU 正确性检查，容量报告仅包含
-静态规划，见 [ECHO cache 实验](../experiments/deepseek_v32_echo_cache/README.md)。
-不能将用户历史命中等同为所选历史 token 已驻留 HBM。
+直接 `backend.extend` 和非 GR 模型保持上述持久事务。通用字节预算 serving 的
+`hbm/dense_prefetch` 使用持久 append 后 truncate；`echo/serial_sparse` 使用显式 GPU
+transient candidate。固定 P/NH 的四个方案均在 GPU 临时执行 candidate 后 discard。
+各路径的独立验收、静态规划与完整请求观测见
+[两模型 cache 管理报告](../experiments/cache_management/README.md)，不能用短请求正确性
+检查或旧实现的容量记录证明当前物理容量。
+不能将用户历史命中等同于所选历史 token 已驻留 HBM。

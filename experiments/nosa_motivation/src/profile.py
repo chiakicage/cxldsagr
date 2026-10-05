@@ -15,6 +15,7 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
 
+from cache.allocator.snapshot import runtime_info as allocator_snapshot_runtime_info
 from evaluation import pool_scan_provenance as pool_scan
 from experiments.nosa_motivation.src.config import (
     BENCH_SCHEMA,
@@ -56,7 +57,6 @@ from experiments.nosa_motivation.src.report import audit_run, read_jsonl
 from experiments.nosa_motivation.src.timeline import analyze_trace
 from experiments.nosa_motivation.src.validation import reference_directory
 from experiments.nosa_motivation.src.work_intervals import capture_candidate_work
-from models.nosa._allocator_snapshot import runtime_info as allocator_snapshot_runtime_info
 
 
 def parser():
@@ -97,7 +97,7 @@ def module_scopes(model, backend):
     import torch
 
     from models.nosa import scoring
-    from models.nosa.fixed_cache import NosaFixedAttention
+    from models.nosa.attention import NosaFixedAttention
     from models.nosa.indexer import NosaIndexer
 
     def wrap(function, name):

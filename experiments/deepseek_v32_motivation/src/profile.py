@@ -18,7 +18,7 @@ import shutil
 import tempfile
 import time
 from collections import defaultdict
-from contextlib import ExitStack, contextmanager
+from contextlib import ExitStack, contextmanager, nullcontext
 from functools import wraps
 from pathlib import Path
 from types import SimpleNamespace
@@ -34,6 +34,28 @@ SCHEMA = "deepseek-v32-motivation-profile-v1"
 
 def sha(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+@contextmanager
+def capture_range(cudart):
+    """Close a diagnostic capture while preserving a simultaneous body failure."""
+    cudart.cudaProfilerStart()
+    body_error = None
+    try:
+        yield
+    except BaseException as error:
+        body_error = error
+        raise
+    finally:
+        try:
+            cudart.cudaProfilerStop()
+        except BaseException as completion_error:
+            if body_error is not None:
+                raise BaseExceptionGroup(
+                    "profile execution and capture completion both failed",
+                    [body_error, completion_error],
+                ) from None
+            raise
 
 
 def parser():
@@ -232,7 +254,7 @@ class InstrumentServing:
         from experiments.deepseek_v32_echo_prefill.src.operator_instrumentation import (
             InstrumentOperators,
         )
-        from models.deepseek_v32.pool_prefetch import PoolHistoryPrefetch
+        from models.deepseek_v32.cache.prefetch import PoolHistoryPrefetch
         from operators.common import kv_transfer
 
         backend, scopes = self.backend, self.scopes
@@ -253,12 +275,12 @@ class InstrumentServing:
                 finally:
                     scopes.close_chunk()
 
-        def prefill(session, ids):
+        def prefill(session, ids, **kwargs):
             with (
                 scopes.context(segment="history", chunk="shared", layer="shared"),
                 scopes("history_prefill"),
             ):
-                result = original_prefill(session, ids)
+                result = original_prefill(session, ids, **kwargs)
             # The production forward already synchronized. This extra small-counter
             # read is visibly separated and never used as formal request timing.
             with (
@@ -268,12 +290,12 @@ class InstrumentServing:
                 self.segment_counters["history"] = original_metrics(session)
             return result
 
-        def candidate(session, ids):
+        def candidate(session, ids, **kwargs):
             with (
                 scopes.context(segment="candidate", chunk="shared", layer="shared"),
                 scopes("candidate_extend"),
             ):
-                return original_candidate(session, ids)
+                return original_candidate(session, ids, **kwargs)
 
         def metrics(session):
             # Intercept the runner's existing candidate diagnostics; no duplicate read.
@@ -540,6 +562,29 @@ def cpu_summary(calls):
     ]
 
 
+def reference_provenance(requested, numerical):
+    """Retain the formal run while identifying its independent numerical source."""
+    result = {}
+    configurations = []
+    for prefix, path in (("reference", requested), ("numerical_reference", numerical)):
+        path = Path(path).resolve(strict=True)
+        metadata = json.loads((path / "metadata.json").read_text())
+        if metadata.get("status") != "accepted":
+            raise ValueError("profile reference is not accepted")
+        configurations.append(metadata["config"])
+        result.update(
+            {
+                prefix + "_run": str(path),
+                prefix + "_run_id": metadata["run_id"],
+                prefix + "_source_sha256": metadata["source_sha256"],
+                prefix + "_metadata_sha256": sha(path / "metadata.json"),
+            }
+        )
+    if configurations[0] != configurations[1]:
+        raise ValueError("formal and numerical profile reference configurations differ")
+    return result
+
+
 def main(argv=None):
     args = parser().parse_args(argv)
     if not re.fullmatch(r"[A-Za-z0-9_-]+", args.run_id):
@@ -569,10 +614,7 @@ def main(argv=None):
         "config": config,
         "schemes": schemes,
         "nsys": args.nsys,
-        "reference_run": str(reference),
-        "reference_run_id": reference_metadata["run_id"],
-        "reference_source_sha256": reference_metadata["source_sha256"],
-        "reference_metadata_sha256": sha(reference / "metadata.json"),
+        **reference_provenance(args.reference_run, reference),
         "workload_sha256": workload.manifest["workload_sha256"],
         "warmup_traces": {},
         "captures": [],
@@ -591,6 +633,7 @@ def main(argv=None):
         },
     }
     backend = None
+    failure = None
     all_calls, evidence = [], []
     try:
         import torch
@@ -601,7 +644,7 @@ def main(argv=None):
             numerical_comparison,
             verify_source_snapshot,
         )
-        from models.deepseek_v32.serving_backend import DeepSeekServingBackend
+        from models.deepseek_v32.execution.adapter import DeepSeekServingBackend
         from serving.persistent import PersistentGRRunner
 
         device = torch.device(args.device)
@@ -715,33 +758,37 @@ def main(argv=None):
                 )
 
                 setup_index = len(metadata["captures"]) + len(metadata["graph_setup_captures"]) + 1
-                torch.cuda.cudart().cudaProfilerStart()
                 runner = None
                 try:
-                    with CaptureGraphOperators(backend) as graph_operators:
-                        runner = PersistentGRRunner(
-                            backend,
-                            resource_limits=measure.resource_limits(config),
-                            native_token_validation=True,
-                        )
-                    graph_ledger = graph_operators.finalize()
-                except BaseException:
+                    with capture_range(torch.cuda.cudart()):
+                        with CaptureGraphOperators(backend) as graph_operators:
+                            runner = PersistentGRRunner(
+                                backend,
+                                resource_limits=measure.resource_limits(config),
+                                native_token_validation=True,
+                            )
+                        graph_ledger = graph_operators.finalize()
+                    metadata["graph_setup_captures"].append(
+                        {
+                            "scheme": scheme,
+                            "trace_index": setup_index,
+                            "sqlite": f"capture_{setup_index}.sqlite",
+                            **graph_ledger,
+                        }
+                    )
+                    measure.write_json(
+                        output / "graph_capture_ledger.json", metadata["graph_setup_captures"]
+                    )
+                except BaseException as setup_error:
                     if runner is not None:
-                        runner.close()
+                        try:
+                            runner.close()
+                        except BaseException as cleanup_error:  # noqa: BLE001 -- preserve setup
+                            raise BaseExceptionGroup(
+                                "graph profile setup and runner cleanup both failed",
+                                [setup_error, cleanup_error],
+                            ) from None
                     raise
-                finally:
-                    torch.cuda.cudart().cudaProfilerStop()
-                metadata["graph_setup_captures"].append(
-                    {
-                        "scheme": scheme,
-                        "trace_index": setup_index,
-                        "sqlite": f"capture_{setup_index}.sqlite",
-                        **graph_ledger,
-                    }
-                )
-                measure.write_json(
-                    output / "graph_capture_ledger.json", metadata["graph_setup_captures"]
-                )
             else:
                 runner = PersistentGRRunner(
                     backend,
@@ -782,17 +829,12 @@ def main(argv=None):
                         )
                         instrument = InstrumentServing(backend, scopes, runner)
                         backend.synchronize()
-                        with instrument:
-                            if args.nsys:
-                                torch.cuda.cudart().cudaProfilerStart()
-                            try:
-                                with scopes(
-                                    "request", request_id=index, user_id=request["user_id"]
-                                ):
-                                    result = runner.execute(request)
-                            finally:
-                                if args.nsys:
-                                    torch.cuda.cudart().cudaProfilerStop()
+                        with (
+                            instrument,
+                            capture_range(torch.cuda.cudart()) if args.nsys else nullcontext(),
+                            scopes("request", request_id=index, user_id=request["user_id"]),
+                        ):
+                            result = runner.execute(request)
                         if scopes.active:
                             raise AssertionError("unclosed request scopes")
                         all_calls.extend(scopes.calls)
@@ -872,13 +914,28 @@ def main(argv=None):
         shutil.move(str(output), str(target))
         print(f"accepted profile: {target}", flush=True)
     except BaseException as error:
-        metadata.update(status="failed", error=repr(error))
-        measure.write_json(output / "metadata.json", metadata)
-        print(f"failed profile retained outside experiments: {output}", flush=True)
+        failure = error
+        try:
+            metadata.update(status="failed", error=repr(error))
+            measure.write_json(output / "metadata.json", metadata)
+            print(f"failed profile retained outside experiments: {output}", flush=True)
+        except BaseException as reporting_error:  # noqa: BLE001 -- retain original and report errors
+            failure = BaseExceptionGroup(
+                "DeepSeek profile and failure reporting both failed", [error, reporting_error]
+            )
+            raise failure from None
         raise
     finally:
         if backend is not None:
-            backend.close()
+            try:
+                backend.close()
+            except BaseException as cleanup_error:
+                if failure is not None:
+                    raise BaseExceptionGroup(
+                        "DeepSeek profile and resource cleanup both failed",
+                        [failure, cleanup_error],
+                    ) from None
+                raise
 
 
 if __name__ == "__main__":

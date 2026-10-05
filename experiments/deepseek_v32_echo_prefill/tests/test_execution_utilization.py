@@ -125,3 +125,47 @@ def test_publication_rejects_missing_stage_or_non_equivalent_mode_work():
     ledger["calls"][0]["useful_flops"] *= 2
     with pytest.raises(ValueError, match="semantic equivalence"):
         _end_to_end_utilization(result, ledger, PEAKS)
+
+
+@pytest.mark.parametrize("resident_only", [False, True])
+def test_offload_indexer_dispatch_preserves_complete_work(resident_only):
+    result, ledger = complete_fixture()
+    expected = _end_to_end_utilization(result, ledger, PEAKS)
+    for call in list(ledger["calls"]):
+        if (
+            call["mode"] == "offload"
+            and call["phase"] == "prefill_annotated"
+            and call["stage"] == "indexer_fused"
+        ):
+            if resident_only:
+                call["stage"] = "indexer_qk"
+            else:
+                call["useful_flops"] //= 2
+                call["executed_matmul_flops"] //= 2
+                ledger["calls"].append({**call, "stage": "indexer_qk"})
+    actual = _end_to_end_utilization(result, ledger, PEAKS)
+    for field in ("ideal_compute_ms", "useful_flops_by_precision", "utilization_samples_percent"):
+        assert actual["offload"]["prefix"][field] == expected["offload"]["prefix"][field]
+
+
+@pytest.mark.parametrize("stage", ["indexer_fused", "unknown_indexer"])
+def test_resident_publication_rejects_unsupported_indexer_dispatch(stage):
+    result, ledger = complete_fixture()
+    call = next(row for row in ledger["calls"] if row["stage"] == "indexer_qk")
+    call["stage"] = stage
+    with pytest.raises(ValueError, match="Incomplete or unsupported matrix ledger"):
+        _end_to_end_utilization(result, ledger, PEAKS)
+
+
+def test_utilization_retains_independent_benchmark_denominator_identity():
+    result, ledger = complete_fixture()
+    result["wall_time_denominator"] = {
+        "mode": "independent_bench",
+        "run_id": "clean-bench",
+        "source_sha256": {"model.py": "source-digest"},
+        "result_sha256": "bench-digest",
+    }
+    metrics = _end_to_end_utilization(result, ledger, PEAKS)
+    for mode in ("resident", "offload"):
+        for phase in ("prefix", "extend"):
+            assert metrics[mode][phase]["wall_time_denominator"] == result["wall_time_denominator"]

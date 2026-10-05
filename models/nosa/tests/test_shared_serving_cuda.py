@@ -10,7 +10,7 @@ import pytest
 import torch
 
 from cache.prefix_pool import CacheFootprint
-from models.nosa.serving import NosaServingBackend
+from models.nosa.execution.adapter import NosaServingBackend
 from models.nosa.tests.test_model import tiny_config
 from models.nosa.tests.test_serving_resources import storages
 from models.nosa.tests.test_sparse_model import initialized_sparse_model
@@ -317,8 +317,7 @@ def _unique_historical_payload(selection, prefix, record_bytes):
 def test_cuda_shared_transfer_metrics_match_payload_and_consumed_union(
     native_model, monkeypatch, scheme
 ):
-    from models.nosa.attention import NosaSparseAttention
-    from models.nosa.serving import _DensePrefetchAttention
+    from models.nosa.attention import NosaDensePrefetchAttention, NosaSparseAttention
 
     with allocated(native_model, scheme) as (backend, _):
         session = backend.create_session(210)
@@ -328,7 +327,7 @@ def test_cuda_shared_transfer_metrics_match_payload_and_consumed_union(
             "indexer_host_to_device_bytes",
         )
         expected = [{name: 0 for name in fields} for _ in range(2)]
-        adapter = _DensePrefetchAttention if scheme == "dense_prefetch" else NosaSparseAttention
+        adapter = NosaDensePrefetchAttention if scheme == "dense_prefetch" else NosaSparseAttention
         original = adapter.__call__
 
         def observe(self, q, selection, access, context):

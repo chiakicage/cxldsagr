@@ -47,5 +47,5 @@ Component probe `/tmp/deepseek_c7_dense_probe.py` completed run
 `deepseek_dense_prefetch_c7a_20261004_01`; its exactness, timing, source and
 measurement checks are recorded in checkpoint.md. Full-model command and
 coverage are in [validation_plan.md](validation_plan.md); the completed result
-is in [the combined checkpoint](../../system/deepseek_motivation_c7_hint_validation.md).
+is in the combined checkpoint（Git `934485b:docs/agents/system/deepseek_motivation_c7_hint_validation.md`）.
 Final performance/publication remains root-owned.

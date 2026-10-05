@@ -6,11 +6,11 @@ import pytest
 import torch
 
 from cache.sparse_token_pool import SharedSparseTokenPool
-from models.deepseek_v32.echo_attention import EchoAttentionRunner
+from models.deepseek_v32.attention import EchoAttentionRunner
 
 
 def diagnostic_runner(monkeypatch, *, enabled, slots=3, prefetch_ids=(), candidate_slots=0):
-    import models.deepseek_v32.echo_attention as attention_module
+    import models.deepseek_v32.attention as attention_module
     import operators.deepseek_v32.indexer.echo as indexer
 
     pool = SharedSparseTokenPool(64, 4, 1, slots, device="cpu", candidate_slots=candidate_slots)

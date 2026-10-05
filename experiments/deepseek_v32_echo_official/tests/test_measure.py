@@ -169,3 +169,18 @@ def test_numerical_gate_requires_matching_finite_tensors(defect):
         actual[0, 0] = float("nan")
     with pytest.raises(AssertionError):
         numerical_comparison(actual, reference, "hidden")
+
+
+def test_modes_reject_missing_or_unexpected_receipts_before_configuration(monkeypatch):
+    from experiments.deepseek_v32_echo_official.src import measure
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("invalid mode reached configuration or CUDA")
+
+    monkeypatch.setattr(measure, "configuration", forbidden)
+    with pytest.raises(ValueError, match="bench requires"):
+        measure.main(["--run-id", "missing_receipt"])
+    with pytest.raises(ValueError, match="check creates"):
+        measure.main(
+            ["--mode", "check", "--run-id", "extra_receipt", "--validation-receipt", "/none"]
+        )

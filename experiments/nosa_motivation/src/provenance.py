@@ -30,9 +30,17 @@ def publish_directories(sources, targets):
             target.mkdir(exist_ok=False)
             created.append(target)
             shutil.copytree(sources[name], target, dirs_exist_ok=True)
-    except BaseException:
+    except BaseException as error:
+        cleanup_errors = []
         for target in reversed(created):
-            shutil.rmtree(target)
+            try:
+                shutil.rmtree(target)
+            except BaseException as cleanup_error:  # noqa: BLE001 -- retain every cleanup failure.
+                cleanup_errors.append(cleanup_error)
+        if cleanup_errors:
+            raise BaseExceptionGroup(
+                "publication and rollback failed", [error, *cleanup_errors]
+            ) from None
         raise
 
 
@@ -78,7 +86,7 @@ def native_build_identity():
     """
     from tvm_ffi import libinfo
 
-    from models.nosa._allocator_snapshot import build_info as allocator_snapshot_build_info
+    from cache.allocator.snapshot import build_info as allocator_snapshot_build_info
     from operators.nosa import _native
     from operators.nosa.attention.offload import _fused
 
@@ -238,11 +246,10 @@ def audit_native_identity(metadata, *, require_pool_referrers=False, expected_ab
 
 
 def source_paths():
-    paths = {ROOT / "pyproject.toml", ROOT / "uv.lock"}
+    paths = {ROOT / "pyproject.toml", ROOT / "uv.lock", ROOT / "models/attention_contracts.py"}
     suffixes = {".py", ".cu", ".cuh", ".c", ".cpp", ".h", ".hpp", ".sh"}
     for name in (
         "models/nosa",
-        "layers",
         "cache",
         "executor",
         "serving",

@@ -4,7 +4,7 @@ import pytest
 import torch
 
 from cache.prefix_pool import CacheFootprint
-from models.nosa.serving import NosaServingBackend
+from models.nosa.execution.adapter import NosaServingBackend
 from models.nosa.tests.test_model import tiny_config
 from models.nosa.tests.test_sparse_model import initialized_sparse_model
 from serving.persistent import PersistentGRRunner

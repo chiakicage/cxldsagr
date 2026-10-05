@@ -1,0 +1,1461 @@
+{
+  "diagnostic_validity": "passed",
+  "async_every_sample_page_and_stripe_90pct": {
+    "status": "failed",
+    "rule": "both page-envelope and nonempty-stripe-copy ratios >= 0.9 for every applicable layer/sample",
+    "checked_layer_samples": 96,
+    "no_fetch_layer_samples": 96,
+    "failed_layer_samples": [
+      {
+        "request_id": 16,
+        "sample": 0,
+        "layer": 0,
+        "page_ratio": 0.7051776226690281,
+        "stripe_ratio": 0.7051776226690281
+      },
+      {
+        "request_id": 16,
+        "sample": 0,
+        "layer": 1,
+        "page_ratio": 0.6878151260504202,
+        "stripe_ratio": 0.6878151260504202
+      },
+      {
+        "request_id": 16,
+        "sample": 0,
+        "layer": 2,
+        "page_ratio": 0.720575984767345,
+        "stripe_ratio": 0.720575984767345
+      },
+      {
+        "request_id": 16,
+        "sample": 0,
+        "layer": 3,
+        "page_ratio": 0.732095228687148,
+        "stripe_ratio": 0.732095228687148
+      },
+      {
+        "request_id": 16,
+        "sample": 0,
+        "layer": 4,
+        "page_ratio": 0.6641618497109827,
+        "stripe_ratio": 0.6641618497109827
+      },
+      {
+        "request_id": 16,
+        "sample": 0,
+        "layer": 5,
+        "page_ratio": 0.6982730880617827,
+        "stripe_ratio": 0.6982730880617827
+      },
+      {
+        "request_id": 16,
+        "sample": 0,
+        "layer": 6,
+        "page_ratio": 0.7730275942479595,
+        "stripe_ratio": 0.7730275942479595
+      },
+      {
+        "request_id": 16,
+        "sample": 0,
+        "layer": 7,
+        "page_ratio": 0.7105263157894737,
+        "stripe_ratio": 0.7105263157894737
+      },
+      {
+        "request_id": 16,
+        "sample": 0,
+        "layer": 8,
+        "page_ratio": 0.7689792581996526,
+        "stripe_ratio": 0.7689792581996526
+      },
+      {
+        "request_id": 16,
+        "sample": 0,
+        "layer": 9,
+        "page_ratio": 0.691601538270686,
+        "stripe_ratio": 0.691601538270686
+      },
+      {
+        "request_id": 16,
+        "sample": 0,
+        "layer": 10,
+        "page_ratio": 0.7121017851859158,
+        "stripe_ratio": 0.7121017851859158
+      },
+      {
+        "request_id": 16,
+        "sample": 0,
+        "layer": 11,
+        "page_ratio": 0.6877260873222848,
+        "stripe_ratio": 0.6877260873222848
+      },
+      {
+        "request_id": 16,
+        "sample": 0,
+        "layer": 12,
+        "page_ratio": 0.7024873479056746,
+        "stripe_ratio": 0.7024873479056746
+      },
+      {
+        "request_id": 16,
+        "sample": 0,
+        "layer": 13,
+        "page_ratio": 0.6993498049414825,
+        "stripe_ratio": 0.6993498049414825
+      },
+      {
+        "request_id": 16,
+        "sample": 0,
+        "layer": 14,
+        "page_ratio": 0.7433958459366807,
+        "stripe_ratio": 0.7433958459366807
+      },
+      {
+        "request_id": 16,
+        "sample": 0,
+        "layer": 15,
+        "page_ratio": 0.7347040622816648,
+        "stripe_ratio": 0.7347040622816648
+      },
+      {
+        "request_id": 16,
+        "sample": 0,
+        "layer": 16,
+        "page_ratio": 0.6233842538190364,
+        "stripe_ratio": 0.6233842538190364
+      },
+      {
+        "request_id": 16,
+        "sample": 0,
+        "layer": 17,
+        "page_ratio": 0.7219351389878831,
+        "stripe_ratio": 0.7219351389878831
+      },
+      {
+        "request_id": 16,
+        "sample": 0,
+        "layer": 18,
+        "page_ratio": 0.7270729026743192,
+        "stripe_ratio": 0.7270729026743192
+      },
+      {
+        "request_id": 16,
+        "sample": 0,
+        "layer": 19,
+        "page_ratio": 0.7182346326836582,
+        "stripe_ratio": 0.7182346326836582
+      },
+      {
+        "request_id": 16,
+        "sample": 0,
+        "layer": 20,
+        "page_ratio": 0.7792365669827377,
+        "stripe_ratio": 0.7792365669827377
+      },
+      {
+        "request_id": 16,
+        "sample": 0,
+        "layer": 21,
+        "page_ratio": 0.6423561151079137,
+        "stripe_ratio": 0.6423561151079137
+      },
+      {
+        "request_id": 16,
+        "sample": 0,
+        "layer": 22,
+        "page_ratio": 0.6634351268379383,
+        "stripe_ratio": 0.6634351268379383
+      },
+      {
+        "request_id": 16,
+        "sample": 0,
+        "layer": 23,
+        "page_ratio": 0.678374815848647,
+        "stripe_ratio": 0.678374815848647
+      },
+      {
+        "request_id": 16,
+        "sample": 0,
+        "layer": 24,
+        "page_ratio": 0.7020083741395217,
+        "stripe_ratio": 0.7020083741395217
+      },
+      {
+        "request_id": 16,
+        "sample": 0,
+        "layer": 25,
+        "page_ratio": 0.7335375191424196,
+        "stripe_ratio": 0.7335375191424196
+      },
+      {
+        "request_id": 16,
+        "sample": 0,
+        "layer": 26,
+        "page_ratio": 0.6912219996357676,
+        "stripe_ratio": 0.6912219996357676
+      },
+      {
+        "request_id": 16,
+        "sample": 0,
+        "layer": 27,
+        "page_ratio": 0.7523629489603024,
+        "stripe_ratio": 0.7523629489603024
+      },
+      {
+        "request_id": 16,
+        "sample": 0,
+        "layer": 28,
+        "page_ratio": 0.7248080614203455,
+        "stripe_ratio": 0.7248080614203455
+      },
+      {
+        "request_id": 16,
+        "sample": 0,
+        "layer": 29,
+        "page_ratio": 0.6937161271422294,
+        "stripe_ratio": 0.6937161271422294
+      },
+      {
+        "request_id": 16,
+        "sample": 0,
+        "layer": 30,
+        "page_ratio": 0.7833632067785563,
+        "stripe_ratio": 0.7833632067785563
+      },
+      {
+        "request_id": 16,
+        "sample": 0,
+        "layer": 31,
+        "page_ratio": 0.7618040196172708,
+        "stripe_ratio": 0.7618040196172708
+      },
+      {
+        "request_id": 16,
+        "sample": 1,
+        "layer": 0,
+        "page_ratio": 0.7274702534919814,
+        "stripe_ratio": 0.7274702534919814
+      },
+      {
+        "request_id": 16,
+        "sample": 1,
+        "layer": 1,
+        "page_ratio": 0.6750370841279932,
+        "stripe_ratio": 0.6750370841279932
+      },
+      {
+        "request_id": 16,
+        "sample": 1,
+        "layer": 2,
+        "page_ratio": 0.6787016347171586,
+        "stripe_ratio": 0.6787016347171586
+      },
+      {
+        "request_id": 16,
+        "sample": 1,
+        "layer": 3,
+        "page_ratio": 0.7433480608738341,
+        "stripe_ratio": 0.7433480608738341
+      },
+      {
+        "request_id": 16,
+        "sample": 1,
+        "layer": 4,
+        "page_ratio": 0.7033414832925835,
+        "stripe_ratio": 0.7033414832925835
+      },
+      {
+        "request_id": 16,
+        "sample": 1,
+        "layer": 5,
+        "page_ratio": 0.7114909169085242,
+        "stripe_ratio": 0.7114909169085242
+      },
+      {
+        "request_id": 16,
+        "sample": 1,
+        "layer": 6,
+        "page_ratio": 0.7932612717888792,
+        "stripe_ratio": 0.7932612717888792
+      },
+      {
+        "request_id": 16,
+        "sample": 1,
+        "layer": 7,
+        "page_ratio": 0.7422426706612455,
+        "stripe_ratio": 0.7422426706612455
+      },
+      {
+        "request_id": 16,
+        "sample": 1,
+        "layer": 8,
+        "page_ratio": 0.7545371590793876,
+        "stripe_ratio": 0.7545371590793876
+      },
+      {
+        "request_id": 16,
+        "sample": 1,
+        "layer": 9,
+        "page_ratio": 0.6815911306042886,
+        "stripe_ratio": 0.6815911306042886
+      },
+      {
+        "request_id": 16,
+        "sample": 1,
+        "layer": 10,
+        "page_ratio": 0.6919161676646707,
+        "stripe_ratio": 0.6919161676646707
+      },
+      {
+        "request_id": 16,
+        "sample": 1,
+        "layer": 11,
+        "page_ratio": 0.7220985963711057,
+        "stripe_ratio": 0.7220985963711057
+      },
+      {
+        "request_id": 16,
+        "sample": 1,
+        "layer": 12,
+        "page_ratio": 0.6999235891278245,
+        "stripe_ratio": 0.6999235891278245
+      },
+      {
+        "request_id": 16,
+        "sample": 1,
+        "layer": 13,
+        "page_ratio": 0.7199765670767428,
+        "stripe_ratio": 0.7199765670767428
+      },
+      {
+        "request_id": 16,
+        "sample": 1,
+        "layer": 14,
+        "page_ratio": 0.7489870340356564,
+        "stripe_ratio": 0.7489870340356564
+      },
+      {
+        "request_id": 16,
+        "sample": 1,
+        "layer": 15,
+        "page_ratio": 0.7078740939330752,
+        "stripe_ratio": 0.7078740939330752
+      },
+      {
+        "request_id": 16,
+        "sample": 1,
+        "layer": 16,
+        "page_ratio": 0.656957928802589,
+        "stripe_ratio": 0.656957928802589
+      },
+      {
+        "request_id": 16,
+        "sample": 1,
+        "layer": 17,
+        "page_ratio": 0.733184855233853,
+        "stripe_ratio": 0.733184855233853
+      },
+      {
+        "request_id": 16,
+        "sample": 1,
+        "layer": 18,
+        "page_ratio": 0.72791802975125,
+        "stripe_ratio": 0.72791802975125
+      },
+      {
+        "request_id": 16,
+        "sample": 1,
+        "layer": 19,
+        "page_ratio": 0.6984533723803422,
+        "stripe_ratio": 0.6984533723803422
+      },
+      {
+        "request_id": 16,
+        "sample": 1,
+        "layer": 20,
+        "page_ratio": 0.7242194505584088,
+        "stripe_ratio": 0.7242194505584088
+      },
+      {
+        "request_id": 16,
+        "sample": 1,
+        "layer": 21,
+        "page_ratio": 0.6688082526468193,
+        "stripe_ratio": 0.6688082526468193
+      },
+      {
+        "request_id": 16,
+        "sample": 1,
+        "layer": 22,
+        "page_ratio": 0.6579146407347379,
+        "stripe_ratio": 0.6579146407347379
+      },
+      {
+        "request_id": 16,
+        "sample": 1,
+        "layer": 23,
+        "page_ratio": 0.6595785587941244,
+        "stripe_ratio": 0.6595785587941244
+      },
+      {
+        "request_id": 16,
+        "sample": 1,
+        "layer": 24,
+        "page_ratio": 0.6871692175654412,
+        "stripe_ratio": 0.6871692175654412
+      },
+      {
+        "request_id": 16,
+        "sample": 1,
+        "layer": 25,
+        "page_ratio": 0.7739289637495423,
+        "stripe_ratio": 0.7739289637495423
+      },
+      {
+        "request_id": 16,
+        "sample": 1,
+        "layer": 26,
+        "page_ratio": 0.6827454891649288,
+        "stripe_ratio": 0.6827454891649288
+      },
+      {
+        "request_id": 16,
+        "sample": 1,
+        "layer": 27,
+        "page_ratio": 0.8029016975917884,
+        "stripe_ratio": 0.8029016975917884
+      },
+      {
+        "request_id": 16,
+        "sample": 1,
+        "layer": 28,
+        "page_ratio": 0.7182508303020718,
+        "stripe_ratio": 0.7182508303020718
+      },
+      {
+        "request_id": 16,
+        "sample": 1,
+        "layer": 29,
+        "page_ratio": 0.6723913043478261,
+        "stripe_ratio": 0.6723913043478261
+      },
+      {
+        "request_id": 16,
+        "sample": 1,
+        "layer": 30,
+        "page_ratio": 0.7509572301425662,
+        "stripe_ratio": 0.7509572301425662
+      },
+      {
+        "request_id": 16,
+        "sample": 1,
+        "layer": 31,
+        "page_ratio": 0.7645484949832776,
+        "stripe_ratio": 0.7645484949832776
+      },
+      {
+        "request_id": 16,
+        "sample": 2,
+        "layer": 0,
+        "page_ratio": 0.7197336561743342,
+        "stripe_ratio": 0.7197336561743342
+      },
+      {
+        "request_id": 16,
+        "sample": 2,
+        "layer": 1,
+        "page_ratio": 0.6999467802022352,
+        "stripe_ratio": 0.6999467802022352
+      },
+      {
+        "request_id": 16,
+        "sample": 2,
+        "layer": 2,
+        "page_ratio": 0.7034039514401333,
+        "stripe_ratio": 0.7034039514401333
+      },
+      {
+        "request_id": 16,
+        "sample": 2,
+        "layer": 3,
+        "page_ratio": 0.7559008654602675,
+        "stripe_ratio": 0.7559008654602675
+      },
+      {
+        "request_id": 16,
+        "sample": 2,
+        "layer": 4,
+        "page_ratio": 0.6972884525479196,
+        "stripe_ratio": 0.6972884525479196
+      },
+      {
+        "request_id": 16,
+        "sample": 2,
+        "layer": 5,
+        "page_ratio": 0.7032105658756577,
+        "stripe_ratio": 0.7032105658756577
+      },
+      {
+        "request_id": 16,
+        "sample": 2,
+        "layer": 6,
+        "page_ratio": 0.7636151829919425,
+        "stripe_ratio": 0.7636151829919425
+      },
+      {
+        "request_id": 16,
+        "sample": 2,
+        "layer": 7,
+        "page_ratio": 0.7304979928393186,
+        "stripe_ratio": 0.7304979928393186
+      },
+      {
+        "request_id": 16,
+        "sample": 2,
+        "layer": 8,
+        "page_ratio": 0.7141148325358851,
+        "stripe_ratio": 0.7141148325358851
+      },
+      {
+        "request_id": 16,
+        "sample": 2,
+        "layer": 9,
+        "page_ratio": 0.7016273745436544,
+        "stripe_ratio": 0.7016273745436544
+      },
+      {
+        "request_id": 16,
+        "sample": 2,
+        "layer": 10,
+        "page_ratio": 0.7008453505718548,
+        "stripe_ratio": 0.7008453505718548
+      },
+      {
+        "request_id": 16,
+        "sample": 2,
+        "layer": 11,
+        "page_ratio": 0.7263068423289418,
+        "stripe_ratio": 0.7263068423289418
+      },
+      {
+        "request_id": 16,
+        "sample": 2,
+        "layer": 12,
+        "page_ratio": 0.7011693373754873,
+        "stripe_ratio": 0.7011693373754873
+      },
+      {
+        "request_id": 16,
+        "sample": 2,
+        "layer": 13,
+        "page_ratio": 0.719489273446108,
+        "stripe_ratio": 0.719489273446108
+      },
+      {
+        "request_id": 16,
+        "sample": 2,
+        "layer": 14,
+        "page_ratio": 0.7522759457819138,
+        "stripe_ratio": 0.7522759457819138
+      },
+      {
+        "request_id": 16,
+        "sample": 2,
+        "layer": 15,
+        "page_ratio": 0.7082214931901779,
+        "stripe_ratio": 0.7082214931901779
+      },
+      {
+        "request_id": 16,
+        "sample": 2,
+        "layer": 16,
+        "page_ratio": 0.6477564736113857,
+        "stripe_ratio": 0.6477564736113857
+      },
+      {
+        "request_id": 16,
+        "sample": 2,
+        "layer": 17,
+        "page_ratio": 0.7003987594151528,
+        "stripe_ratio": 0.7003987594151528
+      },
+      {
+        "request_id": 16,
+        "sample": 2,
+        "layer": 18,
+        "page_ratio": 0.6967412451361867,
+        "stripe_ratio": 0.6967412451361867
+      },
+      {
+        "request_id": 16,
+        "sample": 2,
+        "layer": 19,
+        "page_ratio": 0.7358825729244577,
+        "stripe_ratio": 0.7358825729244577
+      },
+      {
+        "request_id": 16,
+        "sample": 2,
+        "layer": 20,
+        "page_ratio": 0.7264548549197601,
+        "stripe_ratio": 0.7264548549197601
+      },
+      {
+        "request_id": 16,
+        "sample": 2,
+        "layer": 21,
+        "page_ratio": 0.6832807570977918,
+        "stripe_ratio": 0.6832807570977918
+      },
+      {
+        "request_id": 16,
+        "sample": 2,
+        "layer": 22,
+        "page_ratio": 0.6292839903459373,
+        "stripe_ratio": 0.6292839903459373
+      },
+      {
+        "request_id": 16,
+        "sample": 2,
+        "layer": 23,
+        "page_ratio": 0.6578401229823213,
+        "stripe_ratio": 0.6578401229823213
+      },
+      {
+        "request_id": 16,
+        "sample": 2,
+        "layer": 24,
+        "page_ratio": 0.6980069324090121,
+        "stripe_ratio": 0.6980069324090121
+      },
+      {
+        "request_id": 16,
+        "sample": 2,
+        "layer": 25,
+        "page_ratio": 0.7233132835712733,
+        "stripe_ratio": 0.7233132835712733
+      },
+      {
+        "request_id": 16,
+        "sample": 2,
+        "layer": 26,
+        "page_ratio": 0.6780895362344741,
+        "stripe_ratio": 0.6780895362344741
+      },
+      {
+        "request_id": 16,
+        "sample": 2,
+        "layer": 27,
+        "page_ratio": 0.7629276054097056,
+        "stripe_ratio": 0.7629276054097056
+      },
+      {
+        "request_id": 16,
+        "sample": 2,
+        "layer": 28,
+        "page_ratio": 0.7309539052496798,
+        "stripe_ratio": 0.7309539052496798
+      },
+      {
+        "request_id": 16,
+        "sample": 2,
+        "layer": 29,
+        "page_ratio": 0.6845064252336449,
+        "stripe_ratio": 0.6845064252336449
+      },
+      {
+        "request_id": 16,
+        "sample": 2,
+        "layer": 30,
+        "page_ratio": 0.7681206685690991,
+        "stripe_ratio": 0.7681206685690991
+      },
+      {
+        "request_id": 16,
+        "sample": 2,
+        "layer": 31,
+        "page_ratio": 0.7574590952839269,
+        "stripe_ratio": 0.7574590952839269
+      }
+    ],
+    "minimum_page_ratio": 0.6233842538190364,
+    "minimum_stripe_ratio": 0.6233842538190364,
+    "boundary": "Actual device copy intervals intersect softmax-only work; separate intrusive replay"
+  },
+  "async_end_to_end_speedup": {
+    "status": "pending",
+    "reason": "independent check publishes no wall timings; run clean bench"
+  },
+  "raw_matrix_api_mfu_proximity": "pending",
+  "compute_io_dominance": "pending interpretation of complete API and timeline evidence",
+  "formal_performance_acceptance": "pending",
+  "matrix_api_evidence": {
+    "raw_reference": {
+      "full_request": {
+        "equivalent_gemm_bmm_ms": 1860.8017053455114,
+        "useful_gemm_bmm_flops": 1031063293919232,
+        "dense_executed_gemm_bmm_flops": 1031585885323264,
+        "useful_mfu_pct": 55.997602350129725
+      },
+      "candidate_only": {
+        "equivalent_gemm_bmm_ms": 6.973151907324791,
+        "useful_gemm_bmm_flops": 2078854348800,
+        "dense_executed_gemm_bmm_flops": 2079003246592,
+        "useful_mfu_pct": 30.128612901979132
+      }
+    },
+    "native_provenance": {
+      "build_sha256": "e6a0cf778f9cb360f595d69d211051f3eeabc99ae212a7cfe7545cf7b387e74f",
+      "replay_artifact_count": 30,
+      "raw_only_artifacts": {},
+      "boundary": "All libraries mapped before the independent raw matrix benchmark match the replay's final inventory and retain identical recorded file identities afterward. Newly mapped libraries are classified only as raw-benchmark additions; they are not evidence that replay used those libraries. Native build/dependency identity is unchanged throughout."
+    },
+    "request_comparisons": [
+      {
+        "sample": 0,
+        "method": "hbm",
+        "request_id": 0,
+        "prefix_cache_hit": false,
+        "accepted_runner_latency_ms": null,
+        "useful_full_model_flops": 1166661887459328,
+        "request_wall_mfu_pct": null,
+        "complete_compute_api_gpu_span_union_ms": 2170.536336364746,
+        "compute_api_gpu_activity_union_ms": 2131.600433898926,
+        "compute_api_gpu_activity_only_mfu_pct": 55.312515792767215,
+        "complete_compute_api_mfu_pct": 54.32029894573056,
+        "wall_to_complete_api_mfu_ratio": null,
+        "independent_gemm_bmm": {
+          "equivalent_gemm_bmm_ms": 1860.8017053455114,
+          "useful_gemm_bmm_flops": 1031063293919232,
+          "dense_executed_gemm_bmm_flops": 1031585885323264,
+          "useful_mfu_pct": 55.997602350129725,
+          "same_subset_over_request_wall_mfu_pct": null,
+          "wall_to_raw_same_subset_mfu_ratio": null,
+          "excluded_useful_attention_flops": 135598593540096
+        },
+        "composition_estimate": {
+          "profiled_attention_api_ms": 397.6532839355469,
+          "raw_matrix_plus_attention_ms": 2258.4549892810583,
+          "full_work_mfu_pct": 52.20568185927701,
+          "wall_to_composition_mfu_ratio": null,
+          "is_observed_request": false
+        },
+        "boundary": "Independent check has no benchmark wall latency. API spans and API MFUs are diagnostic; all runner wall metrics/ratios are null. A separate clean bench is required for end-to-end performance or API-proximity conclusions."
+      },
+      {
+        "sample": 0,
+        "method": "hbm",
+        "request_id": 16,
+        "prefix_cache_hit": false,
+        "accepted_runner_latency_ms": null,
+        "useful_full_model_flops": 1166661887459328,
+        "request_wall_mfu_pct": null,
+        "complete_compute_api_gpu_span_union_ms": 2192.741912597656,
+        "compute_api_gpu_activity_union_ms": 2154.3080032958983,
+        "compute_api_gpu_activity_only_mfu_pct": 54.729492014846976,
+        "complete_compute_api_mfu_pct": 53.77020523324028,
+        "wall_to_complete_api_mfu_ratio": null,
+        "independent_gemm_bmm": {
+          "equivalent_gemm_bmm_ms": 1860.8017053455114,
+          "useful_gemm_bmm_flops": 1031063293919232,
+          "dense_executed_gemm_bmm_flops": 1031585885323264,
+          "useful_mfu_pct": 55.997602350129725,
+          "same_subset_over_request_wall_mfu_pct": null,
+          "wall_to_raw_same_subset_mfu_ratio": null,
+          "excluded_useful_attention_flops": 135598593540096
+        },
+        "composition_estimate": {
+          "profiled_attention_api_ms": 402.24144592285154,
+          "raw_matrix_plus_attention_ms": 2263.043151268363,
+          "full_work_mfu_pct": 52.099838484220804,
+          "wall_to_composition_mfu_ratio": null,
+          "is_observed_request": false
+        },
+        "boundary": "Independent check has no benchmark wall latency. API spans and API MFUs are diagnostic; all runner wall metrics/ratios are null. A separate clean bench is required for end-to-end performance or API-proximity conclusions."
+      },
+      {
+        "sample": 1,
+        "method": "hbm",
+        "request_id": 0,
+        "prefix_cache_hit": false,
+        "accepted_runner_latency_ms": null,
+        "useful_full_model_flops": 1166661887459328,
+        "request_wall_mfu_pct": null,
+        "complete_compute_api_gpu_span_union_ms": 2183.342575866699,
+        "compute_api_gpu_activity_union_ms": 2144.928392700195,
+        "compute_api_gpu_activity_only_mfu_pct": 54.96881996861315,
+        "complete_compute_api_mfu_pct": 54.00168712282844,
+        "wall_to_complete_api_mfu_ratio": null,
+        "independent_gemm_bmm": {
+          "equivalent_gemm_bmm_ms": 1860.8017053455114,
+          "useful_gemm_bmm_flops": 1031063293919232,
+          "dense_executed_gemm_bmm_flops": 1031585885323264,
+          "useful_mfu_pct": 55.997602350129725,
+          "same_subset_over_request_wall_mfu_pct": null,
+          "wall_to_raw_same_subset_mfu_ratio": null,
+          "excluded_useful_attention_flops": 135598593540096
+        },
+        "composition_estimate": {
+          "profiled_attention_api_ms": 400.2942426757813,
+          "raw_matrix_plus_attention_ms": 2261.0959480212928,
+          "full_work_mfu_pct": 52.144705653505284,
+          "wall_to_composition_mfu_ratio": null,
+          "is_observed_request": false
+        },
+        "boundary": "Independent check has no benchmark wall latency. API spans and API MFUs are diagnostic; all runner wall metrics/ratios are null. A separate clean bench is required for end-to-end performance or API-proximity conclusions."
+      },
+      {
+        "sample": 1,
+        "method": "hbm",
+        "request_id": 16,
+        "prefix_cache_hit": false,
+        "accepted_runner_latency_ms": null,
+        "useful_full_model_flops": 1166661887459328,
+        "request_wall_mfu_pct": null,
+        "complete_compute_api_gpu_span_union_ms": 2193.3805947265623,
+        "compute_api_gpu_activity_union_ms": 2155.1849010620117,
+        "compute_api_gpu_activity_only_mfu_pct": 54.70722377732141,
+        "complete_compute_api_mfu_pct": 53.754548092280494,
+        "wall_to_complete_api_mfu_ratio": null,
+        "independent_gemm_bmm": {
+          "equivalent_gemm_bmm_ms": 1860.8017053455114,
+          "useful_gemm_bmm_flops": 1031063293919232,
+          "dense_executed_gemm_bmm_flops": 1031585885323264,
+          "useful_mfu_pct": 55.997602350129725,
+          "same_subset_over_request_wall_mfu_pct": null,
+          "wall_to_raw_same_subset_mfu_ratio": null,
+          "excluded_useful_attention_flops": 135598593540096
+        },
+        "composition_estimate": {
+          "profiled_attention_api_ms": 402.52054711914064,
+          "raw_matrix_plus_attention_ms": 2263.322252464652,
+          "full_work_mfu_pct": 52.09341380155285,
+          "wall_to_composition_mfu_ratio": null,
+          "is_observed_request": false
+        },
+        "boundary": "Independent check has no benchmark wall latency. API spans and API MFUs are diagnostic; all runner wall metrics/ratios are null. A separate clean bench is required for end-to-end performance or API-proximity conclusions."
+      },
+      {
+        "sample": 2,
+        "method": "hbm",
+        "request_id": 0,
+        "prefix_cache_hit": false,
+        "accepted_runner_latency_ms": null,
+        "useful_full_model_flops": 1166661887459328,
+        "request_wall_mfu_pct": null,
+        "complete_compute_api_gpu_span_union_ms": 2177.1656575927736,
+        "compute_api_gpu_activity_union_ms": 2138.288484436035,
+        "compute_api_gpu_activity_only_mfu_pct": 55.13951158699737,
+        "complete_compute_api_mfu_pct": 54.15489733301548,
+        "wall_to_complete_api_mfu_ratio": null,
+        "independent_gemm_bmm": {
+          "equivalent_gemm_bmm_ms": 1860.8017053455114,
+          "useful_gemm_bmm_flops": 1031063293919232,
+          "dense_executed_gemm_bmm_flops": 1031585885323264,
+          "useful_mfu_pct": 55.997602350129725,
+          "same_subset_over_request_wall_mfu_pct": null,
+          "wall_to_raw_same_subset_mfu_ratio": null,
+          "excluded_useful_attention_flops": 135598593540096
+        },
+        "composition_estimate": {
+          "profiled_attention_api_ms": 399.1033050537109,
+          "raw_matrix_plus_attention_ms": 2259.905010399222,
+          "full_work_mfu_pct": 52.172185167674584,
+          "wall_to_composition_mfu_ratio": null,
+          "is_observed_request": false
+        },
+        "boundary": "Independent check has no benchmark wall latency. API spans and API MFUs are diagnostic; all runner wall metrics/ratios are null. A separate clean bench is required for end-to-end performance or API-proximity conclusions."
+      },
+      {
+        "sample": 2,
+        "method": "hbm",
+        "request_id": 16,
+        "prefix_cache_hit": false,
+        "accepted_runner_latency_ms": null,
+        "useful_full_model_flops": 1166661887459328,
+        "request_wall_mfu_pct": null,
+        "complete_compute_api_gpu_span_union_ms": 2193.4921309814454,
+        "compute_api_gpu_activity_union_ms": 2154.7502791748047,
+        "compute_api_gpu_activity_only_mfu_pct": 54.71825844666188,
+        "complete_compute_api_mfu_pct": 53.75181474261744,
+        "wall_to_complete_api_mfu_ratio": null,
+        "independent_gemm_bmm": {
+          "equivalent_gemm_bmm_ms": 1860.8017053455114,
+          "useful_gemm_bmm_flops": 1031063293919232,
+          "dense_executed_gemm_bmm_flops": 1031585885323264,
+          "useful_mfu_pct": 55.997602350129725,
+          "same_subset_over_request_wall_mfu_pct": null,
+          "wall_to_raw_same_subset_mfu_ratio": null,
+          "excluded_useful_attention_flops": 135598593540096
+        },
+        "composition_estimate": {
+          "profiled_attention_api_ms": 402.108267578125,
+          "raw_matrix_plus_attention_ms": 2262.9099729236364,
+          "full_work_mfu_pct": 52.10290469999292,
+          "wall_to_composition_mfu_ratio": null,
+          "is_observed_request": false
+        },
+        "boundary": "Independent check has no benchmark wall latency. API spans and API MFUs are diagnostic; all runner wall metrics/ratios are null. A separate clean bench is required for end-to-end performance or API-proximity conclusions."
+      },
+      {
+        "sample": 0,
+        "method": "dense_prefetch",
+        "request_id": 0,
+        "prefix_cache_hit": false,
+        "accepted_runner_latency_ms": null,
+        "useful_full_model_flops": 1166661887459328,
+        "request_wall_mfu_pct": null,
+        "complete_compute_api_gpu_span_union_ms": 2430.5459779052735,
+        "compute_api_gpu_activity_union_ms": 2014.0634372558593,
+        "compute_api_gpu_activity_only_mfu_pct": 58.54045134970874,
+        "complete_compute_api_mfu_pct": 48.50934059084025,
+        "wall_to_complete_api_mfu_ratio": null,
+        "independent_gemm_bmm": {
+          "equivalent_gemm_bmm_ms": 1860.8017053455114,
+          "useful_gemm_bmm_flops": 1031063293919232,
+          "dense_executed_gemm_bmm_flops": 1031585885323264,
+          "useful_mfu_pct": 55.997602350129725,
+          "same_subset_over_request_wall_mfu_pct": null,
+          "wall_to_raw_same_subset_mfu_ratio": null,
+          "excluded_useful_attention_flops": 135598593540096
+        },
+        "composition_estimate": {
+          "profiled_attention_api_ms": 373.573020690918,
+          "raw_matrix_plus_attention_ms": 2234.3747260364294,
+          "full_work_mfu_pct": 52.76831199798555,
+          "wall_to_composition_mfu_ratio": null,
+          "is_observed_request": false
+        },
+        "boundary": "Independent check has no benchmark wall latency. API spans and API MFUs are diagnostic; all runner wall metrics/ratios are null. A separate clean bench is required for end-to-end performance or API-proximity conclusions."
+      },
+      {
+        "sample": 0,
+        "method": "dense_prefetch",
+        "request_id": 16,
+        "prefix_cache_hit": true,
+        "accepted_runner_latency_ms": null,
+        "useful_full_model_flops": 2351618326528,
+        "request_wall_mfu_pct": null,
+        "complete_compute_api_gpu_span_union_ms": 61.312994689941405,
+        "compute_api_gpu_activity_union_ms": 38.84671044921875,
+        "compute_api_gpu_activity_only_mfu_pct": 6.117821325343108,
+        "complete_compute_api_mfu_pct": 3.8761315575513366,
+        "wall_to_complete_api_mfu_ratio": null,
+        "independent_gemm_bmm": {
+          "equivalent_gemm_bmm_ms": 6.973151907324791,
+          "useful_gemm_bmm_flops": 2078854348800,
+          "dense_executed_gemm_bmm_flops": 2079003246592,
+          "useful_mfu_pct": 30.128612901979132,
+          "same_subset_over_request_wall_mfu_pct": null,
+          "wall_to_raw_same_subset_mfu_ratio": null,
+          "excluded_useful_attention_flops": 272763977728
+        },
+        "composition_estimate": {
+          "profiled_attention_api_ms": 3.3497029418945314,
+          "raw_matrix_plus_attention_ms": 10.322854849219322,
+          "full_work_mfu_pct": 23.022432948733414,
+          "wall_to_composition_mfu_ratio": null,
+          "is_observed_request": false
+        },
+        "boundary": "Independent check has no benchmark wall latency. API spans and API MFUs are diagnostic; all runner wall metrics/ratios are null. A separate clean bench is required for end-to-end performance or API-proximity conclusions."
+      },
+      {
+        "sample": 1,
+        "method": "dense_prefetch",
+        "request_id": 0,
+        "prefix_cache_hit": false,
+        "accepted_runner_latency_ms": null,
+        "useful_full_model_flops": 1166661887459328,
+        "request_wall_mfu_pct": null,
+        "complete_compute_api_gpu_span_union_ms": 2446.5059771118163,
+        "compute_api_gpu_activity_union_ms": 2013.1930067138671,
+        "compute_api_gpu_activity_only_mfu_pct": 58.565762085751864,
+        "complete_compute_api_mfu_pct": 48.19288559560099,
+        "wall_to_complete_api_mfu_ratio": null,
+        "independent_gemm_bmm": {
+          "equivalent_gemm_bmm_ms": 1860.8017053455114,
+          "useful_gemm_bmm_flops": 1031063293919232,
+          "dense_executed_gemm_bmm_flops": 1031585885323264,
+          "useful_mfu_pct": 55.997602350129725,
+          "same_subset_over_request_wall_mfu_pct": null,
+          "wall_to_raw_same_subset_mfu_ratio": null,
+          "excluded_useful_attention_flops": 135598593540096
+        },
+        "composition_estimate": {
+          "profiled_attention_api_ms": 373.3781419067383,
+          "raw_matrix_plus_attention_ms": 2234.1798472522496,
+          "full_work_mfu_pct": 52.772914771794476,
+          "wall_to_composition_mfu_ratio": null,
+          "is_observed_request": false
+        },
+        "boundary": "Independent check has no benchmark wall latency. API spans and API MFUs are diagnostic; all runner wall metrics/ratios are null. A separate clean bench is required for end-to-end performance or API-proximity conclusions."
+      },
+      {
+        "sample": 1,
+        "method": "dense_prefetch",
+        "request_id": 16,
+        "prefix_cache_hit": true,
+        "accepted_runner_latency_ms": null,
+        "useful_full_model_flops": 2351618326528,
+        "request_wall_mfu_pct": null,
+        "complete_compute_api_gpu_span_union_ms": 61.351008544921875,
+        "compute_api_gpu_activity_union_ms": 38.97503332519531,
+        "compute_api_gpu_activity_only_mfu_pct": 6.097678778686931,
+        "complete_compute_api_mfu_pct": 3.873729857784558,
+        "wall_to_complete_api_mfu_ratio": null,
+        "independent_gemm_bmm": {
+          "equivalent_gemm_bmm_ms": 6.973151907324791,
+          "useful_gemm_bmm_flops": 2078854348800,
+          "dense_executed_gemm_bmm_flops": 2079003246592,
+          "useful_mfu_pct": 30.128612901979132,
+          "same_subset_over_request_wall_mfu_pct": null,
+          "wall_to_raw_same_subset_mfu_ratio": null,
+          "excluded_useful_attention_flops": 272763977728
+        },
+        "composition_estimate": {
+          "profiled_attention_api_ms": 3.382757080078125,
+          "raw_matrix_plus_attention_ms": 10.355908987402916,
+          "full_work_mfu_pct": 22.948949618497927,
+          "wall_to_composition_mfu_ratio": null,
+          "is_observed_request": false
+        },
+        "boundary": "Independent check has no benchmark wall latency. API spans and API MFUs are diagnostic; all runner wall metrics/ratios are null. A separate clean bench is required for end-to-end performance or API-proximity conclusions."
+      },
+      {
+        "sample": 2,
+        "method": "dense_prefetch",
+        "request_id": 0,
+        "prefix_cache_hit": false,
+        "accepted_runner_latency_ms": null,
+        "useful_full_model_flops": 1166661887459328,
+        "request_wall_mfu_pct": null,
+        "complete_compute_api_gpu_span_union_ms": 2429.85602154541,
+        "compute_api_gpu_activity_union_ms": 2016.6559940795898,
+        "compute_api_gpu_activity_only_mfu_pct": 58.465193374597206,
+        "complete_compute_api_mfu_pct": 48.52311479299736,
+        "wall_to_complete_api_mfu_ratio": null,
+        "independent_gemm_bmm": {
+          "equivalent_gemm_bmm_ms": 1860.8017053455114,
+          "useful_gemm_bmm_flops": 1031063293919232,
+          "dense_executed_gemm_bmm_flops": 1031585885323264,
+          "useful_mfu_pct": 55.997602350129725,
+          "same_subset_over_request_wall_mfu_pct": null,
+          "wall_to_raw_same_subset_mfu_ratio": null,
+          "excluded_useful_attention_flops": 135598593540096
+        },
+        "composition_estimate": {
+          "profiled_attention_api_ms": 374.3449595336914,
+          "raw_matrix_plus_attention_ms": 2235.146664879203,
+          "full_work_mfu_pct": 52.75008773094353,
+          "wall_to_composition_mfu_ratio": null,
+          "is_observed_request": false
+        },
+        "boundary": "Independent check has no benchmark wall latency. API spans and API MFUs are diagnostic; all runner wall metrics/ratios are null. A separate clean bench is required for end-to-end performance or API-proximity conclusions."
+      },
+      {
+        "sample": 2,
+        "method": "dense_prefetch",
+        "request_id": 16,
+        "prefix_cache_hit": true,
+        "accepted_runner_latency_ms": null,
+        "useful_full_model_flops": 2351618326528,
+        "request_wall_mfu_pct": null,
+        "complete_compute_api_gpu_span_union_ms": 61.294638305664066,
+        "compute_api_gpu_activity_union_ms": 39.47007092285156,
+        "compute_api_gpu_activity_only_mfu_pct": 6.021201078411683,
+        "complete_compute_api_mfu_pct": 3.8772923729561874,
+        "wall_to_complete_api_mfu_ratio": null,
+        "independent_gemm_bmm": {
+          "equivalent_gemm_bmm_ms": 6.973151907324791,
+          "useful_gemm_bmm_flops": 2078854348800,
+          "dense_executed_gemm_bmm_flops": 2079003246592,
+          "useful_mfu_pct": 30.128612901979132,
+          "same_subset_over_request_wall_mfu_pct": null,
+          "wall_to_raw_same_subset_mfu_ratio": null,
+          "excluded_useful_attention_flops": 272763977728
+        },
+        "composition_estimate": {
+          "profiled_attention_api_ms": 3.3755281982421876,
+          "raw_matrix_plus_attention_ms": 10.348680105566979,
+          "full_work_mfu_pct": 22.96498018890485,
+          "wall_to_composition_mfu_ratio": null,
+          "is_observed_request": false
+        },
+        "boundary": "Independent check has no benchmark wall latency. API spans and API MFUs are diagnostic; all runner wall metrics/ratios are null. A separate clean bench is required for end-to-end performance or API-proximity conclusions."
+      },
+      {
+        "sample": 0,
+        "method": "sync_sparse",
+        "request_id": 0,
+        "prefix_cache_hit": false,
+        "accepted_runner_latency_ms": null,
+        "useful_full_model_flops": 1166661887459328,
+        "request_wall_mfu_pct": null,
+        "complete_compute_api_gpu_span_union_ms": 2250.46425012207,
+        "compute_api_gpu_activity_union_ms": 2083.3794220581053,
+        "compute_api_gpu_activity_only_mfu_pct": 56.59275570046187,
+        "complete_compute_api_mfu_pct": 52.39104893912819,
+        "wall_to_complete_api_mfu_ratio": null,
+        "independent_gemm_bmm": {
+          "equivalent_gemm_bmm_ms": 1860.8017053455114,
+          "useful_gemm_bmm_flops": 1031063293919232,
+          "dense_executed_gemm_bmm_flops": 1031585885323264,
+          "useful_mfu_pct": 55.997602350129725,
+          "same_subset_over_request_wall_mfu_pct": null,
+          "wall_to_raw_same_subset_mfu_ratio": null,
+          "excluded_useful_attention_flops": 135598593540096
+        },
+        "composition_estimate": {
+          "profiled_attention_api_ms": 467.54025317382815,
+          "raw_matrix_plus_attention_ms": 2328.3419585193396,
+          "full_work_mfu_pct": 50.638688287386486,
+          "wall_to_composition_mfu_ratio": null,
+          "is_observed_request": false
+        },
+        "boundary": "Independent check has no benchmark wall latency. API spans and API MFUs are diagnostic; all runner wall metrics/ratios are null. A separate clean bench is required for end-to-end performance or API-proximity conclusions."
+      },
+      {
+        "sample": 0,
+        "method": "sync_sparse",
+        "request_id": 16,
+        "prefix_cache_hit": true,
+        "accepted_runner_latency_ms": null,
+        "useful_full_model_flops": 2351618326528,
+        "request_wall_mfu_pct": null,
+        "complete_compute_api_gpu_span_union_ms": 29.460369873046876,
+        "compute_api_gpu_activity_union_ms": 19.549025695800783,
+        "compute_api_gpu_activity_only_mfu_pct": 12.156986097609419,
+        "complete_compute_api_mfu_pct": 8.06701459044106,
+        "wall_to_complete_api_mfu_ratio": null,
+        "independent_gemm_bmm": {
+          "equivalent_gemm_bmm_ms": 6.973151907324791,
+          "useful_gemm_bmm_flops": 2078854348800,
+          "dense_executed_gemm_bmm_flops": 2079003246592,
+          "useful_mfu_pct": 30.128612901979132,
+          "same_subset_over_request_wall_mfu_pct": null,
+          "wall_to_raw_same_subset_mfu_ratio": null,
+          "excluded_useful_attention_flops": 272763977728
+        },
+        "composition_estimate": {
+          "profiled_attention_api_ms": 11.690066833496093,
+          "raw_matrix_plus_attention_ms": 18.663218740820884,
+          "full_work_mfu_pct": 12.733989613798327,
+          "wall_to_composition_mfu_ratio": null,
+          "is_observed_request": false
+        },
+        "boundary": "Independent check has no benchmark wall latency. API spans and API MFUs are diagnostic; all runner wall metrics/ratios are null. A separate clean bench is required for end-to-end performance or API-proximity conclusions."
+      },
+      {
+        "sample": 1,
+        "method": "sync_sparse",
+        "request_id": 0,
+        "prefix_cache_hit": false,
+        "accepted_runner_latency_ms": null,
+        "useful_full_model_flops": 1166661887459328,
+        "request_wall_mfu_pct": null,
+        "complete_compute_api_gpu_span_union_ms": 2259.641198364258,
+        "compute_api_gpu_activity_union_ms": 2083.2168201293944,
+        "compute_api_gpu_activity_only_mfu_pct": 56.59717295129195,
+        "complete_compute_api_mfu_pct": 52.17827624547384,
+        "wall_to_complete_api_mfu_ratio": null,
+        "independent_gemm_bmm": {
+          "equivalent_gemm_bmm_ms": 1860.8017053455114,
+          "useful_gemm_bmm_flops": 1031063293919232,
+          "dense_executed_gemm_bmm_flops": 1031585885323264,
+          "useful_mfu_pct": 55.997602350129725,
+          "same_subset_over_request_wall_mfu_pct": null,
+          "wall_to_raw_same_subset_mfu_ratio": null,
+          "excluded_useful_attention_flops": 135598593540096
+        },
+        "composition_estimate": {
+          "profiled_attention_api_ms": 470.20904022216797,
+          "raw_matrix_plus_attention_ms": 2331.0107455676794,
+          "full_work_mfu_pct": 50.58071177410645,
+          "wall_to_composition_mfu_ratio": null,
+          "is_observed_request": false
+        },
+        "boundary": "Independent check has no benchmark wall latency. API spans and API MFUs are diagnostic; all runner wall metrics/ratios are null. A separate clean bench is required for end-to-end performance or API-proximity conclusions."
+      },
+      {
+        "sample": 1,
+        "method": "sync_sparse",
+        "request_id": 16,
+        "prefix_cache_hit": true,
+        "accepted_runner_latency_ms": null,
+        "useful_full_model_flops": 2351618326528,
+        "request_wall_mfu_pct": null,
+        "complete_compute_api_gpu_span_union_ms": 28.568277893066405,
+        "compute_api_gpu_activity_union_ms": 19.392714294433596,
+        "compute_api_gpu_activity_only_mfu_pct": 12.254975244691536,
+        "complete_compute_api_mfu_pct": 8.318920534700464,
+        "wall_to_complete_api_mfu_ratio": null,
+        "independent_gemm_bmm": {
+          "equivalent_gemm_bmm_ms": 6.973151907324791,
+          "useful_gemm_bmm_flops": 2078854348800,
+          "dense_executed_gemm_bmm_flops": 2079003246592,
+          "useful_mfu_pct": 30.128612901979132,
+          "same_subset_over_request_wall_mfu_pct": null,
+          "wall_to_raw_same_subset_mfu_ratio": null,
+          "excluded_useful_attention_flops": 272763977728
+        },
+        "composition_estimate": {
+          "profiled_attention_api_ms": 11.592920043945313,
+          "raw_matrix_plus_attention_ms": 18.566071951270104,
+          "full_work_mfu_pct": 12.800620089668527,
+          "wall_to_composition_mfu_ratio": null,
+          "is_observed_request": false
+        },
+        "boundary": "Independent check has no benchmark wall latency. API spans and API MFUs are diagnostic; all runner wall metrics/ratios are null. A separate clean bench is required for end-to-end performance or API-proximity conclusions."
+      },
+      {
+        "sample": 2,
+        "method": "sync_sparse",
+        "request_id": 0,
+        "prefix_cache_hit": false,
+        "accepted_runner_latency_ms": null,
+        "useful_full_model_flops": 1166661887459328,
+        "request_wall_mfu_pct": null,
+        "complete_compute_api_gpu_span_union_ms": 2262.9335287475587,
+        "compute_api_gpu_activity_union_ms": 2075.2815291748047,
+        "compute_api_gpu_activity_only_mfu_pct": 56.81358456979381,
+        "complete_compute_api_mfu_pct": 52.102362339011755,
+        "wall_to_complete_api_mfu_ratio": null,
+        "independent_gemm_bmm": {
+          "equivalent_gemm_bmm_ms": 1860.8017053455114,
+          "useful_gemm_bmm_flops": 1031063293919232,
+          "dense_executed_gemm_bmm_flops": 1031585885323264,
+          "useful_mfu_pct": 55.997602350129725,
+          "same_subset_over_request_wall_mfu_pct": null,
+          "wall_to_raw_same_subset_mfu_ratio": null,
+          "excluded_useful_attention_flops": 135598593540096
+        },
+        "composition_estimate": {
+          "profiled_attention_api_ms": 469.33485900878907,
+          "raw_matrix_plus_attention_ms": 2330.1365643543004,
+          "full_work_mfu_pct": 50.599687789790984,
+          "wall_to_composition_mfu_ratio": null,
+          "is_observed_request": false
+        },
+        "boundary": "Independent check has no benchmark wall latency. API spans and API MFUs are diagnostic; all runner wall metrics/ratios are null. A separate clean bench is required for end-to-end performance or API-proximity conclusions."
+      },
+      {
+        "sample": 2,
+        "method": "sync_sparse",
+        "request_id": 16,
+        "prefix_cache_hit": true,
+        "accepted_runner_latency_ms": null,
+        "useful_full_model_flops": 2351618326528,
+        "request_wall_mfu_pct": null,
+        "complete_compute_api_gpu_span_union_ms": 28.491385681152344,
+        "compute_api_gpu_activity_union_ms": 19.624836669921876,
+        "compute_api_gpu_activity_only_mfu_pct": 12.110023517796007,
+        "complete_compute_api_mfu_pct": 8.34137153823567,
+        "wall_to_complete_api_mfu_ratio": null,
+        "independent_gemm_bmm": {
+          "equivalent_gemm_bmm_ms": 6.973151907324791,
+          "useful_gemm_bmm_flops": 2078854348800,
+          "dense_executed_gemm_bmm_flops": 2079003246592,
+          "useful_mfu_pct": 30.128612901979132,
+          "same_subset_over_request_wall_mfu_pct": null,
+          "wall_to_raw_same_subset_mfu_ratio": null,
+          "excluded_useful_attention_flops": 272763977728
+        },
+        "composition_estimate": {
+          "profiled_attention_api_ms": 11.684408081054688,
+          "raw_matrix_plus_attention_ms": 18.65755998837948,
+          "full_work_mfu_pct": 12.737851774491409,
+          "wall_to_composition_mfu_ratio": null,
+          "is_observed_request": false
+        },
+        "boundary": "Independent check has no benchmark wall latency. API spans and API MFUs are diagnostic; all runner wall metrics/ratios are null. A separate clean bench is required for end-to-end performance or API-proximity conclusions."
+      },
+      {
+        "sample": 0,
+        "method": "async_sparse",
+        "request_id": 0,
+        "prefix_cache_hit": false,
+        "accepted_runner_latency_ms": null,
+        "useful_full_model_flops": 1166661887459328,
+        "request_wall_mfu_pct": null,
+        "complete_compute_api_gpu_span_union_ms": 2356.050567932129,
+        "compute_api_gpu_activity_union_ms": 2191.098502380371,
+        "compute_api_gpu_activity_only_mfu_pct": 53.81053500598661,
+        "complete_compute_api_mfu_pct": 50.04314604647326,
+        "wall_to_complete_api_mfu_ratio": null,
+        "independent_gemm_bmm": {
+          "equivalent_gemm_bmm_ms": 1860.8017053455114,
+          "useful_gemm_bmm_flops": 1031063293919232,
+          "dense_executed_gemm_bmm_flops": 1031585885323264,
+          "useful_mfu_pct": 55.997602350129725,
+          "same_subset_over_request_wall_mfu_pct": null,
+          "wall_to_raw_same_subset_mfu_ratio": null,
+          "excluded_useful_attention_flops": 135598593540096
+        },
+        "composition_estimate": {
+          "profiled_attention_api_ms": 572.49964453125,
+          "raw_matrix_plus_attention_ms": 2433.3013498767614,
+          "full_work_mfu_pct": 48.45441057675624,
+          "wall_to_composition_mfu_ratio": null,
+          "is_observed_request": false
+        },
+        "boundary": "Independent check has no benchmark wall latency. API spans and API MFUs are diagnostic; all runner wall metrics/ratios are null. A separate clean bench is required for end-to-end performance or API-proximity conclusions."
+      },
+      {
+        "sample": 0,
+        "method": "async_sparse",
+        "request_id": 16,
+        "prefix_cache_hit": true,
+        "accepted_runner_latency_ms": null,
+        "useful_full_model_flops": 2351618326528,
+        "request_wall_mfu_pct": null,
+        "complete_compute_api_gpu_span_union_ms": 29.162588439941405,
+        "compute_api_gpu_activity_union_ms": 22.398973205566406,
+        "compute_api_gpu_activity_only_mfu_pct": 10.610184289456575,
+        "complete_compute_api_mfu_pct": 8.14938749676148,
+        "wall_to_complete_api_mfu_ratio": null,
+        "independent_gemm_bmm": {
+          "equivalent_gemm_bmm_ms": 6.973151907324791,
+          "useful_gemm_bmm_flops": 2078854348800,
+          "dense_executed_gemm_bmm_flops": 2079003246592,
+          "useful_mfu_pct": 30.128612901979132,
+          "same_subset_over_request_wall_mfu_pct": null,
+          "wall_to_raw_same_subset_mfu_ratio": null,
+          "excluded_useful_attention_flops": 272763977728
+        },
+        "composition_estimate": {
+          "profiled_attention_api_ms": 14.63481396484375,
+          "raw_matrix_plus_attention_ms": 21.607965872168542,
+          "full_work_mfu_pct": 10.998593528498965,
+          "wall_to_composition_mfu_ratio": null,
+          "is_observed_request": false
+        },
+        "boundary": "Independent check has no benchmark wall latency. API spans and API MFUs are diagnostic; all runner wall metrics/ratios are null. A separate clean bench is required for end-to-end performance or API-proximity conclusions."
+      },
+      {
+        "sample": 1,
+        "method": "async_sparse",
+        "request_id": 0,
+        "prefix_cache_hit": false,
+        "accepted_runner_latency_ms": null,
+        "useful_full_model_flops": 1166661887459328,
+        "request_wall_mfu_pct": null,
+        "complete_compute_api_gpu_span_union_ms": 2353.331448852539,
+        "compute_api_gpu_activity_union_ms": 2190.6145234375,
+        "compute_api_gpu_activity_only_mfu_pct": 53.82242352656788,
+        "complete_compute_api_mfu_pct": 50.100967596975224,
+        "wall_to_complete_api_mfu_ratio": null,
+        "independent_gemm_bmm": {
+          "equivalent_gemm_bmm_ms": 1860.8017053455114,
+          "useful_gemm_bmm_flops": 1031063293919232,
+          "dense_executed_gemm_bmm_flops": 1031585885323264,
+          "useful_mfu_pct": 55.997602350129725,
+          "same_subset_over_request_wall_mfu_pct": null,
+          "wall_to_raw_same_subset_mfu_ratio": null,
+          "excluded_useful_attention_flops": 135598593540096
+        },
+        "composition_estimate": {
+          "profiled_attention_api_ms": 572.0243106689453,
+          "raw_matrix_plus_attention_ms": 2432.826016014457,
+          "full_work_mfu_pct": 48.46387776510984,
+          "wall_to_composition_mfu_ratio": null,
+          "is_observed_request": false
+        },
+        "boundary": "Independent check has no benchmark wall latency. API spans and API MFUs are diagnostic; all runner wall metrics/ratios are null. A separate clean bench is required for end-to-end performance or API-proximity conclusions."
+      },
+      {
+        "sample": 1,
+        "method": "async_sparse",
+        "request_id": 16,
+        "prefix_cache_hit": true,
+        "accepted_runner_latency_ms": null,
+        "useful_full_model_flops": 2351618326528,
+        "request_wall_mfu_pct": null,
+        "complete_compute_api_gpu_span_union_ms": 28.749691711425783,
+        "compute_api_gpu_activity_union_ms": 22.38221435546875,
+        "compute_api_gpu_activity_only_mfu_pct": 10.618128744155802,
+        "complete_compute_api_mfu_pct": 8.266427201764012,
+        "wall_to_complete_api_mfu_ratio": null,
+        "independent_gemm_bmm": {
+          "equivalent_gemm_bmm_ms": 6.973151907324791,
+          "useful_gemm_bmm_flops": 2078854348800,
+          "dense_executed_gemm_bmm_flops": 2079003246592,
+          "useful_mfu_pct": 30.128612901979132,
+          "same_subset_over_request_wall_mfu_pct": null,
+          "wall_to_raw_same_subset_mfu_ratio": null,
+          "excluded_useful_attention_flops": 272763977728
+        },
+        "composition_estimate": {
+          "profiled_attention_api_ms": 14.591388671875,
+          "raw_matrix_plus_attention_ms": 21.564540579199793,
+          "full_work_mfu_pct": 11.020741792889996,
+          "wall_to_composition_mfu_ratio": null,
+          "is_observed_request": false
+        },
+        "boundary": "Independent check has no benchmark wall latency. API spans and API MFUs are diagnostic; all runner wall metrics/ratios are null. A separate clean bench is required for end-to-end performance or API-proximity conclusions."
+      },
+      {
+        "sample": 2,
+        "method": "async_sparse",
+        "request_id": 0,
+        "prefix_cache_hit": false,
+        "accepted_runner_latency_ms": null,
+        "useful_full_model_flops": 1166661887459328,
+        "request_wall_mfu_pct": null,
+        "complete_compute_api_gpu_span_union_ms": 2353.7791864624023,
+        "compute_api_gpu_activity_union_ms": 2194.64303515625,
+        "compute_api_gpu_activity_only_mfu_pct": 53.723626473728324,
+        "complete_compute_api_mfu_pct": 50.091437354031136,
+        "wall_to_complete_api_mfu_ratio": null,
+        "independent_gemm_bmm": {
+          "equivalent_gemm_bmm_ms": 1860.8017053455114,
+          "useful_gemm_bmm_flops": 1031063293919232,
+          "dense_executed_gemm_bmm_flops": 1031585885323264,
+          "useful_mfu_pct": 55.997602350129725,
+          "same_subset_over_request_wall_mfu_pct": null,
+          "wall_to_raw_same_subset_mfu_ratio": null,
+          "excluded_useful_attention_flops": 135598593540096
+        },
+        "composition_estimate": {
+          "profiled_attention_api_ms": 570.721729309082,
+          "raw_matrix_plus_attention_ms": 2431.5234346545935,
+          "full_work_mfu_pct": 48.489840148570266,
+          "wall_to_composition_mfu_ratio": null,
+          "is_observed_request": false
+        },
+        "boundary": "Independent check has no benchmark wall latency. API spans and API MFUs are diagnostic; all runner wall metrics/ratios are null. A separate clean bench is required for end-to-end performance or API-proximity conclusions."
+      },
+      {
+        "sample": 2,
+        "method": "async_sparse",
+        "request_id": 16,
+        "prefix_cache_hit": true,
+        "accepted_runner_latency_ms": null,
+        "useful_full_model_flops": 2351618326528,
+        "request_wall_mfu_pct": null,
+        "complete_compute_api_gpu_span_union_ms": 28.74806884765625,
+        "compute_api_gpu_activity_union_ms": 22.367829345703125,
+        "compute_api_gpu_activity_only_mfu_pct": 10.624957385563814,
+        "complete_compute_api_mfu_pct": 8.266893851725102,
+        "wall_to_complete_api_mfu_ratio": null,
+        "independent_gemm_bmm": {
+          "equivalent_gemm_bmm_ms": 6.973151907324791,
+          "useful_gemm_bmm_flops": 2078854348800,
+          "dense_executed_gemm_bmm_flops": 2079003246592,
+          "useful_mfu_pct": 30.128612901979132,
+          "same_subset_over_request_wall_mfu_pct": null,
+          "wall_to_raw_same_subset_mfu_ratio": null,
+          "excluded_useful_attention_flops": 272763977728
+        },
+        "composition_estimate": {
+          "profiled_attention_api_ms": 14.553761779785157,
+          "raw_matrix_plus_attention_ms": 21.526913687109946,
+          "full_work_mfu_pct": 11.040004947293752,
+          "wall_to_composition_mfu_ratio": null,
+          "is_observed_request": false
+        },
+        "boundary": "Independent check has no benchmark wall latency. API spans and API MFUs are diagnostic; all runner wall metrics/ratios are null. A separate clean bench is required for end-to-end performance or API-proximity conclusions."
+      }
+    ]
+  }
+}

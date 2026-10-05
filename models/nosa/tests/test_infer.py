@@ -169,8 +169,9 @@ def test_direct_script_imports_canonical_runtime_with_root_already_on_pythonpath
         sys.argv = [str(script), "--model-path", str(missing_model), "--prompt", "test"]
         try:
             runpy.run_path(str(script), run_name="__main__")
-        except SystemExit as exc:
-            assert exc.code == 1
+        except FileNotFoundError as exc:
+            assert Path(exc.filename) == missing_model / "config.json"
+            print(str(exc), file=sys.stderr)
         else:
             raise AssertionError("The missing checkpoint should fail after runtime import")
         assert sys.path[0] == str(root)

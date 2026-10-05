@@ -1,0 +1,72 @@
+{
+  "cwd": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr",
+  "environment": {
+    "CUDA_VISIBLE_DEVICES": "",
+    "OMP_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "argv": [
+    "numactl",
+    "--physcpubind=0-7",
+    "--membind=0",
+    ".venv/bin/python",
+    "-B",
+    "/tmp/nosa_plan_cpu_profile_20261005_01/profile_plan.py"
+  ],
+  "stdout": "/tmp/nosa_plan_cpu_profile_20261005_01/stdout.log",
+  "stderr": "/tmp/nosa_plan_cpu_profile_20261005_01/stderr.log",
+  "exit_code": 0,
+  "files": [
+    {
+      "original_path": "/tmp/nosa_plan_cpu_profile_20261005_01/serial_sparse.pstats",
+      "retained_path": "docs/agents/acceptance/unified_runtime_20261005/nosa_plan_cpu_profile_01/serial_sparse.pstats",
+      "bytes": 6679,
+      "sha256": "ba6ed70f9bfb3215420339cb1289078cb320d6f82a066e93628e69d5ffdf29b7"
+    },
+    {
+      "original_path": "/tmp/nosa_plan_cpu_profile_20261005_01/dense_prefetch.pstats",
+      "retained_path": "docs/agents/acceptance/unified_runtime_20261005/nosa_plan_cpu_profile_01/dense_prefetch.pstats",
+      "bytes": 6679,
+      "sha256": "6f03abcb978aa68bc4fc13112811d181ecf0db224788b4e64b5c15485cec7a77"
+    },
+    {
+      "original_path": "/tmp/nosa_plan_cpu_profile_20261005_01/hbm.pstats",
+      "retained_path": "docs/agents/acceptance/unified_runtime_20261005/nosa_plan_cpu_profile_01/hbm.pstats",
+      "bytes": 6409,
+      "sha256": "870b69e1679637d656afbf9da5bca570860cb78103809f1e11a2bde35e6a45dd"
+    },
+    {
+      "original_path": "/tmp/nosa_plan_cpu_profile_20261005_01/result.json",
+      "retained_path": "docs/agents/acceptance/unified_runtime_20261005/nosa_plan_cpu_profile_01/result.json",
+      "bytes": 187132,
+      "sha256": "c812e8f13d5fa032c087df367e8eec39a0d3b8bd0093715c9a8ba7807306f45f"
+    },
+    {
+      "original_path": "/tmp/nosa_plan_cpu_profile_20261005_01/profile_plan.py",
+      "retained_path": "docs/agents/acceptance/unified_runtime_20261005/nosa_plan_cpu_profile_01/profile_plan.txt",
+      "bytes": 8384,
+      "sha256": "93fc356aa5a7d0bcc819bc9063592be0e28ff81482ccc27c874f3ac5648adb29"
+    },
+    {
+      "original_path": "/tmp/nosa_plan_cpu_profile_20261005_01/stdout.log",
+      "retained_path": "docs/agents/acceptance/unified_runtime_20261005/nosa_plan_cpu_profile_01/stdout.log",
+      "bytes": 1886,
+      "sha256": "1def393161519c14c9a9035adcf6eb5f1ed6f79f1c3a4ab0c969cd46dcf50bef"
+    },
+    {
+      "original_path": "/tmp/nosa_plan_cpu_profile_20261005_01/overlap.pstats",
+      "retained_path": "docs/agents/acceptance/unified_runtime_20261005/nosa_plan_cpu_profile_01/overlap.pstats",
+      "bytes": 6679,
+      "sha256": "ba7e5e8e6f592407b2bebb6e29e8958db050528f68b9063fdfddad9d1d01f866"
+    },
+    {
+      "original_path": "/tmp/nosa_plan_cpu_profile_20261005_01/stderr.log",
+      "retained_path": "docs/agents/acceptance/unified_runtime_20261005/nosa_plan_cpu_profile_01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "scope": "Pure-CPU offline plan microdiagnostic; runtime source unmodified. No model weights, CUDA initialization, session allocation or serving run. Resources were planned but not allocated; no complete-serving causal attribution."
+}

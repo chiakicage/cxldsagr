@@ -11,6 +11,7 @@ import tempfile
 from collections import defaultdict
 from pathlib import Path
 
+from experiments.deepseek_v32_echo_prefill.src.compare_backends import validate_result
 from experiments.deepseek_v32_echo_prefill.src.execution_utilization import (
     precision_normalized_utilization,
 )
@@ -23,6 +24,7 @@ from experiments.deepseek_v32_echo_prefill.src.profile_summary import (
     run_directory,
     write_csv,
 )
+from experiments.deepseek_v32_echo_prefill.src.run_contract import benchmark_view
 
 MODES = ("resident", "offload")
 PHASES = ("prefill_annotated", "extend_annotated")
@@ -77,8 +79,13 @@ def _end_to_end_utilization(result, ledger, peaks):
             matrix = [r for r in calls if r["useful_flops"] is not None]
             for layer in range(3):
                 stages = {r["stage"] for r in matrix if r["layer"] == f"layer_{layer}"}
-                indexer = "indexer_qk" if mode == "resident" else "indexer_fused"
-                require(stages == required | {indexer}, "Incomplete or unsupported matrix ledger")
+                indexer_stages = stages & {"indexer_qk", "indexer_fused"}
+                require(
+                    bool(indexer_stages)
+                    and stages == required | indexer_stages
+                    and (mode == "offload" or indexer_stages == {"indexer_qk"}),
+                    "Incomplete or unsupported matrix ledger",
+                )
             head = [r for r in matrix if r["layer"] == "shared"]
             require(
                 len(head) == 1 and head[0]["stage"] == "lm_head",
@@ -101,6 +108,8 @@ def _end_to_end_utilization(result, ledger, peaks):
                 peaks_tflops=peaks,
                 scope=scope,
             )
+            if "wall_time_denominator" in result:
+                output[mode][phase]["wall_time_denominator"] = result["wall_time_denominator"]
         require(
             work_by_mode["resident", phase] == work_by_mode["offload", phase],
             "Resident/offload useful matrix work differs; inspect semantic equivalence",
@@ -375,6 +384,15 @@ def _markdown(summary, matrix, nonmatrix):
         "| 阶段 | Resident 中位延迟 (ms) | Offload 中位延迟 (ms) | 每种模式重复次数 |",
         "| --- | ---: | ---: | ---: |",
     ]
+    if "wall_time_denominator" in summary:
+        denominator = summary["wall_time_denominator"]
+        lines[4:4] = [
+            (
+                f"延迟与利用率分母来自独立 bench `{denominator['run_id']}`；"
+                f"其 result SHA256 为 `{denominator['result_sha256']}`，源码清单见 summary.json。"
+            ),
+            "",
+        ]
     for phase in ("prefix", "extend"):
         lines.append(
             f"| {phase} | {_format(summary['measurements']['resident'][phase + '_median_ms'])} | {_format(summary['measurements']['offload'][phase + '_median_ms'])} | {len(summary['measurements']['resident'][phase + '_samples_ms'])} |"
@@ -386,7 +404,7 @@ def _markdown(summary, matrix, nonmatrix):
         (
             "端到端精度归一化利用率 = 100 × Σ精度（useful matrix FLOPs / 对应精度 dense peak）/ "
             "无插桩同步 wall time。分子使用同一 run、同一阶段完整 annotated 调用账本中的"
-            "逻辑矩阵工作量，按 FP8/BF16/FP32 分别换算理想计算时间；分母包含整个请求阶段的"
+            "逻辑矩阵工作量，按 FP8/BF16/FP32 分别换算理想计算时间；新 schema 的分母来自匹配的独立 bench，包含整个请求阶段的"
             "CPU 调度、非矩阵计算、搬运、等待和 launch gap。它是当前 absorbed-MLA 实现的"
             "三层工作负载指标，不外推完整 61 层，也不等于单一峰值 MFU 或 Tensor pipe active。"
         ),
@@ -434,24 +452,18 @@ def _markdown(summary, matrix, nonmatrix):
             "| 算子 | 精度 | Resident kernel ms | MFU (%) | Offload kernel ms | MFU (%) |",
             "| --- | --- | ---: | ---: | ---: | ---: |",
         ]
-        lookup = {
-            (
-                r["mode"],
-                "indexer" if r["stage"] in ("indexer_qk", "indexer_fused") else r["stage"],
-            ): r
-            for r in matrix
-            if r["phase"] == phase
-        }
-        for stage in dict.fromkeys(
-            "indexer" if name in ("indexer_qk", "indexer_fused") else name for name in STAGES
-        ):
+        lookup = {(r["mode"], r["stage"]): r for r in matrix if r["phase"] == phase}
+        for stage in STAGES:
             left, right = lookup.get(("resident", stage), {}), lookup.get(("offload", stage), {})
             lines.append(
                 f"| {stage} | {left.get('precision', right.get('precision', 'N/A'))} | {_format(left.get('kernel_ms'))} | {_format(left.get('kernel_mfu_percent'), 2)} | {_format(right.get('kernel_ms'))} | {_format(right.get('kernel_mfu_percent'), 2)} |"
             )
         lines += [
             "",
-            "Indexer 行在 offload 中包含融合 prefetch；MLA 行共同计入 QK/PV。",
+            (
+                "indexer_qk 记录 resident logits 调用，indexer_fused 包含融合 prefetch。"
+                "同一 offload 阶段可包含两种调用，分别列出；MLA 行共同计入 QK/PV。"
+            ),
             "",
             (
                 "下表按最内层 scope 归因；attention_projection、dense_mlp 等父 scope 仅保留"
@@ -475,17 +487,22 @@ def _markdown(summary, matrix, nonmatrix):
         ),
         "",
         (
-            "正确性与覆盖验收、硬件 identity、源码及输入 SHA256、完整 NCU full/source 的验证记录见 "
+            "正确性与覆盖验收、硬件 identity、源码及输入 SHA256 见 "
             "[summary.json](report/layers3/summary.json)。逐层及 pooled 数据见 "
             "[operator_mfu.csv](report/layers3/operator_mfu.csv)、"
             "[operator_mfu_by_layer.csv](report/layers3/operator_mfu_by_layer.csv)、"
             "[nonmatrix.csv](report/layers3/nonmatrix.csv)。"
         ),
         "",
-        "NCU 是同 run 对应真实层激活的独立 replay，不替代 NSYS 实际调用的 MFU 或正式 wall 延迟；"
-        "其 cache 状态、排除项和报告 SHA256 单独保存。NCU run IDs："
-        + ", ".join(f"`{run['run_id']}`" for run in summary["ncu"])
-        + "。",
+        (
+            "完整 NCU full/source 的验证记录见 [summary.json](report/layers3/summary.json)。"
+            "NCU 是同 run 对应真实层激活的独立 replay，不替代 NSYS 实际调用的 MFU 或正式 wall 延迟；"
+            "其 cache 状态、排除项和报告 SHA256 单独保存。NCU run IDs："
+            + ", ".join(f"`{run['run_id']}`" for run in summary["ncu"])
+            + "。"
+            if summary["ncu"]
+            else "本次未采集 NCU replay；报告不包含 NCU full/source 指标或验证结论。"
+        ),
         "",
         "生成命令：",
         "",
@@ -510,6 +527,10 @@ def generate(run_id, ncu_run_ids, *, publish=False):
     require(len(set(ncu_run_ids)) == len(ncu_run_ids), "Duplicate NCU run IDs")
     hashes = {}
     result = read_json(directory / "result.json")
+    if result.get("schema_version", 1) == 2:
+        require(result.get("mode") == "profile", "Formal report requires an independent profile")
+        validate_result(directory, result)
+        result = benchmark_view(directory, result)
     analysis = read_json(directory / "analysis" / "analysis.json")
     ledger = read_json(directory / "operator_calls.json")
     coverage, intervals = _verify(directory, result, analysis, ledger, hashes)
@@ -645,10 +666,7 @@ def main(argv=None):
     parser.add_argument("--ncu-run-id", action="append", default=[])
     parser.add_argument("--publish", action="store_true")
     args = parser.parse_args(argv)
-    try:
-        status = generate(args.run_id, args.ncu_run_id, publish=args.publish)
-    except (OSError, ValueError, KeyError) as exc:
-        parser.exit(2, f"Three-layer publication rejected: {exc}\n")
+    status = generate(args.run_id, args.ncu_run_id, publish=args.publish)
     print(json.dumps(status))
 
 

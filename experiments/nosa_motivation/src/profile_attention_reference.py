@@ -17,6 +17,7 @@ from functools import partial
 from pathlib import Path
 from types import SimpleNamespace
 
+from cache.allocator.snapshot import runtime_info as allocator_snapshot_runtime_info
 from evaluation import pool_scan_provenance as pool_scan
 from experiments.nosa_motivation.src.attention_reference import (
     benchmark_attention_reference,
@@ -66,7 +67,6 @@ from experiments.nosa_motivation.src.provenance import (
     write_json,
 )
 from experiments.nosa_motivation.src.report import audit_run, read_jsonl
-from models.nosa._allocator_snapshot import runtime_info as allocator_snapshot_runtime_info
 
 
 def combined_comparison(row, matrix, attention, *, model_config=None, config=None):
@@ -209,7 +209,7 @@ def audit_reference(data, reference_dir, matrix_profile_run, matrix_profile_dir)
         metadata,
         reference,
         require_pool_referrers=pool_scan.requires_provenance(saved_sources),
-        expected_abi_sha256=saved_sources.get(pool_scan.POOL_SCAN_ABI),
+        expected_abi_sha256=pool_scan.source_abi_sha256(saved_sources),
     )
     native_audit = audit_matrix_native_provenance(
         metadata["benchmark_native_provenance"], metadata["native_provenance"]

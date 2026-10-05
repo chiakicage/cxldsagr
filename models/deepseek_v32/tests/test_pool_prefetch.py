@@ -7,7 +7,7 @@ import torch
 
 from cache.sparse_token_cache import WorkingSetTooLarge
 from cache.sparse_token_pool import PRIORITY_LIMIT, SharedSparseTokenPool
-from models.deepseek_v32.pool_prefetch import PoolHistoryPrefetch
+from models.deepseek_v32.cache.prefetch import PoolHistoryPrefetch
 
 
 def make_pool(*, slots=8, layers=1, device="cpu"):

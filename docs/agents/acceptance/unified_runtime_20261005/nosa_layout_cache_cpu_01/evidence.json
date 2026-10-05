@@ -1,0 +1,21 @@
+{
+  "scope": "NOSA backend-owned single-entry immutable session allocation layout cache",
+  "cpu_only": true,
+  "gpu_acceptance_performed": false,
+  "formal_timing_or_profile_performed": false,
+  "pytest": {
+    "command": ".venv/bin/python -m pytest models/nosa/tests/test_runtime_session_plan.py models/nosa/tests/test_session_budget.py models/nosa/tests/test_fixed_serving.py models/nosa/tests/test_serving_resources.py models/nosa/tests/test_serving_owner.py models/nosa/tests/test_resource_drain.py cache/tests/test_capacity.py -q -p no:cacheprovider",
+    "exit_code": 0,
+    "passed": 264,
+    "duration_seconds": 15.84,
+    "note": "After this run Ruff applied only multiline formatting to one monkeypatch.setattr call in the test file; production source did not change."
+  },
+  "equivalence_command": "CUDA_VISIBLE_DEVICES='' PYTHONPATH=. .venv/bin/python /tmp/nosa_layout_cache_equivalence_20261005_01.py",
+  "planning_script_sha256": "2e4bc4e197af7fe2a697789e7742aa26f935ff83c32a900c1fecb19d99615ea0",
+  "files_sha256": {
+    "models/nosa/execution/adapter.py": "3ef7d72a4e00cc366e2983099f9107722555b23887d723a2310bd50948e4e7bb",
+    "models/nosa/execution/session_budget.py": "b920a121eb51d37b20824bbe85e22e282a60bc63f999e3b19cb868ab4e80f9fd",
+    "models/nosa/tests/test_runtime_session_plan.py": "6b973dd87ce233c986e39b3af99489ea1c5f86e3d02f2245fdf8a70c1fe53919"
+  },
+  "independent_static_review": "behavior_audit: no blocking findings; actual allocator audit and SessionPlan validation paths retained"
+}

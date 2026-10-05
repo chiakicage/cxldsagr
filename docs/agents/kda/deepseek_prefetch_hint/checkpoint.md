@@ -81,5 +81,5 @@ checks, 947 explicit optional/hardware skips and 58 subtests. The quiet trace
 all 128 output checks, 96 offload/HBM byte comparisons and independent
 saved-data arithmetic. ECHO first-visit mean is 2423.584 ms, 19.415 ms below C6;
 the combined trace does not isolate this helper's contribution. See
-[C7 integration](../../system/deepseek_motivation_c7_hint_integration.md).
+C7 integration（Git `934485b:docs/agents/system/deepseek_motivation_c7_hint_integration.md`）.
 Matching attribution remains required before publication.

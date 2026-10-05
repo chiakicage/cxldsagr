@@ -1,0 +1,88 @@
+import csv,hashlib,json,statistics,math,shutil
+from pathlib import Path
+from datetime import datetime,timezone
+root=Path('/mnt/ssd-wlcb/chenkaiqi/cxldsagr');acc=root/'docs/agents/acceptance/unified_runtime_20261005';exp=root/'experiments/deepseek_v32_motivation/output/data';compdir=exp/'refactor_final_deepseek_three_version_20261005_01'
+result=json.loads((compdir/'comparison.json').read_text());plan=json.loads(Path('/tmp/unified_final_deepseek_comparison_plan.json').read_text())
+inputs=[]
+def sha(path):return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+def record(path):
+ path=Path(path);row={'path':str(path),'bytes':path.stat().st_size,'sha256':sha(path)};inputs.append(row);return row
+for name in ('comparison.json','request_samples.csv','results.md'):record(compdir/name)
+assert len(result['runs'])==7
+allrows={};allmeta={};groups={'published':[],'baseline':[],'current':[]}
+for run in result['runs']:
+ p=Path(run['directory']);m=json.loads((p/'metadata.json').read_text());rs=[json.loads(x) for x in (p/'measurements.jsonl').read_text().splitlines() if x.strip()]
+ assert len(rs)==128 and m['status']=='accepted'
+ for name,want in run['input_sha256'].items():
+  got=record(p/name);assert got['sha256']==want,(run['run_id'],name)
+ allrows[run['run_id']]=rs;allmeta[run['run_id']]=m;groups[run['role']].append(run)
+assert [len(groups[k]) for k in ('published','baseline','current')]==[1,3,3]
+source={role:sorted({r['source_sha256'] for r in rs}) for role,rs in groups.items()}
+assert source=={'published':['11fc11b18b2e70baf450a82ab4fad66f2f8d4e22cda2e9f36bf74453a400df8f'],'baseline':['d31a0ff6bde97acab24bb2f2c648e9d91ae46ba18f6c074b5f572cf49aaaab7a'],'current':['1319a540b7f78da9c363dd09c0f1568b450df3df5e4d3e8b60155a58c348b3dc']}
+contracts=groups['baseline'][0]['contract'];assert all(r['contract']==contracts for role in ('baseline','current') for r in groups[role])
+receipt_observations={}
+for role,rec in ((k,plan['receipts'][k]) for k in ('baseline','current')):
+ p=Path(rec['path']);got=record(p);receipt=json.loads(p.read_text());assert got['sha256']==rec['recorded_file_sha256'];assert receipt['receipt_sha256']==rec['recorded_internal_receipt_sha256'];assert receipt['kind']==rec['kind']
+ for run in groups[role]:
+  m=allmeta[run['run_id']];assert m['correctness_receipt']['sha256']==got['sha256'];assert m['correctness_receipt']['identity']==receipt['identity'];assert m['validation_identity']==receipt['identity']
+ receipt_observations[role]={'file_sha256':got['sha256'],'canonical_self_digest':receipt['receipt_sha256'],'kind':receipt['kind'],'artifacts':len(receipt['artifacts']),'explicit_override':str(p)}
+check_manifest=json.loads((acc/'deepseek_final/source_manifest.json').read_text());source_changes={}
+for run in groups['current']:
+ m=json.loads((Path(run['directory'])/'source_manifest.json').read_text());changes={k:{'check':check_manifest.get(k),'bench':m.get(k)} for k in sorted(check_manifest.keys()|m.keys()) if check_manifest.get(k)!=m.get(k)}
+ assert list(changes)==['experiments/deepseek_v32_motivation/src/profile.py'];source_changes[run['run_id']]=changes
+phase_names=('latency_ms','admission_ms','prefix_ms','extend_ms','cleanup_ms')
+def summary(xs):
+ c=statistics.median(xs);return {'values':xs,'median':c,'min':min(xs),'max':max(xs),'range':max(xs)-min(xs),'mad':statistics.median(abs(x-c) for x in xs)}
+def chosen(rs,method,visit):return [r for r in rs if r['scheme']==method and ('revisit' if r['is_revisit'] else 'first')==visit]
+phase=[];matched=[]
+for method in ('hbm','echo','serial_sparse','dense_prefetch'):
+ for visit in ('first','revisit'):
+  for metric in phase_names:
+   v={role:summary([statistics.fmean(r[metric] for r in chosen(allrows[run['run_id']],method,visit)) for run in runs]) for role,runs in groups.items()}
+   a,b=v['baseline'],v['current'];delta=b['median']-a['median']
+   phase.append({'method':method,'visit':visit,'metric':metric,'roles':v,'delta_ms':delta,'delta_percent':100*delta/a['median'] if a['median'] else None,'positive_delta_exceeds_both_ranges':delta>max(a['range'],b['range']),'current_entire_run_range_above_baseline':b['min']>a['max'],'current_entire_run_range_below_baseline':b['max']<a['min']})
+  keys=[r['request_id'] for r in chosen(allrows[groups['baseline'][0]['run_id']],method,visit)]
+  assert len(keys)==16
+  for req in keys:
+   entry={'method':method,'visit':visit,'request_id':req,'phases':{}}
+   for metric in phase_names:
+    v={role:[next(r[metric] for r in allrows[run['run_id']] if r['scheme']==method and r['request_id']==req) for run in groups[role]] for role in ('baseline','current')}
+    a,b=v['baseline'],v['current'];entry['phases'][metric]={'baseline':a,'current':b,'median_delta_ms':statistics.median(b)-statistics.median(a),'every_current_above_every_baseline':min(b)>max(a)}
+   matched.append(entry)
+trace={role:summary([sum(r['latency_ms'] for r in allrows[run['run_id']]) for run in runs]) for role,runs in groups.items()};a,b=trace['baseline'],trace['current'];trace.update(delta_ms=b['median']-a['median'],delta_percent=100*(b['median']/a['median']-1),positive_delta_exceeds_both_ranges=b['median']-a['median']>max(a['range'],b['range']),current_entire_run_range_above_baseline=b['min']>a['max'])
+phase_sum=max(abs(sum(r[k] for k in phase_names[1:])-r['latency_ms']) for rs in allrows.values() for r in rs)
+basekey={(r['scheme'],r['request_id']):r for r in allrows[groups['baseline'][0]['run_id']]}
+identity_fields=['user_id','request_id','visit_number','is_revisit','prefix_sha256','candidate_sha256','input_sha256','history_sha256','workload_sha256','prefix_cache_hit','prefix_hit_tier','evicted_users','resource_mode','hbm_budget_bytes','dram_budget_bytes','cache_hbm_bytes','cache_dram_bytes','request_cache_hbm_bytes','request_cache_dram_bytes','reserved_hbm_bytes','reserved_dram_bytes','shared_cache_hbm_bytes','shared_cache_dram_bytes','shared_reserved_hbm_bytes','shared_reserved_dram_bytes','session_reserved_hbm_bytes','session_reserved_dram_bytes','cache_host_pages','host_page_capacity','session_host_pages','cache_hbm_tokens','hbm_token_capacity','session_hbm_tokens','host_page_tokens','cache_pool_scope','cached_users','cache_diagnostics']
+differences=[]
+for role in ('baseline','current'):
+ for run in groups[role]:
+  rs=allrows[run['run_id']];assert len({(r['scheme'],r['request_id']) for r in rs})==128
+  for r in rs:
+   key=(r['scheme'],r['request_id']);ref=basekey[key]
+   for field in identity_fields:
+    if r[field]!=ref[field]:differences.append({'run_id':run['run_id'],'scheme':r['scheme'],'request_id':r['request_id'],'field':field,'baseline':ref[field],'observed':r[field]})
+accounting={'status':'exact_match' if not differences else 'differences_require_review','runs':6,'rows_each':128,'fields':identity_fields,'differences':differences,'boundary':'Complete cache_diagnostics values compared, including candidate H2D/D2H, selection/residency counts and per-layer records. PyTorch allocated/reserved and device occupancy are separate observations, not cache-budget equality.'}
+noise_path=exp/'refactor_p0_deepseek_noise_20261005/deepseek_noise_calibration.json';noise=json.loads(noise_path.read_text());record(noise_path)
+monitor=[]
+def stamp(s):return datetime.fromisoformat(s).timestamp()
+for run in groups['current']:
+ p=Path(run['directory'])/'driver';ledger=json.loads((p/'run.json').read_text());samples=[json.loads(x) for x in (p/'gpu_monitor.jsonl').read_text().splitlines() if x.strip()];assert ledger['exit_code']==0 and not ledger.get('driver_errors');assert ledger['run_id']==run['run_id'];assert sha(p/'driver.py')==ledger['driver_sha256'];start,end=stamp(ledger['started_utc']),stamp(ledger['completed_utc']);times=[];observed=[];empty=[];foreign=[]
+ for s in samples:
+  assert s['returncode']==0;t=stamp(s['time_utc']);assert start<=t<=end,(run['run_id'],s['time_utc']);times.append(t)
+  if not s['stdout'].strip():empty.append(s['time_utc'])
+  for line in s['stdout'].splitlines():
+   if not line.strip():continue
+   pid,gpu,memory=[v.strip() for v in line.split(',')];pid=int(pid);ancestry=s.get('ancestry',{}).get(str(pid),[]);owned=pid==ledger['pid'] or any(a['pid']==ledger['pid'] for a in ancestry);valid=owned and gpu=='GPU-80ff95c3-176e-fd8a-728f-9c5577c4a779'
+   r={'time_utc':s['time_utc'],'pid':pid,'gpu_uuid':gpu,'used_memory':memory,'belongs_to_this_run_process_tree':owned};observed.append(r)
+   if not valid:foreign.append(r)
+ assert times==sorted(times) and not foreign
+ for name in ('run.json','gpu_monitor.jsonl','driver.py'):record(p/name)
+ if (p/'gpu_observation_audit.json').exists():record(p/'gpu_observation_audit.json')
+ intervals=[b-a for a,b in zip(times,times[1:])]
+ monitor.append({'run_id':run['run_id'],'pid':ledger['pid'],'start_utc':ledger['started_utc'],'finish_utc':ledger['completed_utc'],'samples':len(samples),'compute_rows':len(observed),'empty_samples':empty,'observed_rows':observed,'unexpected_rows':foreign,'sample_interval_seconds':summary(intervals),'first_sample_after_start_s':times[0]-start,'completion_after_last_sample_s':end-times[-1],'return_codes_all_zero':True})
+review={'schema':'deepseek-final-three-version-independent-review-v1','created_utc':datetime.now(timezone.utc).isoformat(),'status':'completed_with_all_residuals_preserved','complete_saved_evidence_audit':'All seven original inputs passed the experiment audit via the completed comparison CLI. This independent pass reopens raw rows and stored identities/receipts and does not rerun model execution.','comparison_run_id':result['run_id'],'source_sha256':source,'receipt_observations':receipt_observations,'final_check_to_bench_source_changes':source_changes,'contracts_match':True,'phase_sum_max_error_ms':phase_sum,'trace':trace,'phase_summary':phase,'matched_requests':matched,'accounting':accounting,'original_noise':{'recorded_status':noise['status'],'repeat_noise':noise['repeat_noise'],'interpretation':noise['interpretation'],'boundary':noise['boundary']},'monitor':{'runs':monitor,'samples':sum(r['samples'] for r in monitor),'compute_rows':sum(r['compute_rows'] for r in monitor),'unexpected_rows':sum(len(r['unexpected_rows']) for r in monitor),'boundary':'Each sample is checked against its own run UTC interval and process tree; other-GPU compute would count as foreign. Discrete process polling does not capture CPU activity/clocks/utilization or exclude short unsampled activity.'},'inputs':inputs,'limitations':['Historical published data use their original placement and combined-check timing context, not a matched performance control.','Three independent repeats establish empirical ranges and MAD only, not statistical confidence intervals, a tolerated regression percentage, causality or tail behavior.','Correctness/charge equality does not erase latency differences; device used boundary samples are not device or process peaks.','This phase audit cannot prove absence of every unexpected device sync; the separately planned main profile must inspect execution/synchronization/API reasonableness.']}
+record(__file__);review['inputs']=inputs
+(acc/'deepseek_final_independent_review.json').write_text(json.dumps(review,indent=2)+'\n')
+shutil.copyfile(__file__,acc/'deepseek_final_independent_review.py.txt')
+shutil.copyfile('/tmp/unified_final_deepseek_comparison_plan.json',acc/'deepseek_final_comparison_plan.json')
+print(json.dumps({'saved':str(acc/'deepseek_final_independent_review.json'),'source':source,'trace':trace,'accounting_differences':len(differences),'first_difference':differences[:1],'monitor':[{'run_id':r['run_id'],'samples':r['samples'],'compute_rows':r['compute_rows'],'empty_samples':len(r['empty_samples']),'max_gap_s':r['sample_interval_seconds']['max']} for r in monitor],'groups':[{'method':p['method'],'visit':p['visit'],'metric':p['metric'],'baseline':p['roles']['baseline']['median'],'current':p['roles']['current']['median'],'delta':p['delta_ms'],'baseline_range':p['roles']['baseline']['range'],'current_range':p['roles']['current']['range'],'above_both_ranges':p['positive_delta_exceeds_both_ranges'],'nonoverlap_slower':p['current_entire_run_range_above_baseline']} for p in phase]},indent=2),flush=True)

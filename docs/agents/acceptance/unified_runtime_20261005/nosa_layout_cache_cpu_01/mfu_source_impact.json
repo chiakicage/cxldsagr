@@ -1,0 +1,38 @@
+[
+  {
+    "check": "/tmp/refactor_mfu_real_check_20261005_01.json",
+    "receipt_sha256": "11cca19c934a13b30793a6f65705aa1a6e115abea75e9dc47cadf56e64276b14",
+    "kind": "nosa_resident_operators",
+    "source_collection": "source_sha256",
+    "old_adapter": "4f08bd651b8b6195f59fa2a7a701f91ce83cecf450b8ede3e4b5a3ab52acdc79",
+    "current_adapter": "3ef7d72a4e00cc366e2983099f9107722555b23887d723a2310bd50948e4e7bb",
+    "changed_sources": [
+      "models/nosa/execution/adapter.py"
+    ],
+    "missing_sources": []
+  },
+  {
+    "check": "/tmp/refactor_mfu_modules_native_check_20261005_01.json",
+    "receipt_sha256": "e8d2c5babf18b97c6a38d3813360192f0b7ae67fbf6ab6c82fc18be99ae88f86",
+    "kind": "nosa_resident_modules",
+    "source_collection": "source_sha256",
+    "old_adapter": "4f08bd651b8b6195f59fa2a7a701f91ce83cecf450b8ede3e4b5a3ab52acdc79",
+    "current_adapter": "3ef7d72a4e00cc366e2983099f9107722555b23887d723a2310bd50948e4e7bb",
+    "changed_sources": [
+      "models/nosa/execution/adapter.py"
+    ],
+    "missing_sources": []
+  },
+  {
+    "check": "/tmp/refactor_mfu_modules_triton_check_20261005_01.json",
+    "receipt_sha256": "b60abfe866cb543978a69ffa54247486deea6f102a12288091159c3641c03bbe",
+    "kind": "nosa_resident_modules",
+    "source_collection": "source_sha256",
+    "old_adapter": "4f08bd651b8b6195f59fa2a7a701f91ce83cecf450b8ede3e4b5a3ab52acdc79",
+    "current_adapter": "3ef7d72a4e00cc366e2983099f9107722555b23887d723a2310bd50948e4e7bb",
+    "changed_sources": [
+      "models/nosa/execution/adapter.py"
+    ],
+    "missing_sources": []
+  }
+]

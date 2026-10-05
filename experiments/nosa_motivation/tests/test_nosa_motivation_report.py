@@ -205,11 +205,11 @@ def saved_run(tmp_path, request):
         if graphs_enabled:
             # Use the actual planner wrapper: the backend retains its base
             # metadata while the runner receives graph metadata and capacity.
+            from cache.capacity import ResourcePlan
             from cache.prefix_pool import CacheFootprint
-            from executor.serving_backend import SharedCachePlan
-            from models.nosa.serving import NosaServingBackend
+            from models.nosa.execution.adapter import NosaServingBackend
 
-            base = SharedCachePlan(shared=CacheFootprint(hbm=32), metadata=case["resource_plan"])
+            base = ResourcePlan(shared=CacheFootprint(hbm=32), metadata=case["resource_plan"])
             planning_backend = SimpleNamespace(
                 device=torch.device("cpu"),
                 resources=SimpleNamespace(plan_resources=lambda *_, value=base: value),

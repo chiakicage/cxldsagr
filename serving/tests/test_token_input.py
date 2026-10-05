@@ -1,7 +1,6 @@
 """Owned token encoding preserves identity, strict types and admission order."""
 
 import gc
-import struct
 import sys
 import weakref
 from array import array
@@ -63,10 +62,10 @@ def test_big_endian_prefix_hash_uses_copy_and_preserves_native_tensor_buffer(mon
     assert packed.tobytes() == before
 
 
-def test_int64_overflow_retains_prefix_struct_error_and_candidate_tensor_error():
-    with pytest.raises(struct.error) as prefix_error:
+def test_int64_overflow_propagates_encoder_error_without_alternate_construction():
+    with pytest.raises(OverflowError) as prefix_error:
         _prepare_token_input([2**63, 1], 1)
-    with pytest.raises(ValueError, match="Overflow when unpacking long long") as candidate_error:
+    with pytest.raises(OverflowError) as candidate_error:
         _prepare_token_input([1, 2**63], 1)
     assert prefix_error.value.__context__ is candidate_error.value.__context__ is None
 
@@ -127,7 +126,7 @@ def test_candidate_overflow_keeps_existing_session_before_admission():
     with PersistentGRRunner(backend, hbm_budget_bytes=64, dram_budget_bytes=64) as runner:
         runner.execute(request())
         original = runner.pool._entries[0]
-        with pytest.raises(ValueError, match="Overflow when unpacking long long"):
+        with pytest.raises(OverflowError):
             runner.execute(request(candidate=(2**63,)))
         assert runner.pool._entries[0] is original
         assert runner.visits[0] == 1 and backend.released == 0

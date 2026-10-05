@@ -177,7 +177,15 @@ def generate(
                     decode_steps += 1
             synchronize()
             decode_seconds = time.perf_counter() - decode_start
-    finally:
+    except BaseException as error:
+        try:
+            executor.release(cache)
+        except BaseException as release_error:  # noqa: BLE001 -- retain execution and release.
+            raise BaseExceptionGroup(
+                "NOSA generation and cache release both failed", [error, release_error]
+            ) from None
+        raise
+    else:
         executor.release(cache)
     return generated_ids, {
         "prompt_tokens": prompt_tokens,
@@ -236,99 +244,90 @@ def main(argv: list[str] | None = None) -> None:
     if not __package__:
         script_dir = Path(__file__).resolve().parent
         repo_root = script_dir.parents[1]
-        # A local cache.py/layers.py beats a namespace directory even when the
-        # root appears first. Remove the script directory before runtime imports.
+        # Local model modules can shadow repository namespace directories.
+        # Remove the script directory before importing the runtime.
         sys.path[:] = [str(repo_root)] + [
             entry
             for entry in sys.path
             if Path(entry or ".").resolve() not in (repo_root, script_dir)
         ]
-    try:
-        _validate_generation_options(
-            args.max_new_tokens, args.prefill_chunk_size, args.temperature, args.top_p
-        )
-        prompt = (
-            args.prompt_file.read_text(encoding="utf-8")
-            if args.prompt_file is not None
-            else args.prompt
-        )
-        import torch
+    _validate_generation_options(
+        args.max_new_tokens, args.prefill_chunk_size, args.temperature, args.top_p
+    )
+    prompt = (
+        args.prompt_file.read_text(encoding="utf-8")
+        if args.prompt_file is not None
+        else args.prompt
+    )
+    import torch
 
-        device = torch.device(args.device)
-        if device.type != "cuda":
-            raise ValueError(
-                "NOSA CLI inference requires a CUDA device (for example --device cuda:0)"
-            )
-        if not torch.cuda.is_available():
-            raise RuntimeError(
-                "CUDA is unavailable; check the NVIDIA driver and CUDA PyTorch installation"
-            )
-        if device.index is None:
-            device = torch.device("cuda", torch.cuda.current_device())
-        torch.cuda.set_device(device)
-        if args.dtype == "bfloat16" and not torch.cuda.is_bf16_supported():
-            raise ValueError("this CUDA device does not support bfloat16; use --dtype float16")
-
-        # Fail before allocating model weights if a runtime dependency is absent.
-        import flashinfer  # noqa: F401
-        import safetensors  # noqa: F401
-
-        from models.nosa.model import NosaConfig, NosaForCausalLM
-
-        config = NosaConfig.from_pretrained(args.model_path)
-        tokenizer, tokenizer_config = load_tokenizer(args.model_path)
-        token_ids = encode_prompt(
-            tokenizer,
-            tokenizer_config,
-            prompt,
-            raw_prompt=args.raw_prompt,
-            system_prompt=args.system_prompt,
-            disable_thinking=args.disable_thinking,
+    device = torch.device(args.device)
+    if device.type != "cuda":
+        raise ValueError("NOSA CLI inference requires a CUDA device (for example --device cuda:0)")
+    if not torch.cuda.is_available():
+        raise RuntimeError(
+            "CUDA is unavailable; check the NVIDIA driver and CUDA PyTorch installation"
         )
-        if not token_ids:
-            raise ValueError("the encoded prompt is empty")
-        if len(token_ids) + args.max_new_tokens > config.max_position_embeddings:
-            raise ValueError(
-                f"prompt ({len(token_ids)}) + max_new_tokens ({args.max_new_tokens}) exceeds "
-                f"max_position_embeddings ({config.max_position_embeddings})"
-            )
-        dtype = getattr(torch, args.dtype)
-        load_start = time.perf_counter()
-        model = NosaForCausalLM.from_pretrained(
-            args.model_path,
-            device=device,
-            dtype=dtype,
-            attention_mode=args.attention_mode,
-            sparse_backend=args.sparse_backend,
-            cache_backend=args.cache_backend,
-            offload_query_tile_size=args.offload_query_tile_size,
-            offload_fetch_ctas=args.offload_fetch_ctas,
-            offload_overlap=not args.no_fetch_overlap,
+    if device.index is None:
+        device = torch.device("cuda", torch.cuda.current_device())
+    torch.cuda.set_device(device)
+    if args.dtype == "bfloat16" and not torch.cuda.is_bf16_supported():
+        raise ValueError("this CUDA device does not support bfloat16; use --dtype float16")
+
+    # Fail before allocating model weights if a runtime dependency is absent.
+    import flashinfer  # noqa: F401
+    import safetensors  # noqa: F401
+
+    from models.nosa.model import NosaConfig, NosaForCausalLM
+
+    config = NosaConfig.from_pretrained(args.model_path)
+    tokenizer, tokenizer_config = load_tokenizer(args.model_path)
+    token_ids = encode_prompt(
+        tokenizer,
+        tokenizer_config,
+        prompt,
+        raw_prompt=args.raw_prompt,
+        system_prompt=args.system_prompt,
+        disable_thinking=args.disable_thinking,
+    )
+    if not token_ids:
+        raise ValueError("the encoded prompt is empty")
+    if len(token_ids) + args.max_new_tokens > config.max_position_embeddings:
+        raise ValueError(
+            f"prompt ({len(token_ids)}) + max_new_tokens ({args.max_new_tokens}) exceeds "
+            f"max_position_embeddings ({config.max_position_embeddings})"
         )
-        torch.cuda.synchronize(device)
-        load_seconds = time.perf_counter() - load_start
-        generated_ids, stats = generate(
-            model,
-            torch.tensor(token_ids, dtype=torch.long, device=device),
-            max_new_tokens=args.max_new_tokens,
-            prefill_chunk_size=args.prefill_chunk_size,
-            temperature=args.temperature,
-            top_p=args.top_p,
-            seed=args.seed,
-        )
-        print(tokenizer.decode(generated_ids, skip_special_tokens=True))
-        stats["load_seconds"] = load_seconds
-        stats["attention_mode"] = args.attention_mode
-        stats["cache_backend"] = args.cache_backend
-        if args.attention_mode == "sparse":
-            stats["sparse_backend"] = (
-                "triton" if args.sparse_backend == "auto" else args.sparse_backend
-            )
-        print(json.dumps(stats, ensure_ascii=False), file=sys.stderr)
-    except ImportError as exc:
-        parser.exit(1, f"error: missing or incompatible dependency: {exc}. Run uv sync.\n")
-    except (OSError, ValueError, RuntimeError) as exc:
-        parser.exit(1, f"error: {exc}\n")
+    dtype = getattr(torch, args.dtype)
+    load_start = time.perf_counter()
+    model = NosaForCausalLM.from_pretrained(
+        args.model_path,
+        device=device,
+        dtype=dtype,
+        attention_mode=args.attention_mode,
+        sparse_backend=args.sparse_backend,
+        cache_backend=args.cache_backend,
+        offload_query_tile_size=args.offload_query_tile_size,
+        offload_fetch_ctas=args.offload_fetch_ctas,
+        offload_overlap=not args.no_fetch_overlap,
+    )
+    torch.cuda.synchronize(device)
+    load_seconds = time.perf_counter() - load_start
+    generated_ids, stats = generate(
+        model,
+        torch.tensor(token_ids, dtype=torch.long, device=device),
+        max_new_tokens=args.max_new_tokens,
+        prefill_chunk_size=args.prefill_chunk_size,
+        temperature=args.temperature,
+        top_p=args.top_p,
+        seed=args.seed,
+    )
+    print(tokenizer.decode(generated_ids, skip_special_tokens=True))
+    stats["load_seconds"] = load_seconds
+    stats["attention_mode"] = args.attention_mode
+    stats["cache_backend"] = args.cache_backend
+    if args.attention_mode == "sparse":
+        stats["sparse_backend"] = "triton" if args.sparse_backend == "auto" else args.sparse_backend
+    print(json.dumps(stats, ensure_ascii=False), file=sys.stderr)
 
 
 if __name__ == "__main__":

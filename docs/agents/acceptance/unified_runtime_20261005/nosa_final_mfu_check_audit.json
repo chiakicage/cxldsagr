@@ -1,0 +1,59 @@
+[
+  {
+    "check": "/tmp/refactor_mfu_real_check_20261005_02.json",
+    "kind": "nosa_resident_operators",
+    "receipt_sha256": "141faf93e8334ca9aeba4bba82b898192b77be7ad48e0da6ba0ac788bbb5aba3",
+    "sources": 123,
+    "current_sources_match": true,
+    "artifacts_reopened": true,
+    "checks_keys": [
+      "cases",
+      "passed",
+      "run_id",
+      "scope"
+    ],
+    "cases": [
+      "layer_00",
+      "layer_15",
+      "layer_31"
+    ]
+  },
+  {
+    "check": "/tmp/refactor_mfu_modules_native_check_20261005_02.json",
+    "kind": "nosa_resident_modules",
+    "receipt_sha256": "fba224dbb0bd1c94cc6489656d9e376a7eb15cce038ae8773919954b2a031bce",
+    "sources": 123,
+    "current_sources_match": true,
+    "artifacts_reopened": true,
+    "checks_keys": [
+      "cases",
+      "passed",
+      "run_id",
+      "scope"
+    ],
+    "cases": [
+      "layer_00",
+      "layer_15",
+      "layer_31"
+    ]
+  },
+  {
+    "check": "/tmp/refactor_mfu_modules_triton_check_20261005_02.json",
+    "kind": "nosa_resident_modules",
+    "receipt_sha256": "85b176681f0688acedd1511080b39cb358f4eb74ab9bf18781709b24091ac570",
+    "sources": 123,
+    "current_sources_match": true,
+    "artifacts_reopened": true,
+    "checks_keys": [
+      "cases",
+      "passed",
+      "run_id",
+      "scope"
+    ],
+    "cases": [
+      "layer_00",
+      "layer_15",
+      "layer_31"
+    ]
+  }
+]

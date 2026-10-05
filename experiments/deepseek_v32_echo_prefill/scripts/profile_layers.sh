@@ -50,7 +50,8 @@ python - "$staging/data/result.json" <<'PY'
 import json, sys
 result = json.load(open(sys.argv[1]))
 assert result['accepted'] and result['num_layers'] == 3
-assert len(result['correctness']) == 8
+assert result['schema_version'] == 2 and result['mode'] == 'profile'
+assert len(result['correctness']) == 8 and result['validation_receipt']
 PY
 for capture in 1 2 3 4; do
   nsys export --type sqlite --output "$staging/data/capture_${capture}.sqlite" \

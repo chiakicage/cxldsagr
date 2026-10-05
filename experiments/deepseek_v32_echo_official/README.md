@@ -1,117 +1,213 @@
 # DeepSeek V3.2 官方 ECHO 适配实验
 
-本实验沿用 [motivation](../deepseek_v32_motivation/README.md) 的模型、输入和固定 P/NH 容量，比较官方 ECHO offload 路径与本轮重新执行的 HBM-only 基线。
-C10 正式运行 `echo_official_c10_20261004_u16_r2_01` 已完成两方案各 32 条请求、32 条独立 resident 重跑及全部保存输出的验收。两方案均启用公共投影与收尾计算图。下文数字来自本轮冻结源码。
 
-官方 ECHO 的复访均值为 45.561 ms，HBM-only 为 2106.515 ms；对应请求时间比为 46.235。32 条请求耗时合计为 74.930 s 和 67.533 s，ECHO 相对 HBM 增加 10.95%。
+本实验验证官方 ECHO 适配路径的性能，沿用 [motivation](../deepseek_v32_motivation/README.md)
+的模型、输入及固定 P/NH 容量，比较官方 ECHO offload 与同一实验重新执行的
+HBM-only。结果覆盖官方算子接入本地单卡固定历史 GR 生命周期后的路径，不代表
+上游完整 TP=8 AWQ SGLang serving。
+
+独立数值验收为 `refactor_final_official_check_20261005_01`，正式计时为 `refactor_final_official_bench_20261005_01`，
+诊断为 `refactor_final_official_profile_20261005_01`。正式运行与四段 profile 均已通过各自验收。
 
 ## 结果
 
 | 方案 | 访问 | 请求数 | history hit | 均值 ms | 中位数 ms | p95 ms |
 |---|---|---:|---:|---:|---:|---:|
-| HBM-only | 首次 | 16 | 0/16 | 2114.286 | 2115.503 | 2121.285 |
-| HBM-only | 复访 | 16 | 0/16 | 2106.515 | 2105.440 | 2117.721 |
-| 官方 ECHO 适配路径 | 首次 | 16 | 0/16 | 4637.566 | 4638.341 | 4651.222 |
-| 官方 ECHO 适配路径 | 复访 | 16 | 16/16 | 45.561 | 45.470 | 46.138 |
+| HBM-only | 首次 | 16 | 0/16 | 2126.499 | 2126.137 | 2132.862 |
+| HBM-only | 复访 | 16 | 0/16 | 2123.192 | 2124.119 | 2126.623 |
+| 官方 ECHO 适配路径 | 首次 | 16 | 0/16 | 4596.177 | 4593.201 | 4609.691 |
+| 官方 ECHO 适配路径 | 复访 | 16 | 16/16 | 44.862 | 44.516 | 46.391 |
 
-完整轨迹的 HBM/ECHO 时间比为 0.901。首访 history 构建均值分别为 2100.909 ms 和 4591.403 ms；复访 candidate 执行阶段均值分别为 10.112 ms 和 41.411 ms。ECHO 保留全部 16 位用户的历史；HBM 的 history 配额只容纳一位用户，两轮顺序访问均需重建。被淘汰后的访问仍计作复访。复访端到端时间比包含历史重建差异，不能解释为 attention 算子加速。
+HBM/ECHO 的 32 请求总耗时分别为 67.995 / 74.257 s。
+ECHO 的 16 次复访全部命中历史；HBM-only 的复访均重建历史。被淘汰后的访问仍算复访。复访请求
+时间比包含 history 重建差异，不能解释为 attention 算子加速。单条正式轨迹的尾
+分位数只描述本轮样本，不能证明差异稳定。
 
-完整数字见[报告](report/results.md)、[分组数据](report/summary.csv)、[逐请求数据](report/per_request.csv)、[配置与验收](report/summary.json)和[报告来源](report/report_provenance.json)。六个正式报告文件从本轮冻结版 `src.report` 生成的 `output/data/<run_id>/report/` 原样复制。
+详细结果、逐请求数据、配置、数值摘要和来源见 [results.md](report/results.md)、[逐请求数据](report/per_request.csv)和[summary.json](report/summary.json)。
 
-## 与本地 C10 实现对照
+## 与本地实现及旧结果对照
 
-以下引用本地与官方各自的新正式轨迹，保留两组 HBM 对照。两组使用相同输入 token、请求顺序、模型、P/NH 和计算图模式。表格整理本身不增加 GPU 测量。
+本地 motivation 和官方实验分别保留自己的 HBM 基线。下表引用两边的独立正式
+bench；输入、请求顺序、模型、P/NH、计算图及实际执行环境须经对照工具核验。
 
 | 实现 | 首访均值 ms | 复访均值 ms | 复访 p95 ms | 32 请求总耗时 s |
 |---|---:|---:|---:|---:|
-| HBM-only（本地对照） | 2176.886 | 2170.244 | 2178.394 | 69.554 |
-| 我们的 ECHO（已有验收版本） | 2283.433 | 24.947 | 25.509 | 36.934 |
-| HBM-only（官方对照） | 2114.286 | 2106.515 | 2117.721 | 67.533 |
-| 官方 ECHO 适配路径 | 4637.566 | 45.561 | 46.138 | 74.930 |
+| HBM-only（本地对照） | 2192.406 | 2187.398 | 2191.141 | 70.077 |
+| 本地 ECHO | 2294.994 | 24.530 | 25.607 | 37.112 |
+| HBM-only（官方对照） | 2126.499 | 2123.192 | 2126.623 | 67.995 |
+| 官方 ECHO 适配路径 | 4596.177 | 44.862 | 46.391 | 74.257 |
 
-本地 run ID 为 `motivation_c10_20261004_u16_r2_01`，官方 run ID 为 `echo_official_c10_20261004_u16_r2_01`。两次独立运行使用同一物理 GPU。两组共同记录的有效精度设置一致；仅一组记录的字段及各实验的 policy ID 不能用于确认完整精度策略相同。本地 HBM 使用 mainline DeepGEMM resident logits，本地 ECHO 使用项目融合 indexer/prefetch，二者均使用 FlashInfer top-k；官方组使用 ECHO 原始 resident/fused logits 和原始 top-k。两组选择路径和 HBM 基线有差异，不能把观测差额全部归因于缓存或搬运路径。单次轨迹不足以判断差异是否稳定。本地和官方输出分别在来源运行内验收，未新增跨运行数值比较。
+本地 run ID 为 `refactor_final_deepseek_bench_20261005_01`，官方 run ID 为
+`refactor_final_official_bench_20261005_01`。以官方 ECHO 为分母，本地 ECHO 的首访、复访与完整轨迹耗时分别低 50.067%、45.322%、50.021%；这是独立运行间的观测差异，未证明稳定性。
+本地 HBM 使用 mainline DeepGEMM resident logits，本地 ECHO 使用项目融合
+indexer/prefetch，两者均使用 FlashInfer top-k。官方组使用 ECHO 原始
+resident/fused logits 和 top-k。选择路径与 HBM 基线有差异，观测差额不能全部
+归因于缓存或搬运。两边各自在独立 check 内验收，不声称已完成新的跨运行数值比较。
 
-完整来源、未四舍五入差值和生成器身份见[对照报告](report/existing_implementation_comparison.md)、[对照数据](report/existing_implementation_comparison.csv)和[来源清单](report/existing_implementation_comparison.json)。对照生成器是报告修正版本，其哈希单独记录；它不改变冻结推理源码。
+旧发布 `echo_official_c10_20261004_u16_r2_01` 使用合并验收与计时流程，作为历史
+对照单独列在 [旧/新选定对照](report/old_new/results.md)。旧运行的物理 GPU 与当前不同，计时契约也不同；所列差值仅作描述。旧完整产物清理后，选定样本与身份不能支持完整历史源码、native 或数值重审。
+本地实现的旧发布/P0/新实现三版本对照见 motivation；不得把本地 P0 当作官方路径
+的 P0，也不得由单条官方新轨迹声称稳定回归或优化收益。
+
+完整来源、未四舍五入数值及报告生成器身份见 [实现对照](report/existing_implementation_comparison.md)与[JSON](report/existing_implementation_comparison.json)。
 
 ## 设置与测量边界
 
-- 固定 P=65,536 个逐层 history HBM 槽，NH=16,777,216 个全局 host token；H=65,536、A=128、history chunk=1,024，16 用户顺序访问两轮，seed=42。P/NH 是 token 容量，不另设 cache 字节子预算，也不扣除经验性 headroom。
-- 使用 `/preset-models` 的真实 checkpoint 前三层，独立复制为十个 dense block，共 7,827,793,408 参数，含 embedding、final norm 和 LM head。每个副本重放对应 source block 的 hidden/residual 输入，独立权重、KV、indexer 不共享。这是 checkpoint 工作负载替身，不代表经过训练的十层模型或完整 DeepSeek V3.2。
-- 普通 linear 使用 FP8，主 KV 为 BF16 576 元素 record，indexer K/scales resident，RoPE 后不加 Hadamard。计算全部 candidate hidden `[128, 7168]` 和末 token logits `[1, 129280]`。candidate 整批在 GPU 临时执行后丢弃，不写入 DRAM。
-- 两方案各预热两位用户的首访及第一位用户的复访；ECHO 复访预热实际读取 host KV。随后释放预热 cache，从空缓存执行正式轨迹，每请求测量一次。
-- 同步墙钟包含输入搬入、准入/淘汰、miss 时 history 构建、候选执行和清理。forward 内 GPU 计数累积与归约计入延迟；加载、编译、图准备、预热、计数 host 读取、输出保存与比较不计时。传输计数只覆盖 candidate forward。
+H=65,536、A=128、history chunk=1,024，16 用户顺序访问两轮，seed=42。
+P=65,536 个逐层 history HBM 槽，NH=16,777,216 个全局 host token。
+P/NH 是容量配额，不另设 cache 字节子预算，也不扣除经验性 headroom。
 
-两方案都使用官方 ECHO 原始 top-k：HBM-only 调用官方 resident logits，ECHO 调用官方融合 indexer/prefetch、allocator、精确 recall 和释放 helper。offload 每次 indexer 调用均执行官方融合 kernel，策略为 `official_fused_every_offload_call_v1`。模型投影与 FlashMLA 沿用 motivation。结果覆盖官方算子接入本地单卡固定历史 GR 生命周期后的适配路径，不是上游完整 TP=8 AWQ SGLang serving。本轮未测内部 overlap；合成输入及工作负载替身不证明实际 GR 任务质量或场景代表性。
+模型将 `/preset-models` checkpoint 前三层独立复制为十个 dense block，共
+7,827,793,408 参数，含 embedding、final norm 和 LM head。每个副本重放对应
+source block 的 hidden/residual 输入，权重、KV 和 indexer 独立。该工作负载
+替身不代表经过训练的十层模型、完整 DeepSeek V3.2 或真实 GR 任务质量。
 
-## 计算图、精度与源码
+普通 linear 使用 FP8，主 KV 为 BF16 的 576 元素 record，indexer K/scales
+resident，RoPE 后不加 Hadamard。每请求计算全部 candidate hidden `[128, 7168]`
+和末 token logits `[1, 129280]`；candidate 在 GPU 临时执行后丢弃，不写入 DRAM。
 
-十个独立层在 1,024-token history chunk 和 128-token candidate 两种形状下，各有 projection/finish 两类计算图，共 40 张。HBM、官方 ECHO 和独立 HBM 重跑的 replay 总数分别为 41,600、21,120、41,600；逐请求覆盖完整，eager fallback 为零。图 bank 的静态 storage、实际 allocator 分配和所选 reservation 上限分别核对，规划上限不等于已分配 storage。预热 replay 明细未保存，因此不把正式轨迹检查扩大为预热覆盖证明。
+两方案均使用官方原始 top-k：HBM-only 调用官方 resident logits，ECHO 调用官方
+融合 indexer/prefetch、allocator、精确 recall 和释放 helper。offload 每次
+indexer 调用均执行官方融合 kernel，策略为 `official_fused_every_offload_call_v1`。
+模型投影与 FlashMLA 沿用 motivation。当前实验未单独测量内部 overlap。
 
-FP32 matmul 使用 `highest`，matmul TF32 关闭；BF16/FP16 reduced-precision reduction 分别为 `True` / `True`，cuDNN TF32 为 `True`。运行前后设置及图捕获精度均经核对。三个正式/验证 runner 均实际选择 C10 native token validator，其加载二进制和编译依赖哈希已核对。
+两方案各预热两位用户首访及第一位用户复访，ECHO 复访预热须实际读取 host KV。
+释放预热资源后，从空缓存执行正式轨迹。check 保存两方案全部输出及独立 HBM
+重跑，签发数值 receipt；bench 匹配 receipt 后计时，不在样本间保存或比较完整输出。
 
-PyTorch 将设备标识为 NVIDIA H200；运行后的 `nvidia-smi` 查询将同一 UUID 标识为 NVIDIA M403。GPU UUID 为 `1bdee8b4-22ac-536c-208b-bfb4ed38b878`，132 SM，可见 HBM 139.812 GiB；Python 3.12.13、PyTorch 2.12.1+cu130、CUDA 13.0。依赖版本为 DeepGEMM 2.8.1+057ca59、FlashMLA 1.0.0+ba89a34、FlashInfer 0.6.18。
+同步墙钟包含输入验证与搬入、准入/淘汰、miss 时 history 构建、candidate 和清理。
+forward 内原有计数归约计时；加载、编译、计算图准备、预热、计数 host 读取和
+数值保存/比较不计时。传输计数只覆盖 candidate forward。
 
-运行窗口保存了 150 次全部设备的 compute-process 查询，仅观察到本轮指定进程及 GPU。最大采样间隔为 30.383 s；离散观测不能排除采样间隙中的其他工作。监测程序、原始观测和退出记录随运行数据保留。
+## 计算图、精度与来源
 
-源码身份为 `fef9fef45d923343967198552709f7a7549da9145ce0927b535539d86f8cc60d`；输入身份为 `7e4c737a86464c12238191933e707344426231bf671a29658837e676ff5284ae`。官方 ECHO 固定提交为 `bc1b75c1000010d0ac6f032ebaac283255c050b1`。完整源码、官方 native/JIT 产物和运行参数随原始数据保留；checkpoint 身份核对依赖路径、shard 大小和 mtime 清单，没有完整权重内容哈希。
+十个独立层在 Q=1,024 和 Q=128 两种形状下分别使用 projection/finish 图，
+共 40 张。正式轨迹与独立 check 的重放覆盖、fallback 和图内精度见
+[summary.json](report/summary.json) 的 `audit.compute_graphs` 与逐方案 `backend.compute_graphs`。图 bank 静态 storage、实际 allocator 占用与规划
+reservation 上限分别记录，不能将规划值当成已分配 storage。
+
+实际精度与执行环境为 FP8 普通 linear、BF16 主 KV，TF32 关闭，intraop=8、interop=96；硬件、GPU UUID
+和 CPU/NUMA 绑定为 H200 / SM90 / 132 SM，GPU UUID `80ff95c3-176e-fd8a-728f-9c5577c4a779`，CPU24–31、NUMA0。官方 ECHO 固定提交为
+`bc1b75c1000010d0ac6f032ebaac283255c050b1`。依赖、源码、native/JIT 产物及其身份
+随运行保存。checkpoint 身份基于路径、shard 大小和 mtime，未 hash 全部权重。
+
+独立 check 的完整源码快照为
+`a9d45df3f2ccca5b3ed2a5e36bbb6c0d54a768c87fe7d1863555398ff76c47a1`，共 1,303 个文件。
+receipt 文件 SHA-256 为
+`665f934d09aee400c452aba3af10e9becf4bebeafc3591d79e20973ea10b39d5`；其独立的内部
+canonical signature 为 `1ac1fc23f0a3fea378e610fc9bf555d7c10d7fb27720799163d847337e66b0b4`。
+本轮 bench/profile 均为同一 `a9d45df3f2ccca5b3ed2a5e36bbb6c0d54a768c87fe7d1863555398ff76c47a1` 完整源码快照；工作负载 SHA256 为 `7e4c737a86464c12238191933e707344426231bf671a29658837e676ff5284ae`。
+receipt 的执行源码集合不包含仅用于 profile/报告的辅助文件；bench 仍逐项核验
+输入、模型、native、backend/cache/graph、精度和执行环境。Nsight 注入库及完整
+诊断环境单独记录，不能把 profiler 环境差异隐藏成相同运行。
+
+运行窗口的全部 GPU 进程观测与退出记录见 [运行验收](report/profile/run_acceptance.json)。
+观测次数和最大间隔分别为 bench 58 次、profile 75 次、bench 28.315 秒、profile 29.443 秒；
+离散观测不能排除采样间隙中的工作。
 
 ## 内存与搬运
 
-| 方案 | allocated 峰值 GiB | reserved 峰值 GiB | 边界采样设备已用最大 GiB | cache HBM 最大 GiB | cache DRAM 最大 GiB |
+| 方案 | allocated 峰值 GiB | reserved 峰值 GiB | 设备已用量采样最大 GiB | cache HBM 最大 GiB | cache DRAM 最大 GiB |
 |---|---:|---:|---:|---:|---:|
-| HBM-only | 14.549007 | 23.875000 | 24.616272 | 6.625494 | 0.000000 |
-| 官方 ECHO 适配路径 | 16.409619 | 24.521484 | 25.891663 | 8.485923 | 320.001038 |
+| HBM-only | 14.549 | 23.875 | 24.616 | 6.625 | 0.000 |
+| 官方 ECHO | 16.410 | 24.521 | 25.892 | 8.486 | 320.001 |
 
-PyTorch 峰值在各方案释放预热 cache 后重置，包含权重和正式执行；reserved 含 allocator 缓存，不能与 allocated 相加。cache 为请求边界的实际分配计量，已经包含 shared 与全部 session；其中计算图计入观测到的静态 allocator blocks 和 private reserved segments，不能再次加上 shared 字段。规划 reservation 是分配上限，另行记录。设备已用量由 total−free 计算，只在边界采样，不是连续峰值。
+PyTorch 峰值在各方案释放预热资源后重置，包含模型和正式执行。reserved 包含
+allocator 缓存，不能与 allocated 相加。cache 在请求边界计量，包含 shared
+与全部 session；计算图相关占用不能重复加算。设备已用量由 total−free 计算，
+仅为边界采样最大值，不是连续峰值。
 
-NH 对应的 BF16 主 KV 逻辑 storage 为 180.000 GiB，本轮 pinned record backing 实际为 320.000 GiB。正式轨迹保留 1,048,576 个 history token，未填满 NH；相同 P/NH 不等于相同总 HBM/DRAM 字节数。pinned allocator 的 active-byte 统计可能受缓存块复用影响，不单独用于推断物理 backing。
+NH 对应 180 GiB 逻辑主 KV 容量；包含实际 pinned backing 与元数据的 DRAM cache 计费最大值为 320.001038 GiB。轨迹仅保留 16 个 history，未填满 NH；相同 P/NH
+不等于相同总 HBM/DRAM 字节数。pinned allocator 的 active-byte 统计可能受缓存块
+复用影响，不能单独用于推断物理 backing。
 
-| 访问 | candidate H2D B | candidate D2H B |
-|---|---:|---:|
-| 首次 | 0 | 0 |
-| 复访 | 1,246,828,032 | 0 |
+candidate 的首访/复访 H2D 分别为 0 /
+1,246,371,840 B，D2H 为 0 B。
+上述 H2D 是各 16 条请求的合计。这些计数不包含 history 构建阶段。
 
-HBM-only 的 candidate H2D/D2H 均为零。这些计数不含 history 构建阶段。
+## 独立数值验收与诊断
 
-## 数值验收
-
-HBM、独立 HBM 重跑和官方 ECHO 共保存 96 份输出。CPU FP64 独立重算全部 hidden/logits，32 条 resident 重跑与 32 条 ECHO 请求均通过原有门槛：输出有限、shape/dtype 一致，hidden/logits relative L2 分别不超过 0.005/0.01，且至少 99.9% 元素满足 `|actual-reference| <= 1/32 + (1/64)*|reference|`。规则在正式 offload 测量前根据独立 resident 校准固定，没有按本轮输出调整。
+数值 check 保存 HBM、独立 HBM 重跑和官方 ECHO 共 96 份输出。按预先固定的门槛
+核验 finite、shape/dtype、hidden/logits relative L2（分别不超过 0.005/0.01），
+并要求至少 99.9% 元素满足 `|actual-reference| <= 1/32 + (1/64)*|reference|`。
+门槛来自独立 resident 校准，不随本轮输出调整。当前 check 的 64 条 HBM/ECHO
+请求、32 条独立 HBM 重跑及 6 条预热均通过验收，2499 项带签名证据已另行复核。
+ECHO 预热确认经过 host recall。check 轨迹中的 HBM/ECHO 重放次数为
+41,600/21,120，独立 HBM 重跑为 41,600；未保存预热重放明细，因此不把轨迹
+覆盖证明扩大到预热的每次重放。
 
 | 比较 | 输出 | 最大 relative L2 | 最低元素通过比例 | 最大绝对误差 |
 |---|---|---:|---:|---:|
-| HBM 重跑 / HBM | hidden | 0.001140275 | 99.99989101% | 0.046875 |
-| HBM 重跑 / HBM | logits | 0.003396577 | 100.00000000% | 0.0625 |
-| 官方 ECHO / HBM | hidden | 0.002477424 | 99.99291556% | 0.1796875 |
-| 官方 ECHO / HBM | logits | 0.003394204 | 100.00000000% | 0.0625 |
+| HBM 重跑 / HBM | hidden | 0.001227370399 | 100.00000000% | 0.046875 |
+| HBM 重跑 / HBM | logits | 0.004026068375 | 99.99845297% | 0.0625 |
+| 官方 ECHO / HBM | hidden | 0.002528261085 | 99.99291556% | 0.1796875 |
+| 官方 ECHO / HBM | logits | 0.002501402473 | 100.00000000% | 0.0625 |
 
-allclose、逐位相等和最大绝对误差分别报告，见[数值汇总](report/numerical_summary.json)。官方 top-k 顺序及并列值可能变化，不能把全部差异归为已经证实的舍入误差。独立 HBM 重跑只用于数值验证，不发布延迟。
+HBM 重跑的 hidden/logits 分别有 32/31 条满足逐元素 allclose，ECHO 的
+hidden/logits 分别为 31/32 条；四组均没有逐位相等的请求。全部请求通过的是
+上述预先固定的数值门槛，不能写成与本地 motivation 相同的逐位一致结论。
+完整数值证据在
+`docs/agents/acceptance/unified_runtime_20261005/official_final/driver/check_summary.json`，
+数值摘要见 [numerical_summary.json](report/numerical_summary.json)。
+官方 top-k 的顺序及并列值可能变化，不能把全部差异归为已证实的舍入误差。
+独立 HBM 重跑只用于数值验证，不发布延迟。模型及算子正确性范围见[模型说明](../../models/deepseek_v32/README.md)；正确性检查不代替完整 serving 计时。
 
-C10 另已通过三项 checkpoint 数据路径检查：eager/graph 的完整 H64K 检查分别验证 1,310 次 attention、2,650,296,320 次选中 KV，以及相同有序选择下的 FlashMLA 输出；H2304 检查保留普通 consumer，覆盖两位用户、128/121-token candidate、非默认 stream 和输出所有权。这些是正确性测试，不能替代正式 serving 轨迹。来源见[C10 验证记录](../../docs/agents/system/deepseek_echo_official_c10_validation.md)。
+check 的 driver 以退出码 0 完成；71 次全 GPU 观测覆盖 387.035 秒，最大间隔
+32.855 秒，所选 GPU 未观察到外来进程。其他设备上保留了获准并行的 NOSA
+正确性检查记录。该监测只支持离散采样下所选 GPU 的归属核验，不是未来正式
+bench/profile 的独占窗口证明。
+
+profile 在两方案各采集首访和完整首轮之后的第一次复访，共四次 capture。
+数值比较在 capture 之外；其他请求用于恢复缓存状态。34 条请求通过固定数值门槛；wrapper 独立核验 2,401 项证据，四段共 207,988 个 kernel 的计数与时长守恒。
+分析核对 kernel 数量与时长，按实际 launch 关联到最内层 host scope，保留无法
+归属的 graph 活动，不把阶段时长解释为独立算子时间、MFU 或正式请求延迟。
+
+| 方案 / 访问 | kernel 数量 | kernel duration sum ms | 未归属活动数量 | 未归属活动 duration sum ms |
+|---|---:|---:|---:|---:|
+| HBM / 首访 | 42019 | 2057.074 | 0 | 0.000 |
+| HBM / 复访 | 42019 | 2063.195 | 0 | 0.000 |
+| ECHO / 首访 | 122290 | 4139.862 | 0 | 0.000 |
+| ECHO / 复访 | 1660 | 34.460 | 0 | 0.000 |
+
+duration sum 可能包含重叠区间；未归属活动可能包含 kernel 及 copy，不能当作纯
+kernel 子集相减。mapped-host 访问流量使用验收后的 cache 计数，不由 memcpy
+活动推算。本次四段 capture 均无未归属活动；HBM 复访仍执行 history 构建。证据见 [analysis.json](report/profile/analysis.json)、[stages.csv](report/profile/stages.csv)与[kernels.csv](report/profile/kernels.csv)。
 
 ## 复现与模块
 
-按[第三方依赖说明](../../3rdparty/README.md)准备基础环境和固定提交的只读 ECHO checkout。从仓库根目录运行，使用新的 run ID；`--help` 给出全部参数，默认 checkpoint 为 `/preset-models`。
+按[第三方依赖说明](../../3rdparty/README.md)准备基础环境及固定提交的只读 ECHO
+checkout，从仓库根目录使用新 run ID 运行。先设置 motivation 运行方式中列出的
+环境，再执行以下入口。完整环境和 placement 仍以实际运行记录为准。
 
 ```bash
-export OMP_NUM_THREADS=8 MKL_NUM_THREADS=8
-export TRITON_PTXAS_PATH="$PWD/.venv/lib/python3.12/site-packages/triton/backends/nvidia/bin/ptxas"
-export TRITON_PTXAS_BLACKWELL_PATH=/usr/local/cuda/bin/ptxas
-CUDA_VISIBLE_DEVICES=0 bash experiments/deepseek_v32_echo_official/scripts/run.sh \
-  --run-id deepseek_v32_echo_official_c10_new_run --compute-graphs
+CUDA_VISIBLE_DEVICES=3 numactl --physcpubind=24-31 --membind=0 \
+  .venv/bin/python -B -m experiments.deepseek_v32_echo_official.src.measure \
+  --mode check --run-id official_check_new --compute-graphs \
+  --output-dir /tmp/cxldsagr-checks/deepseek_v32_echo_official/official_check_new
+
+CUDA_VISIBLE_DEVICES=3 numactl --physcpubind=24-31 --membind=0 \
+  .venv/bin/python -B -m experiments.deepseek_v32_echo_official.src.measure \
+  --mode bench --run-id official_bench_new --compute-graphs \
+  --validation-receipt /tmp/cxldsagr-checks/deepseek_v32_echo_official/official_check_new/receipt.json
+
+CUDA_VISIBLE_DEVICES=3 numactl --physcpubind=24-31 --membind=0 \
+  env PATH=/usr/local/cuda/bin:/usr/local/bin:/usr/bin:/bin \
+  bash experiments/deepseek_v32_echo_official/scripts/profile.sh \
+  --run-id official_profile_new \
+  --reference-run experiments/deepseek_v32_echo_official/output/data/official_bench_new
 ```
 
-Blackwell 环境项只固定依赖导入配置，不表示本实验在 Blackwell 上运行。入口复用 `experiments.deepseek_v32_motivation.src.measure` 的配置、预热和请求检查，使用共享 `GR/` 生成器及 `serving/persistent.py` 的计时边界。模型适配位于 `models/deepseek_v32/official_serving.py` 和 `official_cache.py`；官方独立绑定位于 `operators/deepseek_v32/indexer/official.py`。
+模型装配位于 `models/deepseek_v32/execution/official.py`，cache 适配位于
+`models/deepseek_v32/cache/official.py`，官方绑定位于
+`operators/deepseek_v32/indexer/official.py`。measure 复用 motivation 的配置、
+预热和请求检查，通过共享 `GR/` 与 `serving/persistent.py` 执行。
 
-本轮实际命令从冻结目录 `/tmp/deepseek-motivation-c10_host_rope_v2-frozen-6mdyfgj0` 执行，使用本页 run ID 和 `--compute-graphs`；完整命令及环境保存在 `output/data/echo_official_c10_20261004_u16_r2_01/gpu_monitor/window.json`。
+check 证据位于 `docs/agents/acceptance/unified_runtime_20261005/official_final`，bench 数据与源码位于
+`output/data/<run_id>/`，日志位于 `output/log/<run_id>/`，原始 Nsight 文件位于
+`output/profile/<profile_run_id>/`。report 或 profile 的 `--receipt-override`
+允许证据重定位，前提是原 receipt 字节和全部文件哈希不变；不改写原 bench metadata。
+正式报告由 `src.report` 生成，诊断由 `src.profile_report` 生成。本地/官方对照
+使用发布时已安装并记录身份的 `src.compare_existing`，完整来源见
+[发布清单](report/publication_manifest.json)。
 
-stdout/stderr 位于 `output/log/echo_official_c10_20261004_u16_r2_01/`；配置、输入、96 份输出 tensor、内存采样、源码、native 快照和独立审计位于 `output/data/echo_official_c10_20261004_u16_r2_01/`。只有验收通过的运行进入实验目录。报告重建须使用本轮冻结源码及尚不存在的输出目录：
-
-```bash
-python -m experiments.deepseek_v32_echo_official.src.report \
-  --run-dir <run_dir> --output-dir <new_report_dir>
-
-python -m experiments.deepseek_v32_echo_official.src.compare_existing \
-  --motivation-report experiments/deepseek_v32_motivation/report \
-  --official-report experiments/deepseek_v32_echo_official/report \
-  --output-dir <new_comparison_dir>
-```
+测量时源码、原分析生成器与发布时辅助文件分别绑定，见 [source_bindings.json](report/source_bindings.json)和[helper 清单](report/report_helper_sources.json)。发布时的辅助快照只记录当时磁盘上的已加载模块；它不替代原测量或早先分析的源码身份。

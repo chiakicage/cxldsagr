@@ -3,7 +3,7 @@
 import pytest
 import torch
 
-from layers.attention import BlockSelection
+from models.attention_contracts import BlockSelection
 from operators.nosa.attention.device_only.api import nosa_block_sparse_attention
 from operators.nosa.attention.offload.api import NosaFetchWorkspace, prefetch_cached_history
 from operators.nosa.attention.offload.tests.test_nosa_offload import _inputs, hopper  # noqa: F401

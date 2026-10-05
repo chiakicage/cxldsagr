@@ -1,20 +1,22 @@
-## 前三层重新测量：`20261003_echo_layers3_nonmatrix_candidate_02`
+## 前三层重新测量：`refactor_three_layers_profile_20261005_01`
 
 完整 checkpoint 的第 0–2 层依次传播 hidden/residual，包含 embedding、final norm 和最后 token LM head。Prefix=65,536，extend=1,024，chunk=1,024，offload pool=16,384 tokens/层。仅代表前三层。
 
+延迟与利用率分母来自独立 bench `refactor_three_layers_bench_20261005_01`；其 result SHA256 为 `a625e71e78bf54734b6a6335b35f54e1e3c904f854cc75c0797438acbdcacce6`，源码清单见 summary.json。
+
 | 阶段 | Resident 中位延迟 (ms) | Offload 中位延迟 (ms) | 每种模式重复次数 |
 | --- | ---: | ---: | ---: |
-| prefix | 850.664 | 1773.963 | 3 |
-| extend | 18.344 | 36.245 | 5 |
+| prefix | 642.340 | 1190.485 | 3 |
+| extend | 13.954 | 27.632 | 5 |
 
 ![前三层无插桩延迟](latency.svg)
 
-端到端精度归一化利用率 = 100 × Σ精度（useful matrix FLOPs / 对应精度 dense peak）/ 无插桩同步 wall time。分子使用同一 run、同一阶段完整 annotated 调用账本中的逻辑矩阵工作量，按 FP8/BF16/FP32 分别换算理想计算时间；分母包含整个请求阶段的CPU 调度、非矩阵计算、搬运、等待和 launch gap。它是当前 absorbed-MLA 实现的三层工作负载指标，不外推完整 61 层，也不等于单一峰值 MFU 或 Tensor pipe active。
+端到端精度归一化利用率 = 100 × Σ精度（useful matrix FLOPs / 对应精度 dense peak）/ 无插桩同步 wall time。分子使用同一 run、同一阶段完整 annotated 调用账本中的逻辑矩阵工作量，按 FP8/BF16/FP32 分别换算理想计算时间；新 schema 的分母来自匹配的独立 bench，包含整个请求阶段的CPU 调度、非矩阵计算、搬运、等待和 launch gap。它是当前 absorbed-MLA 实现的三层工作负载指标，不外推完整 61 层，也不等于单一峰值 MFU 或 Tensor pipe active。
 
 | 阶段 | 理想矩阵计算时间 (ms) | Resident 端到端利用率 (%) | Offload 端到端利用率 (%) |
 | --- | ---: | ---: | ---: |
-| prefix | 289.549 | 34.04 | 16.32 |
-| extend | 5.400 | 29.44 | 14.90 |
+| prefix | 289.549 | 45.08 | 24.32 |
+| extend | 5.400 | 38.70 | 19.54 |
 
 表中利用率由中位 wall time 计算；每次重复的比率、分精度 FLOPs 与理想计算时间见 [summary.json](summary.json) 的 `end_to_end_utilization`。
 
@@ -28,89 +30,91 @@
 
 | 算子 | 精度 | Resident kernel ms | MFU (%) | Offload kernel ms | MFU (%) |
 | --- | --- | ---: | ---: | ---: | ---: |
-| q_a_proj | FP8 | 5.364 | 40.78 | 5.362 | 40.80 |
-| q_b_proj | FP8 | 12.559 | 59.72 | 12.612 | 59.47 |
-| q_absorb | BF16 | 9.952 | 33.49 | 9.885 | 33.72 |
-| kv_a_proj | FP8 | 5.131 | 15.99 | 5.083 | 16.14 |
-| index_q_proj | FP8 | 5.315 | 47.04 | 5.323 | 46.97 |
-| index_k_proj | FP8 | 3.623 | 5.03 | 3.609 | 5.05 |
-| index_weights_proj | FP32 | 7.570 | 35.57 | 7.566 | 35.59 |
-| indexer | FP8 | 141.957 | 37.57 | 301.530 | 17.69 |
-| mla_qk_pv | BF16 | 169.396 | 65.86 | 170.405 | 65.47 |
-| v_expand | BF16 | 9.754 | 34.18 | 9.760 | 34.16 |
-| o_proj | FP8 | 40.428 | 57.72 | 40.424 | 57.73 |
-| mlp_gate | FP8 | 43.951 | 59.73 | 44.094 | 59.54 |
-| mlp_up | FP8 | 43.647 | 60.15 | 43.643 | 60.15 |
-| mlp_down | FP8 | 45.164 | 58.12 | 45.195 | 58.09 |
-| lm_head | BF16 | 0.423 | 0.44 | 0.424 | 0.44 |
+| q_a_proj | FP8 | 5.155 | 42.44 | 5.130 | 42.65 |
+| q_b_proj | FP8 | 12.429 | 60.35 | 12.433 | 60.33 |
+| q_absorb | BF16 | 10.871 | 30.66 | 10.698 | 31.16 |
+| kv_a_proj | FP8 | 5.276 | 15.55 | 5.228 | 15.69 |
+| index_q_proj | FP8 | 5.472 | 45.69 | 5.422 | 46.11 |
+| index_k_proj | FP8 | 3.606 | 5.06 | 3.565 | 5.11 |
+| index_weights_proj | FP32 | 7.624 | 35.31 | 7.579 | 35.53 |
+| indexer_qk | FP8 | 106.862 | 49.91 | 8.270 | 45.51 |
+| indexer_fused | FP8 | N/A | N/A | 280.531 | 17.67 |
+| mla_qk_pv | BF16 | 171.130 | 65.20 | 170.502 | 65.44 |
+| v_expand | BF16 | 9.839 | 33.88 | 9.833 | 33.90 |
+| o_proj | FP8 | 40.168 | 58.09 | 39.907 | 58.47 |
+| mlp_gate | FP8 | 43.163 | 60.82 | 42.931 | 61.15 |
+| mlp_up | FP8 | 42.405 | 61.91 | 42.140 | 62.30 |
+| mlp_down | FP8 | 45.167 | 58.12 | 44.878 | 58.50 |
+| lm_head | BF16 | 0.421 | 0.44 | 0.420 | 0.45 |
 
-Indexer 行在 offload 中包含融合 prefetch；MLA 行共同计入 QK/PV。
+indexer_qk 记录 resident logits 调用，indexer_fused 包含融合 prefetch。同一 offload 阶段可包含两种调用，分别列出；MLA 行共同计入 QK/PV。
 
 下表按最内层 scope 归因；attention_projection、dense_mlp 等父 scope 仅保留未归入子算子的剩余 kernel。这里只列 kernel 时间，cache_write 的 memcpy、CPU API 等另见完整数据，0 ms kernel 不表示没有搬运或同步开销。
 
 | 非矩阵 scope（MFU N/A） | Resident kernel ms | Offload kernel ms |
 | --- | ---: | ---: |
-| apply_rope_pair | 7.874 | 7.901 |
-| attention_output | 8.167 | 8.164 |
-| attention_projection | 68.688 | 68.658 |
-| cache_write | 0.459 | 29.413 |
+| apply_rope_pair | 2.003 | 2.050 |
+| attention_output | 0.000 | 0.000 |
+| attention_projection | 9.324 | 9.299 |
+| cache_write | 0.462 | 21.785 |
 | dense_mlp | 0.000 | 0.000 |
-| embedding | 0.427 | 0.424 |
-| exact_topk | 99.580 | 99.444 |
-| final_norm_lm_head | 0.012 | 0.012 |
-| forward_misc | 0.022 | 0.021 |
+| embedding | 0.403 | 0.404 |
+| exact_topk | 54.313 | 55.278 |
+| final_norm_lm_head | 0.013 | 0.012 |
+| forward_misc | 0.018 | 0.022 |
 | hidden_transfer | 0.000 | 0.000 |
 | index_cache_write | 0.000 | 0.000 |
-| index_layer_norm | 0.715 | 0.714 |
-| indexer_aux | 0.000 | N/A |
+| index_layer_norm | 0.727 | 0.721 |
+| indexer_aux | 0.000 | 0.000 |
 | indexer_prefetch_aux | N/A | 0.000 |
 | input_residual_norm | 0.000 | 0.000 |
-| layer_misc | 0.000 | 1.998 |
-| offload_exact_recall | N/A | 103.462 |
-| offload_finalize | N/A | 0.818 |
-| offload_prepare | 0.000 | 10.943 |
+| layer_misc | 0.000 | 1.990 |
+| offload_exact_recall | N/A | 93.127 |
+| offload_finalize | N/A | 0.615 |
+| offload_prepare | 0.000 | 8.109 |
 | offload_source_reservation | 0.000 | 0.000 |
 | post_attention_residual_norm | 0.000 | 0.000 |
-| prepare_rotary_cache | 1.173 | 1.174 |
-| quantize_index | 1.279 | 1.281 |
-| residual_rms_norm | 33.683 | 33.631 |
-| rms_norm | 3.619 | 3.629 |
-| silu_mul | 12.800 | 12.782 |
+| prepare_rotary_cache | 1.188 | 1.183 |
+| quantize_index | 1.261 | 1.278 |
+| residual_rms_norm | 5.095 | 5.092 |
+| rms_norm | 1.384 | 1.374 |
+| silu_mul | 5.532 | 5.523 |
 | sparse_mla_aux | 0.000 | 0.000 |
 
 ### Extend 矩阵算子
 
 | 算子 | 精度 | Resident kernel ms | MFU (%) | Offload kernel ms | MFU (%) |
 | --- | --- | ---: | ---: | ---: | ---: |
-| q_a_proj | FP8 | 0.084 | 40.91 | 0.084 | 40.77 |
-| q_b_proj | FP8 | 0.197 | 59.59 | 0.196 | 59.81 |
-| q_absorb | BF16 | 0.159 | 32.77 | 0.154 | 33.71 |
-| kv_a_proj | FP8 | 0.078 | 16.39 | 0.079 | 16.22 |
-| index_q_proj | FP8 | 0.083 | 47.04 | 0.083 | 47.17 |
-| index_k_proj | FP8 | 0.056 | 5.09 | 0.055 | 5.14 |
-| index_weights_proj | FP32 | 0.118 | 35.57 | 0.117 | 35.85 |
-| indexer | FP8 | 4.408 | 38.11 | 9.366 | 17.93 |
-| mla_qk_pv | BF16 | 2.660 | 66.57 | 2.685 | 65.95 |
-| v_expand | BF16 | 0.153 | 34.15 | 0.152 | 34.33 |
-| o_proj | FP8 | 0.630 | 57.85 | 0.632 | 57.71 |
-| mlp_gate | FP8 | 0.686 | 59.78 | 0.689 | 59.56 |
-| mlp_up | FP8 | 0.682 | 60.11 | 0.680 | 60.30 |
-| mlp_down | FP8 | 0.706 | 58.14 | 0.705 | 58.18 |
-| lm_head | BF16 | 0.423 | 0.44 | 0.425 | 0.44 |
+| q_a_proj | FP8 | 0.081 | 42.42 | 0.080 | 42.62 |
+| q_b_proj | FP8 | 0.193 | 60.81 | 0.195 | 60.09 |
+| q_absorb | BF16 | 0.168 | 31.00 | 0.168 | 31.00 |
+| kv_a_proj | FP8 | 0.082 | 15.68 | 0.081 | 15.73 |
+| index_q_proj | FP8 | 0.085 | 46.10 | 0.084 | 46.44 |
+| index_k_proj | FP8 | 0.056 | 5.11 | 0.056 | 5.10 |
+| index_weights_proj | FP32 | 0.117 | 35.85 | 0.119 | 35.47 |
+| indexer_qk | FP8 | 3.214 | 52.27 | N/A | N/A |
+| indexer_fused | FP8 | N/A | N/A | 9.369 | 17.93 |
+| mla_qk_pv | BF16 | 2.657 | 66.66 | 2.690 | 65.83 |
+| v_expand | BF16 | 0.153 | 34.01 | 0.153 | 34.05 |
+| o_proj | FP8 | 0.622 | 58.58 | 0.623 | 58.54 |
+| mlp_gate | FP8 | 0.669 | 61.28 | 0.670 | 61.22 |
+| mlp_up | FP8 | 0.658 | 62.32 | 0.658 | 62.36 |
+| mlp_down | FP8 | 0.701 | 58.47 | 0.701 | 58.51 |
+| lm_head | BF16 | 0.422 | 0.44 | 0.421 | 0.45 |
 
-Indexer 行在 offload 中包含融合 prefetch；MLA 行共同计入 QK/PV。
+indexer_qk 记录 resident logits 调用，indexer_fused 包含融合 prefetch。同一 offload 阶段可包含两种调用，分别列出；MLA 行共同计入 QK/PV。
 
 下表按最内层 scope 归因；attention_projection、dense_mlp 等父 scope 仅保留未归入子算子的剩余 kernel。这里只列 kernel 时间，cache_write 的 memcpy、CPU API 等另见完整数据，0 ms kernel 不表示没有搬运或同步开销。
 
 | 非矩阵 scope（MFU N/A） | Resident kernel ms | Offload kernel ms |
 | --- | ---: | ---: |
-| apply_rope_pair | 0.124 | 0.124 |
-| attention_output | 0.127 | 0.128 |
-| attention_projection | 1.069 | 1.071 |
-| cache_write | 0.007 | 0.472 |
+| apply_rope_pair | 0.032 | 0.032 |
+| attention_output | 0.000 | 0.000 |
+| attention_projection | 0.144 | 0.144 |
+| cache_write | 0.007 | 0.446 |
 | dense_mlp | 0.000 | 0.000 |
 | embedding | 0.006 | 0.006 |
-| exact_topk | 2.371 | 2.364 |
+| exact_topk | 1.133 | 1.149 |
 | final_norm_lm_head | 0.012 | 0.012 |
 | forward_misc | 0.004 | 0.004 |
 | hidden_transfer | 0.000 | 0.000 |
@@ -120,26 +124,26 @@ Indexer 行在 offload 中包含融合 prefetch；MLA 行共同计入 QK/PV。
 | indexer_prefetch_aux | N/A | 0.000 |
 | input_residual_norm | 0.000 | 0.000 |
 | layer_misc | 0.000 | 0.067 |
-| offload_exact_recall | N/A | 2.055 |
+| offload_exact_recall | N/A | 2.082 |
 | offload_finalize | N/A | 0.013 |
 | offload_prepare | 0.000 | 0.170 |
 | offload_source_reservation | 0.000 | 0.000 |
 | post_attention_residual_norm | 0.000 | 0.000 |
-| prepare_rotary_cache | 0.018 | 0.018 |
-| quantize_index | 0.020 | 0.020 |
-| residual_rms_norm | 0.527 | 0.525 |
-| rms_norm | 0.059 | 0.059 |
-| silu_mul | 0.200 | 0.200 |
+| prepare_rotary_cache | 0.019 | 0.018 |
+| quantize_index | 0.019 | 0.020 |
+| residual_rms_norm | 0.080 | 0.080 |
+| rms_norm | 0.024 | 0.024 |
+| silu_mul | 0.086 | 0.085 |
 | sparse_mla_aux | 0.000 | 0.000 |
 
 GPU kernel 时间、CPU API 时间、NVTX host 区间、无插桩 wall time 分别保存，不相加为端到端分解。Padding 工作另列 `executed_matmul_flops`，不计入 useful MFU；cuBLAS 内部 padding 未知，保留空值。
 
-正确性与覆盖验收、硬件 identity、源码及输入 SHA256、完整 NCU full/source 的验证记录见 [summary.json](summary.json)。逐层及 pooled 数据见 [operator_mfu.csv](operator_mfu.csv)、[operator_mfu_by_layer.csv](operator_mfu_by_layer.csv)、[nonmatrix.csv](nonmatrix.csv)。
+正确性与覆盖验收、硬件 identity、源码及输入 SHA256 见 [summary.json](summary.json)。逐层及 pooled 数据见 [operator_mfu.csv](operator_mfu.csv)、[operator_mfu_by_layer.csv](operator_mfu_by_layer.csv)、[nonmatrix.csv](nonmatrix.csv)。
 
-NCU 是同 run 对应真实层激活的独立 replay，不替代 NSYS 实际调用的 MFU 或正式 wall 延迟；其 cache 状态、排除项和报告 SHA256 单独保存。NCU run IDs：`20261003_echo_ncu_nonmatrix_mla_02`, `20261003_echo_ncu_nonmatrix_indexer_resident_02`, `20261003_echo_ncu_nonmatrix_indexer_offload_02`。
+本次未采集 NCU replay；报告不包含 NCU full/source 指标或验证结论。
 
 生成命令：
 
 ```bash
-python -m experiments.deepseek_v32_echo_prefill.src.publish_layers --run-id 20261003_echo_layers3_nonmatrix_candidate_02 --ncu-run-id 20261003_echo_ncu_nonmatrix_mla_02 --ncu-run-id 20261003_echo_ncu_nonmatrix_indexer_resident_02 --ncu-run-id 20261003_echo_ncu_nonmatrix_indexer_offload_02 --publish
+python -m experiments.deepseek_v32_echo_prefill.src.publish_layers --run-id refactor_three_layers_profile_20261005_01  --publish
 ```

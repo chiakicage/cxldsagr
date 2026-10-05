@@ -1,0 +1,145 @@
+{
+  "refactor_final_official_bench_20261005_01": {
+    "stage": {
+      "run_id": "refactor_final_official_bench_20261005_01",
+      "accepted": true,
+      "rows": 64,
+      "source_files_verified": 1303,
+      "source_sha256": "a9d45df3f2ccca5b3ed2a5e36bbb6c0d54a768c87fe7d1863555398ff76c47a1",
+      "receipt_reference": {
+        "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/docs/agents/acceptance/unified_runtime_20261005/official_final/receipt.json",
+        "sha256": "665f934d09aee400c452aba3af10e9becf4bebeafc3591d79e20973ea10b39d5",
+        "kind": "deepseek-v32-echo-official-full-trace-v1"
+      },
+      "identity_verifications": [
+        {
+          "stage": "after_hbm_warmup",
+          "status": "passed"
+        },
+        {
+          "stage": "after_echo_warmup",
+          "status": "passed"
+        },
+        {
+          "stage": "final",
+          "status": "passed"
+        }
+      ],
+      "phase_sums_checked": 64,
+      "monitor_audit": "driver/gpu_observation_audit.json",
+      "boundary": "Bounded postrun check of accepted metadata, all source snapshots against the accepted check manifest, unchanged receipt file/identity, row coverage/phase arithmetic and sampled process ownership. Native artifact checks were performed by the run receipt/runtime verifier; no additional independent native rehash or numerical replay is claimed."
+    },
+    "monitor": {
+      "schema": "deepseek-final-gpu-observation-audit-v1",
+      "status": "passed_for_recorded_samples",
+      "run_id": "refactor_final_official_bench_20261005_01",
+      "pid": 2980122,
+      "gpu_uuid": "80ff95c3-176e-fd8a-728f-9c5577c4a779",
+      "samples": 58,
+      "compute_process_observations": 56,
+      "observed_owned_pids": [
+        2980122
+      ],
+      "other_device_observations": [],
+      "isolation_scope": "all_recorded_gpus",
+      "first_observation_utc": "2026-10-04T23:38:55.305728+00:00",
+      "last_observation_utc": "2026-10-04T23:44:09.676345+00:00",
+      "duration_seconds": 314.46995186805725,
+      "maximum_sample_gap_seconds": 28.314661026000977,
+      "first_sample_after_start_seconds": 0.0992128849029541,
+      "completion_after_last_sample_seconds": 0.00012183189392089844,
+      "foreign_observations": [],
+      "inputs_sha256": {
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/output/data/refactor_final_official_bench_20261005_01/driver/run.json": "0a380f07b98e3ba540450285ef1496fde96a106a522b3a1e76896f72cda9ba6d",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/output/data/refactor_final_official_bench_20261005_01/driver/gpu_monitor.jsonl": "b5c2d076503dfa1ce1c98ffd8e2391eb3bc388238cbe3825962aa7e6048b7638",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/output/data/refactor_final_official_bench_20261005_01/driver/driver.py": "409686d51ec2838e2ddd6f3ca6eb8d51b51e0b084b2a842b3fbfc30a4e466c40",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/output/data/refactor_final_official_bench_20261005_01/metadata.json": "2de3e0df73c41f3a00e9e377d98f1bec7a6f09a4713ffcb57ed04217453e683d"
+      },
+      "auditor_sha256": "8718d6c14623b16dce203ebd5ada575f293fb53614591a4f9e364086c1418d95",
+      "boundary": "Every recorded selected-GPU process belongs to the launched process tree. Other-device work is allowed only for independent numerical checks and is retained explicitly. Discrete observations cannot exclude work between samples or establish absence of unrelated CPU work."
+    }
+  },
+  "refactor_final_official_profile_20261005_01": {
+    "stage": {
+      "run_id": "refactor_final_official_profile_20261005_01",
+      "accepted": true,
+      "source_files_verified": 1303,
+      "source_sha256": "a9d45df3f2ccca5b3ed2a5e36bbb6c0d54a768c87fe7d1863555398ff76c47a1",
+      "numerical_check": "refactor_final_official_check_20261005_01",
+      "driver_formal_reference_run": "refactor_final_official_bench_20261005_01",
+      "receipt_file_sha256": "665f934d09aee400c452aba3af10e9becf4bebeafc3591d79e20973ea10b39d5",
+      "checked_requests": 34,
+      "profile_report_artifacts_checked": 2401,
+      "captures": 4,
+      "sqlite_exports": 4,
+      "kernel_count": 207988,
+      "kernel_count_and_duration_conserved": true,
+      "unattributed_activities": 0,
+      "numerics": {
+        "hbm": {
+          "hidden": {
+            "max_relative_l2": 0.0009688476470750506,
+            "max_abs": 0.03125,
+            "minimum_elementwise_pass_fraction": 1.0,
+            "allclose_requests": 17,
+            "bitwise_equal_requests": 0
+          },
+          "logits": {
+            "max_relative_l2": 0.00338951603719108,
+            "max_abs": 0.0625,
+            "minimum_elementwise_pass_fraction": 1.0,
+            "allclose_requests": 17,
+            "bitwise_equal_requests": 0
+          }
+        },
+        "echo": {
+          "hidden": {
+            "max_relative_l2": 0.0009945187593424715,
+            "max_abs": 0.03125,
+            "minimum_elementwise_pass_fraction": 1.0,
+            "allclose_requests": 17,
+            "bitwise_equal_requests": 0
+          },
+          "logits": {
+            "max_relative_l2": 0.003912452655293625,
+            "max_abs": 0.0625,
+            "minimum_elementwise_pass_fraction": 0.9999845297029702,
+            "allclose_requests": 16,
+            "bitwise_equal_requests": 0
+          }
+        }
+      },
+      "monitor_audit": "driver/gpu_observation_audit.json",
+      "boundary": "Bounded postrun source/receipt/config identity and numerical-result checks, complete capture inventory, and verification of the wrapper-generated profile_report evidence/attribution result. The wrapper independently checked2401 artifacts and parsed4 SQLite captures; those heavy checks were not rerun here. Profile timing is intrusive and does not replace formal bench latency."
+    },
+    "monitor": {
+      "schema": "deepseek-final-gpu-observation-audit-v1",
+      "status": "passed_for_recorded_samples",
+      "run_id": "refactor_final_official_profile_20261005_01",
+      "pid": 2990219,
+      "gpu_uuid": "80ff95c3-176e-fd8a-728f-9c5577c4a779",
+      "samples": 75,
+      "compute_process_observations": 67,
+      "observed_owned_pids": [
+        2990267
+      ],
+      "other_device_observations": [],
+      "isolation_scope": "all_recorded_gpus",
+      "first_observation_utc": "2026-10-05T00:04:56.103708+00:00",
+      "last_observation_utc": "2026-10-05T00:11:38.493336+00:00",
+      "duration_seconds": 402.7814030647278,
+      "maximum_sample_gap_seconds": 29.44257402420044,
+      "first_sample_after_start_seconds": 0.12343502044677734,
+      "completion_after_last_sample_seconds": 0.2683401107788086,
+      "foreign_observations": [],
+      "inputs_sha256": {
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/output/data/refactor_final_official_profile_20261005_01/driver/run.json": "c9547e17ff75b723508c3a5e09d179f7dd20f0fcbf56d2e78a863fe9339a5c7a",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/output/data/refactor_final_official_profile_20261005_01/driver/gpu_monitor.jsonl": "8863e1048bce417c051710727df2ab6c5cb03cb421cd977ae17ff2daedd2c572",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/output/data/refactor_final_official_profile_20261005_01/driver/driver.py": "409686d51ec2838e2ddd6f3ca6eb8d51b51e0b084b2a842b3fbfc30a4e466c40",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/output/data/refactor_final_official_profile_20261005_01/metadata.json": "e0ad07f940d892b319c29ef79a4be113361d3f1d049613c90c9eb7ea1e54d27c"
+      },
+      "auditor_sha256": "8718d6c14623b16dce203ebd5ada575f293fb53614591a4f9e364086c1418d95",
+      "boundary": "Every recorded selected-GPU process belongs to the launched process tree. Other-device work is allowed only for independent numerical checks and is retained explicitly. Discrete observations cannot exclude work between samples or establish absence of unrelated CPU work."
+    }
+  }
+}

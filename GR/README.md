@@ -238,11 +238,12 @@ DeepSeek tokenizer：/mnt/nfs/share/models/DeepSeek-V3.2/tokenizer.json
 测量边界沿用 KV 实验口径：history 包含 23-token 固定指令，new 是完整候选后缀。因此测量配置将 generator 的 user 预算设为 `history - instruction_tokens`，item 预算设为 `new + instruction_tokens`，总 token 数和实际 KV 边界精确匹配。
 
 GPU 测量入口已随 SM120 清理移除，复现须使用整理前 revision `397e645`，
-详见 [历史实验归档](../experiments/legacy/deepseek_v32/README.md)。已有原始结果时，
-当前工作树保留 CPU 报告入口：
+说明保存在本地 `local/experiments/legacy/deepseek_v32/README.md`，不随 Git 仓库分发。
+本地副本及原始结果均存在时，可从仓库根目录运行 CPU 报告工具：
 
 ```bash
-.venv/bin/python -m experiments.legacy.deepseek_v32.report_gr_content_matrix
+.venv/bin/python -m local.experiments.legacy.deepseek_v32.report_gr_content_matrix
 ```
 
-结果和回放索引在 `GR/generated/content_matrix/`，报告见 [三层 KV 命中](../experiments/legacy/deepseek_v32/docs/extend_step_profile/gr_multilayer_kv_hits.md)。
+结果和回放索引在 `GR/generated/content_matrix/`，三层 KV 命中报告的本地路径为
+`local/experiments/legacy/deepseek_v32/docs/extend_step_profile/gr_multilayer_kv_hits.md`。

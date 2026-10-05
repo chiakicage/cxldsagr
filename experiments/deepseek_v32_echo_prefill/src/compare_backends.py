@@ -8,6 +8,12 @@ import math
 import statistics
 from pathlib import Path
 
+from experiments.deepseek_v32_echo_prefill.src.run_contract import (
+    benchmark_view,
+    control_directory,
+    validated_receipt,
+)
+
 DEFAULT_PURPOSE = (
     "Original implementation versus official compute backends, same pre-shared-cache semantics"
 )
@@ -57,10 +63,18 @@ def digest(path):
         return hashlib.file_digest(stream, "sha256").hexdigest()
 
 
-def validate_result(directory, run):
+def validate_result(directory, run, *, require_benchmark=True):
     """Keep the accepted three-layer run's internal numerical gate unchanged."""
     if run["accepted"] is not True or run["num_layers"] != 3:
         raise ValueError("Both runs must be accepted three-layer measurements")
+    if run.get("schema_version", 1) == 2:
+        original = run
+        run = benchmark_view(directory, run, required=require_benchmark)
+        checks = validated_receipt(original)["checks"]["comparisons"]
+        if not all(row["bitwise_equal"] is True for row in checks.values()):
+            raise ValueError("Independent check did not pass the internal bitwise audit")
+        if original["mode"] == "bench":
+            return run
     if set(run["correctness"]) != CORRECTNESS_FIELDS or not all(
         row["bitwise_equal"] is True
         and row["max_abs"] == 0
@@ -72,6 +86,12 @@ def validate_result(directory, run):
         raise ValueError("Each implementation must pass its eight resident/offload checks")
     if digest(directory / "request.json") != run["request_sha256"]:
         raise ValueError("Request SHA mismatch")
+    if (
+        run.get("schema_version", 1) == 2
+        and run.get("mode") == "profile"
+        and not run.get("benchmark")
+    ):
+        return run
     for mode in ("resident", "offload"):
         for phase in ("prefix", "extend"):
             samples = run["measurements"][mode][phase + "_samples_ms"]
@@ -84,6 +104,7 @@ def validate_result(directory, run):
                 raise ValueError("Invalid timing samples or repeat count")
             if statistics.median(samples) != run["measurements"][mode][phase + "_median_ms"]:
                 raise ValueError("Stored median differs from samples")
+    return run
 
 
 def compare_tensors(actual, previous):
@@ -248,6 +269,8 @@ def compare(
     runs = {
         name: json.loads((path / "result.json").read_text()) for name, path in directories.items()
     }
+    runs = {name: validate_result(directories[name], run) for name, run in runs.items()}
+    controls = {name: control_directory(directories[name], run) for name, run in runs.items()}
     # Historical runs may omit the whole newer cache contract. A one-sided
     # omission is a mismatch, so a new cache cannot silently reuse old results.
     optional = tuple(
@@ -259,8 +282,6 @@ def compare(
             runs["control"][key] != runs["official"][key]
         ):
             raise ValueError(f"Workload mismatch: {key}")
-    for name, run in runs.items():
-        validate_result(directories[name], run)
     plans = {}
     for mode in ("resident", "offload"):
         measured = {name: run["measurements"][mode] for name, run in runs.items()}
@@ -291,9 +312,9 @@ def compare(
         filename = mode + "_control.pt"
         outputs = {
             name: torch.load(path / filename, map_location="cpu", weights_only=True)
-            for name, path in directories.items()
+            for name, path in controls.items()
         }
-        output_hashes[mode] = {name: digest(path / filename) for name, path in directories.items()}
+        output_hashes[mode] = {name: digest(path / filename) for name, path in controls.items()}
         numerical[mode] = {}
         for key in ("hidden", "logits"):
             actual, previous = (outputs[name][key] for name in ("official", "control"))
@@ -305,7 +326,14 @@ def compare(
                 numerical[mode][key]["same_argmax"] = bool(
                     (actual.argmax(-1) == previous.argmax(-1)).all()
                 )
-    selection_drift = compare_selections(directories, runs)
+    if all(run.get("mode") != "bench" for run in runs.values()):
+        selection_drift = compare_selections(directories, runs)
+    else:
+        selection_drift = {
+            "available": False,
+            "boundary": "Selection comparison requires profile runs bound to these independent benches",
+            "layers": [],
+        }
     cache_metrics = compare_cache_metrics(runs)
     output.mkdir(parents=True, exist_ok=False)
     summary = {
@@ -316,6 +344,8 @@ def compare(
                 "result_sha256": digest(directories[name] / "result.json"),
                 "hardware": run["hardware"],
                 "source_sha256": run["source_sha256"],
+                "wall_time_denominator": run.get("wall_time_denominator"),
+                "validation_receipt": run.get("validation_receipt"),
             }
             for name, run in runs.items()
         },

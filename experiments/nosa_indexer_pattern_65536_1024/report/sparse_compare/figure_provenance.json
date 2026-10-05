@@ -1,12 +1,13 @@
 {
-  "run_id": "nosa_pattern_flags_20261004_01",
-  "comparison_sha256": "15a670b8a69bf2e407d4256d74c1abe3548b5476996e212b242a7bfe3addf478",
-  "label_overrides": {
+  "run_id": "refactor_nosa_pattern_capture_20261005_01",
+  "comparison_sha256": "4da24ca1c92a3a4da9cf69f186aa27facabe8100f9e07d21d404a3386fc17ea1",
+  "labels": {
     "dense_qa64": "dense_qa64: dense / QA-only, 16 local, FP32",
     "dense_nosa64": "dense_nosa64: dense / NOSA+CIS, 17 local, SM90 dispatcher",
     "sparse_nosa64": "sparse_nosa64: sparse / NOSA+CIS, 17 local, SM90 dispatcher"
   },
-  "plot_source_sha256": "7662a8a303a3678881fad835bd9eca8ac00ee8c1d669682ce0b90f1d78528047",
-  "data_changed": false,
-  "purpose": "Use SM90 dispatcher for full NOSA interface labels; do not infer per-kernel backend from the model API string."
+  "plot_source_sha256": "3902c0a95c2b75e03405f81caa461b98e4f71218d5c8583748a5357d784e29eb",
+  "selected_source": "Original figures emitted by the accepted current capture analysis.",
+  "rebuild": "Numerical report and CSV regenerated independently in a separate CPU directory; arrays and summaries equal.",
+  "data_changed": false
 }

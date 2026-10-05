@@ -1,21 +1,28 @@
 # DeepSeek V3.2
 
-独立 SM90 完整 checkpoint 的 ECHO prefill/extend，包含全部 61 层、embedding、
-3 个 dense MLP、58 个 MoE、final norm 和 LM head。硬件算子按功能位于
+
+独立 SM90 checkpoint 推理实现，支持 ECHO prefill/extend。完整结构包含 61 层、
+embedding、3 个 dense MLP、58 个 MoE、final norm 和 LM head。硬件算子按功能位于
 [operators/deepseek_v32](../../operators/deepseek_v32/README.md)。
 当前非 GR benchmark 仅执行真实 checkpoint 第 0–2 层，包含 embedding、final norm
-和末 token LM head。完整层数能力仍保留，当前 benchmark 不要求运行完整 61 层。
-旧报告与新实现的替换进度、各自版本与测量边界见
+和末 token LM head；GR 对照另用十个独立 dense block 的输入重放工作负载。
+完整层数入口仍保留，本轮验收不等于完整 61 层验证。两条工作负载分别报告，
+真实三层的数值、性能和 profile 边界见
 [ECHO 实验](../../experiments/deepseek_v32_echo_prefill/README.md)。
 
 | 模块 | 用途 |
 | --- | --- |
-| [echo_infer.py](echo_infer.py) | 完整模型：跨 GPU 放置常驻权重、按 token chunk 执行全部层、统一缓存事务及 LM head |
-| [echo_block.py](echo_block.py) | 双路 hidden/residual、RMSNorm、dense / grouped MoE 与 checkpoint 权重加载 |
-| [echo_attention.py](echo_attention.py) | 执行外层 query batch 的投影、融合 prefetch、精确 top-k / recall、物理 ID remap 与 sparse MLA |
-| [echo_model.py](echo_model.py) | checkpoint 配置与读取、FP8 投影、RoPE、MLA 吸收投影 |
+| [model.py](model.py)、[infer.py](infer.py) | 完整模型与 CLI：跨 GPU 放置权重、按 token chunk 执行全部层、统一缓存事务及 LM head |
+| [layers.py](layers.py) | 双路 hidden/residual、RMSNorm、dense / grouped MoE 与 checkpoint 权重加载 |
+| [attention.py](attention.py) | 执行外层 query batch 的投影、融合 prefetch、精确 top-k / recall、物理 ID remap 与 sparse MLA |
+| [config.py](config.py)、[checkpoint.py](checkpoint.py) | checkpoint 配置、tensor 读取与 BF16/FP8 线性权重 |
+| [projections.py](projections.py)、[rotary.py](rotary.py) | MLA/indexer 投影、YaRN 与 RoPE 配对 |
 | [nonmatrix.py](nonmatrix.py) | FlashInfer RMSNorm、残差归一化与 SiLU 适配，保留 FP32 checkpoint norm 权重 |
-| [serving_backend.py](serving_backend.py) | 单卡 GR serving 的 10 个 dense block / 输入复制工作负载与可复用用户 cache session |
+| [adapter.py](execution/adapter.py) | 单卡 GR serving 的 10 个 dense block / 输入复制工作负载与可复用用户 cache session |
+| [replay.py](replay.py) | checkpoint 副本的独立加载、source 层映射及 hidden/residual 输入克隆；物理层数由入口显式指定 |
+| [session.py](cache/session.py) | 用户 session 状态与借用双缓冲的 dense cache view |
+| [planning.py](execution/planning.py) | 根据模型维度和执行上限计算固定 P/NH 或字节预算的资源计划 |
+| [pipeline.py](execution/pipeline.py)、[official.py](execution/official.py) | 本地与官方 attention/cache/resource factory；官方入口为 `build_official_backend` |
 | [tests/](tests) | ECHO checkpoint / block / 全模型调度事务参考测试 |
 
 ## 运行
@@ -26,8 +33,8 @@
 python3 scripts/prepare_3rdparty.py --init
 uv sync
 source .venv/bin/activate
-python -m models.deepseek_v32.echo_infer --help
-python -m models.deepseek_v32.echo_infer \
+python -m models.deepseek_v32.infer --help
+python -m models.deepseek_v32.infer \
   --model /preset-models --num-layers 3 --devices 0 \
   --input-ids /path/to/input_ids.json --history 65536 --chunk-size 1024 --offload --slots 16384
 ```
@@ -76,22 +83,23 @@ python -m models.deepseek_v32.echo_infer \
 当前前三层 benchmark 与 profile 见
 [SM90 ECHO prefill/extend](../../experiments/deepseek_v32_echo_prefill/README.md)。
 十 block GR 工作负载的固定 P/NH 容量检查见
-[ECHO cache 实验](../../experiments/deepseek_v32_echo_cache/README.md)。
-原有 DeepSeek / SM120 实验的有效历史结果见
-[归档入口](../../experiments/legacy/deepseek_v32/README.md)，按原 run ID 和测量环境解读。
+[统一 cache management 实验](../../experiments/cache_management/README.md)。
+原有 DeepSeek / SM120 实验的有效历史结果保存在
+`local/experiments/legacy/deepseek_v32/`，不进 Git，仍按原 run ID 和测量环境解读。
 
 共享 GR 请求生成使用 [request_format.py](request_format.py)：DeepSeek 历史请求模板与长上下文预算适配。
 用法见 [GR 生成器](../../GR/README.md)。
 
 ## 单卡 GR Serving 工作负载
 
-共享 ECHO cache 与模型级 chunk 调度已接入。当前按固定 P/NH 检查完整请求能否执行，
-并估算联合容量边界。GR 整批 GPU candidate 已通过短 GPU 正确性检查，当前容量结论
-仅为静态规划；实现版本及适用范围见
-[ECHO cache 实验](../../experiments/deepseek_v32_echo_cache/README.md)。
+共享 ECHO cache 与模型级 chunk 调度已接入。固定 P/NH 的静态规划、实际分配和
+完整请求验收分别报告。十 block 本地四方案已完成 H65,536/A128、16 用户两轮的
+独立数值验收及三次正式计时；官方路径另按固定容差完成独立验收。这些运行没有
+填满 NH，也不能代表任意用户数或 H/A 配置。容量范围与可核验结果见
+[统一 cache management 实验](../../experiments/cache_management/README.md)。
 旧 4 GiB / W / chunk 对照已撤回，不再据此指定默认 chunk 或给出性能排名。
 
-[serving_backend.py](serving_backend.py) 提供本次 GR serving 对照使用的单卡工作负载：
+[adapter.py](execution/adapter.py) 提供本次 GR serving 对照使用的单卡工作负载：
 从真实 checkpoint 前三层重复加载 10 个独立的 dense block，source 顺序为
 `[0,1,2,0,1,2,0,1,2,0]`，不执行 MoE。每个副本复制其 source block 的 hidden 与
 residual 输入，并使用独立权重、主 KV 和 indexer cache。加上真实 embedding、final
@@ -99,16 +107,30 @@ norm 和 LM head 共 7,827,793,408 参数；其中 dense backbone 为 5,974,428,
 这个工作负载用于控制计算和缓存大小，不能作为经过训练的 DeepSeek 8B 模型；它与
 上述非 GR 前三层 benchmark 分别报告。
 
-`DeepSeekServingBackend` 实现共享 serving backend 契约，每个用户 session 在多次请求
+`DeepSeekServingBackend.runtime_driver(policy)` 接入公共 token runtime 契约，每个用户 session 在多次请求
 间保留固定 prefix。策略包括 `hbm`、`echo`、`serial_sparse` 和 `dense_prefetch`：
 前两种复用 resident / ECHO 路径，串行 sparse
-在 indexer 与精确 top-k 完成后召回缺失 records，dense 策略使用两块完整 layer staging
-和独立 CUDA stream，在当前 block 执行时预取下一层的全部历史主 KV。四者均执行相同的
+在 indexer 与精确 top-k 完成后召回缺失 records。通用预算模式的 dense 使用两块
+完整 layer staging 和独立 CUDA stream，在当前 block 执行时预取下一层的全部
+历史主 KV；固定 P/NH 的 dense 直接使用逐层 pool，见下文。四者均执行相同的
 稀疏选择与 MLA。所有用户 cache 的主 KV、indexer、映射、ECHO counter 及 dense staging
 在 budget 模式下都计入 cache budget；权重和临时激活另计。固定 P/NH 模式按指定
 pool/arena 容量执行，并记录物理显存和 DRAM 占用；cache 统计仍不等于进程峰值。
 
-GR 的 `echo/serial_sparse` 通过 `retained_session_capacity` 将 session 容量设为 H，
+模型装配已拆分为 replay、session、资源规划和 pipeline。资源与 session 计划列出具名
+分配项，创建 session 时消费同一份不可变计划；共享生命周期管理 owner、generation、
+执行 lease 与失败后的资源保留。逻辑 token ID 通过 `TokenSelection` 传给 attention，
+不新增 tensor 搬运或改变 indexer/prefetch 融合顺序。`num_layers` 由调用入口显式
+传入；GR 入口与当前实验使用十个物理 block。执行时把 session 的 attention runner 和
+chunk 大小作为参数传给 block，模型不再临时挂载用户 attention/cache。官方 ECHO 由
+`build_official_backend` 装配同一 backend，直接构造官方 runner 和 cache view，并单独
+预留、核验和释放官方额外资源。数值验收、正式计时和诊断 profile 使用独立入口；
+报告中的 run ID、源码和测量边界共同标识结果。当前正式发布状态为
+本地三次 bench、独立 profile 和官方 bench/profile 已验收发布；P0/当前对照仍保留部分阶段延迟增加，当前 profile 未单独确定其原因；结果入口见
+[motivation](../../experiments/deepseek_v32_motivation/README.md)和
+[官方 ECHO](../../experiments/deepseek_v32_echo_official/README.md)。
+
+GR 的 `echo/serial_sparse` 在 session 计划中将保留容量设为 H，
 host pages 与私有 history indexer 都按 H 保留；`extend_candidate` 使用 backend
 共享的 GPU 临时空间处理候选。每层主 KV storage 为 `[P+1+Amax,576]`，前 P+1 行
 包括 P 个历史槽和一个 sentinel，保留原映射；尾部只存本次候选，不分配 host ID 或淘汰元数据。
@@ -127,7 +149,7 @@ hidden 和末 token logits，history-only 只改变保留容量。
 
 固定 P/NH 模式已接入四方案：HBM-only 按 H 扣除独立 HBM token 配额 P，
 `echo/serial_sparse/dense_prefetch` 按 H 扣除 NH 的 host 页配额，并复用相同的逐层
-P 槽历史 cache。固定模式 dense 要求 H<=P，使用 `pool_prefetch.py` 在独立 stream
+P 槽历史 cache。固定模式 dense 要求 H<=P，使用 [cache/prefetch.py](cache/prefetch.py) 在独立 stream
 提前读取下一层完整历史中的 miss，命中直接复用；每层 pool 本身提供独立拷贝目标，
 不另分配完整 layer staging。HBM-only 的 candidate 紧接 resident history，offload
 的 candidate 使用 pool 尾部；四方案都使用共享的合并 indexer workspace，结束后
@@ -137,9 +159,19 @@ P 槽历史 cache。固定模式 dense 要求 H<=P，使用 `pool_prefetch.py` �
 host records、映射和 indexer 状态。一次完整 prefill/extend 借用双缓冲，槽位覆盖前
 等待前一个 consumer，归还前等待包括未消费预取在内的全部异步操作。
 runner 从构造到 close 绑定唯一准入 owner；其关闭只释放 session，最外层再关闭
-backend。新实现已通过 GPU 回归、真实前三层及十 block serving 的完整 hidden/logits
-检查，分配验收见[工程 checkpoint](../../docs/agents/system/nosa_shared_cache_checkpoint.md)。
-这些工程检查不替代固定 P/NH 容量实验，也不提供新实现的性能排名。
+backend。真实三层验收 `refactor_three_layers_check_20261005_02` 在 H65,536/A1,024
+下比较完整 extend hidden、末 token logits、默认输出与 resident/offload prefix
+logits，五项比较均逐位相等；它沿真实第 0–2 层顺序传播，不使用 C10 输入重放。
+对应 bench/profile 的发布结果见
+[三层实验](../../experiments/deepseek_v32_echo_prefill/README.md)，当前状态为
+独立 bench/profile 已验收发布，当前报告覆盖真实前三层，未采集 NCU replay。
+
+C10 本地验收 `refactor_final_deepseek_check_20261005_01` 保存 128 份完整候选输出，
+96 组 offload/HBM 对照逐位一致。官方验收
+`refactor_final_official_check_20261005_01` 保存 HBM、独立 HBM 重跑和官方 ECHO
+共 96 份输出，全部通过预先固定的数值门槛，但比较请求没有逐位相等。
+官方门槛与本地 exact 对照不能互换。模型测试与这些数值 check 不替代固定 P/NH
+容量实验、正式计时或未运行的配置。
 
 `sparse_pool_tokens` 配置 backend 每层共享容量，`host_arena_tokens` 配置全局 host
 容量；原 per-session `slots` 参数已移除。固定 P/NH 模式按实际 prefill chunk 与
@@ -165,5 +197,5 @@ candidate 与截短后的复访；所有策略的全部 candidate hidden，以�
 的 hidden / residual 均通过 bitwise 对照。这是正确性验证，serving 性能结果由对应实验
 单独报告。GPU candidate 的短检查同样比较 2,304-token history 与 16 / 23-token
 候选的全部 hidden/logits，确认与 HBM 逐位一致、候选 D2H 为零、history KV 与 indexer
-不变；该工程检查不提供完整多用户容量或显存峰值结果。实现契约与验证边界见
-[执行材料](../../docs/agents/system/gr_serving_deepseek.md)。
+不变；该工程检查不提供完整多用户容量或显存峰值结果。实现契约见
+[模型规则](AGENTS.md)，完整请求与测量边界见上述对应实验。

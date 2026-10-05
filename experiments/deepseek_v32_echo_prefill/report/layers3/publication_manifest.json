@@ -1,0 +1,123 @@
+{
+  "schema": "deepseek-audited-publication-v1",
+  "publication_id": "refactor_three_layers_publication_20261005_01",
+  "status": "published",
+  "formal_run_id": "refactor_three_layers_bench_20261005_01",
+  "profile_run_id": "refactor_three_layers_profile_20261005_01",
+  "publication_output": "experiments/deepseek_v32_echo_prefill/output/data/refactor_three_layers_profile_20261005_01/publication",
+  "report_directory": "experiments/deepseek_v32_echo_prefill/report/layers3",
+  "source_bindings_sha256": "79c7e0d51760ccb73ae6bb9e91f05375e0168e96942e66be71d8309d72c44a3e",
+  "source_snapshot_boundary": "Source snapshots remain under output/data, excluded from the selected report tree.",
+  "publication_driver_sha256": "19776b0e38aac96f2eec814820a0a88993ed26c08a10fd899102243b35062e2d",
+  "publication_driver_invocation": [
+    "python",
+    "/tmp/cxldsagr_refactor_final_deepseek_20261005/publish_and_retire.py"
+  ],
+  "readme": {
+    "path": "experiments/deepseek_v32_echo_prefill/README.md",
+    "sha256": "c3dc0030844ded82fa3a85e6d34717d04e47e19cb388994d4d577312f0183e03"
+  },
+  "artifacts": {
+    "latency.png": {
+      "sha256": "b9af0360e4aff2296fedb7b8a2c40bda7fe1fe54a33b6d00e433b93c2f7a204b",
+      "size_bytes": 98806
+    },
+    "latency.svg": {
+      "sha256": "e19fe4a0b7eb2b5ad9336fee0bd6f5bb2a9be816e9b09ba93c483ecdc0d7653a",
+      "size_bytes": 20073
+    },
+    "mfu.png": {
+      "sha256": "57facb218e01729fdca9f9b6206d6ee114c5f824379f6d3a111ebe06c1b6ef43",
+      "size_bytes": 430655
+    },
+    "mfu.svg": {
+      "sha256": "b1390e812d17b4e4a6b1643c2bd1a8440f456b12631345dd2b31903b68b4ed85",
+      "size_bytes": 105451
+    },
+    "ncu_metrics.csv": {
+      "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+      "size_bytes": 2
+    },
+    "nonmatrix.csv": {
+      "sha256": "8fff436bdd979f941c674eddf9c1a762669c0e205b6da59590afd32971e773b8",
+      "size_bytes": 30163
+    },
+    "nonmatrix_by_layer.csv": {
+      "sha256": "eb3ad20a4044ed3cd7f722f92d821f619fe072d1be4ec134234bd78b3a0389b4",
+      "size_bytes": 78757
+    },
+    "operator_inventory.csv": {
+      "sha256": "04beece2d9c4e27260f02f95e7a1865386f6250b18154cec7115d61a9ff75189",
+      "size_bytes": 57511
+    },
+    "operator_mfu.csv": {
+      "sha256": "6a37dd3342e2a12cceb9fe3cc395b17f9a8b391fdf43087ab82e4396df14d7d3",
+      "size_bytes": 27856
+    },
+    "operator_mfu_by_layer.csv": {
+      "sha256": "2fea202d77ab6809eff6f32589b3fe2b776ed1adf0201fce02e679026ad37fed",
+      "size_bytes": 78259
+    },
+    "postrun_audit.json": {
+      "sha256": "a4c761895ff08d0794202cb62d99cc7c01ab9e58f95fe801dae88be419dde593",
+      "size_bytes": 983708
+    },
+    "report_helper_sources.json": {
+      "sha256": "77d1d32ce3416ecf88c240c51138749a126f03e33142ee6b5715695905abf36f",
+      "size_bytes": 5671
+    },
+    "results.md": {
+      "sha256": "8e9913eda00f20a9052b8e27a7c705cea15af8605f48c4f0ebc2a0bb78b4363f",
+      "size_bytes": 8346
+    },
+    "retirement.json": {
+      "sha256": "77bbb83a42f86b79c8beb107de9921f88429f496abfa70a52b97075e69bf487e",
+      "size_bytes": 630013
+    },
+    "run_acceptance.json": {
+      "sha256": "752d947e15f8c4fd4bd052e2491e9cd0cc143c98c0345d71a183626250cdcfd7",
+      "size_bytes": 11452
+    },
+    "source_bindings.json": {
+      "sha256": "79c7e0d51760ccb73ae6bb9e91f05375e0168e96942e66be71d8309d72c44a3e",
+      "size_bytes": 4721
+    },
+    "summary.json": {
+      "sha256": "6b3267ffbaf52ff8fd4e259968603cd3d755c798760efadb951fa511df656a36",
+      "size_bytes": 3613065
+    }
+  },
+  "retirement": {
+    "inventory_sha256": "77bbb83a42f86b79c8beb107de9921f88429f496abfa70a52b97075e69bf487e",
+    "status": "completed"
+  },
+  "verification": {
+    "independent_staged_arithmetic_and_links": "passed",
+    "selected_helper_and_generator_snapshots": "passed",
+    "measurement_source_identities_preserved": true,
+    "no_new_gpu_execution_during_publication": true
+  },
+  "actual_publisher_command": {
+    "argv": [
+      "taskset",
+      "-c",
+      "24-31",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin/python",
+      "-m",
+      "experiments.deepseek_v32_echo_prefill.src.publish_layers",
+      "--run-id",
+      "refactor_three_layers_profile_20261005_01",
+      "--publish"
+    ],
+    "exit_code": 0,
+    "cwd": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr",
+    "environment_overrides": {
+      "CUDA_VISIBLE_DEVICES": "",
+      "OMP_NUM_THREADS": "2",
+      "MKL_NUM_THREADS": "2",
+      "OPENBLAS_NUM_THREADS": "2",
+      "PYTHONDONTWRITEBYTECODE": "1"
+    }
+  },
+  "completed_utc": "2026-10-05T00:48:21.752930+00:00"
+}

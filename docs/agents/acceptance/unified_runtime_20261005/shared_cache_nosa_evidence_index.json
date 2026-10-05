@@ -1,0 +1,217 @@
+{
+  "schema": "nosa-freeze03-engineering-evidence-index-v1",
+  "freeze_id": "7c12bfb334dee401bfdb66d904787962e49ef59e70811a3701249b26db06ed21",
+  "allocation_review_sha256": "886b4d0c57fc27787db4977bed21cc810b2e0046545c2f946b1fdf5d3819801d",
+  "source_manifest_sha256": "754d15f982d88b0d19da2f3eb388575038f1f62ebdef4f073d8423a0518754a3",
+  "jobs": {
+    "nosa-allocation-128": {
+      "result": {
+        "command": [
+          "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/freeze03-evidence/run.sh",
+          ".venv/bin/python",
+          "-m",
+          "pytest",
+          "models/nosa/tests/test_cache_allocation_checkpoint.py::test_checkpoint_cache_allocation_lifetimes",
+          "-q",
+          "-s",
+          "--tb=short",
+          "-p",
+          "no:cacheprovider",
+          "--basetemp",
+          "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/freeze03-evidence/validation/nosa-allocation-128/pytest"
+        ],
+        "environment_overrides": {
+          "CUDA_VISIBLE_DEVICES": "2",
+          "OMP_NUM_THREADS": "8",
+          "MKL_NUM_THREADS": "8",
+          "PYTHONDONTWRITEBYTECODE": "1",
+          "TMPDIR": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/freeze03-evidence/validation/nosa-allocation-128/tmp",
+          "NOSA_CACHE_AUDIT_SUFFIX_TOKENS": "128",
+          "NOSA_CACHE_AUDIT_CHECKPOINT": "/mnt/ssd-wlcb/chenkaiqi/NOSA-8B"
+        },
+        "freeze_id": "7c12bfb334dee401bfdb66d904787962e49ef59e70811a3701249b26db06ed21",
+        "driver_sha256": "1b0fd64950e19ff8f9217be36688c236fdb6099a09b2a0c2ba2dcf90a458137d",
+        "start_utc": "2026-10-03T12:46:35.705502+00:00",
+        "exit_code": 0,
+        "end_utc": "2026-10-03T12:54:47.298453+00:00"
+      },
+      "files_sha256": {
+        "command.json": "4ffee916eaeb8531c9ede8b50fcd68a18956daf6bdf6fa6a854dcf5be3d237d1",
+        "result.json": "675081cabcf3b2b8b15e6be9bc2ededb5015bb2ef8525a3cf597df686c154017",
+        "stdout.log": "ff233ce25abef6a095f93842e9781aba5bbb513418e2fc3938939832dd7673d6",
+        "stderr.log": "20336ae471e39bb8911e252214392056f7e68f7834ed022547ec680c9c47e684"
+      }
+    },
+    "nosa-allocation-1024": {
+      "result": {
+        "command": [
+          "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/freeze03-evidence/run.sh",
+          ".venv/bin/python",
+          "-m",
+          "pytest",
+          "models/nosa/tests/test_cache_allocation_checkpoint.py::test_checkpoint_cache_allocation_lifetimes",
+          "-q",
+          "-s",
+          "--tb=short",
+          "-p",
+          "no:cacheprovider",
+          "--basetemp",
+          "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/freeze03-evidence/validation/nosa-allocation-1024/pytest"
+        ],
+        "environment_overrides": {
+          "CUDA_VISIBLE_DEVICES": "3",
+          "OMP_NUM_THREADS": "8",
+          "MKL_NUM_THREADS": "8",
+          "PYTHONDONTWRITEBYTECODE": "1",
+          "TMPDIR": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/freeze03-evidence/validation/nosa-allocation-1024/tmp",
+          "NOSA_CACHE_AUDIT_SUFFIX_TOKENS": "1024",
+          "NOSA_CACHE_AUDIT_CHECKPOINT": "/mnt/ssd-wlcb/chenkaiqi/NOSA-8B"
+        },
+        "freeze_id": "7c12bfb334dee401bfdb66d904787962e49ef59e70811a3701249b26db06ed21",
+        "driver_sha256": "1b0fd64950e19ff8f9217be36688c236fdb6099a09b2a0c2ba2dcf90a458137d",
+        "start_utc": "2026-10-03T12:46:36.868105+00:00",
+        "exit_code": 0,
+        "end_utc": "2026-10-03T12:54:46.539168+00:00"
+      },
+      "files_sha256": {
+        "command.json": "b149818029abb8a1d0a4b793963a9fd2446279d80bd739301803ecc6114b44fd",
+        "result.json": "2715b23426716c49ac79b94d2df1e58a9002c2750e18fcaec4785fab28ea388b",
+        "stdout.log": "5db3882c21dfff019b0bf1bbbe6bd4bde265f94f3ee4648faf8f4a416ef812ff",
+        "stderr.log": "57c836f0bd25712b8e394ea505d165990012dd9e18ad5853a9f5be4b27899087"
+      }
+    },
+    "nosa-checkpoint-128": {
+      "result": {
+        "command": [
+          "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/freeze03-evidence/run.sh",
+          ".venv/bin/python",
+          "-m",
+          "pytest",
+          "models/nosa/tests/test_serving.py::test_cuda_serving_checkpoint_independent_prefixes_and_revisits",
+          "-q",
+          "-s",
+          "--tb=short",
+          "-p",
+          "no:cacheprovider",
+          "--basetemp",
+          "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/freeze03-evidence/validation/nosa-checkpoint-128/pytest"
+        ],
+        "environment_overrides": {
+          "CUDA_VISIBLE_DEVICES": "1",
+          "OMP_NUM_THREADS": "8",
+          "MKL_NUM_THREADS": "8",
+          "PYTHONDONTWRITEBYTECODE": "1",
+          "TMPDIR": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/freeze03-evidence/validation/nosa-checkpoint-128/tmp",
+          "NOSA_SERVING_SUFFIX_TOKENS": "128",
+          "NOSA_SERVING_CHECKPOINT": "/mnt/ssd-wlcb/chenkaiqi/NOSA-8B",
+          "NOSA_SERVING_PREFIX_TOKENS": "65536"
+        },
+        "freeze_id": "7c12bfb334dee401bfdb66d904787962e49ef59e70811a3701249b26db06ed21",
+        "driver_sha256": "1b0fd64950e19ff8f9217be36688c236fdb6099a09b2a0c2ba2dcf90a458137d",
+        "start_utc": "2026-10-03T12:55:16.238623+00:00",
+        "exit_code": 0,
+        "end_utc": "2026-10-03T12:55:59.219007+00:00"
+      },
+      "files_sha256": {
+        "command.json": "35309e134c846a44b98dabfe236f08cdf2aff31b84f96c5f657ac79431d67e88",
+        "result.json": "7233f56d0bad58acaac74f526bff6468129035edcb001a171e32469d7bac5c86",
+        "stdout.log": "1240832f046bc2c984d7d281d582a0531be818782544b387c6f5101a264e81e8",
+        "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "nosa-global-gpu-repeat": {
+      "result": {
+        "spec": {
+          "name": "nosa-global-gpu-repeat",
+          "evidence_directory": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/freeze03-evidence/validation/nosa-global-gpu-repeat",
+          "command": [
+            "bash",
+            "scripts/run_tests.sh",
+            "gpu"
+          ],
+          "environment": {
+            "CUDA_VISIBLE_DEVICES": "1",
+            "CXLDSAGR_SM90_BACKEND": "native",
+            "NOSA_SERVING_CHECKPOINT": "/mnt/ssd-wlcb/chenkaiqi/NOSA-8B",
+            "NOSA_SERVING_PREFIX_TOKENS": "65536",
+            "NOSA_SERVING_SUFFIX_TOKENS": "1024",
+            "NOSA_OFFLOAD_CHECKPOINT": "/mnt/ssd-wlcb/chenkaiqi/NOSA-8B",
+            "NOSA_OFFLOAD_REQUEST": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/indexer_block_sparse_profile/output/data/sparse_native_h200_gpu1_20260929_01/request.json",
+            "NOSA_MODEL_PATH": "/mnt/ssd-wlcb/chenkaiqi/NOSA-8B",
+            "PYTEST_ADDOPTS": "--basetemp=/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/freeze03-evidence/validation/nosa-global-gpu-repeat/pytest"
+          },
+          "verifier": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/freeze03-evidence/echo-test-dependency/verify.sh"
+        },
+        "spec_sha256": "69bbe63662724de7ef79f6da6316b2ff5600c3dcc6d961df49b5ec40ded1af4d",
+        "driver_sha256": "b5c84811ec097c1907358027c739a084ed528e3d28f82321af420c746c7457d8",
+        "freeze_id": "7c12bfb334dee401bfdb66d904787962e49ef59e70811a3701249b26db06ed21",
+        "start_utc": "2026-10-03T12:58:54.231961+00:00",
+        "environment_overrides": {
+          "OMP_NUM_THREADS": "8",
+          "MKL_NUM_THREADS": "8",
+          "OPENBLAS_NUM_THREADS": "8",
+          "TMPDIR": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/freeze03-evidence/validation/nosa-global-gpu-repeat/tmp",
+          "PYTHONDONTWRITEBYTECODE": "1",
+          "PYTHONUNBUFFERED": "1",
+          "CUDA_VISIBLE_DEVICES": "1",
+          "CXLDSAGR_SM90_BACKEND": "native",
+          "NOSA_SERVING_CHECKPOINT": "/mnt/ssd-wlcb/chenkaiqi/NOSA-8B",
+          "NOSA_SERVING_PREFIX_TOKENS": "65536",
+          "NOSA_SERVING_SUFFIX_TOKENS": "1024",
+          "NOSA_OFFLOAD_CHECKPOINT": "/mnt/ssd-wlcb/chenkaiqi/NOSA-8B",
+          "NOSA_OFFLOAD_REQUEST": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/indexer_block_sparse_profile/output/data/sparse_native_h200_gpu1_20260929_01/request.json",
+          "NOSA_MODEL_PATH": "/mnt/ssd-wlcb/chenkaiqi/NOSA-8B",
+          "PYTEST_ADDOPTS": "--basetemp=/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/freeze03-evidence/validation/nosa-global-gpu-repeat/pytest"
+        },
+        "exit_code": 0,
+        "end_utc": "2026-10-03T13:01:57.868942+00:00"
+      },
+      "exit_ledger": [
+        {
+          "label": "verify_before",
+          "command": [
+            "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/freeze03-evidence/echo-test-dependency/verify.sh"
+          ],
+          "exit_code": 0,
+          "ended_utc": "2026-10-03T12:58:56.616104+00:00"
+        },
+        {
+          "label": "job",
+          "command": [
+            "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/freeze03-evidence/run.sh",
+            "bash",
+            "scripts/run_tests.sh",
+            "gpu"
+          ],
+          "exit_code": 0,
+          "ended_utc": "2026-10-03T13:01:55.510630+00:00"
+        },
+        {
+          "label": "verify_after",
+          "command": [
+            "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/freeze03-evidence/echo-test-dependency/verify.sh"
+          ],
+          "exit_code": 0,
+          "ended_utc": "2026-10-03T13:01:57.865157+00:00"
+        }
+      ],
+      "files_sha256": {
+        "command.json": "e6418b869422888b3daf5ff800bb36d4b2604e51c9a51b1ff0abe68f8a7926a4",
+        "exit_ledger.json": "e9c233119ba5a5ce24100db74413465b9873bea488a4de7e8b178632f9da3a73",
+        "job.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "job.stdout.log": "8ea2208b4018c93dff8fec843cd80f3349c33d9d57db85ded84d896ccdb1cf57",
+        "result.json": "b2cd18d8f7fb17739a4d60b5856c9df652c9257a03ce3355b0b3b0a647a3169f",
+        "verify_after.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "verify_after.stdout.log": "95f5330d251f788b406ae1b4f7a3378956545b8339ef293e46bc2e4c283fade0",
+        "verify_before.stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "verify_before.stdout.log": "95f5330d251f788b406ae1b4f7a3378956545b8339ef293e46bc2e4c283fade0"
+      }
+    }
+  },
+  "source_verification": {
+    "command": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/freeze03-evidence/verify.sh",
+    "exit_code": 0,
+    "verified_freeze_id": "7c12bfb334dee401bfdb66d904787962e49ef59e70811a3701249b26db06ed21",
+    "note": "Read-only verification was executed after both allocation jobs and the independent report arithmetic audit; the source/dependency verifier returned the original freeze identity."
+  }
+}

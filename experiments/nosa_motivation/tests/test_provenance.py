@@ -59,7 +59,10 @@ def test_native_drift_and_unwarmed_artifacts_are_rejected(monkeypatch):
         provenance.verify_native_build_identity({"headers": "old"})
 
 
-def test_cross_category_publication_failure_rolls_back_owned_paths(tmp_path, monkeypatch):
+@pytest.mark.parametrize("failure_type", [OSError, KeyboardInterrupt])
+def test_cross_category_publication_failure_rolls_back_owned_paths(
+    tmp_path, monkeypatch, failure_type
+):
     sources, targets = {}, {}
     for name in ("data", "profile"):
         sources[name] = tmp_path / "staged" / name
@@ -67,24 +70,81 @@ def test_cross_category_publication_failure_rolls_back_owned_paths(tmp_path, mon
         (sources[name] / "artifact").write_text(name)
         targets[name] = tmp_path / "published" / name
     original = shutil.copytree
+    failure = failure_type("simulated partial copy failure")
 
     def copy_then_fail(source, target, **kwargs):
         original(source, target, **kwargs)
         if source == sources["profile"]:
-            raise OSError("simulated partial copy failure")
+            raise failure
 
     monkeypatch.setattr(provenance.shutil, "copytree", copy_then_fail)
-    with pytest.raises(OSError, match="partial"):
+    with pytest.raises(failure_type) as caught:
         provenance.publish_directories(sources, targets)
+    assert caught.value is failure
     assert all(not path.exists() for path in targets.values())
     assert all((path / "artifact").exists() for path in sources.values())
 
 
 def test_publication_preserves_existing_target(tmp_path):
     source, target = tmp_path / "source", tmp_path / "target"
+    owned = tmp_path / "owned"
     source.mkdir()
     target.mkdir()
     (target / "keep").write_text("existing")
     with pytest.raises(FileExistsError):
-        provenance.publish_directories({"data": source}, {"data": target})
+        provenance.publish_directories(
+            {"data": source, "profile": source}, {"data": owned, "profile": target}
+        )
+    assert not owned.exists()
     assert (target / "keep").read_text() == "existing"
+    assert source.is_dir()
+
+
+@pytest.mark.parametrize(
+    ("publication_error_type", "cleanup_error_type"),
+    [(OSError, OSError), (KeyboardInterrupt, OSError), (OSError, SystemExit)],
+)
+def test_publication_retains_all_errors_and_continues_rollback(
+    tmp_path, monkeypatch, publication_error_type, cleanup_error_type
+):
+    sources, targets = {}, {}
+    for name in ("data", "profile", "report"):
+        sources[name] = tmp_path / "staged" / name
+        sources[name].mkdir(parents=True)
+        (sources[name] / "artifact").write_text(name)
+        targets[name] = tmp_path / "published" / name
+    original_copy = shutil.copytree
+    original_remove = shutil.rmtree
+    publication_error = publication_error_type("partial report copy")
+    cleanup_errors = {
+        targets["report"]: cleanup_error_type("report cleanup failed"),
+        targets["profile"]: cleanup_error_type("profile cleanup failed"),
+    }
+    attempted = []
+
+    def copy_then_fail(source, target, **kwargs):
+        original_copy(source, target, **kwargs)
+        if source == sources["report"]:
+            raise publication_error
+
+    def remove_or_fail(target, *args, **kwargs):
+        attempted.append(target)
+        if target in cleanup_errors:
+            raise cleanup_errors[target]
+        return original_remove(target, *args, **kwargs)
+
+    monkeypatch.setattr(provenance.shutil, "copytree", copy_then_fail)
+    monkeypatch.setattr(provenance.shutil, "rmtree", remove_or_fail)
+    with pytest.raises(BaseExceptionGroup) as caught:
+        provenance.publish_directories(sources, targets)
+
+    expected_errors = (publication_error, *cleanup_errors.values())
+    assert len(caught.value.exceptions) == len(expected_errors)
+    assert all(
+        actual is expected
+        for actual, expected in zip(caught.value.exceptions, expected_errors, strict=True)
+    )
+    assert attempted == [targets["report"], targets["profile"], targets["data"]]
+    assert not targets["data"].exists()
+    assert all((target / "artifact").is_file() for target in cleanup_errors)
+    assert all((path / "artifact").read_text() == name for name, path in sources.items())

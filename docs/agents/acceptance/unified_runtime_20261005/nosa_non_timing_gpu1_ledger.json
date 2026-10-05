@@ -1,0 +1,438 @@
+[
+  {
+    "label": "full_sparse_native",
+    "run_id": "refactor_mfu_sparse_native_check_20261005_01",
+    "argv": [
+      "numactl",
+      "--physcpubind=16-23",
+      "--membind=0",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin/python",
+      "-B",
+      "-m",
+      "experiments.nosa_mfu.src.sparse.capture",
+      "--mode",
+      "check",
+      "--model-path",
+      "/mnt/ssd-wlcb/chenkaiqi/NOSA-8B",
+      "--device",
+      "cuda:0",
+      "--prefix-tokens",
+      "65536",
+      "--new-tokens",
+      "1024",
+      "--chunk-size",
+      "1024",
+      "--warmup",
+      "2",
+      "--repeats",
+      "5",
+      "--request-file",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_mfu/output/data/sparse_flags_native_20261004_01/request.json",
+      "--kernel-backend",
+      "native",
+      "--profile-repeats",
+      "1",
+      "--run-id",
+      "refactor_mfu_sparse_native_check_20261005_01",
+      "--output-dir",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-run-tmp/refactor_mfu_sparse_native_check_20261005_01"
+    ],
+    "cwd": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr",
+    "environment": {},
+    "data": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-run-tmp/refactor_mfu_sparse_native_check_20261005_01",
+    "inspection": "receipt",
+    "command": {
+      "pid": 2953593,
+      "started_utc": "2026-10-04T22:20:38.024003+00:00",
+      "exit_code": 0,
+      "completed_utc": "2026-10-04T22:21:00.059484+00:00"
+    },
+    "inspection_process": {
+      "pid": 2953822,
+      "started_utc": "2026-10-04T22:21:00.067093+00:00",
+      "exit_code": 0,
+      "completed_utc": "2026-10-04T22:21:00.109973+00:00"
+    },
+    "status": "accepted",
+    "inspection_result": {
+      "stage": "full_sparse_native",
+      "inspection": "receipt",
+      "passed": true,
+      "receipt": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-run-tmp/refactor_mfu_sparse_native_check_20261005_01/receipt.json",
+      "receipt_sha256": "deaf0e5e43b6574448c4a2c8376a7b0d83c3b6317d3205da490e3fa118838a6a",
+      "kind": "nosa-resident-baseline",
+      "check_fields": [
+        "finite",
+        "full_vs_extend_hidden_max_abs",
+        "instrumentation_output_equal",
+        "passed"
+      ],
+      "source_count": 131,
+      "artifacts_reopened": true
+    }
+  },
+  {
+    "label": "full_sparse_triton",
+    "run_id": "refactor_mfu_sparse_triton_check_20261005_01",
+    "argv": [
+      "numactl",
+      "--physcpubind=16-23",
+      "--membind=0",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin/python",
+      "-B",
+      "-m",
+      "experiments.nosa_mfu.src.sparse.capture",
+      "--mode",
+      "check",
+      "--model-path",
+      "/mnt/ssd-wlcb/chenkaiqi/NOSA-8B",
+      "--device",
+      "cuda:0",
+      "--prefix-tokens",
+      "65536",
+      "--new-tokens",
+      "1024",
+      "--chunk-size",
+      "1024",
+      "--warmup",
+      "2",
+      "--repeats",
+      "5",
+      "--request-file",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_mfu/output/data/sparse_flags_native_20261004_01/request.json",
+      "--kernel-backend",
+      "triton",
+      "--profile-repeats",
+      "1",
+      "--run-id",
+      "refactor_mfu_sparse_triton_check_20261005_01",
+      "--output-dir",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-run-tmp/refactor_mfu_sparse_triton_check_20261005_01"
+    ],
+    "cwd": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr",
+    "environment": {},
+    "data": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-run-tmp/refactor_mfu_sparse_triton_check_20261005_01",
+    "inspection": "receipt",
+    "command": {
+      "pid": 2953823,
+      "started_utc": "2026-10-04T22:21:00.123346+00:00",
+      "exit_code": 0,
+      "completed_utc": "2026-10-04T22:21:25.934290+00:00"
+    },
+    "inspection_process": {
+      "pid": 2954058,
+      "started_utc": "2026-10-04T22:21:25.944632+00:00",
+      "exit_code": 0,
+      "completed_utc": "2026-10-04T22:21:25.989542+00:00"
+    },
+    "status": "accepted",
+    "inspection_result": {
+      "stage": "full_sparse_triton",
+      "inspection": "receipt",
+      "passed": true,
+      "receipt": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-run-tmp/refactor_mfu_sparse_triton_check_20261005_01/receipt.json",
+      "receipt_sha256": "b31a80190b8a3f64ff6b77de709be90a98d458ac72973b2957a2e19a50966192",
+      "kind": "nosa-resident-baseline",
+      "check_fields": [
+        "finite",
+        "full_vs_extend_hidden_max_abs",
+        "instrumentation_output_equal",
+        "passed"
+      ],
+      "source_count": 131,
+      "artifacts_reopened": true
+    }
+  },
+  {
+    "label": "full_dense",
+    "run_id": "refactor_mfu_dense_check_20261005_01",
+    "argv": [
+      "numactl",
+      "--physcpubind=16-23",
+      "--membind=0",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin/python",
+      "-B",
+      "-m",
+      "experiments.nosa_mfu.src.dense.capture",
+      "--mode",
+      "check",
+      "--model-path",
+      "/mnt/ssd-wlcb/chenkaiqi/NOSA-8B",
+      "--device",
+      "cuda:0",
+      "--prefix-tokens",
+      "65536",
+      "--new-tokens",
+      "1024",
+      "--chunk-size",
+      "1024",
+      "--warmup",
+      "2",
+      "--repeats",
+      "5",
+      "--request-file",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_mfu/output/data/dense_wrapper_20261004_01/request.json",
+      "--output-dir",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-run-tmp/refactor_mfu_dense_check_20261005_01"
+    ],
+    "cwd": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr",
+    "environment": {},
+    "data": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-run-tmp/refactor_mfu_dense_check_20261005_01",
+    "inspection": "receipt",
+    "command": {
+      "pid": 2954059,
+      "started_utc": "2026-10-04T22:21:26.003514+00:00",
+      "exit_code": 0,
+      "completed_utc": "2026-10-04T22:21:47.621486+00:00"
+    },
+    "inspection_process": {
+      "pid": 2954305,
+      "started_utc": "2026-10-04T22:21:47.631775+00:00",
+      "exit_code": 0,
+      "completed_utc": "2026-10-04T22:21:47.677315+00:00"
+    },
+    "status": "accepted",
+    "inspection_result": {
+      "stage": "full_dense",
+      "inspection": "receipt",
+      "passed": true,
+      "receipt": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-run-tmp/refactor_mfu_dense_check_20261005_01/receipt.json",
+      "receipt_sha256": "04fb7a760e54379362dbb17ab60221c39ad3e88c308ad8482451bdef7b93e1f4",
+      "kind": "nosa-resident-baseline",
+      "check_fields": [
+        "candidate_hidden_max_abs",
+        "compared_shape",
+        "finite",
+        "passed",
+        "scope"
+      ],
+      "source_count": 129,
+      "artifacts_reopened": true
+    }
+  },
+  {
+    "label": "owned_offload_checkpoint",
+    "argv": [
+      "numactl",
+      "--physcpubind=16-23",
+      "--membind=0",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin/python",
+      "-B",
+      "-m",
+      "pytest",
+      "-s",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "models/nosa/tests/test_offload_checkpoint.py::test_cuda_offloaded_checkpoint_matches_independent_resident_64k_1k"
+    ],
+    "cwd": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr",
+    "environment": {
+      "NOSA_OFFLOAD_CHECKPOINT": "/mnt/ssd-wlcb/chenkaiqi/NOSA-8B",
+      "NOSA_OFFLOAD_REQUEST": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_mfu/output/data/sparse_flags_native_20261004_01/request.json"
+    },
+    "inspection": "single_pytest",
+    "source_test_sha256": "989bb7473d3cda77d1984c6aa40af8ac9f0facba909b67f6b609171d5c1c2352",
+    "command": {
+      "pid": 2954306,
+      "started_utc": "2026-10-04T22:21:47.694854+00:00",
+      "exit_code": 0,
+      "completed_utc": "2026-10-04T22:22:04.344298+00:00"
+    },
+    "inspection_process": {
+      "pid": 2954589,
+      "started_utc": "2026-10-04T22:22:04.354850+00:00",
+      "exit_code": 0,
+      "completed_utc": "2026-10-04T22:22:04.397310+00:00"
+    },
+    "status": "accepted",
+    "inspection_result": {
+      "stage": "owned_offload_checkpoint",
+      "inspection": "single_pytest",
+      "passed": true,
+      "tests_passed": 1,
+      "tests_skipped": 0,
+      "terminal_output": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-run-tmp/nosa_non_timing_gpu1_batch_01_logs/owned_offload_checkpoint.stdout.log"
+    }
+  },
+  {
+    "label": "pattern_check",
+    "run_id": "refactor_nosa_pattern_check_20261005_01",
+    "argv": [
+      "numactl",
+      "--physcpubind=16-23",
+      "--membind=0",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin/python",
+      "-B",
+      "-m",
+      "experiments.nosa_indexer_pattern_65536_1024.src.sparse_capture",
+      "--mode",
+      "check",
+      "--run-id",
+      "refactor_nosa_pattern_check_20261005_01",
+      "--output-dir",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-run-tmp/refactor_nosa_pattern_check_20261005_01",
+      "--request-file",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_mfu/output/data/dense_wrapper_20261004_01/request.json",
+      "--model-path",
+      "/mnt/ssd-wlcb/chenkaiqi/NOSA-8B",
+      "--device",
+      "cuda:0"
+    ],
+    "cwd": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr",
+    "environment": {},
+    "data": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-run-tmp/refactor_nosa_pattern_check_20261005_01",
+    "inspection": "pattern_check",
+    "command": {
+      "pid": 2954590,
+      "started_utc": "2026-10-04T22:22:04.419449+00:00",
+      "exit_code": 0,
+      "completed_utc": "2026-10-04T22:22:34.095230+00:00"
+    },
+    "inspection_process": {
+      "pid": 2954786,
+      "started_utc": "2026-10-04T22:22:34.103236+00:00",
+      "exit_code": 0,
+      "completed_utc": "2026-10-04T22:22:34.143629+00:00"
+    },
+    "status": "accepted",
+    "inspection_result": {
+      "stage": "pattern_check",
+      "inspection": "pattern_check",
+      "passed": true,
+      "data": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-run-tmp/refactor_nosa_pattern_check_20261005_01",
+      "validation": {
+        "hidden_finite": true,
+        "dense_observer_hidden_max_abs": 0.0,
+        "sparse_observer_hidden_max_abs": 0.0,
+        "full_nosa_layer0_selection_equal": true
+      },
+      "performance_measured": false
+    }
+  },
+  {
+    "label": "pattern_capture",
+    "run_id": "refactor_nosa_pattern_capture_20261005_01",
+    "argv": [
+      "numactl",
+      "--physcpubind=16-23",
+      "--membind=0",
+      "bash",
+      "experiments/nosa_indexer_pattern_65536_1024/scripts/sparse_compare.sh",
+      "refactor_nosa_pattern_capture_20261005_01",
+      "--mode",
+      "capture",
+      "--request-file",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_mfu/output/data/dense_wrapper_20261004_01/request.json",
+      "--model-path",
+      "/mnt/ssd-wlcb/chenkaiqi/NOSA-8B",
+      "--device",
+      "cuda:0"
+    ],
+    "cwd": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr",
+    "environment": {},
+    "data": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_indexer_pattern_65536_1024/output/data/refactor_nosa_pattern_capture_20261005_01",
+    "inspection": "pattern_capture",
+    "independent_check": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-run-tmp/refactor_nosa_pattern_check_20261005_01",
+    "command": {
+      "pid": 2954790,
+      "started_utc": "2026-10-04T22:22:34.157433+00:00",
+      "exit_code": 0,
+      "completed_utc": "2026-10-04T22:23:08.960998+00:00"
+    },
+    "inspection_process": {
+      "pid": 2955066,
+      "started_utc": "2026-10-04T22:23:08.969285+00:00",
+      "exit_code": 0,
+      "completed_utc": "2026-10-04T22:23:09.015025+00:00"
+    },
+    "status": "accepted",
+    "inspection_result": {
+      "stage": "pattern_capture",
+      "inspection": "pattern_capture",
+      "passed": true,
+      "independent_observer_check": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-run-tmp/refactor_nosa_pattern_check_20261005_01",
+      "data": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_indexer_pattern_65536_1024/output/data/refactor_nosa_pattern_capture_20261005_01",
+      "validation": {
+        "hidden_finite": null,
+        "dense_observer_hidden_max_abs": null,
+        "sparse_observer_hidden_max_abs": null,
+        "full_nosa_layer0_selection_equal": true
+      },
+      "performance_measured": false
+    }
+  },
+  {
+    "label": "overlap_check",
+    "run_id": "refactor_nosa_overlap_check_20261005_01",
+    "argv": [
+      "numactl",
+      "--physcpubind=16-23",
+      "--membind=0",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin/python",
+      "-B",
+      "-m",
+      "experiments.nosa_offload_overlap.src.measure",
+      "--mode",
+      "check",
+      "--run-id",
+      "refactor_nosa_overlap_check_20261005_01",
+      "--output-dir",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-run-tmp/refactor_nosa_overlap_check_20261005_01",
+      "--input-dir",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_mfu/output/data/kda_inputs_baseline_20260928_1345",
+      "--layers",
+      "0",
+      "15",
+      "31",
+      "--queries",
+      "1024",
+      "--tile-size",
+      "128",
+      "--fetch-ctas",
+      "96",
+      "--warmup",
+      "5",
+      "--repeats",
+      "20",
+      "--seed",
+      "42",
+      "--validation-receipt",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-run-tmp/refactor_nosa_overlap_check_20261005_01.json"
+    ],
+    "cwd": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr",
+    "environment": {},
+    "data": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-run-tmp/refactor_nosa_overlap_check_20261005_01",
+    "inspection": "receipt",
+    "receipt": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-run-tmp/refactor_nosa_overlap_check_20261005_01.json",
+    "command": {
+      "pid": 2955067,
+      "started_utc": "2026-10-04T22:23:09.027608+00:00",
+      "exit_code": 0,
+      "completed_utc": "2026-10-04T22:23:19.334134+00:00"
+    },
+    "inspection_process": {
+      "pid": 2955293,
+      "started_utc": "2026-10-04T22:23:19.345750+00:00",
+      "exit_code": 0,
+      "completed_utc": "2026-10-04T22:23:19.389659+00:00"
+    },
+    "status": "accepted",
+    "inspection_result": {
+      "stage": "overlap_check",
+      "inspection": "receipt",
+      "passed": true,
+      "receipt": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-run-tmp/refactor_nosa_overlap_check_20261005_01.json",
+      "receipt_sha256": "8367e0a14f04663bba2a342463d50fef0c5d6d2ee6d21e5e5151aa10b888aae4",
+      "kind": "nosa_offload_attention",
+      "check_fields": [
+        "cases",
+        "passed",
+        "run_id",
+        "scope"
+      ],
+      "source_count": 116,
+      "artifacts_reopened": true
+    }
+  }
+]

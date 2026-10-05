@@ -19,13 +19,17 @@
 
 - Supervisor：[材料依据](agents/research-supervisor/sources.md)、[重要理解修正](agents/research-supervisor/updates.md)。
 - KDA：[组件文档](agents/kda/README.md)，分别维护 indexer、sparse attention 和 offload attention 的任务与检查点。
-- 系统编码与实验执行者：[工程背景](agents/system/research-context.md)、[实现状态](agents/system/implementation-status.md)、[候选实现方案](agents/system/implementation-roadmap.md)。
+- 系统编码与实验执行者：[在办工程任务](agents/system/README.md)；已完成重构的接口见各模块 README，结果见对应实验报告。
+- 独立正确性验收：[冻结源码与证据索引](agents/acceptance/unified_runtime_20261005/evidence.json)，原始收据保留各自的源码和验证边界。
+
+完整入口见 [agent 文档导航](agents/README.md)。工程方案只保留当前任务所需材料，
+验收记录按原始身份独立保留，不另维护一份与研究状态表并行的“当前实现状态”。
 
 具体实验报告和素材留在 `experiments/<experiment>/`，模块说明留在模块内。
 职责与目录约束见 [AGENTS.md](../AGENTS.md)；[Supervisor 技能](../skills/research-supervisor/SKILL.md)在项目内更新，直接读取使用。
 
 ## 工作怎样回到研究状态
 
-每项研究工作关联状态表中的具体条目。执行者维护详细材料，返回发现、影响的条目和仍然未知的内容；
+每项研究工作关联状态表中的具体条目。执行者维护详细材料，返回发现、受影响的条目和仍然未知的内容；
 Supervisor 更新研究判断和下一步任务。完成的工作从 roadmap 移除，必要历史留在内部记录中。
 研究发现可以支持、修正或否定原判断；四环节可交叉推进。

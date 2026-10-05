@@ -1,0 +1,861 @@
+{
+  "denominator": {
+    "run_id": "refactor_final_nosa_bench_20261005_01",
+    "source_sha256": "4665ccce226af23f631e619f748369cea28d4a09b99c1947cbb6b030e58f120c",
+    "metadata_sha256": "b3ae1d3749e66b00dbd0a3962b9e9a9e3e68c3f1446d1e2e03193317dec50323",
+    "measurements_sha256": "66ada308e333d7a26029ad451e5711d922ab5ee311158c5a7b22b443211c84eb",
+    "boundary": "Synchronized runner wall latency includes token validation/transfer, admission, eviction, independent sparse history construction on miss, all candidate hidden states, and candidate discard. Model loading, request generation, warmup, counters and reports are outside latency. Bench performs no full-output CPU copies, numerical comparison or output saving between requests. Check publishes no timings."
+  },
+  "profile_run_id": "refactor_final_nosa_profile_20261005_02",
+  "request_comparisons": [
+    {
+      "sample": 0,
+      "method": "hbm",
+      "request_id": 0,
+      "prefix_cache_hit": false,
+      "accepted_runner_latency_ms": 2353.533356101252,
+      "useful_full_model_flops": 1166661887459328,
+      "request_wall_mfu_pct": 50.09666948558489,
+      "complete_compute_api_gpu_span_union_ms": 2170.536336364746,
+      "compute_api_gpu_activity_union_ms": 2131.600433898926,
+      "compute_api_gpu_activity_only_mfu_pct": 55.312515792767215,
+      "complete_compute_api_mfu_pct": 54.32029894573056,
+      "wall_to_complete_api_mfu_ratio": 0.9222458354957629,
+      "independent_gemm_bmm": {
+        "equivalent_gemm_bmm_ms": 1860.8017053455114,
+        "useful_gemm_bmm_flops": 1031063293919232,
+        "dense_executed_gemm_bmm_flops": 1031585885323264,
+        "useful_mfu_pct": 55.997602350129725,
+        "same_subset_over_request_wall_mfu_pct": 44.274041699155916,
+        "wall_to_raw_same_subset_mfu_ratio": 0.7906417389503347,
+        "excluded_useful_attention_flops": 135598593540096
+      },
+      "composition_estimate": {
+        "profiled_attention_api_ms": 397.6532839355469,
+        "raw_matrix_plus_attention_ms": 2258.4549892810583,
+        "full_work_mfu_pct": 52.20568185927701,
+        "wall_to_composition_mfu_ratio": 0.9596018613572165,
+        "is_observed_request": false
+      },
+      "boundary": "Wall latency is the accepted uninstrumented runner request including token validation/upload, admission/eviction, required history construction, candidate, and cleanup. Complete API GPU execution-span unions come from a separate exact-output profile: first correlated device activity to last completion per invocation, including intra-API gaps but excluding earlier host work. They are not API CPU/wall latency. Activity-only unions are also retained. Raw F.linear/BMM medians cover the matching GEMM/BMM subset and omit sparse QK/PV and helpers; BMM expands GQA and materializes rectangular scores. Full-model and raw-subset MFUs have different numerators. Their same-subset ratio uses GEMM/BMM FLOPs over full runner wall time. Raw matrix plus profiled attention is only a composition estimate; it does not establish an independent full-model matrix-API baseline or a passed proximity gate."
+    },
+    {
+      "sample": 0,
+      "method": "hbm",
+      "request_id": 16,
+      "prefix_cache_hit": false,
+      "accepted_runner_latency_ms": 2344.728020951152,
+      "useful_full_model_flops": 1166661887459328,
+      "request_wall_mfu_pct": 50.2848013118704,
+      "complete_compute_api_gpu_span_union_ms": 2192.741912597656,
+      "compute_api_gpu_activity_union_ms": 2154.3080032958983,
+      "compute_api_gpu_activity_only_mfu_pct": 54.729492014846976,
+      "complete_compute_api_mfu_pct": 53.77020523324028,
+      "wall_to_complete_api_mfu_ratio": 0.9351796425873558,
+      "independent_gemm_bmm": {
+        "equivalent_gemm_bmm_ms": 1860.8017053455114,
+        "useful_gemm_bmm_flops": 1031063293919232,
+        "dense_executed_gemm_bmm_flops": 1031585885323264,
+        "useful_mfu_pct": 55.997602350129725,
+        "same_subset_over_request_wall_mfu_pct": 44.440307369257994,
+        "wall_to_raw_same_subset_mfu_ratio": 0.7936108958985644,
+        "excluded_useful_attention_flops": 135598593540096
+      },
+      "composition_estimate": {
+        "profiled_attention_api_ms": 402.24144592285154,
+        "raw_matrix_plus_attention_ms": 2263.043151268363,
+        "full_work_mfu_pct": 52.099838484220804,
+        "wall_to_composition_mfu_ratio": 0.9651623263112398,
+        "is_observed_request": false
+      },
+      "boundary": "Wall latency is the accepted uninstrumented runner request including token validation/upload, admission/eviction, required history construction, candidate, and cleanup. Complete API GPU execution-span unions come from a separate exact-output profile: first correlated device activity to last completion per invocation, including intra-API gaps but excluding earlier host work. They are not API CPU/wall latency. Activity-only unions are also retained. Raw F.linear/BMM medians cover the matching GEMM/BMM subset and omit sparse QK/PV and helpers; BMM expands GQA and materializes rectangular scores. Full-model and raw-subset MFUs have different numerators. Their same-subset ratio uses GEMM/BMM FLOPs over full runner wall time. Raw matrix plus profiled attention is only a composition estimate; it does not establish an independent full-model matrix-API baseline or a passed proximity gate."
+    },
+    {
+      "sample": 1,
+      "method": "hbm",
+      "request_id": 0,
+      "prefix_cache_hit": false,
+      "accepted_runner_latency_ms": 2353.533356101252,
+      "useful_full_model_flops": 1166661887459328,
+      "request_wall_mfu_pct": 50.09666948558489,
+      "complete_compute_api_gpu_span_union_ms": 2183.342575866699,
+      "compute_api_gpu_activity_union_ms": 2144.928392700195,
+      "compute_api_gpu_activity_only_mfu_pct": 54.96881996861315,
+      "complete_compute_api_mfu_pct": 54.00168712282844,
+      "wall_to_complete_api_mfu_ratio": 0.9276871178420506,
+      "independent_gemm_bmm": {
+        "equivalent_gemm_bmm_ms": 1860.8017053455114,
+        "useful_gemm_bmm_flops": 1031063293919232,
+        "dense_executed_gemm_bmm_flops": 1031585885323264,
+        "useful_mfu_pct": 55.997602350129725,
+        "same_subset_over_request_wall_mfu_pct": 44.274041699155916,
+        "wall_to_raw_same_subset_mfu_ratio": 0.7906417389503347,
+        "excluded_useful_attention_flops": 135598593540096
+      },
+      "composition_estimate": {
+        "profiled_attention_api_ms": 400.2942426757813,
+        "raw_matrix_plus_attention_ms": 2261.0959480212928,
+        "full_work_mfu_pct": 52.144705653505284,
+        "wall_to_composition_mfu_ratio": 0.9607239864094866,
+        "is_observed_request": false
+      },
+      "boundary": "Wall latency is the accepted uninstrumented runner request including token validation/upload, admission/eviction, required history construction, candidate, and cleanup. Complete API GPU execution-span unions come from a separate exact-output profile: first correlated device activity to last completion per invocation, including intra-API gaps but excluding earlier host work. They are not API CPU/wall latency. Activity-only unions are also retained. Raw F.linear/BMM medians cover the matching GEMM/BMM subset and omit sparse QK/PV and helpers; BMM expands GQA and materializes rectangular scores. Full-model and raw-subset MFUs have different numerators. Their same-subset ratio uses GEMM/BMM FLOPs over full runner wall time. Raw matrix plus profiled attention is only a composition estimate; it does not establish an independent full-model matrix-API baseline or a passed proximity gate."
+    },
+    {
+      "sample": 1,
+      "method": "hbm",
+      "request_id": 16,
+      "prefix_cache_hit": false,
+      "accepted_runner_latency_ms": 2344.728020951152,
+      "useful_full_model_flops": 1166661887459328,
+      "request_wall_mfu_pct": 50.2848013118704,
+      "complete_compute_api_gpu_span_union_ms": 2193.3805947265623,
+      "compute_api_gpu_activity_union_ms": 2155.1849010620117,
+      "compute_api_gpu_activity_only_mfu_pct": 54.70722377732141,
+      "complete_compute_api_mfu_pct": 53.754548092280494,
+      "wall_to_complete_api_mfu_ratio": 0.9354520332967255,
+      "independent_gemm_bmm": {
+        "equivalent_gemm_bmm_ms": 1860.8017053455114,
+        "useful_gemm_bmm_flops": 1031063293919232,
+        "dense_executed_gemm_bmm_flops": 1031585885323264,
+        "useful_mfu_pct": 55.997602350129725,
+        "same_subset_over_request_wall_mfu_pct": 44.440307369257994,
+        "wall_to_raw_same_subset_mfu_ratio": 0.7936108958985644,
+        "excluded_useful_attention_flops": 135598593540096
+      },
+      "composition_estimate": {
+        "profiled_attention_api_ms": 402.52054711914064,
+        "raw_matrix_plus_attention_ms": 2263.322252464652,
+        "full_work_mfu_pct": 52.09341380155285,
+        "wall_to_composition_mfu_ratio": 0.9652813598169577,
+        "is_observed_request": false
+      },
+      "boundary": "Wall latency is the accepted uninstrumented runner request including token validation/upload, admission/eviction, required history construction, candidate, and cleanup. Complete API GPU execution-span unions come from a separate exact-output profile: first correlated device activity to last completion per invocation, including intra-API gaps but excluding earlier host work. They are not API CPU/wall latency. Activity-only unions are also retained. Raw F.linear/BMM medians cover the matching GEMM/BMM subset and omit sparse QK/PV and helpers; BMM expands GQA and materializes rectangular scores. Full-model and raw-subset MFUs have different numerators. Their same-subset ratio uses GEMM/BMM FLOPs over full runner wall time. Raw matrix plus profiled attention is only a composition estimate; it does not establish an independent full-model matrix-API baseline or a passed proximity gate."
+    },
+    {
+      "sample": 2,
+      "method": "hbm",
+      "request_id": 0,
+      "prefix_cache_hit": false,
+      "accepted_runner_latency_ms": 2353.533356101252,
+      "useful_full_model_flops": 1166661887459328,
+      "request_wall_mfu_pct": 50.09666948558489,
+      "complete_compute_api_gpu_span_union_ms": 2177.1656575927736,
+      "compute_api_gpu_activity_union_ms": 2138.288484436035,
+      "compute_api_gpu_activity_only_mfu_pct": 55.13951158699737,
+      "complete_compute_api_mfu_pct": 54.15489733301548,
+      "wall_to_complete_api_mfu_ratio": 0.9250625881076779,
+      "independent_gemm_bmm": {
+        "equivalent_gemm_bmm_ms": 1860.8017053455114,
+        "useful_gemm_bmm_flops": 1031063293919232,
+        "dense_executed_gemm_bmm_flops": 1031585885323264,
+        "useful_mfu_pct": 55.997602350129725,
+        "same_subset_over_request_wall_mfu_pct": 44.274041699155916,
+        "wall_to_raw_same_subset_mfu_ratio": 0.7906417389503347,
+        "excluded_useful_attention_flops": 135598593540096
+      },
+      "composition_estimate": {
+        "profiled_attention_api_ms": 399.1033050537109,
+        "raw_matrix_plus_attention_ms": 2259.905010399222,
+        "full_work_mfu_pct": 52.172185167674584,
+        "wall_to_composition_mfu_ratio": 0.9602179652736555,
+        "is_observed_request": false
+      },
+      "boundary": "Wall latency is the accepted uninstrumented runner request including token validation/upload, admission/eviction, required history construction, candidate, and cleanup. Complete API GPU execution-span unions come from a separate exact-output profile: first correlated device activity to last completion per invocation, including intra-API gaps but excluding earlier host work. They are not API CPU/wall latency. Activity-only unions are also retained. Raw F.linear/BMM medians cover the matching GEMM/BMM subset and omit sparse QK/PV and helpers; BMM expands GQA and materializes rectangular scores. Full-model and raw-subset MFUs have different numerators. Their same-subset ratio uses GEMM/BMM FLOPs over full runner wall time. Raw matrix plus profiled attention is only a composition estimate; it does not establish an independent full-model matrix-API baseline or a passed proximity gate."
+    },
+    {
+      "sample": 2,
+      "method": "hbm",
+      "request_id": 16,
+      "prefix_cache_hit": false,
+      "accepted_runner_latency_ms": 2344.728020951152,
+      "useful_full_model_flops": 1166661887459328,
+      "request_wall_mfu_pct": 50.2848013118704,
+      "complete_compute_api_gpu_span_union_ms": 2193.4921309814454,
+      "compute_api_gpu_activity_union_ms": 2154.7502791748047,
+      "compute_api_gpu_activity_only_mfu_pct": 54.71825844666188,
+      "complete_compute_api_mfu_pct": 53.75181474261744,
+      "wall_to_complete_api_mfu_ratio": 0.9354996022488115,
+      "independent_gemm_bmm": {
+        "equivalent_gemm_bmm_ms": 1860.8017053455114,
+        "useful_gemm_bmm_flops": 1031063293919232,
+        "dense_executed_gemm_bmm_flops": 1031585885323264,
+        "useful_mfu_pct": 55.997602350129725,
+        "same_subset_over_request_wall_mfu_pct": 44.440307369257994,
+        "wall_to_raw_same_subset_mfu_ratio": 0.7936108958985644,
+        "excluded_useful_attention_flops": 135598593540096
+      },
+      "composition_estimate": {
+        "profiled_attention_api_ms": 402.108267578125,
+        "raw_matrix_plus_attention_ms": 2262.9099729236364,
+        "full_work_mfu_pct": 52.10290469999292,
+        "wall_to_composition_mfu_ratio": 0.965105527252442,
+        "is_observed_request": false
+      },
+      "boundary": "Wall latency is the accepted uninstrumented runner request including token validation/upload, admission/eviction, required history construction, candidate, and cleanup. Complete API GPU execution-span unions come from a separate exact-output profile: first correlated device activity to last completion per invocation, including intra-API gaps but excluding earlier host work. They are not API CPU/wall latency. Activity-only unions are also retained. Raw F.linear/BMM medians cover the matching GEMM/BMM subset and omit sparse QK/PV and helpers; BMM expands GQA and materializes rectangular scores. Full-model and raw-subset MFUs have different numerators. Their same-subset ratio uses GEMM/BMM FLOPs over full runner wall time. Raw matrix plus profiled attention is only a composition estimate; it does not establish an independent full-model matrix-API baseline or a passed proximity gate."
+    },
+    {
+      "sample": 0,
+      "method": "dense_prefetch",
+      "request_id": 0,
+      "prefix_cache_hit": false,
+      "accepted_runner_latency_ms": 2790.8537100302055,
+      "useful_full_model_flops": 1166661887459328,
+      "request_wall_mfu_pct": 42.24663666180758,
+      "complete_compute_api_gpu_span_union_ms": 2430.5459779052735,
+      "compute_api_gpu_activity_union_ms": 2014.0634372558593,
+      "compute_api_gpu_activity_only_mfu_pct": 58.54045134970874,
+      "complete_compute_api_mfu_pct": 48.50934059084025,
+      "wall_to_complete_api_mfu_ratio": 0.870896947829977,
+      "independent_gemm_bmm": {
+        "equivalent_gemm_bmm_ms": 1860.8017053455114,
+        "useful_gemm_bmm_flops": 1031063293919232,
+        "dense_executed_gemm_bmm_flops": 1031585885323264,
+        "useful_mfu_pct": 55.997602350129725,
+        "same_subset_over_request_wall_mfu_pct": 37.33640125023014,
+        "wall_to_raw_same_subset_mfu_ratio": 0.6667499979156456,
+        "excluded_useful_attention_flops": 135598593540096
+      },
+      "composition_estimate": {
+        "profiled_attention_api_ms": 373.573020690918,
+        "raw_matrix_plus_attention_ms": 2234.3747260364294,
+        "full_work_mfu_pct": 52.76831199798555,
+        "wall_to_composition_mfu_ratio": 0.8006061793945648,
+        "is_observed_request": false
+      },
+      "boundary": "Wall latency is the accepted uninstrumented runner request including token validation/upload, admission/eviction, required history construction, candidate, and cleanup. Complete API GPU execution-span unions come from a separate exact-output profile: first correlated device activity to last completion per invocation, including intra-API gaps but excluding earlier host work. They are not API CPU/wall latency. Activity-only unions are also retained. Raw F.linear/BMM medians cover the matching GEMM/BMM subset and omit sparse QK/PV and helpers; BMM expands GQA and materializes rectangular scores. Full-model and raw-subset MFUs have different numerators. Their same-subset ratio uses GEMM/BMM FLOPs over full runner wall time. Raw matrix plus profiled attention is only a composition estimate; it does not establish an independent full-model matrix-API baseline or a passed proximity gate."
+    },
+    {
+      "sample": 0,
+      "method": "dense_prefetch",
+      "request_id": 16,
+      "prefix_cache_hit": true,
+      "accepted_runner_latency_ms": 70.77300210949033,
+      "useful_full_model_flops": 2351618326528,
+      "request_wall_mfu_pct": 3.358021088860814,
+      "complete_compute_api_gpu_span_union_ms": 61.312994689941405,
+      "compute_api_gpu_activity_union_ms": 38.84671044921875,
+      "compute_api_gpu_activity_only_mfu_pct": 6.117821325343108,
+      "complete_compute_api_mfu_pct": 3.8761315575513366,
+      "wall_to_complete_api_mfu_ratio": 0.8663331053144574,
+      "independent_gemm_bmm": {
+        "equivalent_gemm_bmm_ms": 6.973151907324791,
+        "useful_gemm_bmm_flops": 2078854348800,
+        "dense_executed_gemm_bmm_flops": 2079003246592,
+        "useful_mfu_pct": 30.128612901979132,
+        "same_subset_over_request_wall_mfu_pct": 2.9685245540024057,
+        "wall_to_raw_same_subset_mfu_ratio": 0.09852841760954102,
+        "excluded_useful_attention_flops": 272763977728
+      },
+      "composition_estimate": {
+        "profiled_attention_api_ms": 3.3497029418945314,
+        "raw_matrix_plus_attention_ms": 10.322854849219322,
+        "full_work_mfu_pct": 23.022432948733414,
+        "wall_to_composition_mfu_ratio": 0.1458586543107103,
+        "is_observed_request": false
+      },
+      "boundary": "Wall latency is the accepted uninstrumented runner request including token validation/upload, admission/eviction, required history construction, candidate, and cleanup. Complete API GPU execution-span unions come from a separate exact-output profile: first correlated device activity to last completion per invocation, including intra-API gaps but excluding earlier host work. They are not API CPU/wall latency. Activity-only unions are also retained. Raw F.linear/BMM medians cover the matching GEMM/BMM subset and omit sparse QK/PV and helpers; BMM expands GQA and materializes rectangular scores. Full-model and raw-subset MFUs have different numerators. Their same-subset ratio uses GEMM/BMM FLOPs over full runner wall time. Raw matrix plus profiled attention is only a composition estimate; it does not establish an independent full-model matrix-API baseline or a passed proximity gate."
+    },
+    {
+      "sample": 1,
+      "method": "dense_prefetch",
+      "request_id": 0,
+      "prefix_cache_hit": false,
+      "accepted_runner_latency_ms": 2790.8537100302055,
+      "useful_full_model_flops": 1166661887459328,
+      "request_wall_mfu_pct": 42.24663666180758,
+      "complete_compute_api_gpu_span_union_ms": 2446.5059771118163,
+      "compute_api_gpu_activity_union_ms": 2013.1930067138671,
+      "compute_api_gpu_activity_only_mfu_pct": 58.565762085751864,
+      "complete_compute_api_mfu_pct": 48.19288559560099,
+      "wall_to_complete_api_mfu_ratio": 0.8766156277984695,
+      "independent_gemm_bmm": {
+        "equivalent_gemm_bmm_ms": 1860.8017053455114,
+        "useful_gemm_bmm_flops": 1031063293919232,
+        "dense_executed_gemm_bmm_flops": 1031585885323264,
+        "useful_mfu_pct": 55.997602350129725,
+        "same_subset_over_request_wall_mfu_pct": 37.33640125023014,
+        "wall_to_raw_same_subset_mfu_ratio": 0.6667499979156456,
+        "excluded_useful_attention_flops": 135598593540096
+      },
+      "composition_estimate": {
+        "profiled_attention_api_ms": 373.3781419067383,
+        "raw_matrix_plus_attention_ms": 2234.1798472522496,
+        "full_work_mfu_pct": 52.772914771794476,
+        "wall_to_composition_mfu_ratio": 0.8005363517344909,
+        "is_observed_request": false
+      },
+      "boundary": "Wall latency is the accepted uninstrumented runner request including token validation/upload, admission/eviction, required history construction, candidate, and cleanup. Complete API GPU execution-span unions come from a separate exact-output profile: first correlated device activity to last completion per invocation, including intra-API gaps but excluding earlier host work. They are not API CPU/wall latency. Activity-only unions are also retained. Raw F.linear/BMM medians cover the matching GEMM/BMM subset and omit sparse QK/PV and helpers; BMM expands GQA and materializes rectangular scores. Full-model and raw-subset MFUs have different numerators. Their same-subset ratio uses GEMM/BMM FLOPs over full runner wall time. Raw matrix plus profiled attention is only a composition estimate; it does not establish an independent full-model matrix-API baseline or a passed proximity gate."
+    },
+    {
+      "sample": 1,
+      "method": "dense_prefetch",
+      "request_id": 16,
+      "prefix_cache_hit": true,
+      "accepted_runner_latency_ms": 70.77300210949033,
+      "useful_full_model_flops": 2351618326528,
+      "request_wall_mfu_pct": 3.358021088860814,
+      "complete_compute_api_gpu_span_union_ms": 61.351008544921875,
+      "compute_api_gpu_activity_union_ms": 38.97503332519531,
+      "compute_api_gpu_activity_only_mfu_pct": 6.097678778686931,
+      "complete_compute_api_mfu_pct": 3.873729857784558,
+      "wall_to_complete_api_mfu_ratio": 0.8668702289894099,
+      "independent_gemm_bmm": {
+        "equivalent_gemm_bmm_ms": 6.973151907324791,
+        "useful_gemm_bmm_flops": 2078854348800,
+        "dense_executed_gemm_bmm_flops": 2079003246592,
+        "useful_mfu_pct": 30.128612901979132,
+        "same_subset_over_request_wall_mfu_pct": 2.9685245540024057,
+        "wall_to_raw_same_subset_mfu_ratio": 0.09852841760954102,
+        "excluded_useful_attention_flops": 272763977728
+      },
+      "composition_estimate": {
+        "profiled_attention_api_ms": 3.382757080078125,
+        "raw_matrix_plus_attention_ms": 10.355908987402916,
+        "full_work_mfu_pct": 22.948949618497927,
+        "wall_to_composition_mfu_ratio": 0.14632569876549345,
+        "is_observed_request": false
+      },
+      "boundary": "Wall latency is the accepted uninstrumented runner request including token validation/upload, admission/eviction, required history construction, candidate, and cleanup. Complete API GPU execution-span unions come from a separate exact-output profile: first correlated device activity to last completion per invocation, including intra-API gaps but excluding earlier host work. They are not API CPU/wall latency. Activity-only unions are also retained. Raw F.linear/BMM medians cover the matching GEMM/BMM subset and omit sparse QK/PV and helpers; BMM expands GQA and materializes rectangular scores. Full-model and raw-subset MFUs have different numerators. Their same-subset ratio uses GEMM/BMM FLOPs over full runner wall time. Raw matrix plus profiled attention is only a composition estimate; it does not establish an independent full-model matrix-API baseline or a passed proximity gate."
+    },
+    {
+      "sample": 2,
+      "method": "dense_prefetch",
+      "request_id": 0,
+      "prefix_cache_hit": false,
+      "accepted_runner_latency_ms": 2790.8537100302055,
+      "useful_full_model_flops": 1166661887459328,
+      "request_wall_mfu_pct": 42.24663666180758,
+      "complete_compute_api_gpu_span_union_ms": 2429.85602154541,
+      "compute_api_gpu_activity_union_ms": 2016.6559940795898,
+      "compute_api_gpu_activity_only_mfu_pct": 58.465193374597206,
+      "complete_compute_api_mfu_pct": 48.52311479299736,
+      "wall_to_complete_api_mfu_ratio": 0.8706497272904754,
+      "independent_gemm_bmm": {
+        "equivalent_gemm_bmm_ms": 1860.8017053455114,
+        "useful_gemm_bmm_flops": 1031063293919232,
+        "dense_executed_gemm_bmm_flops": 1031585885323264,
+        "useful_mfu_pct": 55.997602350129725,
+        "same_subset_over_request_wall_mfu_pct": 37.33640125023014,
+        "wall_to_raw_same_subset_mfu_ratio": 0.6667499979156456,
+        "excluded_useful_attention_flops": 135598593540096
+      },
+      "composition_estimate": {
+        "profiled_attention_api_ms": 374.3449595336914,
+        "raw_matrix_plus_attention_ms": 2235.146664879203,
+        "full_work_mfu_pct": 52.75008773094353,
+        "wall_to_composition_mfu_ratio": 0.8008827753479819,
+        "is_observed_request": false
+      },
+      "boundary": "Wall latency is the accepted uninstrumented runner request including token validation/upload, admission/eviction, required history construction, candidate, and cleanup. Complete API GPU execution-span unions come from a separate exact-output profile: first correlated device activity to last completion per invocation, including intra-API gaps but excluding earlier host work. They are not API CPU/wall latency. Activity-only unions are also retained. Raw F.linear/BMM medians cover the matching GEMM/BMM subset and omit sparse QK/PV and helpers; BMM expands GQA and materializes rectangular scores. Full-model and raw-subset MFUs have different numerators. Their same-subset ratio uses GEMM/BMM FLOPs over full runner wall time. Raw matrix plus profiled attention is only a composition estimate; it does not establish an independent full-model matrix-API baseline or a passed proximity gate."
+    },
+    {
+      "sample": 2,
+      "method": "dense_prefetch",
+      "request_id": 16,
+      "prefix_cache_hit": true,
+      "accepted_runner_latency_ms": 70.77300210949033,
+      "useful_full_model_flops": 2351618326528,
+      "request_wall_mfu_pct": 3.358021088860814,
+      "complete_compute_api_gpu_span_union_ms": 61.294638305664066,
+      "compute_api_gpu_activity_union_ms": 39.47007092285156,
+      "compute_api_gpu_activity_only_mfu_pct": 6.021201078411683,
+      "complete_compute_api_mfu_pct": 3.8772923729561874,
+      "wall_to_complete_api_mfu_ratio": 0.866073735445578,
+      "independent_gemm_bmm": {
+        "equivalent_gemm_bmm_ms": 6.973151907324791,
+        "useful_gemm_bmm_flops": 2078854348800,
+        "dense_executed_gemm_bmm_flops": 2079003246592,
+        "useful_mfu_pct": 30.128612901979132,
+        "same_subset_over_request_wall_mfu_pct": 2.9685245540024057,
+        "wall_to_raw_same_subset_mfu_ratio": 0.09852841760954102,
+        "excluded_useful_attention_flops": 272763977728
+      },
+      "composition_estimate": {
+        "profiled_attention_api_ms": 3.3755281982421876,
+        "raw_matrix_plus_attention_ms": 10.348680105566979,
+        "full_work_mfu_pct": 22.96498018890485,
+        "wall_to_composition_mfu_ratio": 0.14622355696536532,
+        "is_observed_request": false
+      },
+      "boundary": "Wall latency is the accepted uninstrumented runner request including token validation/upload, admission/eviction, required history construction, candidate, and cleanup. Complete API GPU execution-span unions come from a separate exact-output profile: first correlated device activity to last completion per invocation, including intra-API gaps but excluding earlier host work. They are not API CPU/wall latency. Activity-only unions are also retained. Raw F.linear/BMM medians cover the matching GEMM/BMM subset and omit sparse QK/PV and helpers; BMM expands GQA and materializes rectangular scores. Full-model and raw-subset MFUs have different numerators. Their same-subset ratio uses GEMM/BMM FLOPs over full runner wall time. Raw matrix plus profiled attention is only a composition estimate; it does not establish an independent full-model matrix-API baseline or a passed proximity gate."
+    },
+    {
+      "sample": 0,
+      "method": "sync_sparse",
+      "request_id": 0,
+      "prefix_cache_hit": false,
+      "accepted_runner_latency_ms": 2751.0277980472893,
+      "useful_full_model_flops": 1166661887459328,
+      "request_wall_mfu_pct": 42.85823020312391,
+      "complete_compute_api_gpu_span_union_ms": 2250.46425012207,
+      "compute_api_gpu_activity_union_ms": 2083.3794220581053,
+      "compute_api_gpu_activity_only_mfu_pct": 56.59275570046187,
+      "complete_compute_api_mfu_pct": 52.39104893912819,
+      "wall_to_complete_api_mfu_ratio": 0.8180448964272463,
+      "independent_gemm_bmm": {
+        "equivalent_gemm_bmm_ms": 1860.8017053455114,
+        "useful_gemm_bmm_flops": 1031063293919232,
+        "dense_executed_gemm_bmm_flops": 1031585885323264,
+        "useful_mfu_pct": 55.997602350129725,
+        "same_subset_over_request_wall_mfu_pct": 37.8769105940492,
+        "wall_to_raw_same_subset_mfu_ratio": 0.6764023637515876,
+        "excluded_useful_attention_flops": 135598593540096
+      },
+      "composition_estimate": {
+        "profiled_attention_api_ms": 467.54025317382815,
+        "raw_matrix_plus_attention_ms": 2328.3419585193396,
+        "full_work_mfu_pct": 50.638688287386486,
+        "wall_to_composition_mfu_ratio": 0.8463534829317331,
+        "is_observed_request": false
+      },
+      "boundary": "Wall latency is the accepted uninstrumented runner request including token validation/upload, admission/eviction, required history construction, candidate, and cleanup. Complete API GPU execution-span unions come from a separate exact-output profile: first correlated device activity to last completion per invocation, including intra-API gaps but excluding earlier host work. They are not API CPU/wall latency. Activity-only unions are also retained. Raw F.linear/BMM medians cover the matching GEMM/BMM subset and omit sparse QK/PV and helpers; BMM expands GQA and materializes rectangular scores. Full-model and raw-subset MFUs have different numerators. Their same-subset ratio uses GEMM/BMM FLOPs over full runner wall time. Raw matrix plus profiled attention is only a composition estimate; it does not establish an independent full-model matrix-API baseline or a passed proximity gate."
+    },
+    {
+      "sample": 0,
+      "method": "sync_sparse",
+      "request_id": 16,
+      "prefix_cache_hit": true,
+      "accepted_runner_latency_ms": 28.650762047618628,
+      "useful_full_model_flops": 2351618326528,
+      "request_wall_mfu_pct": 8.294970765896707,
+      "complete_compute_api_gpu_span_union_ms": 29.460369873046876,
+      "compute_api_gpu_activity_union_ms": 19.549025695800783,
+      "compute_api_gpu_activity_only_mfu_pct": 12.156986097609419,
+      "complete_compute_api_mfu_pct": 8.06701459044106,
+      "wall_to_complete_api_mfu_ratio": 1.0282578112261953,
+      "independent_gemm_bmm": {
+        "equivalent_gemm_bmm_ms": 6.973151907324791,
+        "useful_gemm_bmm_flops": 2078854348800,
+        "dense_executed_gemm_bmm_flops": 2079003246592,
+        "useful_mfu_pct": 30.128612901979132,
+        "same_subset_over_request_wall_mfu_pct": 7.332837924984558,
+        "wall_to_raw_same_subset_mfu_ratio": 0.24338451786151985,
+        "excluded_useful_attention_flops": 272763977728
+      },
+      "composition_estimate": {
+        "profiled_attention_api_ms": 11.690066833496093,
+        "raw_matrix_plus_attention_ms": 18.663218740820884,
+        "full_work_mfu_pct": 12.733989613798327,
+        "wall_to_composition_mfu_ratio": 0.6514039211174182,
+        "is_observed_request": false
+      },
+      "boundary": "Wall latency is the accepted uninstrumented runner request including token validation/upload, admission/eviction, required history construction, candidate, and cleanup. Complete API GPU execution-span unions come from a separate exact-output profile: first correlated device activity to last completion per invocation, including intra-API gaps but excluding earlier host work. They are not API CPU/wall latency. Activity-only unions are also retained. Raw F.linear/BMM medians cover the matching GEMM/BMM subset and omit sparse QK/PV and helpers; BMM expands GQA and materializes rectangular scores. Full-model and raw-subset MFUs have different numerators. Their same-subset ratio uses GEMM/BMM FLOPs over full runner wall time. Raw matrix plus profiled attention is only a composition estimate; it does not establish an independent full-model matrix-API baseline or a passed proximity gate."
+    },
+    {
+      "sample": 1,
+      "method": "sync_sparse",
+      "request_id": 0,
+      "prefix_cache_hit": false,
+      "accepted_runner_latency_ms": 2751.0277980472893,
+      "useful_full_model_flops": 1166661887459328,
+      "request_wall_mfu_pct": 42.85823020312391,
+      "complete_compute_api_gpu_span_union_ms": 2259.641198364258,
+      "compute_api_gpu_activity_union_ms": 2083.2168201293944,
+      "compute_api_gpu_activity_only_mfu_pct": 56.59717295129195,
+      "complete_compute_api_mfu_pct": 52.17827624547384,
+      "wall_to_complete_api_mfu_ratio": 0.8213807217681249,
+      "independent_gemm_bmm": {
+        "equivalent_gemm_bmm_ms": 1860.8017053455114,
+        "useful_gemm_bmm_flops": 1031063293919232,
+        "dense_executed_gemm_bmm_flops": 1031585885323264,
+        "useful_mfu_pct": 55.997602350129725,
+        "same_subset_over_request_wall_mfu_pct": 37.8769105940492,
+        "wall_to_raw_same_subset_mfu_ratio": 0.6764023637515876,
+        "excluded_useful_attention_flops": 135598593540096
+      },
+      "composition_estimate": {
+        "profiled_attention_api_ms": 470.20904022216797,
+        "raw_matrix_plus_attention_ms": 2331.0107455676794,
+        "full_work_mfu_pct": 50.58071177410645,
+        "wall_to_composition_mfu_ratio": 0.8473235883774992,
+        "is_observed_request": false
+      },
+      "boundary": "Wall latency is the accepted uninstrumented runner request including token validation/upload, admission/eviction, required history construction, candidate, and cleanup. Complete API GPU execution-span unions come from a separate exact-output profile: first correlated device activity to last completion per invocation, including intra-API gaps but excluding earlier host work. They are not API CPU/wall latency. Activity-only unions are also retained. Raw F.linear/BMM medians cover the matching GEMM/BMM subset and omit sparse QK/PV and helpers; BMM expands GQA and materializes rectangular scores. Full-model and raw-subset MFUs have different numerators. Their same-subset ratio uses GEMM/BMM FLOPs over full runner wall time. Raw matrix plus profiled attention is only a composition estimate; it does not establish an independent full-model matrix-API baseline or a passed proximity gate."
+    },
+    {
+      "sample": 1,
+      "method": "sync_sparse",
+      "request_id": 16,
+      "prefix_cache_hit": true,
+      "accepted_runner_latency_ms": 28.650762047618628,
+      "useful_full_model_flops": 2351618326528,
+      "request_wall_mfu_pct": 8.294970765896707,
+      "complete_compute_api_gpu_span_union_ms": 28.568277893066405,
+      "compute_api_gpu_activity_union_ms": 19.392714294433596,
+      "compute_api_gpu_activity_only_mfu_pct": 12.254975244691536,
+      "complete_compute_api_mfu_pct": 8.318920534700464,
+      "wall_to_complete_api_mfu_ratio": 0.9971210484937493,
+      "independent_gemm_bmm": {
+        "equivalent_gemm_bmm_ms": 6.973151907324791,
+        "useful_gemm_bmm_flops": 2078854348800,
+        "dense_executed_gemm_bmm_flops": 2079003246592,
+        "useful_mfu_pct": 30.128612901979132,
+        "same_subset_over_request_wall_mfu_pct": 7.332837924984558,
+        "wall_to_raw_same_subset_mfu_ratio": 0.24338451786151985,
+        "excluded_useful_attention_flops": 272763977728
+      },
+      "composition_estimate": {
+        "profiled_attention_api_ms": 11.592920043945313,
+        "raw_matrix_plus_attention_ms": 18.566071951270104,
+        "full_work_mfu_pct": 12.800620089668527,
+        "wall_to_composition_mfu_ratio": 0.6480131984068209,
+        "is_observed_request": false
+      },
+      "boundary": "Wall latency is the accepted uninstrumented runner request including token validation/upload, admission/eviction, required history construction, candidate, and cleanup. Complete API GPU execution-span unions come from a separate exact-output profile: first correlated device activity to last completion per invocation, including intra-API gaps but excluding earlier host work. They are not API CPU/wall latency. Activity-only unions are also retained. Raw F.linear/BMM medians cover the matching GEMM/BMM subset and omit sparse QK/PV and helpers; BMM expands GQA and materializes rectangular scores. Full-model and raw-subset MFUs have different numerators. Their same-subset ratio uses GEMM/BMM FLOPs over full runner wall time. Raw matrix plus profiled attention is only a composition estimate; it does not establish an independent full-model matrix-API baseline or a passed proximity gate."
+    },
+    {
+      "sample": 2,
+      "method": "sync_sparse",
+      "request_id": 0,
+      "prefix_cache_hit": false,
+      "accepted_runner_latency_ms": 2751.0277980472893,
+      "useful_full_model_flops": 1166661887459328,
+      "request_wall_mfu_pct": 42.85823020312391,
+      "complete_compute_api_gpu_span_union_ms": 2262.9335287475587,
+      "compute_api_gpu_activity_union_ms": 2075.2815291748047,
+      "compute_api_gpu_activity_only_mfu_pct": 56.81358456979381,
+      "complete_compute_api_mfu_pct": 52.102362339011755,
+      "wall_to_complete_api_mfu_ratio": 0.8225774855324307,
+      "independent_gemm_bmm": {
+        "equivalent_gemm_bmm_ms": 1860.8017053455114,
+        "useful_gemm_bmm_flops": 1031063293919232,
+        "dense_executed_gemm_bmm_flops": 1031585885323264,
+        "useful_mfu_pct": 55.997602350129725,
+        "same_subset_over_request_wall_mfu_pct": 37.8769105940492,
+        "wall_to_raw_same_subset_mfu_ratio": 0.6764023637515876,
+        "excluded_useful_attention_flops": 135598593540096
+      },
+      "composition_estimate": {
+        "profiled_attention_api_ms": 469.33485900878907,
+        "raw_matrix_plus_attention_ms": 2330.1365643543004,
+        "full_work_mfu_pct": 50.599687789790984,
+        "wall_to_composition_mfu_ratio": 0.8470058230630231,
+        "is_observed_request": false
+      },
+      "boundary": "Wall latency is the accepted uninstrumented runner request including token validation/upload, admission/eviction, required history construction, candidate, and cleanup. Complete API GPU execution-span unions come from a separate exact-output profile: first correlated device activity to last completion per invocation, including intra-API gaps but excluding earlier host work. They are not API CPU/wall latency. Activity-only unions are also retained. Raw F.linear/BMM medians cover the matching GEMM/BMM subset and omit sparse QK/PV and helpers; BMM expands GQA and materializes rectangular scores. Full-model and raw-subset MFUs have different numerators. Their same-subset ratio uses GEMM/BMM FLOPs over full runner wall time. Raw matrix plus profiled attention is only a composition estimate; it does not establish an independent full-model matrix-API baseline or a passed proximity gate."
+    },
+    {
+      "sample": 2,
+      "method": "sync_sparse",
+      "request_id": 16,
+      "prefix_cache_hit": true,
+      "accepted_runner_latency_ms": 28.650762047618628,
+      "useful_full_model_flops": 2351618326528,
+      "request_wall_mfu_pct": 8.294970765896707,
+      "complete_compute_api_gpu_span_union_ms": 28.491385681152344,
+      "compute_api_gpu_activity_union_ms": 19.624836669921876,
+      "compute_api_gpu_activity_only_mfu_pct": 12.110023517796007,
+      "complete_compute_api_mfu_pct": 8.34137153823567,
+      "wall_to_complete_api_mfu_ratio": 0.9944372730400192,
+      "independent_gemm_bmm": {
+        "equivalent_gemm_bmm_ms": 6.973151907324791,
+        "useful_gemm_bmm_flops": 2078854348800,
+        "dense_executed_gemm_bmm_flops": 2079003246592,
+        "useful_mfu_pct": 30.128612901979132,
+        "same_subset_over_request_wall_mfu_pct": 7.332837924984558,
+        "wall_to_raw_same_subset_mfu_ratio": 0.24338451786151985,
+        "excluded_useful_attention_flops": 272763977728
+      },
+      "composition_estimate": {
+        "profiled_attention_api_ms": 11.684408081054688,
+        "raw_matrix_plus_attention_ms": 18.65755998837948,
+        "full_work_mfu_pct": 12.737851774491409,
+        "wall_to_composition_mfu_ratio": 0.6512064131966167,
+        "is_observed_request": false
+      },
+      "boundary": "Wall latency is the accepted uninstrumented runner request including token validation/upload, admission/eviction, required history construction, candidate, and cleanup. Complete API GPU execution-span unions come from a separate exact-output profile: first correlated device activity to last completion per invocation, including intra-API gaps but excluding earlier host work. They are not API CPU/wall latency. Activity-only unions are also retained. Raw F.linear/BMM medians cover the matching GEMM/BMM subset and omit sparse QK/PV and helpers; BMM expands GQA and materializes rectangular scores. Full-model and raw-subset MFUs have different numerators. Their same-subset ratio uses GEMM/BMM FLOPs over full runner wall time. Raw matrix plus profiled attention is only a composition estimate; it does not establish an independent full-model matrix-API baseline or a passed proximity gate."
+    },
+    {
+      "sample": 0,
+      "method": "async_sparse",
+      "request_id": 0,
+      "prefix_cache_hit": false,
+      "accepted_runner_latency_ms": 2804.8552769469097,
+      "useful_full_model_flops": 1166661887459328,
+      "request_wall_mfu_pct": 42.035745527748844,
+      "complete_compute_api_gpu_span_union_ms": 2356.050567932129,
+      "compute_api_gpu_activity_union_ms": 2191.098502380371,
+      "compute_api_gpu_activity_only_mfu_pct": 53.81053500598661,
+      "complete_compute_api_mfu_pct": 50.04314604647326,
+      "wall_to_complete_api_mfu_ratio": 0.8399900655468736,
+      "independent_gemm_bmm": {
+        "equivalent_gemm_bmm_ms": 1860.8017053455114,
+        "useful_gemm_bmm_flops": 1031063293919232,
+        "dense_executed_gemm_bmm_flops": 1031585885323264,
+        "useful_mfu_pct": 55.997602350129725,
+        "same_subset_over_request_wall_mfu_pct": 37.150021537583065,
+        "wall_to_raw_same_subset_mfu_ratio": 0.6634216462572706,
+        "excluded_useful_attention_flops": 135598593540096
+      },
+      "composition_estimate": {
+        "profiled_attention_api_ms": 572.49964453125,
+        "raw_matrix_plus_attention_ms": 2433.3013498767614,
+        "full_work_mfu_pct": 48.45441057675624,
+        "wall_to_composition_mfu_ratio": 0.8675318722773513,
+        "is_observed_request": false
+      },
+      "boundary": "Wall latency is the accepted uninstrumented runner request including token validation/upload, admission/eviction, required history construction, candidate, and cleanup. Complete API GPU execution-span unions come from a separate exact-output profile: first correlated device activity to last completion per invocation, including intra-API gaps but excluding earlier host work. They are not API CPU/wall latency. Activity-only unions are also retained. Raw F.linear/BMM medians cover the matching GEMM/BMM subset and omit sparse QK/PV and helpers; BMM expands GQA and materializes rectangular scores. Full-model and raw-subset MFUs have different numerators. Their same-subset ratio uses GEMM/BMM FLOPs over full runner wall time. Raw matrix plus profiled attention is only a composition estimate; it does not establish an independent full-model matrix-API baseline or a passed proximity gate."
+    },
+    {
+      "sample": 0,
+      "method": "async_sparse",
+      "request_id": 16,
+      "prefix_cache_hit": true,
+      "accepted_runner_latency_ms": 30.501244007609785,
+      "useful_full_model_flops": 2351618326528,
+      "request_wall_mfu_pct": 7.7917226440458,
+      "complete_compute_api_gpu_span_union_ms": 29.162588439941405,
+      "compute_api_gpu_activity_union_ms": 22.398973205566406,
+      "compute_api_gpu_activity_only_mfu_pct": 10.610184289456575,
+      "complete_compute_api_mfu_pct": 8.14938749676148,
+      "wall_to_complete_api_mfu_ratio": 0.956111443607533,
+      "independent_gemm_bmm": {
+        "equivalent_gemm_bmm_ms": 6.973151907324791,
+        "useful_gemm_bmm_flops": 2078854348800,
+        "dense_executed_gemm_bmm_flops": 2079003246592,
+        "useful_mfu_pct": 30.128612901979132,
+        "same_subset_over_request_wall_mfu_pct": 6.887961503146239,
+        "wall_to_raw_same_subset_mfu_ratio": 0.22861860668978132,
+        "excluded_useful_attention_flops": 272763977728
+      },
+      "composition_estimate": {
+        "profiled_attention_api_ms": 14.63481396484375,
+        "raw_matrix_plus_attention_ms": 21.607965872168542,
+        "full_work_mfu_pct": 10.998593528498965,
+        "wall_to_composition_mfu_ratio": 0.7084290026589588,
+        "is_observed_request": false
+      },
+      "boundary": "Wall latency is the accepted uninstrumented runner request including token validation/upload, admission/eviction, required history construction, candidate, and cleanup. Complete API GPU execution-span unions come from a separate exact-output profile: first correlated device activity to last completion per invocation, including intra-API gaps but excluding earlier host work. They are not API CPU/wall latency. Activity-only unions are also retained. Raw F.linear/BMM medians cover the matching GEMM/BMM subset and omit sparse QK/PV and helpers; BMM expands GQA and materializes rectangular scores. Full-model and raw-subset MFUs have different numerators. Their same-subset ratio uses GEMM/BMM FLOPs over full runner wall time. Raw matrix plus profiled attention is only a composition estimate; it does not establish an independent full-model matrix-API baseline or a passed proximity gate."
+    },
+    {
+      "sample": 1,
+      "method": "async_sparse",
+      "request_id": 0,
+      "prefix_cache_hit": false,
+      "accepted_runner_latency_ms": 2804.8552769469097,
+      "useful_full_model_flops": 1166661887459328,
+      "request_wall_mfu_pct": 42.035745527748844,
+      "complete_compute_api_gpu_span_union_ms": 2353.331448852539,
+      "compute_api_gpu_activity_union_ms": 2190.6145234375,
+      "compute_api_gpu_activity_only_mfu_pct": 53.82242352656788,
+      "complete_compute_api_mfu_pct": 50.100967596975224,
+      "wall_to_complete_api_mfu_ratio": 0.8390206326132251,
+      "independent_gemm_bmm": {
+        "equivalent_gemm_bmm_ms": 1860.8017053455114,
+        "useful_gemm_bmm_flops": 1031063293919232,
+        "dense_executed_gemm_bmm_flops": 1031585885323264,
+        "useful_mfu_pct": 55.997602350129725,
+        "same_subset_over_request_wall_mfu_pct": 37.150021537583065,
+        "wall_to_raw_same_subset_mfu_ratio": 0.6634216462572706,
+        "excluded_useful_attention_flops": 135598593540096
+      },
+      "composition_estimate": {
+        "profiled_attention_api_ms": 572.0243106689453,
+        "raw_matrix_plus_attention_ms": 2432.826016014457,
+        "full_work_mfu_pct": 48.46387776510984,
+        "wall_to_composition_mfu_ratio": 0.8673624040462411,
+        "is_observed_request": false
+      },
+      "boundary": "Wall latency is the accepted uninstrumented runner request including token validation/upload, admission/eviction, required history construction, candidate, and cleanup. Complete API GPU execution-span unions come from a separate exact-output profile: first correlated device activity to last completion per invocation, including intra-API gaps but excluding earlier host work. They are not API CPU/wall latency. Activity-only unions are also retained. Raw F.linear/BMM medians cover the matching GEMM/BMM subset and omit sparse QK/PV and helpers; BMM expands GQA and materializes rectangular scores. Full-model and raw-subset MFUs have different numerators. Their same-subset ratio uses GEMM/BMM FLOPs over full runner wall time. Raw matrix plus profiled attention is only a composition estimate; it does not establish an independent full-model matrix-API baseline or a passed proximity gate."
+    },
+    {
+      "sample": 1,
+      "method": "async_sparse",
+      "request_id": 16,
+      "prefix_cache_hit": true,
+      "accepted_runner_latency_ms": 30.501244007609785,
+      "useful_full_model_flops": 2351618326528,
+      "request_wall_mfu_pct": 7.7917226440458,
+      "complete_compute_api_gpu_span_union_ms": 28.749691711425783,
+      "compute_api_gpu_activity_union_ms": 22.38221435546875,
+      "compute_api_gpu_activity_only_mfu_pct": 10.618128744155802,
+      "complete_compute_api_mfu_pct": 8.266427201764012,
+      "wall_to_complete_api_mfu_ratio": 0.9425743980885827,
+      "independent_gemm_bmm": {
+        "equivalent_gemm_bmm_ms": 6.973151907324791,
+        "useful_gemm_bmm_flops": 2078854348800,
+        "dense_executed_gemm_bmm_flops": 2079003246592,
+        "useful_mfu_pct": 30.128612901979132,
+        "same_subset_over_request_wall_mfu_pct": 6.887961503146239,
+        "wall_to_raw_same_subset_mfu_ratio": 0.22861860668978132,
+        "excluded_useful_attention_flops": 272763977728
+      },
+      "composition_estimate": {
+        "profiled_attention_api_ms": 14.591388671875,
+        "raw_matrix_plus_attention_ms": 21.564540579199793,
+        "full_work_mfu_pct": 11.020741792889996,
+        "wall_to_composition_mfu_ratio": 0.707005280631165,
+        "is_observed_request": false
+      },
+      "boundary": "Wall latency is the accepted uninstrumented runner request including token validation/upload, admission/eviction, required history construction, candidate, and cleanup. Complete API GPU execution-span unions come from a separate exact-output profile: first correlated device activity to last completion per invocation, including intra-API gaps but excluding earlier host work. They are not API CPU/wall latency. Activity-only unions are also retained. Raw F.linear/BMM medians cover the matching GEMM/BMM subset and omit sparse QK/PV and helpers; BMM expands GQA and materializes rectangular scores. Full-model and raw-subset MFUs have different numerators. Their same-subset ratio uses GEMM/BMM FLOPs over full runner wall time. Raw matrix plus profiled attention is only a composition estimate; it does not establish an independent full-model matrix-API baseline or a passed proximity gate."
+    },
+    {
+      "sample": 2,
+      "method": "async_sparse",
+      "request_id": 0,
+      "prefix_cache_hit": false,
+      "accepted_runner_latency_ms": 2804.8552769469097,
+      "useful_full_model_flops": 1166661887459328,
+      "request_wall_mfu_pct": 42.035745527748844,
+      "complete_compute_api_gpu_span_union_ms": 2353.7791864624023,
+      "compute_api_gpu_activity_union_ms": 2194.64303515625,
+      "compute_api_gpu_activity_only_mfu_pct": 53.723626473728324,
+      "complete_compute_api_mfu_pct": 50.091437354031136,
+      "wall_to_complete_api_mfu_ratio": 0.8391802621005442,
+      "independent_gemm_bmm": {
+        "equivalent_gemm_bmm_ms": 1860.8017053455114,
+        "useful_gemm_bmm_flops": 1031063293919232,
+        "dense_executed_gemm_bmm_flops": 1031585885323264,
+        "useful_mfu_pct": 55.997602350129725,
+        "same_subset_over_request_wall_mfu_pct": 37.150021537583065,
+        "wall_to_raw_same_subset_mfu_ratio": 0.6634216462572706,
+        "excluded_useful_attention_flops": 135598593540096
+      },
+      "composition_estimate": {
+        "profiled_attention_api_ms": 570.721729309082,
+        "raw_matrix_plus_attention_ms": 2431.5234346545935,
+        "full_work_mfu_pct": 48.489840148570266,
+        "wall_to_composition_mfu_ratio": 0.8668980017041419,
+        "is_observed_request": false
+      },
+      "boundary": "Wall latency is the accepted uninstrumented runner request including token validation/upload, admission/eviction, required history construction, candidate, and cleanup. Complete API GPU execution-span unions come from a separate exact-output profile: first correlated device activity to last completion per invocation, including intra-API gaps but excluding earlier host work. They are not API CPU/wall latency. Activity-only unions are also retained. Raw F.linear/BMM medians cover the matching GEMM/BMM subset and omit sparse QK/PV and helpers; BMM expands GQA and materializes rectangular scores. Full-model and raw-subset MFUs have different numerators. Their same-subset ratio uses GEMM/BMM FLOPs over full runner wall time. Raw matrix plus profiled attention is only a composition estimate; it does not establish an independent full-model matrix-API baseline or a passed proximity gate."
+    },
+    {
+      "sample": 2,
+      "method": "async_sparse",
+      "request_id": 16,
+      "prefix_cache_hit": true,
+      "accepted_runner_latency_ms": 30.501244007609785,
+      "useful_full_model_flops": 2351618326528,
+      "request_wall_mfu_pct": 7.7917226440458,
+      "complete_compute_api_gpu_span_union_ms": 28.74806884765625,
+      "compute_api_gpu_activity_union_ms": 22.367829345703125,
+      "compute_api_gpu_activity_only_mfu_pct": 10.624957385563814,
+      "complete_compute_api_mfu_pct": 8.266893851725102,
+      "wall_to_complete_api_mfu_ratio": 0.942521191610541,
+      "independent_gemm_bmm": {
+        "equivalent_gemm_bmm_ms": 6.973151907324791,
+        "useful_gemm_bmm_flops": 2078854348800,
+        "dense_executed_gemm_bmm_flops": 2079003246592,
+        "useful_mfu_pct": 30.128612901979132,
+        "same_subset_over_request_wall_mfu_pct": 6.887961503146239,
+        "wall_to_raw_same_subset_mfu_ratio": 0.22861860668978132,
+        "excluded_useful_attention_flops": 272763977728
+      },
+      "composition_estimate": {
+        "profiled_attention_api_ms": 14.553761779785157,
+        "raw_matrix_plus_attention_ms": 21.526913687109946,
+        "full_work_mfu_pct": 11.040004947293752,
+        "wall_to_composition_mfu_ratio": 0.7057716623538101,
+        "is_observed_request": false
+      },
+      "boundary": "Wall latency is the accepted uninstrumented runner request including token validation/upload, admission/eviction, required history construction, candidate, and cleanup. Complete API GPU execution-span unions come from a separate exact-output profile: first correlated device activity to last completion per invocation, including intra-API gaps but excluding earlier host work. They are not API CPU/wall latency. Activity-only unions are also retained. Raw F.linear/BMM medians cover the matching GEMM/BMM subset and omit sparse QK/PV and helpers; BMM expands GQA and materializes rectangular scores. Full-model and raw-subset MFUs have different numerators. Their same-subset ratio uses GEMM/BMM FLOPs over full runner wall time. Raw matrix plus profiled attention is only a composition estimate; it does not establish an independent full-model matrix-API baseline or a passed proximity gate."
+    }
+  ],
+  "independent_attention": {
+    "run_id": "refactor_final_nosa_attention_reference_20261005_01",
+    "audit": {
+      "passed": true,
+      "captured_requests": [
+        0,
+        16
+      ],
+      "attention_calls": 2112,
+      "native_build_sha256": "e6a0cf778f9cb360f595d69d211051f3eeabc99ae212a7cfe7545cf7b387e74f",
+      "repeated_history": {
+        "history_calls_reused": 2048,
+        "final_prefix_layers_equal": 32
+      },
+      "full_useful_flop_coverage": true,
+      "boundary": "Saved operand bytes, identities, numerical observations and timing arithmetic reopened on CPU. GPU operations are not rerun. Both API compositions remain distinct from observed request latency; no efficiency acceptance is inferred."
+    },
+    "metadata_sha256": "003f121f83114d28c41ac1c3b51c7818a1f2cd2955445fea4458ac9922250a83",
+    "comparisons": [
+      {
+        "request_id": 0,
+        "accepted_runner_wall_ms": 2353.533356101252,
+        "full_useful_matrix_flops": 1166661887459328,
+        "raw_useful_flop_coverage": 1.0,
+        "accepted_runner_mfu_pct": 50.09666948558489,
+        "raw_materialized_reference": {
+          "summed_api_ms": 4230.536233976483,
+          "full_work_mfu_pct": 27.869796201480586,
+          "wall_to_reference_mfu_ratio": 1.7975255047944516
+        },
+        "independent_fa3_composition": {
+          "summed_api_ms": 2347.256744801998,
+          "full_work_mfu_pct": 50.23062897784944,
+          "wall_to_reference_mfu_ratio": 0.9973331113905896
+        },
+        "lowest_tested_reference_sum_ms": 2347.256744801998,
+        "efficiency_gate": "requires interpretation; beating the slower materialized reference alone is insufficient",
+        "boundary": "All useful matrix FLOPs are covered, but both references sum independently measured API medians and are not observed requests. Raw QK/PV duplicates selected KV per query and materializes scores. FA3 composition preserves the optimized sparse access path and includes attention helpers. The matrix-profile reference was measured in its own identified run. Both outcomes remain visible; no reference is selected because it creates an easier pass."
+      },
+      {
+        "request_id": 16,
+        "accepted_runner_wall_ms": 2344.728020951152,
+        "full_useful_matrix_flops": 1166661887459328,
+        "raw_useful_flop_coverage": 1.0,
+        "accepted_runner_mfu_pct": 50.2848013118704,
+        "raw_materialized_reference": {
+          "summed_api_ms": 4230.075305968523,
+          "full_work_mfu_pct": 27.87283301967323,
+          "wall_to_reference_mfu_ratio": 1.8040793082058915
+        },
+        "independent_fa3_composition": {
+          "summed_api_ms": 2347.328040793538,
+          "full_work_mfu_pct": 50.22910331018117,
+          "wall_to_reference_mfu_ratio": 1.0011088790764446
+        },
+        "lowest_tested_reference_sum_ms": 2347.328040793538,
+        "efficiency_gate": "requires interpretation; beating the slower materialized reference alone is insufficient",
+        "boundary": "All useful matrix FLOPs are covered, but both references sum independently measured API medians and are not observed requests. Raw QK/PV duplicates selected KV per query and materializes scores. FA3 composition preserves the optimized sparse access path and includes attention helpers. The matrix-profile reference was measured in its own identified run. Both outcomes remain visible; no reference is selected because it creates an easier pass."
+      }
+    ],
+    "candidate_comparisons": [
+      {
+        "request_id": 0,
+        "raw_useful_flop_coverage": 1.0,
+        "raw_materialized_reference": {
+          "summed_api_ms": 12.64841590821743,
+          "full_work_mfu_pct": 18.78948599810496,
+          "wall_to_reference_mfu_ratio": 0.785732239169058
+        },
+        "independent_fa3_composition": {
+          "summed_api_ms": 12.129759922623634,
+          "full_work_mfu_pct": 19.59290498094663,
+          "wall_to_reference_mfu_ratio": 0.7535128109120944
+        },
+        "lowest_tested_reference_sum_ms": 12.129759922623634,
+        "efficiency_gate": "requires interpretation; beating the slower materialized reference alone is insufficient",
+        "boundary": "All useful matrix FLOPs are covered, but both references sum independently measured API medians and are not observed requests. Raw QK/PV duplicates selected KV per query and materializes scores. FA3 composition preserves the optimized sparse access path and includes attention helpers. The matrix-profile reference was measured in its own identified run. Both outcomes remain visible; no reference is selected because it creates an easier pass.",
+        "accepted_candidate_wall_ms": 16.097616055049002,
+        "accepted_candidate_mfu_pct": 14.763504906126672,
+        "useful_candidate_matrix_flops": 2351618326528,
+        "denominator_boundary": "Clean benchmark extend_ms; excludes admission, prefix construction and separate runner cleanup_ms. Backend-internal discard and lease drain remain inside extend_ms."
+      },
+      {
+        "request_id": 16,
+        "raw_useful_flop_coverage": 1.0,
+        "raw_materialized_reference": {
+          "summed_api_ms": 12.18748790025711,
+          "full_work_mfu_pct": 19.500100065793358,
+          "wall_to_reference_mfu_ratio": 0.7246871600484709
+        },
+        "independent_fa3_composition": {
+          "summed_api_ms": 12.20105591416359,
+          "full_work_mfu_pct": 19.478415251730397,
+          "wall_to_reference_mfu_ratio": 0.725493935451725
+        },
+        "lowest_tested_reference_sum_ms": 12.18748790025711,
+        "efficiency_gate": "requires interpretation; beating the slower materialized reference alone is insufficient",
+        "boundary": "All useful matrix FLOPs are covered, but both references sum independently measured API medians and are not observed requests. Raw QK/PV duplicates selected KV per query and materializes scores. FA3 composition preserves the optimized sparse access path and includes attention helpers. The matrix-profile reference was measured in its own identified run. Both outcomes remain visible; no reference is selected because it creates an easier pass.",
+        "accepted_candidate_wall_ms": 16.817584983073175,
+        "accepted_candidate_mfu_pct": 14.131472137340788,
+        "useful_candidate_matrix_flops": 2351618326528,
+        "denominator_boundary": "Clean benchmark extend_ms; excludes admission, prefix construction and separate runner cleanup_ms. Backend-internal discard and lease drain remain inside extend_ms."
+      }
+    ]
+  }
+}

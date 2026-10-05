@@ -28,9 +28,7 @@ COLORS = {
     "sync_sparse": "#4084b5",
     "async_sparse": "#39997a",
 }
-DEFAULT_INPUT = (
-    Path(__file__).resolve().parents[1] / "report" / ("nosa_motivation_poolscan_sm90_20261004_01")
-)
+DEFAULT_INPUT = Path(__file__).resolve().parents[1] / "report" / "final"
 GIB = 1 << 30
 
 

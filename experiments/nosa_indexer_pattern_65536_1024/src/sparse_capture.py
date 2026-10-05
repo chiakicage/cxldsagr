@@ -21,9 +21,6 @@ import numpy as np
 import torch
 
 from executor.model_executor import run_chunks
-from experiments.nosa_baseline_performance.src.dense.capture import execution_split
-from experiments.nosa_baseline_performance.src.dense.sources import source_hashes
-from experiments.nosa_baseline_performance.src.sparse.capture import validate_request
 from experiments.nosa_indexer_pattern_65536_1024.src.analyze import summarize
 from experiments.nosa_indexer_pattern_65536_1024.src.capture import (
     DEFAULT_REQUEST,
@@ -31,7 +28,10 @@ from experiments.nosa_indexer_pattern_65536_1024.src.capture import (
     sha256_file,
     write_json,
 )
-from layers.attention import DenseMainAttention
+from experiments.nosa_mfu.src.dense.capture import execution_split
+from experiments.nosa_mfu.src.dense.sources import source_hashes
+from experiments.nosa_mfu.src.sparse.capture import validate_request
+from models.nosa.attention import DenseMainAttention
 from models.nosa.indexer import NosaIndexer
 from models.nosa.infer import DEFAULT_MODEL_PATH
 from models.nosa.model import NosaForCausalLM
@@ -219,7 +219,7 @@ def main(argv=None):
     parser.add_argument("--run-id", required=True)
     args = parser.parse_args(argv)
     if args.mode == "check":
-        from experiments.nosa_baseline_performance.src.acceptance import check_directory
+        from experiments.nosa_mfu.src.acceptance import check_directory
 
         check_directory(args.output_dir)
     request_bytes = args.request_file.read_bytes()
@@ -325,7 +325,7 @@ def main(argv=None):
     sources = source_hashes(
         *own.glob("*.py"),
         *own.parent.joinpath("scripts").glob("*.sh"),
-        ROOT / "experiments/nosa_baseline_performance/src/sparse/capture.py",
+        ROOT / "experiments/nosa_mfu/src/sparse/capture.py",
         ROOT / "pyproject.toml",
         ROOT / "uv.lock",
     )

@@ -245,7 +245,7 @@ class CaptureGraphOperators:
         from experiments.deepseek_v32_echo_prefill.src.operator_instrumentation import (
             InstrumentOperators,
         )
-        from models.deepseek_v32.compute_graphs import DeepSeekComputeGraphs
+        from models.deepseek_v32.execution.compute_graphs import DeepSeekComputeGraphs
 
         self.inspector = GraphInspector()
         self.stack = ExitStack()

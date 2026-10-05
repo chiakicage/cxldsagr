@@ -1,0 +1,1352 @@
+{
+  "schema": "mock-shared-runner-cleanup-cpu-profile-v1",
+  "role": "baseline",
+  "checkout": "/tmp/cxldsagr_refactor_p0_20261005/checkout",
+  "scope": "Existing SharedBackend fixture with host quota widened to 1 or 16 sessions and a local no-compute candidate returning one preallocated CPU tensor. Actual runner/audit source is unmodified. No NOSA model, real cache storage enumeration, allocator/lease audit, or CUDA synchronization is exercised; these values cannot explain full-serving cleanup causally.",
+  "unit": "microseconds",
+  "command": [
+    ".venv/bin/python",
+    "-B",
+    "/tmp/nosa_cleanup_cpu_profile_20261005_01/profile_cleanup.py",
+    "/tmp/cxldsagr_refactor_p0_20261005/checkout",
+    "baseline"
+  ],
+  "affinity": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "threads": 1,
+  "gc_enabled": true,
+  "cuda_initialized": false,
+  "source_sha256": {
+    "serving/tests/test_persistent.py": "12fc6d53dbf9eb318e36711f11ffd109e65a509b0de54977d81d30375bd8d4a3",
+    "serving/persistent.py": "c4bfb300e4ef98d0d7bb94825d26770c4d2b600eb430549b726a1941b78ae572",
+    "cache/prefix_pool.py": "92080f5fd8eac4081be6bd4128501bf6ba07b74945c550b338016f304664e7e0"
+  },
+  "script_sha256": "9c2c00bf178c768ea55b62e245ff9687cb28ee91b97800ea5bab92d126445c79",
+  "timing": "20 warmup calls then 7 batches \u00d7 500; cProfile is a separate 300-iteration pass; all unprofiled samples retained.",
+  "cases": {
+    "1": {
+      "pool_audit_us": {
+        "values": [
+          3.132428,
+          3.111008,
+          3.17484,
+          3.1557399999999998,
+          3.1400360000000003,
+          3.169066,
+          3.1414400000000002
+        ],
+        "median": 3.1414400000000002,
+        "min": 3.111008,
+        "max": 3.17484,
+        "range": 0.06383200000000011
+      },
+      "mock_candidate_cleanup_us": {
+        "values": [
+          7.5267653446644545,
+          7.435341365635395,
+          7.541161961853504,
+          7.45583395473659,
+          7.443803129717708,
+          7.500815903767943,
+          7.471354445442557
+        ],
+        "median": 7.471354445442557,
+        "min": 7.435341365635395,
+        "max": 7.541161961853504,
+        "range": 0.10582059621810913
+      },
+      "mock_candidate_extend_us": {
+        "values": [
+          3.5906166303902864,
+          3.624119097366929,
+          3.5881944932043552,
+          3.5135492216795683,
+          3.500494873151183,
+          3.5734407138079405,
+          3.5116877406835556
+        ],
+        "median": 3.5734407138079405,
+        "min": 3.500494873151183,
+        "max": 3.624119097366929,
+        "range": 0.12362422421574593
+      },
+      "mock_request_wall_us": {
+        "values": [
+          17.454412765800953,
+          17.334685660898685,
+          17.511513084173203,
+          17.2175751067698,
+          17.202071379870176,
+          17.381372628733516,
+          17.22903666086495
+        ],
+        "median": 17.334685660898685,
+        "min": 17.202071379870176,
+        "max": 17.511513084173203,
+        "range": 0.3094417043030262
+      },
+      "profile_pool_audit": [
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/cache/prefix_pool.py",
+          "line": 232,
+          "function": "audit",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 2.371466666666667,
+          "cumulative_us_per_iteration": 10.815500000000002
+        },
+        {
+          "file": "<string>",
+          "line": 2,
+          "function": "__init__",
+          "calls_per_iteration": 3.0,
+          "self_us_per_iteration": 1.3050166666666667,
+          "cumulative_us_per_iteration": 3.08785
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/cache/prefix_pool.py",
+          "line": 22,
+          "function": "from_mapping",
+          "calls_per_iteration": 2.0,
+          "self_us_per_iteration": 0.8548833333333332,
+          "cumulative_us_per_iteration": 2.929316666666667
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/cache/prefix_pool.py",
+          "line": 133,
+          "function": "shared_bytes",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.6929866666666668,
+          "cumulative_us_per_iteration": 2.4744800000000002
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/cache/prefix_pool.py",
+          "line": 16,
+          "function": "__post_init__",
+          "calls_per_iteration": 3.0,
+          "self_us_per_iteration": 1.26644,
+          "cumulative_us_per_iteration": 1.7828333333333335
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/cache/prefix_pool.py",
+          "line": 29,
+          "function": "__add__",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.35250000000000004,
+          "cumulative_us_per_iteration": 1.365916666666667
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/cache/prefix_pool.py",
+          "line": 117,
+          "function": "reserved_host_pages",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.51859,
+          "cumulative_us_per_iteration": 1.2399900000000001
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.sum>",
+          "calls_per_iteration": 2.0,
+          "self_us_per_iteration": 0.71755,
+          "cumulative_us_per_iteration": 1.1429
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/cache/prefix_pool.py",
+          "line": 125,
+          "function": "reserved_hbm_tokens",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.47430666666666665,
+          "cumulative_us_per_iteration": 1.1360966666666668
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.getattr>",
+          "calls_per_iteration": 6.0,
+          "self_us_per_iteration": 0.5163933333333334,
+          "cumulative_us_per_iteration": 0.5163933333333334
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/serving/tests/test_persistent.py",
+          "line": 169,
+          "function": "session_host_pages",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.2400666666666667,
+          "cumulative_us_per_iteration": 0.3466266666666667
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/cache/prefix_pool.py",
+          "line": 26,
+          "function": "fits",
+          "calls_per_iteration": 2.0,
+          "self_us_per_iteration": 0.30414666666666673,
+          "cumulative_us_per_iteration": 0.30414666666666673
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'values' of 'collections.OrderedDict' objects>",
+          "calls_per_iteration": 2.0,
+          "self_us_per_iteration": 0.24029,
+          "cumulative_us_per_iteration": 0.24029
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/cache/prefix_pool.py",
+          "line": 119,
+          "function": "<genexpr>",
+          "calls_per_iteration": 2.0,
+          "self_us_per_iteration": 0.21896000000000002,
+          "cumulative_us_per_iteration": 0.21896000000000002
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/cache/prefix_pool.py",
+          "line": 127,
+          "function": "<genexpr>",
+          "calls_per_iteration": 2.0,
+          "self_us_per_iteration": 0.20639000000000002,
+          "cumulative_us_per_iteration": 0.20639000000000002
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/serving/tests/test_persistent.py",
+          "line": 40,
+          "function": "session_bytes",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.14867333333333335,
+          "cumulative_us_per_iteration": 0.14867333333333335
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/serving/tests/test_persistent.py",
+          "line": 163,
+          "function": "shared_bytes",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.14107000000000003,
+          "cumulative_us_per_iteration": 0.14107000000000003
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'items' of 'collections.OrderedDict' objects>",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.13921,
+          "cumulative_us_per_iteration": 0.13921
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/serving/tests/test_persistent.py",
+          "line": 166,
+          "function": "estimate_session_host_pages",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.10656000000000002,
+          "cumulative_us_per_iteration": 0.10656000000000002
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'disable' of '_lsprof.Profiler' objects>",
+          "calls_per_iteration": 0.0033333333333333335,
+          "self_us_per_iteration": 0.04028,
+          "cumulative_us_per_iteration": 0.04028
+        }
+      ],
+      "profile_mock_execute": [
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/lib/python3.12/site-packages/torch/autograd/grad_mode.py",
+          "line": 293,
+          "function": "__exit__",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 3.374076666666667,
+          "cumulative_us_per_iteration": 30.57271666666667
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/lib/python3.12/site-packages/torch/autograd/grad_mode.py",
+          "line": 289,
+          "function": "__enter__",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 6.664173333333333,
+          "cumulative_us_per_iteration": 26.45998666666667
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/cache/prefix_pool.py",
+          "line": 232,
+          "function": "audit",
+          "calls_per_iteration": 2.0,
+          "self_us_per_iteration": 5.385026666666667,
+          "cumulative_us_per_iteration": 24.15587
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/cache/prefix_pool.py",
+          "line": 110,
+          "function": "session_reserved",
+          "calls_per_iteration": 4.0,
+          "self_us_per_iteration": 3.1844433333333337,
+          "cumulative_us_per_iteration": 13.254086666666668
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/cache/prefix_pool.py",
+          "line": 16,
+          "function": "__post_init__",
+          "calls_per_iteration": 19.0,
+          "self_us_per_iteration": 8.179393333333332,
+          "cumulative_us_per_iteration": 11.50157
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/cache/prefix_pool.py",
+          "line": 29,
+          "function": "__add__",
+          "calls_per_iteration": 8.0,
+          "self_us_per_iteration": 2.96425,
+          "cumulative_us_per_iteration": 11.10401
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/cache/prefix_pool.py",
+          "line": 105,
+          "function": "reserved",
+          "calls_per_iteration": 2.0,
+          "self_us_per_iteration": 0.9620700000000001,
+          "cumulative_us_per_iteration": 10.51497
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/cache/prefix_pool.py",
+          "line": 22,
+          "function": "from_mapping",
+          "calls_per_iteration": 6.0,
+          "self_us_per_iteration": 2.8982466666666666,
+          "cumulative_us_per_iteration": 9.789923333333334
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/cache/prefix_pool.py",
+          "line": 133,
+          "function": "shared_bytes",
+          "calls_per_iteration": 3.0,
+          "self_us_per_iteration": 2.3072333333333335,
+          "cumulative_us_per_iteration": 8.21202
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/serving/persistent.py",
+          "line": 213,
+          "function": "_validate",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 3.7515733333333334,
+          "cumulative_us_per_iteration": 5.611773333333334
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/cache/prefix_pool.py",
+          "line": 153,
+          "function": "acquire",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 2.56687,
+          "cumulative_us_per_iteration": 5.0532633333333346
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/cache/prefix_pool.py",
+          "line": 117,
+          "function": "reserved_host_pages",
+          "calls_per_iteration": 3.0,
+          "self_us_per_iteration": 1.7415533333333337,
+          "cumulative_us_per_iteration": 4.177186666666667
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.sum>",
+          "calls_per_iteration": 6.0,
+          "self_us_per_iteration": 2.4810966666666667,
+          "cumulative_us_per_iteration": 3.9675100000000003
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/cache/prefix_pool.py",
+          "line": 125,
+          "function": "reserved_hbm_tokens",
+          "calls_per_iteration": 3.0,
+          "self_us_per_iteration": 1.5515233333333334,
+          "cumulative_us_per_iteration": 3.820466666666667
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.getattr>",
+          "calls_per_iteration": 40.0,
+          "self_us_per_iteration": 3.6066800000000003,
+          "cumulative_us_per_iteration": 3.6066800000000003
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/serving/persistent.py",
+          "line": 37,
+          "function": "_prepare_token_input",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 1.0975266666666668,
+          "cumulative_us_per_iteration": 3.5315766666666666
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/serving/persistent.py",
+          "line": 28,
+          "function": "_packed_prefix_digest",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.9860233333333334,
+          "cumulative_us_per_iteration": 1.6847866666666669
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.len>",
+          "calls_per_iteration": 8.0,
+          "self_us_per_iteration": 1.19045,
+          "cumulative_us_per_iteration": 1.4511133333333333
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'values' of 'collections.OrderedDict' objects>",
+          "calls_per_iteration": 10.0,
+          "self_us_per_iteration": 1.2128766666666666,
+          "cumulative_us_per_iteration": 1.2128766666666666
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/cache/prefix_pool.py",
+          "line": 26,
+          "function": "fits",
+          "calls_per_iteration": 6.0,
+          "self_us_per_iteration": 0.9761033333333334,
+          "cumulative_us_per_iteration": 0.9761033333333334
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/lib/python3.12/site-packages/torch/autograd/grad_mode.py",
+          "line": 284,
+          "function": "__new__",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.6244533333333334,
+          "cumulative_us_per_iteration": 0.9357266666666667
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'get' of 'dict' objects>",
+          "calls_per_iteration": 6.0,
+          "self_us_per_iteration": 0.9287333333333335,
+          "cumulative_us_per_iteration": 0.9287333333333335
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/serving/tests/test_persistent.py",
+          "line": 169,
+          "function": "session_host_pages",
+          "calls_per_iteration": 2.0,
+          "self_us_per_iteration": 0.57929,
+          "cumulative_us_per_iteration": 0.83453
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method time.perf_counter>",
+          "calls_per_iteration": 5.0,
+          "self_us_per_iteration": 0.8156566666666667,
+          "cumulative_us_per_iteration": 0.8156566666666667
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/lib/python3.12/site-packages/torch/autograd/grad_mode.py",
+          "line": 279,
+          "function": "__init__",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.6682233333333334,
+          "cumulative_us_per_iteration": 0.7724300000000001
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/cache/prefix_pool.py",
+          "line": 119,
+          "function": "<genexpr>",
+          "calls_per_iteration": 6.0,
+          "self_us_per_iteration": 0.7652100000000001,
+          "cumulative_us_per_iteration": 0.7652100000000001
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'update' of 'dict' objects>",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.7521133333333334,
+          "cumulative_us_per_iteration": 0.7521133333333334
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method torch.frombuffer>",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.7492633333333334,
+          "cumulative_us_per_iteration": 0.7492633333333334
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/cache/prefix_pool.py",
+          "line": 127,
+          "function": "<genexpr>",
+          "calls_per_iteration": 6.0,
+          "self_us_per_iteration": 0.7212033333333334,
+          "cumulative_us_per_iteration": 0.7212033333333334
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'to' of 'torch._C.TensorBase' objects>",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.7104766666666666,
+          "cumulative_us_per_iteration": 0.7104766666666666
+        },
+        {
+          "file": "/tmp/nosa_cleanup_cpu_profile_20261005_01/profile_cleanup.py",
+          "line": 55,
+          "function": "no_compute",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.41530333333333336,
+          "cumulative_us_per_iteration": 0.5915833333333335
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.isinstance>",
+          "calls_per_iteration": 4.0,
+          "self_us_per_iteration": 0.5181433333333334,
+          "cumulative_us_per_iteration": 0.5181433333333334
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/serving/tests/test_persistent.py",
+          "line": 163,
+          "function": "shared_bytes",
+          "calls_per_iteration": 3.0,
+          "self_us_per_iteration": 0.5100466666666666,
+          "cumulative_us_per_iteration": 0.5100466666666666
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'hexdigest' of '_hashlib.HASH' objects>",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.40266666666666673,
+          "cumulative_us_per_iteration": 0.40266666666666673
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/serving/tests/test_persistent.py",
+          "line": 166,
+          "function": "estimate_session_host_pages",
+          "calls_per_iteration": 3.0,
+          "self_us_per_iteration": 0.4018133333333333,
+          "cumulative_us_per_iteration": 0.4018133333333333
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/serving/tests/test_persistent.py",
+          "line": 47,
+          "function": "synchronize",
+          "calls_per_iteration": 4.0,
+          "self_us_per_iteration": 0.3818133333333334,
+          "cumulative_us_per_iteration": 0.3818133333333334
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/cache/prefix_pool.py",
+          "line": 144,
+          "function": "__len__",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.2606633333333333,
+          "cumulative_us_per_iteration": 0.37944333333333335
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/serving/tests/test_persistent.py",
+          "line": 40,
+          "function": "session_bytes",
+          "calls_per_iteration": 2.0,
+          "self_us_per_iteration": 0.3407866666666667,
+          "cumulative_us_per_iteration": 0.3407866666666667
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'items' of 'collections.OrderedDict' objects>",
+          "calls_per_iteration": 2.0,
+          "self_us_per_iteration": 0.31337000000000004,
+          "cumulative_us_per_iteration": 0.31337000000000004
+        },
+        {
+          "file": "<string>",
+          "line": 2,
+          "function": "__eq__",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.30566333333333334,
+          "cumulative_us_per_iteration": 0.30566333333333334
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method _hashlib.openssl_sha256>",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.2960966666666666,
+          "cumulative_us_per_iteration": 0.2960966666666666
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.all>",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.29267,
+          "cumulative_us_per_iteration": 0.29267
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.min>",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.2605333333333334,
+          "cumulative_us_per_iteration": 0.2605333333333334
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/serving/tests/test_persistent.py",
+          "line": 37,
+          "function": "truncate",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.23991666666666664,
+          "cumulative_us_per_iteration": 0.23991666666666664
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/serving/tests/test_persistent.py",
+          "line": 18,
+          "function": "estimate_session_bytes",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.20085333333333333,
+          "cumulative_us_per_iteration": 0.20085333333333333
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'items' of 'dict' objects>",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.19105000000000003,
+          "cumulative_us_per_iteration": 0.19105000000000003
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'move_to_end' of 'collections.OrderedDict' objects>",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.18962,
+          "cumulative_us_per_iteration": 0.18962
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method __new__ of type object at 0x14484b0>",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.18747333333333335,
+          "cumulative_us_per_iteration": 0.18747333333333335
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'extend' of 'list' objects>",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.17628000000000002,
+          "cumulative_us_per_iteration": 0.17628000000000002
+        },
+        {
+          "file": "<string>",
+          "line": 2,
+          "function": "__init__",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.15733666666666668,
+          "cumulative_us_per_iteration": 0.15733666666666668
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/serving/persistent.py",
+          "line": 117,
+          "function": "<lambda>",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.15421333333333334,
+          "cumulative_us_per_iteration": 0.15421333333333334
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/lib/python3.12/site-packages/torch/_jit_internal.py",
+          "line": 104,
+          "function": "is_scripting",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.10420666666666667,
+          "cumulative_us_per_iteration": 0.10420666666666667
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/serving/persistent.py",
+          "line": 119,
+          "function": "<lambda>",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.10140333333333335,
+          "cumulative_us_per_iteration": 0.10140333333333335
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'disable' of '_lsprof.Profiler' objects>",
+          "calls_per_iteration": 0.0033333333333333335,
+          "self_us_per_iteration": 0.041253333333333336,
+          "cumulative_us_per_iteration": 0.041253333333333336
+        }
+      ]
+    },
+    "16": {
+      "pool_audit_us": {
+        "values": [
+          27.685012,
+          27.50399,
+          27.894914,
+          27.514264,
+          27.523784,
+          27.803103999999998,
+          28.002148000000002
+        ],
+        "median": 27.685012,
+        "min": 27.50399,
+        "max": 28.002148000000002,
+        "range": 0.4981580000000001
+      },
+      "mock_candidate_cleanup_us": {
+        "values": [
+          56.12529441714287,
+          56.04379600845277,
+          55.84210460074246,
+          56.02781125344336,
+          55.888888193294406,
+          56.3005234580487,
+          56.45892024040222
+        ],
+        "median": 56.04379600845277,
+        "min": 55.84210460074246,
+        "max": 56.45892024040222,
+        "range": 0.6168156396597624
+      },
+      "mock_candidate_extend_us": {
+        "values": [
+          3.79117950797081,
+          3.690664656460285,
+          3.6962297745049,
+          3.668383462354541,
+          3.764637280255556,
+          3.605205100029707,
+          3.663909388706088
+        ],
+        "median": 3.690664656460285,
+        "min": 3.605205100029707,
+        "max": 3.79117950797081,
+        "range": 0.18597440794110298
+      },
+      "mock_request_wall_us": {
+        "values": [
+          66.39080448076129,
+          66.36505667120218,
+          65.95105514861643,
+          66.13370031118393,
+          66.27315143123269,
+          66.38739327900112,
+          66.65575969964266
+        ],
+        "median": 66.36505667120218,
+        "min": 65.95105514861643,
+        "max": 66.65575969964266,
+        "range": 0.7047045510262251
+      },
+      "profile_pool_audit": [
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/cache/prefix_pool.py",
+          "line": 232,
+          "function": "audit",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 22.569866666666666,
+          "cumulative_us_per_iteration": 87.01904
+        },
+        {
+          "file": "<string>",
+          "line": 2,
+          "function": "__init__",
+          "calls_per_iteration": 33.0,
+          "self_us_per_iteration": 13.86210666666667,
+          "cumulative_us_per_iteration": 32.564466666666675
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/cache/prefix_pool.py",
+          "line": 22,
+          "function": "from_mapping",
+          "calls_per_iteration": 17.0,
+          "self_us_per_iteration": 7.299083333333333,
+          "cumulative_us_per_iteration": 24.155226666666668
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/cache/prefix_pool.py",
+          "line": 29,
+          "function": "__add__",
+          "calls_per_iteration": 16.0,
+          "self_us_per_iteration": 5.771646666666667,
+          "cumulative_us_per_iteration": 21.47997
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/cache/prefix_pool.py",
+          "line": 16,
+          "function": "__post_init__",
+          "calls_per_iteration": 33.0,
+          "self_us_per_iteration": 13.218833333333334,
+          "cumulative_us_per_iteration": 18.702360000000002
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.sum>",
+          "calls_per_iteration": 2.0,
+          "self_us_per_iteration": 3.3409866666666663,
+          "cumulative_us_per_iteration": 6.71851
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.getattr>",
+          "calls_per_iteration": 66.0,
+          "self_us_per_iteration": 5.483526666666666,
+          "cumulative_us_per_iteration": 5.483526666666666
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/serving/tests/test_persistent.py",
+          "line": 169,
+          "function": "session_host_pages",
+          "calls_per_iteration": 16.0,
+          "self_us_per_iteration": 3.524493333333333,
+          "cumulative_us_per_iteration": 5.016743333333334
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/cache/prefix_pool.py",
+          "line": 117,
+          "function": "reserved_host_pages",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.5910233333333333,
+          "cumulative_us_per_iteration": 4.243953333333334
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/cache/prefix_pool.py",
+          "line": 125,
+          "function": "reserved_hbm_tokens",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.5057033333333334,
+          "cumulative_us_per_iteration": 3.819113333333333
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/cache/prefix_pool.py",
+          "line": 133,
+          "function": "shared_bytes",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.7635033333333334,
+          "cumulative_us_per_iteration": 2.6141300000000003
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/cache/prefix_pool.py",
+          "line": 26,
+          "function": "fits",
+          "calls_per_iteration": 17.0,
+          "self_us_per_iteration": 2.482113333333334,
+          "cumulative_us_per_iteration": 2.482113333333334
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/serving/tests/test_persistent.py",
+          "line": 40,
+          "function": "session_bytes",
+          "calls_per_iteration": 16.0,
+          "self_us_per_iteration": 2.1801066666666666,
+          "cumulative_us_per_iteration": 2.1801066666666666
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/cache/prefix_pool.py",
+          "line": 119,
+          "function": "<genexpr>",
+          "calls_per_iteration": 17.0,
+          "self_us_per_iteration": 1.7810133333333333,
+          "cumulative_us_per_iteration": 1.7810133333333333
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/cache/prefix_pool.py",
+          "line": 127,
+          "function": "<genexpr>",
+          "calls_per_iteration": 17.0,
+          "self_us_per_iteration": 1.59651,
+          "cumulative_us_per_iteration": 1.59651
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/serving/tests/test_persistent.py",
+          "line": 166,
+          "function": "estimate_session_host_pages",
+          "calls_per_iteration": 16.0,
+          "self_us_per_iteration": 1.49225,
+          "cumulative_us_per_iteration": 1.49225
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'values' of 'collections.OrderedDict' objects>",
+          "calls_per_iteration": 2.0,
+          "self_us_per_iteration": 0.24783000000000002,
+          "cumulative_us_per_iteration": 0.24783000000000002
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/serving/tests/test_persistent.py",
+          "line": 163,
+          "function": "shared_bytes",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.16146000000000002,
+          "cumulative_us_per_iteration": 0.16146000000000002
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'items' of 'collections.OrderedDict' objects>",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.14698333333333335,
+          "cumulative_us_per_iteration": 0.14698333333333335
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'disable' of '_lsprof.Profiler' objects>",
+          "calls_per_iteration": 0.0033333333333333335,
+          "self_us_per_iteration": 0.04178666666666667,
+          "cumulative_us_per_iteration": 0.04178666666666667
+        }
+      ],
+      "profile_mock_execute": [
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/cache/prefix_pool.py",
+          "line": 232,
+          "function": "audit",
+          "calls_per_iteration": 2.0,
+          "self_us_per_iteration": 47.66921,
+          "cumulative_us_per_iteration": 181.62308000000002
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/cache/prefix_pool.py",
+          "line": 29,
+          "function": "__add__",
+          "calls_per_iteration": 98.0,
+          "self_us_per_iteration": 34.477243333333334,
+          "cumulative_us_per_iteration": 129.26039
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/cache/prefix_pool.py",
+          "line": 110,
+          "function": "session_reserved",
+          "calls_per_iteration": 4.0,
+          "self_us_per_iteration": 16.57957,
+          "cumulative_us_per_iteration": 103.22504333333335
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/cache/prefix_pool.py",
+          "line": 16,
+          "function": "__post_init__",
+          "calls_per_iteration": 139.0,
+          "self_us_per_iteration": 55.540516666666676,
+          "cumulative_us_per_iteration": 78.58045333333334
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/cache/prefix_pool.py",
+          "line": 105,
+          "function": "reserved",
+          "calls_per_iteration": 2.0,
+          "self_us_per_iteration": 0.9973233333333333,
+          "cumulative_us_per_iteration": 56.34367333333333
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/cache/prefix_pool.py",
+          "line": 22,
+          "function": "from_mapping",
+          "calls_per_iteration": 36.0,
+          "self_us_per_iteration": 15.918796666666667,
+          "cumulative_us_per_iteration": 53.367046666666674
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/lib/python3.12/site-packages/torch/autograd/grad_mode.py",
+          "line": 293,
+          "function": "__exit__",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 3.8445300000000007,
+          "cumulative_us_per_iteration": 33.25231666666667
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/lib/python3.12/site-packages/torch/autograd/grad_mode.py",
+          "line": 289,
+          "function": "__enter__",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 7.305066666666667,
+          "cumulative_us_per_iteration": 28.627840000000003
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.getattr>",
+          "calls_per_iteration": 280.0,
+          "self_us_per_iteration": 23.350990000000003,
+          "cumulative_us_per_iteration": 23.350990000000003
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.sum>",
+          "calls_per_iteration": 6.0,
+          "self_us_per_iteration": 10.333523333333334,
+          "cumulative_us_per_iteration": 20.692623333333334
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/cache/prefix_pool.py",
+          "line": 117,
+          "function": "reserved_host_pages",
+          "calls_per_iteration": 3.0,
+          "self_us_per_iteration": 1.943293333333333,
+          "cumulative_us_per_iteration": 13.273883333333334
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/cache/prefix_pool.py",
+          "line": 125,
+          "function": "reserved_hbm_tokens",
+          "calls_per_iteration": 3.0,
+          "self_us_per_iteration": 1.6554366666666667,
+          "cumulative_us_per_iteration": 11.869183333333334
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/serving/tests/test_persistent.py",
+          "line": 169,
+          "function": "session_host_pages",
+          "calls_per_iteration": 32.0,
+          "self_us_per_iteration": 7.355423333333333,
+          "cumulative_us_per_iteration": 10.541763333333336
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/cache/prefix_pool.py",
+          "line": 133,
+          "function": "shared_bytes",
+          "calls_per_iteration": 3.0,
+          "self_us_per_iteration": 2.4998433333333336,
+          "cumulative_us_per_iteration": 8.493013333333334
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/serving/persistent.py",
+          "line": 213,
+          "function": "_validate",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 3.959693333333334,
+          "cumulative_us_per_iteration": 5.885823333333334
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/cache/prefix_pool.py",
+          "line": 119,
+          "function": "<genexpr>",
+          "calls_per_iteration": 51.0,
+          "self_us_per_iteration": 5.471826666666667,
+          "cumulative_us_per_iteration": 5.471826666666667
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/cache/prefix_pool.py",
+          "line": 26,
+          "function": "fits",
+          "calls_per_iteration": 36.0,
+          "self_us_per_iteration": 5.464026666666667,
+          "cumulative_us_per_iteration": 5.464026666666667
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/cache/prefix_pool.py",
+          "line": 153,
+          "function": "acquire",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 2.8504766666666668,
+          "cumulative_us_per_iteration": 5.407963333333334
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/cache/prefix_pool.py",
+          "line": 127,
+          "function": "<genexpr>",
+          "calls_per_iteration": 51.0,
+          "self_us_per_iteration": 4.887273333333334,
+          "cumulative_us_per_iteration": 4.887273333333334
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/serving/tests/test_persistent.py",
+          "line": 40,
+          "function": "session_bytes",
+          "calls_per_iteration": 32.0,
+          "self_us_per_iteration": 4.4782399999999996,
+          "cumulative_us_per_iteration": 4.4782399999999996
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/serving/persistent.py",
+          "line": 37,
+          "function": "_prepare_token_input",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 1.2698033333333334,
+          "cumulative_us_per_iteration": 3.99256
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/serving/tests/test_persistent.py",
+          "line": 166,
+          "function": "estimate_session_host_pages",
+          "calls_per_iteration": 33.0,
+          "self_us_per_iteration": 3.3316033333333333,
+          "cumulative_us_per_iteration": 3.3316033333333333
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/serving/persistent.py",
+          "line": 28,
+          "function": "_packed_prefix_digest",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 1.1382033333333335,
+          "cumulative_us_per_iteration": 1.9124100000000002
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.len>",
+          "calls_per_iteration": 8.0,
+          "self_us_per_iteration": 1.2820866666666666,
+          "cumulative_us_per_iteration": 1.5561666666666667
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'values' of 'collections.OrderedDict' objects>",
+          "calls_per_iteration": 10.0,
+          "self_us_per_iteration": 1.3573766666666667,
+          "cumulative_us_per_iteration": 1.3573766666666667
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/lib/python3.12/site-packages/torch/autograd/grad_mode.py",
+          "line": 284,
+          "function": "__new__",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.7087133333333334,
+          "cumulative_us_per_iteration": 1.0456666666666667
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/lib/python3.12/site-packages/torch/autograd/grad_mode.py",
+          "line": 279,
+          "function": "__init__",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.85943,
+          "cumulative_us_per_iteration": 0.9698866666666667
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'get' of 'dict' objects>",
+          "calls_per_iteration": 6.0,
+          "self_us_per_iteration": 0.9400200000000001,
+          "cumulative_us_per_iteration": 0.9400200000000001
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'update' of 'dict' objects>",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.8905500000000001,
+          "cumulative_us_per_iteration": 0.8905500000000001
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'to' of 'torch._C.TensorBase' objects>",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.8180833333333334,
+          "cumulative_us_per_iteration": 0.8180833333333334
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method torch.frombuffer>",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.8103466666666667,
+          "cumulative_us_per_iteration": 0.8103466666666667
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method time.perf_counter>",
+          "calls_per_iteration": 5.0,
+          "self_us_per_iteration": 0.7988433333333333,
+          "cumulative_us_per_iteration": 0.7988433333333333
+        },
+        {
+          "file": "/tmp/nosa_cleanup_cpu_profile_20261005_01/profile_cleanup.py",
+          "line": 55,
+          "function": "no_compute",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.42812999999999996,
+          "cumulative_us_per_iteration": 0.6124633333333334
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.isinstance>",
+          "calls_per_iteration": 4.0,
+          "self_us_per_iteration": 0.54689,
+          "cumulative_us_per_iteration": 0.54689
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/serving/tests/test_persistent.py",
+          "line": 163,
+          "function": "shared_bytes",
+          "calls_per_iteration": 3.0,
+          "self_us_per_iteration": 0.5368233333333334,
+          "cumulative_us_per_iteration": 0.5368233333333334
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'hexdigest' of '_hashlib.HASH' objects>",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.44451999999999997,
+          "cumulative_us_per_iteration": 0.44451999999999997
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/serving/tests/test_persistent.py",
+          "line": 47,
+          "function": "synchronize",
+          "calls_per_iteration": 4.0,
+          "self_us_per_iteration": 0.4211733333333334,
+          "cumulative_us_per_iteration": 0.4211733333333334
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/cache/prefix_pool.py",
+          "line": 144,
+          "function": "__len__",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.27408,
+          "cumulative_us_per_iteration": 0.40366
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'items' of 'collections.OrderedDict' objects>",
+          "calls_per_iteration": 2.0,
+          "self_us_per_iteration": 0.3643866666666667,
+          "cumulative_us_per_iteration": 0.3643866666666667
+        },
+        {
+          "file": "<string>",
+          "line": 2,
+          "function": "__eq__",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.3545466666666667,
+          "cumulative_us_per_iteration": 0.3545466666666667
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method _hashlib.openssl_sha256>",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.3296866666666667,
+          "cumulative_us_per_iteration": 0.3296866666666667
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.min>",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.30800333333333335,
+          "cumulative_us_per_iteration": 0.30800333333333335
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.all>",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.2866066666666667,
+          "cumulative_us_per_iteration": 0.2866066666666667
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/serving/tests/test_persistent.py",
+          "line": 37,
+          "function": "truncate",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.27426666666666666,
+          "cumulative_us_per_iteration": 0.27426666666666666
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/serving/tests/test_persistent.py",
+          "line": 18,
+          "function": "estimate_session_bytes",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.22736000000000003,
+          "cumulative_us_per_iteration": 0.22736000000000003
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'items' of 'dict' objects>",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.22645,
+          "cumulative_us_per_iteration": 0.22645
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method __new__ of type object at 0x14484b0>",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.20547333333333334,
+          "cumulative_us_per_iteration": 0.20547333333333334
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'extend' of 'list' objects>",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.18433333333333335,
+          "cumulative_us_per_iteration": 0.18433333333333335
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'move_to_end' of 'collections.OrderedDict' objects>",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.18269000000000002,
+          "cumulative_us_per_iteration": 0.18269000000000002
+        },
+        {
+          "file": "<string>",
+          "line": 2,
+          "function": "__init__",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.1743566666666667,
+          "cumulative_us_per_iteration": 0.1743566666666667
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/serving/persistent.py",
+          "line": 117,
+          "function": "<lambda>",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.13763333333333333,
+          "cumulative_us_per_iteration": 0.13763333333333333
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/lib/python3.12/site-packages/torch/_jit_internal.py",
+          "line": 104,
+          "function": "is_scripting",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.11045666666666669,
+          "cumulative_us_per_iteration": 0.11045666666666669
+        },
+        {
+          "file": "/tmp/cxldsagr_refactor_p0_20261005/checkout/serving/persistent.py",
+          "line": 119,
+          "function": "<lambda>",
+          "calls_per_iteration": 1.0,
+          "self_us_per_iteration": 0.09843,
+          "cumulative_us_per_iteration": 0.09843
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'disable' of '_lsprof.Profiler' objects>",
+          "calls_per_iteration": 0.0033333333333333335,
+          "self_us_per_iteration": 0.04519666666666666,
+          "cumulative_us_per_iteration": 0.04519666666666666
+        }
+      ]
+    }
+  }
+}

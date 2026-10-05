@@ -11,7 +11,8 @@ from experiments.nosa_indexer_pattern_65536_1024.src.sparse_capture import (
     capture_extend,
     run_trajectory,
 )
-from layers.attention import AttentionContext, DenseMainAttention, ResidentLayerView
+from models.attention_contracts import AttentionContext
+from models.nosa.attention import DenseMainAttention, ResidentLayerView
 from models.nosa.indexer import NosaIndexer
 from models.nosa.tests.test_model import dense_attention, tiny_config
 from models.nosa.tests.test_sparse_model import initialized_sparse_model

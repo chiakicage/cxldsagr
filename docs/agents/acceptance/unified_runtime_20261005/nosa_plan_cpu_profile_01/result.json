@@ -1,0 +1,5973 @@
+{
+  "schema": "nosa-offline-plan-cpu-profile-v1",
+  "scope": "Microdiagnostic of unmodified production pure planning functions with an offline resource constructor. No weights, CUDA initialization, sessions, tensor allocation, serving execution or complete-request causal attribution.",
+  "parameters": {
+    "H": 65536,
+    "A": 128,
+    "C": 1024,
+    "layers": 32,
+    "P": 65536,
+    "NH": 16777216
+  },
+  "environment": {
+    "python": "3.12.13 (main, Jun 11 2026, 04:03:26) [Clang 22.1.3 ]",
+    "platform": "Linux-6.8.0-54-generic-x86_64-with-glibc2.39",
+    "affinity": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "gc_enabled": true,
+    "gc_thresholds": [
+      700,
+      10,
+      10
+    ],
+    "CUDA_initialized": false,
+    "env": {
+      "CUDA_VISIBLE_DEVICES": "",
+      "OMP_NUM_THREADS": "1",
+      "MKL_NUM_THREADS": "1",
+      "OPENBLAS_NUM_THREADS": "1",
+      "PYTHONDONTWRITEBYTECODE": "1"
+    },
+    "torch_num_threads": 1
+  },
+  "command": [
+    ".venv/bin/python",
+    "-B",
+    "/tmp/nosa_plan_cpu_profile_20261005_01/profile_plan.py"
+  ],
+  "cwd": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr",
+  "script_sha256": "93fc356aa5a7d0bcc819bc9063592be0e28ff81482ccc27c874f3ac5648adb29",
+  "source_sha256": {
+    "cache/capacity.py": "ba39f57a49124b23c60552240d87fbb9804b5320275b09596eadf2f0ff8c3a96",
+    "cache/lifecycle.py": "4e699cedce01acd99133e19c662027fb56c9abaf01a9855d09386962d688e68f",
+    "cache/allocator/budget.py": "3fdc40173b284fbf6d4f4cb01954217657f64168820c0f00c1b1008af816fda4",
+    "executor/contracts.py": "8ca7b8af35fcd935f1ce96911bb30d04757e02f0d0b4635508eff12b38705139",
+    "models/nosa/config.py": "eaa168a439fada20f13b6d0a44c801de30e3b1c04d3e5ac43d4273a3454db165",
+    "models/nosa/execution/adapter.py": "4f08bd651b8b6195f59fa2a7a701f91ce83cecf450b8ede3e4b5a3ab52acdc79",
+    "models/nosa/execution/fixed.py": "d764a07f0bc15158efc41177a1a54546ec1080758779558ccf03976947154949",
+    "models/nosa/execution/resources.py": "b9c356f7a082856f90cf9164b806e40de50fd691b008d2d2d16e245b91867d58",
+    "models/nosa/execution/fixed_resources.py": "8ce76def3724191bd37c277b8c2f7bd56297f5d293c6b9081d33c45e84abefee",
+    "models/nosa/execution/session_budget.py": "b920a121eb51d37b20824bbe85e22e282a60bc63f999e3b19cb868ab4e80f9fd",
+    "experiments/cache_management/src/nosa_plan.py": "02bda4b9b4efe65d7a840adf99eba302ac91e154698c60405e0bd557141d98c0"
+  },
+  "config": {
+    "path": "/mnt/ssd-wlcb/chenkaiqi/NOSA-8B/config.json",
+    "sha256": "1dcc43c82877f1f0dfce453f49d6cdab8e538f437279c5a83000102b671bcb17"
+  },
+  "measurement_notes": [
+    "Unprofiled timings and cProfile are separate; profiler overhead is not subtracted from serving time.",
+    "All samples are retained. Timing calls execute serially with GC enabled; isolated cost estimates are not additive.",
+    "AllocationSpec reconstruction uses prebuilt kwargs and includes a Python loop/tuple; existing-object validation excludes construction.",
+    "Internal scan inputs were observed in one untimed call via a temporary local-process wrapper, restored before all timing.",
+    "Two additional full scans occur outside layout: geometry reservation and SessionPlan validation."
+  ],
+  "cases": {
+    "hbm": {
+      "allocation_count": 121,
+      "internal_footprint_scan_lengths": [
+        96,
+        100,
+        2,
+        0,
+        10,
+        8,
+        18,
+        121
+      ],
+      "external_full_footprint_scans_per_plan": 2,
+      "reservation_bytes": {
+        "hbm": 2276651008,
+        "dram": 2
+      },
+      "timing": {
+        "plan_runtime_session": {
+          "unit": "microseconds_per_call",
+          "batch_means": [
+            554.42025,
+            552.35462,
+            553.7194300000001,
+            551.7820300000001,
+            553.2966899999999,
+            552.27508,
+            552.7734499999999
+          ],
+          "median": 552.7734499999999,
+          "min": 551.7820300000001,
+          "max": 554.42025,
+          "repeats": 7,
+          "iterations_per_repeat": 100
+        },
+        "session_allocation_layout": {
+          "unit": "microseconds_per_call",
+          "batch_means": [
+            495.38586,
+            496.59689000000003,
+            498.2021,
+            497.61494,
+            550.33315,
+            495.24809999999997,
+            545.60983
+          ],
+          "median": 497.61494,
+          "min": 495.24809999999997,
+          "max": 550.33315,
+          "repeats": 7,
+          "iterations_per_repeat": 100
+        },
+        "all_internal_layout_footprint_scans": {
+          "unit": "microseconds_per_call",
+          "batch_means": [
+            58.98282,
+            58.81957,
+            58.71179,
+            59.05919,
+            58.9119,
+            59.17496,
+            58.97567
+          ],
+          "median": 58.97567,
+          "min": 58.71179,
+          "max": 59.17496,
+          "repeats": 7,
+          "iterations_per_repeat": 100
+        },
+        "one_full_allocation_footprint": {
+          "unit": "microseconds_per_call",
+          "batch_means": [
+            18.294900000000002,
+            18.44259,
+            18.22725,
+            18.416349999999998,
+            20.877959999999998,
+            18.43858,
+            18.33986
+          ],
+          "median": 18.416349999999998,
+          "min": 18.22725,
+          "max": 20.877959999999998,
+          "repeats": 7,
+          "iterations_per_repeat": 100
+        },
+        "construct_all_AllocationSpec_from_prebuilt_kwargs": {
+          "unit": "microseconds_per_call",
+          "batch_means": [
+            234.13689000000002,
+            234.07234,
+            235.2981,
+            233.91018,
+            233.34824,
+            233.09679,
+            232.66682999999998
+          ],
+          "median": 233.91018,
+          "min": 232.66682999999998,
+          "max": 235.2981,
+          "repeats": 7,
+          "iterations_per_repeat": 100
+        },
+        "validate_all_existing_AllocationSpec": {
+          "unit": "microseconds_per_call",
+          "batch_means": [
+            87.39508000000001,
+            87.92387,
+            88.79802000000001,
+            125.61591,
+            86.81378,
+            87.45835000000001,
+            88.07428
+          ],
+          "median": 87.92387,
+          "min": 86.81378,
+          "max": 125.61591,
+          "repeats": 7,
+          "iterations_per_repeat": 100
+        },
+        "construct_SessionPlan_from_prebuilt_kwargs": {
+          "unit": "microseconds_per_call",
+          "batch_means": [
+            23.324060000000003,
+            23.171080000000003,
+            23.26398,
+            23.07803,
+            23.101599999999998,
+            22.98867,
+            23.29455
+          ],
+          "median": 23.171080000000003,
+          "min": 22.98867,
+          "max": 23.324060000000003,
+          "repeats": 7,
+          "iterations_per_repeat": 100
+        },
+        "validate_existing_SessionPlan": {
+          "unit": "microseconds_per_call",
+          "batch_means": [
+            22.26187,
+            22.24345,
+            22.13688,
+            22.11665,
+            22.28722,
+            22.23724,
+            22.08709
+          ],
+          "median": 22.23724,
+          "min": 22.08709,
+          "max": 22.28722,
+          "repeats": 7,
+          "iterations_per_repeat": 100
+        }
+      },
+      "profile_sorted_cumulative": [
+        {
+          "file": "/tmp/nosa_plan_cpu_profile_20261005_01/profile_plan.py",
+          "line": 72,
+          "function": "plan",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 0.88193,
+          "cumulative_us_per_plan": 1437.6356349999999,
+          "callers": []
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/adapter.py",
+          "line": 232,
+          "function": "plan_runtime_session",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 8.960735,
+          "cumulative_us_per_plan": 1436.753705,
+          "callers": [
+            {
+              "file": "/tmp/nosa_plan_cpu_profile_20261005_01/profile_plan.py",
+              "line": 72,
+              "function": "plan",
+              "stats": [
+                200,
+                200,
+                0.001792147,
+                0.287350741
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+          "line": 32,
+          "function": "session_allocation_layout",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 73.68237,
+          "cumulative_us_per_plan": 1290.452195,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/adapter.py",
+              "line": 232,
+              "function": "plan_runtime_session",
+              "stats": [
+                200,
+                200,
+                0.014736474000000001,
+                0.258090439
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+          "line": 91,
+          "function": "record",
+          "primitive_calls_per_plan": 121.0,
+          "total_calls_per_plan": 121.0,
+          "self_us_per_plan": 233.73493000000002,
+          "cumulative_us_per_plan": 1026.808235,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 32,
+              "function": "session_allocation_layout",
+              "stats": [
+                20600,
+                20600,
+                0.039507102,
+                0.174226499
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 183,
+              "function": "helper_phase",
+              "stats": [
+                3600,
+                3600,
+                0.007239884,
+                0.031135148
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 150,
+          "function": "__post_init__",
+          "primitive_calls_per_plan": 121.0,
+          "total_calls_per_plan": 121.0,
+          "self_us_per_plan": 226.988355,
+          "cumulative_us_per_plan": 418.90418000000005,
+          "callers": [
+            {
+              "file": "<string>",
+              "line": 2,
+              "function": "__init__",
+              "stats": [
+                24200,
+                24200,
+                0.045397671,
+                0.08378083600000001
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 192,
+          "function": "allocation_footprint",
+          "primitive_calls_per_plan": 10.0,
+          "total_calls_per_plan": 10.0,
+          "self_us_per_plan": 174.67215,
+          "cumulative_us_per_plan": 260.69552500000003,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 276,
+              "function": "__post_init__",
+              "stats": [
+                200,
+                200,
+                0.006332000000000001,
+                0.009334659
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/adapter.py",
+              "line": 232,
+              "function": "plan_runtime_session",
+              "stats": [
+                200,
+                200,
+                0.006355223,
+                0.009246255
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 120,
+              "function": "footprint",
+              "stats": [
+                1600,
+                1600,
+                0.022247207,
+                0.033558191
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+          "line": 120,
+          "function": "footprint",
+          "primitive_calls_per_plan": 8.0,
+          "total_calls_per_plan": 8.0,
+          "self_us_per_plan": 6.7896350000000005,
+          "cumulative_us_per_plan": 174.58059,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 32,
+              "function": "session_allocation_layout",
+              "stats": [
+                1600,
+                1600,
+                0.001357927,
+                0.034916118
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+          "line": 183,
+          "function": "helper_phase",
+          "primitive_calls_per_plan": 5.0,
+          "total_calls_per_plan": 5.0,
+          "self_us_per_plan": 8.519295000000001,
+          "cumulative_us_per_plan": 164.19503500000002,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 32,
+              "function": "session_allocation_layout",
+              "stats": [
+                1000,
+                1000,
+                0.001703859,
+                0.032839007
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/allocator/budget.py",
+          "line": 64,
+          "function": "allocation_bytes",
+          "primitive_calls_per_plan": 120.0,
+          "total_calls_per_plan": 120.0,
+          "self_us_per_plan": 52.877875,
+          "cumulative_us_per_plan": 110.36103000000001,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 32,
+              "function": "session_allocation_layout",
+              "stats": [
+                200,
+                200,
+                9.9505e-05,
+                0.00019876500000000003
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 91,
+              "function": "record",
+              "stats": [
+                23800,
+                23800,
+                0.01047607,
+                0.021873441
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 183,
+          "function": "logical_bytes",
+          "primitive_calls_per_plan": 121.0,
+          "total_calls_per_plan": 121.0,
+          "self_us_per_plan": 46.035250000000005,
+          "cumulative_us_per_plan": 74.697815,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 150,
+              "function": "__post_init__",
+              "stats": [
+                24200,
+                24200,
+                0.009207050000000001,
+                0.014939563000000001
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 78,
+          "function": "nonnegative",
+          "primitive_calls_per_plan": 537.0,
+          "total_calls_per_plan": 537.0,
+          "self_us_per_plan": 73.132405,
+          "cumulative_us_per_plan": 73.132405,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 150,
+              "function": "__post_init__",
+              "stats": [
+                103000,
+                103000,
+                0.013926260000000001,
+                0.013926260000000001
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 276,
+              "function": "__post_init__",
+              "stats": [
+                400,
+                400,
+                6.2376e-05,
+                6.2376e-05
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 88,
+              "function": "__post_init__",
+              "stats": [
+                4000,
+                4000,
+                0.0006378450000000001,
+                0.0006378450000000001
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 276,
+          "function": "__post_init__",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 3.736895,
+          "cumulative_us_per_plan": 68.49049,
+          "callers": [
+            {
+              "file": "<string>",
+              "line": 2,
+              "function": "__init__",
+              "stats": [
+                200,
+                200,
+                0.0007473790000000001,
+                0.013698098
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/allocator/budget.py",
+          "line": 54,
+          "function": "allocator_policy",
+          "primitive_calls_per_plan": 120.0,
+          "total_calls_per_plan": 120.0,
+          "self_us_per_plan": 57.483155,
+          "cumulative_us_per_plan": 57.483155,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/allocator/budget.py",
+              "line": 64,
+              "function": "allocation_bytes",
+              "stats": [
+                24000,
+                24000,
+                0.011496631,
+                0.011496631
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'removeprefix' of 'str' objects>",
+          "primitive_calls_per_plan": 363.0,
+          "total_calls_per_plan": 363.0,
+          "self_us_per_plan": 43.18798000000001,
+          "cumulative_us_per_plan": 43.18798000000001,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 150,
+              "function": "__post_init__",
+              "stats": [
+                24200,
+                24200,
+                0.002654329,
+                0.002654329
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 91,
+              "function": "record",
+              "stats": [
+                24200,
+                24200,
+                0.003508372,
+                0.003508372
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 183,
+              "function": "logical_bytes",
+              "stats": [
+                24200,
+                24200,
+                0.002474895,
+                0.002474895
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 187,
+          "function": "tier",
+          "primitive_calls_per_plan": 597.0,
+          "total_calls_per_plan": 597.0,
+          "self_us_per_plan": 39.22281,
+          "cumulative_us_per_plan": 39.22281,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 192,
+              "function": "allocation_footprint",
+              "stats": [
+                119400,
+                119400,
+                0.007844562000000001,
+                0.007844562000000001
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method math.prod>",
+          "primitive_calls_per_plan": 245.0,
+          "total_calls_per_plan": 245.0,
+          "self_us_per_plan": 34.646660000000004,
+          "cumulative_us_per_plan": 34.646660000000004,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 284,
+              "function": "<genexpr>",
+              "stats": [
+                600,
+                600,
+                0.00010189900000000001,
+                0.00010189900000000001
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 91,
+              "function": "record",
+              "stats": [
+                24200,
+                24200,
+                0.003569815,
+                0.003569815
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 183,
+              "function": "logical_bytes",
+              "stats": [
+                24200,
+                24200,
+                0.0032576180000000003,
+                0.0032576180000000003
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'split' of 'str' objects>",
+          "primitive_calls_per_plan": 121.0,
+          "total_calls_per_plan": 121.0,
+          "self_us_per_plan": 20.790995000000002,
+          "cumulative_us_per_plan": 20.790995000000002,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 150,
+              "function": "__post_init__",
+              "stats": [
+                24200,
+                24200,
+                0.0041581990000000004,
+                0.0041581990000000004
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.any>",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 8.959905000000001,
+          "cumulative_us_per_plan": 16.914845000000003,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 276,
+              "function": "__post_init__",
+              "stats": [
+                200,
+                200,
+                0.0017919810000000002,
+                0.0033829690000000004
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'append' of 'list' objects>",
+          "primitive_calls_per_plan": 123.0,
+          "total_calls_per_plan": 123.0,
+          "self_us_per_plan": 14.868635000000001,
+          "cumulative_us_per_plan": 14.868635000000001,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 32,
+              "function": "session_allocation_layout",
+              "stats": [
+                400,
+                400,
+                6.935e-05,
+                6.935e-05
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 91,
+              "function": "record",
+              "stats": [
+                24200,
+                24200,
+                0.002904377,
+                0.002904377
+              ]
+            }
+          ]
+        },
+        {
+          "file": "<string>",
+          "line": 2,
+          "function": "__init__",
+          "primitive_calls_per_plan": 10.0,
+          "total_calls_per_plan": 10.0,
+          "self_us_per_plan": 6.196255,
+          "cumulative_us_per_plan": 14.304835,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 192,
+              "function": "allocation_footprint",
+              "stats": [
+                2000,
+                2000,
+                0.001239251,
+                0.0028609670000000003
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'setdefault' of 'dict' objects>",
+          "primitive_calls_per_plan": 90.0,
+          "total_calls_per_plan": 90.0,
+          "self_us_per_plan": 14.074010000000003,
+          "cumulative_us_per_plan": 14.074010000000003,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 192,
+              "function": "allocation_footprint",
+              "stats": [
+                18000,
+                18000,
+                0.0028148020000000004,
+                0.0028148020000000004
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.isinstance>",
+          "primitive_calls_per_plan": 123.0,
+          "total_calls_per_plan": 123.0,
+          "self_us_per_plan": 13.761130000000001,
+          "cumulative_us_per_plan": 13.761130000000001,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 150,
+              "function": "__post_init__",
+              "stats": [
+                24200,
+                24200,
+                0.0027048140000000003,
+                0.0027048140000000003
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 276,
+              "function": "__post_init__",
+              "stats": [
+                400,
+                400,
+                4.7412000000000006e-05,
+                4.7412000000000006e-05
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'get' of 'dict' objects>",
+          "primitive_calls_per_plan": 90.0,
+          "total_calls_per_plan": 90.0,
+          "self_us_per_plan": 10.673095,
+          "cumulative_us_per_plan": 10.673095,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 192,
+              "function": "allocation_footprint",
+              "stats": [
+                18000,
+                18000,
+                0.002134619,
+                0.002134619
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/root/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/dataclasses.py",
+          "line": 1540,
+          "function": "replace",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 5.372020000000001,
+          "cumulative_us_per_plan": 9.55746,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/adapter.py",
+              "line": 232,
+              "function": "plan_runtime_session",
+              "stats": [
+                200,
+                200,
+                0.0010744040000000002,
+                0.001911492
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 88,
+          "function": "__post_init__",
+          "primitive_calls_per_plan": 10.0,
+          "total_calls_per_plan": 10.0,
+          "self_us_per_plan": 4.919355,
+          "cumulative_us_per_plan": 8.10858,
+          "callers": [
+            {
+              "file": "<string>",
+              "line": 2,
+              "function": "__init__",
+              "stats": [
+                2000,
+                2000,
+                0.000983871,
+                0.001621716
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 288,
+          "function": "<genexpr>",
+          "primitive_calls_per_plan": 122.0,
+          "total_calls_per_plan": 122.0,
+          "self_us_per_plan": 7.954940000000001,
+          "cumulative_us_per_plan": 7.954940000000001,
+          "callers": [
+            {
+              "file": "~",
+              "line": 0,
+              "function": "<built-in method builtins.any>",
+              "stats": [
+                24400,
+                24400,
+                0.001590988,
+                0.001590988
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/fixed.py",
+          "line": 147,
+          "function": "_session_geometry",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 3.0786050000000005,
+          "cumulative_us_per_plan": 7.753590000000002,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/adapter.py",
+              "line": 232,
+              "function": "plan_runtime_session",
+              "stats": [
+                200,
+                200,
+                0.0006157210000000001,
+                0.0015507180000000002
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.len>",
+          "primitive_calls_per_plan": 26.0,
+          "total_calls_per_plan": 26.0,
+          "self_us_per_plan": 3.8515500000000005,
+          "cumulative_us_per_plan": 3.8515500000000005,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 192,
+              "function": "allocation_footprint",
+              "stats": [
+                4000,
+                4000,
+                0.0005824360000000001,
+                0.0005824360000000001
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 32,
+              "function": "session_allocation_layout",
+              "stats": [
+                1200,
+                1200,
+                0.000187874,
+                0.000187874
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/adapter.py",
+          "line": 102,
+          "function": "_validate_capacity",
+          "primitive_calls_per_plan": 2.0,
+          "total_calls_per_plan": 2.0,
+          "self_us_per_plan": 0.764965,
+          "cumulative_us_per_plan": 3.6906950000000007,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/fixed.py",
+              "line": 147,
+              "function": "_session_geometry",
+              "stats": [
+                200,
+                200,
+                7.0485e-05,
+                0.000349671
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/fixed.py",
+              "line": 115,
+              "function": "estimate_session_hbm_tokens",
+              "stats": [
+                200,
+                200,
+                8.2508e-05,
+                0.00038846800000000005
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.max>",
+          "primitive_calls_per_plan": 10.0,
+          "total_calls_per_plan": 10.0,
+          "self_us_per_plan": 3.109785,
+          "cumulative_us_per_plan": 3.109785,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 192,
+              "function": "allocation_footprint",
+              "stats": [
+                1200,
+                1200,
+                0.000377238,
+                0.000377238
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/fixed.py",
+              "line": 147,
+              "function": "_session_geometry",
+              "stats": [
+                200,
+                200,
+                6.705e-05,
+                6.705e-05
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 32,
+              "function": "session_allocation_layout",
+              "stats": [
+                600,
+                600,
+                0.000177669,
+                0.000177669
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/resources.py",
+          "line": 317,
+          "function": "validate_capacity",
+          "primitive_calls_per_plan": 2.0,
+          "total_calls_per_plan": 2.0,
+          "self_us_per_plan": 1.4441650000000001,
+          "cumulative_us_per_plan": 2.92573,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/adapter.py",
+              "line": 102,
+              "function": "_validate_capacity",
+              "stats": [
+                400,
+                400,
+                0.000288833,
+                0.000585146
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/fixed.py",
+          "line": 115,
+          "function": "estimate_session_hbm_tokens",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 0.49129000000000006,
+          "cumulative_us_per_plan": 2.4336300000000004,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/adapter.py",
+              "line": 232,
+              "function": "plan_runtime_session",
+              "stats": [
+                200,
+                200,
+                9.825800000000001e-05,
+                0.00048672600000000004
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'items' of 'dict' objects>",
+          "primitive_calls_per_plan": 10.0,
+          "total_calls_per_plan": 10.0,
+          "self_us_per_plan": 1.8847350000000003,
+          "cumulative_us_per_plan": 1.8847350000000003,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 192,
+              "function": "allocation_footprint",
+              "stats": [
+                2000,
+                2000,
+                0.00037694700000000004,
+                0.00037694700000000004
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.getattr>",
+          "primitive_calls_per_plan": 12.0,
+          "total_calls_per_plan": 12.0,
+          "self_us_per_plan": 1.743095,
+          "cumulative_us_per_plan": 1.743095,
+          "callers": [
+            {
+              "file": "/root/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/dataclasses.py",
+              "line": 1540,
+              "function": "replace",
+              "stats": [
+                1800,
+                1800,
+                0.000253064,
+                0.000253064
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/resources.py",
+              "line": 31,
+              "function": "<lambda>",
+              "stats": [
+                600,
+                600,
+                9.5555e-05,
+                9.5555e-05
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+          "line": 284,
+          "function": "<genexpr>",
+          "primitive_calls_per_plan": 4.0,
+          "total_calls_per_plan": 4.0,
+          "self_us_per_plan": 1.1696550000000001,
+          "cumulative_us_per_plan": 1.6791500000000001,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 32,
+              "function": "session_allocation_layout",
+              "stats": [
+                800,
+                800,
+                0.00023393100000000002,
+                0.00033583
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/resources.py",
+          "line": 31,
+          "function": "<lambda>",
+          "primitive_calls_per_plan": 3.0,
+          "total_calls_per_plan": 3.0,
+          "self_us_per_plan": 0.981785,
+          "cumulative_us_per_plan": 1.4595600000000002,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/fixed.py",
+              "line": 147,
+              "function": "_session_geometry",
+              "stats": [
+                200,
+                200,
+                5.3273e-05,
+                7.9732e-05
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/resources.py",
+              "line": 317,
+              "function": "validate_capacity",
+              "stats": [
+                400,
+                400,
+                0.000143084,
+                0.00021218000000000002
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'values' of 'dict' objects>",
+          "primitive_calls_per_plan": 7.0,
+          "total_calls_per_plan": 7.0,
+          "self_us_per_plan": 1.2948650000000002,
+          "cumulative_us_per_plan": 1.2948650000000002,
+          "callers": [
+            {
+              "file": "/root/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/dataclasses.py",
+              "line": 1540,
+              "function": "replace",
+              "stats": [
+                200,
+                200,
+                4.5869000000000004e-05,
+                4.5869000000000004e-05
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 192,
+              "function": "allocation_footprint",
+              "stats": [
+                1200,
+                1200,
+                0.000213104,
+                0.000213104
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+          "line": 23,
+          "function": "_positive",
+          "primitive_calls_per_plan": 6.0,
+          "total_calls_per_plan": 6.0,
+          "self_us_per_plan": 0.9703250000000001,
+          "cumulative_us_per_plan": 0.9703250000000001,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 32,
+              "function": "session_allocation_layout",
+              "stats": [
+                1200,
+                1200,
+                0.00019406500000000002,
+                0.00019406500000000002
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.min>",
+          "primitive_calls_per_plan": 3.0,
+          "total_calls_per_plan": 3.0,
+          "self_us_per_plan": 0.9485300000000001,
+          "cumulative_us_per_plan": 0.9485300000000001,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/fixed.py",
+              "line": 147,
+              "function": "_session_geometry",
+              "stats": [
+                200,
+                200,
+                7.1795e-05,
+                7.1795e-05
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 32,
+              "function": "session_allocation_layout",
+              "stats": [
+                400,
+                400,
+                0.000117911,
+                0.000117911
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/executor/contracts.py",
+          "line": 66,
+          "function": "validate",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 0.62377,
+          "cumulative_us_per_plan": 0.9211050000000001,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/adapter.py",
+              "line": 232,
+              "function": "plan_runtime_session",
+              "stats": [
+                200,
+                200,
+                0.000124754,
+                0.000184221
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/root/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/dataclasses.py",
+          "line": 1296,
+          "function": "_is_dataclass_instance",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 0.46818000000000004,
+          "cumulative_us_per_plan": 0.6574550000000001,
+          "callers": [
+            {
+              "file": "/root/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/dataclasses.py",
+              "line": 1540,
+              "function": "replace",
+              "stats": [
+                200,
+                200,
+                9.363600000000001e-05,
+                0.00013149100000000002
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+          "line": 28,
+          "function": "_align256",
+          "primitive_calls_per_plan": 2.0,
+          "total_calls_per_plan": 2.0,
+          "self_us_per_plan": 0.45438500000000004,
+          "cumulative_us_per_plan": 0.45438500000000004,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 32,
+              "function": "session_allocation_layout",
+              "stats": [
+                400,
+                400,
+                9.0877e-05,
+                9.0877e-05
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/resources.py",
+          "line": 23,
+          "function": "_positive",
+          "primitive_calls_per_plan": 2.0,
+          "total_calls_per_plan": 2.0,
+          "self_us_per_plan": 0.42066499999999996,
+          "cumulative_us_per_plan": 0.42066499999999996,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/resources.py",
+              "line": 317,
+              "function": "validate_capacity",
+              "stats": [
+                400,
+                400,
+                8.4133e-05,
+                8.4133e-05
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 96,
+          "function": "fits",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 0.39189500000000005,
+          "cumulative_us_per_plan": 0.39189500000000005,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 276,
+              "function": "__post_init__",
+              "stats": [
+                200,
+                200,
+                7.8379e-05,
+                7.8379e-05
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/executor/contracts.py",
+          "line": 26,
+          "function": "total_tokens",
+          "primitive_calls_per_plan": 2.0,
+          "total_calls_per_plan": 2.0,
+          "self_us_per_plan": 0.297335,
+          "cumulative_us_per_plan": 0.297335,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/executor/contracts.py",
+              "line": 66,
+              "function": "validate",
+              "stats": [
+                400,
+                400,
+                5.9467000000000005e-05,
+                5.9467000000000005e-05
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/fixed.py",
+          "line": 168,
+          "function": "_session_layout_options",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 0.270805,
+          "cumulative_us_per_plan": 0.270805,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/adapter.py",
+              "line": 232,
+              "function": "plan_runtime_session",
+              "stats": [
+                200,
+                200,
+                5.4161000000000005e-05,
+                5.4161000000000005e-05
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.hash>",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 0.22462000000000004,
+          "cumulative_us_per_plan": 0.22462000000000004,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 276,
+              "function": "__post_init__",
+              "stats": [
+                200,
+                200,
+                4.4924000000000006e-05,
+                4.4924000000000006e-05
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.hasattr>",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 0.18927500000000003,
+          "cumulative_us_per_plan": 0.18927500000000003,
+          "callers": [
+            {
+              "file": "/root/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/dataclasses.py",
+              "line": 1296,
+              "function": "_is_dataclass_instance",
+              "stats": [
+                200,
+                200,
+                3.7855e-05,
+                3.7855e-05
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'disable' of '_lsprof.Profiler' objects>",
+          "primitive_calls_per_plan": 0.005,
+          "total_calls_per_plan": 0.005,
+          "self_us_per_plan": 0.11509,
+          "cumulative_us_per_plan": 0.11509,
+          "callers": []
+        }
+      ]
+    },
+    "serial_sparse": {
+      "allocation_count": 226,
+      "internal_footprint_scan_lengths": [
+        96,
+        100,
+        2,
+        64,
+        10,
+        10,
+        36,
+        3,
+        59,
+        226
+      ],
+      "external_full_footprint_scans_per_plan": 2,
+      "reservation_bytes": {
+        "hbm": 180146688,
+        "dram": 4294967312
+      },
+      "timing": {
+        "plan_runtime_session": {
+          "unit": "microseconds_per_call",
+          "batch_means": [
+            1027.3056,
+            1027.90044,
+            1025.8349699999999,
+            1026.58798,
+            1027.37102,
+            1026.48059,
+            1034.86095
+          ],
+          "median": 1027.3056,
+          "min": 1025.8349699999999,
+          "max": 1034.86095,
+          "repeats": 7,
+          "iterations_per_repeat": 100
+        },
+        "session_allocation_layout": {
+          "unit": "microseconds_per_call",
+          "batch_means": [
+            926.5096500000001,
+            1099.89155,
+            929.9770100000001,
+            930.75037,
+            928.46172,
+            925.52052,
+            924.62126
+          ],
+          "median": 928.46172,
+          "min": 924.62126,
+          "max": 1099.89155,
+          "repeats": 7,
+          "iterations_per_repeat": 100
+        },
+        "all_internal_layout_footprint_scans": {
+          "unit": "microseconds_per_call",
+          "batch_means": [
+            110.95103999999999,
+            111.35382000000001,
+            111.13222,
+            111.055,
+            111.91654,
+            112.44921000000001,
+            111.38587
+          ],
+          "median": 111.35382000000001,
+          "min": 110.95103999999999,
+          "max": 112.44921000000001,
+          "repeats": 7,
+          "iterations_per_repeat": 100
+        },
+        "one_full_allocation_footprint": {
+          "unit": "microseconds_per_call",
+          "batch_means": [
+            37.396260000000005,
+            37.187839999999994,
+            38.248,
+            37.28266000000001,
+            37.44475,
+            37.21225,
+            37.289970000000004
+          ],
+          "median": 37.289970000000004,
+          "min": 37.187839999999994,
+          "max": 38.248,
+          "repeats": 7,
+          "iterations_per_repeat": 100
+        },
+        "construct_all_AllocationSpec_from_prebuilt_kwargs": {
+          "unit": "microseconds_per_call",
+          "batch_means": [
+            444.45808,
+            443.15863,
+            445.21038,
+            443.83295000000004,
+            445.41815,
+            440.96832,
+            441.69719
+          ],
+          "median": 443.83295000000004,
+          "min": 440.96832,
+          "max": 445.41815,
+          "repeats": 7,
+          "iterations_per_repeat": 100
+        },
+        "validate_all_existing_AllocationSpec": {
+          "unit": "microseconds_per_call",
+          "batch_means": [
+            166.93833999999998,
+            168.17432,
+            167.31815,
+            167.60520000000002,
+            167.46467,
+            165.54733,
+            166.51119
+          ],
+          "median": 167.31815,
+          "min": 165.54733,
+          "max": 168.17432,
+          "repeats": 7,
+          "iterations_per_repeat": 100
+        },
+        "construct_SessionPlan_from_prebuilt_kwargs": {
+          "unit": "microseconds_per_call",
+          "batch_means": [
+            45.7428,
+            45.58231,
+            45.40066,
+            45.64738,
+            45.31441,
+            45.16299,
+            45.602019999999996
+          ],
+          "median": 45.58231,
+          "min": 45.16299,
+          "max": 45.7428,
+          "repeats": 7,
+          "iterations_per_repeat": 100
+        },
+        "validate_existing_SessionPlan": {
+          "unit": "microseconds_per_call",
+          "batch_means": [
+            44.116769999999995,
+            44.31515,
+            44.30334,
+            44.90064,
+            44.66722,
+            44.22636,
+            44.28558
+          ],
+          "median": 44.30334,
+          "min": 44.116769999999995,
+          "max": 44.90064,
+          "repeats": 7,
+          "iterations_per_repeat": 100
+        }
+      },
+      "profile_sorted_cumulative": [
+        {
+          "file": "/tmp/nosa_plan_cpu_profile_20261005_01/profile_plan.py",
+          "line": 72,
+          "function": "plan",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 0.9530250000000001,
+          "cumulative_us_per_plan": 2689.737095,
+          "callers": []
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/adapter.py",
+          "line": 232,
+          "function": "plan_runtime_session",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 10.509455,
+          "cumulative_us_per_plan": 2688.7840700000006,
+          "callers": [
+            {
+              "file": "/tmp/nosa_plan_cpu_profile_20261005_01/profile_plan.py",
+              "line": 72,
+              "function": "plan",
+              "stats": [
+                200,
+                200,
+                0.0021018910000000003,
+                0.5377568140000001
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+          "line": 32,
+          "function": "session_allocation_layout",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 115.57494000000001,
+          "cumulative_us_per_plan": 2419.57135,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/adapter.py",
+              "line": 232,
+              "function": "plan_runtime_session",
+              "stats": [
+                200,
+                200,
+                0.023114988000000003,
+                0.48391427000000004
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+          "line": 91,
+          "function": "record",
+          "primitive_calls_per_plan": 226.0,
+          "total_calls_per_plan": 226.0,
+          "self_us_per_plan": 442.461075,
+          "cumulative_us_per_plan": 1924.24318,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 32,
+              "function": "session_allocation_layout",
+              "stats": [
+                33400,
+                33400,
+                0.064857017,
+                0.285619249
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 183,
+              "function": "helper_phase",
+              "stats": [
+                11800,
+                11800,
+                0.023635198000000003,
+                0.099229387
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 150,
+          "function": "__post_init__",
+          "primitive_calls_per_plan": 226.0,
+          "total_calls_per_plan": 226.0,
+          "self_us_per_plan": 425.92499000000004,
+          "cumulative_us_per_plan": 783.997795,
+          "callers": [
+            {
+              "file": "<string>",
+              "line": 2,
+              "function": "__init__",
+              "stats": [
+                45200,
+                45200,
+                0.08518499800000001,
+                0.156799559
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 192,
+          "function": "allocation_footprint",
+          "primitive_calls_per_plan": 12.0,
+          "total_calls_per_plan": 12.0,
+          "self_us_per_plan": 357.20277500000003,
+          "cumulative_us_per_plan": 533.696025,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 276,
+              "function": "__post_init__",
+              "stats": [
+                200,
+                200,
+                0.013552989000000001,
+                0.01996519
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/adapter.py",
+              "line": 232,
+              "function": "plan_runtime_session",
+              "stats": [
+                200,
+                200,
+                0.013725536000000002,
+                0.020020213000000002
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 120,
+              "function": "footprint",
+              "stats": [
+                2000,
+                2000,
+                0.044162030000000005,
+                0.066753802
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+          "line": 183,
+          "function": "helper_phase",
+          "primitive_calls_per_plan": 13.0,
+          "total_calls_per_plan": 13.0,
+          "self_us_per_plan": 24.898005,
+          "cumulative_us_per_plan": 521.04494,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 32,
+              "function": "session_allocation_layout",
+              "stats": [
+                2600,
+                2600,
+                0.004979601,
+                0.104208988
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+          "line": 120,
+          "function": "footprint",
+          "primitive_calls_per_plan": 10.0,
+          "total_calls_per_plan": 10.0,
+          "self_us_per_plan": 10.838080000000001,
+          "cumulative_us_per_plan": 344.60709,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 32,
+              "function": "session_allocation_layout",
+              "stats": [
+                2000,
+                2000,
+                0.0021676160000000002,
+                0.068921418
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/allocator/budget.py",
+          "line": 64,
+          "function": "allocation_bytes",
+          "primitive_calls_per_plan": 224.0,
+          "total_calls_per_plan": 224.0,
+          "self_us_per_plan": 98.726725,
+          "cumulative_us_per_plan": 205.90664,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 32,
+              "function": "session_allocation_layout",
+              "stats": [
+                200,
+                200,
+                0.00010220400000000001,
+                0.00020553700000000002
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 91,
+              "function": "record",
+              "stats": [
+                44600,
+                44600,
+                0.019643141000000003,
+                0.040975791000000004
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 183,
+          "function": "logical_bytes",
+          "primitive_calls_per_plan": 226.0,
+          "total_calls_per_plan": 226.0,
+          "self_us_per_plan": 86.67280000000001,
+          "cumulative_us_per_plan": 139.779785,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 150,
+              "function": "__post_init__",
+              "stats": [
+                45200,
+                45200,
+                0.017334560000000002,
+                0.027955957
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 276,
+          "function": "__post_init__",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 4.307955000000001,
+          "cumulative_us_per_plan": 134.32817500000002,
+          "callers": [
+            {
+              "file": "<string>",
+              "line": 2,
+              "function": "__init__",
+              "stats": [
+                200,
+                200,
+                0.0008615910000000001,
+                0.026865635000000002
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 78,
+          "function": "nonnegative",
+          "primitive_calls_per_plan": 990.0,
+          "total_calls_per_plan": 990.0,
+          "self_us_per_plan": 133.75347000000002,
+          "cumulative_us_per_plan": 133.75347000000002,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 150,
+              "function": "__post_init__",
+              "stats": [
+                192800,
+                192800,
+                0.025919238,
+                0.025919238
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 276,
+              "function": "__post_init__",
+              "stats": [
+                400,
+                400,
+                6.898100000000001e-05,
+                6.898100000000001e-05
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 88,
+              "function": "__post_init__",
+              "stats": [
+                4800,
+                4800,
+                0.0007624750000000001,
+                0.0007624750000000001
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/allocator/budget.py",
+          "line": 54,
+          "function": "allocator_policy",
+          "primitive_calls_per_plan": 225.0,
+          "total_calls_per_plan": 225.0,
+          "self_us_per_plan": 107.72163,
+          "cumulative_us_per_plan": 107.72163,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/allocator/budget.py",
+              "line": 64,
+              "function": "allocation_bytes",
+              "stats": [
+                44800,
+                44800,
+                0.021435983000000002,
+                0.021435983000000002
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/allocator/budget.py",
+              "line": 82,
+              "function": "pinned_allocation_bytes",
+              "stats": [
+                200,
+                200,
+                0.000108343,
+                0.000108343
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'removeprefix' of 'str' objects>",
+          "primitive_calls_per_plan": 678.0,
+          "total_calls_per_plan": 678.0,
+          "self_us_per_plan": 80.57899,
+          "cumulative_us_per_plan": 80.57899,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 150,
+              "function": "__post_init__",
+              "stats": [
+                45200,
+                45200,
+                0.005044806000000001,
+                0.005044806000000001
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 91,
+              "function": "record",
+              "stats": [
+                45200,
+                45200,
+                0.0064221320000000005,
+                0.0064221320000000005
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 183,
+              "function": "logical_bytes",
+              "stats": [
+                45200,
+                45200,
+                0.00464886,
+                0.00464886
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 187,
+          "function": "tier",
+          "primitive_calls_per_plan": 1058.0,
+          "total_calls_per_plan": 1058.0,
+          "self_us_per_plan": 70.643505,
+          "cumulative_us_per_plan": 70.643505,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 192,
+              "function": "allocation_footprint",
+              "stats": [
+                211600,
+                211600,
+                0.014128701,
+                0.014128701
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method math.prod>",
+          "primitive_calls_per_plan": 455.0,
+          "total_calls_per_plan": 455.0,
+          "self_us_per_plan": 63.36992,
+          "cumulative_us_per_plan": 63.36992,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 284,
+              "function": "<genexpr>",
+              "stats": [
+                600,
+                600,
+                0.000109158,
+                0.000109158
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 91,
+              "function": "record",
+              "stats": [
+                45200,
+                45200,
+                0.006592289,
+                0.006592289
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 183,
+              "function": "logical_bytes",
+              "stats": [
+                45200,
+                45200,
+                0.005972537,
+                0.005972537
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'setdefault' of 'dict' objects>",
+          "primitive_calls_per_plan": 295.0,
+          "total_calls_per_plan": 295.0,
+          "self_us_per_plan": 42.896875,
+          "cumulative_us_per_plan": 42.896875,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 192,
+              "function": "allocation_footprint",
+              "stats": [
+                59000,
+                59000,
+                0.008579375,
+                0.008579375
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'split' of 'str' objects>",
+          "primitive_calls_per_plan": 226.0,
+          "total_calls_per_plan": 226.0,
+          "self_us_per_plan": 38.430240000000005,
+          "cumulative_us_per_plan": 38.430240000000005,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 150,
+              "function": "__post_init__",
+              "stats": [
+                45200,
+                45200,
+                0.007686048000000001,
+                0.007686048000000001
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'get' of 'dict' objects>",
+          "primitive_calls_per_plan": 295.0,
+          "total_calls_per_plan": 295.0,
+          "self_us_per_plan": 33.988495,
+          "cumulative_us_per_plan": 33.988495,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 192,
+              "function": "allocation_footprint",
+              "stats": [
+                59000,
+                59000,
+                0.006797699000000001,
+                0.006797699000000001
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.any>",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 15.171880000000002,
+          "cumulative_us_per_plan": 28.929885,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 276,
+              "function": "__post_init__",
+              "stats": [
+                200,
+                200,
+                0.003034376,
+                0.005785977
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'append' of 'list' objects>",
+          "primitive_calls_per_plan": 230.0,
+          "total_calls_per_plan": 230.0,
+          "self_us_per_plan": 27.339365,
+          "cumulative_us_per_plan": 27.339365,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 32,
+              "function": "session_allocation_layout",
+              "stats": [
+                800,
+                800,
+                0.00014108500000000002,
+                0.00014108500000000002
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 91,
+              "function": "record",
+              "stats": [
+                45200,
+                45200,
+                0.005326788000000001,
+                0.005326788000000001
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.isinstance>",
+          "primitive_calls_per_plan": 228.0,
+          "total_calls_per_plan": 228.0,
+          "self_us_per_plan": 25.2863,
+          "cumulative_us_per_plan": 25.2863,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 150,
+              "function": "__post_init__",
+              "stats": [
+                45200,
+                45200,
+                0.0050085120000000006,
+                0.0050085120000000006
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 276,
+              "function": "__post_init__",
+              "stats": [
+                400,
+                400,
+                4.8748e-05,
+                4.8748e-05
+              ]
+            }
+          ]
+        },
+        {
+          "file": "<string>",
+          "line": 2,
+          "function": "__init__",
+          "primitive_calls_per_plan": 12.0,
+          "total_calls_per_plan": 12.0,
+          "self_us_per_plan": 8.253185,
+          "cumulative_us_per_plan": 18.346220000000002,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 192,
+              "function": "allocation_footprint",
+              "stats": [
+                2400,
+                2400,
+                0.0016506370000000002,
+                0.0036692440000000003
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 288,
+          "function": "<genexpr>",
+          "primitive_calls_per_plan": 227.0,
+          "total_calls_per_plan": 227.0,
+          "self_us_per_plan": 13.758005,
+          "cumulative_us_per_plan": 13.758005,
+          "callers": [
+            {
+              "file": "~",
+              "line": 0,
+              "function": "<built-in method builtins.any>",
+              "stats": [
+                45400,
+                45400,
+                0.0027516010000000002,
+                0.0027516010000000002
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/root/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/dataclasses.py",
+          "line": 1540,
+          "function": "replace",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 5.830565,
+          "cumulative_us_per_plan": 10.19494,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/adapter.py",
+              "line": 232,
+              "function": "plan_runtime_session",
+              "stats": [
+                200,
+                200,
+                0.001166113,
+                0.0020389880000000003
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 88,
+          "function": "__post_init__",
+          "primitive_calls_per_plan": 12.0,
+          "total_calls_per_plan": 12.0,
+          "self_us_per_plan": 6.28066,
+          "cumulative_us_per_plan": 10.093035,
+          "callers": [
+            {
+              "file": "<string>",
+              "line": 2,
+              "function": "__init__",
+              "stats": [
+                2400,
+                2400,
+                0.001256132,
+                0.002018607
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/fixed.py",
+          "line": 147,
+          "function": "_session_geometry",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 3.3554900000000005,
+          "cumulative_us_per_plan": 8.339770000000001,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/adapter.py",
+              "line": 232,
+              "function": "plan_runtime_session",
+              "stats": [
+                200,
+                200,
+                0.0006710980000000001,
+                0.0016679540000000001
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.len>",
+          "primitive_calls_per_plan": 32.0,
+          "total_calls_per_plan": 32.0,
+          "self_us_per_plan": 5.02326,
+          "cumulative_us_per_plan": 5.02326,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 192,
+              "function": "allocation_footprint",
+              "stats": [
+                4800,
+                4800,
+                0.0007315710000000001,
+                0.0007315710000000001
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 32,
+              "function": "session_allocation_layout",
+              "stats": [
+                1600,
+                1600,
+                0.000273081,
+                0.000273081
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.max>",
+          "primitive_calls_per_plan": 13.0,
+          "total_calls_per_plan": 13.0,
+          "self_us_per_plan": 4.7993250000000005,
+          "cumulative_us_per_plan": 4.7993250000000005,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 192,
+              "function": "allocation_footprint",
+              "stats": [
+                1600,
+                1600,
+                0.000641332,
+                0.000641332
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/fixed.py",
+              "line": 147,
+              "function": "_session_geometry",
+              "stats": [
+                200,
+                200,
+                7.1926e-05,
+                7.1926e-05
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 32,
+              "function": "session_allocation_layout",
+              "stats": [
+                800,
+                800,
+                0.00024660700000000003,
+                0.00024660700000000003
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/adapter.py",
+          "line": 102,
+          "function": "_validate_capacity",
+          "primitive_calls_per_plan": 2.0,
+          "total_calls_per_plan": 2.0,
+          "self_us_per_plan": 0.7987800000000002,
+          "cumulative_us_per_plan": 3.927555,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/fixed.py",
+              "line": 147,
+              "function": "_session_geometry",
+              "stats": [
+                200,
+                200,
+                7.2482e-05,
+                0.000369229
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/fixed.py",
+              "line": 107,
+              "function": "estimate_session_host_pages",
+              "stats": [
+                200,
+                200,
+                8.7274e-05,
+                0.000416282
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/resources.py",
+          "line": 317,
+          "function": "validate_capacity",
+          "primitive_calls_per_plan": 2.0,
+          "total_calls_per_plan": 2.0,
+          "self_us_per_plan": 1.5472750000000002,
+          "cumulative_us_per_plan": 3.1287750000000005,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/adapter.py",
+              "line": 102,
+              "function": "_validate_capacity",
+              "stats": [
+                400,
+                400,
+                0.00030945500000000004,
+                0.0006257550000000001
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/fixed.py",
+          "line": 107,
+          "function": "estimate_session_host_pages",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 0.6473350000000001,
+          "cumulative_us_per_plan": 2.728745,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/adapter.py",
+              "line": 232,
+              "function": "plan_runtime_session",
+              "stats": [
+                200,
+                200,
+                0.000129467,
+                0.000545749
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'items' of 'dict' objects>",
+          "primitive_calls_per_plan": 12.0,
+          "total_calls_per_plan": 12.0,
+          "self_us_per_plan": 2.22851,
+          "cumulative_us_per_plan": 2.22851,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 192,
+              "function": "allocation_footprint",
+              "stats": [
+                2400,
+                2400,
+                0.000445702,
+                0.000445702
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.getattr>",
+          "primitive_calls_per_plan": 12.0,
+          "total_calls_per_plan": 12.0,
+          "self_us_per_plan": 1.842745,
+          "cumulative_us_per_plan": 1.842745,
+          "callers": [
+            {
+              "file": "/root/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/dataclasses.py",
+              "line": 1540,
+              "function": "replace",
+              "stats": [
+                1800,
+                1800,
+                0.00026424900000000004,
+                0.00026424900000000004
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/resources.py",
+              "line": 31,
+              "function": "<lambda>",
+              "stats": [
+                600,
+                600,
+                0.0001043,
+                0.0001043
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/allocator/budget.py",
+          "line": 82,
+          "function": "pinned_allocation_bytes",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 1.0717100000000002,
+          "cumulative_us_per_plan": 1.8295450000000002,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 32,
+              "function": "session_allocation_layout",
+              "stats": [
+                200,
+                200,
+                0.00021434200000000002,
+                0.00036590900000000004
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+          "line": 284,
+          "function": "<genexpr>",
+          "primitive_calls_per_plan": 4.0,
+          "total_calls_per_plan": 4.0,
+          "self_us_per_plan": 1.2777900000000002,
+          "cumulative_us_per_plan": 1.82358,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 32,
+              "function": "session_allocation_layout",
+              "stats": [
+                800,
+                800,
+                0.000255558,
+                0.000364716
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'values' of 'dict' objects>",
+          "primitive_calls_per_plan": 9.0,
+          "total_calls_per_plan": 9.0,
+          "self_us_per_plan": 1.7659050000000003,
+          "cumulative_us_per_plan": 1.7659050000000003,
+          "callers": [
+            {
+              "file": "/root/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/dataclasses.py",
+              "line": 1540,
+              "function": "replace",
+              "stats": [
+                200,
+                200,
+                4.8155e-05,
+                4.8155e-05
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 192,
+              "function": "allocation_footprint",
+              "stats": [
+                1600,
+                1600,
+                0.000305026,
+                0.000305026
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/resources.py",
+          "line": 31,
+          "function": "<lambda>",
+          "primitive_calls_per_plan": 3.0,
+          "total_calls_per_plan": 3.0,
+          "self_us_per_plan": 1.06279,
+          "cumulative_us_per_plan": 1.58429,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/fixed.py",
+              "line": 147,
+              "function": "_session_geometry",
+              "stats": [
+                200,
+                200,
+                5.7611e-05,
+                8.633000000000001e-05
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/resources.py",
+              "line": 317,
+              "function": "validate_capacity",
+              "stats": [
+                400,
+                400,
+                0.000154947,
+                0.00023052800000000003
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.min>",
+          "primitive_calls_per_plan": 4.0,
+          "total_calls_per_plan": 4.0,
+          "self_us_per_plan": 1.3528350000000002,
+          "cumulative_us_per_plan": 1.3528350000000002,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/fixed.py",
+              "line": 147,
+              "function": "_session_geometry",
+              "stats": [
+                200,
+                200,
+                7.732e-05,
+                7.732e-05
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 32,
+              "function": "session_allocation_layout",
+              "stats": [
+                600,
+                600,
+                0.00019324700000000002,
+                0.00019324700000000002
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/executor/contracts.py",
+          "line": 66,
+          "function": "validate",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 0.6851200000000002,
+          "cumulative_us_per_plan": 1.0441900000000002,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/adapter.py",
+              "line": 232,
+              "function": "plan_runtime_session",
+              "stats": [
+                200,
+                200,
+                0.00013702400000000002,
+                0.000208838
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+          "line": 23,
+          "function": "_positive",
+          "primitive_calls_per_plan": 6.0,
+          "total_calls_per_plan": 6.0,
+          "self_us_per_plan": 0.9993850000000002,
+          "cumulative_us_per_plan": 0.9993850000000002,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 32,
+              "function": "session_allocation_layout",
+              "stats": [
+                1200,
+                1200,
+                0.00019987700000000002,
+                0.00019987700000000002
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/root/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/dataclasses.py",
+          "line": 1296,
+          "function": "_is_dataclass_instance",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 0.48429,
+          "cumulative_us_per_plan": 0.6797050000000001,
+          "callers": [
+            {
+              "file": "/root/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/dataclasses.py",
+              "line": 1540,
+              "function": "replace",
+              "stats": [
+                200,
+                200,
+                9.6858e-05,
+                0.00013594100000000002
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 96,
+          "function": "fits",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 0.44193000000000005,
+          "cumulative_us_per_plan": 0.44193000000000005,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 276,
+              "function": "__post_init__",
+              "stats": [
+                200,
+                200,
+                8.8386e-05,
+                8.8386e-05
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/resources.py",
+          "line": 23,
+          "function": "_positive",
+          "primitive_calls_per_plan": 2.0,
+          "total_calls_per_plan": 2.0,
+          "self_us_per_plan": 0.42886,
+          "cumulative_us_per_plan": 0.42886,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/resources.py",
+              "line": 317,
+              "function": "validate_capacity",
+              "stats": [
+                400,
+                400,
+                8.5772e-05,
+                8.5772e-05
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/executor/contracts.py",
+          "line": 26,
+          "function": "total_tokens",
+          "primitive_calls_per_plan": 2.0,
+          "total_calls_per_plan": 2.0,
+          "self_us_per_plan": 0.35907000000000006,
+          "cumulative_us_per_plan": 0.35907000000000006,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/executor/contracts.py",
+              "line": 66,
+              "function": "validate",
+              "stats": [
+                400,
+                400,
+                7.1814e-05,
+                7.1814e-05
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+          "line": 28,
+          "function": "_align256",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 0.29784000000000005,
+          "cumulative_us_per_plan": 0.29784000000000005,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 32,
+              "function": "session_allocation_layout",
+              "stats": [
+                200,
+                200,
+                5.9568e-05,
+                5.9568e-05
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/fixed.py",
+          "line": 168,
+          "function": "_session_layout_options",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 0.28785000000000005,
+          "cumulative_us_per_plan": 0.28785000000000005,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/adapter.py",
+              "line": 232,
+              "function": "plan_runtime_session",
+              "stats": [
+                200,
+                200,
+                5.7570000000000006e-05,
+                5.7570000000000006e-05
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.hash>",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 0.23381,
+          "cumulative_us_per_plan": 0.23381,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 276,
+              "function": "__post_init__",
+              "stats": [
+                200,
+                200,
+                4.6762000000000004e-05,
+                4.6762000000000004e-05
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'bit_length' of 'int' objects>",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 0.21612,
+          "cumulative_us_per_plan": 0.21612,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/allocator/budget.py",
+              "line": 82,
+              "function": "pinned_allocation_bytes",
+              "stats": [
+                200,
+                200,
+                4.3224000000000005e-05,
+                4.3224000000000005e-05
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.hasattr>",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 0.19541500000000003,
+          "cumulative_us_per_plan": 0.19541500000000003,
+          "callers": [
+            {
+              "file": "/root/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/dataclasses.py",
+              "line": 1296,
+              "function": "_is_dataclass_instance",
+              "stats": [
+                200,
+                200,
+                3.9083000000000005e-05,
+                3.9083000000000005e-05
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'disable' of '_lsprof.Profiler' objects>",
+          "primitive_calls_per_plan": 0.005,
+          "total_calls_per_plan": 0.005,
+          "self_us_per_plan": 0.12483000000000001,
+          "cumulative_us_per_plan": 0.12483000000000001,
+          "callers": []
+        }
+      ]
+    },
+    "dense_prefetch": {
+      "allocation_count": 226,
+      "internal_footprint_scan_lengths": [
+        96,
+        100,
+        2,
+        64,
+        10,
+        10,
+        36,
+        3,
+        59,
+        226
+      ],
+      "external_full_footprint_scans_per_plan": 2,
+      "reservation_bytes": {
+        "hbm": 180146688,
+        "dram": 4294967304
+      },
+      "timing": {
+        "plan_runtime_session": {
+          "unit": "microseconds_per_call",
+          "batch_means": [
+            1025.77386,
+            1027.26488,
+            1029.88359,
+            1026.67227,
+            1027.37712,
+            1024.98162,
+            1023.91105
+          ],
+          "median": 1026.67227,
+          "min": 1023.91105,
+          "max": 1029.88359,
+          "repeats": 7,
+          "iterations_per_repeat": 100
+        },
+        "session_allocation_layout": {
+          "unit": "microseconds_per_call",
+          "batch_means": [
+            924.39391,
+            926.5733,
+            924.99169,
+            925.43816,
+            928.70775,
+            988.6417299999999,
+            994.51722
+          ],
+          "median": 926.5733,
+          "min": 924.39391,
+          "max": 994.51722,
+          "repeats": 7,
+          "iterations_per_repeat": 100
+        },
+        "all_internal_layout_footprint_scans": {
+          "unit": "microseconds_per_call",
+          "batch_means": [
+            120.57477,
+            117.03838,
+            121.70133,
+            120.13185,
+            112.91363,
+            111.95455,
+            112.10937
+          ],
+          "median": 117.03838,
+          "min": 111.95455,
+          "max": 121.70133,
+          "repeats": 7,
+          "iterations_per_repeat": 100
+        },
+        "one_full_allocation_footprint": {
+          "unit": "microseconds_per_call",
+          "batch_means": [
+            37.71214,
+            38.00016,
+            37.766949999999994,
+            38.241550000000004,
+            38.72958,
+            37.802550000000004,
+            38.198209999999996
+          ],
+          "median": 38.00016,
+          "min": 37.71214,
+          "max": 38.72958,
+          "repeats": 7,
+          "iterations_per_repeat": 100
+        },
+        "construct_all_AllocationSpec_from_prebuilt_kwargs": {
+          "unit": "microseconds_per_call",
+          "batch_means": [
+            444.23178,
+            445.97024,
+            482.08902,
+            453.859,
+            446.50033,
+            444.42178,
+            448.45570000000004
+          ],
+          "median": 446.50033,
+          "min": 444.23178,
+          "max": 482.08902,
+          "repeats": 7,
+          "iterations_per_repeat": 100
+        },
+        "validate_all_existing_AllocationSpec": {
+          "unit": "microseconds_per_call",
+          "batch_means": [
+            169.96664,
+            175.05323,
+            185.96293,
+            184.82132000000001,
+            181.27549,
+            184.92917,
+            171.88701999999998
+          ],
+          "median": 181.27549,
+          "min": 169.96664,
+          "max": 185.96293,
+          "repeats": 7,
+          "iterations_per_repeat": 100
+        },
+        "construct_SessionPlan_from_prebuilt_kwargs": {
+          "unit": "microseconds_per_call",
+          "batch_means": [
+            45.61753,
+            45.49908,
+            45.12064,
+            45.598819999999996,
+            44.94564,
+            45.73813,
+            45.15872
+          ],
+          "median": 45.49908,
+          "min": 44.94564,
+          "max": 45.73813,
+          "repeats": 7,
+          "iterations_per_repeat": 100
+        },
+        "validate_existing_SessionPlan": {
+          "unit": "microseconds_per_call",
+          "batch_means": [
+            43.895900000000005,
+            43.99789,
+            43.6089,
+            44.38167,
+            44.02432,
+            44.1164,
+            44.29503
+          ],
+          "median": 44.02432,
+          "min": 43.6089,
+          "max": 44.38167,
+          "repeats": 7,
+          "iterations_per_repeat": 100
+        }
+      },
+      "profile_sorted_cumulative": [
+        {
+          "file": "/tmp/nosa_plan_cpu_profile_20261005_01/profile_plan.py",
+          "line": 72,
+          "function": "plan",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 0.9423150000000001,
+          "cumulative_us_per_plan": 2710.5981500000007,
+          "callers": []
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/adapter.py",
+          "line": 232,
+          "function": "plan_runtime_session",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 10.657895000000002,
+          "cumulative_us_per_plan": 2709.655835,
+          "callers": [
+            {
+              "file": "/tmp/nosa_plan_cpu_profile_20261005_01/profile_plan.py",
+              "line": 72,
+              "function": "plan",
+              "stats": [
+                200,
+                200,
+                0.002131579,
+                0.541931167
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+          "line": 32,
+          "function": "session_allocation_layout",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 116.41191,
+          "cumulative_us_per_plan": 2438.5756850000002,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/adapter.py",
+              "line": 232,
+              "function": "plan_runtime_session",
+              "stats": [
+                200,
+                200,
+                0.023282382,
+                0.487715137
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+          "line": 91,
+          "function": "record",
+          "primitive_calls_per_plan": 226.0,
+          "total_calls_per_plan": 226.0,
+          "self_us_per_plan": 442.446275,
+          "cumulative_us_per_plan": 1939.0791100000001,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 32,
+              "function": "session_allocation_layout",
+              "stats": [
+                33400,
+                33400,
+                0.06471328400000001,
+                0.286996695
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 183,
+              "function": "helper_phase",
+              "stats": [
+                11800,
+                11800,
+                0.023775971,
+                0.10081912700000001
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 150,
+          "function": "__post_init__",
+          "primitive_calls_per_plan": 226.0,
+          "total_calls_per_plan": 226.0,
+          "self_us_per_plan": 430.716035,
+          "cumulative_us_per_plan": 793.07342,
+          "callers": [
+            {
+              "file": "<string>",
+              "line": 2,
+              "function": "__init__",
+              "stats": [
+                45200,
+                45200,
+                0.086143207,
+                0.158614684
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 192,
+          "function": "allocation_footprint",
+          "primitive_calls_per_plan": 12.0,
+          "total_calls_per_plan": 12.0,
+          "self_us_per_plan": 360.75506500000006,
+          "cumulative_us_per_plan": 538.126075,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 276,
+              "function": "__post_init__",
+              "stats": [
+                200,
+                200,
+                0.013655612000000001,
+                0.020092889000000003
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/adapter.py",
+              "line": 232,
+              "function": "plan_runtime_session",
+              "stats": [
+                200,
+                200,
+                0.013874254,
+                0.020217179000000002
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 120,
+              "function": "footprint",
+              "stats": [
+                2000,
+                2000,
+                0.044621147,
+                0.067315147
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+          "line": 183,
+          "function": "helper_phase",
+          "primitive_calls_per_plan": 13.0,
+          "total_calls_per_plan": 13.0,
+          "self_us_per_plan": 25.464885,
+          "cumulative_us_per_plan": 529.56052,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 32,
+              "function": "session_allocation_layout",
+              "stats": [
+                2600,
+                2600,
+                0.005092977,
+                0.105912104
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+          "line": 120,
+          "function": "footprint",
+          "primitive_calls_per_plan": 10.0,
+          "total_calls_per_plan": 10.0,
+          "self_us_per_plan": 10.869629999999999,
+          "cumulative_us_per_plan": 347.44536500000004,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 32,
+              "function": "session_allocation_layout",
+              "stats": [
+                2000,
+                2000,
+                0.002173926,
+                0.069489073
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/allocator/budget.py",
+          "line": 64,
+          "function": "allocation_bytes",
+          "primitive_calls_per_plan": 224.0,
+          "total_calls_per_plan": 224.0,
+          "self_us_per_plan": 100.01111499999999,
+          "cumulative_us_per_plan": 208.51766,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 32,
+              "function": "session_allocation_layout",
+              "stats": [
+                200,
+                200,
+                0.00011323400000000001,
+                0.00022284100000000002
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 91,
+              "function": "record",
+              "stats": [
+                44600,
+                44600,
+                0.019888989000000003,
+                0.041480691
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 183,
+          "function": "logical_bytes",
+          "primitive_calls_per_plan": 226.0,
+          "total_calls_per_plan": 226.0,
+          "self_us_per_plan": 88.27330500000002,
+          "cumulative_us_per_plan": 142.19565500000002,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 150,
+              "function": "__post_init__",
+              "stats": [
+                45200,
+                45200,
+                0.017654661000000002,
+                0.028439131000000003
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 276,
+          "function": "__post_init__",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 4.2037,
+          "cumulative_us_per_plan": 134.99517000000003,
+          "callers": [
+            {
+              "file": "<string>",
+              "line": 2,
+              "function": "__init__",
+              "stats": [
+                200,
+                200,
+                0.0008407400000000001,
+                0.026999034
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 78,
+          "function": "nonnegative",
+          "primitive_calls_per_plan": 990.0,
+          "total_calls_per_plan": 990.0,
+          "self_us_per_plan": 134.19608000000002,
+          "cumulative_us_per_plan": 134.19608000000002,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 150,
+              "function": "__post_init__",
+              "stats": [
+                192800,
+                192800,
+                0.026008675000000002,
+                0.026008675000000002
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 276,
+              "function": "__post_init__",
+              "stats": [
+                400,
+                400,
+                7.0154e-05,
+                7.0154e-05
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 88,
+              "function": "__post_init__",
+              "stats": [
+                4800,
+                4800,
+                0.0007603870000000001,
+                0.0007603870000000001
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/allocator/budget.py",
+          "line": 54,
+          "function": "allocator_policy",
+          "primitive_calls_per_plan": 225.0,
+          "total_calls_per_plan": 225.0,
+          "self_us_per_plan": 109.05679500000002,
+          "cumulative_us_per_plan": 109.05679500000002,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/allocator/budget.py",
+              "line": 64,
+              "function": "allocation_bytes",
+              "stats": [
+                44800,
+                44800,
+                0.021701309000000002,
+                0.021701309000000002
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/allocator/budget.py",
+              "line": 82,
+              "function": "pinned_allocation_bytes",
+              "stats": [
+                200,
+                200,
+                0.00011005,
+                0.00011005
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'removeprefix' of 'str' objects>",
+          "primitive_calls_per_plan": 678.0,
+          "total_calls_per_plan": 678.0,
+          "self_us_per_plan": 80.787845,
+          "cumulative_us_per_plan": 80.787845,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 150,
+              "function": "__post_init__",
+              "stats": [
+                45200,
+                45200,
+                0.005058251000000001,
+                0.005058251000000001
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 91,
+              "function": "record",
+              "stats": [
+                45200,
+                45200,
+                0.0063933,
+                0.0063933
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 183,
+              "function": "logical_bytes",
+              "stats": [
+                45200,
+                45200,
+                0.004706018,
+                0.004706018
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 187,
+          "function": "tier",
+          "primitive_calls_per_plan": 1058.0,
+          "total_calls_per_plan": 1058.0,
+          "self_us_per_plan": 70.655305,
+          "cumulative_us_per_plan": 70.655305,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 192,
+              "function": "allocation_footprint",
+              "stats": [
+                211600,
+                211600,
+                0.014131061,
+                0.014131061
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method math.prod>",
+          "primitive_calls_per_plan": 455.0,
+          "total_calls_per_plan": 455.0,
+          "self_us_per_plan": 63.83169500000001,
+          "cumulative_us_per_plan": 63.83169500000001,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 284,
+              "function": "<genexpr>",
+              "stats": [
+                600,
+                600,
+                0.00010637000000000001,
+                0.00010637000000000001
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 91,
+              "function": "record",
+              "stats": [
+                45200,
+                45200,
+                0.006581517,
+                0.006581517
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 183,
+              "function": "logical_bytes",
+              "stats": [
+                45200,
+                45200,
+                0.006078452000000001,
+                0.006078452000000001
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'setdefault' of 'dict' objects>",
+          "primitive_calls_per_plan": 295.0,
+          "total_calls_per_plan": 295.0,
+          "self_us_per_plan": 43.45225500000001,
+          "cumulative_us_per_plan": 43.45225500000001,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 192,
+              "function": "allocation_footprint",
+              "stats": [
+                59000,
+                59000,
+                0.008690451,
+                0.008690451
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'split' of 'str' objects>",
+          "primitive_calls_per_plan": 226.0,
+          "total_calls_per_plan": 226.0,
+          "self_us_per_plan": 39.087795,
+          "cumulative_us_per_plan": 39.087795,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 150,
+              "function": "__post_init__",
+              "stats": [
+                45200,
+                45200,
+                0.007817559,
+                0.007817559
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'get' of 'dict' objects>",
+          "primitive_calls_per_plan": 295.0,
+          "total_calls_per_plan": 295.0,
+          "self_us_per_plan": 34.46821,
+          "cumulative_us_per_plan": 34.46821,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 192,
+              "function": "allocation_footprint",
+              "stats": [
+                59000,
+                59000,
+                0.006893642,
+                0.006893642
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.any>",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 15.274375000000003,
+          "cumulative_us_per_plan": 29.051610000000004,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 276,
+              "function": "__post_init__",
+              "stats": [
+                200,
+                200,
+                0.0030548750000000003,
+                0.005810322000000001
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'append' of 'list' objects>",
+          "primitive_calls_per_plan": 230.0,
+          "total_calls_per_plan": 230.0,
+          "self_us_per_plan": 27.70613,
+          "cumulative_us_per_plan": 27.70613,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 32,
+              "function": "session_allocation_layout",
+              "stats": [
+                800,
+                800,
+                0.000147491,
+                0.000147491
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 91,
+              "function": "record",
+              "stats": [
+                45200,
+                45200,
+                0.005393735,
+                0.005393735
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.isinstance>",
+          "primitive_calls_per_plan": 228.0,
+          "total_calls_per_plan": 228.0,
+          "self_us_per_plan": 25.982400000000002,
+          "cumulative_us_per_plan": 25.982400000000002,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 150,
+              "function": "__post_init__",
+              "stats": [
+                45200,
+                45200,
+                0.005147861,
+                0.005147861
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 276,
+              "function": "__post_init__",
+              "stats": [
+                400,
+                400,
+                4.8619e-05,
+                4.8619e-05
+              ]
+            }
+          ]
+        },
+        {
+          "file": "<string>",
+          "line": 2,
+          "function": "__init__",
+          "primitive_calls_per_plan": 12.0,
+          "total_calls_per_plan": 12.0,
+          "self_us_per_plan": 8.263165,
+          "cumulative_us_per_plan": 18.32574,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 192,
+              "function": "allocation_footprint",
+              "stats": [
+                2400,
+                2400,
+                0.0016526330000000001,
+                0.003665148
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 288,
+          "function": "<genexpr>",
+          "primitive_calls_per_plan": 227.0,
+          "total_calls_per_plan": 227.0,
+          "self_us_per_plan": 13.777235000000001,
+          "cumulative_us_per_plan": 13.777235000000001,
+          "callers": [
+            {
+              "file": "~",
+              "line": 0,
+              "function": "<built-in method builtins.any>",
+              "stats": [
+                45400,
+                45400,
+                0.0027554470000000003,
+                0.0027554470000000003
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/root/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/dataclasses.py",
+          "line": 1540,
+          "function": "replace",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 5.87344,
+          "cumulative_us_per_plan": 10.233995,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/adapter.py",
+              "line": 232,
+              "function": "plan_runtime_session",
+              "stats": [
+                200,
+                200,
+                0.0011746880000000001,
+                0.002046799
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 88,
+          "function": "__post_init__",
+          "primitive_calls_per_plan": 12.0,
+          "total_calls_per_plan": 12.0,
+          "self_us_per_plan": 6.26064,
+          "cumulative_us_per_plan": 10.062575000000002,
+          "callers": [
+            {
+              "file": "<string>",
+              "line": 2,
+              "function": "__init__",
+              "stats": [
+                2400,
+                2400,
+                0.0012521280000000001,
+                0.0020125150000000003
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/fixed.py",
+          "line": 147,
+          "function": "_session_geometry",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 3.39702,
+          "cumulative_us_per_plan": 8.373665,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/adapter.py",
+              "line": 232,
+              "function": "plan_runtime_session",
+              "stats": [
+                200,
+                200,
+                0.000679404,
+                0.001674733
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.len>",
+          "primitive_calls_per_plan": 32.0,
+          "total_calls_per_plan": 32.0,
+          "self_us_per_plan": 4.972805000000001,
+          "cumulative_us_per_plan": 4.972805000000001,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 192,
+              "function": "allocation_footprint",
+              "stats": [
+                4800,
+                4800,
+                0.000720088,
+                0.000720088
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 32,
+              "function": "session_allocation_layout",
+              "stats": [
+                1600,
+                1600,
+                0.000274473,
+                0.000274473
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.max>",
+          "primitive_calls_per_plan": 12.0,
+          "total_calls_per_plan": 12.0,
+          "self_us_per_plan": 4.52383,
+          "cumulative_us_per_plan": 4.52383,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 192,
+              "function": "allocation_footprint",
+              "stats": [
+                1600,
+                1600,
+                0.0006390580000000001,
+                0.0006390580000000001
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/fixed.py",
+              "line": 147,
+              "function": "_session_geometry",
+              "stats": [
+                200,
+                200,
+                7.5678e-05,
+                7.5678e-05
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 32,
+              "function": "session_allocation_layout",
+              "stats": [
+                600,
+                600,
+                0.00019003000000000002,
+                0.00019003000000000002
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/adapter.py",
+          "line": 102,
+          "function": "_validate_capacity",
+          "primitive_calls_per_plan": 2.0,
+          "total_calls_per_plan": 2.0,
+          "self_us_per_plan": 0.79712,
+          "cumulative_us_per_plan": 3.923045,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/fixed.py",
+              "line": 147,
+              "function": "_session_geometry",
+              "stats": [
+                200,
+                200,
+                7.253500000000001e-05,
+                0.00036286
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/fixed.py",
+              "line": 107,
+              "function": "estimate_session_host_pages",
+              "stats": [
+                200,
+                200,
+                8.6889e-05,
+                0.000421749
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/resources.py",
+          "line": 317,
+          "function": "validate_capacity",
+          "primitive_calls_per_plan": 2.0,
+          "total_calls_per_plan": 2.0,
+          "self_us_per_plan": 1.5412700000000001,
+          "cumulative_us_per_plan": 3.1259249999999996,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/adapter.py",
+              "line": 102,
+              "function": "_validate_capacity",
+              "stats": [
+                400,
+                400,
+                0.000308254,
+                0.000625185
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/fixed.py",
+          "line": 107,
+          "function": "estimate_session_host_pages",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 0.62091,
+          "cumulative_us_per_plan": 2.729655,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/adapter.py",
+              "line": 232,
+              "function": "plan_runtime_session",
+              "stats": [
+                200,
+                200,
+                0.000124182,
+                0.000545931
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'items' of 'dict' objects>",
+          "primitive_calls_per_plan": 12.0,
+          "total_calls_per_plan": 12.0,
+          "self_us_per_plan": 2.24575,
+          "cumulative_us_per_plan": 2.24575,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 192,
+              "function": "allocation_footprint",
+              "stats": [
+                2400,
+                2400,
+                0.00044915000000000005,
+                0.00044915000000000005
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.getattr>",
+          "primitive_calls_per_plan": 12.0,
+          "total_calls_per_plan": 12.0,
+          "self_us_per_plan": 1.8789100000000003,
+          "cumulative_us_per_plan": 1.8789100000000003,
+          "callers": [
+            {
+              "file": "/root/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/dataclasses.py",
+              "line": 1540,
+              "function": "replace",
+              "stats": [
+                1800,
+                1800,
+                0.00026854200000000003,
+                0.00026854200000000003
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/resources.py",
+              "line": 31,
+              "function": "<lambda>",
+              "stats": [
+                600,
+                600,
+                0.00010724000000000001,
+                0.00010724000000000001
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/allocator/budget.py",
+          "line": 82,
+          "function": "pinned_allocation_bytes",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 1.1003200000000002,
+          "cumulative_us_per_plan": 1.8648150000000001,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 32,
+              "function": "session_allocation_layout",
+              "stats": [
+                200,
+                200,
+                0.000220064,
+                0.00037296300000000003
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+          "line": 284,
+          "function": "<genexpr>",
+          "primitive_calls_per_plan": 4.0,
+          "total_calls_per_plan": 4.0,
+          "self_us_per_plan": 1.30722,
+          "cumulative_us_per_plan": 1.8390700000000002,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 32,
+              "function": "session_allocation_layout",
+              "stats": [
+                800,
+                800,
+                0.000261444,
+                0.000367814
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'values' of 'dict' objects>",
+          "primitive_calls_per_plan": 9.0,
+          "total_calls_per_plan": 9.0,
+          "self_us_per_plan": 1.6606049999999999,
+          "cumulative_us_per_plan": 1.6606049999999999,
+          "callers": [
+            {
+              "file": "/root/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/dataclasses.py",
+              "line": 1540,
+              "function": "replace",
+              "stats": [
+                200,
+                200,
+                4.6517e-05,
+                4.6517e-05
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 192,
+              "function": "allocation_footprint",
+              "stats": [
+                1600,
+                1600,
+                0.000285604,
+                0.000285604
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/resources.py",
+          "line": 31,
+          "function": "<lambda>",
+          "primitive_calls_per_plan": 3.0,
+          "total_calls_per_plan": 3.0,
+          "self_us_per_plan": 1.058435,
+          "cumulative_us_per_plan": 1.594635,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/fixed.py",
+              "line": 147,
+              "function": "_session_geometry",
+              "stats": [
+                200,
+                200,
+                5.6680000000000006e-05,
+                8.5585e-05
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/resources.py",
+              "line": 317,
+              "function": "validate_capacity",
+              "stats": [
+                400,
+                400,
+                0.000155007,
+                0.00023334200000000002
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.min>",
+          "primitive_calls_per_plan": 4.0,
+          "total_calls_per_plan": 4.0,
+          "self_us_per_plan": 1.37185,
+          "cumulative_us_per_plan": 1.37185,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/fixed.py",
+              "line": 147,
+              "function": "_session_geometry",
+              "stats": [
+                200,
+                200,
+                7.506900000000001e-05,
+                7.506900000000001e-05
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 32,
+              "function": "session_allocation_layout",
+              "stats": [
+                600,
+                600,
+                0.000199301,
+                0.000199301
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/executor/contracts.py",
+          "line": 66,
+          "function": "validate",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 0.6893600000000001,
+          "cumulative_us_per_plan": 1.02595,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/adapter.py",
+              "line": 232,
+              "function": "plan_runtime_session",
+              "stats": [
+                200,
+                200,
+                0.000137872,
+                0.00020519
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+          "line": 23,
+          "function": "_positive",
+          "primitive_calls_per_plan": 6.0,
+          "total_calls_per_plan": 6.0,
+          "self_us_per_plan": 1.0012100000000002,
+          "cumulative_us_per_plan": 1.0012100000000002,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 32,
+              "function": "session_allocation_layout",
+              "stats": [
+                1200,
+                1200,
+                0.00020024200000000003,
+                0.00020024200000000003
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/root/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/dataclasses.py",
+          "line": 1296,
+          "function": "_is_dataclass_instance",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 0.492715,
+          "cumulative_us_per_plan": 0.6851050000000001,
+          "callers": [
+            {
+              "file": "/root/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/dataclasses.py",
+              "line": 1540,
+              "function": "replace",
+              "stats": [
+                200,
+                200,
+                9.854300000000001e-05,
+                0.000137021
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 96,
+          "function": "fits",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 0.45006,
+          "cumulative_us_per_plan": 0.45006,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 276,
+              "function": "__post_init__",
+              "stats": [
+                200,
+                200,
+                9.0012e-05,
+                9.0012e-05
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/resources.py",
+          "line": 23,
+          "function": "_positive",
+          "primitive_calls_per_plan": 2.0,
+          "total_calls_per_plan": 2.0,
+          "self_us_per_plan": 0.417945,
+          "cumulative_us_per_plan": 0.417945,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/resources.py",
+              "line": 317,
+              "function": "validate_capacity",
+              "stats": [
+                400,
+                400,
+                8.3589e-05,
+                8.3589e-05
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/executor/contracts.py",
+          "line": 26,
+          "function": "total_tokens",
+          "primitive_calls_per_plan": 2.0,
+          "total_calls_per_plan": 2.0,
+          "self_us_per_plan": 0.33659000000000006,
+          "cumulative_us_per_plan": 0.33659000000000006,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/executor/contracts.py",
+              "line": 66,
+              "function": "validate",
+              "stats": [
+                400,
+                400,
+                6.731800000000001e-05,
+                6.731800000000001e-05
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+          "line": 28,
+          "function": "_align256",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 0.29864,
+          "cumulative_us_per_plan": 0.29864,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 32,
+              "function": "session_allocation_layout",
+              "stats": [
+                200,
+                200,
+                5.9728e-05,
+                5.9728e-05
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/fixed.py",
+          "line": 168,
+          "function": "_session_layout_options",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 0.289505,
+          "cumulative_us_per_plan": 0.289505,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/adapter.py",
+              "line": 232,
+              "function": "plan_runtime_session",
+              "stats": [
+                200,
+                200,
+                5.790100000000001e-05,
+                5.790100000000001e-05
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.hash>",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 0.23149,
+          "cumulative_us_per_plan": 0.23149,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 276,
+              "function": "__post_init__",
+              "stats": [
+                200,
+                200,
+                4.6298e-05,
+                4.6298e-05
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'bit_length' of 'int' objects>",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 0.21424500000000002,
+          "cumulative_us_per_plan": 0.21424500000000002,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/allocator/budget.py",
+              "line": 82,
+              "function": "pinned_allocation_bytes",
+              "stats": [
+                200,
+                200,
+                4.2849e-05,
+                4.2849e-05
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.hasattr>",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 0.19239,
+          "cumulative_us_per_plan": 0.19239,
+          "callers": [
+            {
+              "file": "/root/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/dataclasses.py",
+              "line": 1296,
+              "function": "_is_dataclass_instance",
+              "stats": [
+                200,
+                200,
+                3.8478e-05,
+                3.8478e-05
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'disable' of '_lsprof.Profiler' objects>",
+          "primitive_calls_per_plan": 0.005,
+          "total_calls_per_plan": 0.005,
+          "self_us_per_plan": 0.10900499999999999,
+          "cumulative_us_per_plan": 0.10900499999999999,
+          "callers": []
+        }
+      ]
+    },
+    "overlap": {
+      "allocation_count": 226,
+      "internal_footprint_scan_lengths": [
+        96,
+        100,
+        2,
+        64,
+        10,
+        10,
+        36,
+        3,
+        59,
+        226
+      ],
+      "external_full_footprint_scans_per_plan": 2,
+      "reservation_bytes": {
+        "hbm": 180146688,
+        "dram": 4294967312
+      },
+      "timing": {
+        "plan_runtime_session": {
+          "unit": "microseconds_per_call",
+          "batch_means": [
+            1031.9523000000002,
+            1033.84937,
+            1031.94901,
+            1033.76394,
+            1032.8885699999998,
+            1034.88083,
+            1034.71302
+          ],
+          "median": 1033.76394,
+          "min": 1031.94901,
+          "max": 1034.88083,
+          "repeats": 7,
+          "iterations_per_repeat": 100
+        },
+        "session_allocation_layout": {
+          "unit": "microseconds_per_call",
+          "batch_means": [
+            928.5661899999999,
+            928.9681899999999,
+            927.32957,
+            926.67044,
+            927.72215,
+            928.7801,
+            928.50102
+          ],
+          "median": 928.50102,
+          "min": 926.67044,
+          "max": 928.9681899999999,
+          "repeats": 7,
+          "iterations_per_repeat": 100
+        },
+        "all_internal_layout_footprint_scans": {
+          "unit": "microseconds_per_call",
+          "batch_means": [
+            111.92026,
+            111.96321,
+            112.45992,
+            111.38618,
+            111.09786,
+            111.56172000000001,
+            111.31007000000001
+          ],
+          "median": 111.56172000000001,
+          "min": 111.09786,
+          "max": 112.45992,
+          "repeats": 7,
+          "iterations_per_repeat": 100
+        },
+        "one_full_allocation_footprint": {
+          "unit": "microseconds_per_call",
+          "batch_means": [
+            37.87703,
+            37.769800000000004,
+            37.57792,
+            37.69817,
+            37.745290000000004,
+            37.47639,
+            37.54922
+          ],
+          "median": 37.69817,
+          "min": 37.47639,
+          "max": 37.87703,
+          "repeats": 7,
+          "iterations_per_repeat": 100
+        },
+        "construct_all_AllocationSpec_from_prebuilt_kwargs": {
+          "unit": "microseconds_per_call",
+          "batch_means": [
+            441.23305,
+            440.65309,
+            441.68415999999996,
+            440.91952000000003,
+            442.33584,
+            441.5773,
+            441.32932
+          ],
+          "median": 441.32932,
+          "min": 440.65309,
+          "max": 442.33584,
+          "repeats": 7,
+          "iterations_per_repeat": 100
+        },
+        "validate_all_existing_AllocationSpec": {
+          "unit": "microseconds_per_call",
+          "batch_means": [
+            164.69241,
+            164.46904999999998,
+            164.6866,
+            165.59582999999998,
+            166.09018,
+            168.01888,
+            165.17852
+          ],
+          "median": 165.17852,
+          "min": 164.46904999999998,
+          "max": 168.01888,
+          "repeats": 7,
+          "iterations_per_repeat": 100
+        },
+        "construct_SessionPlan_from_prebuilt_kwargs": {
+          "unit": "microseconds_per_call",
+          "batch_means": [
+            45.6578,
+            45.621629999999996,
+            45.349489999999996,
+            45.49916,
+            45.66668,
+            45.76297,
+            45.791059999999995
+          ],
+          "median": 45.6578,
+          "min": 45.349489999999996,
+          "max": 45.791059999999995,
+          "repeats": 7,
+          "iterations_per_repeat": 100
+        },
+        "validate_existing_SessionPlan": {
+          "unit": "microseconds_per_call",
+          "batch_means": [
+            45.015449999999994,
+            44.6788,
+            45.037279999999996,
+            44.418519999999994,
+            44.72999,
+            45.0515,
+            44.823980000000006
+          ],
+          "median": 44.823980000000006,
+          "min": 44.418519999999994,
+          "max": 45.0515,
+          "repeats": 7,
+          "iterations_per_repeat": 100
+        }
+      },
+      "profile_sorted_cumulative": [
+        {
+          "file": "/tmp/nosa_plan_cpu_profile_20261005_01/profile_plan.py",
+          "line": 72,
+          "function": "plan",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 0.947015,
+          "cumulative_us_per_plan": 2705.78397,
+          "callers": []
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/adapter.py",
+          "line": 232,
+          "function": "plan_runtime_session",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 10.952710000000002,
+          "cumulative_us_per_plan": 2704.836955,
+          "callers": [
+            {
+              "file": "/tmp/nosa_plan_cpu_profile_20261005_01/profile_plan.py",
+              "line": 72,
+              "function": "plan",
+              "stats": [
+                200,
+                200,
+                0.002190542,
+                0.540967391
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+          "line": 32,
+          "function": "session_allocation_layout",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 117.16653000000001,
+          "cumulative_us_per_plan": 2430.57084,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/adapter.py",
+              "line": 232,
+              "function": "plan_runtime_session",
+              "stats": [
+                200,
+                200,
+                0.023433306,
+                0.486114168
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+          "line": 91,
+          "function": "record",
+          "primitive_calls_per_plan": 226.0,
+          "total_calls_per_plan": 226.0,
+          "self_us_per_plan": 441.04511500000007,
+          "cumulative_us_per_plan": 1931.144425,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 32,
+              "function": "session_allocation_layout",
+              "stats": [
+                33400,
+                33400,
+                0.06465009000000001,
+                0.286320697
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 183,
+              "function": "helper_phase",
+              "stats": [
+                11800,
+                11800,
+                0.023558933,
+                0.09990818800000001
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 150,
+          "function": "__post_init__",
+          "primitive_calls_per_plan": 226.0,
+          "total_calls_per_plan": 226.0,
+          "self_us_per_plan": 430.35105000000004,
+          "cumulative_us_per_plan": 788.707865,
+          "callers": [
+            {
+              "file": "<string>",
+              "line": 2,
+              "function": "__init__",
+              "stats": [
+                45200,
+                45200,
+                0.08607021000000001,
+                0.157741573
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 192,
+          "function": "allocation_footprint",
+          "primitive_calls_per_plan": 12.0,
+          "total_calls_per_plan": 12.0,
+          "self_us_per_plan": 362.19261000000006,
+          "cumulative_us_per_plan": 539.7305650000001,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 276,
+              "function": "__post_init__",
+              "stats": [
+                200,
+                200,
+                0.013875584000000002,
+                0.020330145
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/adapter.py",
+              "line": 232,
+              "function": "plan_runtime_session",
+              "stats": [
+                200,
+                200,
+                0.014034997,
+                0.020396193
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 120,
+              "function": "footprint",
+              "stats": [
+                2000,
+                2000,
+                0.044527941,
+                0.06721977500000001
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+          "line": 183,
+          "function": "helper_phase",
+          "primitive_calls_per_plan": 13.0,
+          "total_calls_per_plan": 13.0,
+          "self_us_per_plan": 24.974085,
+          "cumulative_us_per_plan": 524.515025,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 32,
+              "function": "session_allocation_layout",
+              "stats": [
+                2600,
+                2600,
+                0.004994817,
+                0.10490300500000001
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+          "line": 120,
+          "function": "footprint",
+          "primitive_calls_per_plan": 10.0,
+          "total_calls_per_plan": 10.0,
+          "self_us_per_plan": 10.848095,
+          "cumulative_us_per_plan": 346.94697,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 32,
+              "function": "session_allocation_layout",
+              "stats": [
+                2000,
+                2000,
+                0.0021696190000000002,
+                0.06938939400000001
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/allocator/budget.py",
+          "line": 64,
+          "function": "allocation_bytes",
+          "primitive_calls_per_plan": 224.0,
+          "total_calls_per_plan": 224.0,
+          "self_us_per_plan": 99.519935,
+          "cumulative_us_per_plan": 207.57312000000002,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 32,
+              "function": "session_allocation_layout",
+              "stats": [
+                200,
+                200,
+                0.000102614,
+                0.000205312
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 91,
+              "function": "record",
+              "stats": [
+                44600,
+                44600,
+                0.019801373,
+                0.041309312
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 183,
+          "function": "logical_bytes",
+          "primitive_calls_per_plan": 226.0,
+          "total_calls_per_plan": 226.0,
+          "self_us_per_plan": 86.19618,
+          "cumulative_us_per_plan": 139.16326500000002,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 150,
+              "function": "__post_init__",
+              "stats": [
+                45200,
+                45200,
+                0.017239236,
+                0.027832653000000002
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 276,
+          "function": "__post_init__",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 4.37781,
+          "cumulative_us_per_plan": 136.707955,
+          "callers": [
+            {
+              "file": "<string>",
+              "line": 2,
+              "function": "__init__",
+              "stats": [
+                200,
+                200,
+                0.0008755620000000001,
+                0.027341591000000002
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 78,
+          "function": "nonnegative",
+          "primitive_calls_per_plan": 990.0,
+          "total_calls_per_plan": 990.0,
+          "self_us_per_plan": 134.08426500000002,
+          "cumulative_us_per_plan": 134.08426500000002,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 150,
+              "function": "__post_init__",
+              "stats": [
+                192800,
+                192800,
+                0.025990210000000003,
+                0.025990210000000003
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 276,
+              "function": "__post_init__",
+              "stats": [
+                400,
+                400,
+                6.940700000000001e-05,
+                6.940700000000001e-05
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 88,
+              "function": "__post_init__",
+              "stats": [
+                4800,
+                4800,
+                0.000757236,
+                0.000757236
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/allocator/budget.py",
+          "line": 54,
+          "function": "allocator_policy",
+          "primitive_calls_per_plan": 225.0,
+          "total_calls_per_plan": 225.0,
+          "self_us_per_plan": 108.60133000000002,
+          "cumulative_us_per_plan": 108.60133000000002,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/allocator/budget.py",
+              "line": 64,
+              "function": "allocation_bytes",
+              "stats": [
+                44800,
+                44800,
+                0.021610637000000002,
+                0.021610637000000002
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/allocator/budget.py",
+              "line": 82,
+              "function": "pinned_allocation_bytes",
+              "stats": [
+                200,
+                200,
+                0.000109629,
+                0.000109629
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'removeprefix' of 'str' objects>",
+          "primitive_calls_per_plan": 678.0,
+          "total_calls_per_plan": 678.0,
+          "self_us_per_plan": 80.440405,
+          "cumulative_us_per_plan": 80.440405,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 150,
+              "function": "__post_init__",
+              "stats": [
+                45200,
+                45200,
+                0.005017825,
+                0.005017825
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 91,
+              "function": "record",
+              "stats": [
+                45200,
+                45200,
+                0.006418906,
+                0.006418906
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 183,
+              "function": "logical_bytes",
+              "stats": [
+                45200,
+                45200,
+                0.00465135,
+                0.00465135
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 187,
+          "function": "tier",
+          "primitive_calls_per_plan": 1058.0,
+          "total_calls_per_plan": 1058.0,
+          "self_us_per_plan": 70.706255,
+          "cumulative_us_per_plan": 70.706255,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 192,
+              "function": "allocation_footprint",
+              "stats": [
+                211600,
+                211600,
+                0.014141251,
+                0.014141251
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method math.prod>",
+          "primitive_calls_per_plan": 455.0,
+          "total_calls_per_plan": 455.0,
+          "self_us_per_plan": 62.78043,
+          "cumulative_us_per_plan": 62.78043,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 284,
+              "function": "<genexpr>",
+              "stats": [
+                600,
+                600,
+                0.00010521400000000001,
+                0.00010521400000000001
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 91,
+              "function": "record",
+              "stats": [
+                45200,
+                45200,
+                0.006508805,
+                0.006508805
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 183,
+              "function": "logical_bytes",
+              "stats": [
+                45200,
+                45200,
+                0.0059420670000000005,
+                0.0059420670000000005
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'setdefault' of 'dict' objects>",
+          "primitive_calls_per_plan": 295.0,
+          "total_calls_per_plan": 295.0,
+          "self_us_per_plan": 43.30993,
+          "cumulative_us_per_plan": 43.30993,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 192,
+              "function": "allocation_footprint",
+              "stats": [
+                59000,
+                59000,
+                0.008661986,
+                0.008661986
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'split' of 'str' objects>",
+          "primitive_calls_per_plan": 226.0,
+          "total_calls_per_plan": 226.0,
+          "self_us_per_plan": 38.790755000000004,
+          "cumulative_us_per_plan": 38.790755000000004,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 150,
+              "function": "__post_init__",
+              "stats": [
+                45200,
+                45200,
+                0.0077581510000000005,
+                0.0077581510000000005
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'get' of 'dict' objects>",
+          "primitive_calls_per_plan": 295.0,
+          "total_calls_per_plan": 295.0,
+          "self_us_per_plan": 34.43842000000001,
+          "cumulative_us_per_plan": 34.43842000000001,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 192,
+              "function": "allocation_footprint",
+              "stats": [
+                59000,
+                59000,
+                0.006887684000000001,
+                0.006887684000000001
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.any>",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 15.48162,
+          "cumulative_us_per_plan": 29.371045,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 276,
+              "function": "__post_init__",
+              "stats": [
+                200,
+                200,
+                0.003096324,
+                0.005874209
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'append' of 'list' objects>",
+          "primitive_calls_per_plan": 230.0,
+          "total_calls_per_plan": 230.0,
+          "self_us_per_plan": 27.518030000000003,
+          "cumulative_us_per_plan": 27.518030000000003,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 32,
+              "function": "session_allocation_layout",
+              "stats": [
+                800,
+                800,
+                0.000146402,
+                0.000146402
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 91,
+              "function": "record",
+              "stats": [
+                45200,
+                45200,
+                0.005357204,
+                0.005357204
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.isinstance>",
+          "primitive_calls_per_plan": 228.0,
+          "total_calls_per_plan": 228.0,
+          "self_us_per_plan": 25.621470000000002,
+          "cumulative_us_per_plan": 25.621470000000002,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 150,
+              "function": "__post_init__",
+              "stats": [
+                45200,
+                45200,
+                0.005072524,
+                0.005072524
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 276,
+              "function": "__post_init__",
+              "stats": [
+                400,
+                400,
+                5.177e-05,
+                5.177e-05
+              ]
+            }
+          ]
+        },
+        {
+          "file": "<string>",
+          "line": 2,
+          "function": "__init__",
+          "primitive_calls_per_plan": 12.0,
+          "total_calls_per_plan": 12.0,
+          "self_us_per_plan": 8.258395,
+          "cumulative_us_per_plan": 18.384025,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 192,
+              "function": "allocation_footprint",
+              "stats": [
+                2400,
+                2400,
+                0.001651679,
+                0.0036768050000000004
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 288,
+          "function": "<genexpr>",
+          "primitive_calls_per_plan": 227.0,
+          "total_calls_per_plan": 227.0,
+          "self_us_per_plan": 13.889425000000001,
+          "cumulative_us_per_plan": 13.889425000000001,
+          "callers": [
+            {
+              "file": "~",
+              "line": 0,
+              "function": "<built-in method builtins.any>",
+              "stats": [
+                45400,
+                45400,
+                0.0027778850000000003,
+                0.0027778850000000003
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/root/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/dataclasses.py",
+          "line": 1540,
+          "function": "replace",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 5.901435,
+          "cumulative_us_per_plan": 10.438485,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/adapter.py",
+              "line": 232,
+              "function": "plan_runtime_session",
+              "stats": [
+                200,
+                200,
+                0.0011802870000000001,
+                0.0020876970000000003
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 88,
+          "function": "__post_init__",
+          "primitive_calls_per_plan": 12.0,
+          "total_calls_per_plan": 12.0,
+          "self_us_per_plan": 6.33945,
+          "cumulative_us_per_plan": 10.12563,
+          "callers": [
+            {
+              "file": "<string>",
+              "line": 2,
+              "function": "__init__",
+              "stats": [
+                2400,
+                2400,
+                0.00126789,
+                0.002025126
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/fixed.py",
+          "line": 147,
+          "function": "_session_geometry",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 3.41432,
+          "cumulative_us_per_plan": 8.409905000000002,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/adapter.py",
+              "line": 232,
+              "function": "plan_runtime_session",
+              "stats": [
+                200,
+                200,
+                0.000682864,
+                0.0016819810000000001
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.len>",
+          "primitive_calls_per_plan": 32.0,
+          "total_calls_per_plan": 32.0,
+          "self_us_per_plan": 5.0454,
+          "cumulative_us_per_plan": 5.0454,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 192,
+              "function": "allocation_footprint",
+              "stats": [
+                4800,
+                4800,
+                0.0007268950000000001,
+                0.0007268950000000001
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 32,
+              "function": "session_allocation_layout",
+              "stats": [
+                1600,
+                1600,
+                0.000282185,
+                0.000282185
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.max>",
+          "primitive_calls_per_plan": 13.0,
+          "total_calls_per_plan": 13.0,
+          "self_us_per_plan": 4.760435,
+          "cumulative_us_per_plan": 4.760435,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 192,
+              "function": "allocation_footprint",
+              "stats": [
+                1600,
+                1600,
+                0.000633489,
+                0.000633489
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/fixed.py",
+              "line": 147,
+              "function": "_session_geometry",
+              "stats": [
+                200,
+                200,
+                7.3071e-05,
+                7.3071e-05
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 32,
+              "function": "session_allocation_layout",
+              "stats": [
+                800,
+                800,
+                0.000245527,
+                0.000245527
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/adapter.py",
+          "line": 102,
+          "function": "_validate_capacity",
+          "primitive_calls_per_plan": 2.0,
+          "total_calls_per_plan": 2.0,
+          "self_us_per_plan": 0.785015,
+          "cumulative_us_per_plan": 3.888145,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/fixed.py",
+              "line": 147,
+              "function": "_session_geometry",
+              "stats": [
+                200,
+                200,
+                7.1673e-05,
+                0.000361917
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/fixed.py",
+              "line": 107,
+              "function": "estimate_session_host_pages",
+              "stats": [
+                200,
+                200,
+                8.533000000000001e-05,
+                0.00041571200000000005
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/resources.py",
+          "line": 317,
+          "function": "validate_capacity",
+          "primitive_calls_per_plan": 2.0,
+          "total_calls_per_plan": 2.0,
+          "self_us_per_plan": 1.5336750000000001,
+          "cumulative_us_per_plan": 3.1031299999999997,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/adapter.py",
+              "line": 102,
+              "function": "_validate_capacity",
+              "stats": [
+                400,
+                400,
+                0.00030673500000000004,
+                0.000620626
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/fixed.py",
+          "line": 107,
+          "function": "estimate_session_host_pages",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 0.635305,
+          "cumulative_us_per_plan": 2.7138650000000006,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/adapter.py",
+              "line": 232,
+              "function": "plan_runtime_session",
+              "stats": [
+                200,
+                200,
+                0.000127061,
+                0.0005427730000000001
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'items' of 'dict' objects>",
+          "primitive_calls_per_plan": 12.0,
+          "total_calls_per_plan": 12.0,
+          "self_us_per_plan": 2.4425850000000002,
+          "cumulative_us_per_plan": 2.4425850000000002,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 192,
+              "function": "allocation_footprint",
+              "stats": [
+                2400,
+                2400,
+                0.000488517,
+                0.000488517
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.getattr>",
+          "primitive_calls_per_plan": 12.0,
+          "total_calls_per_plan": 12.0,
+          "self_us_per_plan": 1.9055450000000003,
+          "cumulative_us_per_plan": 1.9055450000000003,
+          "callers": [
+            {
+              "file": "/root/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/dataclasses.py",
+              "line": 1540,
+              "function": "replace",
+              "stats": [
+                1800,
+                1800,
+                0.000277042,
+                0.000277042
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/resources.py",
+              "line": 31,
+              "function": "<lambda>",
+              "stats": [
+                600,
+                600,
+                0.000104067,
+                0.000104067
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/allocator/budget.py",
+          "line": 82,
+          "function": "pinned_allocation_bytes",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 1.0756400000000002,
+          "cumulative_us_per_plan": 1.8417450000000002,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 32,
+              "function": "session_allocation_layout",
+              "stats": [
+                200,
+                200,
+                0.000215128,
+                0.000368349
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+          "line": 284,
+          "function": "<genexpr>",
+          "primitive_calls_per_plan": 4.0,
+          "total_calls_per_plan": 4.0,
+          "self_us_per_plan": 1.2633500000000002,
+          "cumulative_us_per_plan": 1.7894200000000005,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 32,
+              "function": "session_allocation_layout",
+              "stats": [
+                800,
+                800,
+                0.00025267000000000003,
+                0.00035788400000000004
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'values' of 'dict' objects>",
+          "primitive_calls_per_plan": 9.0,
+          "total_calls_per_plan": 9.0,
+          "self_us_per_plan": 1.6926949999999998,
+          "cumulative_us_per_plan": 1.6926949999999998,
+          "callers": [
+            {
+              "file": "/root/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/dataclasses.py",
+              "line": 1540,
+              "function": "replace",
+              "stats": [
+                200,
+                200,
+                4.7575000000000004e-05,
+                4.7575000000000004e-05
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 192,
+              "function": "allocation_footprint",
+              "stats": [
+                1600,
+                1600,
+                0.000290964,
+                0.000290964
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/resources.py",
+          "line": 31,
+          "function": "<lambda>",
+          "primitive_calls_per_plan": 3.0,
+          "total_calls_per_plan": 3.0,
+          "self_us_per_plan": 1.051425,
+          "cumulative_us_per_plan": 1.5717599999999998,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/fixed.py",
+              "line": 147,
+              "function": "_session_geometry",
+              "stats": [
+                200,
+                200,
+                5.6445000000000006e-05,
+                8.4276e-05
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/resources.py",
+              "line": 317,
+              "function": "validate_capacity",
+              "stats": [
+                400,
+                400,
+                0.00015384,
+                0.000230076
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.min>",
+          "primitive_calls_per_plan": 4.0,
+          "total_calls_per_plan": 4.0,
+          "self_us_per_plan": 1.378665,
+          "cumulative_us_per_plan": 1.378665,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/fixed.py",
+              "line": 147,
+              "function": "_session_geometry",
+              "stats": [
+                200,
+                200,
+                7.662600000000001e-05,
+                7.662600000000001e-05
+              ]
+            },
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 32,
+              "function": "session_allocation_layout",
+              "stats": [
+                600,
+                600,
+                0.00019910700000000002,
+                0.00019910700000000002
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/executor/contracts.py",
+          "line": 66,
+          "function": "validate",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 0.6904350000000001,
+          "cumulative_us_per_plan": 1.026925,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/adapter.py",
+              "line": 232,
+              "function": "plan_runtime_session",
+              "stats": [
+                200,
+                200,
+                0.000138087,
+                0.000205385
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+          "line": 23,
+          "function": "_positive",
+          "primitive_calls_per_plan": 6.0,
+          "total_calls_per_plan": 6.0,
+          "self_us_per_plan": 0.99318,
+          "cumulative_us_per_plan": 0.99318,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 32,
+              "function": "session_allocation_layout",
+              "stats": [
+                1200,
+                1200,
+                0.000198636,
+                0.000198636
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/root/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/dataclasses.py",
+          "line": 1296,
+          "function": "_is_dataclass_instance",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 0.4851150000000001,
+          "cumulative_us_per_plan": 0.68442,
+          "callers": [
+            {
+              "file": "/root/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/dataclasses.py",
+              "line": 1540,
+              "function": "replace",
+              "stats": [
+                200,
+                200,
+                9.702300000000001e-05,
+                0.000136884
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+          "line": 96,
+          "function": "fits",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 0.441375,
+          "cumulative_us_per_plan": 0.441375,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 276,
+              "function": "__post_init__",
+              "stats": [
+                200,
+                200,
+                8.8275e-05,
+                8.8275e-05
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/resources.py",
+          "line": 23,
+          "function": "_positive",
+          "primitive_calls_per_plan": 2.0,
+          "total_calls_per_plan": 2.0,
+          "self_us_per_plan": 0.4190750000000001,
+          "cumulative_us_per_plan": 0.4190750000000001,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/resources.py",
+              "line": 317,
+              "function": "validate_capacity",
+              "stats": [
+                400,
+                400,
+                8.381500000000001e-05,
+                8.381500000000001e-05
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/executor/contracts.py",
+          "line": 26,
+          "function": "total_tokens",
+          "primitive_calls_per_plan": 2.0,
+          "total_calls_per_plan": 2.0,
+          "self_us_per_plan": 0.33649,
+          "cumulative_us_per_plan": 0.33649,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/executor/contracts.py",
+              "line": 66,
+              "function": "validate",
+              "stats": [
+                400,
+                400,
+                6.7298e-05,
+                6.7298e-05
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+          "line": 28,
+          "function": "_align256",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 0.32182,
+          "cumulative_us_per_plan": 0.32182,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/session_budget.py",
+              "line": 32,
+              "function": "session_allocation_layout",
+              "stats": [
+                200,
+                200,
+                6.436400000000001e-05,
+                6.436400000000001e-05
+              ]
+            }
+          ]
+        },
+        {
+          "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/fixed.py",
+          "line": 168,
+          "function": "_session_layout_options",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 0.29031,
+          "cumulative_us_per_plan": 0.29031,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/models/nosa/execution/adapter.py",
+              "line": 232,
+              "function": "plan_runtime_session",
+              "stats": [
+                200,
+                200,
+                5.8062e-05,
+                5.8062e-05
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.hash>",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 0.26111500000000004,
+          "cumulative_us_per_plan": 0.26111500000000004,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/capacity.py",
+              "line": 276,
+              "function": "__post_init__",
+              "stats": [
+                200,
+                200,
+                5.2223000000000005e-05,
+                5.2223000000000005e-05
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'bit_length' of 'int' objects>",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 0.21796000000000004,
+          "cumulative_us_per_plan": 0.21796000000000004,
+          "callers": [
+            {
+              "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/cache/allocator/budget.py",
+              "line": 82,
+              "function": "pinned_allocation_bytes",
+              "stats": [
+                200,
+                200,
+                4.3592000000000005e-05,
+                4.3592000000000005e-05
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<built-in method builtins.hasattr>",
+          "primitive_calls_per_plan": 1.0,
+          "total_calls_per_plan": 1.0,
+          "self_us_per_plan": 0.199305,
+          "cumulative_us_per_plan": 0.199305,
+          "callers": [
+            {
+              "file": "/root/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/dataclasses.py",
+              "line": 1296,
+              "function": "_is_dataclass_instance",
+              "stats": [
+                200,
+                200,
+                3.9861000000000003e-05,
+                3.9861000000000003e-05
+              ]
+            }
+          ]
+        },
+        {
+          "file": "~",
+          "line": 0,
+          "function": "<method 'disable' of '_lsprof.Profiler' objects>",
+          "primitive_calls_per_plan": 0.005,
+          "total_calls_per_plan": 0.005,
+          "self_us_per_plan": 0.10665000000000001,
+          "cumulative_us_per_plan": 0.10665000000000001,
+          "callers": []
+        }
+      ]
+    }
+  }
+}

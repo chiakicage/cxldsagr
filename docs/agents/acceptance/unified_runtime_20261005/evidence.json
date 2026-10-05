@@ -1,0 +1,692 @@
+{
+  "schema": "unified-runtime-independent-acceptance-v1",
+  "created_utc": "2026-10-04T19:18:32.674377+00:00",
+  "baseline_head": "934485bcade30b138a87e65ff87fbbbd04844fbf",
+  "note": "Independent numerical receipts and minimal original source/validation evidence are versioned here. Required receipt artifacts remain available beside each receipt as ignored local acceptance data. Original metadata, commands and hashes are unmodified. Accepted performance data lives in each experiment output directory.",
+  "checks": [
+    {
+      "name": "nosa_check_02",
+      "directory": "docs/agents/acceptance/unified_runtime_20261005/nosa_baseline",
+      "receipt_sha256": "49328ecd4ef668e75abe7206c32b1d26666faae633a21700f44815011bb6cc99",
+      "original_directory": "/tmp/cxldsagr_refactor_p0_20261005/nosa_check_02"
+    },
+    {
+      "name": "deepseek_check_01",
+      "directory": "docs/agents/acceptance/unified_runtime_20261005/deepseek_baseline",
+      "receipt_sha256": "07d368adc96baadaed44cbeaedbc8eccf734ba73943349d75c08710f5ff9ed88",
+      "original_directory": "/tmp/cxldsagr_refactor_p0_20261005/deepseek_check_01"
+    }
+  ],
+  "benchmarks": [
+    {
+      "run_id": "refactor_p0_nosa_bench_20261005_01",
+      "directory": "experiments/nosa_motivation/output/data/refactor_p0_nosa_bench_20261005_01",
+      "metadata_sha256": "9d2d65791a68b899bccb8c274bf69131561488d9d11261af5d78397799fe00f8",
+      "measurements_sha256": "b49decdaf99611583af3f09f9582448dc80417e7b8230306679e255e0283d297"
+    },
+    {
+      "run_id": "refactor_p0_nosa_bench_20261005_02",
+      "directory": "experiments/nosa_motivation/output/data/refactor_p0_nosa_bench_20261005_02",
+      "metadata_sha256": "7f37b7de9b4cfa403f8d98f465a0ac3f1d424c2ac510419e7238595688b8a687",
+      "measurements_sha256": "9a9a426abd05e04f944081ba9aa0373089531a56c9f55459fff0b3d964c37b88"
+    },
+    {
+      "run_id": "refactor_p0_nosa_bench_20261005_03",
+      "directory": "experiments/nosa_motivation/output/data/refactor_p0_nosa_bench_20261005_03",
+      "metadata_sha256": "05461fd0293a1ee74c0b7dff13b6366dbc62913e4edd211950864c6b3d2d4a42",
+      "measurements_sha256": "329683f47738de76c3446907cc5a4878ad4121f6e858a6ae28b6a768dc316ea8"
+    },
+    {
+      "run_id": "refactor_p0_deepseek_bench_20261005_01",
+      "directory": "experiments/deepseek_v32_motivation/output/data/refactor_p0_deepseek_bench_20261005_01",
+      "metadata_sha256": "f77929873ec2849dbc2ad4bdcc35d62ef7649463ccce8b360aa5daa4e1de79c1",
+      "measurements_sha256": "92cfbd1fb1fb8f73523c64823513dde550194fdbb4011443922100af96ad5212"
+    },
+    {
+      "run_id": "refactor_p0_deepseek_bench_20261005_02",
+      "directory": "experiments/deepseek_v32_motivation/output/data/refactor_p0_deepseek_bench_20261005_02",
+      "metadata_sha256": "4491c3b23969fc7e7b8bf5871d6e2926412b2ec988b13d073d37db8795131787",
+      "measurements_sha256": "09828a2fb58b9ba7c30f922442d36a06574870862e5851bc83328ceff4faaff7"
+    },
+    {
+      "run_id": "refactor_p0_deepseek_bench_20261005_03",
+      "directory": "experiments/deepseek_v32_motivation/output/data/refactor_p0_deepseek_bench_20261005_03",
+      "metadata_sha256": "8ce9dadd84c348cf42e928bba34117fb3399e50f3ecfdd445dfe5c226cbf7853",
+      "measurements_sha256": "41ee8f3f1221b877a992d86a4d10a78edde877437042225e7a97e800252d7758"
+    }
+  ],
+  "frozen_source_records": {
+    "baseline_source_manifest.json": {
+      "path": "docs/agents/acceptance/unified_runtime_20261005/baseline_source_manifest.json",
+      "sha256": "0af64a9e7a54cac8c0ea054fc90febc005590f8c6705d4f76b1e30ceed743498"
+    },
+    "baseline_environment.json": {
+      "path": "docs/agents/acceptance/unified_runtime_20261005/baseline_environment.json",
+      "sha256": "3b7472106aed5375e12c85176b590426fca4f1daf6b9c69edb36c383b5a00477"
+    }
+  },
+  "rejected_checks": [
+    {
+      "run_id": "refactor_p0_nosa_check_20261005_01",
+      "exit_code": 1,
+      "reason": "Final environment identity changed because lazy FlashInfer import introduced TRITON_PTXAS_BLACKWELL_PATH. All 128 numerical requests completed, but no receipt was issued; this run is not accepted evidence. Explicit environment was fixed before independent check02.",
+      "receipt_published": false,
+      "original_evidence_directory": "/tmp/nosa-motivation-refactor_p0_nosa_check_20261005_01-90ztb8zf"
+    }
+  ],
+  "noise_calibrations": [
+    {
+      "model": "nosa",
+      "directory": "experiments/nosa_motivation/output/data/refactor_p0_nosa_noise_20261005",
+      "sha256": {
+        "nosa_noise_calibration.json": "3eed53674daf09f7bd3a3d28ffb3ddeae4443227b76c20c2ef42128281d95944",
+        "nosa_noise_samples.csv": "b990af619f45307a42d3be431916a9239b298607c17b191f62cbc188996179ee",
+        "gpu_monitor.jsonl": "583a67c53e538f543dc17ebf89773a8d9e44c05fe2de117963061b3b3f055dd2"
+      }
+    },
+    {
+      "model": "deepseek",
+      "directory": "experiments/deepseek_v32_motivation/output/data/refactor_p0_deepseek_noise_20261005",
+      "sha256": {
+        "deepseek_noise_calibration.json": "81bbc1b35cc89ef06961e04a1ff5668873f218208f56a73ed99a0a792ac6e817",
+        "deepseek_noise_samples.csv": "db1616c6711496821fb9d6f982ccd3d5b7f1be825fb67d99a67e43049a2a5562",
+        "gpu_monitor.jsonl": "a3eb3543aacd58bfbf3ab8a61995c0a02e3a23196d902fd97670e8ef3ecebf3e"
+      }
+    }
+  ],
+  "prior_shared_cache_correctness_acceptance": {
+    "scope": "Historical 2026-10-03 correctness-only acceptance; original source, commands, results and hashes are unchanged. It does not certify the refactored source or any performance result.",
+    "files": [
+      {
+        "path": "docs/agents/acceptance/unified_runtime_20261005/shared_cache_integration_evidence.json",
+        "original_path": "docs/agents/system/shared_runtime/nosa_shared_cache_integration_evidence.json",
+        "bytes": 5902,
+        "sha256": "fa7bed422ceb63676e4e0cf90d25b7d21ad7ce38d0aa5236dc1d0a3df5b9629a"
+      },
+      {
+        "path": "docs/agents/acceptance/unified_runtime_20261005/shared_cache_source_manifest.json",
+        "original_path": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/freeze03-evidence/manifest.json",
+        "bytes": 2078253,
+        "sha256": "754d15f982d88b0d19da2f3eb388575038f1f62ebdef4f073d8423a0518754a3"
+      },
+      {
+        "path": "docs/agents/acceptance/unified_runtime_20261005/shared_cache_nosa_evidence_index.json",
+        "original_path": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/freeze03-evidence/validation/nosa-engineering-evidence-index.json",
+        "bytes": 10891,
+        "sha256": "041b66a48a73863e4f424f76aa6fdb1456200bbdc9015698fcdfb787985bd70c"
+      },
+      {
+        "path": "docs/agents/acceptance/unified_runtime_20261005/shared_cache_deepseek_exit_ledger.json",
+        "original_path": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/deepseek-freeze03-validation/exit_ledger.json",
+        "bytes": 7475,
+        "sha256": "14de83aac189d5df8cef1b206ef14304b945562ca128ce099784cc4ecfe37943"
+      }
+    ],
+    "reference_integrity": {
+      "checked_utc": "2026-10-05",
+      "original_index_records_sha256_matched": 16,
+      "scope": "The 16 directly indexed command/result/log/summary files were rehashed. Nested raw artifacts and source inventories were not reaudited by this documentation relocation."
+    },
+    "raw_evidence_location": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-shared-integration/freeze03-evidence"
+  },
+  "t007_historical_numerical_reference": {
+    "index": "docs/agents/acceptance/unified_runtime_20261005/t007_reference/evidence.json",
+    "index_sha256": "8d1ed1a52a2296a3af556e59b81d81b7eef6cf7f5220ed57298c28c061cdb93c",
+    "explanation": "docs/agents/acceptance/unified_runtime_20261005/t007_reference.md",
+    "files": 6,
+    "bytes": 26548253,
+    "scope": "Original numerical inputs only for the independently unfinished T-007 diagnostics; exact source/destination hashes verified. No diagnostic rerun, refactored-runtime acceptance or current performance result."
+  },
+  "nosa_three_version_comparison": {
+    "directory": "experiments/nosa_motivation/output/data/refactor_nosa_three_version_20261005_01",
+    "status": "accepted_saved_evidence_comparison_with_latency_findings",
+    "phase_review": "docs/agents/acceptance/unified_runtime_20261005/nosa_three_version_phase_review.json",
+    "phase_review_sha256": "f0ae7899bae569b994ceb93021533c55b69b2046518532efb7d0ea9e3db8e654",
+    "note": "Async first/revisit and total trace latency changes require investigation; current continuous GPU-process telemetry was not collected. This status is not performance-regression closure.",
+    "role": "intermediate_before_single_entry_layout_cache_optimization_not_final",
+    "preserved_phase_evidence": "docs/agents/acceptance/unified_runtime_20261005/nosa_three_version_phase_review.json",
+    "preserved_phase_evidence_file_sha256": "f0ae7899bae569b994ceb93021533c55b69b2046518532efb7d0ea9e3db8e654"
+  },
+  "nosa_final_three_version_comparison": {
+    "status": "saved_evidence_comparison_and_utc_sample_audit_completed_with_residual_timing_findings",
+    "plan": "docs/agents/acceptance/unified_runtime_20261005/nosa_final_comparison_plan.json",
+    "plan_file_sha256": "69444a125d53bd6afdf67c6bdb9dfb3b7f45409b4c12e308d230d846e313502e",
+    "expected_run_id": "refactor_final_nosa_three_version_20261005_01",
+    "execution_requires": "Three accepted final benchmark runs and root CPU GO",
+    "directory": "experiments/nosa_motivation/output/data/refactor_final_nosa_three_version_20261005_01",
+    "phase_and_monitor_review": "docs/agents/acceptance/unified_runtime_20261005/nosa_final_phase_and_monitor_review.json",
+    "matched_request_review": "docs/agents/acceptance/unified_runtime_20261005/nosa_final_matched_request_phase_review.json",
+    "accounting_review": "docs/agents/acceptance/unified_runtime_20261005/nosa_final_accounting_review.json",
+    "let_it_crash_summary": "docs/agents/acceptance/unified_runtime_20261005/let_it_crash_summary.md",
+    "review_file_sha256": {
+      "nosa_final_phase_and_monitor_review.json": "e80abeb726ae47b086e417f6320b8bf56f771f5738d93f6245fb4cefeb4f9687",
+      "nosa_final_matched_request_phase_review.json": "df3b59a09dcecd5a5258ffb278a136aeb4fd6baff7be46420334bcb17195383f",
+      "nosa_final_accounting_review.json": "03226c4d077ab4224a5d18b6f0106289dc61c866350977cc050f0b81f57ad662",
+      "nosa_final_comparison_findings.md": "dde3e42291fe33979cb635639f7dd2c009b1609e2cf08a131c30d2c6e146dad4",
+      "let_it_crash_summary.md": "b5210226b341efaa532e291046aa5f5e76b4262341d76d42985a5c2a74459b6d",
+      "nosa_interleaved_confirmation_plan.json": "df6832eb2f75b33df8236d778cb228af534a83e06beb911d28046d6560b85f9d"
+    }
+  },
+  "nosa_cleanup_mock_cpu_diagnostic": {
+    "directory": "docs/agents/acceptance/unified_runtime_20261005/nosa_cleanup_cpu_profile_01",
+    "evidence_sha256": "629efe50c3db694bb14faecc6660975befa62eea331787014921edcfa19f79a6",
+    "scope": "Existing SharedBackend fixture with host quota widened to 1 or 16 sessions and a local no-compute candidate returning one preallocated CPU tensor. Actual runner/audit source is unmodified. No NOSA model, real cache storage enumeration, allocator/lease audit, or CUDA synchronization is exercised; these values cannot explain full-serving cleanup causally.",
+    "status": "completed_two_subprocesses_exit_zero"
+  },
+  "nosa_pair04_independent_review": {
+    "status": "completed_with_reported_residual_cleanup_and_latency_overhead",
+    "review": "docs/agents/acceptance/unified_runtime_20261005/nosa_pair04_independent_review.json",
+    "review_sha256": "3b29e78bea10014aaed51c44846a2c5a794aa4298d2de1e5cf5a2e814ef8cfa3",
+    "findings": "docs/agents/acceptance/unified_runtime_20261005/nosa_pair04_findings.md",
+    "findings_sha256": "19e0ab4e9f80c99fbba8fbcf907bc49ce35c56c4378ee0afe8d6e9cab21e7761",
+    "script": "docs/agents/acceptance/unified_runtime_20261005/nosa_pair04_audit.py.txt",
+    "boundary": "No concrete correctness/accounting/contract or sampled process-integrity blocker found; planned main profile/publication remain incomplete. All prior runs retained."
+  },
+  "deepseek_final_three_version_comparison": {
+    "status": "saved_evidence_phase_accounting_and_UTC_monitor_audit_completed_with_residual_timing_findings",
+    "comparison_directory": "experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_three_version_20261005_01",
+    "plan": "docs/agents/acceptance/unified_runtime_20261005/deepseek_final_comparison_plan.json",
+    "independent_review": "docs/agents/acceptance/unified_runtime_20261005/deepseek_final_independent_review.json",
+    "independent_review_sha256": "fbe81452c2ae3a71e8c11164e1aee03544f6bf37850f797cad09aaa7f8ec1410",
+    "findings": "docs/agents/acceptance/unified_runtime_20261005/deepseek_final_comparison_findings.md",
+    "findings_sha256": "4569f15dd173400a08eb89b605502d57f4801b1f532da276ff09c6be1d4f3cb3",
+    "scope": "Seven original runs audited; current per-run UTC monitor and exact six-run accounting independently checked. Residual admission, cleanup and revisit latency preserved. Main profile/publication pending."
+  },
+  "prepared_motivation_three_version_assets": {
+    "manifest": "docs/agents/acceptance/unified_runtime_20261005/motivation_three_version_assets.json",
+    "manifest_sha256": "83072385e23f4bf027cc0011f57ff3a7b89b9c37644bc57491746896efc786c6",
+    "status": "prepared_not_published"
+  },
+  "final_cpu_and_cli_validation": {
+    "recorded_utc": "2026-10-05T01:05:45.943465+00:00",
+    "scope": "CPU regression and CLI help/import checks only; no new GPU execution or performance measurement.",
+    "cpu": {
+      "argv": [
+        "taskset",
+        "-c",
+        "0-7",
+        "bash",
+        "scripts/run_tests.sh",
+        "cpu"
+      ],
+      "cwd": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr",
+      "environment_overrides": {
+        "CUDA_VISIBLE_DEVICES": "",
+        "OMP_NUM_THREADS": "1",
+        "MKL_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "PYTEST_ADDOPTS": "--tb=short"
+      },
+      "exit_code": 0,
+      "passed": 3834,
+      "skipped": 1274,
+      "subtests_passed": 58,
+      "warnings": 1,
+      "duration_seconds": 82.07,
+      "log": "/tmp/unified_global_cpu_final_20261005.log",
+      "log_file_sha256": "825269dc7b248d19ebe285a8fc43da7e4acb56b095c12e0ff742723da576267b",
+      "skips_boundary": "Hardware and opt-in skips are not GPU validation.",
+      "source_stage": "Before final import-order/formatting normalization; does not certify later source bytes."
+    },
+    "source_graph_test_expectation_correction": {
+      "test_file": "experiments/nosa_mfu/tests/sparse/test_checkpoint_source_graph.py",
+      "failed_cases": [
+        "test_published_checkpoint_matches_its_recorded_inference_sources[native]",
+        "test_published_checkpoint_matches_its_recorded_inference_sources[triton]"
+      ],
+      "reason": "New published metadata was indexed with the historical graph containing experiments/indexer_block_sparse_profile/src/capture.py.",
+      "correction": "Test-only expected graph changed to the accepted failure-preserving graph. Complete anchor equality and unknown/missing-source rejection tests remain.",
+      "targeted_passed": 508,
+      "targeted_duration_seconds": 1.78,
+      "diagnosis_log": "/tmp/unified_global_cpu_failure_diagnosis_20261005.log",
+      "diagnosis_log_file_sha256": "670d80f8fc274f0db23f414269034157757c39b829adf60f6146596ec33596e0",
+      "boundary": "No runtime or kernel repair; the complete CPU run above followed this correction."
+    },
+    "report_publication_helper_suite": {
+      "passed": 29,
+      "collection": "--import-mode=importlib",
+      "scope": "Original and paired cleanup exception identities, rollback ownership, post-commit staging failure, exact report-helper bytes and source exclusions.",
+      "boundary": "CPU tests; also included in the final complete CPU regression."
+    },
+    "cli": {
+      "record": "/tmp/unified_final_cli_check.json",
+      "record_file_sha256": "357379eb44a83dd90cd87635c6087c9e78581192a0a14db7c702ed04fd0aaa23",
+      "commands": [
+        {
+          "argv": [
+            ".venv/bin/python",
+            "-B",
+            "-m",
+            "models.nosa.infer",
+            "--help"
+          ],
+          "exit_code": 0
+        },
+        {
+          "argv": [
+            ".venv/bin/python",
+            "-B",
+            "-m",
+            "models.deepseek_v32.infer",
+            "--help"
+          ],
+          "exit_code": 0
+        },
+        {
+          "argv": [
+            ".venv/bin/python",
+            "-B",
+            "-m",
+            "serving.run_gr",
+            "--help"
+          ],
+          "exit_code": 0
+        },
+        {
+          "argv": [
+            ".venv/bin/python",
+            "-B",
+            "-m",
+            "serving.run_multi_user",
+            "--help"
+          ],
+          "exit_code": 0
+        },
+        {
+          "argv": [
+            ".venv/bin/python",
+            "-B",
+            "-m",
+            "experiments.cache_management.src.report",
+            "--help"
+          ],
+          "exit_code": 0
+        },
+        {
+          "argv": [
+            ".venv/bin/python",
+            "-B",
+            "-m",
+            "experiments.nosa_motivation.src.publish",
+            "--help"
+          ],
+          "exit_code": 0
+        },
+        {
+          "argv": [
+            ".venv/bin/python",
+            "-B",
+            "-m",
+            "experiments.nosa_motivation.src.render_motivation_summary",
+            "--help"
+          ],
+          "exit_code": 0
+        },
+        {
+          "argv": [
+            ".venv/bin/python",
+            "-B",
+            "models/nosa/infer.py",
+            "--help"
+          ],
+          "exit_code": 0
+        },
+        {
+          "argv": [
+            ".venv/bin/python",
+            "-B",
+            "models/deepseek_v32/infer.py",
+            "--help"
+          ],
+          "exit_code": 0
+        },
+        {
+          "argv": [
+            "bash",
+            "scripts/run_tests.sh",
+            "--help"
+          ],
+          "exit_code": 0
+        },
+        {
+          "argv": [
+            "bash",
+            "experiments/cache_management/scripts/run.sh",
+            "--help"
+          ],
+          "exit_code": 0
+        },
+        {
+          "argv": [
+            "bash",
+            "experiments/deepseek_v32_echo_prefill/scripts/run.sh",
+            "--help"
+          ],
+          "exit_code": 0
+        }
+      ],
+      "passed": 12,
+      "boundary": "Help, argument parsing and import entrypoints, not model execution.",
+      "source_stage": "Before final import-order/formatting normalization."
+    },
+    "post_style_validation": {
+      "path": "docs/agents/acceptance/unified_runtime_20261005/final_validation.json",
+      "sha256": "094655e9e609b8149d001e63fcc95a2fbfb88aab8ba0196e796f9960b42423b5",
+      "size_bytes": 6987
+    },
+    "latest_source_stage": "Post-style CPU and CLI repeat passed; preceding records remain historical checkpoints."
+  },
+  "final_report_bindings": {
+    "deepseek_v32_motivation": {
+      "manifest": "experiments/deepseek_v32_motivation/report/publication_manifest.json",
+      "manifest_file_sha256": "4526b6a9a52d45d0c2df9173fee4a75d85eb3a68018e2c2b379f231b0ee91583",
+      "status": "published",
+      "verified_selected_assets": 49,
+      "readme_file_sha256": "7bfefe648b66db25bfed1dcdd3785433a24a6cc034e64c56d1e05ae31fe26429",
+      "verification_boundary": "Selected report files and README hashes matched the final manifest; this index update does not repeat raw-array, numerical, source/native or GPU acceptance.",
+      "publication_id": "refactor_final_deepseek_publication_20261005_01",
+      "formal_run_id": "refactor_final_deepseek_bench_20261005_01",
+      "profile_run_id": "refactor_final_deepseek_profile_20261005_01",
+      "source_bindings": "experiments/deepseek_v32_motivation/report/source_bindings.json",
+      "source_bindings_file_sha256": "f64bca8e18324efdaed589fc4c63f951fa15d80ea8bdc2ff3c7f657ad272bf93",
+      "retirement": "completed",
+      "helper_boundary": "Later CPU publication collected current disk files for loaded modules. This is not the loaded-code identity of prior completed analyses or original GPU/native execution."
+    },
+    "deepseek_v32_echo_official": {
+      "manifest": "experiments/deepseek_v32_echo_official/report/publication_manifest.json",
+      "manifest_file_sha256": "ef7321498d14d8690a08b97e932b34c37d180cdb839e8a64ceef099016413607",
+      "status": "published",
+      "verified_selected_assets": 19,
+      "readme_file_sha256": "468d3de2b81526295e7457b6c337728e46bf5e46e1543f394c54f9ed6ec76f70",
+      "verification_boundary": "Selected report files and README hashes matched the final manifest; this index update does not repeat raw-array, numerical, source/native or GPU acceptance.",
+      "publication_id": "refactor_final_official_publication_20261005_01",
+      "formal_run_id": "refactor_final_official_bench_20261005_01",
+      "profile_run_id": "refactor_final_official_profile_20261005_01",
+      "source_bindings": "experiments/deepseek_v32_echo_official/report/source_bindings.json",
+      "source_bindings_file_sha256": "6acf5f2889d29a17bdc673e7d9bfab88da2ed3300abe9c18fecd6acc7529c10b",
+      "retirement": "completed",
+      "helper_boundary": "Later CPU publication collected current disk files for loaded modules. This is not the loaded-code identity of prior completed analyses or original GPU/native execution."
+    },
+    "deepseek_v32_echo_prefill": {
+      "manifest": "experiments/deepseek_v32_echo_prefill/report/layers3/publication_manifest.json",
+      "manifest_file_sha256": "496ac82d6662b2b90dffcbddeb72ad737eedb0bf0c37d88ab880f323b8c8bf4e",
+      "status": "published",
+      "verified_selected_assets": 17,
+      "readme_file_sha256": "c3dc0030844ded82fa3a85e6d34717d04e47e19cb388994d4d577312f0183e03",
+      "verification_boundary": "Selected report files and README hashes matched the final manifest; this index update does not repeat raw-array, numerical, source/native or GPU acceptance.",
+      "publication_id": "refactor_three_layers_publication_20261005_01",
+      "formal_run_id": "refactor_three_layers_bench_20261005_01",
+      "profile_run_id": "refactor_three_layers_profile_20261005_01",
+      "source_bindings": "experiments/deepseek_v32_echo_prefill/report/layers3/source_bindings.json",
+      "source_bindings_file_sha256": "79c7e0d51760ccb73ae6bb9e91f05375e0168e96942e66be71d8309d72c44a3e",
+      "retirement": "completed",
+      "helper_boundary": "Later CPU publication collected current disk files for loaded modules. This is not the loaded-code identity of prior completed analyses or original GPU/native execution."
+    },
+    "cache_management": {
+      "manifest": "experiments/cache_management/report/unified/publication.json",
+      "manifest_file_sha256": "fd161af1ea4890d7875669f1357cab18ec9550cf177787c2de529e875f6e26eb",
+      "status": "published",
+      "verified_selected_assets": 5,
+      "readme_file_sha256": "069b7a7f5dc69d0a89c4c40ae8e213ec54cb1193faa4f0adde8cacb19c3d7f82",
+      "verification_boundary": "Selected report files and README hashes matched the final manifest; this index update does not repeat raw-array, numerical, source/native or GPU acceptance.",
+      "run_id": "cache_unified_20261005_02",
+      "report_helper_sources": {
+        "file": "report_helper_sources.json",
+        "sha256": "ac8cb5959f7a9da42994c336c0bfeb36b65e5a3b60c35e1e1a3c349338c230b0",
+        "snapshot_base": "experiments/cache_management/output/data/cache_unified_20261005_02",
+        "boundary": "Loaded project-module source files on disk at report generation; separate from original captured execution/native identities."
+      },
+      "physical_capacity_fill_run": false
+    },
+    "nosa_mfu": {
+      "manifest": "experiments/nosa_mfu/report/publication.json",
+      "manifest_file_sha256": "3235b595d32cc9246979c2a78c47b55a41d200891fdd2ab0bd8696c4b8db0cbe",
+      "status": "published",
+      "verified_selected_assets": 70,
+      "readme_file_sha256": "b948d4834199edf0a48ca855084ae3c6898f34326ad3c719a2daf97b85bdd820",
+      "verification_boundary": "Selected report files and README hashes matched the final manifest; this index update does not repeat raw-array, numerical, source/native or GPU acceptance.",
+      "captured_run_ids": [
+        "refactor_mfu_real_bench_20261005_01",
+        "refactor_mfu_real_profile_20261005_01",
+        "refactor_mfu_modules_native_bench_20261005_01",
+        "refactor_mfu_modules_native_profile_20261005_01",
+        "refactor_mfu_modules_triton_bench_20261005_01",
+        "refactor_mfu_modules_triton_profile_20261005_01",
+        "refactor_mfu_sparse_native_bench_20261005_01",
+        "refactor_mfu_sparse_native_profile_20261005_01",
+        "refactor_mfu_sparse_triton_bench_20261005_01",
+        "refactor_mfu_sparse_triton_profile_20261005_01",
+        "refactor_mfu_dense_bench_20261005_02",
+        "refactor_mfu_dense_profile_20261005_02"
+      ],
+      "source_delta": "experiments/nosa_mfu/report/source_delta.json",
+      "retirement_inventory": "experiments/nosa_mfu/report/retirement.json",
+      "helper_boundary": "Original captured execution/native identities remain unchanged. Later actual CPU report generation and navigation/identity deltas are recorded separately in the publication/source_delta manifests."
+    },
+    "nosa_indexer_pattern_65536_1024": {
+      "manifest": "experiments/nosa_indexer_pattern_65536_1024/report/publication.json",
+      "manifest_file_sha256": "b042c475aa8fd4e391729797068079e432eb489659f79d34d99dcfdef4a54e2b",
+      "status": "published",
+      "verified_selected_assets": 58,
+      "readme_file_sha256": "779f16183a912b4326685e9f65740ace59961988ebdffe28e14d21c34c88a1ea",
+      "verification_boundary": "Selected report files and README hashes matched the final manifest; this index update does not repeat raw-array, numerical, source/native or GPU acceptance.",
+      "current_capture": "refactor_nosa_pattern_capture_20261005_01",
+      "qa64_comparison_run_id": "refactor_qa64_environment_compare_20261005_01",
+      "source_delta": "experiments/nosa_indexer_pattern_65536_1024/report/source_delta.json",
+      "retirement_inventory": "experiments/nosa_indexer_pattern_65536_1024/report/retirement.json",
+      "helper_boundary": "Original captured execution/native identities remain unchanged. Later actual CPU report generation and navigation/identity deltas are recorded separately in the publication/source_delta manifests."
+    },
+    "nosa_offload_overlap": {
+      "manifest": "experiments/nosa_offload_overlap/report/publication.json",
+      "manifest_file_sha256": "e577cf8cd13fc7e329da44870c35aa96fe44f477c281449082c2cf428e503da7",
+      "status": "published",
+      "verified_selected_assets": 12,
+      "readme_file_sha256": "6345bfb7c74559de7e2f2b553529d1f4552b7b3019cd8336dac0805ca8ee3f18",
+      "original_publication_manifest_sha256": "01cbbc367b0eb539923f248650050d471502c955a2fa4eec42f2458405194c87",
+      "original_publication_readme_sha256": "884c0d024475af6457dbadbcd89a0343f16d479fb152933b7af8f40101deeab9",
+      "readme_navigation_revision": "layers_navigation_20261005_01",
+      "verification_boundary": "Selected report files retain their original hashes. Current manifest and README hashes include the documented navigation-only revision; this index update does not repeat raw-array, numerical, source/native or GPU acceptance.",
+      "profile_run_id": "refactor_nosa_overlap_profile_20261005_01",
+      "source_delta": "experiments/nosa_offload_overlap/report/source_delta.json",
+      "retirement_inventory": "experiments/nosa_offload_overlap/report/retirement.json",
+      "helper_boundary": "Original captured execution/native identities remain unchanged. Later actual CPU report generation and navigation/identity deltas are recorded separately in the publication/source_delta manifests."
+    },
+    "nosa_motivation": {
+      "manifest": "experiments/nosa_motivation/report/publication_manifest.json",
+      "manifest_file_sha256": "96b8b02cfba356f7d3a5261a2e75346bf6f1b2e1369296ea958182dafe1aa2ab",
+      "status": "published",
+      "verified_selected_assets": 33,
+      "readme_file_sha256": "215aa0c305cb458dcfe7cc790e35ab6f7c1e1af2298834dd3cdc986ac6f4d4e6",
+      "measurement_run_id": "refactor_final_nosa_bench_20261005_01",
+      "profile_run_id": "refactor_final_nosa_profile_20261005_02",
+      "attention_reference_run_id": "refactor_final_nosa_attention_reference_20261005_01",
+      "execution_source_sha256": "4665ccce226af23f631e619f748369cea28d4a09b99c1947cbb6b030e58f120c",
+      "numerical_receipt": {
+        "path": "docs/agents/acceptance/unified_runtime_20261005/nosa_final/receipt.json",
+        "sha256": "34ee0a120712d353bd57dc350c3667f5ce2f2fc2b8a1607aa1f1a9f00c405bc5",
+        "size_bytes": 1216793
+      },
+      "original_generator_publication": {
+        "path": "experiments/nosa_motivation/output/data/refactor_final_nosa_publication_20261005_02/publication.json",
+        "sha256": "8e58d31d2509308ed0bcdb09a06463e3656b89ac0250a5437d29d0c3bc37b4dc",
+        "size_bytes": 19469
+      },
+      "copied_provenance_snapshot_base": "experiments/nosa_motivation/output/data/refactor_final_nosa_publication_20261005_02",
+      "copied_provenance_boundary": "Copied original publication/report/helper manifests are byte-identical. Their source/ paths resolve under the original output directory above, not under report/final. GPU runtime/native identity remains the original captured identity; later report-only files are recorded separately.",
+      "loaded_report_helpers": {
+        "manifest": {
+          "path": "experiments/nosa_motivation/output/data/refactor_final_nosa_publication_20261005_02/report_helper_sources.json",
+          "sha256": "a58cfbdd7b7b13d9aafb279e5dc235ccaf06398c7e4933e01796261803c24a54",
+          "size_bytes": 13572
+        },
+        "files_verified": 37,
+        "boundary": "Current loaded repository Python modules only, plus pyproject.toml and uv.lock; not captured runtime/native identity, not every possible source. Saved bytes are the files on disk at report generation, not the loaded Python bytecode."
+      },
+      "generation_execution": {
+        "path": "docs/agents/acceptance/unified_runtime_20261005/nosa_final_publication_execution.json",
+        "sha256": "4e09bcab2960c4ea3f40b672d59f8cc3e253434cdea2f56e4726210aca60c8e9",
+        "size_bytes": 2874
+      },
+      "retirement": {
+        "status": "completed",
+        "paths": [
+          {
+            "path": "experiments/nosa_motivation/output/data/nosa_motivation_poolscan_sm90_20261004_01",
+            "existed": true,
+            "file_entries": 259,
+            "apparent_bytes": 160463149
+          },
+          {
+            "path": "experiments/nosa_motivation/output/data/nosa_motivation_poolscan_profile_sm90_20261004_01",
+            "existed": true,
+            "file_entries": 577,
+            "apparent_bytes": 312946461
+          },
+          {
+            "path": "experiments/nosa_motivation/output/data/nosa_attention_poolscan_sm90_20261004_01",
+            "existed": true,
+            "file_entries": 2301,
+            "apparent_bytes": 24019250739
+          },
+          {
+            "path": "experiments/nosa_motivation/output/log/nosa_motivation_poolscan_sm90_20261004_01",
+            "existed": true,
+            "file_entries": 2,
+            "apparent_bytes": 10150
+          },
+          {
+            "path": "experiments/nosa_motivation/output/log/nosa_motivation_poolscan_profile_sm90_20261004_01",
+            "existed": true,
+            "file_entries": 2,
+            "apparent_bytes": 6313
+          },
+          {
+            "path": "experiments/nosa_motivation/output/log/nosa_attention_poolscan_sm90_20261004_01",
+            "existed": true,
+            "file_entries": 2,
+            "apparent_bytes": 147
+          },
+          {
+            "path": "experiments/nosa_motivation/output/profile/nosa_motivation_poolscan_profile_sm90_20261004_01",
+            "existed": true,
+            "file_entries": 24,
+            "apparent_bytes": 3183383626
+          },
+          {
+            "path": "experiments/nosa_motivation/report/nosa_motivation_poolscan_sm90_20261004_01",
+            "existed": true,
+            "file_entries": 19,
+            "apparent_bytes": 1703006
+          },
+          {
+            "path": "experiments/nosa_motivation/report/summary_20261005_01",
+            "existed": true,
+            "file_entries": 12,
+            "apparent_bytes": 506092
+          },
+          {
+            "path": "experiments/nosa_motivation/output/data/report_render_20261005_01",
+            "existed": true,
+            "file_entries": 12,
+            "apparent_bytes": 506092
+          },
+          {
+            "path": "experiments/nosa_motivation/output/data/refactor_nosa_bench_20261005_01",
+            "existed": true,
+            "file_entries": 143,
+            "apparent_bytes": 28568019
+          },
+          {
+            "path": "experiments/nosa_motivation/output/log/refactor_nosa_bench_20261005_01",
+            "existed": true,
+            "file_entries": 2,
+            "apparent_bytes": 7909
+          },
+          {
+            "path": "experiments/nosa_motivation/output/data/refactor_nosa_bench_20261005_02",
+            "existed": true,
+            "file_entries": 143,
+            "apparent_bytes": 28568100
+          },
+          {
+            "path": "experiments/nosa_motivation/output/log/refactor_nosa_bench_20261005_02",
+            "existed": true,
+            "file_entries": 2,
+            "apparent_bytes": 7909
+          },
+          {
+            "path": "experiments/nosa_motivation/output/data/refactor_nosa_bench_20261005_03",
+            "existed": true,
+            "file_entries": 143,
+            "apparent_bytes": 28568019
+          },
+          {
+            "path": "experiments/nosa_motivation/output/log/refactor_nosa_bench_20261005_03",
+            "existed": true,
+            "file_entries": 2,
+            "apparent_bytes": 7909
+          },
+          {
+            "path": "experiments/nosa_motivation/output/data/refactor_nosa_three_version_20261005_01",
+            "existed": true,
+            "file_entries": 3,
+            "apparent_bytes": 672445
+          }
+        ],
+        "file_entries": 3648,
+        "apparent_bytes": 27765176085
+      },
+      "acceptance_boundary": "Numerical, measurement, profile and independent attention integrity passed. Async end-to-end speedup and every-sample page/stripe 90% targets remain failed; retained controls show residual refactor overhead. No physical-capacity, GR representativeness or task-quality claim.",
+      "verification_boundary": "All 33 selected report assets, their file sizes, available copied source assets and README hash matched the final manifest. The earlier 14 generator assets and 37 helper snapshots were separately verified. No new raw-array, numerical, source/native or GPU audit was performed.",
+      "post_capture_style_source_delta": {
+        "path": "docs/agents/acceptance/unified_runtime_20261005/static_style_source_delta.json",
+        "sha256": "87a2766d6147fbf60dd1e00124c5019d38c84c91e32b89a49277d578a4c957e0",
+        "size_bytes": 4121
+      }
+    }
+  },
+  "final_publication_source_boundary": {
+    "captured_execution": "Each accepted numerical, benchmark and profile run retains its own original source/native identities and measurement boundary. Different capture scopes need not have equal complete source inventories.",
+    "report_helpers": "snapshot_report_helpers saves current disk bytes for repository Python modules already loaded in the later report process, plus pyproject.toml and uv.lock. It does not identify loaded bytecode, every possible source or earlier GPU/native execution.",
+    "deepseek_later_helper_delta": "DeepSeek source_bindings.json records the later unused snapshot helper addition, unchanged pre-existing function ASTs and the original helper hash; later imports are not represented as earlier analysis execution.",
+    "historical_records": "Earlier audit/preparation states remain historical records. Final report manifests identify accepted publication and selected artifacts; those later acts are not attributed to the earlier audits.",
+    "research_limits": "CPU and publication integrity do not establish speedup, physical-capacity fit, full-NH behavior or real GR task quality. Residual phase overhead and failed A128 async/overlap gates remain explicit in the experiment reports."
+  },
+  "final_error_propagation_summary": {
+    "path": "docs/agents/acceptance/unified_runtime_20261005/let_it_crash_summary.md",
+    "file_sha256": "b5210226b341efaa532e291046aa5f5e76b4262341d76d42985a5c2a74459b6d",
+    "scope": "Historical and final post-style failure-propagation/CPU/CLI/static validation, plus report-publication cleanup contracts. No new GPU fault-path injection."
+  },
+  "final_release": {
+    "status": "completed",
+    "completed_utc": "2026-10-05T01:11:21.441462+00:00",
+    "scope": "Unified contracts/lifecycle/model decomposition and let-it-crash handling; unified cache report; old/P0/current motivation comparisons and all affected report publications; scoped research-state and documentation cleanup.",
+    "validation": {
+      "path": "docs/agents/acceptance/unified_runtime_20261005/final_validation.json",
+      "sha256": "094655e9e609b8149d001e63fcc95a2fbfb88aab8ba0196e796f9960b42423b5",
+      "size_bytes": 6987
+    },
+    "error_summary": {
+      "path": "docs/agents/acceptance/unified_runtime_20261005/let_it_crash_summary.md",
+      "sha256": "b5210226b341efaa532e291046aa5f5e76b4262341d76d42985a5c2a74459b6d",
+      "size_bytes": 7319
+    },
+    "source_identity_boundary": "Captured GPU/native identities remain attached to original run snapshots. Subsequent report/helper, source-graph test, navigation and style differences are explicitly recorded; no numerical receipt was rewritten to match later source bytes.",
+    "supersedes_prepublication_status_fields": [
+      "prepared_motivation_three_version_assets.status",
+      "nosa_pair04_independent_review.boundary",
+      "deepseek_final_three_version_comparison.scope",
+      "nosa_final_three_version_comparison.execution_requires"
+    ],
+    "historical_status_boundary": "Dated preparation, diagnosis and independent-review records describe their original scope; final report manifests and this release record establish later completion.",
+    "report_count": 8,
+    "remaining_research_tasks": [
+      "T-006",
+      "T-003",
+      "T-007",
+      "T-002"
+    ],
+    "research_boundary": "Completion refers to the authorized refactor/report task, not completion of research, a zero-overhead claim, async speedup, physical capacity proof or task-quality validation."
+  }
+}

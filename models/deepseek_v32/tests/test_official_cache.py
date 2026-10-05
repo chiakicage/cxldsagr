@@ -4,7 +4,30 @@ import pytest
 import torch
 
 from cache.sparse_token_pool import SharedSparseTokenPool
-from models.deepseek_v32.official_cache import OfficialCacheState
+from models.deepseek_v32.cache.official import OfficialCacheState
+
+
+def test_official_layer_factory_binds_session_storage_without_replacing_another_view():
+    pool = SharedSparseTokenPool(128, 8, 1, 64, device="cpu")
+    state = object.__new__(OfficialCacheState)
+    state.pool = pool
+    session = pool.allocate_session(64)
+    cache = state.layer_cache(session, 0)
+    assert session.layer(0) is cache
+    assert state.layer_cache(session, 0) is cache
+    assert cache.records is pool.layers[0].records
+    assert cache._counter_totals.data_ptr() == session._counter_totals[0].data_ptr()
+    cache.begin_step(1)
+    cache.rollback()
+    assert cache.length == cache.written == 0
+    other = pool.allocate_session(64)
+    local = other.layer(0)
+    with pytest.raises(ValueError, match="different cache factory"):
+        state.layer_cache(other, 0)
+    assert other.layer(0) is local
+    session.release()
+    other.release()
+    pool.close()
 
 
 def _require_hopper():
@@ -14,7 +37,7 @@ def _require_hopper():
 
 def _populate(state, count, value):
     session = state.pool.allocate_session(count)
-    cache = state.layer_cache(session.layer(0))
+    cache = state.layer_cache(session, 0)
     records = torch.full((count, 576), value, device="cuda", dtype=torch.bfloat16)
     cache.begin_step(count)
     with cache.operation():

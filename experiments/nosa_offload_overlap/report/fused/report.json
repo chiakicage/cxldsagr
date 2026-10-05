@@ -2,12 +2,14 @@
   "schema_version": 3,
   "sources": {
     "measurement": {
-      "run_id": "nosa_cached_fetch_20261004_01",
-      "recorded_at_utc": "2026-10-04T08:54:18.969491+00:00",
+      "run_id": "refactor_nosa_overlap_bench_20261005_01",
+      "recorded_at_utc": "2026-10-04T23:34:57.755995+00:00",
       "args": {
-        "run_id": "nosa_cached_fetch_20261004_01",
-        "output_dir": "/mnt/ssd-wlcb/chenkaiqi/.cxldsagr-tmp/nosa_dependent_rerun_20261004_01/staging/nosa-offload-overlap-nosa_cached_fetch_20261004_01.b0Lk6h/data",
-        "input_dir": "experiments/nosa_kernel_mfu/output/data/kda_inputs_baseline_20260928_1345",
+        "mode": "bench",
+        "validation_receipt": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-run-tmp/refactor_nosa_overlap_check_20261005_01.json",
+        "run_id": "refactor_nosa_overlap_bench_20261005_01",
+        "output_dir": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-run-tmp/nosa-offload-overlap-refactor_nosa_overlap_bench_20261005_01.5i8r5i/data",
+        "input_dir": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_mfu/output/data/kda_inputs_baseline_20260928_1345",
         "synthetic": false,
         "layers": [
           0,
@@ -22,21 +24,30 @@
         "repeats": 20,
         "seed": 42,
         "device": "cuda:0",
-        "reference_all": true,
+        "reference_all": false,
         "profiled": false
       },
+      "numerical_validation": {
+        "kind": "nosa_offload_attention",
+        "file": "validation_receipt.json",
+        "sha256": "88c157e0441d40cc0979738ddb4631dc2eafb737a3f11934d6430f49d7f537c2",
+        "source": "independent_check"
+      },
       "artifact_sha256": {
-        "metadata.json": "5a8b07512195d3041d7a977be491721ec5e508ed780226aa4fa219845656911c",
-        "results.json": "b5f31d3556ed752978a08e6eb4f313904e3346b21e7d39dc1c1245cb7d716f5e"
+        "metadata.json": "650a8229cc8a477adf58f5378332cf502b1d62d28e237f2c8dbc8c8ea31b5dcb",
+        "results.json": "a6907a9220c8ede177d763ac687db210d483e5c9fad77a42308fea595a54672d",
+        "validation_receipt.json": "88c157e0441d40cc0979738ddb4631dc2eafb737a3f11934d6430f49d7f537c2"
       }
     },
     "profile": {
-      "run_id": "nosa_cached_fetch_profile_20261004_01",
-      "recorded_at_utc": "2026-10-04T08:55:43.214731+00:00",
+      "run_id": "refactor_nosa_overlap_profile_20261005_01",
+      "recorded_at_utc": "2026-10-04T23:35:20.022166+00:00",
       "args": {
-        "run_id": "nosa_cached_fetch_profile_20261004_01",
-        "output_dir": "/mnt/ssd-wlcb/chenkaiqi/.cxldsagr-tmp/nosa_dependent_rerun_20261004_01/staging/nosa-offload-overlap-nosa_cached_fetch_profile_20261004_01.SajGjd/data",
-        "input_dir": "experiments/nosa_kernel_mfu/output/data/kda_inputs_baseline_20260928_1345",
+        "mode": "profile",
+        "validation_receipt": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-run-tmp/refactor_nosa_overlap_check_20261005_01.json",
+        "run_id": "refactor_nosa_overlap_profile_20261005_01",
+        "output_dir": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-run-tmp/nosa-offload-overlap-refactor_nosa_overlap_profile_20261005_01.htBkjS/data",
+        "input_dir": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_mfu/output/data/kda_inputs_baseline_20260928_1345",
         "synthetic": false,
         "layers": [
           0,
@@ -51,21 +62,28 @@
         "repeats": 3,
         "seed": 42,
         "device": "cuda:0",
-        "reference_all": true,
+        "reference_all": false,
         "profiled": true
       },
+      "numerical_validation": {
+        "kind": "nosa_offload_attention",
+        "file": "validation_receipt.json",
+        "sha256": "88c157e0441d40cc0979738ddb4631dc2eafb737a3f11934d6430f49d7f537c2",
+        "source": "independent_check"
+      },
       "artifact_sha256": {
-        "metadata.json": "10f2b70d3b4f51fbb798154706a0877e1f56767f29c496029804cf910efabdee",
-        "results.json": "26098bd1b7ff296f1652d1dc80579c80d72c962ebab0fc50d8846099a7229efb",
-        "overlap.json": "1c9d6f87a108cdf4403a1a0fbea5852b631aebc61995a0a42360e455016de169",
-        "timeline.sqlite": "f7c3fc9ccc292439b80db089d9904df5a6cd25d34f09fcfd34fb13a71bc7004c",
-        "work_intervals.json": "af6ef8584db7c85c572cc98edd14862e41ce35bd483c9d7eb93d32b56a2de118"
+        "metadata.json": "5a3bb1dd9db4386255e120376a689e176a789f741614b1c661da1bb74319722d",
+        "results.json": "d87f62447195afcbb44e1887c176cae8a3cef8708bb00813152594a599281a66",
+        "validation_receipt.json": "88c157e0441d40cc0979738ddb4631dc2eafb737a3f11934d6430f49d7f537c2",
+        "overlap.json": "4718570a9a54ac2bc804af51a4e96934193fb19a9a067349f79fff413d5ab1b3",
+        "timeline.sqlite": "30d1afab0ff86e5ce6022b697a9d0dc04e56b1f5318d85c9cd3985960ea79446",
+        "work_intervals.json": "169ab872a332335a464a096cf6c4551fede1b85dd35c2f6a992c26f993b6740f"
       }
     }
   },
   "gpu": {
     "name": "NVIDIA H200",
-    "uuid": "a5cd5bab-33a4-a7e2-4a3c-78c2b08a8872",
+    "uuid": "a2226185-cb05-a411-80da-f365154128fe",
     "sm_count": 132,
     "capability": [
       9,
@@ -153,7 +171,7 @@
         "-DFA3_STAGES=2"
       ],
       "source_sha256": {
-        "_fa3.py": "64f699cf8d11d0551f70808fb733577235fda12f61b9efa8bbc4395a62158653",
+        "_fa3.py": "d56c29942291580bb39281858fe98908a42ee501df460ca700a7a1bcb7949254",
         "nosa_attention_fa3.cu": "f98b5ae4ea4bcc5c3dc5a597958627d6c186f22d1db7108162a2a328401c2f80",
         "nosa_attention.cu": "01c0699b507baebe005b2df44e2f78ec149083a6239b96e7d24990edf2bf09f4",
         "nosa_attention_grouped.cuh": "30f35b34a80c2a26c249b92e055c3158a5a2e40e5c818ff9dadc3074dc525927"
@@ -208,7 +226,7 @@
         "-DFA3_STAGES=2"
       ],
       "source_sha256": {
-        "_fa3.py": "64f699cf8d11d0551f70808fb733577235fda12f61b9efa8bbc4395a62158653",
+        "_fa3.py": "d56c29942291580bb39281858fe98908a42ee501df460ca700a7a1bcb7949254",
         "nosa_attention_fa3.cu": "f98b5ae4ea4bcc5c3dc5a597958627d6c186f22d1db7108162a2a328401c2f80",
         "nosa_attention.cu": "01c0699b507baebe005b2df44e2f78ec149083a6239b96e7d24990edf2bf09f4",
         "nosa_attention_grouped.cuh": "30f35b34a80c2a26c249b92e055c3158a5a2e40e5c818ff9dadc3074dc525927"
@@ -279,70 +297,82 @@
     "GR/reconstruct_histogram.py": "b18bbeb6f3e9ed1c6e354c43ad0e8baa7127abf7e2aea52333fe87c529ef0746",
     "GR/sample_distribution.py": "834de2b70f13da6b41d9e91ff980592da9f551bb23191923f3ae94c9b8e8d832",
     "GR/scheduling.py": "1573fbab8ae1cab6cb287f3a6606124aa845217864e5d68ea55f8f7d6f7369cb",
+    "GR/workload.py": "2c16eb30be6888bf19ed07670dbc37b97e1bb18527545c8d6157dc79b6c644de",
+    "cache/allocator/budget.py": "3fdc40173b284fbf6d4f4cb01954217657f64168820c0f00c1b1008af816fda4",
+    "cache/allocator/csrc/allocator_snapshot.cpp": "827f4a6635369a4bb8602b86ee79195fbde7744fa8744696f642b466123155bc",
+    "cache/allocator/csrc/pool_referrers.c": "412a28128991865975e668d210b883cda596b1e798b09abbaf3726346c718dc6",
+    "cache/allocator/csrc/pool_referrers_abi.json": "e0537a6cc6c16867894a36bff1d84bc54b53cce64de99c5a0886b34b3bdc8079",
+    "cache/allocator/pool_referrers.py": "9417159808a653517a8193a22577a6a6f207cfa874be0d91cc4e4a2ada8ce256",
+    "cache/allocator/snapshot.py": "be7aa6b95e620707d1032e912e3e2df7d246f37eaf0a6ddb04cc0284ea99f61f",
+    "cache/capacity.py": "ba39f57a49124b23c60552240d87fbb9804b5320275b09596eadf2f0ff8c3a96",
     "cache/contracts.py": "58575f1c9aee3f2843b7f2bce07f1589ea8cb9a712b050991199a95639f97f73",
     "cache/host_allocation.py": "6c6c65e166fc6a2289547482a9bc51c1da136190b9105423edd23f9732567150",
     "cache/host_backing.py": "33ca59c06810f4fa83f1009554a8d0709838db1223f6c393162f53739fb29135",
     "cache/indexer_cache.py": "da80484c5d2ad016b3119f80576e72d2956f8d9d1a5cc2804a0e6d668b80b2eb",
+    "cache/lifecycle.py": "4e699cedce01acd99133e19c662027fb56c9abaf01a9855d09386962d688e68f",
     "cache/manager.py": "3f8a3129900f8e5e1af6005fcc187f5d430c5ce5156ca80c169384694dd39f91",
-    "cache/prefix_pool.py": "92080f5fd8eac4081be6bd4128501bf6ba07b74945c550b338016f304664e7e0",
-    "cache/sparse_token_cache.py": "011e6990e9a496b1f6af5ea1ae0afc1d466731ca370978d98daa6f8218d5abfb",
-    "cache/sparse_token_pool.py": "202ba4352118055f2ad3c2e33236487d7f6edd04eb49e5c2cdf2e751deeb2974",
-    "cache/staging.py": "5d96ef67d5cd726887f32ac2baa8baa6dfa29be20d9e07325ec2f1688a9b2fd9",
+    "cache/prefix_pool.py": "1a363205c74cf382c8c4294f6ddf3358c0da31b292dc0edc16f7c80b4d77a695",
+    "cache/sparse_token_cache.py": "a48f17c9fd76891d179ac71b94c1933de206b491469436c4e1ce010fd79f3967",
+    "cache/sparse_token_pool.py": "46efe6b59a76e39075899076a3621caf5255542c67a4fd0e03ff6567d91eb2f3",
+    "cache/staging.py": "95816259b638a9178f600479397d1c09d8ecae7a185b49ce6e85bdacf0a71c77",
+    "evaluation/validation.py": "769add375a8b3b64fe0c391c1a3067f2304c4727f1d4af199b9f5a5480ca2b74",
+    "executor/adapters.py": "7649ee19d5ca3490480a329b9f02286dcc8e6230da0395d097f3e2f9065e4e20",
+    "executor/contracts.py": "8ca7b8af35fcd935f1ce96911bb30d04757e02f0d0b4635508eff12b38705139",
     "executor/model_executor.py": "f585f9940d5fb506e7f8aaeafe8602f9877ac773f2183603744f2b3a2a48c919",
-    "executor/serving_backend.py": "793c1fca9b19278f8903190b8d9c9bdf1e4b62dd9b70f63df51ae84abbfa74bc",
-    "experiments/nosa_gr_65536_1024/src/analyze.py": "0126cc5c4ed401a77c87b5bba57ce3b759d92c1715dc60018611b09ae1f5aa09",
-    "experiments/nosa_gr_65536_1024/src/capture.py": "ba9e591cae497bfd516d04ed8c789c674e7ccfe92be6ec20b8ece0bfbd6fac1b",
-    "experiments/nosa_gr_65536_1024/src/instrumentation.py": "fdcc857f5d3128d0ab36c57ee99f34f3e844259ad5fe88318315258465598853",
-    "experiments/nosa_gr_65536_1024/src/mfu.py": "e30ee5ad7ca52e1de1f6f5f03f2b7b776f8ae707a0ae7468adfb00de2755ec98",
-    "experiments/nosa_gr_65536_1024/src/sources.py": "75a901512f13ff667811a041b62bb5b437356c98a57f216beda9b579e156636f",
-    "experiments/nosa_kernel_mfu/src/capture_inputs.py": "53aaac4f9c2082593ac4056be1b758614fa465e27331c7b4e6a402286bcc4996",
-    "experiments/nosa_kernel_mfu/src/measure.py": "09ce07b5855d9013989649c30ea6e4e66d228404b673d1516b0355ffff288c64",
-    "experiments/nosa_offload_overlap/scripts/run.sh": "8b325bf82d5f8ef14c556073f7a74736daadfbf16e4b24da9c395f44dbcfa9f0",
+    "executor/runtime.py": "796d266c4faee012e8277f8c94970e37e688615f5104cb214ee03d154b833b37",
+    "experiments/nosa_mfu/src/capture_inputs.py": "1bfde8dd8ada059e20a777506fc043fe4c693e1492bbdc43a7578cf0e7aedfb7",
+    "experiments/nosa_mfu/src/dense/analyze.py": "0126cc5c4ed401a77c87b5bba57ce3b759d92c1715dc60018611b09ae1f5aa09",
+    "experiments/nosa_mfu/src/dense/capture.py": "e238d2a2fda19dc8d7bfaa5acd56c61a28d7786e528e75ca0cac0cb27720a4d7",
+    "experiments/nosa_mfu/src/dense/instrumentation.py": "fdcc857f5d3128d0ab36c57ee99f34f3e844259ad5fe88318315258465598853",
+    "experiments/nosa_mfu/src/dense/mfu.py": "790b56e53f06b04b55ad560826c71551c22a3feb9c89672fae3a9a4ba87e32c0",
+    "experiments/nosa_mfu/src/dense/sources.py": "78446d1befb56efabe5b6364fdb21fc41a0664af3fe69efd1050d6abc1757b39",
+    "experiments/nosa_mfu/src/measure.py": "9d0579108e6d7e267df41765cdbfccfe17fbb5e5d249ed86d1579dddc472be72",
+    "experiments/nosa_mfu/src/phases.py": "830412771f461591862856f619dfe4ef755185dae2ca072c9f2e49994e2dfcd7",
+    "experiments/nosa_offload_overlap/scripts/run.sh": "d6ae6c8955091f03e3761134d90e25817d2412027b1f4d7cc886d4fd068f14a2",
     "experiments/nosa_offload_overlap/src/analyze.py": "1c5b3443cac84af910838b6148b5a307f6b2e3cca2d6f21bdf82bdd6701eafdc",
-    "experiments/nosa_offload_overlap/src/measure.py": "40bab488903cdd9eaef91329ef86d6d8b65b68f835b46a0b1a278a8548d71326",
-    "experiments/nosa_offload_overlap/src/report.py": "2530ffdea40a325d0261bf86bb27b1f4cc899b01881a0b12952d22b069388953",
-    "layers/attention.py": "91eccef789f099017c229b99d1d0ccc9d66ce980ab6dbc772a25fe031f6f34d3",
+    "experiments/nosa_offload_overlap/src/measure.py": "25deb8d0a6b2c2dcd805a81842c0da46e5ca42fb822cb71bf41f170636a23040",
+    "experiments/nosa_offload_overlap/src/report.py": "1be0eda8335784219febbcd4e0ee5e0a4a7606375b7144274b49787b3d968672",
+    "layers/attention.py": "744be3135ab18ed9bddfbdd5945949b1dea5cb0130f4a7bea250927eeac26e5a",
     "layers/feed_forward.py": "95dcebaa67b4f2069f580ac0831ef8335fc15b022e802708e24f58c02408de4a",
     "layers/normalization.py": "426b2cd0e1da6c944ff661a93d55eee2b064585d5c5f6c6e6a0b80ca3bc98af0",
-    "models/nosa/_allocator_snapshot.py": "c292b2d265f081258f2223d2cbda8d6ec65d87d5f9948a44c6b6a1a39de5c4aa",
-    "models/nosa/allocation_budget.py": "ad4887285952c62da254473e18c5575ffc2beabf753674774374e0d4f4248274",
-    "models/nosa/attention.py": "62fd14e73b807bbbc5b5c3a509bdde7bb433b6a4416bd957e1e8463f9c74a0b1",
-    "models/nosa/cache.py": "bc8d6898fb1d2eee7a80a689ce846656742fc6fffce2cad73ae33ebba8f62892",
-    "models/nosa/compute_graphs.py": "3dfe3f89950cabd54aed8462b1917dd9b54fc05fce2a45c0829981e3ccd3a68d",
+    "models/nosa/attention.py": "65c6c1e01bb7fa64e00050845f9d67eefd7516f0fa33c40c40f19ebb91b9b30f",
+    "models/nosa/cache/dense_prefetch.py": "e9809272a51116800bf7ff9d76687336cec52aa3adab5dee019fdde171914450",
+    "models/nosa/cache/fixed.py": "a062262c7fbfe80d82682960207f087114a5399ad964cf20813b5fceaca91646",
+    "models/nosa/cache/offload.py": "472e6fea2ea11b0e52a7821871d706e5154de970e68407e20d05ab6c061713a9",
+    "models/nosa/cache/resident.py": "bc8d6898fb1d2eee7a80a689ce846656742fc6fffce2cad73ae33ebba8f62892",
     "models/nosa/config.py": "eaa168a439fada20f13b6d0a44c801de30e3b1c04d3e5ac43d4273a3454db165",
-    "models/nosa/deferred_validation.py": "ca9eef34492e5c7ae7c3bf23169fecc21ca9abde3ae8c8d1670cf14fa0329ede",
-    "models/nosa/fixed_cache.py": "83a518990a2a6d533aab778464d99d785a325aa0e334c4beb2739cdabf183b19",
-    "models/nosa/fixed_resources.py": "7a1c2759965f06161391fc710c7ca7898cf11f6824d13d85547bdb4033f35229",
-    "models/nosa/fixed_serving.py": "76e783d821b6ee6a40435716a172ad458ea380449ddd9516d549c3d9bc51ab13",
-    "models/nosa/indexer.py": "9202660bbcd5aba81406de0ea50ba4cbfdb2da92e7a4f65b32aab77f4fde937a",
-    "models/nosa/infer.py": "5e9e8b78024d3f2073cfb858db60b95c9add264c501ecd983905cae906ea5115",
+    "models/nosa/execution/adapter.py": "3ef7d72a4e00cc366e2983099f9107722555b23887d723a2310bd50948e4e7bb",
+    "models/nosa/execution/compute_graphs.py": "2b0c61263d7cfaebcef9aec957aa083ccc5c3fcdb5d2a047ef8f73452d958bb1",
+    "models/nosa/execution/deferred_validation.py": "ca9eef34492e5c7ae7c3bf23169fecc21ca9abde3ae8c8d1670cf14fa0329ede",
+    "models/nosa/execution/fixed.py": "d764a07f0bc15158efc41177a1a54546ec1080758779558ccf03976947154949",
+    "models/nosa/execution/fixed_resources.py": "8ce76def3724191bd37c277b8c2f7bd56297f5d293c6b9081d33c45e84abefee",
+    "models/nosa/execution/resources.py": "b9c356f7a082856f90cf9164b806e40de50fd691b008d2d2d16e245b91867d58",
+    "models/nosa/execution/session_budget.py": "b920a121eb51d37b20824bbe85e22e282a60bc63f999e3b19cb868ab4e80f9fd",
+    "models/nosa/indexer.py": "41d4113e42fa79749b92c7c2c741804233a95e79691926868e24fc0dbce3d0a6",
+    "models/nosa/infer.py": "4bc01669b4c2c3896115407a56b19ef496f8be3a18f49692878fa5cb3a69a84f",
     "models/nosa/layers.py": "6f9e2a28de209df132266cdb5072f5a8581b543b1b049463338b75a2ff8ec5a9",
-    "models/nosa/model.py": "febb4cafa84e36d5362c1d9b6b959860e10d1fe4fde30cd5a8c80d3b74f05335",
-    "models/nosa/offload_cache.py": "5eb077c8afd4c181150bd26991a64c9a8f336e6f31237c9ece144e30ef16c713",
+    "models/nosa/model.py": "064dbaf31fd36c3aa7479983e21f00c85b23fe4a170aaacf64b2eff1e3705e6a",
     "models/nosa/request_format.py": "25c775ba0b76cab91663b827fc8b38fc20511895a5e6eff3054273cbfe418825",
     "models/nosa/rotary.py": "f14c898cd77a72bd4e6908ef59b0b5fe5d42b2ebadb34aa5db092577d154dbde",
     "models/nosa/scoring.py": "c4c7e75a15a5ffb95e935b02ec482586a288c64ad079a175b293db6baa3f92d8",
-    "models/nosa/serving.py": "5251aa847ec6473781f3008a5da8e7d5094387d0f503ba61e74e7f1493f0b857",
-    "models/nosa/serving_resources.py": "7d9b029f51192ca6fd6d016b47944e4470b1ddbe67f6e05ccae089378fe36cda",
-    "models/nosa/session_budget.py": "9dd85469461ff3013d3562c7f3d1d95020edf52674f31dedde4d4855d0d35bca",
     "operators/common/csrc/kv_transfer.cu": "e082e3b2ef47bad7224f14213c4fe57a6d0bda7399a556230a814d145466bf1b",
     "operators/common/kv_transfer.py": "bc65f850a908dfc4642b7f90170513881a0a564561d9902c736d8e7d7f16b919",
     "operators/flashinfer.py": "55c368b9ffa69301b8407de7f9aa69bfce03db3b6bfc4c59646b7d3fe9d36a8d",
     "operators/nosa/_native.py": "4ed3277e55f21abac43259da7f678af74825a3ef37bbd830558bbd127f3e9b92",
     "operators/nosa/attention/common.py": "e376225202c4daf5899b870c7b30f61e571a570be6937a40456a8cf3c5d4ee69",
     "operators/nosa/attention/device_only/_cuda.py": "2f9de5fdb75e3a87ee98e46ab93ddcd18b0482b872e5f1e114238510858e5742",
-    "operators/nosa/attention/device_only/_fa3.py": "64f699cf8d11d0551f70808fb733577235fda12f61b9efa8bbc4395a62158653",
+    "operators/nosa/attention/device_only/_fa3.py": "d56c29942291580bb39281858fe98908a42ee501df460ca700a7a1bcb7949254",
     "operators/nosa/attention/device_only/_triton.py": "c9b2060928cff8cbf594a876061546521064da78f52b3297922bcc5dd0f96985",
     "operators/nosa/attention/device_only/api.py": "abbe52687cfc3d9835ea88efb31067f503f0cf07caafe95632e849f15f826f34",
     "operators/nosa/attention/device_only/csrc/nosa_attention.cu": "01c0699b507baebe005b2df44e2f78ec149083a6239b96e7d24990edf2bf09f4",
     "operators/nosa/attention/device_only/csrc/nosa_attention_fa3.cu": "f98b5ae4ea4bcc5c3dc5a597958627d6c186f22d1db7108162a2a328401c2f80",
     "operators/nosa/attention/device_only/csrc/nosa_attention_grouped.cuh": "30f35b34a80c2a26c249b92e055c3158a5a2e40e5c818ff9dadc3074dc525927",
     "operators/nosa/attention/offload/_fused.py": "5487ba8ad2b99dc1fb541cb330ffce2ea569edd59e17cb81c5bf39c7c1cd5dc9",
-    "operators/nosa/attention/offload/api.py": "e4a97d3ae77af1dec4b8c3b179bbfc5caa051a1d6084d41451a6465068e4f717",
+    "operators/nosa/attention/offload/api.py": "dc834919dc7d95d68b8f39abfb7d9c4ce93b8168e51d379935814ed45f9a6d89",
     "operators/nosa/attention/offload/csrc/nosa_offload.cu": "eb1049aa74bb9a15eaa82c61c20050d1f7ed7c99b42045643accd4b2fae1f666",
     "operators/nosa/attention/offload/csrc/nosa_offload_fused.cu": "a68fe19bfc5fd6d626ff310c3526624b2a1a4bc88f85678afd705b844410bb28",
     "operators/nosa/attention/reference/torch.py": "04a5bf00bf6d0e94678bc6673d42994c5f94ce144c56b02e0e4ceef8607b4ebc",
-    "operators/nosa/attention/workspace.py": "1831a2031b73d63a29359445fe2a9441712567fc82c61fdb4e1c3f0371ff5a88",
+    "operators/nosa/attention/workspace.py": "21a3fb3f4f8837e763a36e11574d6256cecea5fb9ab103110d44a6beced4eb83",
     "operators/nosa/indexer/_indexer_checked_cuda.py": "1f34a239ace16035e029123daa968e1c538d84985b8a440380dba65603337652",
     "operators/nosa/indexer/_indexer_cuda.py": "a1c80b34aef8f505468d85ceabbb48719b2a99e9beb7723091f8d1e0886629d8",
     "operators/nosa/indexer/_indexer_deferred_cuda.py": "52890966153c4ae29409564839dd19e733db01771f0e44f4d7a561a6dfe3980a",
@@ -367,15 +397,16 @@
     "operators/nosa/indexer/offload_compression.py": "30509159874f32ea78a9cc7b945415fc125cecda8828d793e0a03f8f7565a9ed",
     "operators/nosa/indexer/validation.py": "c00e303f7f7c31dd6081f52da8b8225170e77f7c6f83f59a2a6995019f07ca6e",
     "pyproject.toml": "cac6e9271538d74e99b1bdc83c2a12648bb3c76a310af21c98aff3ec2d3761d1",
-    "serving/persistent.py": "c4bfb300e4ef98d0d7bb94825d26770c4d2b600eb430549b726a1941b78ae572",
-    "serving/run_gr.py": "9c5657fcd311fc0ef0866fe9d97183e0ef8b92153007f0610bd6e7b4fe88792b",
-    "serving/run_multi_user.py": "c2525cf93d3d4be1795c82da09e66da4aaf8cd028392e9bb2d59adfb32b2c037",
-    "serving/runner.py": "bd36c4b8725bbe99f934a1ebee604a7e7b471c6c06859b3d0a1bc91c7686a421",
-    "serving/token_validation.py": "34227128afb5ec52bf57d47c7b7bf8b250cd6da3ba676d20dd3096a7f36a0fde",
+    "serving/csrc/token_validation.cpp": "144f89b7004bd589cf18850a8ac2b0aee29ce7bdf0b6d8fa4db7ee0e02b0d1af",
+    "serving/persistent.py": "2aad3a4260244afec3952fa6897f5261926ae3e709f3e662b099bd4d4ad15d2a",
+    "serving/run_gr.py": "fbfa90d896e5362eb0ce6efadc8ce6c47aecee0ebe47fc34035baec18189ef2e",
+    "serving/run_multi_user.py": "8332e3c6a70f82065519bea10df2bbb0bda6585ed43459b503225c4649833362",
+    "serving/runner.py": "e028638b3b92a7dae351bf8f4c3272dd6abf79c81ceba8d15404874b2aca46ac",
+    "serving/token_validation.py": "d2f4f9d15dbc0a435f6485efde175d144de82b5b46069db406ca7476055640f2",
     "uv.lock": "53339af1728da3661b614d554e928408186b4fac6106a92999bd8fd69b3d2d8f"
   },
   "input_capture": {
-    "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_kernel_mfu/output/data/kda_inputs_baseline_20260928_1345",
+    "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_mfu/output/data/kda_inputs_baseline_20260928_1345",
     "metadata_sha256": "4d05b742ef411e08134976502e0c9f181ff4fb0f1f8c9a01bdccc91b2a0985bc",
     "metadata": {
       "schema_version": 1,
@@ -1106,7 +1137,7 @@
       }
     }
   },
-  "git_commit": "4a02aef12dcf60d78625242856c2196e518b7315",
+  "git_commit": "934485bcade30b138a87e65ff87fbbbd04844fbf",
   "measurement_boundary": {
     "scope": "Isolated one-layer replay, all three paths receive identical Q/K/V/CIS/selection; not a 32-layer forward, indexer offload, or serving benchmark",
     "resident": "Original full-query native FA3 attention with complete K/V in HBM",
@@ -1121,7 +1152,7 @@
     "submit_ms": "Host clock through operator return, without completion wait",
     "bandwidth": "Actual mapped-host hardware transfer, no enforced 50 GB/s bandwidth limit",
     "capacity": "Workspace capacity is full logical NHD length; counts unique sparse K+V payload, not a bounded HBM replacement cache",
-    "byte_accounting": "GPU counters and CPU sparse union validate logical unique K+V payload bytes; they do not establish physical PCIe/CXL host-read bytes or exclude hardware rereads",
+    "byte_accounting": "Independent check compares GPU counters with the CPU sparse union; profile retains diagnostics, bench reuses the receipt without reading counters between samples. Counts cover logical unique K+V payload bytes, not physical PCIe/CXL host-read bytes or hardware rereads",
     "profiled": false,
     "work_instrumentation": "Profile runs only: device globaltimer records nonempty stripe copy windows, their exact per-page min/max envelopes and consumer softmax updates. Stripe and page unions are independently intersected with softmax; page envelopes alone cannot establish an overlap threshold. Stripe identity and bytes must partition every selected historical page exactly. Queue compaction is timed preparation work and performs no host KV fetch. Softmax coverage excludes QK/PV MMA. These windows do not establish wire occupancy or physical host-read traffic"
   },
@@ -1242,10 +1273,25 @@
       "suffix_gpu_bytes": 1048576,
       "fetch_ctas": 96,
       "execution_geometry": "whole-query attention in both offload modes; tile_size is histogram width",
-      "serialized_over_overlap_speedup": 1.4152976471393006,
-      "latency_reduction_fraction": 0.29343484600481706,
+      "serialized_over_overlap_speedup": 1.417805957855934,
+      "latency_reduction_fraction": 0.2946848654012979,
       "acceptance": {
         "measurement": {
+          "atol": 0.016,
+          "errors": {
+            "overlap": {
+              "max_abs": 0.0625,
+              "relative_l2": 0.0007833070848924652
+            },
+            "resident": {
+              "max_abs": 0.0625,
+              "relative_l2": 0.0007833070848924652
+            },
+            "serialized": {
+              "max_abs": 0.0625,
+              "relative_l2": 0.0007833070848924652
+            }
+          },
           "reference": "Independent FP32 QK + CIS, causal softmax and AV over original logical selections",
           "rows": [
             0,
@@ -2273,24 +2319,24 @@
             1022,
             1023
           ],
-          "rtol": 0.016,
-          "atol": 0.016,
-          "errors": {
-            "resident": {
-              "max_abs": 0.0625,
-              "relative_l2": 0.0007833070848924652
-            },
-            "serialized": {
-              "max_abs": 0.0625,
-              "relative_l2": 0.0007833070848924652
-            },
-            "overlap": {
-              "max_abs": 0.0625,
-              "relative_l2": 0.0007833070848924652
-            }
-          }
+          "rtol": 0.016
         },
         "profile": {
+          "atol": 0.016,
+          "errors": {
+            "overlap": {
+              "max_abs": 0.0625,
+              "relative_l2": 0.0007833070848924652
+            },
+            "resident": {
+              "max_abs": 0.0625,
+              "relative_l2": 0.0007833070848924652
+            },
+            "serialized": {
+              "max_abs": 0.0625,
+              "relative_l2": 0.0007833070848924652
+            }
+          },
           "reference": "Independent FP32 QK + CIS, causal softmax and AV over original logical selections",
           "rows": [
             0,
@@ -3318,51 +3364,39 @@
             1022,
             1023
           ],
-          "rtol": 0.016,
-          "atol": 0.016,
-          "errors": {
-            "resident": {
-              "max_abs": 0.0625,
-              "relative_l2": 0.0007833070848924652
-            },
-            "serialized": {
-              "max_abs": 0.0625,
-              "relative_l2": 0.0007833070848924652
-            },
-            "overlap": {
-              "max_abs": 0.0625,
-              "relative_l2": 0.0007833070848924652
-            }
-          }
+          "rtol": 0.016
         },
         "serialized_overlap_exact_equal": true,
-        "traffic_checks": "CPU per-head first-use union equals GPU total and per-tile counts after validation, warmup and every measured iteration"
+        "traffic_checks": {
+          "measurement": "independent_check",
+          "profile": "diagnostic_profile"
+        }
       },
       "modes": {
         "resident": {
           "timing_ms": {
             "cuda_ms": {
-              "median": 0.23942400515079498,
-              "min": 0.23574399948120117,
-              "max": 0.24726399779319763
+              "median": 0.2391519993543625,
+              "min": 0.2351360023021698,
+              "max": 0.24934400618076324
             },
             "wall_ms": {
-              "median": 0.2516270033083856,
-              "min": 0.24826405569911003,
-              "max": 0.2605919726192951
+              "median": 0.2512245555408299,
+              "min": 0.24750805459916592,
+              "max": 0.261181965470314
             },
             "submit_ms": {
-              "median": 0.08060148684307933,
-              "min": 0.07726799231022596,
-              "max": 0.08850893937051296
+              "median": 0.07966102566570044,
+              "min": 0.07602002006024122,
+              "max": 0.09119301103055477
             }
           },
           "profile": {
             "method": "nsys_separate_kernel_intervals",
             "gpu_span_us": {
-              "median": 190.497,
-              "min": 184.96,
-              "max": 191.008
+              "median": 189.952,
+              "min": 187.776,
+              "max": 190.24
             },
             "kernel_intervals": {
               "fetch_union_us": {
@@ -3371,9 +3405,9 @@
                 "max": 0.0
               },
               "attention_union_us": {
-                "median": 175.552,
-                "min": 175.328,
-                "max": 175.617
+                "median": 175.84,
+                "min": 174.784,
+                "max": 176.192
               },
               "overlap_us": {
                 "median": 0.0,
@@ -3394,38 +3428,38 @@
         "serialized": {
           "timing_ms": {
             "cuda_ms": {
-              "median": 0.4769439995288849,
-              "min": 0.47337600588798523,
-              "max": 0.48767998814582825
+              "median": 0.47622400522232056,
+              "min": 0.47196799516677856,
+              "max": 0.6290879845619202
             },
             "wall_ms": {
-              "median": 0.4896050086244941,
-              "min": 0.48598903231322765,
-              "max": 0.5004400154575706
+              "median": 0.488477002363652,
+              "min": 0.4844639915972948,
+              "max": 0.6424800958484411
             },
             "submit_ms": {
-              "median": 0.10162900434806943,
-              "min": 0.09953498374670744,
-              "max": 0.11687993537634611
+              "median": 0.09974103886634111,
+              "min": 0.09505299385637045,
+              "max": 0.26639807038009167
             }
           },
           "profile": {
             "method": "nsys_separate_kernel_intervals",
             "gpu_span_us": {
-              "median": 451.329,
-              "min": 447.489,
-              "max": 472.034
+              "median": 453.663,
+              "min": 450.271,
+              "max": 476.672
             },
             "kernel_intervals": {
               "fetch_union_us": {
-                "median": 213.184,
-                "min": 210.816,
-                "max": 215.584
+                "median": 211.936,
+                "min": 210.591,
+                "max": 214.719
               },
               "attention_union_us": {
-                "median": 174.625,
-                "min": 174.561,
-                "max": 174.945
+                "median": 175.616,
+                "min": 174.592,
+                "max": 175.648
               },
               "overlap_us": {
                 "median": 0.0,
@@ -3433,9 +3467,9 @@
                 "max": 0.0
               },
               "fetch_without_attention_us": {
-                "median": 213.184,
-                "min": 210.816,
-                "max": 215.584
+                "median": 211.936,
+                "min": 210.591,
+                "max": 214.719
               },
               "fetch_hidden_fraction": {
                 "median": 0.0,
@@ -3450,86 +3484,86 @@
         "overlap": {
           "timing_ms": {
             "cuda_ms": {
-              "median": 0.336992010474205,
-              "min": 0.332832008600235,
-              "max": 0.3478719890117645
+              "median": 0.33588799834251404,
+              "min": 0.3309119939804077,
+              "max": 0.35014399886131287
             },
             "wall_ms": {
-              "median": 0.34899497404694557,
-              "min": 0.344960018992424,
-              "max": 0.36044104490429163
+              "median": 0.3478319849818945,
+              "min": 0.3432789817452431,
+              "max": 0.3635580651462078
             },
             "submit_ms": {
-              "median": 0.10058801854029298,
-              "min": 0.095242983661592,
-              "max": 0.11092307977378368
+              "median": 0.09833247167989612,
+              "min": 0.09445298928767443,
+              "max": 0.12045097537338734
             }
           },
           "profile": {
             "method": "globaltimer_fetch_softmax",
             "gpu_span_us": {
-              "median": 343.617,
-              "min": 321.217,
-              "max": 357.313
+              "median": 344.767,
+              "min": 318.016,
+              "max": 359.743
             },
             "kernel_intervals": null,
             "intra_kernel_softmax": {
               "fetch_work_union_us": {
-                "median": 215.2,
-                "min": 212.768,
-                "max": 216.32
+                "median": 212.576,
+                "min": 210.72,
+                "max": 214.112
               },
               "softmax_union_us": {
-                "median": 218.176,
-                "min": 218.048,
-                "max": 223.52
+                "median": 220.0,
+                "min": 217.12,
+                "max": 222.112
               },
               "fetch_math_overlap_us": {
-                "median": 199.872,
-                "min": 199.36,
-                "max": 205.984
+                "median": 200.48,
+                "min": 199.584,
+                "max": 202.56
               },
               "fetch_without_softmax_us": {
-                "median": 13.408,
-                "min": 10.336,
-                "max": 15.328
+                "median": 11.552,
+                "min": 10.24,
+                "max": 12.992
               },
               "fetch_math_overlap_fraction": {
-                "median": 0.9369830049631523,
-                "min": 0.9287732342007435,
-                "max": 0.9522189349112427
+                "median": 0.9460469287102078,
+                "min": 0.9388830347734457,
+                "max": 0.9514047076689446
               },
               "instrumented_span_us": {
-                "median": 233.504,
-                "min": 231.456,
-                "max": 233.856
+                "median": 230.24,
+                "min": 230.112,
+                "max": 233.664
               },
               "effective_fetch_work_GB_s": {
-                "median": 40.35092936802974,
-                "min": 40.142011834319526,
-                "max": 40.81215220333885
+                "median": 40.84901399969893,
+                "min": 40.555970706919744,
+                "max": 41.208807896735
               }
             },
             "intra_kernel_stripes": {
               "fetch_stripe_union_us": {
-                "median": 215.2,
-                "min": 212.768,
-                "max": 216.32
+                "median": 212.576,
+                "min": 210.72,
+                "max": 214.112
               },
               "fetch_stripe_math_overlap_us": {
-                "median": 199.872,
-                "min": 199.36,
-                "max": 205.984
+                "median": 200.48,
+                "min": 199.584,
+                "max": 202.56
               },
               "fetch_stripe_without_softmax_us": {
-                "median": 13.408,
-                "min": 10.336,
-                "max": 15.328
+                "median": 11.552,
+                "min": 10.24,
+                "max": 12.992
               },
               "fetch_stripe_math_overlap_fraction": {
-                "median": 0.9369830049631523,
-                "min": 0.9287732342007435,
-                "max": 0.9522189349112427
+                "median": 0.9460469287102078,
+                "min": 0.9388830347734457,
+                "max": 0.9514047076689446
               },
               "page_envelope_only_union_us": {
                 "median": 0.0,
@@ -3564,20 +3598,20 @@
         "samples": [
           {
             "sample": 0,
-            "page_fraction": 0.9369830049631523,
-            "stripe_fraction": 0.9369830049631523,
+            "page_fraction": 0.9460469287102078,
+            "stripe_fraction": 0.9460469287102078,
             "meets_threshold": true
           },
           {
             "sample": 1,
-            "page_fraction": 0.9287732342007435,
-            "stripe_fraction": 0.9287732342007435,
+            "page_fraction": 0.9388830347734457,
+            "stripe_fraction": 0.9388830347734457,
             "meets_threshold": true
           },
           {
             "sample": 2,
-            "page_fraction": 0.9522189349112427,
-            "stripe_fraction": 0.9522189349112427,
+            "page_fraction": 0.9514047076689446,
+            "stripe_fraction": 0.9514047076689446,
             "meets_threshold": true
           }
         ]
@@ -3688,10 +3722,25 @@
       "suffix_gpu_bytes": 1048576,
       "fetch_ctas": 96,
       "execution_geometry": "whole-query attention in both offload modes; tile_size is histogram width",
-      "serialized_over_overlap_speedup": 1.3249565044489735,
-      "latency_reduction_fraction": 0.24525824308784938,
+      "serialized_over_overlap_speedup": 1.321472230327253,
+      "latency_reduction_fraction": 0.24326824502974442,
       "acceptance": {
         "measurement": {
+          "atol": 0.016,
+          "errors": {
+            "overlap": {
+              "max_abs": 0.015625,
+              "relative_l2": 0.0013297637575991725
+            },
+            "resident": {
+              "max_abs": 0.015625,
+              "relative_l2": 0.0013297637575991725
+            },
+            "serialized": {
+              "max_abs": 0.015625,
+              "relative_l2": 0.0013297637575991725
+            }
+          },
           "reference": "Independent FP32 QK + CIS, causal softmax and AV over original logical selections",
           "rows": [
             0,
@@ -4719,24 +4768,24 @@
             1022,
             1023
           ],
-          "rtol": 0.016,
-          "atol": 0.016,
-          "errors": {
-            "resident": {
-              "max_abs": 0.015625,
-              "relative_l2": 0.0013297637575991725
-            },
-            "serialized": {
-              "max_abs": 0.015625,
-              "relative_l2": 0.0013297637575991725
-            },
-            "overlap": {
-              "max_abs": 0.015625,
-              "relative_l2": 0.0013297637575991725
-            }
-          }
+          "rtol": 0.016
         },
         "profile": {
+          "atol": 0.016,
+          "errors": {
+            "overlap": {
+              "max_abs": 0.015625,
+              "relative_l2": 0.0013297637575991725
+            },
+            "resident": {
+              "max_abs": 0.015625,
+              "relative_l2": 0.0013297637575991725
+            },
+            "serialized": {
+              "max_abs": 0.015625,
+              "relative_l2": 0.0013297637575991725
+            }
+          },
           "reference": "Independent FP32 QK + CIS, causal softmax and AV over original logical selections",
           "rows": [
             0,
@@ -5764,51 +5813,39 @@
             1022,
             1023
           ],
-          "rtol": 0.016,
-          "atol": 0.016,
-          "errors": {
-            "resident": {
-              "max_abs": 0.015625,
-              "relative_l2": 0.0013297637575991725
-            },
-            "serialized": {
-              "max_abs": 0.015625,
-              "relative_l2": 0.0013297637575991725
-            },
-            "overlap": {
-              "max_abs": 0.015625,
-              "relative_l2": 0.0013297637575991725
-            }
-          }
+          "rtol": 0.016
         },
         "serialized_overlap_exact_equal": true,
-        "traffic_checks": "CPU per-head first-use union equals GPU total and per-tile counts after validation, warmup and every measured iteration"
+        "traffic_checks": {
+          "measurement": "independent_check",
+          "profile": "diagnostic_profile"
+        }
       },
       "modes": {
         "resident": {
           "timing_ms": {
             "cuda_ms": {
-              "median": 0.23820800334215164,
-              "min": 0.23503999412059784,
-              "max": 0.24278399348258972
+              "median": 0.23553600162267685,
+              "min": 0.23321600258350372,
+              "max": 0.2436479926109314
             },
             "wall_ms": {
-              "median": 0.2503105206415057,
-              "min": 0.24672201834619045,
-              "max": 0.2550570061430335
+              "median": 0.24758506333455443,
+              "min": 0.24522398598492146,
+              "max": 0.25590695440769196
             },
             "submit_ms": {
-              "median": 0.07953651947900653,
-              "min": 0.07601198740303516,
-              "max": 0.0844800379127264
+              "median": 0.0763445277698338,
+              "min": 0.0743520213291049,
+              "max": 0.08526595775038004
             }
           },
           "profile": {
             "method": "nsys_separate_kernel_intervals",
             "gpu_span_us": {
-              "median": 188.608,
-              "min": 181.505,
-              "max": 189.985
+              "median": 188.064,
+              "min": 185.247,
+              "max": 188.512
             },
             "kernel_intervals": {
               "fetch_union_us": {
@@ -5817,9 +5854,9 @@
                 "max": 0.0
               },
               "attention_union_us": {
-                "median": 174.432,
-                "min": 173.729,
-                "max": 174.528
+                "median": 174.016,
+                "min": 173.76,
+                "max": 175.807
               },
               "overlap_us": {
                 "median": 0.0,
@@ -5840,38 +5877,38 @@
         "serialized": {
           "timing_ms": {
             "cuda_ms": {
-              "median": 0.5719360113143921,
-              "min": 0.5686720013618469,
-              "max": 0.5820479989051819
+              "median": 0.5716160237789154,
+              "min": 0.5674880146980286,
+              "max": 0.5794240236282349
             },
             "wall_ms": {
-              "median": 0.5839029909111559,
-              "min": 0.5808570422232151,
-              "max": 0.5941130220890045
+              "median": 0.583385000936687,
+              "min": 0.5793350283056498,
+              "max": 0.5916319787502289
             },
             "submit_ms": {
-              "median": 0.10032253339886665,
-              "min": 0.09765103459358215,
-              "max": 0.11560204438865185
+              "median": 0.0989024993032217,
+              "min": 0.09351596236228943,
+              "max": 0.10657997336238623
             }
           },
           "profile": {
             "method": "nsys_separate_kernel_intervals",
             "gpu_span_us": {
-              "median": 547.842,
-              "min": 539.938,
-              "max": 569.857
+              "median": 547.967,
+              "min": 536.16,
+              "max": 568.64
             },
             "kernel_intervals": {
               "fetch_union_us": {
-                "median": 312.833,
-                "min": 308.768,
-                "max": 315.073
+                "median": 312.703,
+                "min": 309.568,
+                "max": 313.184
               },
               "attention_union_us": {
-                "median": 173.025,
-                "min": 171.841,
-                "max": 174.272
+                "median": 172.896,
+                "min": 172.704,
+                "max": 174.08
               },
               "overlap_us": {
                 "median": 0.0,
@@ -5879,9 +5916,9 @@
                 "max": 0.0
               },
               "fetch_without_attention_us": {
-                "median": 312.833,
-                "min": 308.768,
-                "max": 315.073
+                "median": 312.703,
+                "min": 309.568,
+                "max": 313.184
               },
               "fetch_hidden_fraction": {
                 "median": 0.0,
@@ -5896,86 +5933,86 @@
         "overlap": {
           "timing_ms": {
             "cuda_ms": {
-              "median": 0.43166399002075195,
-              "min": 0.4278720021247864,
-              "max": 0.44012799859046936
+              "median": 0.432559996843338,
+              "min": 0.4296320080757141,
+              "max": 0.44390401244163513
             },
             "wall_ms": {
-              "median": 0.44408900430426,
-              "min": 0.4405310610309243,
-              "max": 0.4527280107140541
+              "median": 0.44458499178290367,
+              "min": 0.44156203512102365,
+              "max": 0.4559120861813426
             },
             "submit_ms": {
-              "median": 0.09743304690346122,
-              "min": 0.09336008224636316,
-              "max": 0.10824098717421293
+              "median": 0.09713147301226854,
+              "min": 0.09357801172882318,
+              "max": 0.10328099597245455
             }
           },
           "profile": {
             "method": "globaltimer_fetch_softmax",
             "gpu_span_us": {
-              "median": 435.169,
-              "min": 423.969,
-              "max": 448.257
+              "median": 438.591,
+              "min": 420.671,
+              "max": 442.72
             },
             "kernel_intervals": null,
             "intra_kernel_softmax": {
               "fetch_work_union_us": {
-                "median": 314.112,
-                "min": 313.792,
-                "max": 314.624
+                "median": 312.32,
+                "min": 311.936,
+                "max": 315.616
               },
               "softmax_union_us": {
-                "median": 302.944,
-                "min": 301.696,
-                "max": 305.6
+                "median": 306.88,
+                "min": 306.72,
+                "max": 311.84
               },
               "fetch_math_overlap_us": {
-                "median": 286.72,
-                "min": 285.696,
-                "max": 289.408
+                "median": 290.496,
+                "min": 288.704,
+                "max": 294.592
               },
               "fetch_without_softmax_us": {
-                "median": 27.392,
-                "min": 24.384,
-                "max": 28.928
+                "median": 21.44,
+                "min": 21.024,
+                "max": 23.616
               },
               "fetch_math_overlap_fraction": {
-                "median": 0.9127954360228199,
-                "min": 0.9080553295362083,
-                "max": 0.922292473995513
+                "median": 0.9312679524004924,
+                "min": 0.9243852459016394,
+                "max": 0.9333874074825104
               },
               "instrumented_span_us": {
-                "median": 333.216,
-                "min": 332.864,
-                "max": 333.952
+                "median": 333.568,
+                "min": 331.872,
+                "max": 335.264
               },
               "effective_fetch_work_GB_s": {
-                "median": 41.51915240423798,
-                "min": 41.451586655817735,
-                "max": 41.56149296349174
+                "median": 41.75737704918033,
+                "min": 41.32130183514144,
+                "max": 41.80878128846943
               }
             },
             "intra_kernel_stripes": {
               "fetch_stripe_union_us": {
-                "median": 314.112,
-                "min": 313.792,
-                "max": 314.624
+                "median": 312.32,
+                "min": 311.936,
+                "max": 315.616
               },
               "fetch_stripe_math_overlap_us": {
-                "median": 286.72,
-                "min": 285.696,
-                "max": 289.408
+                "median": 290.496,
+                "min": 288.704,
+                "max": 294.592
               },
               "fetch_stripe_without_softmax_us": {
-                "median": 27.392,
-                "min": 24.384,
-                "max": 28.928
+                "median": 21.44,
+                "min": 21.024,
+                "max": 23.616
               },
               "fetch_stripe_math_overlap_fraction": {
-                "median": 0.9127954360228199,
-                "min": 0.9080553295362083,
-                "max": 0.922292473995513
+                "median": 0.9312679524004924,
+                "min": 0.9243852459016394,
+                "max": 0.9333874074825104
               },
               "page_envelope_only_union_us": {
                 "median": 0.0,
@@ -6010,20 +6047,20 @@
         "samples": [
           {
             "sample": 0,
-            "page_fraction": 0.9127954360228199,
-            "stripe_fraction": 0.9127954360228199,
+            "page_fraction": 0.9312679524004924,
+            "stripe_fraction": 0.9312679524004924,
             "meets_threshold": true
           },
           {
             "sample": 1,
-            "page_fraction": 0.922292473995513,
-            "stripe_fraction": 0.922292473995513,
+            "page_fraction": 0.9333874074825104,
+            "stripe_fraction": 0.9333874074825104,
             "meets_threshold": true
           },
           {
             "sample": 2,
-            "page_fraction": 0.9080553295362083,
-            "stripe_fraction": 0.9080553295362083,
+            "page_fraction": 0.9243852459016394,
+            "stripe_fraction": 0.9243852459016394,
             "meets_threshold": true
           }
         ]
@@ -6134,10 +6171,25 @@
       "suffix_gpu_bytes": 1048576,
       "fetch_ctas": 96,
       "execution_geometry": "whole-query attention in both offload modes; tile_size is histogram width",
-      "serialized_over_overlap_speedup": 1.2938620057481305,
-      "latency_reduction_fraction": 0.22712005178497763,
+      "serialized_over_overlap_speedup": 1.2990906519370118,
+      "latency_reduction_fraction": 0.23023077834564665,
       "acceptance": {
         "measurement": {
+          "atol": 0.016,
+          "errors": {
+            "overlap": {
+              "max_abs": 0.125,
+              "relative_l2": 0.0009914699534119575
+            },
+            "resident": {
+              "max_abs": 0.125,
+              "relative_l2": 0.0009914699534119575
+            },
+            "serialized": {
+              "max_abs": 0.125,
+              "relative_l2": 0.0009914699534119575
+            }
+          },
           "reference": "Independent FP32 QK + CIS, causal softmax and AV over original logical selections",
           "rows": [
             0,
@@ -7165,24 +7217,24 @@
             1022,
             1023
           ],
-          "rtol": 0.016,
-          "atol": 0.016,
-          "errors": {
-            "resident": {
-              "max_abs": 0.125,
-              "relative_l2": 0.0009914699534119575
-            },
-            "serialized": {
-              "max_abs": 0.125,
-              "relative_l2": 0.0009914699534119575
-            },
-            "overlap": {
-              "max_abs": 0.125,
-              "relative_l2": 0.0009914699534119575
-            }
-          }
+          "rtol": 0.016
         },
         "profile": {
+          "atol": 0.016,
+          "errors": {
+            "overlap": {
+              "max_abs": 0.125,
+              "relative_l2": 0.0009914699534119575
+            },
+            "resident": {
+              "max_abs": 0.125,
+              "relative_l2": 0.0009914699534119575
+            },
+            "serialized": {
+              "max_abs": 0.125,
+              "relative_l2": 0.0009914699534119575
+            }
+          },
           "reference": "Independent FP32 QK + CIS, causal softmax and AV over original logical selections",
           "rows": [
             0,
@@ -8210,51 +8262,39 @@
             1022,
             1023
           ],
-          "rtol": 0.016,
-          "atol": 0.016,
-          "errors": {
-            "resident": {
-              "max_abs": 0.125,
-              "relative_l2": 0.0009914699534119575
-            },
-            "serialized": {
-              "max_abs": 0.125,
-              "relative_l2": 0.0009914699534119575
-            },
-            "overlap": {
-              "max_abs": 0.125,
-              "relative_l2": 0.0009914699534119575
-            }
-          }
+          "rtol": 0.016
         },
         "serialized_overlap_exact_equal": true,
-        "traffic_checks": "CPU per-head first-use union equals GPU total and per-tile counts after validation, warmup and every measured iteration"
+        "traffic_checks": {
+          "measurement": "independent_check",
+          "profile": "diagnostic_profile"
+        }
       },
       "modes": {
         "resident": {
           "timing_ms": {
             "cuda_ms": {
-              "median": 0.23526399582624435,
-              "min": 0.23126399517059326,
-              "max": 0.2503359913825989
+              "median": 0.23268800228834152,
+              "min": 0.23056000471115112,
+              "max": 0.24012799561023712
             },
             "wall_ms": {
-              "median": 0.24777546059340239,
-              "min": 0.24270801804959774,
-              "max": 0.26284996420145035
+              "median": 0.24472997756674886,
+              "min": 0.24229497648775578,
+              "max": 0.2521589631214738
             },
             "submit_ms": {
-              "median": 0.07915199967101216,
-              "min": 0.0745690194889903,
-              "max": 0.0965408980846405
+              "median": 0.07617054507136345,
+              "min": 0.07378100417554379,
+              "max": 0.08347001858055592
             }
           },
           "profile": {
             "method": "nsys_separate_kernel_intervals",
             "gpu_span_us": {
-              "median": 185.761,
-              "min": 179.329,
-              "max": 186.304
+              "median": 183.68,
+              "min": 180.543,
+              "max": 183.904
             },
             "kernel_intervals": {
               "fetch_union_us": {
@@ -8263,9 +8303,9 @@
                 "max": 0.0
               },
               "attention_union_us": {
-                "median": 171.328,
-                "min": 170.945,
-                "max": 171.361
+                "median": 170.816,
+                "min": 169.76,
+                "max": 171.423
               },
               "overlap_us": {
                 "median": 0.0,
@@ -8286,38 +8326,38 @@
         "serialized": {
           "timing_ms": {
             "cuda_ms": {
-              "median": 0.5716799795627594,
-              "min": 0.5689280033111572,
-              "max": 0.5795199871063232
+              "median": 0.5691680014133453,
+              "min": 0.5651199817657471,
+              "max": 0.5744640231132507
             },
             "wall_ms": {
-              "median": 0.5848434520885348,
-              "min": 0.5809710128232837,
-              "max": 0.5921470001339912
+              "median": 0.581140979193151,
+              "min": 0.5770639982074499,
+              "max": 0.5866710562258959
             },
             "submit_ms": {
-              "median": 0.10127550922334194,
-              "min": 0.09762798435986042,
-              "max": 0.11545803863555193
+              "median": 0.0975820585153997,
+              "min": 0.09297695942223072,
+              "max": 0.10555097833275795
             }
           },
           "profile": {
             "method": "nsys_separate_kernel_intervals",
             "gpu_span_us": {
-              "median": 545.218,
-              "min": 537.346,
-              "max": 580.45
+              "median": 543.103,
+              "min": 535.552,
+              "max": 566.175
             },
             "kernel_intervals": {
               "fetch_union_us": {
-                "median": 311.777,
-                "min": 309.217,
-                "max": 312.609
+                "median": 310.879,
+                "min": 310.432,
+                "max": 311.359
               },
               "attention_union_us": {
-                "median": 170.593,
-                "min": 169.888,
-                "max": 171.393
+                "median": 170.944,
+                "min": 170.656,
+                "max": 171.104
               },
               "overlap_us": {
                 "median": 0.0,
@@ -8325,9 +8365,9 @@
                 "max": 0.0
               },
               "fetch_without_attention_us": {
-                "median": 311.777,
-                "min": 309.217,
-                "max": 312.609
+                "median": 310.879,
+                "min": 310.432,
+                "max": 311.359
               },
               "fetch_hidden_fraction": {
                 "median": 0.0,
@@ -8342,86 +8382,86 @@
         "overlap": {
           "timing_ms": {
             "cuda_ms": {
-              "median": 0.4418399930000305,
-              "min": 0.4373120069503784,
-              "max": 0.44966399669647217
+              "median": 0.4381280094385147,
+              "min": 0.4323199987411499,
+              "max": 0.4469760060310364
             },
             "wall_ms": {
-              "median": 0.454624998383224,
-              "min": 0.4489029524847865,
-              "max": 0.4622110864147544
+              "median": 0.4498910275287926,
+              "min": 0.4445199156180024,
+              "max": 0.4587940638884902
             },
             "submit_ms": {
-              "median": 0.0998174655251205,
-              "min": 0.09577407035976648,
-              "max": 0.10960199870169163
+              "median": 0.09722751565277576,
+              "min": 0.09254296310245991,
+              "max": 0.10639999527484179
             }
           },
           "profile": {
             "method": "globaltimer_fetch_softmax",
             "gpu_span_us": {
-              "median": 449.345,
-              "min": 425.249,
-              "max": 451.586
+              "median": 440.767,
+              "min": 421.888,
+              "max": 453.024
             },
             "kernel_intervals": null,
             "intra_kernel_softmax": {
               "fetch_work_union_us": {
-                "median": 314.72,
-                "min": 314.56,
-                "max": 316.352
+                "median": 313.056,
+                "min": 312.896,
+                "max": 314.304
               },
               "softmax_union_us": {
-                "median": 309.088,
-                "min": 307.008,
-                "max": 315.648
+                "median": 308.288,
+                "min": 308.032,
+                "max": 311.552
               },
               "fetch_math_overlap_us": {
-                "median": 287.264,
-                "min": 285.056,
-                "max": 295.328
+                "median": 287.648,
+                "min": 286.272,
+                "max": 289.376
               },
               "fetch_without_softmax_us": {
-                "median": 27.456,
-                "min": 21.024,
-                "max": 29.504
+                "median": 25.408,
+                "min": 23.52,
+                "max": 28.032
               },
               "fetch_math_overlap_fraction": {
-                "median": 0.9127605490594815,
-                "min": 0.906205493387589,
-                "max": 0.9335423831681166
+                "median": 0.9188388020034755,
+                "min": 0.9108124618204032,
+                "max": 0.9248312538351401
               },
               "instrumented_span_us": {
-                "median": 336.544,
-                "min": 336.512,
-                "max": 336.672
+                "median": 335.072,
+                "min": 333.696,
+                "max": 336.064
               },
               "effective_fetch_work_GB_s": {
-                "median": 41.54306049822064,
-                "min": 41.32874772405422,
-                "max": 41.564191251271616
+                "median": 41.7638761116222,
+                "min": 41.59804520464264,
+                "max": 41.78523215381469
               }
             },
             "intra_kernel_stripes": {
               "fetch_stripe_union_us": {
-                "median": 314.72,
-                "min": 314.56,
-                "max": 316.352
+                "median": 313.056,
+                "min": 312.896,
+                "max": 314.304
               },
               "fetch_stripe_math_overlap_us": {
-                "median": 287.264,
-                "min": 285.056,
-                "max": 295.328
+                "median": 287.648,
+                "min": 286.272,
+                "max": 289.376
               },
               "fetch_stripe_without_softmax_us": {
-                "median": 27.456,
-                "min": 21.024,
-                "max": 29.504
+                "median": 25.408,
+                "min": 23.52,
+                "max": 28.032
               },
               "fetch_stripe_math_overlap_fraction": {
-                "median": 0.9127605490594815,
-                "min": 0.906205493387589,
-                "max": 0.9335423831681166
+                "median": 0.9188388020034755,
+                "min": 0.9108124618204032,
+                "max": 0.9248312538351401
               },
               "page_envelope_only_union_us": {
                 "median": 0.0,
@@ -8456,20 +8496,20 @@
         "samples": [
           {
             "sample": 0,
-            "page_fraction": 0.906205493387589,
-            "stripe_fraction": 0.906205493387589,
+            "page_fraction": 0.9248312538351401,
+            "stripe_fraction": 0.9248312538351401,
             "meets_threshold": true
           },
           {
             "sample": 1,
-            "page_fraction": 0.9335423831681166,
-            "stripe_fraction": 0.9335423831681166,
+            "page_fraction": 0.9108124618204032,
+            "stripe_fraction": 0.9108124618204032,
             "meets_threshold": true
           },
           {
             "sample": 2,
-            "page_fraction": 0.9127605490594815,
-            "stripe_fraction": 0.9127605490594815,
+            "page_fraction": 0.9188388020034755,
+            "stripe_fraction": 0.9188388020034755,
             "meets_threshold": true
           }
         ]

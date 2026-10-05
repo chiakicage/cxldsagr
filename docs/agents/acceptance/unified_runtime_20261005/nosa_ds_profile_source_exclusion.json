@@ -1,0 +1,14 @@
+{
+  "target": "experiments/deepseek_v32_motivation/src/profile.py",
+  "final_check_manifest_entries": 130,
+  "target_in_final_check": false,
+  "current_profile_collector_entries": 130,
+  "target_in_current_profile_collector": false,
+  "collector_path_set_matches_final_check": true,
+  "profile_entrypoints_using_same_collector": [
+    "experiments/nosa_motivation/src/profile.py",
+    "experiments/nosa_motivation/src/profile_hbm.py",
+    "experiments/nosa_motivation/src/profile_attention_reference.py"
+  ],
+  "mechanism": "Exact source_paths AST executed with pathlib and the literal ABI constant; no project/runtime imports, source writes, file hashing, GPU or pytest."
+}

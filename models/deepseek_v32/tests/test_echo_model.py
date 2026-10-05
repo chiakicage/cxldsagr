@@ -5,15 +5,10 @@ import pytest
 import torch
 from safetensors.torch import save_file
 
-from models.deepseek_v32.echo_model import (
-    CheckpointAttention,
-    CheckpointReader,
-    Config,
-    apply_rope,
-    normalized_hadamard,
-    quantize_index,
-    rotary_frequencies,
-)
+from models.deepseek_v32.checkpoint import CheckpointReader
+from models.deepseek_v32.config import Config
+from models.deepseek_v32.projections import CheckpointAttention, quantize_index
+from models.deepseek_v32.rotary import apply_rope, normalized_hadamard, rotary_frequencies
 
 
 @pytest.fixture

@@ -11,42 +11,55 @@ stripe，跨 CTA 只读一次 host K/V。完整 32 层 checkpoint 检查 1 passe
 构建 64K sparse prefix，再执行 1K extend，全部 normalized hidden 逐位相同，max_abs=0。
 单层性能和 stripe / page-envelope overlap 见下文。新增跨请求保留 prefix 的
 串行 serving 适配见下节；共享 workspace 的 4K / 16K / 64K 短轨迹已用
-原源码完成测量与验收；该短轨迹范围现已结束，保留通用模型实现和回归。详见
-[整理记录](../../docs/agents/system/experiment_organization.md#retired-gr-serving)。独立的固定 P/NH 入口及其
+原源码完成测量与验收；该短轨迹范围现已结束，保留通用模型实现和回归。
+独立的固定 P/NH 入口及其
 正式测量、匹配 profile 和 API 对照见[固定容量实验](../../experiments/nosa_motivation/README.md)。
 
 - [model.py](model.py)：模型参数树、权重加载与前向；保留原有导入接口。
 - [config.py](config.py)、[rotary.py](rotary.py)：NOSA 配置与 LongRoPE。
 - [layers.py](layers.py)：NOSA projection、attention 与 decoder 组合。
-- [cache.py](cache.py)：NOSA KV 布局及 resident session 适配。
-- [offload_cache.py](offload_cache.py)：pinned 历史 K/V、resident CIS/压缩记录及共享 staging。
-- [serving.py](serving.py)：完整 NOSA 的跨请求 prefix session、四种缓存方案及预算适配。
-- [serving_resources.py](serving_resources.py)：backend 持有的有界 staging/scratch、
+- [normalization.py](normalization.py)、[feed_forward.py](feed_forward.py)：RMSNorm 与 SwiGLU。
+- [cache/resident.py](cache/resident.py)：NOSA KV 布局及 resident session 适配。
+- [cache/offload.py](cache/offload.py)：pinned 历史 K/V、resident CIS/压缩记录及共享 staging。
+- [execution/adapter.py](execution/adapter.py)：完整 NOSA 的跨请求 prefix session、四种缓存方案及预算适配。
+- [execution/resources.py](execution/resources.py)：backend 持有的有界 staging/scratch、
   C/A/Q 预留、串行执行 lease 与 session 所有权检查。
-- [fixed_serving.py](fixed_serving.py)：固定 P/NH 的四方案入口，候选整批 GPU 执行后 discard。
-- [fixed_resources.py](fixed_resources.py)：逐层有限 P 槽、共享执行资源与固定容量计费。
-- [fixed_cache.py](fixed_cache.py)：独立用户 history、直接映射的 HBM residency 与候选事务。
+- [execution/fixed.py](execution/fixed.py)：固定 P/NH 的四方案入口，候选整批 GPU 执行后 discard。
+- [execution/fixed_resources.py](execution/fixed_resources.py)：逐层有限 P 槽、共享执行资源与固定容量计费。
+- [cache/fixed.py](cache/fixed.py)：独立用户 history、直接映射的 HBM residency 与候选事务。
 - [indexer.py](indexer.py)：64-token block，默认 1 sink + 16 local + 47 query-aware top-k；
   支持 32-block 分析预算，以及显式完整 NOSA 两阶段选块。
 - [scoring.py](scoring.py)：query-agnostic CIS 打分与 32-token / stride-16 压缩。
-- [attention.py](attention.py)：resident / offload sparse adapter，调用
+- [attention.py](attention.py)：`DenseMainAttention`、`ResidentLayerView` 及 resident / offload sparse adapter，调用
   [SM90 算子](../../operators/nosa/README.md) 或 CPU 数学参考。
 - [infer.py](infer.py)：本地 tokenizer、chat template、采样与命令行入口。
 - 现有 DeepSeek 实验见 [DeepSeek V3.2](../deepseek_v32/README.md)。
 
-普通 RMSNorm / SwiGLU 与 attention 契约见 [共享层](../../layers/README.md)，FlashInfer
-调用见 [算子](../../operators/README.md)。[执行器](../../executor/README.md) 统一分块前向，
+普通 RMSNorm / SwiGLU 保留在本模型目录；公共 indexer / attention 协议见
+[attention_contracts.py](../attention_contracts.py)，FlashInfer 调用见
+[算子](../../operators/README.md)。[执行器](../../executor/README.md) 统一分块前向，
 [缓存管理器](../../cache/README.md) 管理逐层写入、有效长度提交及请求释放。
 main attention 接收逻辑块选择与 cache access；显式 offload 由 SM90 算子在单个
-cooperative 主 kernel 内调度 fetch/compute。dense 路径不执行 indexer，仍使用 resident cache。
+cooperative 主 kernel 内调度 fetch/compute。`DenseMainAttention` 通过 cache access
+读取 resident K/V 并调用 FlashInfer Full Attention；无持久 cache 的前向由
+`ResidentLayerView` 提供视图。dense 路径不执行 indexer。
 
 ## 跨请求 GR serving
 
-[NosaServingBackend](serving.py) 提供按 HBM / CPU DRAM 字节预算准入的普通入口，
+[NosaServingBackend](execution/adapter.py) 提供按 HBM / CPU DRAM 字节预算准入的普通入口，
 连接 [PersistentGRRunner](../../serving/persistent.py)，
 支持 `hbm`、`serial_sparse`、`dense_prefetch` 与 `overlap`。四种方案均执行完整
 32 层 NOSA sparse 模型，保留相同的 CIS、selection 和 causal mask；`dense_prefetch`
 表示搬运完整历史 K/V，attention 本身仍为 sparse。
+
+persistent 入口通过 [TokenRuntime](../../executor/runtime.py) 调用 NOSA 适配器。
+NOSA 提供具名的 `ResourcePlan` / `SessionPlan`，保留自己的 cache 布局和 attention
+执行流程；共享 [ResourceLifecycle](../../cache/lifecycle.py) 管理 owner、generation
+和执行占用。会话计划区分实际 storage 与计费预留，分配时沿用该计划的维度。
+backend 最多复用一套不可变分配声明及其 footprint；布局参数、provider 或 generation
+变化时重新构建。history/resource 身份和配额仍逐请求生成并核验，allocator 实时审计
+不缓存。布局复用已通过 [CPU 验收](../../docs/agents/acceptance/unified_runtime_20261005/nosa_layout_cache_cpu_01/evidence.json)
+和 336 组规划配置对照；规划微基准不能替代完整 serving 计时。
 
 每个用户持有自己的稳定 prefix session。命中时直接复用，candidate 执行后统一截短回
 prefix；全局 LRU 按相同 HBM / CPU DRAM cache 上限准入，淘汰时释放该用户的两级缓存。
@@ -76,7 +89,7 @@ CLI 与正式入口显式传入 C/A。公共集成后的完整 32 层、两用�
 四方案的全部 48 个分配阶段，32 组 candidate hidden 对照逐位一致。
 以上为 2026-10-03 的集成 checkpoint；按当时要求只验收正确性，未运行共享版本的
 性能或完整用户容量轨迹，证据见
-[工程 checkpoint](../../docs/agents/system/nosa_shared_cache_checkpoint.md)。
+[集成验收索引](../../docs/agents/acceptance/unified_runtime_20261005/shared_cache_integration_evidence.json)。
 
 完整分配审计随后发现原公式遗漏 allocator 尾部占用及 cache helper 临时张量。
 `nosa_backend_workspace_v2` 将逻辑 storage 与 allocator 预留分开，按每个独立张量
@@ -86,22 +99,22 @@ CLI 与正式入口显式传入 C/A。公共集成后的完整 32 层、两用�
 allocator 回调顺序匹配分配代次，并保留至 `free_completed` 或 capture 结束。
 公共 runner 的准入、所有权和失败清理已通过集成回归；该分配 checkpoint 当时未运行
 完整用户容量轨迹及正式性能。后续共享版本曾完成 H4K / H16K / H64K 短轨迹补测，
-该实验现已整体退出，见[整理记录](../../docs/agents/system/experiment_organization.md#retired-gr-serving)。
-这些短轨迹没有证明填满用户容量时的进程物理 HBM 上界。
+该短轨迹实验现已退出；这些结果没有证明填满用户容量时的进程物理 HBM 上界。
 Pinned DRAM 按每次分配的实际 power-of-two bin 预留和报告，不能只累加 K/V
 逻辑字节；`session_storage_bytes()` 另提供逻辑 storage 账本。
 上述普通 budget 入口的 CUDA 预算限定 PyTorch native 默认 allocator，配置在资源存活期间固定，显式拒绝
 可观察的非默认 pool、CUDA Graph 及不支持的 allocator 设置；进程 reserved 内存和普通
-activation 另报。详见[分配验收记录](../../docs/agents/system/nosa_cache_allocation_checkpoint.md)。
+activation 另报。当前规划与实测边界见
+[cache 管理实验](../../experiments/cache_management/README.md)。
 
-[_pool_referrers.py](_pool_referrers.py) 为普通代中的 Python MemPool 全代检查提供
-可选 native 路径，使用经过认证的 CPython/header ABI，保留原有动态查找与重试。
-不支持的条件仍走原检查；未识别的初始化异常和运行异常直接传播。它与 allocator
-snapshot 是两个独立 provider。接入候选已通过实际路径的空 MemPool、生命周期和
-完整 checkpoint 检查；固定容量性能结果已验收发布，通用 budget 短轨迹已退出，见
-[扫描优化记录](../../docs/agents/system/nosa_pool_scan_optimization.md)。
+[pool_referrers.py](../../cache/allocator/pool_referrers.py) 为 Python MemPool 全代检查提供
+共享 native provider，启动时认证 CPython/header ABI。认证、编译、加载和调用失败直接
+传播，不自动切换 provider。它与 allocator snapshot 是两个独立 provider。
+此前接入版本已通过实际路径的空 MemPool、生命周期和完整 checkpoint 检查；通用 budget
+短轨迹已退出。固定容量结果及其源码版本见
+[固定容量实验](../../experiments/nosa_motivation/README.md)。
 
-独立的 [fixed_serving.py](fixed_serving.py) 使用固定 P/NH：HBM-only 按 P 个 history
+独立的 [execution/fixed.py](execution/fixed.py) 使用固定 P/NH：HBM-only 按 P 个 history
 token 做 session LRU；offload 按 NH 准入，host backing 随 session 分配，逐层有限
 P 槽以逻辑页偏移和 session tag 直接映射。当前要求 H<=P，history 与 prefill chunk
 按 64 token 对齐，不提供任意容量下的 token LRU。dense 预取下一层全部历史 miss，
@@ -109,11 +122,16 @@ sync/async sparse 只取完整 query batch 的稀疏并集 miss，均复用逐�
 候选整批在 GPU 执行后 discard，主 K/V 不写回 host history；CIS/indexer 候选尾部
 仍按实际 session storage 计费。该入口可显式启用纯计算 CUDA Graph，cache、indexer、
 attention 与 IO 留在图外，graph static allocated 和 private reserved 分别计入。
-固定容量的正式、匹配 profile 与独立 API 三组 `poolscan` 结果已验收发布，见
-[实验报告](../../experiments/nosa_motivation/README.md)和
-[发布记录](../../docs/agents/system/nosa_pool_scan_publication.md)。后续测量先限于 64K history。
-async 未通过整体延迟和 90% overlap 门槛；候选 MFU、尾延迟及 compute/IO 主导关系
-仍待解决。
+2026-10-05 的独立验收、正式计时、补充 P0/当前配对、主 profile 与独立 attention
+reference 均已完成，run ID、请求延迟及归因边界见
+[实验报告](../../experiments/nosa_motivation/README.md)。
+[独立验收回执](../../docs/agents/acceptance/unified_runtime_20261005/nosa_final/receipt.json)
+覆盖 H65536/A128 的全部 128 个候选输出；96 次 offload/HBM 对照逐位一致。
+主 profile `refactor_final_nosa_profile_20261005_02` 的诊断证据通过复核，但 async 的
+96 个有搬运层样本均未达到 90% page/stripe 重叠目标，比例为 62.34%–80.29%；
+另外 96 个无搬运层样本单列。独立 attention reference
+`refactor_final_nosa_attention_reference_20261005_01` 已通过保存操作数、身份与计时算术复核。
+完整请求延迟仍取独立 benchmark；API 组合时间不等同于请求延迟。后续测量先限于 64K history。
 
 2026-10-02，CPU 专项为 10 passed；单卡 SM90 完整 checkpoint 分别通过 8192+128 与
 65536+1024 两组检查。每种方案从独立空 cache 构建 sparse prefix，再处理两次不同候选，
@@ -139,7 +157,14 @@ CUDA_VISIBLE_DEVICES=1 PATH="$PWD/.venv/bin:/usr/local/cuda/bin:$PATH" \
 gate/up 合并为一次 `gate_up_proj` GEMM。KV cache 保存 RoPE 后的 K 与原始 V，
 采用此模型的 GQA 布局。BF16 权重约 16.37 GB，还需要 KV cache、激活和 kernel workspace 显存。
 
-CUDA BF16/FP16 推理的 RMSNorm、residual-add + RMSNorm、SwiGLU 激活已接入 FlashInfer。
+[normalization.py](normalization.py) 和 [feed_forward.py](feed_forward.py) 分别实现
+RMSNorm 与 SwiGLU，接收显式维度、eps 和 bias。CUDA BF16/FP16 且关闭 autograd 时，
+归一化和激活调用 FlashInfer `rmsnorm`、`fused_add_rmsnorm` 与 `silu_and_mul`；
+CPU、FP32、开启 autograd 或不满足 kernel 布局要求时使用 PyTorch 数学路径。
+`RMSNorm(x, residual)` 返回 `(normalized, sum)`，FlashInfer 路径会原地覆盖两个输入，
+调用者须持有独立且可覆盖的 activation buffer；不传 residual 时只返回 normalized。
+SwiGLU 的 `gate_up_proj` 一次生成 `[gate | up]` 并直接交给融合激活，随后由
+`down_proj` 执行输出投影，前向不拼接独立的 gate/up activation。
 Decoder 返回待相加的 MLP 输出和 residual，下一层 input norm 合并相加；最后一次相加
 由 final norm 完成。输出选择会同步截取这两个分量。
 融合的数值舍入与逐算子路径不同，正确性通过模型单元测试与跨模块回归检查。
@@ -153,7 +178,7 @@ LongRoPE 使用模型持有的 FP32 cos/sin cache，复用静态频率及位置�
 CUDA 推理通过 FlashInfer `apply_rope_with_cos_sin_cache_inplace` 一次融合 Q/K 旋转，
 直接使用合并 GEMM 输出的行跨距视图，保留 V 并避免 Q/K 复制。
 保留 NOSA 的 split-half 布局和 LongRoPE scaling。dense 性能测量入口见
-[64K+1K 实验](../../experiments/nosa_baseline_performance/README.md)，已于 2026-09-28 在 H200 上补测。
+[64K+1K 实验](../../experiments/nosa_mfu/README.md)，已于 2026-09-28 在 H200 上补测。
 
 默认 dense 模式计算普通 causal GQA attention，保留 checkpoint 的 LongRoPE 缩放向量。
 此模式将 NOSA 的 `self_attn.A` 与 `self_attn.delta.weight` 在加载时明确跳过。
@@ -236,9 +261,12 @@ host flag，模型在校验成功后完成派生预约。验证 scratch 与下�
 原 QA-only pattern 不启用此模式；
 新增完整 NOSA pattern 对照从独立空 cache 构建 sparse prefix，记录 attention 实际消费的选块。
 完整 sparse 路径的全模型 prefill/extend 测量见
-[64K+1K 端到端 profile](../../experiments/nosa_baseline_performance/README.md)。
-BF16-pair / FA3 v3 检查点 `94bf521` 的全模型 native/Triton 对照已于 2026-09-29 补测，
-run ID、实际 kernel 调度及测量边界见报告；受影响的 full-NOSA pattern 仍待补测。
+[64K+1K 端到端 profile](../../experiments/nosa_mfu/README.md)。
+2026-10-05 已完成当前完整模型的 native/Triton 独立验收、bench 与 profile，
+run ID、实际 kernel 调度及测量边界见报告。2026-10-05 的 full-NOSA pattern 已完成
+独立 observer 检查和三组 capture/analysis，运行分别为
+`refactor_nosa_pattern_check_20261005_01`、`refactor_nosa_pattern_capture_20261005_01`；
+这组结果不测量延迟。
 
 ```bash
 source .venv/bin/activate
@@ -306,17 +334,17 @@ CXLDSAGR_SM90_BACKEND=native python -m serving.run_gr \
   --count 1 --user-lengths 4096 --item-lengths 128 --prefill-chunk-size 1024
 ```
 
-2026-10-04 的当前实现补测已发布：主测为
-`nosa_cached_fetch_20261004_01`，独立确认和 profile 分别为
-`nosa_cached_fetch_confirm40_20261004_01`、
-`nosa_cached_fetch_profile_20261004_01`。单层回放的全部 query 通过 FP32 参考，
+2026-10-05 的当前实现补测已发布：主测为
+`refactor_nosa_overlap_bench_20261005_01`，独立确认和 profile 分别为
+`refactor_nosa_overlap_confirm40_20261005_01`、
+`refactor_nosa_overlap_profile_20261005_01`。单层回放的全部 query 通过 FP32 参考，
 串行/融合输出逐位一致；普通完整 32 层 resident/offload 从独立空 cache 构建
 64K prefix 后，全部 1K extend hidden 也逐位一致。两类验收分别报告。
 
 L0/L15/L31 的 20 次主测中，融合完整 API 延迟较同轮串行对照下降
-29.34% / 24.53% / 22.71%，40 次独立复测确认收益。每层独立 profile 3 次，
+29.47% / 24.33% / 23.02%，40 次独立复测确认收益。每层独立 profile 3 次，
 全部 9 个样本的 page-envelope 与非空 stripe-copy 两套 ratio 均达到 90%，
-最低为 90.6205%。两类全局窗口 union 在每个样本中相等；这不表示每页 envelope
+最低为 91.0812%。两类全局窗口 union 在每个样本中相等；这不表示每页 envelope
 都没有 stripe 间隙。输入沿用冻结的历史算子轨迹，默认调用每次重取完整稀疏并集；
 本次不测 fixed P/NH 命中或 serving 延迟，也不作跨 GPU/日期的代码提速归因。
 schema 3 分别记录非空 stripe-copy window、每页的 min(start)/max(end)
@@ -390,6 +418,12 @@ stdout 仅输出生成文本，stderr 输出 JSON 统计，可分别重定向。
 模型单元测试覆盖独立数学参考、分块 cache、权重加载、模板与生成停止条件。
 没有 CUDA 时 GPU 项跳过；未设置模型路径时本地 metadata 项跳过。
 
+2026-10-05 的 [七阶段独立验收](../../docs/agents/acceptance/unified_runtime_20261005/nosa_non_timing_gpu1_ledger.json)
+已通过：完整 native sparse、Triton sparse、dense 的 H64K/A1024 检查，普通 owned
+resident/offload 完整 checkpoint 对照，pattern observer 检查与三组 capture/analysis，
+以及 offload overlap 数值检查。完整 checkpoint 对照实际执行 1 项、无跳过；
+这些结果只证明各自的数值与执行契约，性能由独立 bench/profile 报告。
+
 2026-09-26 在 NVIDIA H200（SM90）上验证了 sparse 路径：CIS/两阶段选择的独立参考、
 BF16/FP16 Triton attention 与 indexer、严格 A/delta 加载、缓存回滚、生成/GR CLI，
 以及 4097-token 场景的 65→64 块裁剪。另以本地 NOSA-8B 完成一次
@@ -397,10 +431,9 @@ BF16/FP16 Triton attention 与 indexer、严格 A/delta 加载、缓存回滚、
 stable prefix 4124、candidate suffix 100。此检查不构成吞吐测量或模型质量评估。
 当时环境为 PyTorch `2.10.0+cu132`、Triton `3.6.0`、FlashInfer `0.6.18`；
 与当前 `pyproject.toml` / `uv.lock` 中的 torch/triton 版本不同；上述验证记录对应 2026-09-26 的环境。
-2026-09-28 已使用当前锁定的 PyTorch `2.12.1+cu130` / Triton `3.7.1` 完成
-[dense](../../experiments/nosa_baseline_performance/README.md) 与
-[sparse native/Triton](../../experiments/nosa_baseline_performance/README.md) 测量及测量内的输出一致性验收，
-具体覆盖范围见各报告。
+2026-10-05 已使用 PyTorch `2.12.1+cu130` / Triton `3.7.1` 完成
+[dense 与 sparse native/Triton](../../experiments/nosa_mfu/README.md) 的独立数值验收、
+正式计时与 profile，具体覆盖范围见报告。
 
 直接加载 cxl-recsys 的 `nosa_ops.py` 作只读对照，CPU/CUDA × FP32/BF16、6147 tokens、
 4 Q heads / 2 KV heads / D64 下，CIS 与 reference 完整选块 ID 均精确一致。
@@ -420,15 +453,13 @@ CUDA 与 FlashInfer 可用。测试命令和环境准备见[项目 README](../..
 上限扩至 66560，resident/offload 分别从空 cache 构建 64K prefix，再比较全部 1K
 extend hidden 与缓存长度、内存统计。默认每 chunk 1024，offload 的首次读取流量
 按 128 queries 分组；它是正确性检查，不计时、不生成报告。
-默认读取既有 profile 的 request JSON，
+默认读取本轮 native sparse bench 中保留的 request JSON，
 可用 `NOSA_OFFLOAD_REQUEST` 指定另一个相同长度的 NOSA GR 请求。
 
 完整 32 层 checkpoint 检查 1 passed：resident/offload 分别从独立空 cache
 构建 64K sparse prefix，再执行 1K extend，全部 normalized hidden 逐位相同，max_abs=0。
 提交后的 cache 分配为 resident HBM `2262627840 B`、offload HBM
 `150825168 B`、offload pinned host `2181038080 B`；不包含模型权重，也不是进程峰值显存。
-全局 CPU 回归为 1339 passed、674 skipped、34 subtests passed；SM90 GPU
-环境专项为 62 passed，另重复通过的 3 个增强 trace 场景不重复计数。
 测试只验收正确性；包含加载或编译的测试总耗时不是模型性能或 overlap 测量。
 
 ```bash
@@ -441,9 +472,12 @@ NOSA_OFFLOAD_CHECKPOINT=/mnt/ssd-wlcb/chenkaiqi/NOSA-8B \
 
 共享 GR 请求生成使用 [request_format.py](request_format.py)：NOSA 聊天模板、tokenizer 与请求预算适配。
 用法见 [GR 生成器](../../GR/README.md)。
-dense 单请求性能测量入口见 [GR 实验](../../experiments/nosa_baseline_performance/README.md)，
-已于 2026-09-28 在 H200 上补测；测量边界与 run ID 见报告。
-通过 `bash experiments/nosa_baseline_performance/scripts/dense.sh --help` 查看独立验收、计时和 profile 的参数。新入口本轮未运行 GPU。
+dense 单请求性能测量入口见 [GR 实验](../../experiments/nosa_mfu/README.md)，
+2026-10-05 的 dense full-prefill/extend wall 中位数为 3506.12 / 81.81 ms，
+MFU 为 62.61% / 63.02%；测量边界与 run ID 见报告。
+通过 `bash experiments/nosa_mfu/scripts/dense.sh --help` 查看独立验收、计时和 profile 的参数。
+本轮 dense、native sparse、Triton sparse 的完整 H64K/A1024 独立验收均已通过；
+各自的正式计时和 profile 已按独立阶段完成并发布，结果见实验报告。
 
 GR 前向使用 `model(input_ids, cache, return_hidden=True)` 返回本次调用所有输入 token 的最终
 normalized hidden states，跳过 LM head；不与 `logits_to_keep` 同时使用。

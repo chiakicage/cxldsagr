@@ -3,10 +3,10 @@
 import pytest
 import torch
 
-from layers.attention import AttentionContext
-from models.nosa.cache import NosaKVCache
+from models.attention_contracts import AttentionContext
+from models.nosa.cache.resident import NosaKVCache
 from models.nosa.config import NosaConfig
-from models.nosa.deferred_validation import DeferredValidation
+from models.nosa.execution.deferred_validation import DeferredValidation
 from models.nosa.indexer import NosaIndexer
 from operators.nosa.indexer import _indexer_checked_cuda, _indexer_deferred_cuda
 

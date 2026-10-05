@@ -593,3 +593,107 @@ def test_report_requires_explicit_stable_precision_and_official_dispatch(saved_r
     write_json(path, metadata)
     with pytest.raises(ValueError):
         audit_run(saved_run)
+
+
+def _independent_check(saved_run):
+    from experiments.deepseek_v32_echo_official.src.measure import CHECK_SCHEMA, publish_receipt
+    from experiments.nosa_motivation.src.validation import base_identity, without_performance
+
+    metadata = json.loads((saved_run / "metadata.json").read_text())
+    metadata.update(
+        schema=CHECK_SCHEMA,
+        mode="check",
+        checkpoint={"fixture": True},
+        execution_environment={},
+        validation_identity_revision=2,
+        cpu_environment_final={"fixture": True},
+        cpu_environment_audit={"status": "recorded_and_equal"},
+    )
+    metadata["hardware"]["cpu_environment"] = {"fixture": True}
+    metadata["validation_identity"] = {
+        "base": base_identity(metadata, saved_run),
+        "methods": {scheme: {"fixture_runtime": scheme} for scheme in SCHEMES},
+    }
+    write_json(saved_run / "metadata.json", metadata)
+    rows = [
+        json.loads(line) for line in (saved_run / "measurements.jsonl").read_text().splitlines()
+    ]
+    write_rows(saved_run / "measurements.jsonl", [without_performance(row) for row in rows])
+    _, _, audit = audit_run(saved_run)
+    publish_receipt(metadata, saved_run, audit)
+    return rows
+
+
+def test_independent_check_has_full_outputs_but_cannot_publish_performance(saved_run):
+    _independent_check(saved_run)
+    _, rows, audit = audit_run(saved_run)
+    assert audit["compared_offload_requests"] == audit["compared_resident_repeat_requests"] == 4
+    assert not any(key.endswith("_ms") for row in rows for key in row)
+    with pytest.raises(ValueError, match="do not publish performance"):
+        write_report(saved_run, saved_run / "not_a_report")
+
+
+def test_independent_check_rejects_changed_cpu_environment(saved_run):
+    _independent_check(saved_run)
+    metadata = json.loads((saved_run / "metadata.json").read_text())
+    metadata["cpu_environment_final"] = {"fixture": "changed"}
+    write_json(saved_run / "metadata.json", metadata)
+    with pytest.raises(ValueError, match="CPU affinity"):
+        audit_run(saved_run)
+
+
+def test_clean_bench_reuses_receipt_without_opening_numerical_outputs(saved_run, monkeypatch):
+    import shutil
+
+    from experiments.deepseek_v32_echo_official.src.measure import BENCH_SCHEMA, RECEIPT_KIND
+    from experiments.nosa_motivation.src.validation import begin_validation
+
+    rows = _independent_check(saved_run)
+    bench = saved_run / "bench"
+    shutil.copytree(
+        saved_run,
+        bench,
+        ignore=shutil.ignore_patterns("bench", "numerical", "receipt.json", "validation.jsonl"),
+    )
+    metadata = json.loads((bench / "metadata.json").read_text())
+    metadata.update(schema=BENCH_SCHEMA, mode="bench", validation_repeats=[])
+    metadata["identity_verifications"] = [
+        item for item in metadata["identity_verifications"] if item["stage"] != "after_hbm_repeat"
+    ]
+    methods = metadata["validation_identity"]["methods"]
+    begin_validation(metadata, bench, saved_run / "receipt.json", RECEIPT_KIND)
+    metadata["validation_identity"]["methods"] = methods
+    write_json(bench / "metadata.json", metadata)
+    write_rows(
+        bench / "measurements.jsonl",
+        [
+            {
+                key: value
+                for key, value in row.items()
+                if key not in ("numerical", "output_file", "output_sha256")
+            }
+            for row in rows
+        ],
+    )
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("bench audit opened tensors")
+
+    monkeypatch.setattr(torch, "load", forbidden)
+    _, measured, audit = audit_run(bench)
+    assert len(measured) == 8 and audit["reference_policy"] == "independent_check_receipt"
+    assert audit["all_candidate_hidden_and_logits_numerical_pass"]
+    write_report(bench, bench / "report")
+    from experiments.deepseek_v32_echo_official.src.profile import load_reference
+
+    relocated_receipt = saved_run / "relocated-receipt.json"
+    shutil.copyfile(saved_run / "receipt.json", relocated_receipt)
+    resolved, checked, receipt = load_reference(bench, receipt_override=relocated_receipt)
+    assert resolved == saved_run.resolve()
+    assert checked["mode"] == "check"
+    assert receipt["receipt_path"] == str(relocated_receipt.resolve())
+    damaged = json.loads((bench / "metadata.json").read_text())
+    damaged["config"]["seed"] += 1
+    write_json(bench / "metadata.json", damaged)
+    with pytest.raises(ValueError, match="identity differs"):
+        audit_run(bench)

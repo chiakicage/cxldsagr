@@ -50,73 +50,68 @@ def main(argv: list[str] | None = None) -> None:
         parser.error("count, num-users and prefill-chunk-size must be positive")
     if args.seed < 0:
         parser.error("seed must be nonnegative")
-    try:
-        import torch
+    import torch
 
-        from executor.model_executor import ModelExecutor
-        from GR.input_generator import TextConfig, create_input_generator
-        from GR.scheduling import ScheduleConfig
-        from models.nosa.model import NosaConfig, NosaForCausalLM
-        from serving.runner import GRRunner
+    from executor.model_executor import ModelExecutor
+    from GR.input_generator import TextConfig, create_input_generator
+    from GR.scheduling import ScheduleConfig
+    from models.nosa.model import NosaConfig, NosaForCausalLM
+    from serving.runner import GRRunner
 
-        config = NosaConfig.from_pretrained(args.model_path)
-        defaults = TextConfig()
-        user_lengths = tuple(args.user_lengths or defaults.user_lengths)
-        item_lengths = tuple(args.item_lengths or defaults.item_lengths)
-        text_config = TextConfig(
-            user_lengths=user_lengths,
-            user_probabilities=(1 / len(user_lengths),) * len(user_lengths),
-            item_lengths=item_lengths,
-            item_probabilities=(1 / len(item_lengths),) * len(item_lengths),
-            max_input_tokens=min(config.max_position_embeddings, defaults.max_input_tokens),
+    config = NosaConfig.from_pretrained(args.model_path)
+    defaults = TextConfig()
+    user_lengths = tuple(args.user_lengths or defaults.user_lengths)
+    item_lengths = tuple(args.item_lengths or defaults.item_lengths)
+    text_config = TextConfig(
+        user_lengths=user_lengths,
+        user_probabilities=(1 / len(user_lengths),) * len(user_lengths),
+        item_lengths=item_lengths,
+        item_probabilities=(1 / len(item_lengths),) * len(item_lengths),
+        max_input_tokens=min(config.max_position_embeddings, defaults.max_input_tokens),
+    )
+    generator = create_input_generator(
+        model="nosa",
+        tokenizer=args.model_path / "tokenizer.json",
+        num_users=args.num_users,
+        text_config=text_config,
+        schedule_config=ScheduleConfig(seed=args.seed),
+    )
+    device = torch.device(args.device)
+    if device.type != "cuda" or not torch.cuda.is_available():
+        raise ValueError("NOSA CLI inference requires an available CUDA device")
+    if device.index is None:
+        device = torch.device("cuda", torch.cuda.current_device())
+    torch.cuda.set_device(device)
+    if args.dtype == "bfloat16" and not torch.cuda.is_bf16_supported():
+        raise ValueError("this CUDA device does not support bfloat16; use --dtype float16")
+    model = NosaForCausalLM.from_pretrained(
+        args.model_path,
+        device=device,
+        dtype=getattr(torch, args.dtype),
+        attention_mode=args.attention_mode,
+        sparse_backend=args.sparse_backend,
+        cache_backend=args.cache_backend,
+        offload_query_tile_size=args.offload_query_tile_size,
+        offload_fetch_ctas=args.offload_fetch_ctas,
+        offload_overlap=not args.no_fetch_overlap,
+    )
+    runner = GRRunner(ModelExecutor(model, chunk_size=args.prefill_chunk_size), device=device)
+    for result in runner.run(generator.iter_generate(args.count)):
+        torch.cuda.synchronize(device)
+        print(
+            json.dumps(
+                {
+                    "status": "completed",
+                    "attention_mode": args.attention_mode,
+                    "metadata": result.metadata,
+                    "feature_shape": list(result.last_hidden.shape),
+                    "feature_dtype": str(result.last_hidden.dtype),
+                    "feature_device": str(result.last_hidden.device),
+                },
+                ensure_ascii=False,
+            ),
+            flush=True,
         )
-        generator = create_input_generator(
-            model="nosa",
-            tokenizer=args.model_path / "tokenizer.json",
-            num_users=args.num_users,
-            text_config=text_config,
-            schedule_config=ScheduleConfig(seed=args.seed),
-        )
-        device = torch.device(args.device)
-        if device.type != "cuda" or not torch.cuda.is_available():
-            raise ValueError("NOSA CLI inference requires an available CUDA device")
-        if device.index is None:
-            device = torch.device("cuda", torch.cuda.current_device())
-        torch.cuda.set_device(device)
-        if args.dtype == "bfloat16" and not torch.cuda.is_bf16_supported():
-            raise ValueError("this CUDA device does not support bfloat16; use --dtype float16")
-        model = NosaForCausalLM.from_pretrained(
-            args.model_path,
-            device=device,
-            dtype=getattr(torch, args.dtype),
-            attention_mode=args.attention_mode,
-            sparse_backend=args.sparse_backend,
-            cache_backend=args.cache_backend,
-            offload_query_tile_size=args.offload_query_tile_size,
-            offload_fetch_ctas=args.offload_fetch_ctas,
-            offload_overlap=not args.no_fetch_overlap,
-        )
-        runner = GRRunner(ModelExecutor(model, chunk_size=args.prefill_chunk_size), device=device)
-        for result in runner.run(generator.iter_generate(args.count)):
-            torch.cuda.synchronize(device)
-            print(
-                json.dumps(
-                    {
-                        "status": "completed",
-                        "attention_mode": args.attention_mode,
-                        "metadata": result.metadata,
-                        "feature_shape": list(result.last_hidden.shape),
-                        "feature_dtype": str(result.last_hidden.dtype),
-                        "feature_device": str(result.last_hidden.device),
-                    },
-                    ensure_ascii=False,
-                ),
-                flush=True,
-            )
-    except ImportError as exc:
-        parser.exit(1, f"error: missing or incompatible dependency: {exc}. Run uv sync.\n")
-    except (OSError, ValueError, RuntimeError) as exc:
-        parser.exit(1, f"error: {exc}\n")
 
 
 if __name__ == "__main__":

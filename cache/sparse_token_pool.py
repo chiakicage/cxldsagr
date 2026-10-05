@@ -336,18 +336,22 @@ class SharedSparseTokenPool:
     def _wait_previous(self):
         self._check()
         if self.device.type == "cuda":
-            current = torch.cuda.current_stream(self.device)
-            if current == self._last_stream:
-                return
-            # Also cover callers using ensure() without an explicit operation
-            # context: their consumer has been submitted on the recorded stream
-            # before the next serial cache call arrives.
-            if self._last_stream is not None:
-                event = torch.cuda.Event()
-                event.record(self._last_stream)
-                current.wait_event(event)
-            if self._last_event is not None:
-                current.wait_event(self._last_event)
+            try:
+                current = torch.cuda.current_stream(self.device)
+                if current == self._last_stream:
+                    return
+                # Also cover callers using ensure() without an explicit operation
+                # context: their consumer has been submitted on the recorded stream
+                # before the next serial cache call arrives.
+                if self._last_stream is not None:
+                    event = torch.cuda.Event()
+                    event.record(self._last_stream)
+                    current.wait_event(event)
+                if self._last_event is not None:
+                    current.wait_event(self._last_event)
+            except BaseException:
+                self.poisoned = True
+                raise
 
     @contextmanager
     def operation(self, session, layer):
@@ -369,8 +373,12 @@ class SharedSparseTokenPool:
                 state.lease_owner = session.owner
             self._active = identity
         self._depth += 1
+        body_error = None
         try:
             yield
+        except BaseException as exc:
+            body_error = exc
+            raise
         finally:
             self._depth -= 1
             if outer:
@@ -379,8 +387,13 @@ class SharedSparseTokenPool:
                         self._last_stream = torch.cuda.current_stream(self.device)
                         self._last_event = torch.cuda.Event()
                         self._last_event.record(self._last_stream)
-                    except RuntimeError:
+                    except BaseException as completion_error:
                         self.poisoned = True
+                        if body_error is not None:
+                            raise BaseExceptionGroup(
+                                "token-pool execution and completion recording failed",
+                                [body_error, completion_error],
+                            ) from None
                         raise
                 self._active = None
 
@@ -446,7 +459,7 @@ class SharedSparseTokenPool:
                     ticket.event.synchronize()
                 self._copy_stream.synchronize()
             self._writes.clear()
-        except RuntimeError:
+        except BaseException:
             self.poisoned = True
             raise
 
@@ -589,6 +602,7 @@ class SharedSparseTokenPool:
 
     def release_session(self, session):
         session._check()
+        session._check_release()
         if self._active is not None:
             raise RuntimeError("session release requires a quiescent pool")
         self.drain()
@@ -628,6 +642,7 @@ class SharedSparseTokenPool:
             ):
                 setattr(cache, name, None)
         session._layers.clear()
+        session._release_guard = None
         session.page_table = session._pages = session._prefetch_totals = None
         session._counter_totals = None
         session._host_runs = session._host_run_ends = ()
@@ -767,6 +782,20 @@ class SparseTokenSession:
         )
         self._prefetch_totals = self._counter_totals[:, :3]
         self.released = False
+        self._release_guard = None
+
+    def bind_release_guard(self, guard):
+        """Attach the owning provider's completion/lease check before release."""
+        self._check()
+        if self._release_guard is not None:
+            raise RuntimeError("session already has a release guard")
+        if not callable(guard):
+            raise TypeError("release guard must be callable")
+        self._release_guard = guard
+
+    def _check_release(self):
+        if self._release_guard is not None:
+            self._release_guard()
 
     def _check(self):
         self.pool._check()

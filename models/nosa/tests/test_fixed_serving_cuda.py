@@ -5,7 +5,7 @@ import os
 import pytest
 import torch
 
-from models.nosa.fixed_serving import NosaFixedServingBackend
+from models.nosa.execution.fixed import NosaFixedServingBackend
 from models.nosa.tests.test_model import tiny_config
 from models.nosa.tests.test_sparse_model import initialized_sparse_model
 from serving.persistent import PersistentGRRunner

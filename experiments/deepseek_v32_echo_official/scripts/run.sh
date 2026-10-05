@@ -8,12 +8,15 @@ export MKL_NUM_THREADS="${MKL_NUM_THREADS:-8}"
 export CXLDSAGR_SM90_BACKEND="${CXLDSAGR_SM90_BACKEND:-native}"
 python_bin="${ECHO_OFFICIAL_PYTHON:-$PWD/.venv/bin/python}"
 run_id=""
+mode="bench"
 args=("$@")
 for ((i=0; i<${#args[@]}; i++)); do
   case "${args[i]}" in
     --help|-h)
       exec "$python_bin" -m experiments.deepseek_v32_echo_official.src.measure --help
       ;;
+    --mode) mode="${args[i+1]:-}" ;;
+    --mode=*) mode="${args[i]#*=}" ;;
     --run-id)
       run_id="${args[i+1]:-}"
       ;;
@@ -30,7 +33,14 @@ if [[ ! "$run_id" =~ ^[A-Za-z0-9_-]+$ ]]; then
   echo "Pass --run-id with letters, digits, underscores or hyphens." >&2
   exit 2
 fi
-output_root="$PWD/experiments/deepseek_v32_echo_official/output"
+if [[ "$mode" == "check" ]]; then
+  output_root="${TMPDIR:-/tmp}/cxldsagr-checks/deepseek_v32_echo_official"
+elif [[ "$mode" == "bench" ]]; then
+  output_root="$PWD/experiments/deepseek_v32_echo_official/output"
+else
+  echo "--mode must be check or bench" >&2
+  exit 2
+fi
 data_dir="$output_root/data/$run_id"
 log_dir="$output_root/log/$run_id"
 if [[ -e "$data_dir" || -e "$log_dir" ]]; then

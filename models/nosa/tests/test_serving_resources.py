@@ -7,7 +7,7 @@ import pytest
 import torch
 
 from cache.prefix_pool import CacheBudgetExceeded, CacheFootprint
-from models.nosa.serving import NosaServingBackend
+from models.nosa.execution.adapter import NosaServingBackend
 from models.nosa.tests.test_model import tiny_config
 from models.nosa.tests.test_sparse_model import initialized_sparse_model
 from serving.persistent import PersistentGRRunner
@@ -102,7 +102,7 @@ def test_planning_is_allocation_free_and_does_not_create_live_state(monkeypatch,
 
 @pytest.mark.parametrize("scheme", SCHEMES)
 def test_allocator_configuration_change_rejects_before_session_allocation(monkeypatch, scheme):
-    from models.nosa import serving_resources
+    from models.nosa.execution import resources as serving_resources
 
     with allocated_backend(scheme) as (backend, plan):
         old = serving_resources.validate_allocator(backend.device)
@@ -124,7 +124,7 @@ def test_allocator_configuration_change_rejects_before_session_allocation(monkey
 
 @pytest.mark.parametrize("scheme", SCHEMES)
 def test_allocator_change_during_lease_poison_preserves_ownership(monkeypatch, scheme):
-    from models.nosa import serving_resources
+    from models.nosa.execution import resources as serving_resources
 
     backend = make_backend(scheme)
     backend.allocate_shared(backend.plan_resources(BUDGET, limits()))
@@ -493,13 +493,20 @@ def test_admission_owner_is_distinct_from_execution_lease(scheme):
                 backend.unbind_owner(foreign)
             with pytest.raises(RuntimeError):
                 backend.close()
-            session = backend.create_session(160)
+            with pytest.raises(RuntimeError, match="admission owner"):
+                backend.create_session(160)
+            session = backend.create_session(160, owner=owner)
             try:
                 with pytest.raises(RuntimeError):
                     backend.unbind_owner(owner)
-                backend.prefill(session, tokens(79))
+                with pytest.raises(RuntimeError, match="admission owner"):
+                    backend.prefill(session, tokens(79))
+                backend.prefill(session, tokens(79), owner=owner)
+                for mutation in (session.reset, session.release, lambda: session.truncate(0)):
+                    with pytest.raises(RuntimeError, match="admission owner"):
+                        mutation()
             finally:
-                backend.release_session(session)
+                backend.release_session(session, owner=owner)
         finally:
             backend.unbind_owner(owner)
         assert backend.resources.plan == plan

@@ -7,7 +7,7 @@ from experiments.nosa_motivation.src.flops import (
     work_counts,
 )
 from experiments.nosa_motivation.src.matrix_baseline import invocation_geometry
-from layers.attention import BlockSelection
+from models.attention_contracts import BlockSelection
 
 
 def test_reference_geometry_preserves_partial_history_and_whole_candidate():

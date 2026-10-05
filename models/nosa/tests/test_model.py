@@ -11,7 +11,8 @@ import torch
 from safetensors import safe_open
 from safetensors.torch import save_file
 
-from layers.attention import AttentionContext, BlockSelection, DenseMainAttention
+from models.attention_contracts import AttentionContext, BlockSelection
+from models.nosa.attention import DenseMainAttention
 from models.nosa.indexer import NosaIndexer, NosaSelectionPolicy
 from models.nosa.model import NosaConfig, NosaForCausalLM
 

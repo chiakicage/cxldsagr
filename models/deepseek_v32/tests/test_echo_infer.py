@@ -5,7 +5,7 @@ from types import SimpleNamespace
 import pytest
 import torch
 
-from models.deepseek_v32.echo_infer import DeepSeekEchoModel, plan_layer_devices
+from models.deepseek_v32.model import DeepSeekEchoModel, plan_layer_devices
 
 
 def test_contiguous_placement_respects_unequal_memory_budgets():
@@ -46,9 +46,9 @@ def constructor_fixture(monkeypatch, tmp_path):
         loaded.append(layer)
         return SimpleNamespace()
 
-    monkeypatch.setattr("models.deepseek_v32.echo_infer.Config.from_checkpoint", lambda _: config)
-    monkeypatch.setattr("models.deepseek_v32.echo_infer.CheckpointReader", lambda _: reader)
-    monkeypatch.setattr("models.deepseek_v32.echo_block.CheckpointBlock", block)
+    monkeypatch.setattr("models.deepseek_v32.model.Config.from_checkpoint", lambda _: config)
+    monkeypatch.setattr("models.deepseek_v32.model.CheckpointReader", lambda _: reader)
+    monkeypatch.setattr("models.deepseek_v32.layers.CheckpointBlock", block)
     monkeypatch.setattr(torch.cuda, "device", lambda *_args, **_kwargs: nullcontext())
     monkeypatch.setattr(torch.cuda, "get_device_capability", lambda _: (9, 0))
     monkeypatch.setattr(torch.cuda, "mem_get_info", lambda _: (80 * 2**30, 80 * 2**30))
@@ -299,13 +299,102 @@ def test_unrecoverable_cuda_drain_poison_prevents_retry(fake_model_factory):
         raise RuntimeError("permanent CUDA failure")
 
     model.synchronize = failed_synchronize
-    with pytest.raises(RuntimeError, match="permanent CUDA"):
+    with pytest.raises(ExceptionGroup) as failed:
         model.forward([4, 5])
+    assert len(failed.value.exceptions) == 2
+    assert all("permanent CUDA" in str(error) for error in failed.value.exceptions)
     assert model._poisoned
     assert model.length == 3
     assert all(block.cache.commits == 1 for block in model.blocks)
     with pytest.raises(RuntimeError, match="poisoned"):
         model.forward([4, 5])
+
+
+@pytest.mark.parametrize("drain_type", [OSError, KeyboardInterrupt])
+def test_model_failed_drain_preserves_original_and_pending_cache(fake_model_factory, drain_type):
+    model = fake_model_factory()
+    model.forward([1, 2, 3])
+    body, drain = ValueError("model execution failed"), drain_type("device drain failed")
+
+    def fail_body(*args, **kwargs):
+        raise body
+
+    def fail_drain():
+        raise drain
+
+    model.blocks[0].forward = fail_body
+    model.synchronize = fail_drain
+    retained = [block.cache for block in model.blocks]
+    with pytest.raises(BaseExceptionGroup) as failed:
+        model.forward([4, 5])
+    assert failed.value.exceptions == (body, drain)
+    assert model._poisoned and model.length == 3
+    assert [block.cache for block in model.blocks] == retained
+    assert all(cache._step_end == 5 and cache.rollbacks == 0 for cache in retained)
+    with pytest.raises(RuntimeError, match="poisoned"):
+        model.forward([4])
+    with pytest.raises(RuntimeError, match="poisoned"):
+        model.set_cache_mode(False)
+
+
+def test_model_collects_all_rollback_and_offset_failures(fake_model_factory):
+    model = fake_model_factory()
+    body = ValueError("model body failed")
+    rollbacks = [OSError("rollback 0"), OSError("rollback 2")]
+    restores = [RuntimeError(f"offset {layer}") for layer in range(3)]
+    attempted = []
+
+    class Offset:
+        def __init__(self, layer):
+            self.layer = layer
+
+        def clone(self):
+            return self
+
+        def copy_(self, saved):
+            assert saved is self
+            attempted.append(("offset", self.layer))
+            raise restores[self.layer]
+
+    def fail_body(*args, **kwargs):
+        raise body
+
+    model.blocks[0].forward = fail_body
+    for layer, block in enumerate(model.blocks):
+        block.attention = SimpleNamespace(offset=Offset(layer))
+        original = block.cache.rollback
+
+        def rollback(layer=layer, original=original):
+            attempted.append(("rollback", layer))
+            if layer != 1:
+                raise rollbacks[layer // 2]
+            original()
+
+        block.cache.rollback = rollback
+    with pytest.raises(ExceptionGroup) as failed:
+        model.forward([1, 2])
+    assert failed.value.exceptions == (body, *rollbacks, *restores)
+    assert attempted == [(kind, layer) for kind in ("rollback", "offset") for layer in range(3)]
+    assert model._poisoned and model.length == 0
+    assert model.blocks[1].cache.rollbacks == 1
+
+
+def test_model_synchronizes_all_devices_and_preserves_each_error(monkeypatch):
+    model = object.__new__(DeepSeekEchoModel)
+    model.devices = [0, 1, 2]
+    errors = [OSError("device 0"), KeyboardInterrupt("device 2")]
+    observed = []
+
+    def synchronize(device):
+        observed.append(device)
+        if device != 1:
+            raise errors[device // 2]
+
+    monkeypatch.setattr(torch.cuda, "synchronize", synchronize)
+    with pytest.raises(BaseExceptionGroup) as failed:
+        model.synchronize()
+    assert observed == model.devices
+    assert failed.value.exceptions == tuple(errors)
 
 
 @pytest.mark.parametrize("offload", [False, True])
@@ -409,8 +498,11 @@ def test_later_device_cache_allocation_failure_releases_earlier_resources(
     model._release_shared_caches()
 
 
-def test_failed_later_cache_runner_replacement_cleans_pools_and_poisons_model(monkeypatch):
-    import models.deepseek_v32.echo_attention as attention_module
+@pytest.mark.parametrize("cleanup_type", [None, OSError, KeyboardInterrupt])
+def test_failed_later_cache_runner_replacement_cleans_pools_and_poisons_model(
+    monkeypatch, cleanup_type
+):
+    import models.deepseek_v32.attention as attention_module
 
     model = object.__new__(DeepSeekEchoModel)
     device = torch.device("cpu")
@@ -430,12 +522,19 @@ def test_failed_later_cache_runner_replacement_cleans_pools_and_poisons_model(mo
     ]
     released = []
     closed = []
+    body = RuntimeError("later indexer cache allocation failed")
+    cleanup = None if cleanup_type is None else cleanup_type("replacement release failed")
     model._shared_pools, model._shared_sessions = {}, {}
+
+    def release():
+        released.append(True)
+        if cleanup is not None:
+            raise cleanup
 
     def allocate_replacements():
         assert all(block.attention is block.cache is None for block in model.blocks)
         model._shared_pools[device] = SimpleNamespace(close=lambda: closed.append(True))
-        model._shared_sessions[device] = SimpleNamespace(release=lambda: released.append(True))
+        model._shared_sessions[device] = SimpleNamespace(release=release)
         return {layer: object() for layer in range(3)}
 
     model._allocate_shared_caches = allocate_replacements
@@ -443,21 +542,104 @@ def test_failed_later_cache_runner_replacement_cleans_pools_and_poisons_model(mo
 
     def runner(*args, cache, **kwargs):
         if created:
-            raise RuntimeError("later indexer cache allocation failed")
+            raise body
         result = SimpleNamespace(cache=cache)
         created.append(result)
         return result
 
     monkeypatch.setattr(attention_module, "EchoAttentionRunner", runner)
     monkeypatch.setattr(torch.cuda, "device", lambda device: nullcontext())
-    with pytest.raises(RuntimeError, match="later indexer cache allocation"):
-        model.set_cache_mode(True)
-    assert released == closed == [True]
-    assert model._shared_pools == model._shared_sessions == {}
+    if cleanup is None:
+        with pytest.raises(RuntimeError) as failed:
+            model.set_cache_mode(True)
+        assert failed.value is body
+        assert released == closed == [True]
+        assert model._shared_pools == model._shared_sessions == {}
+    else:
+        with pytest.raises(BaseExceptionGroup) as failed:
+            model.set_cache_mode(True)
+        assert failed.value.exceptions == (body, cleanup)
+        assert released == [True] and closed == []
+        assert device in model._shared_pools and device in model._shared_sessions
     assert model._cache_generation == 4
     assert model._poisoned
     with pytest.raises(RuntimeError, match="poisoned"):
         model.forward([1])
+
+
+def test_cache_allocation_and_release_errors_keep_original_objects_and_storage(monkeypatch):
+    import cache.sparse_token_pool as cache_module
+
+    model = object.__new__(DeepSeekEchoModel)
+    device = torch.device("cuda:0")
+    model.devices = model.placement = [device]
+    model.capacity, model.host_arena_tokens, model.slots = 32, 64, 4
+    model.cfg = SimpleNamespace(kv_lora_rank=2, qk_rope_head_dim=2)
+    model._shared_pools, model._shared_sessions = {}, {}
+    model._poisoned = False
+    body, cleanup = ValueError("layer view failed"), KeyboardInterrupt("session release failed")
+    releases = []
+
+    class Session:
+        def layer(self, index):
+            raise body
+
+        def release(self):
+            releases.append(self)
+            raise cleanup
+
+    class Pool:
+        def __init__(self, *args, **kwargs):
+            self.session = Session()
+
+        def allocate_session(self, capacity):
+            return self.session
+
+        def close(self):
+            raise AssertionError("failed session still owns this pool")
+
+    monkeypatch.setattr(cache_module, "SharedSparseTokenPool", Pool)
+    with pytest.raises(BaseExceptionGroup) as failed:
+        model._allocate_shared_caches()
+    assert failed.value.exceptions == (body, cleanup)
+    assert model._poisoned
+    pool = model._shared_pools[device]
+    assert model._shared_sessions[device] is pool.session
+    assert releases == [pool.session]
+    with pytest.raises(RuntimeError, match="poisoned"):
+        model._allocate_shared_caches()
+    assert releases == [pool.session]
+
+
+def test_shared_cache_release_attempts_independent_devices_and_retains_failed_owners():
+    model = object.__new__(DeepSeekEchoModel)
+    model._poisoned = False
+    errors = [OSError("session 0"), ValueError("session 2"), KeyboardInterrupt("pool 1")]
+    calls = []
+
+    def release(device):
+        calls.append(("session", device))
+        if device != 1:
+            raise errors[device // 2]
+
+    def close(device):
+        calls.append(("pool", device))
+        assert device == 1
+        raise errors[2]
+
+    model._shared_sessions = {
+        device: SimpleNamespace(release=lambda device=device: release(device))
+        for device in range(3)
+    }
+    model._shared_pools = {
+        device: SimpleNamespace(close=lambda device=device: close(device)) for device in range(3)
+    }
+    with pytest.raises(BaseExceptionGroup) as failed:
+        model._release_shared_caches()
+    assert failed.value.exceptions == tuple(errors)
+    assert calls == [("session", 0), ("session", 1), ("session", 2), ("pool", 1)]
+    assert set(model._shared_sessions) == {0, 2} and set(model._shared_pools) == {0, 1, 2}
+    assert model._poisoned
 
 
 def test_single_query_capacity_is_checked_before_loading_checkpoint_layers(constructor_fixture):

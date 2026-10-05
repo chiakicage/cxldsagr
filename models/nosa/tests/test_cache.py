@@ -3,7 +3,7 @@
 import pytest
 import torch
 
-from models.nosa.cache import NosaKVCache
+from models.nosa.cache.resident import NosaKVCache
 from models.nosa.config import NosaConfig
 
 

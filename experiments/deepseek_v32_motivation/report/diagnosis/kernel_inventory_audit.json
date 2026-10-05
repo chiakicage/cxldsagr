@@ -6,54 +6,54 @@
       "scheme": "dense_prefetch",
       "phase": "cold",
       "kernels": 5200,
-      "gpu_duration_sum_ms": 37.21053
+      "gpu_duration_sum_ms": 37.305382
     },
     {
       "scheme": "dense_prefetch",
       "phase": "revisit",
       "kernels": 80,
-      "gpu_duration_sum_ms": 0.19536
+      "gpu_duration_sum_ms": 0.195456
     },
     {
       "scheme": "echo",
       "phase": "cold",
       "kernels": 5200,
-      "gpu_duration_sum_ms": 36.911636
+      "gpu_duration_sum_ms": 37.06974
     },
     {
       "scheme": "echo",
       "phase": "revisit",
       "kernels": 80,
-      "gpu_duration_sum_ms": 0.195424
+      "gpu_duration_sum_ms": 0.196128
     },
     {
       "scheme": "hbm",
       "phase": "cold",
       "kernels": 5200,
-      "gpu_duration_sum_ms": 37.520904
+      "gpu_duration_sum_ms": 37.587293
     },
     {
       "scheme": "hbm",
       "phase": "revisit",
       "kernels": 5200,
-      "gpu_duration_sum_ms": 37.560885
+      "gpu_duration_sum_ms": 37.633117
     },
     {
       "scheme": "serial_sparse",
       "phase": "cold",
       "kernels": 5200,
-      "gpu_duration_sum_ms": 37.177138
+      "gpu_duration_sum_ms": 37.320177
     },
     {
       "scheme": "serial_sparse",
       "phase": "revisit",
       "kernels": 80,
-      "gpu_duration_sum_ms": 0.196801
+      "gpu_duration_sum_ms": 0.196352
     }
   ],
   "input_sha256": {
-    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/motivation_c10_profile_20261004_01/analysis/independent_gpu_activities.jsonl": "bd48ad80dae98ac22037fce4db979895a4242abbe5a1b78758ae1c050f667521",
-    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/motivation_c10_profile_20261004_01/analysis/operator_mfu/operator_kernel_inventory.csv": "01736f8f61b172923f550bd1391566271635a449a44b0ecf8b4d5e7b8b2d6cba"
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_profile_20261005_01/analysis/independent_gpu_activities.jsonl": "18ee0cfcb9a481eebf6fa7d0728367a645ee5d76c43b72620beea0b45254fc13",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_profile_20261005_01/analysis/operator_mfu/operator_kernel_inventory.csv": "9d1215da840502fac673e43669b4970089e9160b9e5ce249b5857ba2108a4cee"
   },
   "source_sha256": "e575437358d4951b21cebaa4e29e2d8d0e5040d8ebcfbd64fff7525e018b6260",
   "boundary": "Kernel durations are from the same captured requests; these sums are not formal request wall latency or an assured removable latency budget."

@@ -9,7 +9,7 @@ indexer 使用 backend 的共享 GPU 临时空间，候选主 KV 不写回 DRAM�
 已有 `serving.run_gr` 继续提供逐请求创建并释放 cache 的 NOSA 入口。两个入口均无网络服务、
 批调度或模拟到达时间等待。
 
-NOSA 另有独立的 [fixed_serving](../models/nosa/fixed_serving.py) 后端，供
+NOSA 另有独立的 [fixed_serving](../models/nosa/execution/fixed.py) 后端，供
 [固定 P/NH 实验](../experiments/nosa_motivation/README.md)使用；其入口与上面的公共
 CLI 分开。HBM-only 按 P 个 history token 做 session LRU；offload 按 NH 准入，
 host backing 随 session 分配，逐层 P 槽以逻辑页偏移和 session tag 直接映射。
@@ -18,7 +18,7 @@ discard，主 K/V 不写回 host history，CIS/indexer 候选尾部仍按实际 
 
 ## 持久多用户入口
 
-从仓库根目录运行；默认首先使用 DeepSeek V3.2 的 HBM 方案：
+从仓库根目录运行；默认使用 DeepSeek V3.2 的 HBM 方案：
 
 ```bash
 python -m serving.run_multi_user --help
@@ -53,8 +53,7 @@ DeepSeek `echo/serial_sparse` 通过 `retained_session_capacity` 按 H 准入，
 正常结束后 discard 候选，不推进 history 长度或覆盖其 indexer 状态。候选失败直接
 报错终止，runner 释放该用户 session，不恢复或重试。在已规划的执行上限内改变
 候选长度 A 不会导致相同 history 重建。本公共 CLI 的 DeepSeek `hbm/dense_prefetch`
-和普通 NOSA budget 后端仍使用原持久
-extend 后 truncate 的生命周期；
+和普通 NOSA budget 后端仍使用原有的持久 extend 后 truncate 生命周期；
 直接调用 `backend.extend` 也继续持久提交新增 token。
 `is_revisit` 与实际 `prefix_cache_hit` 分别报告；被淘汰后的复访仍计入复访。
 默认每层 query chunk 为 1024。DeepSeek 使用 `--sparse-pool-tokens` 配置逐层共享
@@ -89,17 +88,18 @@ runner 从构造到关闭独占 backend 的准入所有权，构造失败回滚�
 准入前拒绝。history-only session 不缩小完整请求的执行范围。共享候选空间只能在
 执行 lease 内借用，复用前须等待相关 GPU 操作完成；关闭 runner 释放用户，再由外层
 关闭共享资源。NOSA 共享 workspace 与 DeepSeek dense 迁移的早期集成验收见
-[工程进展](../docs/agents/system/nosa_shared_cache_checkpoint.md)。NOSA 共享 workspace 的
+[原始验收索引](../docs/agents/acceptance/unified_runtime_20261005/shared_cache_integration_evidence.json)，
+其结论只适用于记录中的冻结源码。NOSA 共享 workspace 的
 旧 H4K / H16K / H64K 热度短轨迹已结束独立实验维护，通用预算代码和回归保留。
-独立固定 P/NH 的正式、profile
-与 API 结果见[固定容量实验](../experiments/nosa_motivation/README.md)和
-[发布记录](../docs/agents/system/nosa_pool_scan_publication.md)。按研究者要求，后续测量先只做
-64K history。本轮整理没有运行新实验，cache 统计不能代替进程峰值。
+独立固定 P/NH 的正式计时、profile
+与 API 结果见[固定容量实验](../experiments/nosa_motivation/README.md)。按研究者要求，后续先只测量
+64K history。各报告记录当前源码、独立验收和正式测量边界，并保留新旧比较中的阶段开销变化；
+cache 统计不能代替进程峰值。
 固定路径的 async 未通过整体延迟及 90% overlap 门槛，
 候选 MFU、尾延迟和 compute/IO 主导关系仍待解决。
-DeepSeek GPU candidate 路径已通过短 GPU 正确性检查；完整多用户容量与实际峰值尚未
-实测，旧 ECHO 容量运行不作为新实现的容量证明，当前状态见
-[ECHO cache 实验](../experiments/deepseek_v32_echo_cache/README.md)。
+DeepSeek GPU candidate 路径已完成 C10、16 用户两轮的独立数值验收和正式测量，
+请求内存观测与静态容量计划见[两模型 cache 管理报告](../experiments/cache_management/README.md)。
+该轨迹未填满 NH，也不验证离线最大 P/NH 的物理容量。
 
 stdout 输出启动配置、逐请求 JSON 统计及 hidden shape/dtype/device，最后输出请求数、
 复访数、命中数、淘汰数和平均延迟；不输出 hidden 向量或输入 token 数组。

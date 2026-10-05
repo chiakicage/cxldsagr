@@ -115,6 +115,35 @@ def test_successful_drain_after_body_error_returns_lease_and_restores_attention(
         backend.close()
 
 
+def test_failed_graph_close_prevents_resource_generation_reuse():
+    backend = make_backend("hbm")
+    plan = backend.plan_resources(BUDGET, limits())
+    backend.allocate_shared(plan)
+    failure = RuntimeError("graph completion unknown")
+    retained = torch.empty(17)
+
+    def close():
+        raise failure
+
+    graphs = SimpleNamespace(close=close, retained=retained)
+    backend.compute_graphs = graphs
+    with pytest.raises(RuntimeError) as caught:
+        backend.close()
+    assert caught.value is failure
+    assert backend.compute_graphs is graphs
+    assert graphs.retained is retained
+    assert backend.resources.poisoned
+    assert backend.resources.lifecycle.failure is failure
+    with pytest.raises(RuntimeError, match="poisoned"):
+        backend.bind_owner(object())
+    with pytest.raises(RuntimeError, match="poisoned"):
+        backend.resources.allocate_shared(plan)
+    # This test queued no CUDA work; remove the synthetic owner after assertions.
+    backend.compute_graphs = None
+    backend.resources.poisoned = False
+    backend.close()
+
+
 @pytest.mark.parametrize("scheme", SCHEMES)
 @pytest.mark.parametrize("failure_phase", ["event", "stream", "record"])
 @pytest.mark.parametrize("drain_fails", [False, True])
@@ -133,14 +162,14 @@ def test_failed_session_ready_event_cleans_up_or_retains_poisoned_ownership(
     existing_storage = storages(existing, stop=(resources,))
     created, before, drained = [], [], []
 
-    def attach(session):
+    def attach(session, *, owner=None):
         created.append(session)
         before.append(storages(session, stop=(resources,)))
         # The constructor and tensors remain CPU-only. Simulate only CUDA
         # readiness setup so every allocation failure is deterministic.
         resources.device = torch.device("cuda:0")
         try:
-            return original_attach(session)
+            return original_attach(session, owner=owner)
         finally:
             resources.device = original_device
 
@@ -167,9 +196,15 @@ def test_failed_session_ready_event_cleans_up_or_retains_poisoned_ownership(
             patch.setattr(torch.cuda, "Event", event)
             patch.setattr(torch.cuda, "current_stream", current_stream)
             patch.setattr(torch.cuda, "synchronize", synchronize)
-            message = "drain failed NOSA" if drain_fails else "session readiness failure"
-            with pytest.raises(RuntimeError, match=message):
+            failure_type = BaseExceptionGroup if drain_fails else RuntimeError
+            message = "operation and cleanup" if drain_fails else "session readiness failure"
+            with pytest.raises(failure_type, match=message) as caught:
                 backend.create_session(128)
+            if drain_fails:
+                assert [str(error) for error in caught.value.exceptions] == [
+                    "injected session readiness failure",
+                    "injected attachment drain failure",
+                ]
         failed = created[0]
         assert drained == [torch.device("cuda:0")]
         assert resources.plan is plan

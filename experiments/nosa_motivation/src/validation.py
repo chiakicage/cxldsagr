@@ -6,6 +6,33 @@ import json
 import os
 from pathlib import Path
 
+VALIDATION_IDENTITY_REVISION = 2
+
+# These modules run in the three receipt-using serving harnesses, including the
+# numerical auditor invoked before publication. Source collectors limit each
+# manifest to its model; intersecting with explicit paths excludes unrelated
+# experiment profiles and plot-only helpers. Revision 1 retains its old filter.
+_EXECUTION_SOURCES_V2 = frozenset(
+    {
+        "experiments/nosa_motivation/src/measure.py",
+        "experiments/nosa_motivation/src/config.py",
+        "experiments/nosa_motivation/src/validation.py",
+        "experiments/nosa_motivation/src/provenance.py",
+        "experiments/nosa_motivation/src/cpu_environment.py",
+        "experiments/nosa_motivation/src/flops.py",
+        "experiments/nosa_motivation/src/report.py",
+        "experiments/nosa_motivation/src/sources.py",
+        "experiments/deepseek_v32_motivation/src/measure.py",
+        "experiments/deepseek_v32_motivation/src/report.py",
+        "experiments/deepseek_v32_motivation/src/sources.py",
+        "experiments/deepseek_v32_echo_official/src/measure.py",
+        "experiments/deepseek_v32_echo_official/src/report.py",
+        "experiments/deepseek_v32_echo_official/src/sources.py",
+        "experiments/cache_management/src/capacity_probe.py",
+        "experiments/deepseek_v32_echo_prefill/src/backend_provenance.py",
+    }
+)
+
 
 def add_mode_arguments(command):
     command.add_argument(
@@ -58,16 +85,18 @@ def _stable_runtime(value):
 
 def base_identity(metadata, directory):
     manifest = json.loads((Path(directory) / "source_manifest.json").read_text())
-    # Plotting and report edits do not invalidate numerical acceptance. Execution
-    # orchestration, source dependencies and the receipt implementation do.
-    execution_names = {"measure.py", "config.py", "validation.py", "workload.py"}
+    revision = metadata.get("validation_identity_revision", 1)
+    if type(revision) is not int or revision not in (1, VALIDATION_IDENTITY_REVISION):
+        raise ValueError("unsupported validation identity revision")
+    legacy_names = {"measure.py", "config.py", "validation.py", "workload.py"}
     sources = {
         name: sha
         for name, sha in manifest.items()
-        if not name.startswith("experiments/") or Path(name).name in execution_names
+        if not name.startswith("experiments/")
+        or (Path(name).name in legacy_names if revision == 1 else name in _EXECUTION_SOURCES_V2)
     }
     return {
-        "schema": "motivation-validation-identity-v1",
+        "schema": f"motivation-validation-identity-v{revision}",
         "sources": sources,
         "config": {
             key: value for key, value in metadata["config"].items() if key != "peak_bf16_tflops"
@@ -91,6 +120,7 @@ def execution_environment():
 
 
 def begin_validation(metadata, directory, receipt_path, kind):
+    metadata["validation_identity_revision"] = VALIDATION_IDENTITY_REVISION
     metadata["validation_identity"] = {"base": base_identity(metadata, directory), "methods": {}}
     if metadata["mode"] == "check":
         return
@@ -133,12 +163,12 @@ def record_runtime(metadata, method, backend, native, token_validation, allocato
     metadata["validation_identity"]["methods"][method] = identity
 
 
-def audit_receipt(metadata, directory, kind):
+def audit_receipt(metadata, directory, kind, *, receipt_override=None):
     from evaluation.validation import require_receipt
     from experiments.nosa_motivation.src.provenance import digest
 
     evidence = metadata["correctness_receipt"]
-    path = Path(evidence["path"])
+    path = Path(evidence["path"] if receipt_override is None else receipt_override)
     if digest(path) != evidence["sha256"]:
         raise ValueError("external correctness receipt changed")
     actual = {
@@ -152,6 +182,7 @@ def audit_receipt(metadata, directory, kind):
     return {
         "kind": kind,
         "path": str(path),
+        **({"recorded_path": evidence["path"]} if receipt_override is not None else {}),
         "sha256": evidence["sha256"],
         "checks": receipt["checks"],
     }
@@ -198,16 +229,16 @@ def _require_method_coverage(metadata, methods):
         raise ValueError("correctness receipt lacks complete backend/cache/graph method coverage")
 
 
-def reference_directory(directory, *, bench_schema, kind):
+def reference_directory(directory, *, bench_schema, kind, receipt_override=None):
     """Resolve a clean bench to its independent check data for diagnostic replay."""
     directory = Path(directory)
     metadata = json.loads((directory / "metadata.json").read_text())
     if metadata.get("schema") != bench_schema:
+        if receipt_override is not None:
+            raise ValueError("receipt override requires benchmark data")
         return directory
-    audit_receipt(metadata, directory, kind)
+    audit = audit_receipt(metadata, directory, kind, receipt_override=receipt_override)
     from evaluation.validation import require_receipt
 
-    receipt = require_receipt(
-        metadata["correctness_receipt"]["path"], kind=kind, identity=metadata["validation_identity"]
-    )
+    receipt = require_receipt(audit["path"], kind=kind, identity=metadata["validation_identity"])
     return Path(receipt["artifact_paths"]["metadata"]).parent

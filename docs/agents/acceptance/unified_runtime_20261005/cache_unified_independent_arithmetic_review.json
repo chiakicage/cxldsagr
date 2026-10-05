@@ -1,0 +1,457 @@
+{
+  "schema": "unified-cache-independent-arithmetic-review-v1",
+  "status": "arithmetic_and_draft_numbers_pass_final_publication_pending",
+  "created_utc": "2026-10-04T22:27:19.833583+00:00",
+  "scope": "Bounded stdlib-only arithmetic/source-inventory review. No model/cache allocation, GPU work, benchmark, full capacity sweep, native binary rescan or repeated seven-run audit. Source hashes are compared as saved identity entries; raw table JSON/CSV and selected README are re-opened.",
+  "deepseek_plan_refresh": [
+    {
+      "run_id": "cache_deepseek_nh_20261005_02",
+      "plan01_entire_plan_equal": true,
+      "checkpoint_config_equal": true,
+      "changed_source_keys": [
+        "cache/sparse_token_pool.py"
+      ],
+      "shared_source_entries_match_final_bench": 11,
+      "planner_only_sources": [
+        "experiments/cache_management/src/capacity_plan.py"
+      ],
+      "P": 32768,
+      "NH": 29818880,
+      "U": 455,
+      "extra_headroom_gib": 0.0
+    },
+    {
+      "run_id": "cache_deepseek_p_base_20261005_02",
+      "plan01_entire_plan_equal": true,
+      "checkpoint_config_equal": true,
+      "changed_source_keys": [
+        "cache/sparse_token_pool.py"
+      ],
+      "shared_source_entries_match_final_bench": 11,
+      "planner_only_sources": [
+        "experiments/cache_management/src/capacity_plan.py"
+      ],
+      "P": 10296447,
+      "NH": 1048576,
+      "U": 16,
+      "extra_headroom_gib": 0.0
+    },
+    {
+      "run_id": "cache_deepseek_p_base_headroom_20261005_02",
+      "plan01_entire_plan_equal": true,
+      "checkpoint_config_equal": true,
+      "changed_source_keys": [
+        "cache/sparse_token_pool.py"
+      ],
+      "shared_source_entries_match_final_bench": 11,
+      "planner_only_sources": [
+        "experiments/cache_management/src/capacity_plan.py"
+      ],
+      "P": 8983043,
+      "NH": 1048576,
+      "U": 16,
+      "extra_headroom_gib": 14.5
+    },
+    {
+      "run_id": "cache_deepseek_p_nhmax_20261005_02",
+      "plan01_entire_plan_equal": true,
+      "checkpoint_config_equal": true,
+      "changed_source_keys": [
+        "cache/sparse_token_pool.py"
+      ],
+      "shared_source_entries_match_final_bench": 11,
+      "planner_only_sources": [
+        "experiments/cache_management/src/capacity_plan.py"
+      ],
+      "P": 6451364,
+      "NH": 29818880,
+      "U": 455,
+      "extra_headroom_gib": 0.0
+    },
+    {
+      "run_id": "cache_deepseek_p_nhmax_headroom_20261005_02",
+      "plan01_entire_plan_equal": true,
+      "checkpoint_config_equal": true,
+      "changed_source_keys": [
+        "cache/sparse_token_pool.py"
+      ],
+      "shared_source_entries_match_final_bench": 11,
+      "planner_only_sources": [
+        "experiments/cache_management/src/capacity_plan.py"
+      ],
+      "P": 5137960,
+      "NH": 29818880,
+      "U": 455,
+      "extra_headroom_gib": 14.5
+    }
+  ],
+  "deepseek_formula_checks": [
+    {
+      "run_id": "cache_deepseek_nh_20261005_02",
+      "candidate": "selected",
+      "P": 32768,
+      "NH": 29818880,
+      "U": 455,
+      "hbm_base_bytes": 44078184518,
+      "dram_bytes": 343601111080,
+      "feasible": true,
+      "violated_constraints": []
+    },
+    {
+      "run_id": "cache_deepseek_nh_20261005_02",
+      "candidate": "next_candidate",
+      "P": 32768,
+      "NH": 29884416,
+      "U": 456,
+      "hbm_base_bytes": 44171514358,
+      "dram_bytes": 687198502952,
+      "feasible": false,
+      "violated_constraints": [
+        "dram_budget"
+      ]
+    },
+    {
+      "run_id": "cache_deepseek_p_base_20261005_02",
+      "candidate": "selected",
+      "P": 10296447,
+      "NH": 1048576,
+      "U": 16,
+      "hbm_base_bytes": 124773318580,
+      "dram_bytes": 21474967592,
+      "feasible": true,
+      "violated_constraints": []
+    },
+    {
+      "run_id": "cache_deepseek_p_base_20261005_02",
+      "candidate": "next_candidate",
+      "P": 10296448,
+      "NH": 1048576,
+      "U": 16,
+      "hbm_base_bytes": 124773330438,
+      "dram_bytes": 21474967592,
+      "feasible": false,
+      "violated_constraints": [
+        "hbm_budget"
+      ]
+    },
+    {
+      "run_id": "cache_deepseek_p_base_20261005_02",
+      "candidate": "useful_selected",
+      "P": 1048576,
+      "NH": 1048576,
+      "U": 16,
+      "hbm_base_bytes": 15147899766,
+      "dram_bytes": 21474967592,
+      "feasible": true,
+      "violated_constraints": []
+    },
+    {
+      "run_id": "cache_deepseek_p_base_headroom_20261005_02",
+      "candidate": "selected",
+      "P": 8983043,
+      "NH": 1048576,
+      "U": 16,
+      "hbm_base_bytes": 109204063392,
+      "dram_bytes": 21474967592,
+      "feasible": true,
+      "violated_constraints": []
+    },
+    {
+      "run_id": "cache_deepseek_p_base_headroom_20261005_02",
+      "candidate": "next_candidate",
+      "P": 8983044,
+      "NH": 1048576,
+      "U": 16,
+      "hbm_base_bytes": 109204075246,
+      "dram_bytes": 21474967592,
+      "feasible": false,
+      "violated_constraints": [
+        "hbm_budget"
+      ]
+    },
+    {
+      "run_id": "cache_deepseek_p_base_headroom_20261005_02",
+      "candidate": "useful_selected",
+      "P": 1048576,
+      "NH": 1048576,
+      "U": 16,
+      "hbm_base_bytes": 15147899766,
+      "dram_bytes": 21474967592,
+      "feasible": true,
+      "violated_constraints": []
+    },
+    {
+      "run_id": "cache_deepseek_p_nhmax_20261005_02",
+      "candidate": "selected",
+      "P": 6451364,
+      "NH": 29818880,
+      "U": 455,
+      "hbm_base_bytes": 120165023826,
+      "dram_bytes": 343601111080,
+      "feasible": true,
+      "violated_constraints": []
+    },
+    {
+      "run_id": "cache_deepseek_p_nhmax_20261005_02",
+      "candidate": "next_candidate",
+      "P": 6451365,
+      "NH": 29818880,
+      "U": 455,
+      "hbm_base_bytes": 120165035680,
+      "dram_bytes": 343601111080,
+      "feasible": false,
+      "violated_constraints": [
+        "hbm_budget"
+      ]
+    },
+    {
+      "run_id": "cache_deepseek_p_nhmax_20261005_02",
+      "candidate": "useful_selected",
+      "P": 6451364,
+      "NH": 29818880,
+      "U": 455,
+      "hbm_base_bytes": 120165023826,
+      "dram_bytes": 343601111080,
+      "feasible": true,
+      "violated_constraints": []
+    },
+    {
+      "run_id": "cache_deepseek_p_nhmax_headroom_20261005_02",
+      "candidate": "selected",
+      "P": 5137960,
+      "NH": 29818880,
+      "U": 455,
+      "hbm_base_bytes": 104595768634,
+      "dram_bytes": 343601111080,
+      "feasible": true,
+      "violated_constraints": []
+    },
+    {
+      "run_id": "cache_deepseek_p_nhmax_headroom_20261005_02",
+      "candidate": "next_candidate",
+      "P": 5137961,
+      "NH": 29818880,
+      "U": 455,
+      "hbm_base_bytes": 104595780488,
+      "dram_bytes": 343601111080,
+      "feasible": false,
+      "violated_constraints": [
+        "hbm_budget"
+      ]
+    },
+    {
+      "run_id": "cache_deepseek_p_nhmax_headroom_20261005_02",
+      "candidate": "useful_selected",
+      "P": 5137960,
+      "NH": 29818880,
+      "U": 455,
+      "hbm_base_bytes": 104595768634,
+      "dram_bytes": 343601111080,
+      "feasible": true,
+      "violated_constraints": []
+    }
+  ],
+  "nosa_population_checks": [
+    {
+      "scheme": "hbm",
+      "shared_hbm_gib": 0.000980377197265625,
+      "session_hbm_gib": 2.1202964782714844,
+      "quota_users": 1,
+      "population_formulas_exact": true
+    },
+    {
+      "scheme": "serial_sparse",
+      "shared_hbm_gib": 2.0073580741882324,
+      "session_hbm_gib": 0.16777467727661133,
+      "quota_users": 256,
+      "population_formulas_exact": true
+    },
+    {
+      "scheme": "dense_prefetch",
+      "shared_hbm_gib": 2.0073294639587402,
+      "session_hbm_gib": 0.16777467727661133,
+      "quota_users": 256,
+      "population_formulas_exact": true
+    },
+    {
+      "scheme": "overlap",
+      "shared_hbm_gib": 2.0073580741882324,
+      "session_hbm_gib": 0.16777467727661133,
+      "quota_users": 256,
+      "population_formulas_exact": true
+    }
+  ],
+  "memory_checks": [
+    {
+      "model": "nosa",
+      "scheme": "hbm",
+      "raw_rows": 32,
+      "all_csv_and_summary_byte_fields_exact": true,
+      "readme_6decimal_peak_and_charge_rows_match": true
+    },
+    {
+      "model": "nosa",
+      "scheme": "dense_prefetch",
+      "raw_rows": 32,
+      "all_csv_and_summary_byte_fields_exact": true,
+      "readme_6decimal_peak_and_charge_rows_match": true
+    },
+    {
+      "model": "nosa",
+      "scheme": "serial_sparse",
+      "raw_rows": 32,
+      "all_csv_and_summary_byte_fields_exact": true,
+      "readme_6decimal_peak_and_charge_rows_match": true
+    },
+    {
+      "model": "nosa",
+      "scheme": "overlap",
+      "raw_rows": 32,
+      "all_csv_and_summary_byte_fields_exact": true,
+      "readme_6decimal_peak_and_charge_rows_match": true
+    },
+    {
+      "model": "deepseek",
+      "scheme": "hbm",
+      "raw_rows": 32,
+      "all_csv_and_summary_byte_fields_exact": true,
+      "readme_6decimal_peak_and_charge_rows_match": true
+    },
+    {
+      "model": "deepseek",
+      "scheme": "echo",
+      "raw_rows": 32,
+      "all_csv_and_summary_byte_fields_exact": true,
+      "readme_6decimal_peak_and_charge_rows_match": true
+    },
+    {
+      "model": "deepseek",
+      "scheme": "serial_sparse",
+      "raw_rows": 32,
+      "all_csv_and_summary_byte_fields_exact": true,
+      "readme_6decimal_peak_and_charge_rows_match": true
+    },
+    {
+      "model": "deepseek",
+      "scheme": "dense_prefetch",
+      "raw_rows": 32,
+      "all_csv_and_summary_byte_fields_exact": true,
+      "readme_6decimal_peak_and_charge_rows_match": true
+    }
+  ],
+  "nosa_logical_payload_and_headroom_boundary": "32-layer 2 GiB main KV per history; 16 histories32 GiB, quota256 gives512 GiB logical KV and1024 GiB conservative host reservation plus small counters. Graph excluded from static sums and already included in observed cache charges.",
+  "deepseek_pinned_boundary": "NH455 histories gives320 GiB pinned bins;456 crosses to640 GiB. At measured NH16777216 arena logical capacity180 GiB, bins320 GiB, written16 histories11.25 GiB. Static boundary, not measured OOM or maximum capacity.",
+  "known_publication_gates": [
+    "Five plan02 records equal plan01 arithmetic and checkpoint config; final report02 must be regenerated with these new IDs/source inventories, rather than relabeling report01 provenance.",
+    "Confirmed report.py emits the NOSA source paragraph inside the shared model loop, splitting the eight-row table before DeepSeek rows. Root will fix after source-capture thaw and regenerate report02.",
+    "The draft currently names cache_unified_20261005_02 and final report/unified links, which are future publication targets. This is a staged draft, not a claim that report02 exists or has been audited.",
+    "No README/reports are published by this audit. Source joins/full numerical/native evidence are covered by preceding accepted reports and independently audited motivation runs."
+  ],
+  "inputs": [
+    {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_bench_20261005_01/source_manifest.json",
+      "bytes": 183320,
+      "sha256": "31fc8ed1b1c242e45f565acef4c86236d0a61c71dbe68a8ae4a1ee69d18bc699"
+    },
+    {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_nh_20261005_01/plan.json",
+      "bytes": 10444,
+      "sha256": "74fdefaf22f525e27dea866b72fd19b8b2bf7a10abe722227d8b06c3d6f77713"
+    },
+    {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_nh_20261005_02/plan.json",
+      "bytes": 10343,
+      "sha256": "25684e9c4f14fe82b6064d57c8669e3bcb89d271e2ce9031061d3a57113dc527"
+    },
+    {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_base_20261005_01/plan.json",
+      "bytes": 13863,
+      "sha256": "54142ca3496eef2a3961624f6cb320d1bc8b14b590e16bfbed5d2b99408f6beb"
+    },
+    {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_base_20261005_02/plan.json",
+      "bytes": 13758,
+      "sha256": "62556fee8dfa475bcf2c333cdc8abc13d21e02368992df02410c2ba42e401e72"
+    },
+    {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_base_headroom_20261005_01/plan.json",
+      "bytes": 14079,
+      "sha256": "84b3e56d8006e25661b33502d739526676a9c640a65f301b3122261f5a1a01d8"
+    },
+    {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_base_headroom_20261005_02/plan.json",
+      "bytes": 13965,
+      "sha256": "4a74c6e319d8cbe93313602102f453e061adb24610a379b006d5db15b3e629fe"
+    },
+    {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_nhmax_20261005_01/plan.json",
+      "bytes": 13924,
+      "sha256": "ab604dd27780c5c0ede8e93bc5670d7ccb49978ea6ced716e9004fc7105a2e0e"
+    },
+    {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_nhmax_20261005_02/plan.json",
+      "bytes": 13818,
+      "sha256": "10598d6986296c7e24835fdad8581c47c6a82590daa58df065e5ec73750a2347"
+    },
+    {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_nhmax_headroom_20261005_01/plan.json",
+      "bytes": 14146,
+      "sha256": "79754f4ddaf8337d19151ef9b17ef587118c8b5596d8f3a209c4cc20e590013e"
+    },
+    {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_nhmax_headroom_20261005_02/plan.json",
+      "bytes": 14031,
+      "sha256": "3c3823ef74aea1430815d25ff14e80ab5455fa5d1e08bbebee072e115d0d4e1a"
+    },
+    {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_nosa_fixed_20261005_02/plan.json",
+      "bytes": 450453,
+      "sha256": "0fb9f894e92e74b3049f9b5f64036403e539e8107fdd7f3871c1bf03c60fe1f9"
+    },
+    {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_motivation/output/data/refactor_final_nosa_bench_20261005_01/metadata.json",
+      "bytes": 4547388,
+      "sha256": "b3ae1d3749e66b00dbd0a3962b9e9a9e3e68c3f1446d1e2e03193317dec50323"
+    },
+    {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_motivation/output/data/refactor_final_nosa_bench_20261005_01/measurements.jsonl",
+      "bytes": 721767,
+      "sha256": "66ada308e333d7a26029ad451e5711d922ab5ee311158c5a7b22b443211c84eb"
+    },
+    {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_bench_20261005_01/metadata.json",
+      "bytes": 3715195,
+      "sha256": "cda32f5d3a423aa124b6bdc8ee8c13d84a9b6caa92e9badd5ba5c9ddaff9290c"
+    },
+    {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_bench_20261005_01/measurements.jsonl",
+      "bytes": 2222066,
+      "sha256": "fb5969da9d0db6b895a9710970254a55d5f3b30b2cd9a886542c151b923b5907"
+    },
+    {
+      "path": "/tmp/unified_cache_readme.md",
+      "bytes": 14868,
+      "sha256": "5511d929970996f8719c027dc053c2adc715376a8b4472156e05a8fde4ba79f1"
+    },
+    {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_unified_20261005_01/summary.json",
+      "bytes": 1486381,
+      "sha256": "4caa6551c770cc054403633d74594307c47fcea74170de397b16222e399f2d8b"
+    },
+    {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_unified_20261005_01/memory.csv",
+      "bytes": 2285,
+      "sha256": "fca0a78ea498aca470e93bd90997acc03325cbb5c33cc4d0fa5494add0b5ed39"
+    },
+    {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_unified_20261005_01/deepseek_plans.csv",
+      "bytes": 2716,
+      "sha256": "74d3d41993c3bf75ca3c57afc44ff86dd64d7e07fb80c4e097a154cdc2e6a43c"
+    },
+    {
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_unified_20261005_01/results.md",
+      "bytes": 3516,
+      "sha256": "e9d3da12380b54fbcfe84effaa09510da1765a97ae96fcbe1d8c844eb3ac53c9"
+    }
+  ]
+}

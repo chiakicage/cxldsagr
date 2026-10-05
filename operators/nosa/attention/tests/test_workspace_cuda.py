@@ -6,7 +6,7 @@ import pytest
 import torch
 import tvm_ffi
 
-from layers.attention import BlockSelection
+from models.attention_contracts import BlockSelection
 from operators.nosa.attention.device_only import _fa3
 from operators.nosa.attention.device_only.api import nosa_block_sparse_attention
 from operators.nosa.attention.offload.api import NosaFetchWorkspace

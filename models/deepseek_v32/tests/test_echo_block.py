@@ -7,9 +7,10 @@ import pytest
 import torch
 from safetensors.torch import save_file
 
-import models.deepseek_v32.echo_block as block_module
-from models.deepseek_v32.echo_block import CheckpointBlock, CheckpointMoE, route_experts
-from models.deepseek_v32.echo_model import CheckpointReader, Config
+import models.deepseek_v32.layers as block_module
+from models.deepseek_v32.checkpoint import CheckpointReader
+from models.deepseek_v32.config import Config
+from models.deepseek_v32.layers import CheckpointBlock, CheckpointMoE, route_experts
 
 
 @pytest.fixture
@@ -304,6 +305,24 @@ def test_two_blocks_preserve_separate_residual_until_final_norm(block_checkpoint
     torch.testing.assert_close(
         combined, reference_hidden.float() + reference_residual.float(), rtol=0, atol=0
     )
+
+
+def test_detached_block_uses_explicit_runner_without_binding_session_state(
+    block_checkpoint, monkeypatch
+):
+    path, raw = block_checkpoint
+    monkeypatch.setattr(block_module, "EchoAttentionRunner", CPUAttentionOracle)
+    owned = CheckpointBlock(path, 0, "cpu", capacity=128, chunk_size=2)
+    detached = CheckpointBlock(path, 0, "cpu", capacity=128, chunk_size=2, allocate_cache=False)
+    runner = CPUAttentionOracle(detached.attention_layer, 128)
+    hidden = raw["model.embed_tokens.weight"][[0, 2, 7]]
+    expected = owned.forward(hidden)
+    actual = detached.forward(hidden, attention=runner, chunk_size=len(hidden))
+    torch.testing.assert_close(actual, expected, rtol=0, atol=0)
+    assert detached.attention is None and detached.cache is None
+    assert detached.chunk_size == 2
+    with pytest.raises(RuntimeError, match="explicit attention runner"):
+        detached.forward(hidden)
 
 
 def test_incomplete_expert_checkpoint_fails_explicitly(block_checkpoint):

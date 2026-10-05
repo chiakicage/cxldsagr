@@ -4,7 +4,7 @@ import pytest
 import torch
 
 from cache.sparse_token_pool import _tensor_bytes
-from models.deepseek_v32.serving_backend import _storage_bytes
+from models.deepseek_v32.execution.adapter import _storage_bytes
 
 
 @pytest.mark.parametrize("measure", [_tensor_bytes, _storage_bytes])

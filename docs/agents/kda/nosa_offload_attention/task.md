@@ -80,7 +80,7 @@ The accepted implementation build key is `484e32532ba74fb6`. See the
 measurement limits; future changes require new acceptance and run identities.
 
 Source ownership is [backing](../../../../cache/host_backing.py),
-[NOSA adaptation](../../../../models/nosa/offload_cache.py),
+[NOSA adaptation](../../../../models/nosa/cache/offload.py),
 [workspace](../../../../operators/nosa/attention/offload/api.py),
 [native preparation](../../../../operators/nosa/attention/offload/csrc/nosa_offload.cu) and
 [fused kernel](../../../../operators/nosa/attention/offload/csrc/nosa_offload_fused.cu).

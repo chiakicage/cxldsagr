@@ -1,0 +1,81 @@
+{
+  "scope": "Prepared only. Run after all three final NOSA benchmarks and root explicit CPU GO. This plan has not executed; final benchmark directories and receipt bindings must be audited before launch.",
+  "environment_overrides": {
+    "CUDA_VISIBLE_DEVICES": "",
+    "OMP_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "cwd": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr",
+  "command": [
+    "numactl",
+    "--physcpubind=0-7",
+    "--membind=0",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin/python",
+    "-B",
+    "-m",
+    "experiments.nosa_motivation.src.compare_versions",
+    "--run-id",
+    "refactor_final_nosa_three_version_20261005_01",
+    "--published",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_motivation/output/data/nosa_motivation_poolscan_sm90_20261004_01",
+    "--baseline",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_motivation/output/data/refactor_p0_nosa_bench_20261005_01",
+    "--baseline",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_motivation/output/data/refactor_p0_nosa_bench_20261005_02",
+    "--baseline",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_motivation/output/data/refactor_p0_nosa_bench_20261005_03",
+    "--current",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_motivation/output/data/refactor_final_nosa_bench_20261005_01",
+    "--current",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_motivation/output/data/refactor_final_nosa_bench_20261005_02",
+    "--current",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_motivation/output/data/refactor_final_nosa_bench_20261005_03",
+    "--baseline-receipt",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/docs/agents/acceptance/unified_runtime_20261005/nosa_baseline/receipt.json",
+    "--current-receipt",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/docs/agents/acceptance/unified_runtime_20261005/nosa_final/receipt.json",
+    "--output-dir",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_motivation/output/data/refactor_final_nosa_three_version_20261005_01"
+  ],
+  "published_excerpt": "/tmp/unified_nosa_published_excerpt.json",
+  "published_excerpt_sha256": "92ee8d82f3ee02ae43d24626f79550252b87e692247c053198f9364897f3cc9f",
+  "expected_current_receipt_self_sha256": "93953f9389f7fcaa5c46a53f1047bc098da9e58b26fb420dc25d8faea145d2e1",
+  "expected_current_receipt_file_sha256": "34ee0a120712d353bd57dc350c3667f5ce2f2fc2b8a1607aa1f1a9f00c405bc5",
+  "current_receipt_observation": {
+    "kind": "nosa-motivation-full-trace-v1",
+    "bytes": 1216793,
+    "scope": "File SHA and internal self-digest recorded independently. The model owner is auditing the full receipt; this preparation does not replace that audit."
+  },
+  "final_monitor_inputs": {
+    "ledger": "docs/agents/acceptance/unified_runtime_20261005/nosa_final_bench_ledger.json",
+    "samples": "docs/agents/acceptance/unified_runtime_20261005/nosa_final_gpu_monitor.jsonl",
+    "driver_audit": "docs/agents/acceptance/unified_runtime_20261005/nosa_final_gpu_monitor_audit.json",
+    "review_boundary": "Join benchmark PID/GPU UUID and UTC activity intervals against periodic 5-second process samples. Unsampled short activity is not excluded."
+  },
+  "intermediate_diagnostic": {
+    "role": "before_single_entry_layout_cache_optimization_not_final_performance",
+    "comparison_run_id": "refactor_nosa_three_version_20261005_01",
+    "phase_evidence_path": "docs/agents/acceptance/unified_runtime_20261005/nosa_three_version_phase_review.json",
+    "phase_evidence_file_sha256": "f0ae7899bae569b994ceb93021533c55b69b2046518532efb7d0ea9e3db8e654",
+    "original_comparison_files": [
+      {
+        "path": "experiments/nosa_motivation/output/data/refactor_nosa_three_version_20261005_01/comparison.json",
+        "bytes": 430401,
+        "sha256": "42a8c8772ac6d06387f357fceecd02498d81ca677dec2274e2f5b4b83d68b943"
+      },
+      {
+        "path": "experiments/nosa_motivation/output/data/refactor_nosa_three_version_20261005_01/request_samples.csv",
+        "bytes": 237154,
+        "sha256": "515c93ddf60f89946677b8b009180e7dc35ab559b01803cd3ca770730759b77b"
+      },
+      {
+        "path": "experiments/nosa_motivation/output/data/refactor_nosa_three_version_20261005_01/results.md",
+        "bytes": 4890,
+        "sha256": "65ebdebbe7bb6826600f05c3eac4bd8af612a100c9b069ab12e4c1bb00cc5784"
+      }
+    ],
+    "preservation": "Retain the exact phase evidence with every per-run phase mean and its original file hash when replacing intermediate outputs. This intermediate comparison is not the final current-source result."
+  }
+}

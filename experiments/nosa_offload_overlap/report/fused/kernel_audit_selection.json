@@ -1,0 +1,1537 @@
+{
+  "status": "verified_selected_static_closure",
+  "historical_report_to_keep_unchanged": "experiments/nosa_offload_overlap/report/fused/kernel_audit.json",
+  "selected_original_report_fields": [
+    "/fused_build_key",
+    "/native_build",
+    "/source_files",
+    "/artifacts/0",
+    "/artifacts/1",
+    "/artifacts/2",
+    "/artifacts/3",
+    "/artifacts/4",
+    "/extraction_commands",
+    "/sass",
+    "/resources/cuobjdump_sm90a",
+    "/resources/compiled_cta_register_pool",
+    "/resources/dynamic_register_demand",
+    "/resources/limitation",
+    "/read_once/source_proof",
+    "/read_once/static_ownership_enumeration",
+    "/read_once/limits"
+  ],
+  "unselected_original_report_fields": [
+    "/binary_binding",
+    "/resources/cupti_actual_launch",
+    "/read_once/dynamic_profile_evidence",
+    "/read_once/measurement_calls",
+    "/read_once/measurement_path",
+    "/archived_provenance",
+    "/artifacts/5",
+    "/artifacts/6",
+    "/artifacts/7"
+  ],
+  "scope": "Retain original audit bytes as a historical container, selecting only static binary/source facts listed here. Other historical runtime/timing fields are not revalidated, not supporting the new report, and their obsolete raw dependencies are retired. The broad original audit script is provenance, not a promised whole-audit replay entry after this selection.",
+  "replacement_dynamic_evidence": {
+    "run_id": "refactor_nosa_overlap_profile_20261005_01",
+    "unique_stripe_and_page_observations": "experiments/nosa_offload_overlap/output/data/refactor_nosa_overlap_profile_20261005_01/work_intervals.json",
+    "correlated_launch_and_resource_observations": "experiments/nosa_offload_overlap/output/data/refactor_nosa_overlap_profile_20261005_01/timeline.sqlite",
+    "overlap_analysis": "experiments/nosa_offload_overlap/output/data/refactor_nosa_overlap_profile_20261005_01/overlap.json",
+    "independent_numerical_acceptance": "experiments/nosa_offload_overlap/output/data/refactor_nosa_overlap_profile_20261005_01/validation_receipt.json",
+    "gate": "Run the existing report generator and independent publication audit after source thaw, verify all 9 unique-stripe samples and exact CUPTI launch fields, before deleting old SQLite/metadata."
+  },
+  "kept_original_output_files": [
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/audit/cxldsagr_nosa_offload_fused_d34d3d8f463d5b26.so",
+      "recorded_sha256": "43f624f9d25a0fe7f0299e42a4e6d7ba840a2fb356fbd1fa14a66cb6b08ec05d",
+      "reason": "Historical compiled binary, build recipe, static SASS/resource extraction or its original generator; no current execution claim.",
+      "verified_sha256": "43f624f9d25a0fe7f0299e42a4e6d7ba840a2fb356fbd1fa14a66cb6b08ec05d"
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/audit/build.ninja",
+      "recorded_sha256": "ba4eaf3579a3655ce72e3a6a5deaaacc588cd04f5902f99d8a3d86f5e5796550",
+      "reason": "Historical compiled binary, build recipe, static SASS/resource extraction or its original generator; no current execution claim.",
+      "verified_sha256": "ba4eaf3579a3655ce72e3a6a5deaaacc588cd04f5902f99d8a3d86f5e5796550"
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/audit/current_kernel.sass",
+      "recorded_sha256": "fe23ee67920c01d5c325d19f53ae766b9e35db47f5d5c5a7d5df981f48a8e2bb",
+      "reason": "Historical compiled binary, build recipe, static SASS/resource extraction or its original generator; no current execution claim.",
+      "verified_sha256": "fe23ee67920c01d5c325d19f53ae766b9e35db47f5d5c5a7d5df981f48a8e2bb"
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/audit/current_kernel.resources",
+      "recorded_sha256": "db406a8e26c3b5138cd583aef168f6bd719c4d669aba656dd05174b92e6665b4",
+      "reason": "Historical compiled binary, build recipe, static SASS/resource extraction or its original generator; no current execution claim.",
+      "verified_sha256": "db406a8e26c3b5138cd583aef168f6bd719c4d669aba656dd05174b92e6665b4"
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/audit/audit_current_kernel.py",
+      "recorded_sha256": "8cdb1f5bc32542a80ed4637a034340928d6bac72982710f5befaf396039f9a27",
+      "reason": "Historical compiled binary, build recipe, static SASS/resource extraction or its original generator; no current execution claim.",
+      "verified_sha256": "8cdb1f5bc32542a80ed4637a034340928d6bac72982710f5befaf396039f9a27"
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/operators/nosa/attention/offload/csrc/nosa_offload_fused.cu",
+      "original_source_path": "operators/nosa/attention/offload/csrc/nosa_offload_fused.cu",
+      "recorded_sha256": "a68fe19bfc5fd6d626ff310c3526624b2a1a4bc88f85678afd705b844410bb28",
+      "reason": "Frozen source named by static audit plus repository-local quoted-include closure; preserves historical source facts without keeping model timing data.",
+      "verified_sha256": "a68fe19bfc5fd6d626ff310c3526624b2a1a4bc88f85678afd705b844410bb28"
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/operators/nosa/attention/offload/api.py",
+      "original_source_path": "operators/nosa/attention/offload/api.py",
+      "recorded_sha256": "e4a97d3ae77af1dec4b8c3b179bbfc5caa051a1d6084d41451a6465068e4f717",
+      "reason": "Frozen source named by static audit plus repository-local quoted-include closure; preserves historical source facts without keeping model timing data.",
+      "verified_sha256": "e4a97d3ae77af1dec4b8c3b179bbfc5caa051a1d6084d41451a6465068e4f717"
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/operators/nosa/attention/offload/_fused.py",
+      "original_source_path": "operators/nosa/attention/offload/_fused.py",
+      "recorded_sha256": "5487ba8ad2b99dc1fb541cb330ffce2ea569edd59e17cb81c5bf39c7c1cd5dc9",
+      "reason": "Frozen source named by static audit plus repository-local quoted-include closure; preserves historical source facts without keeping model timing data.",
+      "verified_sha256": "5487ba8ad2b99dc1fb541cb330ffce2ea569edd59e17cb81c5bf39c7c1cd5dc9"
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/experiments/nosa_offload_overlap/src/measure.py",
+      "original_source_path": "experiments/nosa_offload_overlap/src/measure.py",
+      "recorded_sha256": "40bab488903cdd9eaef91329ef86d6d8b65b68f835b46a0b1a278a8548d71326",
+      "reason": "Frozen source named by static audit plus repository-local quoted-include closure; preserves historical source facts without keeping model timing data.",
+      "verified_sha256": "40bab488903cdd9eaef91329ef86d6d8b65b68f835b46a0b1a278a8548d71326"
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/operators/nosa/attention/device_only/csrc/nosa_attention_fa3.cu",
+      "original_source_path": "operators/nosa/attention/device_only/csrc/nosa_attention_fa3.cu",
+      "recorded_sha256": "f98b5ae4ea4bcc5c3dc5a597958627d6c186f22d1db7108162a2a328401c2f80",
+      "reason": "Frozen source named by static audit plus repository-local quoted-include closure; preserves historical source facts without keeping model timing data.",
+      "verified_sha256": "f98b5ae4ea4bcc5c3dc5a597958627d6c186f22d1db7108162a2a328401c2f80"
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/operators/nosa/attention/device_only/csrc/nosa_attention.cu",
+      "original_source_path": "operators/nosa/attention/device_only/csrc/nosa_attention.cu",
+      "recorded_sha256": "01c0699b507baebe005b2df44e2f78ec149083a6239b96e7d24990edf2bf09f4",
+      "reason": "Frozen source named by static audit plus repository-local quoted-include closure; preserves historical source facts without keeping model timing data.",
+      "verified_sha256": "01c0699b507baebe005b2df44e2f78ec149083a6239b96e7d24990edf2bf09f4"
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/operators/nosa/attention/device_only/csrc/nosa_attention_grouped.cuh",
+      "original_source_path": "operators/nosa/attention/device_only/csrc/nosa_attention_grouped.cuh",
+      "recorded_sha256": "30f35b34a80c2a26c249b92e055c3158a5a2e40e5c818ff9dadc3074dc525927",
+      "reason": "Frozen source named by static audit plus repository-local quoted-include closure; preserves historical source facts without keeping model timing data.",
+      "verified_sha256": "30f35b34a80c2a26c249b92e055c3158a5a2e40e5c818ff9dadc3074dc525927"
+    }
+  ],
+  "delete_after_verified_publication": [
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/audit/launch/checkpoint_gpu5_20261004_01.after.json",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/audit/launch/checkpoint_gpu5_20261004_01.before.json",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/audit/launch/nosa_cached_fetch_20261004_01.after.json",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/audit/launch/nosa_cached_fetch_20261004_01.before.json",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/audit/launch/nosa_cached_fetch_confirm40_20261004_01.after.json",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/audit/launch/nosa_cached_fetch_confirm40_20261004_01.before.json",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/audit/launch/nosa_cached_fetch_profile_20261004_01.after.json",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/audit/launch/nosa_cached_fetch_profile_20261004_01.before.json",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/audit/provenance/audit_profile.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/audit/provenance/freeze.json",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/audit/provenance/native_build_readiness.json",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/audit/provenance/profile_audit.json",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/audit/provenance/run_one.sh",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/audit/provenance/timing_audit.json",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/audit/provenance/verify_launch.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/metadata.json",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/publication/README.md",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/publication/prepare_publication.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/publication/published.json",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/publication/replacement_manifest.json",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/report/comparison.csv",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/report/kernel_audit.json",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/report/report.json",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/results.json",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/GR/__init__.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/GR/analysis/heat_curves.csv",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/GR/analyze_heat.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/GR/dataset.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/GR/heat.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/GR/input_generator.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/GR/reconstruct_histogram.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/GR/sample_distribution.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/GR/scheduling.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/cache/contracts.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/cache/host_allocation.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/cache/host_backing.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/cache/indexer_cache.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/cache/manager.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/cache/prefix_pool.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/cache/sparse_token_cache.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/cache/sparse_token_pool.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/cache/staging.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/executor/model_executor.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/executor/serving_backend.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/experiments/nosa_gr_65536_1024/src/analyze.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/experiments/nosa_gr_65536_1024/src/capture.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/experiments/nosa_gr_65536_1024/src/instrumentation.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/experiments/nosa_gr_65536_1024/src/mfu.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/experiments/nosa_gr_65536_1024/src/sources.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/experiments/nosa_kernel_mfu/src/capture_inputs.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/experiments/nosa_kernel_mfu/src/measure.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/experiments/nosa_offload_overlap/scripts/run.sh",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/experiments/nosa_offload_overlap/src/analyze.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/experiments/nosa_offload_overlap/src/report.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/layers/attention.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/layers/feed_forward.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/layers/normalization.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/models/nosa/_allocator_snapshot.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/models/nosa/allocation_budget.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/models/nosa/attention.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/models/nosa/cache.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/models/nosa/compute_graphs.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/models/nosa/config.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/models/nosa/deferred_validation.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/models/nosa/fixed_cache.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/models/nosa/fixed_resources.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/models/nosa/fixed_serving.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/models/nosa/indexer.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/models/nosa/infer.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/models/nosa/layers.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/models/nosa/model.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/models/nosa/offload_cache.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/models/nosa/request_format.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/models/nosa/rotary.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/models/nosa/scoring.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/models/nosa/serving.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/models/nosa/serving_resources.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/models/nosa/session_budget.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/operators/common/csrc/kv_transfer.cu",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/operators/common/kv_transfer.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/operators/flashinfer.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/operators/nosa/_native.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/operators/nosa/attention/common.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/operators/nosa/attention/device_only/_cuda.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/operators/nosa/attention/device_only/_fa3.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/operators/nosa/attention/device_only/_triton.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/operators/nosa/attention/device_only/api.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/operators/nosa/attention/offload/csrc/nosa_offload.cu",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/operators/nosa/attention/reference/torch.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/operators/nosa/attention/workspace.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/operators/nosa/indexer/_indexer_checked_cuda.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/operators/nosa/indexer/_indexer_cuda.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/operators/nosa/indexer/_indexer_deferred_cuda.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/operators/nosa/indexer/_prepare_cuda.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/operators/nosa/indexer/_prepare_ranked_cuda.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/operators/nosa/indexer/_scores_cuda.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/operators/nosa/indexer/_selection_cuda.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/operators/nosa/indexer/api.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/operators/nosa/indexer/compression.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/operators/nosa/indexer/csrc/nosa_guarded_buffers.cuh",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/operators/nosa/indexer/csrc/nosa_indexer.cu",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/operators/nosa/indexer/csrc/nosa_indexer_checked.cu",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/operators/nosa/indexer/csrc/nosa_offload_compression.cu",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/operators/nosa/indexer/csrc/nosa_prepare.cu",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/operators/nosa/indexer/csrc/nosa_prepare_ranked.cu",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/operators/nosa/indexer/csrc/nosa_scores.cu",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/operators/nosa/indexer/csrc/nosa_scores_fused.cuh",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/operators/nosa/indexer/csrc/nosa_scores_pruned.cuh",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/operators/nosa/indexer/csrc/nosa_selection.cu",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/operators/nosa/indexer/csrc/nosa_selection_cutoff.cuh",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/operators/nosa/indexer/csrc/nosa_selection_prefix.cuh",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/operators/nosa/indexer/offload_compression.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/operators/nosa/indexer/validation.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/pyproject.toml",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/serving/persistent.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/serving/run_gr.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/serving/run_multi_user.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/serving/runner.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/serving/token_validation.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/sources/uv.lock",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_20261004_01/summary.csv",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/log/nosa_cached_fetch_20261004_01/measure.stderr.log",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/log/nosa_cached_fetch_20261004_01/measure.stdout.log",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/metadata.json",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/report/comparison.csv",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/report/report.json",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/results.json",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/GR/__init__.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/GR/analysis/heat_curves.csv",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/GR/analyze_heat.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/GR/dataset.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/GR/heat.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/GR/input_generator.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/GR/reconstruct_histogram.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/GR/sample_distribution.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/GR/scheduling.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/cache/contracts.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/cache/host_allocation.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/cache/host_backing.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/cache/indexer_cache.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/cache/manager.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/cache/prefix_pool.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/cache/sparse_token_cache.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/cache/sparse_token_pool.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/cache/staging.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/executor/model_executor.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/executor/serving_backend.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/experiments/nosa_gr_65536_1024/src/analyze.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/experiments/nosa_gr_65536_1024/src/capture.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/experiments/nosa_gr_65536_1024/src/instrumentation.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/experiments/nosa_gr_65536_1024/src/mfu.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/experiments/nosa_gr_65536_1024/src/sources.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/experiments/nosa_kernel_mfu/src/capture_inputs.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/experiments/nosa_kernel_mfu/src/measure.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/experiments/nosa_offload_overlap/scripts/run.sh",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/experiments/nosa_offload_overlap/src/analyze.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/experiments/nosa_offload_overlap/src/measure.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/experiments/nosa_offload_overlap/src/report.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/layers/attention.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/layers/feed_forward.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/layers/normalization.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/models/nosa/_allocator_snapshot.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/models/nosa/allocation_budget.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/models/nosa/attention.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/models/nosa/cache.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/models/nosa/compute_graphs.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/models/nosa/config.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/models/nosa/deferred_validation.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/models/nosa/fixed_cache.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/models/nosa/fixed_resources.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/models/nosa/fixed_serving.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/models/nosa/indexer.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/models/nosa/infer.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/models/nosa/layers.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/models/nosa/model.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/models/nosa/offload_cache.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/models/nosa/request_format.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/models/nosa/rotary.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/models/nosa/scoring.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/models/nosa/serving.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/models/nosa/serving_resources.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/models/nosa/session_budget.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/operators/common/csrc/kv_transfer.cu",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/operators/common/kv_transfer.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/operators/flashinfer.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/operators/nosa/_native.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/operators/nosa/attention/common.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/operators/nosa/attention/device_only/_cuda.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/operators/nosa/attention/device_only/_fa3.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/operators/nosa/attention/device_only/_triton.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/operators/nosa/attention/device_only/api.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/operators/nosa/attention/device_only/csrc/nosa_attention.cu",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/operators/nosa/attention/device_only/csrc/nosa_attention_fa3.cu",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/operators/nosa/attention/device_only/csrc/nosa_attention_grouped.cuh",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/operators/nosa/attention/offload/_fused.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/operators/nosa/attention/offload/api.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/operators/nosa/attention/offload/csrc/nosa_offload.cu",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/operators/nosa/attention/offload/csrc/nosa_offload_fused.cu",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/operators/nosa/attention/reference/torch.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/operators/nosa/attention/workspace.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/operators/nosa/indexer/_indexer_checked_cuda.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/operators/nosa/indexer/_indexer_cuda.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/operators/nosa/indexer/_indexer_deferred_cuda.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/operators/nosa/indexer/_prepare_cuda.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/operators/nosa/indexer/_prepare_ranked_cuda.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/operators/nosa/indexer/_scores_cuda.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/operators/nosa/indexer/_selection_cuda.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/operators/nosa/indexer/api.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/operators/nosa/indexer/compression.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/operators/nosa/indexer/csrc/nosa_guarded_buffers.cuh",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/operators/nosa/indexer/csrc/nosa_indexer.cu",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/operators/nosa/indexer/csrc/nosa_indexer_checked.cu",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/operators/nosa/indexer/csrc/nosa_offload_compression.cu",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/operators/nosa/indexer/csrc/nosa_prepare.cu",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/operators/nosa/indexer/csrc/nosa_prepare_ranked.cu",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/operators/nosa/indexer/csrc/nosa_scores.cu",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/operators/nosa/indexer/csrc/nosa_scores_fused.cuh",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/operators/nosa/indexer/csrc/nosa_scores_pruned.cuh",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/operators/nosa/indexer/csrc/nosa_selection.cu",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/operators/nosa/indexer/csrc/nosa_selection_cutoff.cuh",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/operators/nosa/indexer/csrc/nosa_selection_prefix.cuh",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/operators/nosa/indexer/offload_compression.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/operators/nosa/indexer/validation.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/pyproject.toml",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/serving/persistent.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/serving/run_gr.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/serving/run_multi_user.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/serving/runner.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/serving/token_validation.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/sources/uv.lock",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_confirm40_20261004_01/summary.csv",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/log/nosa_cached_fetch_confirm40_20261004_01/measure.stderr.log",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/log/nosa_cached_fetch_confirm40_20261004_01/measure.stdout.log",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/metadata.json",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/overlap.json",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/results.json",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/GR/__init__.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/GR/analysis/heat_curves.csv",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/GR/analyze_heat.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/GR/dataset.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/GR/heat.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/GR/input_generator.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/GR/reconstruct_histogram.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/GR/sample_distribution.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/GR/scheduling.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/cache/contracts.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/cache/host_allocation.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/cache/host_backing.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/cache/indexer_cache.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/cache/manager.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/cache/prefix_pool.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/cache/sparse_token_cache.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/cache/sparse_token_pool.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/cache/staging.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/executor/model_executor.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/executor/serving_backend.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/experiments/nosa_gr_65536_1024/src/analyze.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/experiments/nosa_gr_65536_1024/src/capture.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/experiments/nosa_gr_65536_1024/src/instrumentation.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/experiments/nosa_gr_65536_1024/src/mfu.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/experiments/nosa_gr_65536_1024/src/sources.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/experiments/nosa_kernel_mfu/src/capture_inputs.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/experiments/nosa_kernel_mfu/src/measure.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/experiments/nosa_offload_overlap/scripts/run.sh",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/experiments/nosa_offload_overlap/src/analyze.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/experiments/nosa_offload_overlap/src/measure.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/experiments/nosa_offload_overlap/src/report.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/layers/attention.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/layers/feed_forward.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/layers/normalization.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/models/nosa/_allocator_snapshot.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/models/nosa/allocation_budget.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/models/nosa/attention.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/models/nosa/cache.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/models/nosa/compute_graphs.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/models/nosa/config.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/models/nosa/deferred_validation.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/models/nosa/fixed_cache.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/models/nosa/fixed_resources.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/models/nosa/fixed_serving.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/models/nosa/indexer.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/models/nosa/infer.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/models/nosa/layers.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/models/nosa/model.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/models/nosa/offload_cache.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/models/nosa/request_format.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/models/nosa/rotary.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/models/nosa/scoring.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/models/nosa/serving.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/models/nosa/serving_resources.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/models/nosa/session_budget.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/operators/common/csrc/kv_transfer.cu",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/operators/common/kv_transfer.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/operators/flashinfer.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/operators/nosa/_native.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/operators/nosa/attention/common.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/operators/nosa/attention/device_only/_cuda.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/operators/nosa/attention/device_only/_fa3.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/operators/nosa/attention/device_only/_triton.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/operators/nosa/attention/device_only/api.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/operators/nosa/attention/device_only/csrc/nosa_attention.cu",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/operators/nosa/attention/device_only/csrc/nosa_attention_fa3.cu",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/operators/nosa/attention/device_only/csrc/nosa_attention_grouped.cuh",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/operators/nosa/attention/offload/_fused.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/operators/nosa/attention/offload/api.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/operators/nosa/attention/offload/csrc/nosa_offload.cu",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/operators/nosa/attention/offload/csrc/nosa_offload_fused.cu",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/operators/nosa/attention/reference/torch.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/operators/nosa/attention/workspace.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/operators/nosa/indexer/_indexer_checked_cuda.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/operators/nosa/indexer/_indexer_cuda.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/operators/nosa/indexer/_indexer_deferred_cuda.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/operators/nosa/indexer/_prepare_cuda.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/operators/nosa/indexer/_prepare_ranked_cuda.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/operators/nosa/indexer/_scores_cuda.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/operators/nosa/indexer/_selection_cuda.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/operators/nosa/indexer/api.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/operators/nosa/indexer/compression.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/operators/nosa/indexer/csrc/nosa_guarded_buffers.cuh",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/operators/nosa/indexer/csrc/nosa_indexer.cu",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/operators/nosa/indexer/csrc/nosa_indexer_checked.cu",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/operators/nosa/indexer/csrc/nosa_offload_compression.cu",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/operators/nosa/indexer/csrc/nosa_prepare.cu",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/operators/nosa/indexer/csrc/nosa_prepare_ranked.cu",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/operators/nosa/indexer/csrc/nosa_scores.cu",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/operators/nosa/indexer/csrc/nosa_scores_fused.cuh",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/operators/nosa/indexer/csrc/nosa_scores_pruned.cuh",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/operators/nosa/indexer/csrc/nosa_selection.cu",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/operators/nosa/indexer/csrc/nosa_selection_cutoff.cuh",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/operators/nosa/indexer/csrc/nosa_selection_prefix.cuh",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/operators/nosa/indexer/offload_compression.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/operators/nosa/indexer/validation.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/pyproject.toml",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/serving/persistent.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/serving/run_gr.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/serving/run_multi_user.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/serving/runner.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/serving/token_validation.py",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/sources/uv.lock",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/summary.csv",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/timeline.sqlite",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/data/nosa_cached_fetch_profile_20261004_01/work_intervals.json",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/log/nosa_cached_fetch_profile_20261004_01/analyze.stderr.log",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/log/nosa_cached_fetch_profile_20261004_01/analyze.stdout.log",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/log/nosa_cached_fetch_profile_20261004_01/export.stderr.log",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/log/nosa_cached_fetch_profile_20261004_01/export.stdout.log",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/log/nosa_cached_fetch_profile_20261004_01/measure.stderr.log",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/log/nosa_cached_fetch_profile_20261004_01/measure.stdout.log",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    },
+    {
+      "path": "experiments/nosa_offload_overlap/output/profile/nosa_cached_fetch_profile_20261004_01/timeline.nsys-rep",
+      "reason": "Superseded timing/profile, runtime-binding, broad audit-loader dependency or unselected source; current accepted runs replace dynamic evidence."
+    }
+  ],
+  "obsolete_selected_report_files": [
+    "experiments/nosa_offload_overlap/report/fused/report.json",
+    "experiments/nosa_offload_overlap/report/fused/comparison.csv",
+    "experiments/nosa_offload_overlap/report/fused_confirmation/report.json",
+    "experiments/nosa_offload_overlap/report/fused_confirmation/comparison.csv"
+  ],
+  "required_final_checks": [
+    "Hash the original audit and 12 kept outputs against recorded hashes where present.",
+    "Verify new profile unique-read/launch evidence and selected source facts.",
+    "Reopen exact kept/deleted inventory and assert no retained file is removed.",
+    "Publish the selection manifest alongside unchanged historical kernel audit and new performance reports."
+  ],
+  "historical_report_sha256": "5481c198690e5c5abfb625b8bf944ed154feecd62d28f422922ad05d69986416",
+  "dynamic_evidence": "current_profile_integrity.json",
+  "boundary": "Only selected static fields support current documentation. Historical runtime binding, dynamic profile and archive fields are excluded. The original generator is retained as provenance; whole-audit replay is not promised after selective cleanup."
+}

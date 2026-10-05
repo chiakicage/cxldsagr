@@ -1,13 +1,18 @@
 {
   "passed": true,
-  "profile_run_id": "motivation_c10_profile_20261004_01",
-  "formal_run_id": "motivation_c10_20261004_u16_r2_01",
-  "profile_source_sha256": "c7c2f40915ce41897bd9eabd1dde1efb0dfcfcc528afaea039ef9ac03e57623c",
-  "formal_source_sha256": "11fc11b18b2e70baf450a82ab4fad66f2f8d4e22cda2e9f36bf74453a400df8f",
-  "profile_source_files_rehashed": 1273,
-  "execution_source_files_identical": 1238,
+  "profile_run_id": "refactor_final_deepseek_profile_20261005_01",
+  "formal_run_id": "refactor_final_deepseek_bench_20261005_01",
+  "profile_source_sha256": "cb9ae48c10127178c3bf06edbfb9c4052b11c63959507a15120a819bbcc526eb",
+  "formal_source_sha256": "1319a540b7f78da9c363dd09c0f1568b450df3df5e4d3e8b60155a58c348b3dc",
+  "profile_source_files_rehashed": 1298,
+  "execution_source_files_identical": 1256,
   "actual_quantizer_specializations_identical": 8,
-  "accepted_runtime_artifact_files_rehashed": 202,
+  "accepted_runtime_artifact_files_rehashed": 700,
+  "independent_check_receipt": {
+    "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/docs/agents/acceptance/unified_runtime_20261005/deepseek_final/receipt.json",
+    "sha256": "a25cc5d08891fd6811db232de0b862831b46702c1b2f3124b2921b611574c1b3",
+    "verified_artifacts": 132
+  },
   "declared_backend_identity_and_precision_identical": true,
   "native_flashinfer_libraries_identical": 3,
   "norm_source_files_rehashed": 380,
@@ -89,30 +94,30 @@
   "native_validation": [
     {
       "scheme": "hbm",
-      "fingerprint": "e466ef5193d1231a93228e691c39ad6d38ef0162971d93093fb867dda451e4de",
+      "fingerprint": "941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf",
       "path_environment_equal": true,
-      "loaded_binary_sha256": "308a507e16c6871010f09d37cef7d2012f81cf25328f73103b59bf4a042e0867",
+      "loaded_binary_sha256": "ed79d3e717a464379b4f638f608853277b65f602ef05ca5b293e3afa6025cd40",
       "same_binary_as_formal": true
     },
     {
       "scheme": "echo",
-      "fingerprint": "e466ef5193d1231a93228e691c39ad6d38ef0162971d93093fb867dda451e4de",
+      "fingerprint": "941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf",
       "path_environment_equal": true,
-      "loaded_binary_sha256": "308a507e16c6871010f09d37cef7d2012f81cf25328f73103b59bf4a042e0867",
+      "loaded_binary_sha256": "ed79d3e717a464379b4f638f608853277b65f602ef05ca5b293e3afa6025cd40",
       "same_binary_as_formal": true
     },
     {
       "scheme": "serial_sparse",
-      "fingerprint": "e466ef5193d1231a93228e691c39ad6d38ef0162971d93093fb867dda451e4de",
+      "fingerprint": "941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf",
       "path_environment_equal": true,
-      "loaded_binary_sha256": "308a507e16c6871010f09d37cef7d2012f81cf25328f73103b59bf4a042e0867",
+      "loaded_binary_sha256": "ed79d3e717a464379b4f638f608853277b65f602ef05ca5b293e3afa6025cd40",
       "same_binary_as_formal": true
     },
     {
       "scheme": "dense_prefetch",
-      "fingerprint": "e466ef5193d1231a93228e691c39ad6d38ef0162971d93093fb867dda451e4de",
+      "fingerprint": "941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf",
       "path_environment_equal": true,
-      "loaded_binary_sha256": "308a507e16c6871010f09d37cef7d2012f81cf25328f73103b59bf4a042e0867",
+      "loaded_binary_sha256": "ed79d3e717a464379b4f638f608853277b65f602ef05ca5b293e3afa6025cd40",
       "same_binary_as_formal": true
     }
   ],
@@ -431,12 +436,12 @@
     "/root/.venv/lib/python3.12/site-packages/flashinfer/norm/kernels/rmsnorm.py": "b273fe5444aaf86a1600c196817b7a733b18f6f82030a16e1ef2731c784d48f0",
     "/root/.venv/lib/python3.12/site-packages/flashinfer/norm/utils.py": "3f44ac6727c58883420068bf0aa5b239b12d2e86819ad80e54bc1bc016ec881a",
     "/root/.venv/lib/python3.12/site-packages/flashinfer/utils.py": "6cb8ebcc25eb65521808bf40a8aaf0c5a868827283955867ae382ad7ec773815",
-    "/tmp/deepseek-motivation-c10_host_rope_v2-frozen-6mdyfgj0/operators/deepseek_v32/norm/_compile.py": "d2ae41686db7ec5189855d6c8dc073db0410d5ef8c9f2fc0684ffe878d8472ef",
-    "/tmp/deepseek-motivation-c10_host_rope_v2-frozen-6mdyfgj0/operators/deepseek_v32/norm/_fingerprint.py": "49029800ef9cb28d6c2134a59a500e96deda27ec3fdf0213e80b4bbe0e75d9dd",
-    "/tmp/deepseek-motivation-c10_host_rope_v2-frozen-6mdyfgj0/operators/deepseek_v32/norm/_fused.py": "9d87d526563f5c6b626c071194aab5d951a3da78a94810af37f437e45787633f",
-    "/tmp/deepseek-motivation-c10_host_rope_v2-frozen-6mdyfgj0/operators/deepseek_v32/norm/_layout.py": "3c853a6edc9777306a1f2840630b9a5b4977fa5b6563d41258ed06d1d7a14a86",
-    "/tmp/deepseek-motivation-c10_host_rope_v2-frozen-6mdyfgj0/operators/deepseek_v32/norm/_plain.py": "cfaf2dca0806d0e3192d87c84e42615810ae093e10d13b5ed2b823033032ef18",
-    "/tmp/deepseek-motivation-c10_host_rope_v2-frozen-6mdyfgj0/operators/deepseek_v32/norm/api.py": "f22a9e4b911b566443004025ba2476cc63a1336a4b934d919f5f2e69a640da4d",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/operators/deepseek_v32/norm/_compile.py": "d2ae41686db7ec5189855d6c8dc073db0410d5ef8c9f2fc0684ffe878d8472ef",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/operators/deepseek_v32/norm/_fingerprint.py": "49029800ef9cb28d6c2134a59a500e96deda27ec3fdf0213e80b4bbe0e75d9dd",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/operators/deepseek_v32/norm/_fused.py": "9d87d526563f5c6b626c071194aab5d951a3da78a94810af37f437e45787633f",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/operators/deepseek_v32/norm/_layout.py": "3c853a6edc9777306a1f2840630b9a5b4977fa5b6563d41258ed06d1d7a14a86",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/operators/deepseek_v32/norm/_plain.py": "cfaf2dca0806d0e3192d87c84e42615810ae093e10d13b5ed2b823033032ef18",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/operators/deepseek_v32/norm/api.py": "f22a9e4b911b566443004025ba2476cc63a1336a4b934d919f5f2e69a640da4d",
     "/root/.venv/lib/python3.12/site-packages/tvm_ffi/__init__.py": "9284b5659f79406502c9fb6fee9d5df2714f457e610a3a37c76d37226eda46d2",
     "/root/.venv/lib/python3.12/site-packages/tvm_ffi/3rdparty/dlpack/include/dlpack/dlpack.h": "62052bef24bd69bb7b52e95428f9e99bd7951783850c36c5f2a41e71fd63c2fc",
     "/root/.venv/lib/python3.12/site-packages/tvm_ffi/3rdparty/libbacktrace/backtrace.h": "d2ac7d5c6910c011f860d04a04a4a6a6fbea2882f23878f1f5f6721831a28acd",
@@ -560,6 +565,8 @@
     "/root/.venv/lib/python3.12/site-packages/tvm_ffi/utils/kwargs_wrapper.py": "a476d0d41d4c805e721ee37b3153cd75387286aafb1768ffe186be97594faaf5",
     "/root/.venv/lib/python3.12/site-packages/tvm_ffi/utils/lockfile.py": "5e5b941036979eb44566e64e351e7fddadd27360a9efe56c52493313be15f100",
     "/root/.venv/lib/python3.12/site-packages/tvm_ffi/utils/unpack_dataclass.py": "f38f2b85c25d06452c97993c480bc64afc16993155bea5d4a4502edf2e543439",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/serving/csrc/token_validation.cpp": "144f89b7004bd589cf18850a8ac2b0aee29ce7bdf0b6d8fa4db7ee0e02b0d1af",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/serving/token_validation.py": "d2f4f9d15dbc0a435f6485efde175d144de82b5b46069db406ca7476055640f2",
     "/root/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin/python3.12": "d778d0b551287fb5f06c4464f78b616c086f8d42e94d8cfc209b12324cf937a1",
     "/root/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/include/python3.12/Python.h": "729ef157f6026e6e1b3104593f87dddc597c3b83b60c7c2965878c62a56c6f7d",
     "/root/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/include/python3.12/abstract.h": "8f0b27427f4e16b4295b2ab1a7bb499bf86748fafbd1959e220c506ed59f774f",
@@ -670,8 +677,6 @@
     "/root/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/include/python3.12/unicodeobject.h": "5cc1350da2b00f5187065004a1f5d66764e86a0f20f8faba7d0eadf913297d93",
     "/root/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/include/python3.12/warnings.h": "18fde34b12247460de805fc259ea7f14305fce4779d244c0a7bdc7c73b8f6b51",
     "/root/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/include/python3.12/weakrefobject.h": "031b4bc091cf442b4305f7c5ac9713f32101a5e40617f3cb56c632cb7b15fb5b",
-    "/tmp/deepseek-motivation-c10_host_rope_v2-frozen-6mdyfgj0/serving/csrc/token_validation.cpp": "144f89b7004bd589cf18850a8ac2b0aee29ce7bdf0b6d8fa4db7ee0e02b0d1af",
-    "/tmp/deepseek-motivation-c10_host_rope_v2-frozen-6mdyfgj0/serving/token_validation.py": "34227128afb5ec52bf57d47c7b7bf8b250cd6da3ba676d20dd3096a7f36a0fde",
     "/usr/bin/x86_64-linux-gnu-as": "d0b9315551af88dba9e4f141f270278ff7326d4ed0996b4317067e4fd062cd5e",
     "/usr/bin/x86_64-linux-gnu-g++-13": "1353e9bdd29a7295c7226bf6c63abccce056d8cac31f112e5cdbecc3f28c2769",
     "/usr/bin/x86_64-linux-gnu-ld.bfd": "5b674ea1d7017c2929f3c52c43487478bb240ecdd7197a25cce3813a70329a5c",
@@ -869,16 +874,16 @@
     "/usr/lib/gcc/x86_64-linux-gnu/13/include/syslimits.h": "22dd0ab81baadd5a8d455b445855f341d419c7b0267beca235de00b7ec78e529",
     "/usr/libexec/gcc/x86_64-linux-gnu/13/cc1plus": "840b332fb62ec6f694ac77d91fe69ef7f80b0d69512ed89374af0ee7a506255d",
     "/usr/libexec/gcc/x86_64-linux-gnu/13/collect2": "4d1f341ae5b763b513258ee2812422a45e063c30a2f1924a0cf63d3699f3a158",
-    "/root/.cache/cxldsagr/token-validation/e466ef5193d1231a93228e691c39ad6d38ef0162971d93093fb867dda451e4de/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so": "308a507e16c6871010f09d37cef7d2012f81cf25328f73103b59bf4a042e0867",
-    "/root/.cache/cxldsagr/token-validation/e466ef5193d1231a93228e691c39ad6d38ef0162971d93093fb867dda451e4de/manifest.json": "3b7acb2466f880a6ea55961f7ca3227ebe2f8297f15bcd1ae2f32731fd60c4db"
+    "/root/.cache/cxldsagr/token-validation/941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so": "ed79d3e717a464379b4f638f608853277b65f602ef05ca5b293e3afa6025cd40",
+    "/root/.cache/cxldsagr/token-validation/941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf/manifest.json": "bee233ac0fd073af7d061eedd88a54b37aca7fe161453faf98d4d8594d8e9876"
   },
   "source_and_input_sha256": {
-    "/tmp/deepseek_c10_profile_audit_graph_profile/provenance.py": "58f5ef60dc475b82eacb5cf3b41be0f64197863765c90f3b3b9ae57d4937cf6d",
-    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/motivation_c10_profile_20261004_01/metadata.json": "8e932a52b895f20512eb39a1d89de4354d1968ed116295f696cd7a881a2d7a0e",
-    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/motivation_c10_profile_20261004_01/source_manifest.json": "3ca224dff33e43480445c20734eb49a1e85069ea7e131806405d00cd5e369701",
-    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/motivation_c10_20261004_u16_r2_01/metadata.json": "bd7661384311bd3e204c28ac719ab25ae362cb38b62bcf1be0a4d4d9095466b2",
-    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/motivation_c10_20261004_u16_r2_01/source_manifest.json": "2c46ff8168fc28eb3937d491d2ac8ff92692cd4c117c685aab6c9acfe186ee8e",
-    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/motivation_c10_20261004_u16_r2_01/analysis/independent_formal_audit/runtime_graph_audit.json": "f77edb334589f7e37208a11490fc486aaa0ab721576cefa60af34ea9e0ef8c1c"
+    "/tmp/cxldsagr_refactor_final_deepseek_20261005/analysis_sources/provenance.py": "c3ae87803664439ad7ba59e6afe30d4ccf4540d2613299d33762637c46393d92",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_profile_20261005_01/metadata.json": "8b0cdf242ac0f2f93859cbfdf897e35d7212f286c845500e54c8db951015e9ab",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_profile_20261005_01/source_manifest.json": "509fdc64dd3f6ec5a8dacfeaffe7b1d041e2d460ba84f5a2e01c3aaeb7c2ade9",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_bench_20261005_01/metadata.json": "cda32f5d3a423aa124b6bdc8ee8c13d84a9b6caa92e9badd5ba5c9ddaff9290c",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_bench_20261005_01/source_manifest.json": "31fc8ed1b1c242e45f565acef4c86236d0a61c71dbe68a8ae4a1ee69d18bc699",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/docs/agents/acceptance/unified_runtime_20261005/deepseek_final/receipt.json": "a25cc5d08891fd6811db232de0b862831b46702c1b2f3124b2921b611574c1b3"
   },
   "boundaries": [
     "Independent saved-source and recorded runtime identity checks; timed launch attribution is checked separately against raw SQLite.",

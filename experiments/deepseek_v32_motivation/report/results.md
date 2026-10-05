@@ -1,4 +1,4 @@
-# DeepSeek V3.2 有限缓存对照（motivation_c10_20261004_u16_r2_01）
+# DeepSeek V3.2 有限缓存对照（refactor_final_deepseek_bench_20261005_01）
 
 同一条顺序访问轨迹包含 16 个用户、2 轮；H=65,536，A=128，C=1,024，P=65,536，NH=16,777,216。只执行这 16 个用户，未填满 NH。
 
@@ -12,14 +12,14 @@
 
 | 方案 | 访问 | 请求数 | prefix hit | E2E 均值 ms | 中位数 ms | p95 ms | 均值相对 HBM 加速 |
 |---|---|---:|---:|---:|---:|---:|---:|
-| hbm | 首次 | 16 | 0/16 | 2176.886 | 2175.170 | 2187.259 | 1.000× |
-| hbm | 复访 | 16 | 0/16 | 2170.244 | 2169.457 | 2178.394 | 1.000× |
-| echo | 首次 | 16 | 0/16 | 2283.433 | 2281.884 | 2293.095 | 0.953× |
-| echo | 复访 | 16 | 16/16 | 24.947 | 24.818 | 25.509 | 86.993× |
-| serial_sparse | 首次 | 16 | 0/16 | 2217.737 | 2220.791 | 2229.328 | 0.982× |
-| serial_sparse | 复访 | 16 | 16/16 | 18.456 | 18.350 | 19.213 | 117.589× |
-| dense_prefetch | 首次 | 16 | 0/16 | 2233.838 | 2233.595 | 2237.674 | 0.975× |
-| dense_prefetch | 复访 | 16 | 16/16 | 31.889 | 31.793 | 32.277 | 68.057× |
+| hbm | 首次 | 16 | 0/16 | 2192.406 | 2192.204 | 2199.826 | 1.000× |
+| hbm | 复访 | 16 | 0/16 | 2187.398 | 2187.548 | 2191.141 | 1.000× |
+| echo | 首次 | 16 | 0/16 | 2294.994 | 2295.142 | 2299.413 | 0.955× |
+| echo | 复访 | 16 | 16/16 | 24.530 | 24.346 | 25.607 | 89.172× |
+| serial_sparse | 首次 | 16 | 0/16 | 2228.258 | 2228.076 | 2237.858 | 0.984× |
+| serial_sparse | 复访 | 16 | 16/16 | 18.084 | 18.045 | 18.406 | 120.959× |
+| dense_prefetch | 首次 | 16 | 0/16 | 2239.190 | 2238.555 | 2246.349 | 0.979× |
+| dense_prefetch | 复访 | 16 | 16/16 | 33.197 | 32.528 | 35.543 | 65.892× |
 
 被淘汰后的请求仍计为复访。prefix hit 表示用户固定历史被保留，不表示选中的全部主 KV 已驻留 HBM。
 
@@ -45,12 +45,12 @@
 | 方案 | CUDA allocated 峰值 GiB | reserved 峰值 GiB |
 |---|---:|---:|
 | hbm | 14.517269 | 23.634766 |
-| echo | 16.357101 | 24.296875 |
+| echo | 16.357162 | 24.296875 |
 | serial_sparse | 16.358688 | 24.296875 |
 | dense_prefetch | 16.358688 | 24.304688 |
 
 每种方案在释放预热资源后、重新分配共享缓存前重置 CUDA allocator 峰值；峰值覆盖已加载权重、共享分配和完整请求轨迹。allocated 为活跃分配，reserved 还含 allocator 保留的空闲缓存，两者不能相加。device free-memory 只在边界采样，不等于连续进程峰值。实际 cache 拥有的 HBM/DRAM 字节与这些峰值分开保存。
 
-每条请求的全部 candidate hidden 和末 token logits 均保存到 CPU，在计时外与 HBM-only 相同请求的输出逐位比较；报告生成时再次核验所有保存输出及来源 hash。所有对照均通过。
+数值验收来自独立 check：`/mnt/ssd-wlcb/chenkaiqi/cxldsagr/docs/agents/acceptance/unified_runtime_20261005/deepseek_final/receipt.json`。本次 bench 未逐请求复制、比较或保存完整输出。
 
-逐请求数据见 [per_request.csv](per_request.csv)，分组数据见 [summary.csv](summary.csv)，完整汇总与边界见 [summary.json](summary.json)，验收与来源见 [report_provenance.json](report_provenance.json)。完整源数据与输出 tensor 保留在 `output/data/motivation_c10_20261004_u16_r2_01/`。
+逐请求数据见 [per_request.csv](per_request.csv)，分组数据见 [summary.csv](summary.csv)，完整汇总与边界见 [summary.json](summary.json)，验收与来源见 [report_provenance.json](report_provenance.json)。本次运行的完整源数据保留在 `output/data/refactor_final_deepseek_bench_20261005_01/`。
