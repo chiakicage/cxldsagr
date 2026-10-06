@@ -1,24 +1,37 @@
 {
-  "benchmark_run_id": "deepseek_mfu_dma_a128_bench_20261006_01",
-  "boundary": "Documentation binding for retained v3 formal MFU and accepted V10 diagnostics. Complete/layer extend gates fail. Production resident-mask live CUBIN was not separately recorded; source/raw activity evidence and limitations are retained. Formal MFU and motivation remain pending.",
-  "check_run_id": "deepseek_mfu_dma_a128_check_20261006_01",
-  "current_diagnostic": {
-    "benchmark_run_id": "deepseek_gap_v10_a128_bench_20261006_01",
-    "check_run_id": "deepseek_gap_v10_a128_check_20261006_01",
-    "independent_audit_sha256": "8127dd95bf0614180da4ea8dcb2389efb813470ca9268615b49bcf24c25e3e33",
-    "profile_run_id": "deepseek_gap_v10_a128_minimal_20261006_01",
+  "schema": "mfu-readme-binding-v4",
+  "current_full_extend_graph": {
+    "check_run_id": "deepseek_dense_late_wait_cold_check_20261006_01",
+    "warm_check_run_id": "deepseek_dense_late_wait_warm_check_20261006_01",
+    "benchmark_run_id": "deepseek_dense_late_wait_bench_20261006_01",
+    "profile_run_id": "deepseek_dense_late_wait_profile_20261006_01",
+    "timeline_run_id": "deepseek_dense_late_wait_timeline_20261006_02",
     "publication_manifest": {
-      "path": "gap_v10/publication_manifest.json",
-      "sha256": "c820df034f01ab5656df7bb523d5a8570939854648953bc0392a516f844630a1"
+      "path": "full_extend_graph/publication_manifest.json",
+      "sha256": "abedb8bfdd29b7f8f4abf88ced9db157faf7f55784539f875986aafec33ec5f8"
     }
   },
-  "profile_run_id": "deepseek_mfu_dma_a128_profile_20261006_01",
-  "publication_manifest": {
-    "path": "four_methods/publication_manifest.json",
-    "sha256": "f70afbe59ab5b30052ffb9c10c5a70d1eb4ceb13de5f659145bed3155e6758d4"
+  "current_operator_mfu": {
+    "check_run_id": "deepseek_dense_late_wait_cold_check_20261006_01",
+    "benchmark_run_id": "deepseek_dense_late_wait_bench_20261006_01",
+    "profile_run_id": "deepseek_dense_late_wait_mfu_profile_20261006_01",
+    "report_run_id": "deepseek_dense_late_wait_mfu_report_20261006_01",
+    "publication_manifest": {
+      "path": "full_extend_graph/mfu/publication_manifest.json",
+      "sha256": "d92e4a2bce7082e375ea913fd79a44ee74f7773b00365454e834cb7a3b27099a"
+    }
+  },
+  "extend_startup_comparison": {
+    "timeline_run_id": "deepseek_dense_late_wait_startup_20261006_02",
+    "profile_run_id": "deepseek_dense_late_wait_profile_20261006_01",
+    "publication_manifest": {
+      "path": "full_extend_graph/with_startup/publication_manifest.json",
+      "sha256": "13dccfcd9ef532c42dd89907a51ed7f670356b4886eb7345077a63e178528b8f"
+    }
   },
   "readme": {
     "path": "../README.md",
-    "sha256": "13754fb7103e0ea8771c9d8311bbe299b84a07a2aa13ba749f85ecefed58ce9e"
-  }
+    "sha256": "d9d793cad63c49eb02accc2b44f2116c8597bf5700ee6afed90deb6403a3f200"
+  },
+  "boundary": "One final main pair plus the explicitly requested startup comparison. Prefill last chunk only. Main windows end at L2 last compute and start at L0 first compute, including earlier L0 history H2D for dense extend. GPU idle and productive fused ECHO intervals retain their original definitions. New matched check/bench/profile runs validate the requested dense late-wait schedule."
 }

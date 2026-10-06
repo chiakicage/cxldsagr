@@ -191,7 +191,7 @@ def test_timeline_preserves_launch_gaps_and_prelaunched_next_layer_io():
     assert summary["gpu_gap_ms"] == pytest.approx(20 / 1e6)
     assert summary["compute_io_overlap_ms"] == pytest.approx(20 / 1e6)
     assert summary["next_layer_prefetch_overlap_ms"] == pytest.approx(20 / 1e6)
-    assert next(row for row in rows if row["lane"] == "IO")["layer"] == 2
+    assert next(row for row in rows if row["lane"] == "IO")["layer"] == "layer_2"
 
 
 def test_device_copy_is_control_and_prefetch_overlap_uses_unclipped_gather():

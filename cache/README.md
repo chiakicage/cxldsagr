@@ -175,8 +175,24 @@ workspace，不另存逐层候选 indexer。这份 workspace 和每层候选 KV 
 时禁用 backend。`truncate` 只失效该 session 的 suffix，不重置共享池。
 实验在计时外保存与恢复全局 pool、session 和 prefix 状态；快照要求 host ownership
 及 prefix 内容不变，其额外诊断存储单独披露。
+
+[sparse_token_graph.py](sparse_token_graph.py) 为真实 DeepSeek 层的完整 extend 图保存
+cache 主机状态与异步写回所有权。模型在 `begin_step` 后进入
+`pool.graph_capture(session)`，捕获现有 cache 操作；结束 capture 前汇合全部 IO
+stream。图持有被引用的 host/device storage 和 D2H 写回源，主机状态只在 replay
+同步成功后应用，再由模型提交所有层。GPU 已更新的计数不会重复累计。
+
+该路径只允许一个 session 的固定 prefix 和一次完整 query batch，要求 `H+A<=P`。
+每次 replay 前恢复匹配的 prefix，核验 storage、clock、驻留与追加证明；状态变化
+直接报错。它保留普通持久 append 语义，未用于 GR transient candidate 或 NOSA。
+模型通过 `prepare_extend_graph` 显式启用，API、借用输出的生命周期和支持范围见
+[DeepSeek 模型](../models/deepseek_v32/README.md)，独立验收与性能状态见
+[四方案 MFU 实验](../experiments/deepseek_v32_mfu/README.md)。图销毁前保留写回源，
+其容量已计入 graph private pool；无法确认完成时保留 owner/storage 并禁用复用。
+
 这条路径使用本地 DRAM，不包含 CXL/RDMA，也未接入 NOSA 的 `CacheManager`。
-当前非 GR 验收限定真实 checkpoint 第 0–2 层的 64K + 1K；模型保留完整层数能力。
+非 GR 验收使用真实 checkpoint 第 0–2 层；当前 H/A 和图策略以 MFU 实验为准。
+模型保留完整层数能力，三层结果不等于完整 61 层验证。
 直接 `backend.extend` 和非 GR 模型保持上述持久事务。通用字节预算 serving 的
 `hbm/dense_prefetch` 使用持久 append 后 truncate；`echo/serial_sparse` 使用显式 GPU
 transient candidate。固定 P/NH 的四个方案均在 GPU 临时执行 candidate 后 discard。

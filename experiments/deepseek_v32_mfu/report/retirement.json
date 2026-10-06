@@ -1,8 +1,8 @@
 {
-  "replacement_profile": "deepseek_mfu_dma_a128_profile_20261006_01",
-  "replacement_bench": "deepseek_mfu_dma_a128_bench_20261006_01",
-  "verified_publication_files": 18,
-  "reason": "Replaced prior two-method, A1024 and A128 mapped-host gather materials after independent A128 contiguous DMA validation, timing, profile and publication. No historical report archive retained.",
+  "replacement_profile": "deepseek_dense_late_wait_mfu_profile_20261006_01",
+  "replacement_bench": "deepseek_dense_late_wait_bench_20261006_01",
+  "verified_publication_files": 61,
+  "reason": "Dense late-wait full-extend scheduling is published after fresh cold/warm correctness, independent timing and both stage/API profiles, native dependency/overlap checks and independent attribution audits. Superseded fullgraph MFU/timeline derivatives are removed; still-referenced sources for unaffected experiments are retained with original identity.",
   "removed": [
     "experiments/deepseek_v32_mfu/output/data/deepseek_mfu_bench_20261006_01",
     "experiments/deepseek_v32_mfu/output/data/deepseek_mfu_bench_20261006_02",
@@ -26,6 +26,77 @@
     "experiments/deepseek_v32_mfu/output/profile/deepseek_mfu_a128_bench_20261006_01",
     "experiments/deepseek_v32_mfu/output/data/deepseek_mfu_a128_profile_20261006_01",
     "experiments/deepseek_v32_mfu/output/log/deepseek_mfu_a128_profile_20261006_01",
-    "experiments/deepseek_v32_mfu/output/profile/deepseek_mfu_a128_profile_20261006_01"
-  ]
+    "experiments/deepseek_v32_mfu/output/profile/deepseek_mfu_a128_profile_20261006_01",
+    "experiments/deepseek_v32_mfu/report/four_methods",
+    "experiments/deepseek_v32_mfu/output/data/deepseek_mfu_dma_a128_bench_20261006_01",
+    "experiments/deepseek_v32_mfu/output/log/deepseek_mfu_dma_a128_bench_20261006_01",
+    "experiments/deepseek_v32_mfu/output/profile/deepseek_mfu_dma_a128_bench_20261006_01",
+    "experiments/deepseek_v32_mfu/output/data/deepseek_mfu_dma_a128_profile_20261006_01",
+    "experiments/deepseek_v32_mfu/output/log/deepseek_mfu_dma_a128_profile_20261006_01",
+    "experiments/deepseek_v32_mfu/output/profile/deepseek_mfu_dma_a128_profile_20261006_01",
+    "experiments/deepseek_v32_mfu/output/data/deepseek_full_graph_extend_startup_20261006_02",
+    "experiments/deepseek_v32_mfu/output/data/deepseek_full_graph_gap_sources_20261006_01",
+    "experiments/deepseek_v32_mfu/output/data/deepseek_full_graph_mfu_bench_20261006_01",
+    "experiments/deepseek_v32_mfu/output/log/deepseek_full_graph_mfu_bench_20261006_01",
+    "experiments/deepseek_v32_mfu/output/profile/deepseek_full_graph_mfu_bench_20261006_01",
+    "experiments/deepseek_v32_mfu/output/data/deepseek_full_graph_mfu_profile_20261006_01",
+    "experiments/deepseek_v32_mfu/output/log/deepseek_full_graph_mfu_profile_20261006_01",
+    "experiments/deepseek_v32_mfu/output/profile/deepseek_full_graph_mfu_profile_20261006_01",
+    "experiments/deepseek_v32_mfu/output/data/deepseek_full_graph_mfu_report_20261006_01",
+    "experiments/deepseek_v32_mfu/output/log/deepseek_full_graph_mfu_report_20261006_01",
+    "experiments/deepseek_v32_mfu/output/data/deepseek_full_graph_report_20261006_03"
+  ],
+  "previous_replacement_profile": "deepseek_mfu_dma_a128_profile_20261006_01",
+  "previous_replacement_bench": "deepseek_mfu_dma_a128_bench_20261006_01",
+  "replacement_report": "full_extend_graph",
+  "simulation_withdrawal": {
+    "path": "simulation_retirement.json",
+    "sha256": "44bcac16d124c637b9caeb376df5db59c6c5cfc699e89bbd2e52da964b9f37c8"
+  },
+  "prior_publication_replacements": [
+    {
+      "replacement_profile": "deepseek_full_graph_mfu_profile_20261006_01",
+      "replacement_bench": "deepseek_full_graph_mfu_bench_20261006_01",
+      "replacement_report": "full_extend_graph/mfu",
+      "reason": "Current complete-graph MFU replaces the old compute-island MFU after fresh independent cold check, clean bench, 13-capture profile, exact native node/API attribution and independent audits. The old ECHO scale-stage issue prevents reuse of its derived simulation. Current final timeline evidence is retained under its own unchanged execution identity.",
+      "verified_publication_files": 22
+    }
+  ],
+  "dense_late_wait_replacement": {
+    "publication_run_id": "deepseek_dense_late_wait_report_20261006_01",
+    "timeline_run_id": "deepseek_dense_late_wait_timeline_20261006_02",
+    "startup_run_id": "deepseek_dense_late_wait_startup_20261006_02",
+    "removed_run_ids": [
+      "deepseek_full_graph_extend_startup_20261006_02",
+      "deepseek_full_graph_gap_sources_20261006_01",
+      "deepseek_full_graph_mfu_bench_20261006_01",
+      "deepseek_full_graph_mfu_profile_20261006_01",
+      "deepseek_full_graph_mfu_report_20261006_01",
+      "deepseek_full_graph_report_20261006_03"
+    ],
+    "retained_for_unaffected_experiments": [
+      {
+        "run_id": "deepseek_full_graph_cold_profile_20261006_02",
+        "reason": "Original source of valid cache_manager_performance ECHO/serial transition results; keep data/log/profile and matched check/bench."
+      },
+      {
+        "run_id": "deepseek_full_graph_cold_bench_20261006_01",
+        "reason": "Matched timing source of the retained transition profile."
+      },
+      {
+        "run_id": "deepseek_full_graph_timeline_20261006_02",
+        "reason": "Still used by independently maintained official combined_prefill publication; new combined figures are being generated by concurrent work, so retain until that publication replaces its source references."
+      }
+    ],
+    "preserved_current_audit_input": {
+      "original_path": "experiments/deepseek_v32_mfu/output/data/deepseek_full_graph_mfu_profile_20261006_01/full_graph_templates.json",
+      "path": "/tmp/deepseek_dense_late_wait_audit_20261006_01/prior_full_graph_templates.json",
+      "sha256": "a65de0f6f4c477b447ee956fad1a32f3b7ead771248aa88e9fadc895f842faee",
+      "purpose": "Captured GPU node inventory needed to reproduce the current impact audit; this is not a retained performance report."
+    },
+    "retained_engineering_checks": [
+      "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_full_graph_mfu_check_20261006_01/",
+      "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_full_graph_cold_check_20261006_02/"
+    ]
+  }
 }

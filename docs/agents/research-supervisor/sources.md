@@ -938,7 +938,7 @@ A128 四方法 MFU、局部 dense 重叠及依赖实验补测边界。
 | NOSA pattern | `refactor_nosa_pattern_capture_20261005_01`；独立 observer check 分开保存；`refactor_qa64_environment_compare_20261005_01` 比较当前与保留 QA64 数组 | [publication](../../../experiments/nosa_indexer_pattern_65536_1024/report/publication.json)、[QA64 比较](../../../experiments/nosa_indexer_pattern_65536_1024/report/qa64/environment_comparison.json) |
 | NOSA overlap | `refactor_nosa_overlap_{bench,confirm40,profile}_20261005_01`；主测、40 次确认和独立 profile 分开 | [publication](../../../experiments/nosa_offload_overlap/report/publication.json)、[当前 profile 审计](../../../experiments/nosa_offload_overlap/report/current_profile_integrity.json) |
 | DeepSeek C10 motivation（该次来源） | `refactor_final_deepseek_publication_20261005_01`，选用 `refactor_final_deepseek_{bench,profile}_20261005_01`；三轮对照只保留本条历史范围 | 后续修改的补测另记 S-032；[当前实验入口](../../../experiments/deepseek_v32_motivation/README.md)不反向证明此处旧 run |
-| DeepSeek 真实三层（已替换） | 历史运行 `refactor_three_layers_publication_20261005_01`，独立 check02，`refactor_three_layers_{bench,profile}_20261005_01` | 旧 `layers3` 已替换；[当前四方法 publication](../../../experiments/deepseek_v32_mfu/report/four_methods/publication_manifest.json)与[当前汇总](../../../experiments/deepseek_v32_mfu/report/four_methods/summary.json)只对应 S-032，不能作为本行旧运行的证据 |
+| DeepSeek 真实三层（已替换） | 历史运行 `refactor_three_layers_publication_20261005_01`，独立 check02，`refactor_three_layers_{bench,profile}_20261005_01` | 旧 `layers3` 已替换；[当前四方法 publication](../../../experiments/deepseek_v32_mfu/report/full_extend_graph/mfu/publication_manifest.json)与[当前汇总](../../../experiments/deepseek_v32_mfu/report/full_extend_graph/mfu/summary.json)只对应 S-032，不能作为本行旧运行的证据 |
 
 - **MFU 结果：**native sparse full/extend 为 2374.539186/36.207893 ms、
   50.379877%/52.557023%；dense 为 3506.117727/81.806672 ms、
@@ -1039,83 +1039,75 @@ A128 四方法 MFU、局部 dense 重叠及依赖实验补测边界。
 
 ## S-032：DeepSeek A128 四方法 MFU 与局部重叠
 
-
-- **研究条目与变化：**主条目 2.4、2.5、4.1–4.2。研究者将默认 extend 改为 A=128，
-  并要求 dense 使用连续 Host DRAM/HBM 与 `cudaMemcpyAsync`。真实前三层已完成
-  新实现的四方法独立验收、正式计时和 profile；dense 完整 extend 低于 serial sparse，
-  仍高于 HBM。随后研究者要求“先不要管 motivation 实验”，C10 DMA 补测、容量
-  后续审阅及其他 motivation 实验暂缓，既有报告和产物保留当前状态。
+- **研究者选择与变化：**主条目 2.4、2.5、4.1–4.2。停止广泛优化后，按用户指定
+  完成 dense extend 延后同步及补测：对历史 KV 的等待从整层计算前推迟到
+  indexer/top-k 后、主 KV append 前。Prefill 和其他方法的 GPU 调度未变。
+  C10 motivation、容量后续审阅及其他 motivation 实验继续暂缓，不因剩余 gap
+  或旧 simulation 撤回而新增任务。
 - **正式来源：**[实验 README](../../../experiments/deepseek_v32_mfu/README.md)、
-  [结果](../../../experiments/deepseek_v32_mfu/report/four_methods/results.md)、
-  [汇总](../../../experiments/deepseek_v32_mfu/report/four_methods/summary.json)、
-  [运行验收](../../../experiments/deepseek_v32_mfu/report/four_methods/run_acceptance.json)、
-  [原生 SQL overlap 复核](../../../experiments/deepseek_v32_mfu/report/four_methods/dense_overlap_sql_audit.json)和
-  [发布清单](../../../experiments/deepseek_v32_mfu/report/four_methods/publication_manifest.json)。
-  Check、bench、profile 分别为 `deepseek_mfu_dma_a128_check_20261006_01`、
-  `deepseek_mfu_dma_a128_bench_20261006_01`、`deepseek_mfu_dma_a128_profile_20261006_01`。
-- **实际范围：**真实 checkpoint 第 0–2 层依次传播 hidden/residual，含 embedding、
-  三个 dense MLP、final norm 和末 token LM head；普通持久追加，不使用 C10 source-input
-  replay。H=65,536、A=128、P=65,664，history chunk=1,024，extend 为完整 128-token
-  batch；cold 只清除 offload 历史主 KV 的 HBM 驻留，DRAM/indexer 保留，HBM 方法
-  保留主 KV。主 KV 为 BF16 512 latent + 64 RoPE。GPU3 经 PCI/SM90 核验为 H200
-  SXM，CPU24–31、8 线程。Cache HBM/DRAM 预算为 24/64 GiB，权重和普通 activation
-  另计；没有验证多用户填满 NH 或物理容量上限。
-- **阶段结果：**下表为独立无 profiler bench 的中位延迟。MFU 分子来自完整实际调用
-  账本的 useful matrix FLOPs，按 FP8/BF16/FP32 名义 dense peak 归一化。四方法
-  useful 工作量相同，prefill/extend 理想计算时间分别为 289.549384/0.675229 ms。
+  [MFU 汇总](../../../experiments/deepseek_v32_mfu/report/full_extend_graph/mfu/summary.json)、
+  [逐算子表](../../../experiments/deepseek_v32_mfu/report/full_extend_graph/mfu/operator_mfu.csv)、
+  [逐层表](../../../experiments/deepseek_v32_mfu/report/full_extend_graph/mfu/operator_mfu_by_layer.csv)和
+  [MFU 发布清单](../../../experiments/deepseek_v32_mfu/report/full_extend_graph/mfu/publication_manifest.json)。
+  Check、bench、profile 分别为 `deepseek_dense_late_wait_cold_check_20261006_01`、
+  `deepseek_dense_late_wait_bench_20261006_01`、`deepseek_dense_late_wait_mfu_profile_20261006_01`；
+  CPU 报告运行是 `deepseek_dense_late_wait_mfu_report_20261006_01`。
+- **实际范围：**H=65,536、A=128、history chunk=1,024、extend chunk=128，
+  P=NH=65,664。真实 checkpoint L0–L2 依次传播 hidden/residual，包含 embedding、
+  三个 dense MLP、final norm 和末 token LM head；采用普通持久追加，不是 C10
+  source-input replay，也不外推完整 61 层或 GR 质量。Cold 只清除 offload 主 KV
+  的 HBM 驻留，DRAM 与 resident indexer 保留。GPU3 经 PCI 2335/SM90 核验为
+  H200 SXM，CPU24–31、8 线程；cache HBM/DRAM 规划预算仍为 24/64 GiB。
+- **阶段结果：**独立同步 wall-time 中位数如下。Prefill 覆盖全部 64 个 chunk；
+  extend 包含输入准备、事务开始、同步和主机提交。每方法预热 1 次，prefill
+  正式测量 3 次、extend 5 次。权重加载、编译、图准备与 prefix 恢复在计时外。
 
 | 方法 | Prefill ms | Prefill MFU | Extend ms | Extend MFU |
 | --- | ---: | ---: | ---: | ---: |
-| HBM | 649.381321 | 44.588499% | 3.761362 | 17.951720% |
-| ECHO | 686.326987 | 42.188256% | 8.434403 | 8.005655% |
-| serial sparse | 665.076367 | 43.536261% | 6.534333 | 10.333559% |
-| dense prefetch | 664.751053 | 43.557567% | 5.985946 | 11.280242% |
+| HBM | 644.937600 | 44.895721% | 3.325639 | 20.303742% |
+| ECHO | 648.374795 | 44.657717% | 5.715935 | 11.813101% |
+| serial sparse | 640.701120 | 45.192583% | 4.265032 | 15.831750% |
+| dense prefetch | 645.799839 | 44.835778% | 5.705877 | 11.833924% |
 
-- **DMA 与剩余 gap：**所选第 1 层完整 extend 窗口中，下一层 H2D DMA 的完整时长
-  为 1.374430 ms，与当前层独立计算的交集为 0.690078 ms，占 50.208305%。原生
-  CUPTI 记录为 stream 45 上的一次 `cudaMemcpyAsync_v3020`；独立只读 SQL 核对
-  源内存类型为 Pinned、目标为 Device、copyCount=1。三个层的 H2D memcpy 均为
-  75,497,472 B，与 65,536 records 的 cache 计数一致，dense scope 内没有 mapped-host
-  gather。四方法该层 extend GPU gap 分别为 0.300639/2.078591/1.830013/0.008064 ms，
-  prefill 最后 chunk 分别为 0.075424/0.358751/0.071232/0.071712 ms。Dense 最大
-  单段 gap 为 0.002144 ms。Gap 是全部 GPU 活动区间并集的补集，不是单独归因的
-  CPU 成本；局部重叠也不替代完整 serving 收益。ECHO 融合 kernel 保留为 Compute + IO。
-- **持久追加与资源：**cold extend 每层还写回新增 token 的 147,456 B；C10 的
-  transient candidate 没有这项写回，不能互换语义。Prefill 每层 H2D 为 0、D2H 为
-  75,497,472 B。Dense ticket 借用已有 span，不新增 ID/count tensor，本次三层
-  资源计划中的 ticket workspace 为 0 B。Graph static storage/allocated/private
-  reserved 仍为 195,863,088/197,275,136/1,684,013,056 B；规划上限与实际分配分开。
-- **数值与归属验收：**check 13 项、profile 25 项比较全部逐位一致；发布时额外重开
-  四方法 hidden/logits 的 8 个保存 tensor，与 check controls 逐位一致。Q=128/1024
-  在三层各有 projection/finish，共 12 个模板；八组阶段共 1,560 次 replay。逐层
-  shape、capture/runtime graph ID、GPU 节点及每个 chunk 的调用次数通过核验，
-  kernel count/time、API 归属、每 query 的 indexer/MLA 覆盖与四方法工作量守恒。
-  Graph setup 加八组阶段共九份 NSYS capture。本轮未采集 NCU。
-- **身份与复核边界：**receipt 为
-  `/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_mfu_dma_a128_check_20261006_01/receipt.json`，
-  canonical SHA256 为 `94f396fde2c4dca6bab58b0baf7b0b2b0726e4af09882a77021d933d5111aa02`；
-  canonical execution identity 为
-  `bc72b3bf8ec9a2daa2996f705d5a537ee87b66aeb542358f1b1e4a635df4b310`。
-  三次运行的执行、源码、native 和输入身份相同，显式绑定 dense transport 与实际 pool
-  布局。当前文件核验覆盖所记录 FlashInfer native 库与 build metadata，不扩大为所有
-  二进制的独立审计。报告 helper 的实际哈希单独记录，18 项发布文件和 README 绑定核验。
-- **监测条件：**三个测量进程和 observer wrapper 均退出 0，check/bench/profile
-  分别有 13/18/32 次离散样本，最大间隔为 2.199/2.202/2.846 秒。独立原始记录复核
-  没有发现外来 GPU 进程、退出竞态或查询错误；三份监测与复核均已绑定。离散样本
-  不能证明连续隔离、全机独占或 CPU 独占。
-- **替换边界：**本次 DMA 报告替换 A128 mapped-host gather 版本。旧 query、pool、
-  驻留和计算图条件不同的 A1024 结果不作同配置加速对照。历史命令与 run ID 保留
-  各自含义；受影响旧素材和运行产物在新发布验收后清理，不保留平行旧报告。
-- **C10 与容量边界：**[C10 报告](../../../experiments/deepseek_v32_motivation/README.md)
-  当前保留的 mapped-gather 来源为 `deepseek_mfu_c10_bench_20261006_01` 与
-  `deepseek_mfu_c10_profile_20261006_02`。复访均值为 HBM/ECHO/serial/dense
-  2178.992/23.520/17.188/25.462 ms；16 次候选 H2D 合计分别为
-  0/1.161186/1.161186/11.25 GiB。它们不代表 DMA；C10 独立补测现已暂缓。
-  [容量材料](../../../experiments/cache_management/README.md)保留已发布状态，后续审阅暂停。
-  455 个 64K history 仍是静态估算，真实三层测量不验收填满 NH；NOSA 的有效结果
-  保留各自原始范围。
-- **其他任务边界：**旧本地官方 ECHO 适配已删除，独立 SGLang 计时另行报告。T-006 容量范围探索及
-  C10 DMA、剩余 gap、ECHO 预测/预取与历史保留归因随 motivation 暂缓，不列为当前
-  补测依赖。T-007 保留尚未实施的 NOSA indexer workspace 独立方案；这次 DeepSeek
-  改动没有完成该方案。固定 loop、H64K-only、
-  4K/16K 暂停、不跑满 NH、共同模型与 GR 场景仍待建立等选择不变。
+- **MFU 含义：**相同 useful matrix FLOPs 按 FP8/BF16/FP32 名义 dense peak
+  1979/989.5/67 TFLOP/s 分别换算成理想计算时间，再除以完整 wall-time。
+  四方法 prefill/extend 理想计算时间均为 289.549384/0.675229 ms；每阶段分别
+  有 2,689/43 次矩阵 API 调用，LM head 每阶段只计一次。逐算子分母为其独占 GPU
+  kernel duration sum，保留 API 内的量化、辅助操作和融合预取。非矩阵工作不填
+  FLOPs/MFU；不把阶段 MFU 或算子 MFU 解释为 Tensor Core 活跃率。
+- **图与归属验收：**每种方法 extend 仅一次完整 CUDA Graph launch，图内 GPU
+  节点数依次为 218/299/242/224。每图 43 个矩阵 API 共归属 107 个 GPU 节点，
+  其余节点保留控制和 IO 身份。原生节点 ID、clone lineage、调用数、逐 query
+  indexer/MLA 覆盖、计时守恒与独立数值检查均通过。Prefill 继续使用 v4 计算图，
+  四方法全部 chunk 共 1,536 次 projection/finish replay。Profile 共 13 份 capture：
+  1 份 prefill 图准备、4 份完整 extend 图准备及 8 份正式阶段；未采集 NCU。
+- **Timeline 与 gap：**当前实现使用两张主 timeline 及其
+  [窗口数据](../../../experiments/deepseek_v32_mfu/report/full_extend_graph/windows.csv)，
+  来源为 `deepseek_dense_late_wait_profile_20261006_01`，绘图运行是
+  `deepseek_dense_late_wait_timeline_20261006_02`。Prefill 只显示最后一个 chunk
+  的 L0–L2；extend 显示 L0–L2。Prefill 和其他方法的窗口仍为 L0 首个计算至
+  L2 最后计算结束；dense extend 从 L0 首个计算或历史预取中更早的一项开始，
+  包含首层 H2D。另附 `deepseek_dense_late_wait_startup_20261006_02` 的启动对比图。
+  Gap 是计算与实际 IO 区间并集之外的时间；红色仅表示 GPU 空闲，融合 ECHO 整段
+  算有效工作。本轮 MFU 的完整 wall 分母不随图裁剪；不将新旧 dense 窗口直接
+  比较，也不以停止优化表述为 gap 门槛全部通过。
+- **判断修正：**当前三层完整图中，HBM、serial sparse 的 extend 依次较短，
+  dense 与 ECHO 接近。延后同步后的原生 profile 已验证 dense 预取与前置计算重叠。
+  新旧运行的 native 编译器 PATH 与构建指纹也有变化，旧 dense 6.166 ms 与本轮
+  5.706 ms 不构成单变量调度对照，不能将全部差值归于等待位置调整。
+  旧 v3 报告中“dense 快于 serial”的排序及 50.21% 局部 DMA 重叠数字不再作为
+  当前实现证据。当前结果仍未显示 ECHO 相对 serial sparse 的完整阶段加速；
+  单图 launch、实际 DMA 或局部重叠均不能独立证明 serving 收益。
+- **替换与撤回：**本次结果替换此前层前同步版本的三层发布结果；旧 `four_methods`
+  报告及对应旧 DMA 运行产物已由完整图结果替换。
+  依赖旧输入的 `deepseek_compute_io_simulation_20261006_04` 一并撤回，原因包括
+  旧 ECHO 的融合 indexer scale stage 提前释放问题；没有用当前数字冒充重算。
+  纯模拟函数保留，当前完整图输入适配未完成。旧记录中的运行 ID 只说明当时来源，
+  不表示对应报告仍保留或继续有效。
+- **C10 与其他边界：**[C10 报告](../../../experiments/deepseek_v32_motivation/README.md)
+  保留 `deepseek_mfu_c10_bench_20261006_01` 与 `deepseek_mfu_c10_profile_20261006_02`
+  的 mapped-gather 范围，旧 ECHO 受上述正确性问题影响，不能用于修正后结论。
+  本次没有重跑或清理 C10 实测，也没有更新容量结论。455 个 64K history 仍是
+  静态估算，未验收填满 NH。NOSA、独立 SGLang 的结果保留各自范围；T-007 的
+  NOSA indexer workspace 仍未实施。H64K-only、4K/16K 暂停、不跑满 NH、固定
+  用户同序 loop，以及共同模型和 GR 场景仍待建立等研究者选择保持不变。

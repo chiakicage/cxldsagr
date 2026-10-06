@@ -1,15 +1,27 @@
 """Dependency and boundary checks for the analytical single-layer schedules."""
 
 import copy
+import json
 
 import pytest
 
 from experiments.deepseek_v32_motivation.src.simulate import (
     audit_simulation,
     compute_metrics,
+    publish,
     simulate,
     transfer_metrics,
 )
+from experiments.deepseek_v32_motivation.src.simulation_inputs import WITHDRAWN_PROFILE_RUN_ID
+
+
+def test_saved_withdrawn_inputs_cannot_create_a_new_publication(tmp_path):
+    source = tmp_path / "inputs.json"
+    source.write_text(json.dumps({"source": {"profile_run_id": WITHDRAWN_PROFILE_RUN_ID}}))
+    output = tmp_path / "publication"
+    with pytest.raises(ValueError, match="source profile is withdrawn"):
+        publish(source, output)
+    assert not output.exists()
 
 
 def inputs(*, sparse=3, dense=30, writeback=2):

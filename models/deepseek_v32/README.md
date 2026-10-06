@@ -1,7 +1,7 @@
 # DeepSeek V3.2
 
-真实前三层的四方案 MFU 已完成 H=65,536、A=128 的 DMA 版本独立验收、正式计时
-和 profile，当前结果采用每层 P=65,664、cold extend 和计算图。
+真实前三层支持四种 cache 实现和显式准备的完整 extend CUDA Graph；独立验收、
+正式计时与 profile 的当前状态见[四方案 MFU 实验](../../experiments/deepseek_v32_mfu/README.md)。
 十 block C10 GR 工作负载仍为 A=128，DMA 版本已完成独立 check 和正式 bench；
 profile 按用户要求暂缓。下文保留的 motivation profile 仍对应 mapped-host 实现。
 固定历史的临时候选语义与前三层 MFU 的持久追加分开验收。
@@ -29,6 +29,7 @@ embedding、3 个 dense MLP、58 个 MoE、final norm 和 LM head。硬件算子
 | [prefetch.py](cache/prefetch.py) | 逐层 pool 的连续历史 DMA、异步 ticket 与拷贝 drain |
 | [planning.py](execution/planning.py) | 根据模型维度和执行上限计算固定 P/NH 或字节预算的资源计划 |
 | [compute_graphs.py](execution/compute_graphs.py) | projection/finish 计算图、动态 causal bounds 与 graph storage 审计 |
+| [extend_graph.py](execution/extend_graph.py) | 固定 prefix 的完整 extend 图、输入与 cache 身份检查、主机状态提交及图内 IO 所有权 |
 | [pipeline.py](execution/pipeline.py) | 本地四种 serving 方案的 attention/cache factory 与指标汇总 |
 | [tests/](tests) | ECHO checkpoint / block / 全模型调度事务参考测试 |
 
@@ -61,10 +62,34 @@ python -m models.deepseek_v32.infer \
 Python 接口 `set_cache_method(method)` 接受 `hbm`、`echo`、`serial_sparse` 和
 `dense_prefetch`，每次切换创建独立空 cache。真实前三层的单 GPU dense 路径可预先调用
 `prepare_compute_graphs(query_sizes)`，跨方法和 cache 重建复用同一组 projection/finish
-计算图；cache、选择、召回与事务仍在图外。当前 graph 策略为
-`deepseek-compute-islands-v3-indexer-bounds`，projection 用同一动态位置生成 RoPE
-和 indexer causal ends。graph 的规划上限、static allocated 与 private reserved
-分别记录。模型关闭或异步失败进入 poisoned 状态后拒绝新执行和资源变更，保留
+计算图；cache、选择、召回与事务仍在图外。纯计算图策略为
+`deepseek-compute-islands-v4-bound-inputs`，projection 用同一动态位置生成 RoPE
+和 indexer causal ends，第 1、2 层直接使用前一层 finish 图的输出。
+
+完整 extend 图通过 `prepare_extend_graph(token_ids, *, all_logits=False,
+return_hidden=False, capture_scope=None)` 显式启用，策略为
+`deepseek-full-extend-graph-v2-dense-late-wait`。准备时预热并捕获一次完整 query batch，随后恢复
+匹配的 prefix。之后相同输出模式的 `forward(token_ids)` 使用一次 graph replay，
+覆盖 embedding、三层计算、indexer、cache 写入与精确召回、H2D/D2H、ECHO hint
+备份、final norm 和 LM head。输入校验与 staging、事务开始、同步和主机提交在图外；
+同步成功后先应用 cache 的主机状态增量，再统一提交所有层。
+
+该入口支持单 GPU 的 dense 层前缀和单个 session，offload 要求 `H+A<=P`。
+图绑定 H/A、输出模式、权重与精度、cache generation/storage、clock 及驻留状态。
+每次 replay 前须恢复同一 prefix，并设置与 capture 一致的 cold/warm 状态；这些
+条件变化会直接报错。默认 logits、`return_hidden=True` 和 `all_logits=True`
+分别准备图。返回的 tensor 借用 graph storage，需跨后续 replay 保留时由调用者复制。
+`forward(..., use_extend_graph=False)` 可显式执行原路径作对照。完整图当前只用于
+固定 prefix 的真实层执行，不支持任意增长的 history，也未接入 C10 或 NOSA。
+
+真实三层的 dense 完整图让本层 projection、indexer 和 top-k 与历史 H2D 同时推进；
+在 append 和主 attention 前等待数据及映射就绪，再发起下一层预取。
+跨层预取时释放当前层 cache lease，随后重新取得它完成 append、recall 和 MLA。
+Prefill 与普通 forward 保留原来的层前等待。新调度的验收与测量状态见 MFU 实验。
+
+两类图分别记录规划上限、static allocated、private reserved 和设备已用量。
+完整图引用 cache storage，重建或释放 cache 前先销毁图；其异步写回源保留至图完成。
+模型关闭或异步失败进入 poisoned 状态后拒绝新执行和资源变更，保留
 `synchronize()`、`close()` 用于清理。
 
 MFU 默认 H=65,536、A=128、chunk=1,024、P=65,664，四方案均持久提交新增 token。
@@ -106,30 +131,14 @@ dense 要求 `P >= session capacity`。独立 correctness 通过 `return_hidden=
 
 ## 相关实验
 
-真实前三层的 dense prefetch 已改用连续布局和 `cudaMemcpyAsync`，新的独立数值、
-计时与 profile 结果已发布。C10 已完成 DMA check、正式 bench 和请求内存观测，
-其 profile 按用户要求暂缓；前三层结果不能替代 C10 验收。
+真实前三层的 dense prefetch 使用连续布局和 `cudaMemcpyAsync`。纯计算图与完整
+extend 图的独立数值验收、正式计时和 profile 分别记录在
+[SM90 四方案 prefill/extend MFU](../../experiments/deepseek_v32_mfu/README.md)，
+以该页的实现版本、输入、计时边界和来源为准。完整图的准备及 prefix 恢复不计入
+执行时间；完整请求时延、三层窗口、逐算子 MFU 和局部 IO 重叠分别解释。
 
-当前前三层 benchmark 与 profile 见
-[SM90 四方案 prefill/extend MFU](../../experiments/deepseek_v32_mfu/README.md)。
-当前 A=128 的独立正确性、正式计时和 profile 的 run ID 分别为
-`deepseek_mfu_dma_a128_check_20261006_01`、`deepseek_mfu_dma_a128_bench_20261006_01` 和
-`deepseek_mfu_dma_a128_profile_20261006_01`。独立 check 的 13 组比较和 profile 的
-25 组比较均逐位一致；profile 覆盖四方法各两个阶段及一次 graph setup，共九次
-capture。Q=128/1,024 在三个层各有 projection/finish，共 12 个图模板。
-dense extend 的下一层完整 H2D DMA 为 1.374430 ms，其中 0.690078 ms 与当前层
-独立 compute 相交，占 50.21%。原生记录确认一次 pinned Host-to-Device
-`cudaMemcpyAsync` 搬入 75,497,472 B。这是单次 trace 的实际区间，D2D 不计为 IO。
-独立正式计时的 dense extend 为 5.986 ms，低于 serial sparse 的 6.534 ms 和
-ECHO 的 8.434 ms，仍高于 HBM 的 3.761 ms；局部重叠不能替代完整阶段延迟。
-阶段最终 MFU 与逐算子数据分别
-报告，本轮没有 NCU replay。
-逐算子表、阶段最终 MFU 与 timeline 见
-[结果报告](../../experiments/deepseek_v32_mfu/report/four_methods/results.md)。
-三次测量及 observer wrapper 均以 0 退出，离散采样未观测到目标 GPU 外来进程或
-其他 GPU 进程。单次 profile 不代表稳定性能，离散采样也不能证明连续隔离、全机
-独占或 CPU 独占。详细身份与验收依据见
-[运行验收](../../experiments/deepseek_v32_mfu/report/four_methods/run_acceptance.json)。
+C10 已完成 DMA check、正式 bench 和请求内存观测，
+其 profile 按用户要求暂缓；前三层结果不能替代 C10 验收。
 十 block GR 工作负载的固定 P/NH 容量检查见
 [统一 cache management 实验](../../experiments/cache_management/README.md)。
 原有 DeepSeek / SM120 实验的有效历史结果保存在

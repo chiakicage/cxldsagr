@@ -1,0 +1,29 @@
+{
+  "schema": "selected-window-gap-audit-adapter-v1",
+  "passed": true,
+  "source_audit": "experiments/deepseek_v32_mfu/output/data/deepseek_dense_late_wait_timeline_audit_20261006_02/audit.json",
+  "source_audit_sha256": "94574fa36e0532309bf5604e057d746c8957478d4faaf0f393b99186d3f2cd27",
+  "conversion": "Exact decimal ms to integer ns from independent interval audit",
+  "methods": {
+    "hbm": {
+      "gap_ns": 202464,
+      "idle_ns": 95520,
+      "control_ns": 106944
+    },
+    "echo": {
+      "gap_ns": 489025,
+      "idle_ns": 186274,
+      "control_ns": 302751
+    },
+    "serial_sparse": {
+      "gap_ns": 308769,
+      "idle_ns": 117153,
+      "control_ns": 191616
+    },
+    "dense_prefetch": {
+      "gap_ns": 93248,
+      "idle_ns": 42528,
+      "control_ns": 50720
+    }
+  }
+}

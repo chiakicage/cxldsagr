@@ -1,16 +1,37 @@
 """Prevent full-phase or unrelated graph work from entering a single-layer estimate."""
 
 import copy
+import json
 
 import pytest
 
 from experiments.deepseek_v32_motivation.src.simulation_inputs import (
     COMPUTE_GROUPS,
     MATRIX_STAGES,
+    WITHDRAWN_PROFILE_RUN_ID,
     _dense_pipeline_context,
     _group,
     _work,
+    build_inputs,
 )
+
+
+@pytest.mark.parametrize(
+    "summary,reason",
+    [
+        ({"profile_run_id": WITHDRAWN_PROFILE_RUN_ID}, "source profile is withdrawn"),
+        (
+            {"profile_run_id": "new-profile", "schema": "deepseek-full-extend-graph-mfu-v1"},
+            "not adapted or validated",
+        ),
+    ],
+)
+def test_withdrawn_and_unadapted_sources_fail_before_other_artifacts_are_read(
+    tmp_path, summary, reason
+):
+    (tmp_path / "summary.json").write_text(json.dumps(summary))
+    with pytest.raises(ValueError, match=reason):
+        build_inputs(tmp_path, run_id="new-simulation", operator_calls=tmp_path / "absent.json")
 
 
 def sample(*, graph=False):

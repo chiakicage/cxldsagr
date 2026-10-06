@@ -1,0 +1,206 @@
+{
+  "passed": true,
+  "profile_run_id": "deepseek_dense_late_wait_profile_20261006_01",
+  "timeline_inputs_sha256": {
+    "experiments/deepseek_v32_mfu/output/data/deepseek_dense_late_wait_timeline_20261006_02/window_rows.json": "4f89be39af3a2bcd3f4b3d5287b3cf0dfeeeee41b2c0811403ae7939f5fe566b",
+    "experiments/deepseek_v32_mfu/output/data/deepseek_dense_late_wait_timeline_20261006_02/compact_receipt.json": "c89d25e83f22fca257ded21a1b2713720466fa377699e27dbdceb7edebffd4d9",
+    "experiments/deepseek_v32_mfu/output/data/deepseek_dense_late_wait_startup_20261006_02/window_rows.json": "06770b0430befe4400941521035e181d65f0d713bb2efe90e52dc08a6a47b259",
+    "experiments/deepseek_v32_mfu/output/data/deepseek_dense_late_wait_startup_20261006_02/compact_receipt.json": "f5b9e1a3c7cc6b51a00572e62a9119729571ecb76b55133c1b6182bd44a4b8f1"
+  },
+  "full_profile_extraction_sha256": "000ddcde263a8bd6a00c7e7f08419003877f805845e60ace96e331a62bf9152e",
+  "full_profile_extraction_origin": "extract_profile_panels(profile, gap_audit), read before renderer-boundary fix",
+  "analyzer_sha256": "8f13fd9e0e13d486be7be3cc3b3f9dede090422c9df0403bf4329b46af9163fe",
+  "checks": [
+    {
+      "figure": "main",
+      "phase": "prefill",
+      "method": "hbm",
+      "start_ns": 1310979736,
+      "end_ns": 1322940379,
+      "exact_raw_row_count": 220,
+      "actual_io_or_fused_rows": 0,
+      "adjacent_layer_timestamp_overlap_ns": [
+        0,
+        0
+      ],
+      "raw_endpoints_and_io_evidence_unchanged": true
+    },
+    {
+      "figure": "main",
+      "phase": "prefill",
+      "method": "echo",
+      "start_ns": 1375557492,
+      "end_ns": 1387555832,
+      "exact_raw_row_count": 326,
+      "actual_io_or_fused_rows": 3,
+      "adjacent_layer_timestamp_overlap_ns": [
+        0,
+        0
+      ],
+      "raw_endpoints_and_io_evidence_unchanged": true
+    },
+    {
+      "figure": "main",
+      "phase": "prefill",
+      "method": "serial_sparse",
+      "start_ns": 1319898868,
+      "end_ns": 1331843193,
+      "exact_raw_row_count": 295,
+      "actual_io_or_fused_rows": 3,
+      "adjacent_layer_timestamp_overlap_ns": [
+        0,
+        0
+      ],
+      "raw_endpoints_and_io_evidence_unchanged": true
+    },
+    {
+      "figure": "main",
+      "phase": "prefill",
+      "method": "dense_prefetch",
+      "start_ns": 1321654958,
+      "end_ns": 1333822227,
+      "exact_raw_row_count": 298,
+      "actual_io_or_fused_rows": 3,
+      "adjacent_layer_timestamp_overlap_ns": [
+        0,
+        0
+      ],
+      "raw_endpoints_and_io_evidence_unchanged": true
+    },
+    {
+      "figure": "main",
+      "phase": "extend",
+      "method": "hbm",
+      "start_ns": 33810763,
+      "end_ns": 36286884,
+      "exact_raw_row_count": 215,
+      "actual_io_or_fused_rows": 0,
+      "adjacent_layer_timestamp_overlap_ns": [
+        0,
+        0
+      ],
+      "raw_endpoints_and_io_evidence_unchanged": true
+    },
+    {
+      "figure": "main",
+      "phase": "extend",
+      "method": "echo",
+      "start_ns": 83602643,
+      "end_ns": 88147784,
+      "exact_raw_row_count": 293,
+      "actual_io_or_fused_rows": 9,
+      "adjacent_layer_timestamp_overlap_ns": [
+        0,
+        0
+      ],
+      "raw_endpoints_and_io_evidence_unchanged": true
+    },
+    {
+      "figure": "main",
+      "phase": "extend",
+      "method": "serial_sparse",
+      "start_ns": 82938551,
+      "end_ns": 86033935,
+      "exact_raw_row_count": 239,
+      "actual_io_or_fused_rows": 6,
+      "adjacent_layer_timestamp_overlap_ns": [
+        64,
+        0
+      ],
+      "raw_endpoints_and_io_evidence_unchanged": true
+    },
+    {
+      "figure": "main",
+      "phase": "extend",
+      "method": "dense_prefetch",
+      "start_ns": 84603610,
+      "end_ns": 89138544,
+      "exact_raw_row_count": 221,
+      "actual_io_or_fused_rows": 6,
+      "adjacent_layer_timestamp_overlap_ns": [
+        224,
+        0
+      ],
+      "raw_endpoints_and_io_evidence_unchanged": true
+    },
+    {
+      "figure": "startup",
+      "phase": "extend",
+      "method": "hbm",
+      "start_ns": 32902962,
+      "end_ns": 36286884,
+      "exact_raw_row_count": 221,
+      "actual_io_or_fused_rows": 1,
+      "adjacent_layer_timestamp_overlap_ns": [
+        0,
+        0
+      ],
+      "raw_endpoints_and_io_evidence_unchanged": true
+    },
+    {
+      "figure": "startup",
+      "phase": "extend",
+      "method": "echo",
+      "start_ns": 82751359,
+      "end_ns": 88147784,
+      "exact_raw_row_count": 307,
+      "actual_io_or_fused_rows": 10,
+      "adjacent_layer_timestamp_overlap_ns": [
+        0,
+        0
+      ],
+      "raw_endpoints_and_io_evidence_unchanged": true
+    },
+    {
+      "figure": "startup",
+      "phase": "extend",
+      "method": "serial_sparse",
+      "start_ns": 82053764,
+      "end_ns": 86033935,
+      "exact_raw_row_count": 250,
+      "actual_io_or_fused_rows": 7,
+      "adjacent_layer_timestamp_overlap_ns": [
+        64,
+        0
+      ],
+      "raw_endpoints_and_io_evidence_unchanged": true
+    },
+    {
+      "figure": "startup",
+      "phase": "extend",
+      "method": "dense_prefetch",
+      "start_ns": 83691734,
+      "end_ns": 89138544,
+      "exact_raw_row_count": 232,
+      "actual_io_or_fused_rows": 7,
+      "adjacent_layer_timestamp_overlap_ns": [
+        224,
+        0
+      ],
+      "raw_endpoints_and_io_evidence_unchanged": true
+    }
+  ],
+  "visual_review": {
+    "reviewed_png_sha256": {
+      "experiments/deepseek_v32_mfu/output/data/deepseek_dense_late_wait_timeline_20261006_02/extend.png": "6241138a77cb8082a8a6f5564eab0924286c47280e9fb68b620704024d2792cc",
+      "experiments/deepseek_v32_mfu/output/data/deepseek_dense_late_wait_timeline_20261006_02/prefill.png": "3989e140c95a12dd01c815287078b61f6699f024f35a4d201cbd0ed77fb8b7cc",
+      "experiments/deepseek_v32_mfu/output/data/deepseek_dense_late_wait_startup_20261006_02/extend_with_startup.png": "5970e5c881179a9556196b7d1e615699e395ad6e7751388e474174c2c0437e7b"
+    },
+    "passed": true,
+    "checks": [
+      "Prefill contains only final chunk 64/64, with L0-L2",
+      "Extend contains L0-L2 and all three dense history H2D intervals",
+      "One computation lane per method; phases use colors without segment text",
+      "H2D orange and D2H purple use separate lanes",
+      "Red marks only GPU idle; ECHO prepare/finalize/hint remain separate",
+      "Startup view retains measured forward entry, embedding, and true L0 compute marker",
+      "No clipped labels or legends; one time scale across methods in each figure"
+    ]
+  },
+  "artifacts_sha256": {
+    "timeline_actual_io.csv": "1a419a744de4f02a8350c21a3ff9e610df313ed81b6c5e0a55574ed471a1a6d8",
+    "audit_preservation.py": "8f13fd9e0e13d486be7be3cc3b3f9dede090422c9df0403bf4329b46af9163fe",
+    "audit_layer_gap.py": "4dfaddecd53b28e85ce2bf9b5e559bf45e0abdaaa1450d64602dcc7415b2676c",
+    "boundary_evidence.json": "60755e6bec6af4bdcfba4eea285aedb3039c378f3660d4ba8dca13d9c25e843d"
+  }
+}

@@ -1,0 +1,77 @@
+method,category,description,exposed_us
+hbm,scale_transpose,DeepGEMM scale transpose,59.872
+hbm,projection_layout,Projection metadata / layout,20.64
+hbm,cache_write,Cache / index write and writeback source,21.696
+hbm,exact_recall,Exact recall / resident selection metadata,0.0
+hbm,echo_prepare,ECHO prefetch preparation,0.0
+hbm,echo_finalize,ECHO prefetch finalization,0.0
+hbm,prefetch_hint,Prefetch hint update,0.0
+hbm,dense_mapping,Dense mapping clear / publish,0.0
+hbm,input_norm_layout,Input/residual norm helpers / layout,0.0
+hbm,indexer_layout,Indexer helpers / metadata / layout,4.736
+hbm,topk_layout,Exact top-k helpers / metadata / layout,0.0
+hbm,attention_output_layout,Attention output helpers / layout,0.0
+hbm,attention_layout,Sparse MLA helpers / layout,0.0
+hbm,post_norm_layout,Post-attention norm helpers / layout,0.0
+hbm,mlp_layout,MLP helpers / layout,0.0
+hbm,normalization_layout,Normalization helpers / layout (source stage unspecified),0.0
+hbm,endpoint_layout,Embedding / final norm / LM-head helpers / layout,0.0
+hbm,rollback_backup,ECHO rollback hint backup,0.0
+hbm,finish_layout,Output / MLP graph helpers / layout,0.0
+echo,scale_transpose,DeepGEMM scale transpose,60.064
+echo,projection_layout,Projection metadata / layout,20.864
+echo,cache_write,Cache / index write and writeback source,32.512
+echo,exact_recall,Exact recall / resident selection metadata,65.504
+echo,echo_prepare,ECHO prefetch preparation,70.175
+echo,echo_finalize,ECHO prefetch finalization,16.896
+echo,prefetch_hint,Prefetch hint update,31.776
+echo,dense_mapping,Dense mapping clear / publish,0.0
+echo,input_norm_layout,Input/residual norm helpers / layout,0.0
+echo,indexer_layout,Indexer helpers / metadata / layout,4.96
+echo,topk_layout,Exact top-k helpers / metadata / layout,0.0
+echo,attention_output_layout,Attention output helpers / layout,0.0
+echo,attention_layout,Sparse MLA helpers / layout,0.0
+echo,post_norm_layout,Post-attention norm helpers / layout,0.0
+echo,mlp_layout,MLP helpers / layout,0.0
+echo,normalization_layout,Normalization helpers / layout (source stage unspecified),0.0
+echo,endpoint_layout,Embedding / final norm / LM-head helpers / layout,0.0
+echo,rollback_backup,ECHO rollback hint backup,0.0
+echo,finish_layout,Output / MLP graph helpers / layout,0.0
+serial_sparse,scale_transpose,DeepGEMM scale transpose,60.384
+serial_sparse,projection_layout,Projection metadata / layout,22.048
+serial_sparse,cache_write,Cache / index write and writeback source,34.368
+serial_sparse,exact_recall,Exact recall / resident selection metadata,69.92
+serial_sparse,echo_prepare,ECHO prefetch preparation,0.0
+serial_sparse,echo_finalize,ECHO prefetch finalization,0.0
+serial_sparse,prefetch_hint,Prefetch hint update,0.0
+serial_sparse,dense_mapping,Dense mapping clear / publish,0.0
+serial_sparse,input_norm_layout,Input/residual norm helpers / layout,0.0
+serial_sparse,indexer_layout,Indexer helpers / metadata / layout,4.896
+serial_sparse,topk_layout,Exact top-k helpers / metadata / layout,0.0
+serial_sparse,attention_output_layout,Attention output helpers / layout,0.0
+serial_sparse,attention_layout,Sparse MLA helpers / layout,0.0
+serial_sparse,post_norm_layout,Post-attention norm helpers / layout,0.0
+serial_sparse,mlp_layout,MLP helpers / layout,0.0
+serial_sparse,normalization_layout,Normalization helpers / layout (source stage unspecified),0.0
+serial_sparse,endpoint_layout,Embedding / final norm / LM-head helpers / layout,0.0
+serial_sparse,rollback_backup,ECHO rollback hint backup,0.0
+serial_sparse,finish_layout,Output / MLP graph helpers / layout,0.0
+dense_prefetch,scale_transpose,DeepGEMM scale transpose,11.488
+dense_prefetch,projection_layout,Projection metadata / layout,0.704
+dense_prefetch,cache_write,Cache / index write and writeback source,12.608
+dense_prefetch,exact_recall,Exact recall / resident selection metadata,8.16
+dense_prefetch,echo_prepare,ECHO prefetch preparation,0.0
+dense_prefetch,echo_finalize,ECHO prefetch finalization,0.0
+dense_prefetch,prefetch_hint,Prefetch hint update,0.0
+dense_prefetch,dense_mapping,Dense mapping clear / publish,17.76
+dense_prefetch,input_norm_layout,Input/residual norm helpers / layout,0.0
+dense_prefetch,indexer_layout,Indexer helpers / metadata / layout,0.0
+dense_prefetch,topk_layout,Exact top-k helpers / metadata / layout,0.0
+dense_prefetch,attention_output_layout,Attention output helpers / layout,0.0
+dense_prefetch,attention_layout,Sparse MLA helpers / layout,0.0
+dense_prefetch,post_norm_layout,Post-attention norm helpers / layout,0.0
+dense_prefetch,mlp_layout,MLP helpers / layout,0.0
+dense_prefetch,normalization_layout,Normalization helpers / layout (source stage unspecified),0.0
+dense_prefetch,endpoint_layout,Embedding / final norm / LM-head helpers / layout,0.0
+dense_prefetch,rollback_backup,ECHO rollback hint backup,0.0
+dense_prefetch,finish_layout,Output / MLP graph helpers / layout,0.0

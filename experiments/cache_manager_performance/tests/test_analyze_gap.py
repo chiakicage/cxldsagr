@@ -95,7 +95,7 @@ def test_overlap_retains_compute_and_original_outside_indexer_metric():
     assert all("gate" not in name and "threshold" not in name for name in metrics)
 
 
-def test_fused_bounds_reuse_mfu_and_do_not_claim_separate_io_time():
+def test_fused_work_reuses_mfu_denominator_without_claiming_separate_io_time():
     rows = [
         activity("sm90_fp8_mqa_logits", "indexer", 0, 30),
         activity("sm90_fp8_mqa_logits_fuse_prefetch", "indexer_prefetch", 20, 60),
@@ -109,10 +109,12 @@ def test_fused_bounds_reuse_mfu_and_do_not_claim_separate_io_time():
         if key in reference:
             assert value == reference[key]
     assert metrics["diagnostic_gap_ms"] == 30 / 1e6
-    assert metrics["diagnostic_non_io_window_lower_ms"] == 60 / 1e6
+    assert metrics["diagnostic_non_io_window_ms"] == 90 / 1e6
+    assert metrics["diagnostic_gap_no_io_percent"] == pytest.approx(100 / 3)
+    assert metrics["diagnostic_non_io_window_lower_ms"] == 90 / 1e6
     assert metrics["diagnostic_non_io_window_upper_ms"] == 90 / 1e6
     assert metrics["diagnostic_gap_no_io_percent_lower_bound"] == pytest.approx(100 / 3)
-    assert metrics["diagnostic_gap_no_io_percent_upper_bound"] == 50
+    assert metrics["diagnostic_gap_no_io_percent_upper_bound"] == pytest.approx(100 / 3)
     assert metrics["diagnostic_fused_io_separately_identifiable"] is False
 
 

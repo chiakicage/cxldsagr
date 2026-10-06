@@ -54,6 +54,17 @@ def test_graph_profile_rejects_split_a128_output(tmp_path, capsys):
     assert "one complete extend chunk" in capsys.readouterr().err
 
 
+def test_full_extend_graph_is_explicit_and_requires_complete_batch(tmp_path, capsys):
+    argv = ["--mode", "check", "--run-id", "full", "--output", str(tmp_path / "run")]
+    _, args = profile_layers.parse_run_args(argv=argv)
+    assert not args.extend_graph
+    _, args = profile_layers.parse_run_args(argv=[*argv, "--extend-graph"])
+    assert args.extend_graph
+    with pytest.raises(SystemExit):
+        profile_layers.parse_run_args(argv=[*argv, "--extend-graph", "--extend-chunk-size", "64"])
+    assert "full extend graph requires one complete extend chunk" in capsys.readouterr().err
+
+
 class FakeBlock:
     def __init__(self, layer):
         self.layer = layer
@@ -245,6 +256,57 @@ def test_annotated_hidden_norm_keeps_inference_mode_after_capture(cpu_annotation
         profile_layers.annotate(model, [2, 4, 6], "resident", "extend_annotated", True)
         assert torch.is_grad_enabled()
     assert norm_modes == [(True, False), (True, False)]
+
+
+def test_full_graph_annotation_reads_retained_hidden_after_capture(cpu_annotation, monkeypatch):
+    model = FakeModel(chunk_size=2)
+    graph = SimpleNamespace(
+        last_hidden=torch.tensor([[1.0, 2.0], [3.0, 4.0]]).bfloat16(),
+        last_residual=torch.tensor([[0.25, 0.5], [0.75, 1.0]]).bfloat16(),
+    )
+    model._extend_graph = graph
+    # Full replay must not use the prefill bank's forward-block or query hooks.
+    model._compute_graphs = object()
+    logits = torch.tensor([[2.0, 1.0]])
+    model.forward = lambda ids, scope: logits
+
+    def verify_norm(*args):
+        assert cpu_annotation == ["start", "stop"] and not model.instrumented
+        return rms_norm(*args)
+
+    monkeypatch.setattr(profile_layers, "rms_norm", verify_norm)
+    actual_logits, actual_hidden, _, _ = profile_layers.annotate(
+        model, [2, 4], "hbm", "extend_annotated", True
+    )
+    expected = rms_norm(
+        graph.last_hidden.float() + graph.last_residual.float(),
+        model.final_norm,
+        model.cfg.norm_eps,
+    ).bfloat16()
+    torch.testing.assert_close(actual_logits, logits, rtol=0, atol=0)
+    torch.testing.assert_close(actual_hidden, expected, rtol=0, atol=0)
+
+
+def test_full_graph_operator_input_diagnostics_explicitly_execute_python_hooks(tmp_path):
+    model = FakeModel(chunk_size=2)
+    model.set_cache_method("echo")
+    model.forward([1, 2])
+    snapshot = model.snapshot_prefix()
+    original = model.forward
+    graph_choices = []
+
+    def forward(ids, *, use_extend_graph):
+        graph_choices.append(use_extend_graph)
+        return original(ids)
+
+    model.forward = forward
+    args = SimpleNamespace(
+        output=tmp_path, run_id="fixture", extend_graph=True, extend_residency="cold"
+    )
+    profile_layers.capture_kernel_inputs(model, [3, 4], snapshot, args)
+    assert graph_choices == [False]
+    assert all(block.attention.capture_hook is None for block in model.blocks)
+    assert len(list(tmp_path.glob("kernel_inputs_layer_*.pt"))) == 3
 
 
 @pytest.fixture
@@ -474,3 +536,72 @@ def test_driver_rejects_local_library_change_before_acceptance(driver, monkeypat
         execute("check")
     assert not (tmp_path / "check/result.json").exists()
     assert not (tmp_path / "check/receipt.json").exists()
+
+
+def test_backend_identity_failure_preserves_both_observations_and_field_paths(
+    driver, monkeypatch, tmp_path
+):
+    execute, _, _ = driver
+    identities = iter(
+        (
+            {"installed": {"provider": {"sha256": "original"}}, "jit_environment": {}},
+            {"installed": {"provider": {"sha256": "changed"}}, "jit_environment": {"NEW": "value"}},
+        )
+    )
+    monkeypatch.setattr(backend_provenance, "collect_backend_provenance", lambda: next(identities))
+    with pytest.raises(RuntimeError, match="installed.provider.sha256"):
+        execute("check")
+    before = json.loads((tmp_path / "check/backend_provenance_before.json").read_text())
+    after = json.loads((tmp_path / "check/backend_provenance_after.json").read_text())
+    assert before["installed"]["provider"]["sha256"] == "original"
+    assert after["installed"]["provider"]["sha256"] == "changed"
+    assert json.loads((tmp_path / "check/backend_provenance_differences.json").read_text()) == [
+        "backend_provenance.installed.provider.sha256",
+        "backend_provenance.jit_environment.NEW",
+    ]
+    assert not (tmp_path / "check/result.json").exists()
+
+
+def test_full_graph_check_covers_default_repeated_changed_inputs_and_cache(tmp_path, monkeypatch):
+    from experiments.deepseek_v32_mfu.src import extend_graph_validation
+
+    class GraphModel(FakeModel):
+        def __init__(self):
+            super().__init__(chunk_size=2)
+            self.cfg.vocab_size = 32
+            self.prepared = {}
+            self.graph_replays = []
+            self.baselines = []
+
+        def prepare_extend_graph(self, ids, *, return_hidden, capture_scope):
+            assert self.length == 3
+            self.prepared[return_hidden] = tuple(ids)
+            return SimpleNamespace(describe=lambda: {"fixture": True})
+
+        def forward(self, ids, *, return_hidden=False, use_extend_graph=True):
+            if self.length:
+                if use_extend_graph:
+                    assert return_hidden in self.prepared
+                    self.graph_replays.append((tuple(ids), return_hidden))
+                else:
+                    self.baselines.append(tuple(ids))
+            return super().forward(ids, return_hidden=return_hidden)
+
+    model = GraphModel()
+    model.set_cache_method("hbm")
+    model.forward([1, 2, 3])
+    snapshot = model.snapshot_prefix()
+    monkeypatch.setattr(
+        extend_graph_validation,
+        "cache_state",
+        lambda model: {"length": model.length, "layers": [], "history": tuple(model.history)},
+    )
+    args = SimpleNamespace(extend_graph=True, extend_residency="cold", output=tmp_path)
+    result = {}
+    profile_layers._check_extend_graph(model, [4, 5], snapshot, args, result, "hbm")
+    checks = result["extend_graph_checks"]["hbm"]["checks"]
+    assert len(checks) == 11
+    assert model.graph_replays == [((4, 5), False), ((4, 5), True), ((4, 5), True), ((4, 6), True)]
+    assert model.baselines == [(4, 5), (4, 6)]
+    assert all(row["bitwise_equal"] for key, row in checks.items() if not key.endswith("cache"))
+    assert (tmp_path / "hbm_extend_graph_check.pt").is_file()

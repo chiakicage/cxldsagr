@@ -104,6 +104,8 @@ def execution_identity(result):
     # New runs bind it alongside the full execution source snapshot.
     if "dense_history_transport" in result:
         fields += ("dense_history_transport",)
+    if "extend_graph" in result:
+        fields += ("extend_graph", "extend_graph_policy_revision")
     return {
         **{key: result[key] for key in fields},
         "gpu": {
@@ -162,6 +164,22 @@ def validated_receipt(result):
     )
     if set(checks) != expected:
         raise ValueError("Independent check lacks complete output comparisons")
+    if result.get("extend_graph"):
+        graph_checks = receipt["checks"].get("extend_graph", {})
+        required = {
+            "default_graph_logits",
+            "default_graph_cache",
+            *(
+                f"replay_{repeat}_{output}"
+                for repeat in range(2)
+                for output in ("hidden", "logits", "cache")
+            ),
+            *(f"changed_input_{output}" for output in ("hidden", "logits", "cache")),
+        }
+        if set(graph_checks) != set(METHODS) or any(
+            set(row.get("checks", {})) != required for row in graph_checks.values()
+        ):
+            raise ValueError("Independent check lacks full graph baseline/cache/replay validation")
     return receipt
 
 

@@ -40,7 +40,7 @@ trap 'exit 130' INT
 trap 'exit 143' TERM
 nsys --version >"$staging/log/nsys_version.txt" 2>"$staging/log/nsys_version.stderr.log"
 nsys profile --trace=cuda,nvtx --sample=none --cpuctxsw=none --cuda-graph-trace=node \
-  --capture-range=cudaProfilerApi --capture-range-end=repeat:9 \
+  --capture-range=cudaProfilerApi --capture-range-end=repeat \
   --output "$staging/profile/layers3" \
   python -m experiments.deepseek_v32_mfu.src.profile_layers \
   --run-id "$run_id" --output "$staging/data" --nsys "$@" \
@@ -65,7 +65,7 @@ for entry in "${captures[@]}"; do
   nsys export --type sqlite --output "$staging/data/capture_${capture}.sqlite" \
     "$staging/profile/layers3.${capture}.nsys-rep" \
     >"$staging/log/export_${capture}.stdout.log" 2>"$staging/log/export_${capture}.stderr.log"
-  if [[ "$label" == graph_setup ]]; then
+  if [[ "$label" == graph_setup || "$label" == */extend_graph_setup ]]; then
     analysis_args+=(--graph-setup "$staging/data/capture_${capture}.sqlite")
   else
     analysis_args+=(--sqlite "$staging/data/capture_${capture}.sqlite")

@@ -1,0 +1,13 @@
+method,layer,start_ns,end_ns,window_ms,gap_ms,gap_percent_excluding_pure_io,gpu_idle_ms,control_only_ms,pure_io_only_ms,non_io_window_ms,gap_below_threshold,boundary
+hbm,0,33810763,34631273,0.82051,0.067552,8.232928300691034,0.031872,0.03568,0.0,0.82051,True,L0 first compute to this layer final compute end
+hbm,1,34631273,35460967,0.829694,0.068288,8.230504258196396,0.032512,0.035776,0.0,0.829694,True,Previous layer final compute end to this layer final compute end
+hbm,2,35460967,36286884,0.825917,0.066624,8.066670137556196,0.031136,0.035488,0.0,0.825917,True,Previous layer final compute end to this layer final compute end
+echo,0,83602643,85169231,1.566588,0.167073,11.153696201923205,0.067233,0.09984,0.068672,1.497916,False,L0 first compute to this layer final compute end
+echo,1,85169231,86634698,1.465467,0.156191,10.781228537250877,0.054784,0.101407,0.016736,1.448731,False,Previous layer final compute end to this layer final compute end
+echo,2,86634698,88147784,1.513086,0.165761,11.281799632200306,0.064257,0.101504,0.043808,1.469278,False,Previous layer final compute end to this layer final compute end
+serial_sparse,0,82938551,84024853,1.086302,0.10832,12.526858964128682,0.04688,0.06144,0.2216,0.864702,False,L0 first compute to this layer final compute end
+serial_sparse,1,84024853,84963731,0.938878,0.097314,11.299210678482106,0.033826,0.063488,0.077632,0.861246,False,Previous layer final compute end to this layer final compute end
+serial_sparse,2,84963731,86033935,1.070204,0.103135,11.854420566129471,0.036447,0.066688,0.200191,0.870013,False,Previous layer final compute end to this layer final compute end
+dense_prefetch,0,84603610,86361622,1.758012,0.031808,3.9866943074798145,0.020576,0.011232,0.960158,0.797854,True,L0 first compute to this layer final compute end
+dense_prefetch,1,86361622,87744435,1.382813,0.017408,2.2463616631954393,0.004896,0.012512,0.607871,0.774942,True,Previous layer final compute end to this layer final compute end
+dense_prefetch,2,87744435,89138544,1.394109,0.044032,5.456649920316454,0.017056,0.026976,0.587167,0.806942,True,Previous layer final compute end to this layer final compute end

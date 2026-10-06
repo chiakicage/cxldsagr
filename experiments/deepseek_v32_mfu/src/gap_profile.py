@@ -55,7 +55,7 @@ class ModelScopes:
         finally:
             torch.cuda.nvtx.range_pop()
 
-    def calls(self, graph_capture):
+    def calls(self, graph_capture, full_graph_capture=None):
         calls = [
             {
                 "call_id": call_id,
@@ -74,6 +74,11 @@ class ModelScopes:
             expanded = []
             for call in calls:
                 expanded.extend(graph_capture.expand_replay(call, len(calls) + len(expanded)))
+            calls.extend(expanded)
+        if full_graph_capture is not None:
+            expanded = []
+            for call in calls:
+                expanded.extend(full_graph_capture.expand_replay(call, len(calls) + len(expanded)))
             calls.extend(expanded)
         return calls
 
@@ -139,6 +144,9 @@ def annotate(model, ids, mode, phase, *, prepare, trace_warmups):
             output = model.forward(ids, scope=scopes)
         wall = (time.perf_counter() - start) * 1000
     hidden = None
+    full_graph = getattr(model, "_extend_graph", None)
+    if full_graph is not None and phase == "extend_annotated":
+        block_outputs = [(full_graph.last_hidden, full_graph.last_residual)]
     if block_outputs:
         # Independent output diagnostics occur after the captured forward.
         hidden = torch.cat(
@@ -149,7 +157,15 @@ def annotate(model, ids, mode, phase, *, prepare, trace_warmups):
                 for h, residual in block_outputs
             ]
         ).cpu()
-    return output.cpu(), hidden, scopes.calls(getattr(model, "_profile_graph_capture", None)), wall
+    return (
+        output.cpu(),
+        hidden,
+        scopes.calls(
+            getattr(model, "_profile_graph_capture", None),
+            getattr(model, "_profile_full_graph_capture", None),
+        ),
+        wall,
+    )
 
 
 def measurement_sources():
@@ -160,6 +176,7 @@ def measurement_sources():
     }
 
 
+@torch.inference_mode()
 def run_profile(model, ids, args, result, receipt, *, trace_warmups):
     if not args.nsys:
         raise ValueError("minimal node profiling requires --nsys and cuda graph node tracing")
@@ -207,6 +224,8 @@ def run_profile(model, ids, args, result, receipt, *, trace_warmups):
         )
         prefix_metrics = [block.cache.metrics() for block in model.blocks]
         snapshot = model.snapshot_prefix()
+        common.restore_extend_prefix(model, snapshot, args)
+        common.profile_extend_graph(model, ids[args.prefix :], args, result, method)
         output, hidden, records, extend_wall = annotate(
             model,
             ids[args.prefix :],

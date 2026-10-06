@@ -1,203 +1,641 @@
 {
-  "analysis_id": "cache_attention_transition_model_20261006_02",
-  "artifact_path_base": "repository root; absolute paths only for external acceptance evidence",
-  "checks": {
-    "actual_launch_endpoints": true,
-    "actual_topk_and_mla_endpoints": true,
-    "all_cpu_and_gpu_stage_rows": true,
-    "all_windows_stages_latency_csv_rows": true,
-    "archive_hashes_verified": true,
-    "io_control_idle_ns_partitions": true,
-    "no_model_compute_inside": true,
-    "raw_sql_matches_prior_independent_audit": true,
-    "six_complete_model_windows_only": true,
-    "transport_bytes_and_counters": true
-  },
-  "fresh_independent_raw_sql_audit": {
-    "bytes": 178743,
-    "path": "experiments/cache_manager_performance/output/data/cache_attention_transition_model_20261006_02/independent_validation/raw_sql_audit.json",
-    "sha256": "f536f223437e8d5feb796aa65b0b89de57b6c71de0678f5061191076e1fa0302"
-  },
-  "independent_audit_script": {
-    "bytes": 19312,
-    "path": "experiments/cache_manager_performance/output/data/cache_attention_transition_model_20261006_02/independent_validation/raw_sql_audit.py",
-    "sha256": "6ae2dd17eb4519ed48b1fb935b3e506d38bcd94f07e3068c97dfa144ba4e213e"
-  },
-  "latency_rows": 8,
-  "limits": [
-    "Read-only reanalysis of the accepted V10 cold persistent-extend traces; no new GPU measurement or numerical acceptance.",
-    "One intrusive sample per method; sum across layers is not full-request latency.",
-    "The standalone replay is published separately in report/post_topk; this report contains only complete_model evidence.",
-    "Original V10 resident-mask live JIT/CUBIN archival limitation remains."
-  ],
-  "new_gpu_run": false,
+  "schema": "cache-manager-model-transition-audit-v3",
   "passed": true,
-  "prior_independent_audit": {
-    "bytes": 178627,
-    "path": "experiments/cache_manager_performance/output/data/cache_attention_transition_model_20261006_02/independent_validation/prior_raw_sql_audit.json",
-    "sha256": "e2900c63619ec5a6286b0a09dc029f7ea8b8632794ea8b4459dc1ea29b4eef42"
-  },
-  "profile_run_id": "deepseek_gap_v10_a128_minimal_20261006_01",
-  "publication_validation_script": {
-    "bytes": 13873,
-    "path": "experiments/cache_manager_performance/output/data/cache_attention_transition_model_20261006_02/independent_validation/publication_validation.py",
-    "sha256": "3f3f678f96c3c18fd1ad7c0beb3313d2d087c1daf5d0629fbfd7280d270457db"
-  },
-  "schema": "cache-manager-model-transition-audit-v2",
-  "stage_rows": 21,
-  "summary": {
-    "bytes": 1599771,
-    "path": "experiments/cache_manager_performance/output/data/cache_attention_transition_model_20261006_02/summary.json",
-    "sha256": "07f7e55d2d0cc7facff9108bbfab02bf755436dbfaea639c86ab4f36ac663b07"
-  },
+  "analysis_id": "cache_full_graph_transition_20261006_03",
+  "profile_run_id": "deepseek_full_graph_cold_profile_20261006_02",
+  "new_gpu_run": false,
   "window_count": 6,
+  "stage_rows": 21,
+  "latency_rows": 8,
+  "summary": {
+    "path": "experiments/cache_manager_performance/output/data/cache_full_graph_transition_20261006_03/summary.json",
+    "sha256": "8386ecba2538e7d6e229df0768123b014dbeefa43b39d0f42f07d0b7c6b9d015",
+    "bytes": 664466
+  },
+  "independent_evidence": {
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_full_graph_transition_20261006_03/summary.json": {
+      "path": "experiments/cache_manager_performance/output/data/cache_full_graph_transition_20261006_03/summary.json",
+      "sha256": "8386ecba2538e7d6e229df0768123b014dbeefa43b39d0f42f07d0b7c6b9d015",
+      "bytes": 664466
+    },
+    "/tmp/deepseek_full_graph_independent_audit_20261006_01/transition_audit_03.json": {
+      "path": "experiments/cache_manager_performance/output/data/cache_full_graph_transition_20261006_03/independent_validation/transition_audit_03.json",
+      "sha256": "35f1a63f41d758c7f033e215f1318f2e0b8cc3434136461c349c7c54e29c1df5",
+      "bytes": 12348
+    },
+    "/tmp/deepseek_full_graph_independent_audit_20261006_01/audit_transition_03.py": {
+      "path": "experiments/cache_manager_performance/output/data/cache_full_graph_transition_20261006_03/independent_validation/audit_transition_03.py",
+      "sha256": "8c5a50fa11510aa057bab10b067c895324e398a0071b9d186927455d7f9f34e3",
+      "bytes": 19418
+    },
+    "/tmp/deepseek_full_graph_independent_audit_20261006_01/audit_profile.py": {
+      "path": "experiments/cache_manager_performance/output/data/cache_full_graph_transition_20261006_03/independent_validation/audit_profile.py",
+      "sha256": "541581046b901d0623713cbb1e9600f0fbeee7244c99e09f9b67045e5e7df5af",
+      "bytes": 26566
+    },
+    "/tmp/deepseek_full_graph_independent_audit_20261006_01/audit_accepted.py": {
+      "path": "experiments/cache_manager_performance/output/data/cache_full_graph_transition_20261006_03/independent_validation/audit_accepted.py",
+      "sha256": "fbb2aa9e20dfd8c492205bae3985053bfc5806a857a8ee836e786d623a0b5248",
+      "bytes": 16773
+    },
+    "/tmp/deepseek_full_graph_independent_audit_20261006_01/cold_profile_02_audit.json": {
+      "path": "experiments/cache_manager_performance/output/data/cache_full_graph_transition_20261006_03/independent_validation/cold_profile_02_audit.json",
+      "sha256": "3a1239cfbb2ab7547ff8a12c56ed4ef952ed5ea69a74cb068915945f555fd146",
+      "bytes": 1038443
+    },
+    "/tmp/rebind_transition_audit_03.py": {
+      "path": "experiments/cache_manager_performance/output/data/cache_full_graph_transition_20261006_03/independent_validation/rebind_transition_audit_03.py",
+      "sha256": "dfe9c98c9c538f53cba8089dedebfe37dd79c1349ac09447d9dd79b5c4e8c2ec",
+      "bytes": 6292
+    }
+  },
+  "checks": {
+    "native_sql_boundaries_and_integer_lane_union": true,
+    "all_six_window_csv_rows": true,
+    "all_stage_csv_rows": true,
+    "latency_statistics": true,
+    "all_archived_source_hashes": true,
+    "cpu_stage_metrics_absent": true,
+    "one_graph_launch_precedes_topk": true,
+    "all_post_topk_idle_after_graph_launch": true,
+    "published_samples_equal_independently_audited_samples": true,
+    "fresh_native_sql_audit_binds_current_analysis": true
+  },
+  "format_only_analysis_source_changes": {
+    "experiments/cache_manager_performance/src/transition.py": {
+      "before_source": {
+        "path": "experiments/cache_manager_performance/output/data/cache_full_graph_transition_20261006_03/independent_validation/previous_analysis_sources/experiments/cache_manager_performance/src/transition.py",
+        "sha256": "6491cab15d24b9b4b96f2d59543cada8945d6d3a1869d756470d910baea790bb",
+        "bytes": 24598
+      },
+      "after_source": {
+        "path": "experiments/cache_manager_performance/output/data/cache_full_graph_transition_20261006_03/analysis_sources/experiments/cache_manager_performance/src/transition.py",
+        "sha256": "756357a607f1532223c0fb7cb0fa428c8690a6e4eac6057c1e0d75564af9a4be",
+        "bytes": 24566
+      },
+      "normalized_ast_sha256": "9925f7755a7d5c34230138280d9836eaf2f956b070230f67388a6ba8af03d008",
+      "ast_equal": true
+    },
+    "experiments/cache_manager_performance/src/transition_metrics.py": {
+      "before_source": {
+        "path": "experiments/cache_manager_performance/output/data/cache_full_graph_transition_20261006_03/independent_validation/previous_analysis_sources/experiments/cache_manager_performance/src/transition_metrics.py",
+        "sha256": "e2835f10b12b92482f779a80edea041be924b9e419a9bb67f559274f607e297b",
+        "bytes": 26093
+      },
+      "after_source": {
+        "path": "experiments/cache_manager_performance/output/data/cache_full_graph_transition_20261006_03/analysis_sources/experiments/cache_manager_performance/src/transition_metrics.py",
+        "sha256": "2e66cb7400554d850fcd0a4da5248354d1e25b522919edd4bb5b5829feb09619",
+        "bytes": 26063
+      },
+      "normalized_ast_sha256": "0aa6989ef64105f0050daf9f0e5a295055ff8e70b9b8ab1a03ec1153d859dd62",
+      "ast_equal": true
+    }
+  },
   "windows": [
     {
-      "actual_mla_kernel": "void sm90::prefill::sparse_fwd::sparse_attn_fwd_kernel<sm90::prefill::sparse_fwd::KernelTemplate<(int)576, (bool)0>, sm90::prefill::sparse_fwd::KernelTemplate<(int)576, (bool)0>::TmaParams<cute::tuple<int, int, int>, cute::TiledCopy<cute::Copy_Atom<cute::Copy_Traits<cute::SM90_TMA_LOAD, cute::C<(int)65536>, cute::AuxTmaParams<cute::tuple<cute::ScaledBasis<cute::C<(int)1>, (int)1>, cute::ScaledBasis<cute::C<(int)1>, (int)0>, cute::ScaledBasis<cute::C<(int)1>, (int)2>>, const cute::Layout<cute::tuple<cute::C<(int)64>, cute::C<(int)64>, cute::C<(int)1>>, cute::tuple<cute::ScaledBasis<cute::C<(int)1>, (int)1>, cute::ScaledBasis<cute::C<(int)1>, (int)0>, cute::ScaledBasis<cute::C<(int)1>, (int)2>>> &, const cute::Swizzle<(int)3, (int)4, (int)3> &>>, cutlass::bfloat16_t>, cute::Layout<cute::tuple<cute::C<(int)1>, cute::tuple<cute::tuple<cute::tuple<cute::C<(int)64>, cute::C<(int)64>>, cute::C<(int)9>>>>, cute::tuple<cute::C<(int)0>, cute::tuple<cute::tuple<cute::tuple<cute::C<(int)64>, cute::C<(int)1>>, cute::C<(int)4096>>>>>, cute::tuple<cute::C<(int)64>, cute::C<(int)576>>>>>(SparseAttnFwdParams, T2)",
-      "control_union_ns": 44832,
-      "end_ns": 84335686,
-      "exposed_control_ns": 40480,
-      "gpu_idle_ns": 25247,
-      "idle_before_next_same_stream_launch_api_start_ns": 0,
-      "io_union_ns": 68640,
+      "method": "echo",
       "layer": 0,
-      "mla_launch_api_start_minus_topk_gpu_end_ns": -73695,
-      "non_io_residual_ns": 65727,
-      "passed": true,
-      "phase": "extend_cold",
-      "sample": 0,
-      "scheme": "echo",
-      "stages_checked": [
-        "prefetch_hint",
-        "cache_write",
-        "offload_exact_recall",
-        "sparse_mla"
-      ],
-      "start_ns": 84201319,
-      "topk_last_kernel": "mask_kernel",
-      "window_ns": 134367
+      "start_ns": 84977498,
+      "end_ns": 85113370,
+      "activity_count": 17,
+      "totals_ns": {
+        "window_ns": 135872,
+        "gap_ns": 67616,
+        "gpu_idle_ns": 24608,
+        "gpu_busy_union_ns": 111264,
+        "exposed_control_ns": 43008,
+        "compute_io_fused_union_ns": 68256,
+        "compute_union_ns": 0,
+        "fused_union_ns": 0,
+        "io_union_ns": 68256,
+        "gpu_control_union_ns": 47904
+      },
+      "lane_union_intervals_ns": {
+        "compute": [],
+        "fused": [],
+        "io": [
+          [
+            85006042,
+            85011706
+          ],
+          [
+            85040410,
+            85103002
+          ]
+        ],
+        "control": [
+          [
+            84977882,
+            84980538
+          ],
+          [
+            84982010,
+            84983514
+          ],
+          [
+            84987578,
+            84992602
+          ],
+          [
+            84992986,
+            84994490
+          ],
+          [
+            84994906,
+            84997210
+          ],
+          [
+            84997594,
+            84999994
+          ],
+          [
+            85000410,
+            85004250
+          ],
+          [
+            85004698,
+            85005882
+          ],
+          [
+            85006266,
+            85011162
+          ],
+          [
+            85011866,
+            85016506
+          ],
+          [
+            85029946,
+            85032250
+          ],
+          [
+            85033050,
+            85034202
+          ],
+          [
+            85034650,
+            85039994
+          ],
+          [
+            85103418,
+            85106522
+          ],
+          [
+            85106906,
+            85112954
+          ]
+        ]
+      },
+      "topk_last_node": 227633266756,
+      "mla_first_node": 227633266774
     },
     {
-      "actual_mla_kernel": "void sm90::prefill::sparse_fwd::sparse_attn_fwd_kernel<sm90::prefill::sparse_fwd::KernelTemplate<(int)576, (bool)0>, sm90::prefill::sparse_fwd::KernelTemplate<(int)576, (bool)0>::TmaParams<cute::tuple<int, int, int>, cute::TiledCopy<cute::Copy_Atom<cute::Copy_Traits<cute::SM90_TMA_LOAD, cute::C<(int)65536>, cute::AuxTmaParams<cute::tuple<cute::ScaledBasis<cute::C<(int)1>, (int)1>, cute::ScaledBasis<cute::C<(int)1>, (int)0>, cute::ScaledBasis<cute::C<(int)1>, (int)2>>, const cute::Layout<cute::tuple<cute::C<(int)64>, cute::C<(int)64>, cute::C<(int)1>>, cute::tuple<cute::ScaledBasis<cute::C<(int)1>, (int)1>, cute::ScaledBasis<cute::C<(int)1>, (int)0>, cute::ScaledBasis<cute::C<(int)1>, (int)2>>> &, const cute::Swizzle<(int)3, (int)4, (int)3> &>>, cutlass::bfloat16_t>, cute::Layout<cute::tuple<cute::C<(int)1>, cute::tuple<cute::tuple<cute::tuple<cute::C<(int)64>, cute::C<(int)64>>, cute::C<(int)9>>>>, cute::tuple<cute::C<(int)0>, cute::tuple<cute::tuple<cute::tuple<cute::C<(int)64>, cute::C<(int)1>>, cute::C<(int)4096>>>>>, cute::tuple<cute::C<(int)64>, cute::C<(int)576>>>>>(SparseAttnFwdParams, T2)",
-      "control_union_ns": 42752,
-      "end_ns": 85840739,
-      "exposed_control_ns": 37376,
-      "gpu_idle_ns": 23968,
-      "idle_before_next_same_stream_launch_api_start_ns": 0,
-      "io_union_ns": 17440,
+      "method": "echo",
       "layer": 1,
-      "mla_launch_api_start_minus_topk_gpu_end_ns": -143627,
-      "non_io_residual_ns": 61344,
-      "passed": true,
-      "phase": "extend_cold",
-      "sample": 0,
-      "scheme": "echo",
-      "stages_checked": [
-        "prefetch_hint",
-        "cache_write",
-        "offload_exact_recall",
-        "sparse_mla"
-      ],
-      "start_ns": 85761955,
-      "topk_last_kernel": "mask_kernel",
-      "window_ns": 78784
+      "start_ns": 86505109,
+      "end_ns": 86574101,
+      "activity_count": 17,
+      "totals_ns": {
+        "window_ns": 68992,
+        "gap_ns": 52544,
+        "gpu_idle_ns": 12512,
+        "gpu_busy_union_ns": 56480,
+        "exposed_control_ns": 40032,
+        "compute_io_fused_union_ns": 16448,
+        "compute_union_ns": 0,
+        "fused_union_ns": 0,
+        "io_union_ns": 16448,
+        "gpu_control_union_ns": 45728
+      },
+      "lane_union_intervals_ns": {
+        "compute": [],
+        "fused": [],
+        "io": [
+          [
+            86534421,
+            86540533
+          ],
+          [
+            86553877,
+            86564213
+          ]
+        ],
+        "control": [
+          [
+            86505525,
+            86508565
+          ],
+          [
+            86510005,
+            86511477
+          ],
+          [
+            86514997,
+            86520149
+          ],
+          [
+            86520725,
+            86522325
+          ],
+          [
+            86522741,
+            86525109
+          ],
+          [
+            86525717,
+            86527861
+          ],
+          [
+            86528277,
+            86532213
+          ],
+          [
+            86532629,
+            86533653
+          ],
+          [
+            86534069,
+            86538325
+          ],
+          [
+            86538741,
+            86542997
+          ],
+          [
+            86544565,
+            86546869
+          ],
+          [
+            86547413,
+            86548533
+          ],
+          [
+            86548981,
+            86553429
+          ],
+          [
+            86564629,
+            86567029
+          ],
+          [
+            86567445,
+            86573653
+          ]
+        ]
+      },
+      "topk_last_node": 227633266853,
+      "mla_first_node": 227633266871
     },
     {
-      "actual_mla_kernel": "void sm90::prefill::sparse_fwd::sparse_attn_fwd_kernel<sm90::prefill::sparse_fwd::KernelTemplate<(int)576, (bool)0>, sm90::prefill::sparse_fwd::KernelTemplate<(int)576, (bool)0>::TmaParams<cute::tuple<int, int, int>, cute::TiledCopy<cute::Copy_Atom<cute::Copy_Traits<cute::SM90_TMA_LOAD, cute::C<(int)65536>, cute::AuxTmaParams<cute::tuple<cute::ScaledBasis<cute::C<(int)1>, (int)1>, cute::ScaledBasis<cute::C<(int)1>, (int)0>, cute::ScaledBasis<cute::C<(int)1>, (int)2>>, const cute::Layout<cute::tuple<cute::C<(int)64>, cute::C<(int)64>, cute::C<(int)1>>, cute::tuple<cute::ScaledBasis<cute::C<(int)1>, (int)1>, cute::ScaledBasis<cute::C<(int)1>, (int)0>, cute::ScaledBasis<cute::C<(int)1>, (int)2>>> &, const cute::Swizzle<(int)3, (int)4, (int)3> &>>, cutlass::bfloat16_t>, cute::Layout<cute::tuple<cute::C<(int)1>, cute::tuple<cute::tuple<cute::tuple<cute::C<(int)64>, cute::C<(int)64>>, cute::C<(int)9>>>>, cute::tuple<cute::C<(int)0>, cute::tuple<cute::tuple<cute::tuple<cute::C<(int)64>, cute::C<(int)1>>, cute::C<(int)4096>>>>>, cute::tuple<cute::C<(int)64>, cute::C<(int)576>>>>>(SparseAttnFwdParams, T2)",
-      "control_union_ns": 43392,
-      "end_ns": 87371295,
-      "exposed_control_ns": 39488,
-      "gpu_idle_ns": 22783,
-      "idle_before_next_same_stream_launch_api_start_ns": 0,
-      "io_union_ns": 44544,
+      "method": "echo",
       "layer": 2,
-      "mla_launch_api_start_minus_topk_gpu_end_ns": -160602,
-      "non_io_residual_ns": 62271,
-      "passed": true,
-      "phase": "extend_cold",
-      "sample": 0,
-      "scheme": "echo",
-      "stages_checked": [
-        "prefetch_hint",
-        "cache_write",
-        "offload_exact_recall",
-        "sparse_mla"
-      ],
-      "start_ns": 87264480,
-      "topk_last_kernel": "mask_kernel",
-      "window_ns": 106815
+      "start_ns": 87970385,
+      "end_ns": 88070321,
+      "activity_count": 17,
+      "totals_ns": {
+        "window_ns": 99936,
+        "gap_ns": 55392,
+        "gpu_idle_ns": 15648,
+        "gpu_busy_union_ns": 84288,
+        "exposed_control_ns": 39744,
+        "compute_io_fused_union_ns": 44544,
+        "compute_union_ns": 0,
+        "fused_union_ns": 0,
+        "io_union_ns": 44544,
+        "gpu_control_union_ns": 45088
+      },
+      "lane_union_intervals_ns": {
+        "compute": [],
+        "fused": [],
+        "io": [
+          [
+            88001457,
+            88007921
+          ],
+          [
+            88022353,
+            88060433
+          ]
+        ],
+        "control": [
+          [
+            87970769,
+            87973521
+          ],
+          [
+            87975409,
+            87976145
+          ],
+          [
+            87979633,
+            87984177
+          ],
+          [
+            87984721,
+            87986193
+          ],
+          [
+            87986641,
+            87988945
+          ],
+          [
+            87989425,
+            87991889
+          ],
+          [
+            87992305,
+            87996337
+          ],
+          [
+            87996913,
+            87998001
+          ],
+          [
+            87998417,
+            88002929
+          ],
+          [
+            88003601,
+            88007473
+          ],
+          [
+            88012145,
+            88014961
+          ],
+          [
+            88015345,
+            88016657
+          ],
+          [
+            88017041,
+            88021905
+          ],
+          [
+            88061009,
+            88063377
+          ],
+          [
+            88063825,
+            88069777
+          ]
+        ]
+      },
+      "topk_last_node": 227633266950,
+      "mla_first_node": 227633266968
     },
     {
-      "actual_mla_kernel": "void sm90::prefill::sparse_fwd::sparse_attn_fwd_kernel<sm90::prefill::sparse_fwd::KernelTemplate<(int)576, (bool)0>, sm90::prefill::sparse_fwd::KernelTemplate<(int)576, (bool)0>::TmaParams<cute::tuple<int, int, int>, cute::TiledCopy<cute::Copy_Atom<cute::Copy_Traits<cute::SM90_TMA_LOAD, cute::C<(int)65536>, cute::AuxTmaParams<cute::tuple<cute::ScaledBasis<cute::C<(int)1>, (int)1>, cute::ScaledBasis<cute::C<(int)1>, (int)0>, cute::ScaledBasis<cute::C<(int)1>, (int)2>>, const cute::Layout<cute::tuple<cute::C<(int)64>, cute::C<(int)64>, cute::C<(int)1>>, cute::tuple<cute::ScaledBasis<cute::C<(int)1>, (int)1>, cute::ScaledBasis<cute::C<(int)1>, (int)0>, cute::ScaledBasis<cute::C<(int)1>, (int)2>>> &, const cute::Swizzle<(int)3, (int)4, (int)3> &>>, cutlass::bfloat16_t>, cute::Layout<cute::tuple<cute::C<(int)1>, cute::tuple<cute::tuple<cute::tuple<cute::C<(int)64>, cute::C<(int)64>>, cute::C<(int)9>>>>, cute::tuple<cute::C<(int)0>, cute::tuple<cute::tuple<cute::tuple<cute::C<(int)64>, cute::C<(int)1>>, cute::C<(int)4096>>>>>, cute::tuple<cute::C<(int)64>, cute::C<(int)576>>>>>(SparseAttnFwdParams, T2)",
-      "control_union_ns": 35616,
-      "end_ns": 82817994,
-      "exposed_control_ns": 35616,
-      "gpu_idle_ns": 207968,
-      "idle_before_next_same_stream_launch_api_start_ns": 164106,
-      "io_union_ns": 222111,
+      "method": "serial_sparse",
       "layer": 0,
-      "mla_launch_api_start_minus_topk_gpu_end_ns": 347688,
-      "non_io_residual_ns": 243584,
-      "passed": true,
-      "phase": "extend_cold",
-      "sample": 0,
-      "scheme": "serial_sparse",
-      "stages_checked": [
-        "cache_write",
-        "offload_exact_recall",
-        "sparse_mla"
-      ],
-      "start_ns": 82352299,
-      "topk_last_kernel": "mask_kernel",
-      "window_ns": 465695
+      "start_ns": 85228187,
+      "end_ns": 85500026,
+      "activity_count": 13,
+      "totals_ns": {
+        "window_ns": 271839,
+        "gap_ns": 50848,
+        "gpu_idle_ns": 18976,
+        "gpu_busy_union_ns": 252863,
+        "exposed_control_ns": 31872,
+        "compute_io_fused_union_ns": 220991,
+        "compute_union_ns": 0,
+        "fused_union_ns": 0,
+        "io_union_ns": 220991,
+        "gpu_control_union_ns": 37376
+      },
+      "lane_union_intervals_ns": {
+        "compute": [],
+        "fused": [],
+        "io": [
+          [
+            85241275,
+            85247227
+          ],
+          [
+            85275067,
+            85490106
+          ]
+        ],
+        "control": [
+          [
+            85228827,
+            85231291
+          ],
+          [
+            85231707,
+            85234395
+          ],
+          [
+            85234779,
+            85239003
+          ],
+          [
+            85239387,
+            85240443
+          ],
+          [
+            85240859,
+            85245787
+          ],
+          [
+            85246235,
+            85250491
+          ],
+          [
+            85264219,
+            85266491
+          ],
+          [
+            85267067,
+            85268219
+          ],
+          [
+            85268635,
+            85274523
+          ],
+          [
+            85490746,
+            85493370
+          ],
+          [
+            85493786,
+            85499610
+          ]
+        ]
+      },
+      "topk_last_node": 240518168627,
+      "mla_first_node": 240518168641
     },
     {
-      "actual_mla_kernel": "void sm90::prefill::sparse_fwd::sparse_attn_fwd_kernel<sm90::prefill::sparse_fwd::KernelTemplate<(int)576, (bool)0>, sm90::prefill::sparse_fwd::KernelTemplate<(int)576, (bool)0>::TmaParams<cute::tuple<int, int, int>, cute::TiledCopy<cute::Copy_Atom<cute::Copy_Traits<cute::SM90_TMA_LOAD, cute::C<(int)65536>, cute::AuxTmaParams<cute::tuple<cute::ScaledBasis<cute::C<(int)1>, (int)1>, cute::ScaledBasis<cute::C<(int)1>, (int)0>, cute::ScaledBasis<cute::C<(int)1>, (int)2>>, const cute::Layout<cute::tuple<cute::C<(int)64>, cute::C<(int)64>, cute::C<(int)1>>, cute::tuple<cute::ScaledBasis<cute::C<(int)1>, (int)1>, cute::ScaledBasis<cute::C<(int)1>, (int)0>, cute::ScaledBasis<cute::C<(int)1>, (int)2>>> &, const cute::Swizzle<(int)3, (int)4, (int)3> &>>, cutlass::bfloat16_t>, cute::Layout<cute::tuple<cute::C<(int)1>, cute::tuple<cute::tuple<cute::tuple<cute::C<(int)64>, cute::C<(int)64>>, cute::C<(int)9>>>>, cute::tuple<cute::C<(int)0>, cute::tuple<cute::tuple<cute::tuple<cute::C<(int)64>, cute::C<(int)1>>, cute::C<(int)4096>>>>>, cute::tuple<cute::C<(int)64>, cute::C<(int)576>>>>>(SparseAttnFwdParams, T2)",
-      "control_union_ns": 35168,
-      "end_ns": 83877352,
-      "exposed_control_ns": 31040,
-      "gpu_idle_ns": 113600,
-      "idle_before_next_same_stream_launch_api_start_ns": 80454,
-      "io_union_ns": 78208,
+      "method": "serial_sparse",
       "layer": 1,
-      "mla_launch_api_start_minus_topk_gpu_end_ns": 214642,
-      "non_io_residual_ns": 144640,
-      "passed": true,
-      "phase": "extend_cold",
-      "sample": 0,
-      "scheme": "serial_sparse",
-      "stages_checked": [
-        "cache_write",
-        "offload_exact_recall",
-        "sparse_mla"
-      ],
-      "start_ns": 83654504,
-      "topk_last_kernel": "mask_kernel",
-      "window_ns": 222848
+      "start_ns": 86320856,
+      "end_ns": 86437688,
+      "activity_count": 13,
+      "totals_ns": {
+        "window_ns": 116832,
+        "gap_ns": 38496,
+        "gpu_idle_ns": 6752,
+        "gpu_busy_union_ns": 110080,
+        "exposed_control_ns": 31744,
+        "compute_io_fused_union_ns": 78336,
+        "compute_union_ns": 0,
+        "fused_union_ns": 0,
+        "io_union_ns": 78336,
+        "gpu_control_union_ns": 37216
+      },
+      "lane_union_intervals_ns": {
+        "compute": [],
+        "fused": [],
+        "io": [
+          [
+            86334616,
+            86340504
+          ],
+          [
+            86355512,
+            86427960
+          ]
+        ],
+        "control": [
+          [
+            86321528,
+            86323992
+          ],
+          [
+            86324376,
+            86326584
+          ],
+          [
+            86327000,
+            86332312
+          ],
+          [
+            86332728,
+            86333816
+          ],
+          [
+            86334200,
+            86338488
+          ],
+          [
+            86338904,
+            86343032
+          ],
+          [
+            86344792,
+            86347128
+          ],
+          [
+            86347736,
+            86348856
+          ],
+          [
+            86349304,
+            86355064
+          ],
+          [
+            86428376,
+            86431064
+          ],
+          [
+            86431448,
+            86437272
+          ]
+        ]
+      },
+      "topk_last_node": 240518168706,
+      "mla_first_node": 240518168720
     },
     {
-      "actual_mla_kernel": "void sm90::prefill::sparse_fwd::sparse_attn_fwd_kernel<sm90::prefill::sparse_fwd::KernelTemplate<(int)576, (bool)0>, sm90::prefill::sparse_fwd::KernelTemplate<(int)576, (bool)0>::TmaParams<cute::tuple<int, int, int>, cute::TiledCopy<cute::Copy_Atom<cute::Copy_Traits<cute::SM90_TMA_LOAD, cute::C<(int)65536>, cute::AuxTmaParams<cute::tuple<cute::ScaledBasis<cute::C<(int)1>, (int)1>, cute::ScaledBasis<cute::C<(int)1>, (int)0>, cute::ScaledBasis<cute::C<(int)1>, (int)2>>, const cute::Layout<cute::tuple<cute::C<(int)64>, cute::C<(int)64>, cute::C<(int)1>>, cute::tuple<cute::ScaledBasis<cute::C<(int)1>, (int)1>, cute::ScaledBasis<cute::C<(int)1>, (int)0>, cute::ScaledBasis<cute::C<(int)1>, (int)2>>> &, const cute::Swizzle<(int)3, (int)4, (int)3> &>>, cutlass::bfloat16_t>, cute::Layout<cute::tuple<cute::C<(int)1>, cute::tuple<cute::tuple<cute::tuple<cute::C<(int)64>, cute::C<(int)64>>, cute::C<(int)9>>>>, cute::tuple<cute::C<(int)0>, cute::tuple<cute::tuple<cute::tuple<cute::C<(int)64>, cute::C<(int)1>>, cute::C<(int)4096>>>>>, cute::tuple<cute::C<(int)64>, cute::C<(int)576>>>>>(SparseAttnFwdParams, T2)",
-      "control_union_ns": 34016,
-      "end_ns": 85077253,
-      "exposed_control_ns": 34016,
-      "gpu_idle_ns": 130208,
-      "idle_before_next_same_stream_launch_api_start_ns": 86220,
-      "io_union_ns": 199295,
+      "method": "serial_sparse",
       "layer": 2,
-      "mla_launch_api_start_minus_topk_gpu_end_ns": 261696,
-      "non_io_residual_ns": 164224,
-      "passed": true,
-      "phase": "extend_cold",
-      "sample": 0,
-      "scheme": "serial_sparse",
-      "stages_checked": [
-        "cache_write",
-        "offload_exact_recall",
-        "sparse_mla"
-      ],
-      "start_ns": 84713734,
-      "topk_last_kernel": "mask_kernel",
-      "window_ns": 363519
+      "start_ns": 87261781,
+      "end_ns": 87506932,
+      "activity_count": 13,
+      "totals_ns": {
+        "window_ns": 245151,
+        "gap_ns": 45440,
+        "gpu_idle_ns": 13376,
+        "gpu_busy_union_ns": 231775,
+        "exposed_control_ns": 32064,
+        "compute_io_fused_union_ns": 199711,
+        "compute_union_ns": 0,
+        "fused_union_ns": 0,
+        "io_union_ns": 199711,
+        "gpu_control_union_ns": 36416
+      },
+      "lane_union_intervals_ns": {
+        "compute": [],
+        "fused": [],
+        "io": [
+          [
+            87277845,
+            87284405
+          ],
+          [
+            87303829,
+            87496980
+          ]
+        ],
+        "control": [
+          [
+            87262197,
+            87264597
+          ],
+          [
+            87264981,
+            87267349
+          ],
+          [
+            87267765,
+            87272309
+          ],
+          [
+            87272693,
+            87273717
+          ],
+          [
+            87274101,
+            87278421
+          ],
+          [
+            87278901,
+            87282677
+          ],
+          [
+            87293365,
+            87296085
+          ],
+          [
+            87296469,
+            87297749
+          ],
+          [
+            87298165,
+            87303413
+          ],
+          [
+            87497428,
+            87500052
+          ],
+          [
+            87500468,
+            87506580
+          ]
+        ]
+      },
+      "topk_last_node": 240518168785,
+      "mla_first_node": 240518168799
     }
-  ]
+  ],
+  "limits": [
+    "One intrusive sample per method; the three layer intervals sum to a subtotal, not complete-request latency.",
+    "No per-stage CPU wrapper scopes exist during complete graph replay; graph launch offsets do not identify Python or device scheduling causes.",
+    "Individual live JIT/CUBIN files are not separately revalidated by this transition analyzer."
+  ],
+  "independent_audit_analysis_id": "cache_full_graph_transition_20261006_03",
+  "previous_sample_comparison": {
+    "path": "experiments/cache_manager_performance/output/data/cache_full_graph_transition_20261006_03/independent_validation/previous_summary.json",
+    "sha256": "b4ef2d1804485100e67b600b0fb74bca76e264f10601d826d8052d34cdf612af",
+    "bytes": 664466
+  }
 }

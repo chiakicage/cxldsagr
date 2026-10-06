@@ -20,15 +20,25 @@ from experiments.cache_manager_performance.src.analyze import (
     annotate_diagnostic_io,
     diagnostic_lane,
 )
-from experiments.cache_manager_performance.src.transition_metrics import analyze_transition
+from experiments.cache_manager_performance.src.transition_metrics import (
+    analyze_graph_transition,
+    analyze_transition,
+)
 from experiments.deepseek_v32_mfu.src.analyze_nsys import (
     _assign_scopes,
     _attribute,
     _read_capture,
 )
-from experiments.deepseek_v32_mfu.src.launch_gap import annotate_actual_io
+from experiments.deepseek_v32_mfu.src.full_graph_profile import attribute_full_graph_replays
+from experiments.deepseek_v32_mfu.src.launch_gap import activity_inventory, annotate_actual_io
 from experiments.deepseek_v32_mfu.src.operator_report import _SCOPE as MODEL_SCOPE
-from experiments.deepseek_v32_mfu.src.timeline import activity_lane, select_forward_activities
+from experiments.deepseek_v32_mfu.src.operator_report import read_calls
+from experiments.deepseek_v32_mfu.src.timeline import (
+    activity_lane,
+    select_forward_activities,
+    select_forward_apis,
+)
+from experiments.deepseek_v32_motivation.src.graph_attribution import read_lineage
 
 ROOT = Path(__file__).resolve().parents[3]
 SCHEMES = ("echo", "serial_sparse")
@@ -109,9 +119,10 @@ def _post_topk_detail(detail):
     }
 
 
-def model_transitions(profile):
+def model_transitions(profile, gap_audit=None):
     profile = Path(profile).resolve()
-    result, audit = read(profile / "result.json"), read(profile / "gap_audit.json")
+    gap_audit = Path(gap_audit) if gap_audit is not None else profile / "gap_audit.json"
+    result, audit = read(profile / "result.json"), read(gap_audit)
     if result.get("accepted") is not True or result.get("mode") != "profile":
         raise ValueError("model transition requires an accepted profile run")
     result_binding = binding(profile / "result.json", audit["input_result_sha256"])
@@ -120,6 +131,20 @@ def model_transitions(profile):
     candidates = [row for row in audit["methods"] if row["method"] in SCHEMES]
     if len(candidates) != 2 or {row["method"] for row in candidates} != set(SCHEMES):
         raise ValueError("model audit must identify one capture per sparse method")
+    full_graph = result.get("extend_graph", False)
+    graph_sources, calls, parents = {}, [], None
+    if full_graph:
+        graph_sources["operator_calls"] = binding(profile / "operator_calls.json")
+        calls, _ = read_calls(profile / "operator_calls.json")
+        setup = [
+            profile / f"capture_{index}.sqlite"
+            for index, label in enumerate(result["nsys_capture_order"], 1)
+            if label == "graph_setup" or label.endswith("/extend_graph_setup")
+        ]
+        if not setup:
+            raise ValueError("full graph transition requires captured node lineage")
+        graph_sources["setup_captures"] = [binding(path) for path in setup]
+        parents = read_lineage(setup)
     rows, captures = [], []
     for expected in candidates:
         scheme = expected["method"]
@@ -131,8 +156,24 @@ def model_transitions(profile):
         activities, boundary = select_forward_activities(scopes, activities)
         if boundary != expected["capture_boundary"]:
             raise ValueError("model measured forward boundary differs from audit")
+        graph_audit = None
+        if full_graph:
+            selected_calls = [
+                row for row in calls if (row["mode"], row["phase"]) == (scheme, "extend_annotated")
+            ]
+            graph_audit = attribute_full_graph_replays(
+                activities,
+                selected_calls,
+                parents,
+                scopes=scopes,
+                apis=select_forward_apis(apis, boundary),
+            )
+            if graph_audit != expected["graph_attribution"]:
+                raise ValueError("model graph attribution differs from accepted gap audit")
         counters = result["measurements"][scheme]["extend_cache_per_layer"]
         annotate_actual_io(activities, counters, scheme, "extend_annotated")
+        if full_graph and activity_inventory(activities) != expected["activity_inventory"]:
+            raise ValueError("model GPU classification differs from accepted gap audit")
         for layer in range(result["num_layers"]):
             selected = [
                 s
@@ -142,21 +183,32 @@ def model_transitions(profile):
                 and boundary["measured_start_ns"] <= s["start"] < boundary["measured_end_ns"]
                 and s["stage"] != "attention_output"
             ]
-            detail = analyze_transition(
-                selected,
-                apis,
-                activities,
-                indexer_stage="indexer_fused" if scheme == "echo" else "indexer_qk",
-                topk_stage="exact_topk",
-                consumer_stage="sparse_mla",
-                endpoint_kind="attention_kernel",
-                lane_classifier=activity_lane,
-            )
+            if full_graph:
+                detail = analyze_graph_transition(
+                    apis,
+                    activities,
+                    layer=layer,
+                    indexer_stage="indexer_fused" if scheme == "echo" else "indexer_qk",
+                    topk_stage="exact_topk",
+                    consumer_stage="sparse_mla",
+                    lane_classifier=activity_lane,
+                )
+            else:
+                detail = analyze_transition(
+                    selected,
+                    apis,
+                    activities,
+                    indexer_stage="indexer_fused" if scheme == "echo" else "indexer_qk",
+                    topk_stage="exact_topk",
+                    consumer_stage="sparse_mla",
+                    endpoint_kind="attention_kernel",
+                    lane_classifier=activity_lane,
+                )
             # Compute islands are outside this transition. Do not silently use
             # a graph classifier without its separate node-lineage evidence.
             for span in ("gpu_indexer_to_topk", "gpu_topk_to_consumer"):
                 left, right = detail[span]["start_ns"], detail[span]["end_ns"]
-                if any(
+                if not full_graph and any(
                     a.get("graph_id") and a["start"] < right and a["end"] > left for a in activities
                 ):
                     raise ValueError("transition overlaps a graph; node lineage is required")
@@ -172,13 +224,22 @@ def model_transitions(profile):
                     **_post_topk_detail(detail),
                 }
             )
-        captures.append({**source, "scheme": scheme, "tables": tables, "boundary": boundary})
+        captures.append(
+            {
+                **source,
+                "scheme": scheme,
+                "tables": tables,
+                "boundary": boundary,
+                "graph_attribution": graph_audit,
+            }
+        )
     provenance = {
         "kind": "complete_model",
         "run_id": result["run_id"],
         "result": result_binding,
-        "audit": binding(profile / "gap_audit.json"),
+        "audit": binding(gap_audit),
         "captures": captures,
+        "graph_sources": graph_sources,
         "sources_manifest": binding(profile / "sources.json"),
         "execution_sources": execution_sources(
             profile,
@@ -186,10 +247,21 @@ def model_transitions(profile):
             (
                 "operators/deepseek_v32/attention/offload/mla.py",
                 "operators/deepseek_v32/attention/device_only/mla.py",
+            )
+            + (
+                (
+                    "models/deepseek_v32/model.py",
+                    "models/deepseek_v32/execution/extend_graph.py",
+                    "models/deepseek_v32/cache/prefetch.py",
+                    "cache/sparse_token_graph.py",
+                    "experiments/deepseek_v32_mfu/src/full_graph_profile.py",
+                )
+                if full_graph
+                else ()
             ),
         ),
         "workload": {
-            key: result[key]
+            key: result.get(key)
             for key in (
                 "prefix_tokens",
                 "extend_tokens",
@@ -198,12 +270,13 @@ def model_transitions(profile):
                 "num_layers",
                 "extend_residency",
                 "compute_graphs",
+                "extend_graph",
                 "scope",
             )
         },
         "hardware": result["hardware"],
         "validation_receipt": result["validation_receipt"],
-        "runtime_identity_limit": "Inherits V10: resident mask live JIT/CUBIN was not separately archived.",
+        "runtime_identity_limit": "Execution sources and native identity are inherited from the accepted profile and its validation receipt; individual live JIT/CUBIN artifacts are not separately proven by this analyzer.",
     }
     return rows, provenance
 
@@ -385,14 +458,18 @@ def manager_transitions(profile):
     return rows, provenance
 
 
-def write_analysis(output, run_id, *, manager_run=None, model_run=None):
+def write_analysis(output, run_id, *, manager_run=None, model_run=None, model_gap_audit=None):
     output = Path(output)
     if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]*", run_id):
         raise ValueError("analysis ID must be a plain nonempty name")
     rows, provenance = [], []
     for path, loader in ((manager_run, manager_transitions), (model_run, model_transitions)):
         if path is not None:
-            samples, source = loader(path)
+            samples, source = (
+                loader(path, gap_audit=model_gap_audit)
+                if loader is model_transitions
+                else loader(path)
+            )
             rows.extend(samples)
             provenance.append(source)
     if not rows:
@@ -407,6 +484,9 @@ def write_analysis(output, run_id, *, manager_run=None, model_run=None):
         "experiments/deepseek_v32_mfu/src/launch_gap.py",
         "experiments/deepseek_v32_mfu/src/timeline.py",
         "experiments/deepseek_v32_mfu/src/operator_report.py",
+        "experiments/deepseek_v32_mfu/src/full_graph_profile.py",
+        "experiments/deepseek_v32_motivation/src/graph_attribution.py",
+        "experiments/deepseek_v32_motivation/src/graph_instrumentation.py",
         "evaluation/validation.py",
     )
     sources = {}
@@ -419,7 +499,7 @@ def write_analysis(output, run_id, *, manager_run=None, model_run=None):
             "sha256": sha(destination),
         }
     report = {
-        "schema": "cache-manager-attention-transition-v2",
+        "schema": "cache-manager-attention-transition-v3",
         "analysis_id": run_id,
         "new_gpu_run": False,
         "sources": provenance,
@@ -464,11 +544,16 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--manager-run", type=Path)
     parser.add_argument("--model-run", type=Path)
+    parser.add_argument("--model-gap-audit", type=Path)
     parser.add_argument("--run-id", required=True, help="new analysis ID; not a new GPU run")
     parser.add_argument("--output-dir", required=True, type=Path)
     args = parser.parse_args(argv)
     report = write_analysis(
-        args.output_dir, args.run_id, manager_run=args.manager_run, model_run=args.model_run
+        args.output_dir,
+        args.run_id,
+        manager_run=args.manager_run,
+        model_run=args.model_run,
+        model_gap_audit=args.model_gap_audit,
     )
     print(json.dumps({"analysis_id": report["analysis_id"], "transitions": len(report["samples"])}))
 

@@ -1,0 +1,106 @@
+{
+  "schema": "engine-local-mfu-timeline-comparison-v2",
+  "phase": "prefill",
+  "run_id": "engine_mfu_prefill_20261006_04",
+  "measurement": "Presentation of existing NSYS profiles; no new GPU execution or benchmark.",
+  "inputs_and_sources_sha256": {
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/report/sglang_engine/report.json": "640095c19b6392ad5c66d4a6367035e162252445d23b40215a371020f1667150",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/report/sglang_engine/selected_activities.csv": "d6343c1d2a939878e61aafe2ab83f62b66f13bd6d7ad4797148e96df0abafe56",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/report/sglang_engine/publication.json": "559806288571d71d1df1eb1b8d0e1edfb137ba9d1a2d275eac99d78674d90d18",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/report/full_extend_graph/compact_receipt.json": "c89d25e83f22fca257ded21a1b2713720466fa377699e27dbdceb7edebffd4d9",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/report/full_extend_graph/publication_manifest.json": "abedb8bfdd29b7f8f4abf88ced9db157faf7f55784539f875986aafec33ec5f8",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/report/full_extend_graph/provenance.json": "5ae386327427406f68f98eff68370177db6114d3ef54283505fd8b94226b1eb0",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_dense_late_wait_timeline_20261006_02/window_rows.json": "4f89be39af3a2bcd3f4b3d5287b3cf0dfeeeee41b2c0811403ae7939f5fe566b",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/src/compare_timeline.py": "5e3bb3c9d659a90fc182f1bd45e04fc7ffecde3d68b8835fff4b4f73aaee504b",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/src/engine_timeline.py": "fb2b5b70504cc0a1e6c5441f85893ca151cebbc02c3890445f946f0f8dd8cfb1",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/src/compact_timeline.py": "b50eb7ce04f7d8c0711f2fb65e8ee84f8e447e57dbb48cb2b725c949e92b8fc3",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/src/timeline.py": "898d09d79c5443b98b9c947f7b0e5d89804854519eacf743bf558cca243a8371"
+  },
+  "mfu_profile_run_id": "deepseek_dense_late_wait_profile_20261006_01",
+  "engine_profile_run_ids": [
+    "first3_engine_warm_hbm_profile_20261006_02",
+    "first3_engine_warm_echo_profile_20261006_01"
+  ],
+  "boundary": "Last prefill chunk (64/64), positions 64512-65535; first L0 compute start to last L2 compute end.",
+  "panel_boundaries": [
+    {
+      "source": "SGLang Engine",
+      "method": "hbm",
+      "start_basis": "L0 first compute",
+      "l0_compute_start_ns": 1211085563,
+      "l0_history_h2d_start_ns": null
+    },
+    {
+      "source": "SGLang Engine",
+      "method": "echo",
+      "start_basis": "L0 first compute",
+      "l0_compute_start_ns": 1910909383,
+      "l0_history_h2d_start_ns": null
+    },
+    {
+      "source": "Local MFU",
+      "method": "hbm",
+      "start_basis": "L0 first compute",
+      "l0_compute_start_ns": 1310979736,
+      "l0_history_h2d_start_ns": null
+    },
+    {
+      "source": "Local MFU",
+      "method": "echo",
+      "start_basis": "L0 first compute",
+      "l0_compute_start_ns": 1375557492,
+      "l0_history_h2d_start_ns": null
+    },
+    {
+      "source": "Local MFU",
+      "method": "serial_sparse",
+      "start_basis": "L0 first compute",
+      "l0_compute_start_ns": 1319898868,
+      "l0_history_h2d_start_ns": null
+    },
+    {
+      "source": "Local MFU",
+      "method": "dense_prefetch",
+      "start_basis": "L0 first compute",
+      "l0_compute_start_ns": 1321654958,
+      "l0_history_h2d_start_ns": null
+    }
+  ],
+  "shared_xlim_ms": [
+    0.0,
+    30.0
+  ],
+  "footer": null,
+  "display_policy": {
+    "ECHO recall (IO unknown)": {
+      "lane": "H2D",
+      "label": "H2D",
+      "color": "#E69F00",
+      "hatch": null,
+      "basis": "Kernel function; original category, IO evidence and timestamps are unchanged."
+    }
+  },
+  "audit": {
+    "published_input_hashes": true,
+    "published_window_and_idle_durations": true,
+    "mfu_compute_category_counts": true,
+    "mfu_exact_idle_intervals": true
+  },
+  "limitations": [
+    "Profile windows include profiler overhead and are not standalone benchmark latencies.",
+    "Official cross-implementation numerical acceptance remains false.",
+    "Official and local execution, precision and cache semantics retain their published differences.",
+    "Only captured GPU idle is red; omitted control activities still count as busy.",
+    "Official recall is displayed in H2D by kernel function. Fused/recall paths may transfer zero records; mapped-host bytes remain unknown."
+  ],
+  "artifacts_sha256": {
+    "compact_timeline.py": "b50eb7ce04f7d8c0711f2fb65e8ee84f8e447e57dbb48cb2b725c949e92b8fc3",
+    "compare_timeline.py": "5e3bb3c9d659a90fc182f1bd45e04fc7ffecde3d68b8835fff4b4f73aaee504b",
+    "engine_timeline.py": "fb2b5b70504cc0a1e6c5441f85893ca151cebbc02c3890445f946f0f8dd8cfb1",
+    "panels.json": "1235bd7a21f4e12220739a82f6048d004cca2a77810d304cd10bcce28924c857",
+    "timeline.py": "898d09d79c5443b98b9c947f7b0e5d89804854519eacf743bf558cca243a8371",
+    "timeline_prefill.png": "5f8152e4b69dad5baf661d1970d3c90b10441e10bedccfa9ae1139c8fb7b7187",
+    "timeline_prefill.svg": "bcd5b40b68f1409d2e96690dbc6b48b446eb547a9e28c7075a01f54894f2b760",
+    "windows.csv": "f4aab3eb726d955d59de965ae120106082e3867a882e946ba7863c0d2a930faa"
+  }
+}

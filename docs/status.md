@@ -1,18 +1,19 @@
 # cxldsagr 研究状态
 
-> **2026-10-06 DeepSeek dense DMA：**[真实三层 A128 MFU](../experiments/deepseek_v32_mfu/README.md)
-> 已完成连续 Host DRAM/HBM 与 `cudaMemcpyAsync` 的四方法验收和测量。
-> Dense extend 为 5.986 ms，低于 serial sparse 的 6.534 ms，仍高于 HBM 的
-> 3.761 ms；所选下一层完整 DMA 的 50.21% 与当前层计算重叠。
-> 按研究者“先不要管 motivation 实验”的要求，暂缓
-> [C10 motivation](../experiments/deepseek_v32_motivation/README.md)的 DMA 补测、
-> 容量后续审阅及其他 motivation 实验工作；既有报告和产物保留当前状态。
-> 两种工作负载分别验收；三层局部结果不证明完整 serving 收益，旧 A1024 数字
-> 不代表当前 A128。
+> **2026-10-06 DeepSeek 完整 extend 图：**[真实三层 A128 MFU](../experiments/deepseek_v32_mfu/README.md)
+> 已完成用户指定的 dense 等待位置调整，并补齐四方法独立计时和逐算子 MFU。
+> HBM、ECHO、serial sparse、dense prefetch 的 extend 分别为
+> 3.326、5.716、4.265、5.706 ms。Dense 的原生预取重叠已验证，完整延迟与 ECHO
+> 接近，仍高于 serial sparse；局部重叠不能单独决定完整延迟。
+> 广泛优化仍已停止，本轮只完成这项指定调整及补测，不追加 gap 优化任务。
+> [C10 motivation](../experiments/deepseek_v32_motivation/README.md)、容量后续审阅及
+> 其他 motivation 实验继续暂缓。C10 原测量保留其实现范围；直接依赖已撤回旧 MFU
+> 输入的单层 simulation 已撤回，没有用新图数字替换旧模拟。
+> 三层普通追加与 C10 分别验收；本次结果不证明完整 serving 收益。
 > 旧本地官方 ECHO 适配及其结果已删除；[独立 SGLang 复现](../experiments/deepseek_v32_echo_official/README.md)
 > 保留真实前三层的 performance-only 计时。ECHO 与 HBM-only 均已完成，数值验收未通过；
 > 两种配置的容量不同，不作为等容量对照。
-> 三层 DMA 依据仍见 S-032，两条执行路径分别解释。
+> 三层完整图及 MFU 依据见 S-032，两条执行路径分别解释。
 
 > **2026-10-05 NOSA 安排：**按用户继续推进目标的要求，恢复 H64K NOSA 性能优化。
 > 目标仍是相同配置下的 HBM-only、dense prefetch、sync sparse、async sparse 对照，
@@ -98,8 +99,8 @@ KV 容量约束、offload 开销及相对 ECHO 的设计价值。已有单卡、
 | **2.1 主要 baseline 是否覆盖？** | motivation 目标集合为 HBM-only、ECHO、full prefetch、sync sparse loading、async sparse loading；full prefetch 搬运完整历史，attention 仍稀疏 | **两模型各有四类对照。** 统一资源与执行契约已接入，正式计时、独立数值依据和 profile 分别记录。ECHO 尚未接入同一 NOSA 对照，不能拼接跨模型排名；SOTA 覆盖仍待补 |
 | **2.2 全 HBM 的问题是什么？** | 固定复用距离下，history 配额影响复访是否重建；实际物理容量还受模型布局、workspace、allocator 和其他分配约束 | **指定配额的控制点支持。** P=H 时，两个模型的 HBM-only 均只保留一个 history、复访 0/16 命中，三个 offload 方案均为 16/16。这不证明 HBM 物理上只能容纳一个用户，也不恢复已撤回的 C1024/C2048 容量结论 |
 | **2.3 CPU DRAM offload 的问题是什么？** | NOSA 固定容量 loop 中，保留历史避免了重新构建，但引入了首访分配、写回及复访取数成本 | **重构后已测量。** 各轮先求 16 次复访均值，再取三轮中位数，HBM/dense/sync/async 分别为 2342.511/71.980/29.568/31.952 ms；三个 offload 的首访均慢于 HBM。容量保留收益与取数代价须分开，不能把完整差值归为串行等待 |
-| **2.4 Dense prefetch 的问题是什么？** | 整层历史预取仍使用 sparse attention。NOSA 固定容量轨迹中，dense 的复访 candidate H2D payload 多于两种 sparse；DeepSeek 三层已改用连续内存与 `cudaMemcpyAsync` | **三层 DMA 已验收，C10 补测暂缓。** 所选完整 DMA 的 50.21% 与计算重叠；dense 完整 extend 低于 serial sparse，仍高于 HBM。NOSA 的流量是软件 payload，不是物理总线流量；该局部效率结果不建立通用排名，流量、预取机会、非矩阵工作和调度仍需分解 |
-| **2.5 与 ECHO 如何比较？** | ECHO prefill fetch 适用于后续 chunk 或已有 offloaded prefix 的 extend；无 decode 不排除适用。已复现层内共享 token cache，GR session 保留与容量/异步安全适配单独说明 | **已有本地对照未显示方法整体收益。** 新三层 cold A128 中，ECHO extend 为 8.434 ms、serial sparse 为 6.534 ms、dense DMA 为 5.986 ms；C10 的 DMA 补测按用户要求暂缓。融合 kernel 的计算与 IO 不从 trace 内部分离。独立 SGLang 计时不替代共同模型上的 NOSA/ECHO 比较 |
+| **2.4 Dense prefetch 的问题是什么？** | 整层历史预取仍使用 sparse attention。NOSA 固定容量轨迹中，dense 的复访 candidate H2D payload 多于两种 sparse；DeepSeek 三层完整图使用连续内存与 `cudaMemcpyAsync`，延后同步后已验证预取与计算重叠 | **三层完整图已验收，C10 补测暂缓。** Dense 完整 extend 为 5.706 ms，与 ECHO 的 5.716 ms 接近，仍高于 serial sparse 的 4.265 ms；局部重叠不能单独推出完整延迟收益。NOSA 的流量是软件 payload，不是物理总线流量；流量、预取机会、非矩阵工作和调度仍须按各自路径解释 |
+| **2.5 与 ECHO 如何比较？** | ECHO prefill fetch 适用于后续 chunk 或已有 offloaded prefix 的 extend；无 decode 不排除适用。已复现层内共享 token cache，GR session 保留与容量/异步安全适配单独说明 | **当前本地对照未显示 ECHO 整体加速。** 三层 cold A128 完整图中，ECHO extend 为 5.716 ms，高于 serial sparse 的 4.265 ms；C10 的 DMA 补测继续暂缓。融合 kernel 的计算与 IO 不从 trace 内部分离。独立 SGLang 计时不替代共同模型上的 NOSA/ECHO 比较 |
 
 ECHO cache baseline 的官方逐层共享 pool、实际领取才驱逐、
 `indexer/prefetch → top-k → 主 KV append → exact recall` 的顺序及时间戳 priority
@@ -117,33 +118,38 @@ embedding、三个 dense MLP、final norm 与末 token LM head。当前
 chunk=1K、完整 extend chunk=128、每层 P=65,664、cold extend 和计算图。Offload
 在 extend 前清除历史主 KV 的 HBM 驻留，保留 DRAM 与 resident indexer；HBM
 保留主 KV。该普通持久追加路径与 C10 serving 替身分开，不据此推断完整 61 层、
-GR 场景或推荐质量。下表来自已验收的连续内存 DMA 版本。
+GR 场景或推荐质量。Extend 的 GPU 主体使用一次完整图 replay，输入准备、事务与
+同步提交仍计入独立墙钟。下表来自 dense 延后同步后的四方法独立测量。
 
 | 方法 | Prefill 中位延迟 ms | Prefill 最终 MFU | Extend 中位延迟 ms | Extend 最终 MFU |
 | --- | ---: | ---: | ---: | ---: |
-| HBM | 649.381 | 44.59% | 3.761 | 17.95% |
-| ECHO | 686.327 | 42.19% | 8.434 | 8.01% |
-| serial sparse | 665.076 | 43.54% | 6.534 | 10.33% |
-| dense prefetch | 664.751 | 43.56% | 5.986 | 11.28% |
+| HBM | 644.938 | 44.90% | 3.326 | 20.30% |
+| ECHO | 648.375 | 44.66% | 5.716 | 11.81% |
+| serial sparse | 640.701 | 45.19% | 4.265 | 15.83% |
+| dense prefetch | 645.800 | 44.84% | 5.706 | 11.83% |
 
 最终 MFU 将相同 useful matrix 工作量按精度换算为理论计算时间，再除以独立同步
 墙钟；逐算子 MFU 的分母是对应 API 的 kernel duration sum。两者都不是 Tensor
-Core 活跃率。第 1 层 cold extend timeline 中，下一层完整历史 DMA 耗时
-1.374430 ms，与当前层计算重叠 0.690078 ms，占 50.21%；该层 GPU gap 为
-0.008064 ms。三个层的 H2D memcpy 字节数均与完整历史计数一致。
-Profile 与正式计时是独立测量，其差值不直接等于可移除 CPU 成本。三次运行的
-离散观测没有外来 GPU 进程，但仍不能证明连续隔离或 CPU 独占。
+Core 活跃率。Prefill MFU 覆盖全部 64 个 chunk；主 timeline 只显示最后一个
+chunk 的 L0–L2，extend 主图也取 L0–L2。Dense 的起点包括 L0 首个计算或预取中
+更早的一项，终点仍是 L2 最后计算结束；另附含启动阶段的 extend 对比图。
+图的裁剪不改变完整阶段 MFU 的分母。
+逐算子分母保留其 API 内的量化和融合预取，非矩阵操作不填写 MFU。
 
-新报告替换 A128 mapped-gather 版本；旧 A1024 的 query、pool、驻留及计算图
-条件不能混用，不据旧新差值声称同配置加速。新结果见
-[四方法汇总](../experiments/deepseek_v32_mfu/report/four_methods/summary.json)与
+本轮将 dense extend 的历史 KV 等待延至 indexer/top-k 后，原生 profile 已验证
+预取与前置计算重叠；prefill 和其他方法的调度未变。新旧运行的 native 构建身份
+也有变化，因此旧 dense 6.166 ms 与本轮 5.706 ms 不构成单变量调度对照。
+旧 v3 MFU 和依赖其输入的 simulation 已撤回。Profile 与独立计时的差值不直接
+等于可移除 CPU 成本，本次三层结果也不证明完整 serving 收益。新结果见
+[四方法汇总](../experiments/deepseek_v32_mfu/report/full_extend_graph/mfu/summary.json)与
 [S-032](agents/research-supervisor/sources.md#s-032deepseek-a128-四方法-mfu-与局部重叠)。
 
-C10 本轮已验收的 mapped-gather 版本中，HBM/ECHO/serial sparse/dense 的复访
+C10 保留的 mapped-gather 报告中，HBM/ECHO/serial sparse/dense 的复访
 请求均值为 2178.992/23.520/17.188/25.462 ms；ECHO 与 serial sparse 的
 16 次复访 candidate H2D 均为 1.161186 GiB，dense 为 11.25 GiB。该版本未显示
-ECHO 的整体加速收益；连续内存 DMA 版本尚未完成对应补测，现按用户要求暂缓，
-既有报告和产物保留当前状态。
+ECHO 的整体加速收益。旧 ECHO 还受融合 indexer scale stage 提前释放问题影响，
+原保存输出的比较不替代修正后验收。连续内存 DMA 版本尚未完成 C10 补测，现按
+用户要求暂缓，既有报告和产物保留其原始范围，不用于修正后实现的结论。
 独立 SGLang 计时不构成 C10 补测的依赖。真实三层与 C10 的 A 相同，
 也不意味着两者具有相同计算、事务或缓存范围。
 
@@ -182,8 +188,8 @@ DeepSeek 则持有共享全局 host arena，并按 pinned allocator 档位预留
 
 | 条目 / 要回答的问题 | 当前理解 | 状态与具体缺口 |
 |---|---|---|
-| **4.1 整体系统收益是什么？** | 两模型分别比较完整 loop、首访和复访；offload 的复访优势首先来自保留历史、避免 HBM 重建。真实三层 MFU 单独检查 baseline 执行效率 | **容量、执行效率与方法收益分开。** NOSA 的 async 复访均值比 sync 慢 8.06%，重构后完整 trace 中位数比 P0 增加 406.132 ms；原两模型重构对照的 cleanup 仍有增加。DeepSeek 三层的 dense DMA extend 低于 serial sparse，但 C10 DMA 补测未完成且已暂缓；该结果不替代 serving 收益、共同模型对照或场景质量，也未建立 ECHO 整体加速 |
-| **4.2 哪些设计带来收益？** | 独立矩阵/attention API、resident A1024、冷稀疏并集回放与 DeepSeek 单层 timeline 分别提供局部证据；主机编排诊断不隔离可移除成本 | **收益依赖输入与范围。** NOSA A1024 融合 API 延迟下降 23.02%–29.47%，9 个样本双比率过 90%，但 A128 serving 的 96 个适用样本仍未过。DeepSeek cold A128 完整 DMA 有 50.21% 与计算重叠，所选 dense 层 GPU gap 为 0.008064 ms；这不是 NOSA 的双重门槛。其余 gap、长尾和 ECHO 开销仍待归因 |
+| **4.1 整体系统收益是什么？** | 两模型分别比较完整 loop、首访和复访；offload 的复访优势首先来自保留历史、避免 HBM 重建。真实三层 MFU 单独检查 baseline 执行效率 | **容量、执行效率与方法收益分开。** NOSA 的 async 复访均值比 sync 慢 8.06%，重构后完整 trace 中位数比 P0 增加 406.132 ms；原两模型重构对照的 cleanup 仍有增加。DeepSeek 三层完整图中，serial sparse 快于 ECHO 和 dense；C10 DMA 补测仍暂缓，局部排序不替代 serving 收益、共同模型对照或场景质量 |
+| **4.2 哪些设计带来收益？** | 独立矩阵/attention API、resident A1024、冷稀疏并集回放与 DeepSeek 三层 timeline 分别提供局部证据；主机编排诊断不隔离可移除成本 | **收益依赖输入与范围。** NOSA A1024 融合 API 延迟下降 23.02%–29.47%，9 个样本双比率过 90%，但 A128 serving 的 96 个适用样本仍未过。DeepSeek 四方法每次 extend 仅一次完整图 launch，逐算子计时有独占节点依据；dense 延后同步后的原生预取重叠已验证，但新旧延迟不是单变量对照。广泛优化仍已停止，本轮指定调整已完成，不追加归因或优化任务 |
 | **4.3 结论适用于哪些条件？** | 固定容量控制点覆盖 SM90/Hopper、16 用户两轮、64K+128；NOSA 使用完整 32 层 checkpoint，DeepSeek 使用独立复制 block 的替身且另执行末 token LM head | **范围有限。** 两模型各有三轮同机 P0 与重构后正式 trace；NOSA pair04 是另一次复核，不混入三轮统计。匹配诊断只选请求 0/16。重复测量不扩展到其他 U/R、物理字节预算、真实到达过程或 GR 质量；resident A1024 与 pattern 仍有各自范围 |
 
 完整 resident A1024 对照中，native sparse 的 full/extend 墙钟中位数为

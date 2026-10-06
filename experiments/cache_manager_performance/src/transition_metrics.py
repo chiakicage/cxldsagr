@@ -424,3 +424,157 @@ def analyze_transition(
             "The manager_ready endpoint is a conservative completion bound for pre-consumer work; it does not measure a real MLA consumer.",
         ],
     }
+
+
+def analyze_graph_transition(
+    apis,
+    activities,
+    *,
+    layer,
+    indexer_stage,
+    topk_stage,
+    consumer_stage,
+    lane_classifier,
+):
+    """Use verified captured node ownership, without inventing CPU stage scopes.
+
+    ``attribute_full_graph_replays`` must first verify the complete node ledger.
+    Captured stages describe GPU work; all nodes share one real graph launch.
+    """
+    apis, activities = list(apis), list(activities)
+    _validate_records(apis, "API")
+    _validate_records(activities, "activity")
+    target = [row for row in activities if row.get("graph_layer") == f"layer_{layer}"]
+    if not target or any(not row.get("full_extend_graph") for row in target):
+        raise ValueError("graph transition requires verified full-graph stage ownership")
+    graph_ids = {row["graph_id"] for row in target if row.get("graph_id")}
+    if len(graph_ids) != 1:
+        raise ValueError("layer transition must belong to one executable graph")
+    grouped = {}
+    for row in target:
+        stage = row.get("graph_stage")
+        if not isinstance(stage, str) or not stage:
+            raise ValueError("full graph activity has no captured stage")
+        grouped.setdefault(stage, []).append(row)
+    for stage in (indexer_stage, topk_stage, consumer_stage):
+        if not grouped.get(stage):
+            raise ValueError(f"Missing captured GPU activity for {stage}")
+    indexer_last = max(grouped[indexer_stage], key=lambda row: (row["end"], row["id"]))
+    topk_first = min(grouped[topk_stage], key=lambda row: (row["start"], row["id"]))
+    topk_last = max(grouped[topk_stage], key=lambda row: (row["end"], row["id"]))
+    candidates = [
+        row
+        for row in grouped[consumer_stage]
+        if row["kind"] == "kernel" and "sparse_attn_fwd_kernel" in row["name"]
+    ]
+    if len(candidates) != 1:
+        raise ValueError("Expected one actual attention kernel; missing or split consumers")
+    attention = candidates[0]
+    launch = attention.get("api")
+    if launch is None or "GraphLaunch" not in launch["name"] or launch not in apis:
+        raise ValueError("full graph transition requires its correlated graph launch")
+    process, device = _activity_process(attention), attention.get("device_id")
+    if process is None or device is None or launch.get("process") != process:
+        raise ValueError("full graph transition has missing process or device identity")
+    for row in target:
+        if (
+            row.get("api") != launch
+            or row.get("correlation") != launch.get("correlation")
+            or _activity_process(row) != process
+            or row.get("device_id") != device
+            or launch["start"] > row["start"]
+        ):
+            raise ValueError("full graph stages must share one valid graph launch")
+    endpoint = attention["start"]
+    if indexer_last["end"] > topk_first["start"] or topk_last["end"] > endpoint:
+        raise ValueError("Reversed GPU transition boundaries")
+    spans = ((indexer_last["end"], topk_first["start"]), (topk_last["end"], endpoint))
+    for row in activities:
+        if any(_overlaps(row, *span) for span in spans) and (
+            _activity_process(row) != process or row.get("device_id") != device
+        ):
+            raise ValueError("Mixed GPU device or process identity in measured transition")
+    post_topk = _gpu_interval(activities, *spans[1], lane_classifier)
+    idle_rows, before, during, after = [], 0, 0, 0
+    for segment in post_topk["partition_segments"]:
+        if segment["class"] != "idle":
+            continue
+        start, end = segment["start_ns"], segment["end_ns"]
+        pieces = {
+            "before_graph_launch_ns": max(0, min(end, launch["start"]) - start),
+            "during_graph_launch_ns": max(0, min(end, launch["end"]) - max(start, launch["start"])),
+            "after_graph_launch_ns": max(0, end - max(start, launch["end"])),
+        }
+        if sum(pieces.values()) != end - start:
+            raise ValueError("graph submission partition is incomplete")
+        before += pieces["before_graph_launch_ns"]
+        during += pieces["during_graph_launch_ns"]
+        after += pieces["after_graph_launch_ns"]
+        idle_rows.append({**segment, **pieces})
+    return {
+        "execution_kind": "complete_cuda_graph",
+        "boundaries": {
+            "endpoint_kind": "attention_kernel",
+            "submission_kind": "complete_cuda_graph",
+            "graph_id": graph_ids.pop(),
+            "graph_launch_api": launch,
+            "replay_scope": attention["scope"],
+            "indexer_scope": None,
+            "topk_scope": None,
+            "consumer_scope": None,
+            "indexer_last_activity_id": indexer_last["id"],
+            "topk_first_activity_id": topk_first["id"],
+            "topk_last_activity_id": topk_last["id"],
+            "attention_activity_id": attention["id"],
+            "indexer_last_activity": indexer_last,
+            "topk_first_activity": topk_first,
+            "topk_last_activity": topk_last,
+            "attention_activity": attention,
+            "endpoint_ns": endpoint,
+            "attention_launch_start_minus_topk_end_ms": None,
+            "graph_launch_start_minus_topk_end_ms": (launch["start"] - topk_last["end"]) / 1e6,
+            "process": process,
+            "device_id": device,
+        },
+        "cpu_topk_to_consumer": None,
+        "gpu_indexer_to_topk": _gpu_interval(activities, *spans[0], lane_classifier),
+        "gpu_topk_to_consumer": post_topk,
+        "post_topk_idle_submission": {
+            "submission_kind": "complete_cuda_graph",
+            "main_stream_id": None,
+            "graph_launch_api": launch,
+            "idle_before_next_launch_api_ms": before / 1e6,
+            "idle_after_next_launch_api_ms": (during + after) / 1e6,
+            "idle_before_graph_launch_ms": before / 1e6,
+            "idle_during_graph_launch_ms": during / 1e6,
+            "idle_after_graph_launch_ms": after / 1e6,
+            "unresolved_idle_ms": 0.0,
+            "segments": idle_rows,
+            "note": (
+                "All GPU nodes were submitted by one cudaGraphLaunch. Idle is compared with "
+                "that graph submission, not a separate per-kernel CPU launch. Idle after "
+                "submission does not establish dependency, scheduling, or hardware causation."
+            ),
+        },
+        "stages": [
+            {
+                "stage": stage,
+                "scope": None,
+                "stage_ownership": "verified_capture_node_lineage",
+                "cpu": None,
+                "gpu_in_post_topk": _gpu_interval(rows, *spans[1], lane_classifier),
+                "correlated_api_count": None,
+                "correlated_gpu_activity_count": len(rows),
+                "gpu_first_start_ns": min(row["start"] for row in rows),
+                "gpu_last_end_ns": max(row["end"] for row in rows),
+            }
+            for stage, rows in sorted(grouped.items())
+        ],
+        "notes": [
+            "Stage ownership comes from verified captured GPU node lineage; the original replay scope and correlated graph API remain intact.",
+            "One graph submission covers all layers. Separate CPU stage timings and an MLA wrapper launch do not exist during replay and are null, not zero.",
+            "The interval starts after every exact-top-k GPU node, including invalid-ID masking, and ends at the actual MLA compute kernel.",
+            "All GPU activity overlapping the interval contributes to occupancy, including concurrent IO; only partition_ms is an additive breakdown.",
+            "GPU idle and its relation to graph submission do not establish a critical path or identify a CPU, Python, scheduling, or hardware cause.",
+        ],
+    }

@@ -270,7 +270,10 @@ def generate(
             if file_sha256(directory / "source" / relative) != digest:
                 raise ValueError("execution source snapshot differs from acceptance")
     diagnostics = json.loads((analysis / "summary.json").read_text())
-    if diagnostics.get("schema") != "cache-manager-attention-transition-v2":
+    if diagnostics.get("schema") not in {
+        "cache-manager-attention-transition-v2",
+        "cache-manager-attention-transition-v3",
+    }:
         raise ValueError("report requires actual top-k-to-MLA interval analysis")
     sources = diagnostics["sources"]
     if len(sources) != 1 or sources[0]["kind"] != "standalone_replay":

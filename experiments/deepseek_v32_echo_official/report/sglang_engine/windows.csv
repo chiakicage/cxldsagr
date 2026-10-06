@@ -1,0 +1,5 @@
+case,phase,start_ns,end_ns,window_ms,gpu_busy_ms,gpu_idle_ms,compute_union_ms,activity_count,unattributed_activity_count,unclassified_kernel_count,kernel_without_stage_scope_count,h2d_memcpy_union_ms,h2d_memcpy_count,h2d_memcpy_bytes_whole_overlapping_records,h2d_memcpy_crosses_window_edge,h2d_mapped_kernel_count,d2h_memcpy_union_ms,d2h_memcpy_count,d2h_memcpy_bytes_whole_overlapping_records,d2h_memcpy_crosses_window_edge,d2h_mapped_kernel_count,mapped_host_transfer_bytes,fused_potential_io_kernel_count,potential_h2d_control_kernel_count
+hbm,prefill,1211085563,1224423304,13.337741,11.846383,1.491358,10.481618,184,0,0,1,0.0,0,0,0,0,0.0,0,0,0,0,,0,0
+echo,prefill,1910909383,1939742935,28.833552,26.906513,1.927039,19.668317,396,0,0,0,0.0,0,0,0,0,0.0,0,0,0,3,,3,3
+hbm,extend,1281492536,1289394189,7.901653,2.6103,5.291353,2.085085,177,0,0,0,0.0,0,0,0,0,0.0,0,0,0,0,,0,0
+echo,extend,2034929043,2048814585,13.885542,10.228013,3.657529,4.163228,391,0,0,1,0.0,0,0,0,0,0.0,0,0,0,3,,3,3

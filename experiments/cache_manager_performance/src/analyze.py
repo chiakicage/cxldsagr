@@ -158,6 +158,7 @@ def diagnostic_gap_metrics(rows, start, end):
         "end_ns",
         "window_ms",
         "threshold_percent",
+        "gap_below_threshold",
         "conservative_gate_pass",
         "gate_certifiable",
         "gate_uncertainty",

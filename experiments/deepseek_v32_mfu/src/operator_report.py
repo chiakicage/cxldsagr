@@ -60,6 +60,11 @@ _NOTES = [
         "ratios, not arithmetic means of per-layer MFU values. They are not end-to-end model MFU."
     ),
     (
+        "Full-extend graph matrix APIs use capture-time exclusive node ownership and verified "
+        "native clone lineage. Their virtual replay scopes claim no CPU duration or per-API "
+        "launch: one graph launch may own many matrix APIs and GPU nodes."
+    ),
+    (
         "H200 SXM reference peaks: NVIDIA lists BF16 1979 and FP8 3958 TFLOPS with sparsity; "
         "dense peaks are half, 989.5 and 1979. FP32 is 67 TFLOPS without sparsity. Explicit overrides "
         "must match the recorded device and actual arithmetic. Device identity is a separate record."
@@ -252,13 +257,26 @@ def analyze_captures(sqlite_paths, calls, *, metadata=None, peaks=None, graph_se
         if any(call.get("graph_replay") for call in capture_calls):
             if parents is None:
                 raise ValueError("graph replay timing requires its setup capture lineage")
-            from experiments.deepseek_v32_motivation.src.graph_attribution import (
-                attribute_graph_replays,
-            )
+            if any(call.get("full_extend_graph") for call in capture_calls):
+                if not any(call.get("graph_api") for call in capture_calls):
+                    raise ValueError(
+                        "full-extend operator MFU requires capture-time matrix API metadata"
+                    )
+                from experiments.deepseek_v32_mfu.src.full_graph_profile import (
+                    attribute_full_graph_replays,
+                )
 
-            graph_audit = attribute_graph_replays(
-                activities, capture_calls, parents, scopes=scopes, require_replays=True
-            )
+                graph_audit = attribute_full_graph_replays(
+                    activities, capture_calls, parents, scopes=scopes, apis=apis
+                )
+            else:
+                from experiments.deepseek_v32_motivation.src.graph_attribution import (
+                    attribute_graph_replays,
+                )
+
+                graph_audit = attribute_graph_replays(
+                    activities, capture_calls, parents, scopes=scopes, require_replays=True
+                )
             virtual_scopes = {}
             for call in capture_calls:
                 if call.get("graph_api"):

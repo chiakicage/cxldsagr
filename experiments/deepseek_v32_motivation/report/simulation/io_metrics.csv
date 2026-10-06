@@ -1,7 +1,0 @@
-transfer,phase,source_scheme,layer,records,bytes,MiB,duration_ns,bandwidth_GBps,fused_payload_GBps,boundary
-prefill_d2h,prefill,serial_sparse,1,1024,1179648,1.125,26720,44.14850299401198,,
-sparse_h2d,extend,serial_sparse,1,2875,3312000,3.1585693359375,71968,46.020453534904405,,
-dense_h2d,extend,dense_prefetch,1,65536,75497472,72.0,1374494,54.92746567100329,,
-dense_next_h2d,extend,dense_prefetch,2,65536,75497472,72.0,1374430,54.93002335513631,,
-echo_recall,extend,echo,1,269,309888,0.2955322265625,11008,28.151162790697676,,
-echo_fused,extend,echo,1,2606,3002112,2.863037109375,775775,,3.869823080145661,Whole fused compute+IO kernel; independent IO duration and bandwidth unknown.

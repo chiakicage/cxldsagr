@@ -63,7 +63,7 @@ if name == "python":
             "schema_version": 3, "mode": mode, "num_layers": 3,
             "correctness": {str(i): {} for i in range({"check": 13, "profile": 25, "bench": 0}[mode])},
             "validation_receipt": {"fixture": True},
-            "nsys_capture_order": ["graph_setup"] + [f"{m}/{p}" for m in ("hbm", "echo", "serial_sparse", "dense_prefetch") for p in ("prefill", "extend")],
+            "nsys_capture_order": ["graph_setup"] + [f"{m}/{p}" for m in ("hbm", "echo", "serial_sparse", "dense_prefetch") for p in (("prefill", "extend_graph_setup", "extend") if "--extend-graph" in args else ("prefill", "extend"))],
         }))
         if mode == "check":
             (output / "receipt.json").write_text("{}")
@@ -91,7 +91,7 @@ elif name == "nsys":
         status = subprocess.call(args[args.index("python"):])
         if status:
             sys.exit(status)
-        for capture in range(1, 10):
+        for capture in range(1, 14 if "--extend-graph" in args else 10):
             Path(value("--output") + f".{capture}.nsys-rep").write_text("trace\n")
 elif name == "ncu":
     if args == ["--version"]:
@@ -309,6 +309,25 @@ def test_profile_success_publishes_nine_captures(script_repo):
     assert len(list((experiment / "output/data" / RUN_ID).glob("capture_*.sqlite"))) == 9
     calls = [json.loads(line) for line in Path(env["MOCK_CALLS"]).read_text().splitlines()]
     assert not any("experiments.deepseek_v32_mfu.src.measure" in call for call in calls)
+
+
+def test_full_graph_profile_sends_all_five_setup_lineages_to_analysis(script_repo):
+    _, experiment, _, _, _, env = script_repo
+    completed = invoke(
+        script_repo,
+        "profile_layers.sh",
+        "--extend-graph",
+        "--validation-receipt",
+        "/tmp/check/receipt.json",
+    )
+    assert completed.returncode == 0, completed.stderr
+    assert len(list((experiment / "output/profile" / RUN_ID).glob("*.nsys-rep"))) == 13
+    assert len(list((experiment / "output/data" / RUN_ID).glob("capture_*.sqlite"))) == 13
+    calls = [json.loads(line) for line in Path(env["MOCK_CALLS"]).read_text().splitlines()]
+    analysis = next(
+        call for call in calls if "experiments.deepseek_v32_mfu.src.operator_report" in call
+    )
+    assert analysis.count("--graph-setup") == 5 and analysis.count("--sqlite") == 8
 
 
 @pytest.mark.parametrize("phase,status", [("measure", 37), ("analysis", 39)])

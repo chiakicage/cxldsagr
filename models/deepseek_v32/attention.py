@@ -1,6 +1,6 @@
 """Chunked DeepSeek indexer → ECHO prefetch → exact recall → sparse MLA."""
 
-from contextlib import contextmanager, nullcontext
+from contextlib import ExitStack, contextmanager, nullcontext
 
 import torch
 
@@ -239,6 +239,7 @@ class EchoAttentionRunner:
         project_callback=None,
         output_callback=None,
         indexer_bounds=None,
+        before_kv_consume=None,
     ):
         self.cache_diagnostics = None
         self._diagnostic_state = None
@@ -250,6 +251,8 @@ class EchoAttentionRunner:
                 callbacks["output_callback"] = output_callback
             if indexer_bounds is not None:
                 callbacks["indexer_bounds"] = indexer_bounds
+            if before_kv_consume is not None:
+                callbacks["before_kv_consume"] = before_kv_consume
             result = self._forward(
                 hidden,
                 scope=scope,
@@ -275,6 +278,7 @@ class EchoAttentionRunner:
         project_callback=None,
         output_callback=None,
         indexer_bounds=None,
+        before_kv_consume=None,
     ):
         from operators.deepseek_v32.indexer.echo import logits as index_logits
 
@@ -282,6 +286,19 @@ class EchoAttentionRunner:
         project = self.attention.project if project_callback is None else project_callback
         if not callable(project) or output_callback is not None and not callable(output_callback):
             raise TypeError("attention compute callbacks must be callable")
+        if before_kv_consume is not None:
+            if not callable(before_kv_consume):
+                raise TypeError("before_kv_consume must be callable")
+            if (
+                self.fused_prefetch
+                or not self.cache.offload
+                or not getattr(self.cache, "_shared", False)
+                or not self.cache._pool.dense_contiguous
+                or self.collect_cache_diagnostics
+            ):
+                raise ValueError(
+                    "deferred KV wait requires dense offload without fused prefetch or diagnostics"
+                )
         if hidden.ndim != 2 or not len(hidden):
             raise ValueError("attention requires a nonempty token batch")
         # The model owns prefill chunking. A layer receives exactly one indexer
@@ -289,7 +306,9 @@ class EchoAttentionRunner:
         position = self.cache.written
         end = position + len(hidden)
         operation = getattr(self.cache, "operation", nullcontext)
-        with operation():
+        with ExitStack() if before_kv_consume is not None else operation() as leases:
+            if before_kv_consume is not None:
+                leases.enter_context(operation())
             reserve_source = getattr(self.cache, "reserve_append_source", None)
             if reserve_source is not None:
                 with scope("offload_source_reservation"):
@@ -351,6 +370,13 @@ class EchoAttentionRunner:
                     # selection consumed an aligned score view.
                     update_prefetch_hint(scores[:, :end], self.offset)
             del scores, values
+            if before_kv_consume is not None:
+                # Indexer/top-k use resident index records, not main KV. Release
+                # this layer's lease so the scheduler can prefetch another layer,
+                # then reacquire before append changes maps or MLA reads records.
+                leases.close()
+                before_kv_consume()
+                leases.enter_context(operation())
             if self._diagnostic_state is not None:
                 with scope("cache_diagnostic_selection"):
                     self._diagnose_selection(indices, position)

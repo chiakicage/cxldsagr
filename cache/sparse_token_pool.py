@@ -258,6 +258,8 @@ class SharedSparseTokenPool:
         self._depth = 0
         self._last_stream = None
         self._writes = deque()
+        self._graph_capture = None
+        self._failed_graph_capture = None
         self._copy_stream = (
             torch.cuda.Stream(device=self.device) if self.device.type == "cuda" else None
         )
@@ -325,10 +327,27 @@ class SharedSparseTokenPool:
         if self.poisoned:
             raise RuntimeError("shared token pool is poisoned after a CUDA failure")
         if self.device.type == "cuda" and torch.cuda.is_current_stream_capturing():
-            raise RuntimeError("shared sparse token cache does not support CUDA Graph capture")
+            capture = self._graph_capture
+            if capture is None or not capture.authorizes_current():
+                raise RuntimeError(
+                    "shared sparse token cache requires an explicit graph capture lease"
+                )
+
+    def graph_capture(self, session):
+        """Authorize one fixed, sole-session append recipe on the current stream.
+
+        Enter before CUDA capture, call ``join()`` inside it, then ``finish()``
+        after capture ends. The returned recipe owns captured writeback sources
+        and publishes host bookkeeping only after a synchronized graph replay.
+        """
+        from cache.sparse_token_graph import SparseTokenGraphCapture
+
+        return SparseTokenGraphCapture(self, session)
 
     def allocate_session(self, capacity):
         self._check()
+        if self._graph_capture is not None:
+            raise RuntimeError("session allocation is forbidden during graph capture preparation")
         if self._active is not None:
             raise RuntimeError("session allocation requires a quiescent pool")
         if type(capacity) is not int or capacity < 1:
@@ -435,6 +454,9 @@ class SharedSparseTokenPool:
                 self._active = None
 
     def _reap_writes(self, *, make_room=False):
+        if self._graph_capture is not None:
+            self._graph_capture.check_submission()
+            return
         while self._writes:
             ticket = self._writes[0]
             if make_room and len(self._writes) >= self.max_inflight_writes:
@@ -445,6 +467,8 @@ class SharedSparseTokenPool:
 
     def write_host(self, session, layer, start, source):
         """Keep each complete source storage alive until its D2H event finishes."""
+        if self._graph_capture is not None:
+            self._graph_capture.retain_source(session, source)
         self._reap_writes(make_room=True)
         target = self.layers[layer].host
 
@@ -486,6 +510,10 @@ class SharedSparseTokenPool:
                     stream.wait_event(ticket.event)
 
     def drain(self):
+        if self._graph_capture is not None:
+            raise RuntimeError(
+                "graph capture requires stream joins instead of host synchronization"
+            )
         try:
             if self.device.type == "cuda":
                 if self._last_stream is not None:
@@ -690,6 +718,8 @@ class SharedSparseTokenPool:
 
     def release_session(self, session):
         session._check()
+        if self._graph_capture is not None:
+            raise RuntimeError("session release is forbidden during graph capture preparation")
         session._check_release()
         if self._active is not None:
             raise RuntimeError("session release requires a quiescent pool")
@@ -852,6 +882,8 @@ class SharedSparseTokenPool:
     def close(self):
         if self.closed:
             return
+        if self._graph_capture is not None:
+            raise RuntimeError("pool close is forbidden during graph capture preparation")
         if self._active is not None:
             raise RuntimeError("pool close requires a quiescent pool")
         self.drain()

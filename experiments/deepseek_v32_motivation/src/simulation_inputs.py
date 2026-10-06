@@ -1,4 +1,8 @@
-"""Extract single-layer simulation costs from the accepted three-layer MFU profile."""
+"""Extract legacy-format simulation inputs from explicitly supplied measured evidence.
+
+The former default profile is withdrawn. Full-extend graph input extraction has
+not been adapted or validated; current MFU reports cannot be substituted for it.
+"""
 
 from __future__ import annotations
 
@@ -10,13 +14,8 @@ from collections import Counter
 from pathlib import Path
 
 COMPUTE_GROUPS = ("projection", "index", "topk", "attention", "finish")
-PROFILE_RUN_ID = "deepseek_mfu_dma_a128_profile_20261006_01"
-DEFAULT_RUN_ID = "deepseek_compute_io_simulation_20261006_04"
+WITHDRAWN_PROFILE_RUN_ID = "deepseek_mfu_dma_a128_profile_20261006_01"
 REPOSITORY = Path(__file__).resolve().parents[3]
-DEFAULT_REPORT = REPOSITORY / "experiments/deepseek_v32_mfu/report/four_methods"
-DEFAULT_OPERATOR_CALLS = (
-    REPOSITORY / "experiments/deepseek_v32_mfu/output/data" / PROFILE_RUN_ID / "operator_calls.json"
-)
 MATRIX_STAGES = frozenset(
     {
         "q_a_proj",
@@ -594,15 +593,22 @@ def _echo(rows, timeline, calls, *, serial_counters, record_bytes, peaks):
     }
 
 
-def build_inputs(
-    report_directory=DEFAULT_REPORT, *, run_id=DEFAULT_RUN_ID, operator_calls=DEFAULT_OPERATOR_CALLS
-):
+def build_inputs(report_directory, *, run_id, operator_calls):
     """Read accepted report data and its hash-bound call ledger without requiring CUDA."""
     report = Path(report_directory).resolve(strict=True)
+    summary = json.loads((report / "summary.json").read_text())
+    profile_run_id = summary["profile_run_id"]
+    _require(
+        profile_run_id != WITHDRAWN_PROFILE_RUN_ID,
+        "source profile is withdrawn; its simulation inputs cannot be republished",
+    )
+    _require(
+        summary.get("schema") != "deepseek-full-extend-graph-mfu-v1",
+        "full-extend graph simulation input extraction is not adapted or validated",
+    )
     manifest = json.loads((report / "publication_manifest.json").read_text())
     for name in SOURCE_FILES:
         _require(digest(report / name) == manifest[name], f"published source hash mismatch: {name}")
-    summary = json.loads((report / "summary.json").read_text())
     analysis = json.loads((report / "analysis.json").read_text())
     acceptance = json.loads((report / "run_acceptance.json").read_text())
     timelines = json.loads((report / "timeline_summary.json").read_text())
@@ -613,7 +619,7 @@ def build_inputs(
         "operator call ledger hash differs from the accepted MFU report",
     )
     ledger = json.loads(ledger_path.read_text())
-    _require(ledger["run_id"] == PROFILE_RUN_ID, "operator call ledger run differs")
+    _require(ledger["run_id"] == profile_run_id, "operator call ledger run differs")
     _require(
         summary["dense_peaks_tflops"]
         == analysis["dense_peaks_tflops"]
@@ -628,9 +634,9 @@ def build_inputs(
         rows = list(csv.DictReader(stream))
     with (report / "operator_mfu_by_layer.csv").open(newline="") as stream:
         operator_rows = list(csv.DictReader(stream))
-    _require(summary["profile_run_id"] == PROFILE_RUN_ID, "unexpected source profile run")
     _require(
-        acceptance["run_results"]["profile"]["run_id"] == PROFILE_RUN_ID, "acceptance run differs"
+        acceptance["run_results"]["profile"]["run_id"] == profile_run_id,
+        "acceptance run differs",
     )
     _require(
         all(acceptance["execution_identity_fields_equal"].values()), "source identities differ"
@@ -794,7 +800,7 @@ def build_inputs(
         "schema_version": 1,
         "run_id": run_id,
         "source": {
-            "profile_run_id": PROFILE_RUN_ID,
+            "profile_run_id": profile_run_id,
             "profile_source_sha256": summary["source_sha256"],
             "canonical_execution_identity_sha256": acceptance[
                 "canonical_execution_identity_sha256"
@@ -886,9 +892,9 @@ def build_inputs(
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--report-directory", type=Path, default=DEFAULT_REPORT)
-    parser.add_argument("--operator-calls", type=Path, default=DEFAULT_OPERATOR_CALLS)
-    parser.add_argument("--run-id", default=DEFAULT_RUN_ID)
+    parser.add_argument("--report-directory", type=Path, required=True)
+    parser.add_argument("--operator-calls", type=Path, required=True)
+    parser.add_argument("--run-id", required=True)
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
     output = args.output or (

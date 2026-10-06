@@ -5,6 +5,7 @@ maps before the private stream copies one pinned-host span with cudaMemcpyAsync.
 Publication follows that copy; consumers join the ticket event before use.
 """
 
+from contextlib import contextmanager
 from dataclasses import dataclass, field
 
 import torch
@@ -45,6 +46,49 @@ class HistoryPrefetchTicket:
             target["dense_" + name] += getattr(self, name)
 
 
+class _HistoryGraphCapture:
+    """Own captured DMA tickets after their Python execution has ended."""
+
+    def __init__(self, owner):
+        self.owner = owner
+        self.tickets = ()
+        self.joined_count = None
+        self.finished = False
+
+    def join(self):
+        owner = self.owner
+        if owner._graph_capture is not self or self.finished:
+            raise RuntimeError("history graph capture is inactive")
+        if not torch.cuda.is_current_stream_capturing():
+            raise RuntimeError("history graph join must be captured")
+        current = torch.cuda.current_stream(owner.device)
+        if owner._caller_stream is not None and current != owner._caller_stream:
+            raise RuntimeError("history graph must join on its caller stream")
+        if any(not ticket._waited for ticket in owner._tickets):
+            raise RuntimeError("history graph has an unconsumed prefetch ticket")
+        if any(ticket._ready is not None for ticket in owner._tickets):
+            current.wait_stream(owner._copy_stream)
+        self.joined_count = len(owner._tickets)
+
+    def finish(self):
+        if self.finished:
+            return self
+        owner = self.owner
+        if torch.cuda.is_current_stream_capturing():
+            raise RuntimeError("finish history graph capture after CUDA capture ends")
+        if owner._graph_capture is not self or self.joined_count != len(owner._tickets):
+            raise RuntimeError("history graph capture did not join every DMA ticket")
+        # The CUDA graph owns the dependency chain, while this object keeps
+        # host pages, record storage and event wrappers alive until graph close.
+        self.tickets = tuple(owner._tickets)
+        for ticket in self.tickets:
+            ticket._active = False
+        owner._tickets.clear()
+        owner._caller_stream = None
+        self.finished = True
+        return self
+
+
 class PoolHistoryPrefetch:
     """Copy full contiguous history unless its direct layout is certified.
 
@@ -65,6 +109,7 @@ class PoolHistoryPrefetch:
         )
         self._caller_stream = None
         self._tickets = []
+        self._graph_capture = None
         self.failed = False
         self.closed = False
 
@@ -76,6 +121,30 @@ class PoolHistoryPrefetch:
     def pending_bytes(self):
         # Tickets retain borrowed pool storage, already charged to that pool.
         return 0
+
+    @contextmanager
+    def graph_capture(self):
+        """Authorize one capture, with all DMA streams joined by its root.
+
+        Enter before torch.cuda.graph and retain the returned owner with that
+        graph. Pool-level authorization and replay bookkeeping remain required.
+        """
+        self._check()
+        if self.device.type != "cuda":
+            raise ValueError("history graph capture requires CUDA")
+        if self._graph_capture is not None or torch.cuda.is_current_stream_capturing():
+            raise RuntimeError("history graph capture must start outside capture")
+        self.drain()
+        capture = _HistoryGraphCapture(self)
+        self._graph_capture = capture
+        try:
+            yield capture
+            capture.finish()
+        except BaseException:
+            self.failed = True
+            raise
+        finally:
+            self._graph_capture = None
 
     def prefetch(self, cache):
         """Clear displaced maps, then copy and publish on the private stream."""
@@ -255,6 +324,9 @@ class PoolHistoryPrefetch:
 
     def drain(self):
         """Join every copy, retaining owners if any completion check fails."""
+        if self._graph_capture is not None:
+            self._graph_capture.join()
+            return
         errors = []
         if self._copy_stream is not None and (
             self.failed or any(ticket._ready is not None for ticket in self._tickets)
@@ -282,6 +354,8 @@ class PoolHistoryPrefetch:
     def close(self):
         if self.closed:
             return
+        if self._graph_capture is not None:
+            raise RuntimeError("cannot close active history graph capture")
         self.drain()
         self._copy_stream = None
         self.closed = True

@@ -10,6 +10,64 @@ from cache.sparse_token_pool import PRIORITY_LIMIT, SharedSparseTokenPool
 from models.deepseek_v32.cache.prefetch import PoolHistoryPrefetch
 
 
+def capture_helper(monkeypatch):
+    state = SimpleNamespace(capturing=False, waits=[])
+    caller = SimpleNamespace(wait_stream=lambda stream: state.waits.append(stream))
+    monkeypatch.setattr(torch.cuda, "is_current_stream_capturing", lambda: state.capturing)
+    monkeypatch.setattr(torch.cuda, "current_stream", lambda device: caller)
+    helper = object.__new__(PoolHistoryPrefetch)
+    helper.device = torch.device("cuda:0")
+    helper._copy_stream = object()
+    helper._caller_stream = None
+    helper._tickets = []
+    helper._graph_capture = None
+    helper.failed = helper.closed = False
+    return helper, state, caller
+
+
+def test_captured_dma_joins_and_retains_storage_without_host_synchronization(monkeypatch):
+    helper, state, caller = capture_helper(monkeypatch)
+    host, records = object(), object()
+    ticket = SimpleNamespace(
+        _ready=object(), _waited=True, _active=True, _host=host, _records=records
+    )
+    with helper.graph_capture() as capture:
+        helper._tickets.append(ticket)
+        helper._caller_stream = caller
+        state.capturing = True
+        helper.drain()
+        assert state.waits == [helper._copy_stream]
+        state.capturing = False
+    assert capture.finished and capture.tickets == (ticket,)
+    assert ticket._host is host and ticket._records is records
+    assert not ticket._active and not helper._tickets
+    assert helper._caller_stream is None and helper._graph_capture is None
+    assert not helper.failed
+
+
+def test_captured_dma_unconsumed_ticket_fails_and_retains_owners(monkeypatch):
+    helper, state, caller = capture_helper(monkeypatch)
+    ticket = SimpleNamespace(_ready=object(), _waited=False, _active=True)
+    with pytest.raises(RuntimeError, match="unconsumed"), helper.graph_capture():
+        helper._tickets.append(ticket)
+        helper._caller_stream = caller
+        state.capturing = True
+        helper.drain()
+    assert helper.failed and helper._tickets == [ticket]
+    assert helper._graph_capture is None and not state.waits
+
+
+def test_captured_dma_cannot_finish_without_join_or_close_while_active(monkeypatch):
+    helper, _, _ = capture_helper(monkeypatch)
+    with (
+        pytest.raises(RuntimeError, match="did not join"),
+        helper.graph_capture(),
+        pytest.raises(RuntimeError, match="cannot close active"),
+    ):
+        helper.close()
+    assert helper.failed and not helper.closed
+
+
 def make_pool(*, slots=8, layers=1, device="cpu", dense_contiguous=True):
     from operators.deepseek_v32.indexer import cache_ops
 

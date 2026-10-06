@@ -108,10 +108,11 @@ def io_direction(row):
 
 
 def three_layer_panel(panel, phase):
-    """Clip saved activities to L0 first compute through L2 last compute.
+    """Clip saved activities to the three-layer compute/IO window.
 
     Prefill selects only the last chunk using its accepted lower bound. Kernel
-    lanes and actual-IO evidence are inherited without reclassification.
+    lanes and actual-IO evidence are inherited without reclassification. Dense
+    extend also includes L0 history H2D when it starts before L0 computation.
     """
     cutoff = panel["chunks"][-1]["start_ns"] if phase == "prefill" else panel["window"]["start_ns"]
     endpoints = []
@@ -138,14 +139,34 @@ def three_layer_panel(panel, phase):
             }
         )
     start, end = endpoints[0]["compute_start_ns"], endpoints[-1]["compute_end_ns"]
+    l0_history_h2d_start = None
+    dense_extend = phase == "extend" and panel["method"] == "dense_prefetch"
+    if dense_extend:
+        history_h2d = [
+            row["raw_start_ns"]
+            for row in panel["rows"]
+            if row["lane"] == "IO"
+            and "dense_history_prefetch_layer_0" in {row["stage"], row.get("source_stage")}
+            and io_direction(row) == "H2D: DRAM to GPU"
+        ]
+        if history_h2d:
+            l0_history_h2d_start = min(history_h2d)
+            if l0_history_h2d_start < panel["window"]["start_ns"]:
+                raise ValueError("L0 history H2D starts outside the retained full activity window")
+            start = min(start, l0_history_h2d_start)
     if end != panel["shared_tail"]["start_ns"]:
         raise ValueError("L2 compute end does not match the accepted shared-tail boundary")
     for previous, following in pairwise(endpoints):
-        if previous["compute_end_ns"] > following["compute_start_ns"]:
-            raise ValueError("Expected sequential layer computation")
+        if (
+            previous["compute_start_ns"] >= following["compute_start_ns"]
+            or previous["compute_end_ns"] >= following["compute_end_ns"]
+        ):
+            raise ValueError("Expected increasing layer compute start and end timestamps")
     rows = [
         {
             **row,
+            "start_ns": max(start, row["raw_start_ns"]),
+            "end_ns": min(end, row["raw_end_ns"]),
             "start_ms": (max(start, row["raw_start_ns"]) - start) / 1e6,
             "end_ms": (min(end, row["raw_end_ns"]) - start) / 1e6,
         }
@@ -174,12 +195,26 @@ def three_layer_panel(panel, phase):
         "conservative_gate_pass",
     ):
         window.pop(name)
-    window["gap_below_threshold"] = window["gap_no_io_percent"] < window["threshold_percent"]
+    window["gap_below_threshold"] = (
+        window["gate_certifiable"]
+        and window["gap_no_io_percent"] is not None
+        and window["gap_no_io_percent"] < window["threshold_percent"]
+    )
     window["fused_work_policy"] = (
         "Entire Compute + IO interval is productive and retained in the ratio denominator; "
         "only standalone IO outside Compute and Compute + IO is excluded"
     )
-    window["boundary"] = "L0 first compute kernel start to L2 last compute kernel end"
+    window["boundary"] = (
+        "Earlier of L0 first compute kernel start and L0 history H2D start (when present) "
+        "to L2 last compute kernel end"
+        if dense_extend
+        else "L0 first compute kernel start to L2 last compute kernel end"
+    )
+    window["start_basis"] = (
+        "L0 history H2D" if start < endpoints[0]["compute_start_ns"] else "L0 first compute"
+    )
+    window["l0_compute_start_ns"] = endpoints[0]["compute_start_ns"]
+    window["l0_history_h2d_start_ns"] = l0_history_h2d_start
     layers = [
         {
             "layer": item["layer"],
@@ -201,6 +236,71 @@ def three_layer_panel(panel, phase):
     }
 
 
+def extend_startup_panel(panel):
+    """Include measured forward startup and embedding, retaining the L2 endpoint."""
+    clipped = three_layer_panel(panel, "extend")
+    start, end = panel["window"]["start_ns"], clipped["window"]["end_ns"]
+    rows = [
+        {
+            **row,
+            "start_ns": max(start, row["raw_start_ns"]),
+            "end_ns": min(end, row["raw_end_ns"]),
+            "start_ms": (max(start, row["raw_start_ns"]) - start) / 1e6,
+            "end_ms": (min(end, row["raw_end_ns"]) - start) / 1e6,
+        }
+        for row in panel["rows"]
+        if row["raw_start_ns"] < end and row["raw_end_ns"] > start
+    ]
+    embedding = [
+        row
+        for row in rows
+        if row["kind"] == "kernel" and row["lane"] == "Compute" and row["stage"] == "embedding"
+    ]
+    if not embedding:
+        raise ValueError("startup comparison requires measured embedding GPU activity")
+    embedding_start = min(row["raw_start_ns"] for row in embedding)
+    embedding_end = max(row["raw_end_ns"] for row in embedding)
+    l0_start = clipped["endpoints"][0]["compute_start_ns"]
+    if not start <= embedding_start < embedding_end <= l0_start:
+        raise ValueError("embedding must follow forward entry and precede L0 computation")
+    activities = [
+        {
+            "start": row["raw_start_ns"],
+            "end": row["raw_end_ns"],
+            "lane": row["lane"],
+            "actual_io": row.get("actual_io") or {},
+        }
+        for row in rows
+        if row["kind"] != "api"
+    ]
+    window = launch_gap.summarize_window(
+        activities, start, end, lane_classifier=lambda row: row["lane"]
+    )
+    window["boundary"] = "Measured forward entry to L2 last compute kernel end"
+    return {
+        **clipped,
+        "source_window": panel["window"],
+        "cropped_window": clipped["window"],
+        "window": window,
+        "rows": rows,
+        "startup": {
+            "start_ns": start,
+            "end_ns": embedding_start,
+            "label": "Startup",
+            "wall_ms": (embedding_start - start) / 1e6,
+        },
+        "embedding": {
+            "start_ns": embedding_start,
+            "end_ns": embedding_end,
+            "kernel_union_ms": analyze_nsys._union_ns(
+                [(row["raw_start_ns"], row["raw_end_ns"]) for row in embedding]
+            )
+            / 1e6,
+        },
+        "l0_offset_ms": (l0_start - start) / 1e6,
+    }
+
+
 def draw(
     prefill,
     extend,
@@ -215,12 +315,17 @@ def draw(
     separate = layout == "separate"
     split_io = io_layout == "directions"
     selected_annotations = annotations == "idle-echo"
+    startup_comparison = window_kind == "extend-startup"
+    colors = {"Embedding": "#F0E442", **COLORS} if startup_comparison else COLORS
     fig, axes = plt.subplots(
         4, 1 if separate else 2, figsize=(13, 10) if separate else (18, 10), squeeze=False
     )
     figures = []
     metrics = {}
-    for column, (phase, panels) in enumerate((("prefill", prefill), ("extend", extend))):
+    phases = (
+        [("extend", extend)] if startup_comparison else [("prefill", prefill), ("extend", extend)]
+    )
+    for column, (phase, panels) in enumerate(phases):
         if separate and column:
             fig, axes = plt.subplots(4, 1, figsize=(13, 10), squeeze=False)
         axis_column = 0 if separate else column
@@ -235,7 +340,11 @@ def draw(
             for row in rows:
                 if row["lane"] in {"Compute", "Compute + IO"}:
                     purpose = row.get("purpose") or timeline.computation_segments([row])[0]["label"]
-                    category = GROUPS[purpose]
+                    category = (
+                        "Embedding"
+                        if startup_comparison and purpose == "Embedding"
+                        else GROUPS[purpose]
+                    )
                     fused = row["lane"] == "Compute + IO"
                     counts[category] += 1
                 elif row["lane"] == "IO":
@@ -255,7 +364,7 @@ def draw(
                 axis.broken_barh(
                     [(a, b - a) for a, b in intervals],
                     vertical,
-                    facecolors=COLORS[category],
+                    facecolors=colors[category],
                     edgecolors="#FFFFFF" if fused else "none",
                     hatch="////" if fused else None,
                     linewidth=0,
@@ -280,12 +389,28 @@ def draw(
                 parts = panel["layers"]
                 if window_kind == "full":
                     parts = [*parts, panel["shared_tail"]]
+                elif startup_comparison:
+                    parts = [panel["startup"], *parts]
                 for part in parts:
                     left = (part["start_ns"] - window["start_ns"]) / 1e6
                     right = (part["end_ns"] - window["start_ns"]) / 1e6
-                    label = f"L{part['layer']}" if "layer" in part else "tail"
+                    label = f"L{part['layer']}" if "layer" in part else part.get("label", "tail")
                     axis.text((left + right) / 2, compute_y + 0.52, label, ha="center", fontsize=9)
                     axis.axvline(right, color="#66717D", ls=":", alpha=0.5, lw=0.6)
+                if startup_comparison:
+                    embedding = panel["embedding"]
+                    midpoint = (embedding["start_ns"] + embedding["end_ns"]) / 2
+                    axis.scatter(
+                        [(midpoint - window["start_ns"]) / 1e6],
+                        [compute_y + 0.30],
+                        marker="v",
+                        s=32,
+                        color=colors["Embedding"],
+                        edgecolors="#665A00",
+                        linewidths=0.5,
+                        zorder=4,
+                    )
+                    axis.axvline(panel["l0_offset_ms"], color="#66717D", ls=":", alpha=0.5, lw=0.6)
             else:
                 chunk = panel["chunks"][-1]
                 left = (chunk["start_ns"] - window["start_ns"]) / 1e6
@@ -332,6 +457,7 @@ def draw(
                 raise ValueError("Compute purpose coverage mismatch")
             metrics[f"{phase}/{panel['method']}"] = {
                 "window": window,
+                "layer_windows_ns": panel.get("layers", []),
                 "xlim_ms": list(axis.get_xlim()),
                 "gap_intervals_ms": gaps,
                 "compute_categories": dict(counts),
@@ -342,9 +468,17 @@ def draw(
                     for label, intervals in selected.items()
                 },
             }
+            if startup_comparison:
+                metrics[f"{phase}/{panel['method']}"]["startup"] = panel["startup"]
+                metrics[f"{phase}/{panel['method']}"]["embedding"] = panel["embedding"]
+                metrics[f"{phase}/{panel['method']}"]["l0_offset_ms"] = panel["l0_offset_ms"]
         xlabel = (
-            "Time from L0 first compute kernel start (ms)"
+            "Time from L0 start: first compute or earlier history H2D for dense (ms)"
+            if window_kind == "three-layers" and phase == "extend"
+            else "Time from L0 first compute kernel start (ms)"
             if window_kind == "three-layers"
+            else "Time from forward entry (ms)"
+            if startup_comparison
             else f"Time from complete {phase} start (ms)"
         )
         axes[-1, axis_column].set_xlabel(xlabel, fontsize=10)
@@ -356,10 +490,10 @@ def draw(
         Patch(
             facecolor=color,
             label="Output / MLP"
-            if window_kind == "three-layers" and name == "Output / MLP / head"
+            if window_kind in {"three-layers", "extend-startup"} and name == "Output / MLP / head"
             else name,
         )
-        for name, color in COLORS.items()
+        for name, color in colors.items()
         if not selected_annotations or name != "Gap"
     ]
     if selected_annotations:
@@ -378,14 +512,14 @@ def draw(
         "V10: one Compute lane. Within IO, orange H2D uses the upper band and purple D2H the lower band so concurrent transfers remain visible.",
         "Red gap = full window outside compute and actual IO. Percentages exclude IO-only time; ECHO ranges are fused-IO bounds, not confidence intervals.",
         "Complete windows include startup, final norm / head, synchronization and commit. Same time scale across the four methods within each phase.",
-        "Existing intrusive NSYS profiles; displayed times are not independent benchmark times. No new GPU measurement.",
+        "Intrusive NSYS profile; displayed times are not independent benchmark times.",
     ]
     if window_kind == "three-layers":
         notes[1] = (
             "Fused compute + IO is productive, never gap, and remains in the ratio denominator. Only standalone IO-only time is excluded."
         )
         notes[2] = (
-            "Window: L0 first compute start to L2 last compute end. Prefill uses only chunk 64. Same scale across methods within each phase."
+            "Window ends at L2 last compute. Starts at L0 first compute, or earlier L0 history H2D for dense extend. Prefill uses only chunk 64."
         )
     if split_io:
         notes[0] = (
@@ -398,6 +532,13 @@ def draw(
         notes[1] = (
             "Compute phases use color. H2D and D2H have separate lanes. Hatched fused compute + IO is active work, never idle."
         )
+    if startup_comparison:
+        notes[2] = (
+            "Window: forward entry to L2 last compute end. Startup ends at embedding start; later pre-layer H2D remains IO."
+        )
+        notes.append(
+            "Yellow marker locates the short embedding kernel (about 2 microseconds); all activity widths remain to scale."
+        )
     prefill_title = (
         "Prefill | last chunk 64/64, 1,024 tokens, L0-L2"
         if window_kind == "three-layers"
@@ -406,6 +547,8 @@ def draw(
     for phase, fig in figures:
         if separate:
             title = prefill_title if phase == "prefill" else "Extend | 128 tokens, all 3 layers"
+            if startup_comparison:
+                title = "Extend | startup + embedding + L0-L2, 128 tokens"
             fig.text(0.09, 0.960, title, fontsize=15)
         else:
             fig.text(0.075, 0.960, prefill_title, fontsize=15)
@@ -421,7 +564,7 @@ def draw(
         for index, note in enumerate(notes):
             fig.text(
                 0.09 if separate else 0.075,
-                0.083 - index * 0.018,
+                0.083 - index * (0.016 if startup_comparison else 0.018),
                 note,
                 fontsize=8 if separate else 8.5,
                 va="top",
@@ -435,49 +578,182 @@ def draw(
             wspace=0.16,
         )
         for ext in ("png", "svg"):
-            fig.savefig(output / f"{phase}.{ext}", dpi=180, facecolor="white")
+            name = "extend_with_startup" if startup_comparison else phase
+            fig.savefig(output / f"{name}.{ext}", dpi=180, facecolor="white")
         plt.close(fig)
     return metrics
 
 
+def extract_profile_panels(profile, gate):
+    """Read one accepted profile into the existing final-pair renderer format."""
+    from experiments.deepseek_v32_mfu.src.operator_report import _SCOPE, read_calls
+    from experiments.deepseek_v32_motivation.src.graph_attribution import (
+        attribute_graph_replays,
+        read_lineage,
+    )
+
+    result = read(profile / "result.json")
+    if not result["accepted"] or gate["run_id"] != result["run_id"]:
+        raise ValueError("timeline requires one accepted matching profile and gap audit")
+    if sha(profile / "result.json") != gate["input_result_sha256"]:
+        raise ValueError("gap audit does not match the profile result")
+    if (
+        result["num_layers"],
+        result["prefix_tokens"],
+        result["chunk_size"],
+        result["extend_tokens"],
+    ) != (3, 65536, 1024, 128):
+        raise ValueError("this final timeline pair requires L0-L2, H65536, chunk1024 and A128")
+    calls, _ = read_calls(profile / "operator_calls.json")
+    setup = [
+        profile / f"capture_{index}.sqlite"
+        for index, label in enumerate(result["nsys_capture_order"], 1)
+        if label == "graph_setup" or label.endswith("/extend_graph_setup")
+    ]
+    parents = read_lineage(setup) if setup else None
+    output = {}
+    for phase, key in (("prefill", "prefill_methods"), ("extend", "methods")):
+        panels = []
+        for expected in gate[key]:
+            method = expected["method"]
+            path = profile / expected["sqlite"]
+            if sha(path) != expected["sqlite_sha256"]:
+                raise ValueError("profile capture changed after gap audit")
+            scopes, apis, activities, _ = analyze_nsys._read_capture(
+                path.resolve(), scope_pattern=_SCOPE
+            )
+            analyze_nsys._assign_scopes(apis, scopes)
+            analyze_nsys._attribute(apis, activities)
+            activities, boundary = timeline.select_forward_activities(scopes, activities)
+            if boundary != expected["capture_boundary"]:
+                raise ValueError("timeline measured forward boundary differs from gap audit")
+            selected = [
+                row
+                for row in calls
+                if (row["mode"], row["phase"]) == (method, f"{phase}_annotated")
+            ]
+            if any(row.get("full_extend_graph") for row in selected):
+                from experiments.deepseek_v32_mfu.src.full_graph_profile import (
+                    attribute_full_graph_replays,
+                )
+
+                attribute_full_graph_replays(
+                    activities,
+                    selected,
+                    parents,
+                    scopes=scopes,
+                    apis=timeline.select_forward_apis(apis, boundary),
+                )
+            elif any(row.get("graph_replay") for row in selected):
+                attribute_graph_replays(
+                    activities, selected, parents, scopes=scopes, require_replays=True
+                )
+            counter_key = (
+                "prefix_cache_per_layer" if phase == "prefill" else "extend_cache_per_layer"
+            )
+            launch_gap.annotate_actual_io(
+                activities,
+                result["measurements"][method][counter_key],
+                method,
+                f"{phase}_annotated",
+            )
+            if launch_gap.activity_inventory(activities) != expected["activity_inventory"]:
+                raise ValueError("timeline activity classification differs from accepted gap audit")
+            window = expected[f"full_{phase}"]
+            rows = timeline.activity_rows(activities, apis, window["start_ns"], window["end_ns"])
+            panel = {
+                "method": method,
+                "phase": phase,
+                "window": window,
+                "rows": rows,
+                "shared_tail": expected["shared_tail"],
+            }
+            if phase == "prefill":
+                panel["chunks"] = [
+                    row for row in expected["layer_chunk_windows"] if row["layer"] == 0
+                ]
+                if [row["chunk"] for row in panel["chunks"]] != list(range(64)):
+                    raise ValueError("prefill capture must contain every one of the 64 chunks")
+            else:
+                panel["layers"] = expected["layers"]
+            panels.append(panel)
+        if [panel["method"] for panel in panels] != list(launch_gap.METHODS):
+            raise ValueError("final timeline requires each of the four methods in canonical order")
+        output[phase] = panels
+    return result["run_id"], output
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--prefill-dir", type=Path, required=True)
-    parser.add_argument("--extend-dir", type=Path, required=True)
+    parser.add_argument("--prefill-dir", type=Path)
+    parser.add_argument("--extend-dir", type=Path)
+    parser.add_argument("--profile-run", type=Path)
+    parser.add_argument("--gap-audit", type=Path)
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--layout", choices=("combined", "separate"), default="combined")
-    parser.add_argument("--window", choices=("full", "three-layers"), default="full")
+    parser.add_argument(
+        "--window", choices=("full", "three-layers", "extend-startup"), default="full"
+    )
     parser.add_argument("--io-layout", choices=("shared", "directions"), default="shared")
     parser.add_argument("--annotations", choices=("gap", "idle-echo"), default="gap")
     args = parser.parse_args()
-    prefill_path = args.prefill_dir / "prefill_rows.json"
-    extend_path = args.extend_dir / "complete_extend.json"
-    prefill_receipt = read(args.prefill_dir / "prefill_receipt.json")
-    extend_receipt = read(args.extend_dir / "binding.json")
-    if prefill_receipt["profile_run_id"] != RUN or not extend_receipt["passed"]:
-        raise ValueError("Expected accepted V10 inputs")
-    if sha(prefill_path) != prefill_receipt["artifacts_sha256"][prefill_path.name]:
-        raise ValueError("Prefill extraction changed")
-    if sha(extend_path) != extend_receipt["artifacts_sha256"][str(extend_path.resolve())]:
-        raise ValueError("Extend extraction changed")
+    if args.window == "extend-startup" and args.layout != "separate":
+        parser.error("--window extend-startup requires --layout separate")
+    if args.profile_run:
+        if args.gap_audit is None or args.prefill_dir is not None or args.extend_dir is not None:
+            parser.error("--profile-run requires --gap-audit and excludes legacy extraction inputs")
+        profile = args.profile_run.resolve()
+        input_paths = [
+            profile / "result.json",
+            profile / "operator_calls.json",
+            args.gap_audit.resolve(),
+            *sorted(profile.glob("capture_*.sqlite")),
+        ]
+        inputs_before_extract = {str(path): sha(path) for path in input_paths}
+        profile_run_id, panels = extract_profile_panels(profile, read(args.gap_audit))
+        if inputs_before_extract != {str(path): sha(path) for path in input_paths}:
+            raise ValueError("profile input changed during timeline extraction")
+        prefill, extend = panels["prefill"], panels["extend"]
+    else:
+        if args.prefill_dir is None or args.extend_dir is None or args.gap_audit is not None:
+            parser.error("provide --profile-run/--gap-audit or both --prefill-dir/--extend-dir")
+        prefill_path = args.prefill_dir / "prefill_rows.json"
+        extend_path = args.extend_dir / "complete_extend.json"
+        prefill_receipt = read(args.prefill_dir / "prefill_receipt.json")
+        extend_receipt = read(args.extend_dir / "binding.json")
+        if prefill_receipt["profile_run_id"] != RUN or not extend_receipt["passed"]:
+            raise ValueError("Expected accepted legacy extraction inputs")
+        if sha(prefill_path) != prefill_receipt["artifacts_sha256"][prefill_path.name]:
+            raise ValueError("Prefill extraction changed")
+        if sha(extend_path) != extend_receipt["artifacts_sha256"][str(extend_path.resolve())]:
+            raise ValueError("Extend extraction changed")
+        input_paths = [
+            prefill_path,
+            extend_path,
+            args.prefill_dir / "prefill_receipt.json",
+            args.extend_dir / "binding.json",
+        ]
+        profile_run_id = RUN
+        prefill, extend = read(prefill_path), read(extend_path)
     paths = [
-        prefill_path,
-        extend_path,
-        args.prefill_dir / "prefill_receipt.json",
-        args.extend_dir / "binding.json",
+        *input_paths,
         Path(__file__),
         Path(timeline.__file__),
         Path(redraw_gap_timeline.__file__),
         Path(launch_gap.__file__),
         Path(analyze_nsys.__file__),
+        Path(__file__).with_name("full_graph_profile.py"),
     ]
     before = {str(p.resolve()): sha(p) for p in paths}
     args.output_dir.mkdir(parents=True, exist_ok=False)
-    prefill, extend = read(prefill_path), read(extend_path)
-    if args.window == "three-layers":
-        prefill = [three_layer_panel(panel, "prefill") for panel in prefill]
-        extend = [three_layer_panel(panel, "extend") for panel in extend]
-        panels = {"prefill": prefill, "extend": extend}
+    if args.window in {"three-layers", "extend-startup"}:
+        if args.window == "three-layers":
+            prefill = [three_layer_panel(panel, "prefill") for panel in prefill]
+            extend = [three_layer_panel(panel, "extend") for panel in extend]
+            panels = {"prefill": prefill, "extend": extend}
+        else:
+            extend = [extend_startup_panel(panel) for panel in extend]
+            panels = {"extend": extend}
         (args.output_dir / "window_rows.json").write_text(json.dumps(panels, indent=2) + "\n")
         summaries = [
             {"phase": phase, "method": panel["method"], **panel["window"]}
@@ -522,8 +798,8 @@ def main():
     if before != {str(p.resolve()): sha(p) for p in paths}:
         raise ValueError("Input or renderer changed")
     receipt = {
-        "schema": "v10-compact-prefill-extend-v1",
-        "profile_run_id": RUN,
+        "schema": "compact-prefill-extend-v2",
+        "profile_run_id": profile_run_id,
         "layout": args.layout,
         "window_kind": args.window,
         "io_layout": args.io_layout,
@@ -532,15 +808,17 @@ def main():
         "annotation_colors": ANNOTATION_COLORS if args.annotations == "idle-echo" else {},
         "io_direction_colors": {k: v for k, v in COLORS.items() if k.startswith(("H2D:", "D2H:"))},
         "prefill_annotation": (
-            "Only final chunk 64 (1024 tokens), L0 first compute start through L2 last compute end"
+            None
+            if args.window == "extend-startup"
+            else "Only final chunk 64 (1024 tokens), L0 first compute start through L2 last compute end"
             if args.window == "three-layers"
             else "Only final chunk 64 (1024 tokens), excluding shared tail; full prefill window retained"
         ),
         "inputs_and_sources_sha256": before,
         "metrics": metrics,
         "measurement": (
-            "CPU-only reanalysis of accepted V10 activities in the user-selected window; no new GPU measurement or optimization"
-            if args.window == "three-layers"
+            "CPU reanalysis of accepted profile activities in the user-selected window; no new GPU measurement"
+            if args.window in {"three-layers", "extend-startup"}
             else "Presentation only; no GPU measurement or optimization"
         ),
         "artifacts_sha256": {

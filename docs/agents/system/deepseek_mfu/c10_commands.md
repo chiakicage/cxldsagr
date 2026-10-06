@@ -1,18 +1,21 @@
-# Current DMA formal runs
+# Paused C10 DMA follow-up
 
-All commands run from repository root with `/tmp/deepseek_mfu_env.sh`. GPU3 is
-serialized under `/tmp/deepseek_observed_run.py`, CPU24-31/NUMA0. Background
-analysis uses CPU32-39; heavy analysis is paused during formal bench.
+This independent C10 task remains paused by the user. The real-three-layer
+full-graph MFU supplement is complete and does not resume these commands.
+Current C10 status is in `experiments/deepseek_v32_motivation/README.md`.
+The historical command below used `/tmp/deepseek_mfu_env.sh`, GPU3,
+`/tmp/deepseek_observed_run.py`, and CPU24-31/NUMA0. Verify its inputs and
+environment again before any future authorized execution.
 
-Current completed check:
+Recorded completed check:
 `deepseek_dma_c10_check_20261006_01`,144 observer samples, no foreign GPU process,
 maximum observation gap30.606560s. All four methods x32 requests passed. Receipt:
 `/tmp/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_dma_c10_check_20261006_01/receipt.json`.
 
-Current live benchmark: exec session26726, run `deepseek_dma_c10_bench_20261006_01`.
+Recorded benchmark: `deepseek_dma_c10_bench_20261006_01`; it is no longer a live job.
 It uses H65536,A128,chunk1024,P65536,NH16777216,16users,2rounds,seed42,graphs.
 
-After the benchmark observer and child fully exit, run:
+Historical profile command, not executed by the current MFU supplement:
 
 ```bash
 source /tmp/deepseek_mfu_env.sh
@@ -27,7 +30,3 @@ CUDA_VISIBLE_DEVICES=3 numactl --physcpubind=24-31 --membind=0 \
 Profile executes4x(3warmups+17trace requests)=80requests and captures4graph setups
 plus8selected requests. It must pass numerical and DMA byte/address/activity
 checks before replacing the mapped-gather publication. No official ECHO rerun.
-
-All84changed Python files pass Ruff check. The only pending format-only edit is
-line wrapping in motivation `src/graph_attribution.py`; apply after all source-
-frozen GPU jobs end, then refresh relevant report helper identities as needed.

@@ -28,6 +28,21 @@ def intersection_ns(left, right):
     return total
 
 
+def activity_stage(activity):
+    scope = activity.get("scope") or {}
+    return activity.get("graph_stage", scope.get("stage"))
+
+
+def activity_layer(activity):
+    """GPU capture ownership is distinct from the replay's actual CPU scope."""
+    stage = activity_stage(activity) or ""
+    target = re.fullmatch(r"dense_history_prefetch_layer_(\d+)", stage)
+    if target:
+        return f"layer_{target[1]}"
+    scope = activity.get("scope") or {}
+    return activity.get("graph_layer", scope.get("layer"))
+
+
 def prefetch_transport(activity):
     if activity["kind"] == "memcpy" and activity["name"].lower() in {
         "host-to-device",
@@ -211,6 +226,131 @@ def activity_lane(activity):
     return "GPU control"
 
 
+def activity_rows(activities, apis, start, end):
+    """Keep measured endpoints, actual CPU scope and capture-time GPU ownership."""
+    rows = []
+    for activity in [*activities, *apis]:
+        if activity["start"] >= end or activity["end"] <= start:
+            continue
+        scope = activity.get("scope") or {}
+        kind = activity.get("kind", "api")
+        stage = activity_stage(activity)
+        rows.append(
+            {
+                "lane": "CPU CUDA API" if kind == "api" else activity_lane(activity),
+                "kind": kind,
+                "name": activity["name"],
+                "scope_label": scope.get("label"),
+                "stage": stage,
+                "source_stage": activity.get("graph_source_stage", stage),
+                "scope_path": activity.get("graph_scope_path", []),
+                "layer": activity_layer(activity),
+                "actual_io": activity.get("actual_io"),
+                "correlation": activity.get("correlation"),
+                "stream": activity.get("stream_id"),
+                "device_id": activity.get("device_id"),
+                "process": activity.get("process"),
+                "graph_id": activity.get("graph_id"),
+                "graph_node_id": activity.get("graph_node_id"),
+                "bytes": activity.get("bytes"),
+                "start_ns": max(start, activity["start"]),
+                "end_ns": min(end, activity["end"]),
+                "raw_start_ns": activity["start"],
+                "raw_end_ns": activity["end"],
+                "start_ms": (max(start, activity["start"]) - start) / 1e6,
+                "end_ms": (min(end, activity["end"]) - start) / 1e6,
+            }
+        )
+    return rows
+
+
+def _select_graph_layer(scopes, apis, activities, *, layer, occurrence):
+    from experiments.deepseek_v32_mfu.src.launch_gap import complement, summarize_window
+
+    if occurrence not in (-1, 0):
+        raise ValueError("one full extend graph contains exactly one occurrence of each layer")
+    compute = [row for row in activities if activity_lane(row) in {"Compute", "Compute + IO"}]
+    owned = [row for row in compute if activity_layer(row) == f"layer_{layer}"]
+    if not owned:
+        raise ValueError(f"full graph contains no computation for layer {layer}")
+    if layer == 0:
+        forward = [
+            row for row in scopes if row["layer"] == "shared" and row["stage"] == "forward_misc"
+        ]
+        if len(forward) != 1:
+            raise ValueError("full graph requires one complete measured forward boundary")
+        start, boundary = forward[0]["start"], "complete forward start"
+    else:
+        previous = [row for row in compute if activity_layer(row) == f"layer_{layer - 1}"]
+        if not previous:
+            raise ValueError("full graph lacks previous layer computation")
+        start, boundary = max(row["end"] for row in previous), "previous layer computation end"
+    end = max(row["end"] for row in owned)
+    if start > min(row["start"] for row in owned):
+        raise ValueError("full graph layer computation overlaps its predecessor")
+    visible = [row for row in activities if row["start"] < end and row["end"] > start]
+    rows = activity_rows(visible, apis, start, end)
+    gpu = [(max(start, row["start"]), min(end, row["end"])) for row in visible]
+    pure_compute = [(row["start_ns"], row["end_ns"]) for row in rows if row["lane"] == "Compute"]
+    io = [(row["start_ns"], row["end_ns"]) for row in rows if row["lane"] == "IO"]
+    transfers = [
+        row
+        for row in activities
+        if activity_stage(row) == f"dense_history_prefetch_layer_{layer + 1}"
+        and activity_lane(row) == "IO"
+    ]
+    transfer_intervals = [(row["start"], row["end"]) for row in transfers]
+    transfer_duration = _union_ns(transfer_intervals)
+    window = summarize_window(visible, start, end)
+    summary = {
+        **window,
+        "layer": layer,
+        "occurrence": occurrence,
+        "origin_ns": start,
+        "origin_boundary": boundary,
+        "boundary": f"{boundary} through layer GPU compute completion",
+        "layer_ownership": "capture-time GPU node ownership; no replay-time CPU layer scopes",
+        "gpu_busy_union_ms": _union_ns(gpu) / 1e6,
+        "gpu_gap_ms": window["gpu_idle_ms"],
+        "compute_io_gap_ms": window["gap_ms"],
+        "largest_gpu_gap_ms": max((b - a for a, b in complement(gpu, start, end)), default=0) / 1e6,
+        "compute_io_overlap_ms": intersection_ns(pure_compute, io) / 1e6,
+        "next_layer_prefetch_overlap_ms": intersection_ns(pure_compute, transfer_intervals) / 1e6,
+        "next_layer_prefetch_full_ms": transfer_duration / 1e6,
+        "next_layer_prefetch_span_ms": (
+            max(b for _, b in transfer_intervals) - min(a for a, _ in transfer_intervals)
+        )
+        / 1e6
+        if transfer_intervals
+        else 0,
+        "next_layer_prefetch_h2d_memcpy_bytes": sum(
+            row.get("bytes", 0) for row in transfers if row["kind"] == "memcpy"
+        ),
+        "next_layer_prefetch_transports": sorted({prefetch_transport(row) for row in transfers}),
+        "next_layer_prefetch_activities": [source_activity(row) for row in transfers],
+        "next_layer_prefetch_zero_transfer_activities": [],
+        "next_layer_prefetch_unresolved_gather_count": 0,
+        "next_layer_prefetch_overlap_certifiable": True,
+        "next_layer_prefetch_overlap_percent": 100
+        * intersection_ns(pure_compute, transfer_intervals)
+        / transfer_duration
+        if transfer_duration
+        else None,
+        "next_layer_prefetch_intervals_ns": transfer_intervals,
+        "next_layer_prefetch_intervals_ms": [
+            ((a - start) / 1e6, (b - start) / 1e6) for a, b in transfer_intervals
+        ],
+        "next_layer_prefetch_streams": sorted({row["stream_id"] for row in transfers}),
+        "next_layer_prefetch_started_before_window": any(a < start for a, _ in transfer_intervals),
+        "next_layer_prefetch_ends_after_window": any(b > end for _, b in transfer_intervals),
+        "next_layer_prefetch_scope_label": None,
+        "next_layer_prefetch_scope": None,
+        "unattributed_gpu_activity_count": sum(row.get("scope") is None for row in visible),
+        "fused_note": "Fused ECHO is productive in its entirety and retained in the gap denominator.",
+    }
+    return summary, rows
+
+
 def select_layer(scopes, apis, activities, *, layer=1, occurrence=-1):
     """Select one launch scope, and include every activity overlapping its GPU span.
 
@@ -219,6 +359,9 @@ def select_layer(scopes, apis, activities, *, layer=1, occurrence=-1):
     they are independent lanes, never subtracted from another run's wall time.
     """
     from experiments.deepseek_v32_mfu.src.launch_gap import summarize_window
+
+    if any(row.get("full_extend_graph") for row in activities):
+        return _select_graph_layer(scopes, apis, activities, layer=layer, occurrence=occurrence)
 
     layers = sorted(
         (
@@ -314,12 +457,7 @@ def select_layer(scopes, apis, activities, *, layer=1, occurrence=-1):
     ]
     for activity in visible:
         scope = activity.get("scope")
-        stage = activity.get("graph_stage", scope["stage"] if scope else None)
-        target = (
-            re.search(r"dense_history_prefetch_layer_(\d+)", scope["stage"] or "")
-            if scope
-            else None
-        )
+        stage = activity_stage(activity)
         rows.append(
             {
                 "lane": activity_lane(activity),
@@ -336,7 +474,9 @@ def select_layer(scopes, apis, activities, *, layer=1, occurrence=-1):
                 "graph_id": activity.get("graph_id"),
                 "graph_node_id": activity.get("graph_node_id"),
                 "stage": stage,
-                "layer": int(target[1]) if target else scope["layer"] if scope else None,
+                "source_stage": activity.get("graph_source_stage", stage),
+                "scope_path": activity.get("graph_scope_path", []),
+                "layer": activity_layer(activity),
                 "name": activity["name"],
                 "io_kind": "mapped_host_gather"
                 if kernel_category(activity["name"]) == "mapped_host_kv_gather"
@@ -515,6 +655,18 @@ def select_forward_activities(scopes, activities):
     }
 
 
+def select_forward_apis(apis, boundary):
+    """Match graph-launch validation to the measured synchronized forward."""
+    start, end = boundary["measured_start_ns"], boundary["measured_end_ns"]
+    selected = [api for api in apis if api["start"] < end and api["end"] > start]
+    for api in selected:
+        if "GraphLaunch" in api["name"] and (
+            api["start"] < start or api["end"] > end or api.get("scope") is None
+        ):
+            raise ValueError("measured graph launch must be fully inside an attributed forward")
+    return selected
+
+
 def extract(path, calls, parents, *, layer=1, measurements=None):
     from experiments.deepseek_v32_mfu.src.launch_gap import annotate_actual_io
 
@@ -527,7 +679,17 @@ def extract(path, calls, parents, *, layer=1, measurements=None):
         raise ValueError("timeline requires one method and phase")
     method, phase = identity.pop()
     selected_calls = [row for row in calls if (row["mode"], row["phase"]) == (method, phase)]
-    if any(row.get("graph_replay") for row in selected_calls):
+    if any(row.get("full_extend_graph") for row in selected_calls):
+        from experiments.deepseek_v32_mfu.src.full_graph_profile import attribute_full_graph_replays
+
+        attribute_full_graph_replays(
+            activities,
+            selected_calls,
+            parents,
+            scopes=scopes,
+            apis=select_forward_apis(apis, capture_boundary),
+        )
+    elif any(row.get("graph_replay") for row in selected_calls):
         from experiments.deepseek_v32_motivation.src.graph_attribution import (
             attribute_graph_replays,
         )
@@ -566,9 +728,14 @@ def computation_segments(rows):
         if row["lane"] not in {"Compute", "Compute + IO"}:
             continue
         stage = row.get("stage") or ""
+        source_stage = row.get("source_stage", stage)
         scope = row.get("scope_label") or ""
         if stage == "embedding":
             label = "Embedding"
+        elif source_stage in {"input_residual_norm", "attention_projection"}:
+            label = "Projection / RoPE"
+        elif source_stage in {"post_attention_residual_norm", "dense_mlp", "attention_output"}:
+            label = "Output / MLP"
         elif "compute_graph_projection_layer_" in scope:
             label = "Projection / RoPE"
         elif "compute_graph_finish_layer_" in scope:

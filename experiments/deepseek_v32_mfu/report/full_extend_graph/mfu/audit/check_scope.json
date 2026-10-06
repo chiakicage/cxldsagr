@@ -1,0 +1,205 @@
+{
+  "schema": "deepseek-dense-late-wait-impact-v1",
+  "check_run_id": "deepseek_dense_late_wait_cold_check_20261006_01",
+  "previous_check_run_id": "deepseek_full_graph_mfu_check_20261006_01",
+  "changed_execution_sources": {
+    "experiments/deepseek_v32_mfu/src/profile_layers.py": {
+      "previous": "8ff00f0ab26a4e942ae75d5ee77212ee2d3f4ac9b2569b931a2b86fd0ffe63f5",
+      "current": "8192982801bfe1c90e79ebb892b55ed1e50253eed20cc5fa36115858cc303683"
+    },
+    "models/deepseek_v32/attention.py": {
+      "previous": "492f57fd04340bd3b25c66ea087774e43cb3320ac49147db83a90705551fab64",
+      "current": "929e7afcc0b3c9abdddce464aca23a0c1a50dc19e656275bdf5031fd4dc4fc7b"
+    },
+    "models/deepseek_v32/execution/extend_graph.py": {
+      "previous": "1da1b337dcfd44b4015bf29ec9942ff06a74f5d9dce8ace5e2a45e620c6ad5e6",
+      "current": "0a25bbad2b2c67e199fbb74e5786a9fceb0f3c9bc215f5319a882be8297217ff"
+    },
+    "models/deepseek_v32/model.py": {
+      "previous": "165590c4d6753f5b2e730c1883b614c1a5601a64894e329d7192e2f5c7250f48",
+      "current": "c462164d2ec24e0f0a2d797331c022df89337dd847a04be2936a41c5050f195b"
+    }
+  },
+  "execution_identity_changed_fields": [
+    "backend_provenance",
+    "execution_runtime_artifacts",
+    "extend_graph_policy_revision",
+    "source_sha256"
+  ],
+  "native_payload_comparison": {
+    "path": "/tmp/deepseek_dense_late_wait_audit_20261006_01/native_payload_comparison.json",
+    "sha256": "43242f4e24184d23274d5b2e7e672e6bfbbaf3b1b560dad336b525e0b35ca231",
+    "all_local_native_library_bytes_identical": true,
+    "source_dependency_count": 314,
+    "backend_identity_differences": [
+      {
+        "path": "/recall_dispatch/fingerprint",
+        "previous": "a5d04ecf30f85d86d08f7adc3e24bf499291e7e12ec1fbb0d96b1d7288ec62c6",
+        "current": "72e5dd0d86dcacc7c1714bebecfbfc7033ead09f0223526a34fa02bb7b98c31d"
+      },
+      {
+        "path": "/recall_dispatch/identity/compiler_environment/PATH",
+        "previous": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin:/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin:/usr/local/cuda/bin:/root/.codex/tmp/arg0/codex-arg0jLC2sM:/root/.cloudml-cli/bin:/root/.vscode-server/data/User/globalStorage/github.copilot-chat/debugCommand:/root/.vscode-server/data/User/globalStorage/github.copilot-chat/copilotCli:/root/.vscode-server/bin/07f806f999227108933c2e30515b26eecc1fda74/bin/remote-cli:/root/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/cuda/bin",
+        "current": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin:/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin:/usr/local/cuda/bin:/usr/local/bin:/usr/bin:/bin"
+      }
+    ]
+  },
+  "source_review": {
+    "models/deepseek_v32/attention.py": {
+      "changed_class_functions": [
+        "EchoAttentionRunner._forward",
+        "EchoAttentionRunner.forward"
+      ],
+      "unchanged_class_function_count": 12
+    },
+    "models/deepseek_v32/model.py": {
+      "changed_class_functions": [
+        "DeepSeekEchoModel._execute_gpu_body",
+        "DeepSeekEchoModel._forward",
+        "DeepSeekEchoModel._wait_dense_history"
+      ],
+      "unchanged_class_function_count": 16
+    },
+    "models/deepseek_v32/execution/extend_graph.py": {
+      "changed_class_functions": [
+        "DeepSeekExtendGraph.__init__",
+        "DeepSeekExtendGraph.allocate",
+        "DeepSeekExtendGraph.describe"
+      ],
+      "unchanged_class_function_count": 12
+    }
+  },
+  "non_dense_graph_inventory": {
+    "hbm": {
+      "gpu_node_count": 218,
+      "stage_and_node_type_inventory_unchanged": true
+    },
+    "echo": {
+      "gpu_node_count": 299,
+      "stage_and_node_type_inventory_unchanged": true
+    },
+    "serial_sparse": {
+      "gpu_node_count": 242,
+      "stage_and_node_type_inventory_unchanged": true
+    }
+  },
+  "saved_output_comparisons": [
+    {
+      "name": "hbm/control/hidden",
+      "bitwise_equal": true,
+      "max_abs": 0.0,
+      "rtol": 0.01,
+      "atol": 0.02,
+      "accepted": true
+    },
+    {
+      "name": "hbm/control/logits",
+      "bitwise_equal": true,
+      "max_abs": 0.0,
+      "rtol": 0.01,
+      "atol": 0.02,
+      "accepted": true
+    },
+    {
+      "name": "hbm/prefix_logits/logits",
+      "bitwise_equal": true,
+      "max_abs": 0.0,
+      "rtol": 0.01,
+      "atol": 0.02,
+      "accepted": true
+    },
+    {
+      "name": "echo/control/hidden",
+      "bitwise_equal": true,
+      "max_abs": 0.0,
+      "rtol": 0.01,
+      "atol": 0.02,
+      "accepted": true
+    },
+    {
+      "name": "echo/control/logits",
+      "bitwise_equal": true,
+      "max_abs": 0.0,
+      "rtol": 0.01,
+      "atol": 0.02,
+      "accepted": true
+    },
+    {
+      "name": "echo/prefix_logits/logits",
+      "bitwise_equal": true,
+      "max_abs": 0.0,
+      "rtol": 0.01,
+      "atol": 0.02,
+      "accepted": true
+    },
+    {
+      "name": "serial_sparse/control/hidden",
+      "bitwise_equal": true,
+      "max_abs": 0.0,
+      "rtol": 0.01,
+      "atol": 0.02,
+      "accepted": true
+    },
+    {
+      "name": "serial_sparse/control/logits",
+      "bitwise_equal": true,
+      "max_abs": 0.0,
+      "rtol": 0.01,
+      "atol": 0.02,
+      "accepted": true
+    },
+    {
+      "name": "serial_sparse/prefix_logits/logits",
+      "bitwise_equal": true,
+      "max_abs": 0.0,
+      "rtol": 0.01,
+      "atol": 0.02,
+      "accepted": true
+    },
+    {
+      "name": "dense_prefetch/control/hidden",
+      "bitwise_equal": true,
+      "max_abs": 0.0,
+      "rtol": 0.01,
+      "atol": 0.02,
+      "accepted": true
+    },
+    {
+      "name": "dense_prefetch/control/logits",
+      "bitwise_equal": true,
+      "max_abs": 0.0,
+      "rtol": 0.01,
+      "atol": 0.02,
+      "accepted": true
+    },
+    {
+      "name": "dense_prefetch/prefix_logits/logits",
+      "bitwise_equal": true,
+      "max_abs": 0.0,
+      "rtol": 0.01,
+      "atol": 0.02,
+      "accepted": true
+    }
+  ],
+  "shared_cache_operator_executor_serving_sources_unchanged": true,
+  "affected_results": [
+    "deepseek_v32_mfu dense extend clean latency, final MFU, operator MFU, timeline and gap",
+    "deepseek_v32_echo_official README local dense comparison row"
+  ],
+  "retained_with_original_identity": [
+    "cache_manager_performance independent ECHO/serial post-topk, recall and append results",
+    "cache_manager_performance ECHO/serial fullgraph transition and its source cold_profile_02/check/bench artifacts",
+    "C10 motivation and cache_management capacity reports",
+    "NOSA results",
+    "official HTTP execution artifacts"
+  ],
+  "scope": "New fullgraph scheduling is explicitly enabled only for three-layer dense_prefetch preparation/capture; normal forward uses the original wait-before-layer schedule and callback=None retains one operation lease. Other methods have the same captured GPU node/type/stage inventory and all methods retain identical saved prefix/extend outputs. Default-path source guards and helper extraction do not establish identical historical host timing; fresh complete bench/profile supplies current measurements. The host-only recall-dispatch PATH changes the build fingerprint and library name/path; 314 native source/dependency hashes and all three local native library payloads are identical by live reread. Execution identities still differ; separate-run timing differences are not a controlled single-variable causal estimate. Old reports retain their measured source identity and are not relabelled as new runs. No C10/NOSA performance rerun or new capacity claim.",
+  "inputs_sha256": {
+    "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_dense_late_wait_cold_check_20261006_01/result.json": "63488e65fe08ffd44c28017198dd5e8406e2bdf6ee9d25850faf68a92555d111",
+    "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_full_graph_mfu_check_20261006_01/result.json": "c25e55caa79c296a7c783f0446860c8e371e8af40893df79fdeb31b543de87b2",
+    "experiments/deepseek_v32_mfu/output/data/deepseek_dense_late_wait_profile_20261006_01/full_graph_templates.json": "b679fdb308fc3c3cee8549ce171395c19b2760ea5e0d48be71b49b089b125f45",
+    "experiments/deepseek_v32_mfu/output/data/deepseek_full_graph_mfu_profile_20261006_01/full_graph_templates.json": "a65de0f6f4c477b447ee956fad1a32f3b7ead771248aa88e9fadc895f842faee",
+    "/tmp/deepseek_dense_late_wait_audit_20261006_01/native_payload_comparison.json": "43242f4e24184d23274d5b2e7e672e6bfbbaf3b1b560dad336b525e0b35ca231",
+    "/tmp/deepseek_dense_late_wait_audit_20261006_01/audit_impact.py": "f548a8752d295c8228fd277e10ccc6246396094c0cad168512c4a4d8eac48d35"
+  }
+}

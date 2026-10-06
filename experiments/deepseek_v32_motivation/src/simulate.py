@@ -11,7 +11,10 @@ from collections import Counter
 from itertools import pairwise
 from pathlib import Path
 
-from experiments.deepseek_v32_motivation.src.simulation_inputs import digest
+from experiments.deepseek_v32_motivation.src.simulation_inputs import (
+    WITHDRAWN_PROFILE_RUN_ID,
+    digest,
+)
 
 STAGES = ("projection", "index", "topk", "attention", "finish")
 LABELS = {
@@ -660,7 +663,7 @@ def write_report(output, inputs, simulation):
         "# 单层计算与 I/O simulation",
         "",
         f"Simulation run ID：`{inputs['run_id']}`。测量输入来自 `{inputs['source']['profile_run_id']}`，平台为 H200 / SM90。",
-        "源实验的环境、依赖与独立验收见 [MFU 说明](../../../deepseek_v32_mfu/README.md)，选定原始区间见 [MFU timeline CSV](../../../deepseek_v32_mfu/report/four_methods/timeline_activities.csv)。",
+        "源实验的环境、依赖与独立验收见 [MFU 说明](../../../deepseek_v32_mfu/README.md)；选定区间、来源文件及哈希保存在本报告的 `inputs.json` 中。",
         "",
         "按 motivation 的 H=65,536、A=128、history chunk=1,024 设置，选从 0 编号的 L1。Prefill 只取最后一个 chunk（63），此前已有 64,512 tokens；extend 使用完整 128-token batch。",
         "计时输入来自 MFU 实验中真实 checkpoint 前三层连续执行的 L1，同一形状不表示与 C10 的某个 GR 请求有相同 token 或激活。Motivation 的十 block、P=65,536、NH=16,777,216 作为目标背景；本次只模拟一层，不运行准入或容量轨迹，也不推算完整十层或全部 64 个 chunk。",
@@ -766,9 +769,12 @@ def write_report(output, inputs, simulation):
 
 
 def publish(inputs_path, output):
+    inputs = json.loads(inputs_path.read_text())
+    if inputs.get("source", {}).get("profile_run_id") == WITHDRAWN_PROFILE_RUN_ID:
+        raise ValueError("source profile is withdrawn; its simulation cannot be republished")
+
     from experiments.deepseek_v32_motivation.src.plot_simulation import draw_simulation
 
-    inputs = json.loads(inputs_path.read_text())
     document = simulate(inputs)
     if "metrics" not in document or "echo" not in inputs["extend"]:
         raise ValueError("publication requires selected-call FLOPs and measured ECHO inputs")

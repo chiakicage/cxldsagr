@@ -1,110 +1,36 @@
 {
-  "analysis_id": "cache_attention_transition_model_20261006_02",
-  "analysis_sources": {
-    "evaluation/validation.py": {
-      "bytes": 4803,
-      "path": "experiments/cache_manager_performance/output/data/cache_attention_transition_model_20261006_02/analysis_sources/evaluation/validation.py",
-      "sha256": "769add375a8b3b64fe0c391c1a3067f2304c4727f1d4af199b9f5a5480ca2b74"
-    },
-    "experiments/cache_manager_performance/src/analyze.py": {
-      "bytes": 17972,
-      "path": "experiments/cache_manager_performance/output/data/cache_attention_transition_model_20261006_02/analysis_sources/experiments/cache_manager_performance/src/analyze.py",
-      "sha256": "4f6f7e093c2d1bd6daaed204b3f4c06118a9988598d29308d63bd425f159a04a"
-    },
-    "experiments/cache_manager_performance/src/transition.py": {
-      "bytes": 20888,
-      "path": "experiments/cache_manager_performance/output/data/cache_attention_transition_model_20261006_02/analysis_sources/experiments/cache_manager_performance/src/transition.py",
-      "sha256": "6195161ecaee08a2b57d40a14c300cf94e654710de712aacaedbfd536119b04e"
-    },
-    "experiments/cache_manager_performance/src/transition_metrics.py": {
-      "bytes": 18297,
-      "path": "experiments/cache_manager_performance/output/data/cache_attention_transition_model_20261006_02/analysis_sources/experiments/cache_manager_performance/src/transition_metrics.py",
-      "sha256": "a80c45e25382c0b104717be37e019c8bb64faad89b0dc158528ada6dd2b1c1c2"
-    },
-    "experiments/cache_manager_performance/src/transition_report.py": {
-      "bytes": 9532,
-      "path": "experiments/cache_manager_performance/output/data/cache_attention_transition_model_20261006_02/analysis_sources/experiments/cache_manager_performance/src/transition_report.py",
-      "sha256": "153802b33a71f7d32218ce025272f6c63ad9b80cb2e60197e97e6553989b1cfa"
-    },
-    "experiments/deepseek_v32_mfu/src/analyze_nsys.py": {
-      "bytes": 26035,
-      "path": "experiments/cache_manager_performance/output/data/cache_attention_transition_model_20261006_02/analysis_sources/experiments/deepseek_v32_mfu/src/analyze_nsys.py",
-      "sha256": "fd1277d1be4e164ff99027ffe4f7a37dbec272d987ff39c0074b71b908f45089"
-    },
-    "experiments/deepseek_v32_mfu/src/launch_gap.py": {
-      "bytes": 29830,
-      "path": "experiments/cache_manager_performance/output/data/cache_attention_transition_model_20261006_02/analysis_sources/experiments/deepseek_v32_mfu/src/launch_gap.py",
-      "sha256": "05ccc45af59dd2762fe37d4fba40c16e510c74a8b73cb8f09f5477d37faa60b6"
-    },
-    "experiments/deepseek_v32_mfu/src/operator_report.py": {
-      "bytes": 19971,
-      "path": "experiments/cache_manager_performance/output/data/cache_attention_transition_model_20261006_02/analysis_sources/experiments/deepseek_v32_mfu/src/operator_report.py",
-      "sha256": "b9e938616d41cbf80d15b14ffac5b8e149c489fbd9a1494330ab1c57a22e10b9"
-    },
-    "experiments/deepseek_v32_mfu/src/timeline.py": {
-      "bytes": 31234,
-      "path": "experiments/cache_manager_performance/output/data/cache_attention_transition_model_20261006_02/analysis_sources/experiments/deepseek_v32_mfu/src/timeline.py",
-      "sha256": "2a53a3ee0ecb2dc603e7fdf644ea549eda137b2e81e1802b696c915a3eed960a"
-    }
-  },
-  "artifact_path_base": "repository root; absolute paths only for external acceptance evidence",
-  "measurement": "GPU end of last exact-top-k activity, including validity mask, to actual first MLA compute kernel start",
-  "new_gpu_run": false,
-  "profile_run_id": "deepseek_gap_v10_a128_minimal_20261006_01",
-  "rendered_artifacts": {
-    "latency.csv": {
-      "bytes": 1235,
-      "path": "experiments/cache_manager_performance/output/data/cache_attention_transition_model_20261006_02/latency.csv",
-      "sha256": "a9301a8726ad8de58e100ad50bfbefa369dd50a59bce813b29d95778fd4b3206"
-    },
-    "results.md": {
-      "bytes": 2783,
-      "path": "experiments/cache_manager_performance/output/data/cache_attention_transition_model_20261006_02/results.md",
-      "sha256": "f8bd5482332ee097b76413952fb41e8e173e5adbe3833a5b037d3eaede395d43"
-    },
-    "stages.csv": {
-      "bytes": 3411,
-      "path": "experiments/cache_manager_performance/output/data/cache_attention_transition_model_20261006_02/stages.csv",
-      "sha256": "228b267b3c50885945292489d05047917b7f4c00ca90c55acf234246aa1644c5"
-    },
-    "transition.png": {
-      "bytes": 39288,
-      "path": "experiments/cache_manager_performance/output/data/cache_attention_transition_model_20261006_02/transition.png",
-      "sha256": "b15fa980f3c7a670fcc1ccab3d9c9d3dd07afdc8c51ff76e2ed9a392ade35076"
-    },
-    "transition.svg": {
-      "bytes": 46426,
-      "path": "experiments/cache_manager_performance/output/data/cache_attention_transition_model_20261006_02/transition.svg",
-      "sha256": "2a365a9f271f2ba3c8fd244635faf98d6fd92a2b9f3fd379e2cbfdc384601dca"
-    },
-    "windows.csv": {
-      "bytes": 1439,
-      "path": "experiments/cache_manager_performance/output/data/cache_attention_transition_model_20261006_02/windows.csv",
-      "sha256": "8b2ef8dea907ca56c6273c2e4a8b6d77fc78fb3c86b3ae66c0ed393c6db6eec8"
-    }
-  },
-  "schema": "cache-manager-model-transition-provenance-v2",
+  "analysis_id": "cache_full_graph_transition_20261006_03",
   "sources": [
     {
       "audit": {
-        "path": "experiments/deepseek_v32_mfu/output/data/deepseek_gap_v10_a128_minimal_20261006_01/gap_audit.json",
-        "sha256": "d502fdacf953ea2be134ef252b9d2c9318e529b9554e7d4e5f738231802228a9"
+        "path": "experiments/deepseek_v32_mfu/output/data/deepseek_full_graph_cold_profile_20261006_02/gap_audit.json",
+        "sha256": "d1fc88c520886cd954f473d7d1b89b7323a3e05baa2b6d8d6b5715a1efa56c2a"
       },
       "captures": [
         {
           "boundary": {
             "boundary": "only explicit measured forward; all excluded GPU work proved nonoverlapping; no measured leading/trailing gap removed",
-            "capture_activity_count": 776,
-            "measured_activity_count": 304,
-            "measured_end_ns": 88242901,
-            "measured_start_ns": 82396467,
-            "outside_window_activity_count": 472,
-            "outside_window_activity_duration_sum_ms": 48.337972,
+            "capture_activity_count": 770,
+            "measured_activity_count": 301,
+            "measured_end_ns": 89065692,
+            "measured_start_ns": 83020712,
+            "outside_window_activity_count": 469,
+            "outside_window_activity_duration_sum_ms": 48.164203,
             "outside_window_activity_overlap_ns": 0
           },
-          "path": "experiments/deepseek_v32_mfu/output/data/deepseek_gap_v10_a128_minimal_20261006_01/capture_5.sqlite",
+          "graph_attribution": {
+            "every_replay_gpu_node_verified": true,
+            "full_extend_graph": true,
+            "gpu_node_activities": 299,
+            "outside_graph_activities": 2,
+            "outside_graph_stages": [
+              "extend_graph_inputs"
+            ],
+            "replays": 1
+          },
+          "path": "experiments/deepseek_v32_mfu/output/data/deepseek_full_graph_cold_profile_20261006_02/capture_7.sqlite",
           "scheme": "echo",
-          "sha256": "66196a847b6bf19310d0d2de762e70348d3ab26567ba1cbc31b4f2c6a20a637a",
+          "sha256": "0ce158712122736d2974c2810c181b6b8a70e8cbcda14e0eacb741a0f8ed2f9f",
           "tables": [
             "NVTX_EVENTS",
             "StringIds",
@@ -118,17 +44,27 @@
         {
           "boundary": {
             "boundary": "only explicit measured forward; all excluded GPU work proved nonoverlapping; no measured leading/trailing gap removed",
-            "capture_activity_count": 662,
-            "measured_activity_count": 247,
-            "measured_end_ns": 86070067,
-            "measured_start_ns": 81408953,
-            "outside_window_activity_count": 415,
-            "outside_window_activity_duration_sum_ms": 47.179743,
+            "capture_activity_count": 656,
+            "measured_activity_count": 244,
+            "measured_end_ns": 88522507,
+            "measured_start_ns": 83845544,
+            "outside_window_activity_count": 412,
+            "outside_window_activity_duration_sum_ms": 48.535275,
             "outside_window_activity_overlap_ns": 0
           },
-          "path": "experiments/deepseek_v32_mfu/output/data/deepseek_gap_v10_a128_minimal_20261006_01/capture_7.sqlite",
+          "graph_attribution": {
+            "every_replay_gpu_node_verified": true,
+            "full_extend_graph": true,
+            "gpu_node_activities": 242,
+            "outside_graph_activities": 2,
+            "outside_graph_stages": [
+              "extend_graph_inputs"
+            ],
+            "replays": 1
+          },
+          "path": "experiments/deepseek_v32_mfu/output/data/deepseek_full_graph_cold_profile_20261006_02/capture_10.sqlite",
           "scheme": "serial_sparse",
-          "sha256": "6b85f0a5e2b48cb08b6da6633ec77fcb002a4bb65c9f10118beebbf4e9bc628f",
+          "sha256": "ec45ec7f97d19f4439c9a0a3ee5226134e543c6548020fb9c178f60deaf8965f",
           "tables": [
             "NVTX_EVENTS",
             "StringIds",
@@ -143,52 +79,105 @@
       "execution_sources": {
         "cache/sparse_token_cache.py": {
           "matches_current_source": true,
-          "path": "experiments/deepseek_v32_mfu/output/data/deepseek_gap_v10_a128_minimal_20261006_01/source/cache/sparse_token_cache.py",
+          "path": "experiments/deepseek_v32_mfu/output/data/deepseek_full_graph_cold_profile_20261006_02/source/cache/sparse_token_cache.py",
           "sha256": "1b3da2acfe5dc22c403b5794d6aedcebd1daaccaa9e82e54741fb0afd69c3cdf"
+        },
+        "cache/sparse_token_graph.py": {
+          "matches_current_source": true,
+          "path": "experiments/deepseek_v32_mfu/output/data/deepseek_full_graph_cold_profile_20261006_02/source/cache/sparse_token_graph.py",
+          "sha256": "e50861accecddd0bc863b4e7b1370cb49dcd62143bed93105797d03486ea6fd7"
         },
         "cache/sparse_token_pool.py": {
           "matches_current_source": true,
-          "path": "experiments/deepseek_v32_mfu/output/data/deepseek_gap_v10_a128_minimal_20261006_01/source/cache/sparse_token_pool.py",
-          "sha256": "b34c8cfbc43e58881bd14aa2af314ce7fe612cbbd906ca8573f4259d937e5650"
+          "path": "experiments/deepseek_v32_mfu/output/data/deepseek_full_graph_cold_profile_20261006_02/source/cache/sparse_token_pool.py",
+          "sha256": "56c9386c22d7f8b1833d9d9d420b69b0210dd472a1b24e0ff61e4753b9991ac2"
+        },
+        "experiments/deepseek_v32_mfu/src/full_graph_profile.py": {
+          "matches_current_source": true,
+          "path": "experiments/deepseek_v32_mfu/output/data/deepseek_full_graph_cold_profile_20261006_02/source/experiments/deepseek_v32_mfu/src/full_graph_profile.py",
+          "sha256": "6192332f4d1ffbfecd990dc00b3297d69aae97a05f20869f5880bc9afba4d9d6"
         },
         "models/deepseek_v32/attention.py": {
           "matches_current_source": true,
-          "path": "experiments/deepseek_v32_mfu/output/data/deepseek_gap_v10_a128_minimal_20261006_01/source/models/deepseek_v32/attention.py",
+          "path": "experiments/deepseek_v32_mfu/output/data/deepseek_full_graph_cold_profile_20261006_02/source/models/deepseek_v32/attention.py",
           "sha256": "492f57fd04340bd3b25c66ea087774e43cb3320ac49147db83a90705551fab64"
+        },
+        "models/deepseek_v32/cache/prefetch.py": {
+          "matches_current_source": true,
+          "path": "experiments/deepseek_v32_mfu/output/data/deepseek_full_graph_cold_profile_20261006_02/source/models/deepseek_v32/cache/prefetch.py",
+          "sha256": "0f2e77294c7024df9c4d0709b9fc99ccee38b2d44da82712565a68c924794f95"
+        },
+        "models/deepseek_v32/execution/extend_graph.py": {
+          "matches_current_source": true,
+          "path": "experiments/deepseek_v32_mfu/output/data/deepseek_full_graph_cold_profile_20261006_02/source/models/deepseek_v32/execution/extend_graph.py",
+          "sha256": "1da1b337dcfd44b4015bf29ec9942ff06a74f5d9dce8ace5e2a45e620c6ad5e6"
+        },
+        "models/deepseek_v32/model.py": {
+          "matches_current_source": true,
+          "path": "experiments/deepseek_v32_mfu/output/data/deepseek_full_graph_cold_profile_20261006_02/source/models/deepseek_v32/model.py",
+          "sha256": "165590c4d6753f5b2e730c1883b614c1a5601a64894e329d7192e2f5c7250f48"
         },
         "operators/common/csrc/kv_transfer.cu": {
           "matches_current_source": true,
-          "path": "experiments/deepseek_v32_mfu/output/data/deepseek_gap_v10_a128_minimal_20261006_01/source/operators/common/csrc/kv_transfer.cu",
+          "path": "experiments/deepseek_v32_mfu/output/data/deepseek_full_graph_cold_profile_20261006_02/source/operators/common/csrc/kv_transfer.cu",
           "sha256": "71821370997ee6afb92b0aa0cc7da4c813d17e407b621e2b29aeb343747e525b"
         },
         "operators/deepseek_v32/attention/device_only/mla.py": {
           "matches_current_source": true,
-          "path": "experiments/deepseek_v32_mfu/output/data/deepseek_gap_v10_a128_minimal_20261006_01/source/operators/deepseek_v32/attention/device_only/mla.py",
+          "path": "experiments/deepseek_v32_mfu/output/data/deepseek_full_graph_cold_profile_20261006_02/source/operators/deepseek_v32/attention/device_only/mla.py",
           "sha256": "9075ad9955c9958110b220acf7d21e768142e19a3552154369af4cfe1ad3676c"
         },
         "operators/deepseek_v32/attention/offload/mla.py": {
           "matches_current_source": true,
-          "path": "experiments/deepseek_v32_mfu/output/data/deepseek_gap_v10_a128_minimal_20261006_01/source/operators/deepseek_v32/attention/offload/mla.py",
+          "path": "experiments/deepseek_v32_mfu/output/data/deepseek_full_graph_cold_profile_20261006_02/source/operators/deepseek_v32/attention/offload/mla.py",
           "sha256": "ef77dc5334139aac9cfdf0e58b1bc6d0004aec33bbeab3e3f5d8342b55e7dd56"
         },
         "operators/deepseek_v32/indexer/csrc/echo_cache.cuh": {
           "matches_current_source": true,
-          "path": "experiments/deepseek_v32_mfu/output/data/deepseek_gap_v10_a128_minimal_20261006_01/source/operators/deepseek_v32/indexer/csrc/echo_cache.cuh",
+          "path": "experiments/deepseek_v32_mfu/output/data/deepseek_full_graph_cold_profile_20261006_02/source/operators/deepseek_v32/indexer/csrc/echo_cache.cuh",
           "sha256": "409be4a062180a8c8e73c1fa783d3980cf3e9926bf53ef34ddbaefe46e2dcd12"
         },
         "operators/deepseek_v32/indexer/prefetch_hint.py": {
           "matches_current_source": true,
-          "path": "experiments/deepseek_v32_mfu/output/data/deepseek_gap_v10_a128_minimal_20261006_01/source/operators/deepseek_v32/indexer/prefetch_hint.py",
+          "path": "experiments/deepseek_v32_mfu/output/data/deepseek_full_graph_cold_profile_20261006_02/source/operators/deepseek_v32/indexer/prefetch_hint.py",
           "sha256": "0ba70bdc2daf4be2c385b60af69309974394ab8d237f9aaf5519fb9350b6a07c"
         },
         "operators/deepseek_v32/indexer/selection.py": {
           "matches_current_source": true,
-          "path": "experiments/deepseek_v32_mfu/output/data/deepseek_gap_v10_a128_minimal_20261006_01/source/operators/deepseek_v32/indexer/selection.py",
+          "path": "experiments/deepseek_v32_mfu/output/data/deepseek_full_graph_cold_profile_20261006_02/source/operators/deepseek_v32/indexer/selection.py",
           "sha256": "0e68ecb4e16e40e9dda1541693ce3e00e41ccd4a05ea2e708d04dd2545a4dcd8"
         }
       },
+      "graph_sources": {
+        "operator_calls": {
+          "path": "experiments/deepseek_v32_mfu/output/data/deepseek_full_graph_cold_profile_20261006_02/operator_calls.json",
+          "sha256": "ab78186e3d15b97c50c97ac7d3d85f9ba9240ca25933dd34249ff751fed2b54f"
+        },
+        "setup_captures": [
+          {
+            "path": "experiments/deepseek_v32_mfu/output/data/deepseek_full_graph_cold_profile_20261006_02/capture_1.sqlite",
+            "sha256": "3bc7d701228af4e3cd790e1f4c343792b0860fa5d3d96adba396be12e3ab83bd"
+          },
+          {
+            "path": "experiments/deepseek_v32_mfu/output/data/deepseek_full_graph_cold_profile_20261006_02/capture_3.sqlite",
+            "sha256": "a057549c360521b4fb26fd1da4556ee40178a9feac43c0c5c4e2032aa00fdd54"
+          },
+          {
+            "path": "experiments/deepseek_v32_mfu/output/data/deepseek_full_graph_cold_profile_20261006_02/capture_6.sqlite",
+            "sha256": "7425575d569667cac58c64a2ee58010eb3c594d1c928437d0296dcb04e470a01"
+          },
+          {
+            "path": "experiments/deepseek_v32_mfu/output/data/deepseek_full_graph_cold_profile_20261006_02/capture_9.sqlite",
+            "sha256": "e7f5ad30d4b8883fe7a9dfdfe64af3b35710c943fb06c4fa625baa314de7cac0"
+          },
+          {
+            "path": "experiments/deepseek_v32_mfu/output/data/deepseek_full_graph_cold_profile_20261006_02/capture_12.sqlite",
+            "sha256": "becad74b0e3cf579042a7f05551ffbc3787d7e4e3717b75651b72774506a42c7"
+          }
+        ]
+      },
       "hardware": {
-        "checked_at_utc": "2026-10-06T04:45:20.591961+00:00",
+        "checked_at_utc": "2026-10-06T12:15:27.584360+00:00",
         "command": [
           "nvidia-smi",
           "--id=3",
@@ -221,8 +210,8 @@
           "product_column": "H200 SXM\u00b9",
           "resolved_url": "https://www.nvidia.com/en-us/data-center/h200/",
           "response_bytes": 281108,
-          "response_sha256": "621e596bed86bcddc8e8dfdd967e615e1e14b74d99a4d3401a27c12c9f00a937",
-          "retrieved_at_utc": "2026-10-06T04:45:21.241927+00:00",
+          "response_sha256": "d8eb4538c57a706bb559f269b94415e9430c9c7b09cf9446f0836ea14fcf7d3f",
+          "retrieved_at_utc": "2026-10-06T12:15:28.364404+00:00",
           "selected_rows": {
             "BFLOAT16 Tensor Core": {
               "label": "BFLOAT16 Tensor Core\u00b2",
@@ -376,22 +365,23 @@
       },
       "kind": "complete_model",
       "result": {
-        "path": "experiments/deepseek_v32_mfu/output/data/deepseek_gap_v10_a128_minimal_20261006_01/result.json",
-        "sha256": "00656cffb77dd95f7cd9710f7350d4a0ca8676b99f2fa71095013f60d37de885"
+        "path": "experiments/deepseek_v32_mfu/output/data/deepseek_full_graph_cold_profile_20261006_02/result.json",
+        "sha256": "58eaa0111841f0527499577900868b84beffcdc5fa162a1ffbbe2bcf9ef1a017"
       },
-      "run_id": "deepseek_gap_v10_a128_minimal_20261006_01",
-      "runtime_identity_limit": "Inherits V10: resident mask live JIT/CUBIN was not separately archived.",
+      "run_id": "deepseek_full_graph_cold_profile_20261006_02",
+      "runtime_identity_limit": "Execution sources and native identity are inherited from the accepted profile and its validation receipt; individual live JIT/CUBIN artifacts are not separately proven by this analyzer.",
       "sources_manifest": {
-        "path": "experiments/deepseek_v32_mfu/output/data/deepseek_gap_v10_a128_minimal_20261006_01/sources.json",
-        "sha256": "d1b56b7e4ec648b7399a0f6a5b64fcecff5244e8071d403b163046b5fffae1ce"
+        "path": "experiments/deepseek_v32_mfu/output/data/deepseek_full_graph_cold_profile_20261006_02/sources.json",
+        "sha256": "064713e1b09058c147f6992ed849d323976cb791a38d2f534d6f04222066e836"
       },
       "validation_receipt": {
-        "receipt_path": "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_gap_v10_a128_check_20261006_01/receipt.json",
-        "receipt_sha256": "48e47ed8d1e030055a17ff1a5df4f344276b2b7509891af13be67408f2681f46"
+        "receipt_path": "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_full_graph_cold_check_20261006_02/receipt.json",
+        "receipt_sha256": "889279f715a38d4e45833edadfcaeb4d764c426e15224313594bf6608bfa32a6"
       },
       "workload": {
         "chunk_size": 1024,
         "compute_graphs": true,
+        "extend_graph": true,
         "extend_residency": "cold",
         "extend_tokens": 128,
         "num_layers": 3,
@@ -401,9 +391,89 @@
       }
     }
   ],
+  "analysis_sources": {
+    "evaluation/validation.py": {
+      "path": "experiments/cache_manager_performance/output/data/cache_full_graph_transition_20261006_03/analysis_sources/evaluation/validation.py",
+      "sha256": "769add375a8b3b64fe0c391c1a3067f2304c4727f1d4af199b9f5a5480ca2b74",
+      "bytes": 4803
+    },
+    "experiments/cache_manager_performance/src/analyze.py": {
+      "path": "experiments/cache_manager_performance/output/data/cache_full_graph_transition_20261006_03/analysis_sources/experiments/cache_manager_performance/src/analyze.py",
+      "sha256": "4f6f7e093c2d1bd6daaed204b3f4c06118a9988598d29308d63bd425f159a04a",
+      "bytes": 17972
+    },
+    "experiments/cache_manager_performance/src/transition.py": {
+      "path": "experiments/cache_manager_performance/output/data/cache_full_graph_transition_20261006_03/analysis_sources/experiments/cache_manager_performance/src/transition.py",
+      "sha256": "756357a607f1532223c0fb7cb0fa428c8690a6e4eac6057c1e0d75564af9a4be",
+      "bytes": 24566
+    },
+    "experiments/cache_manager_performance/src/transition_metrics.py": {
+      "path": "experiments/cache_manager_performance/output/data/cache_full_graph_transition_20261006_03/analysis_sources/experiments/cache_manager_performance/src/transition_metrics.py",
+      "sha256": "2e66cb7400554d850fcd0a4da5248354d1e25b522919edd4bb5b5829feb09619",
+      "bytes": 26063
+    },
+    "experiments/cache_manager_performance/src/transition_report.py": {
+      "path": "experiments/cache_manager_performance/output/data/cache_full_graph_transition_20261006_03/analysis_sources/experiments/cache_manager_performance/src/transition_report.py",
+      "sha256": "1b9c90f110aa4e1f6c053616f33581f0a5bf58f7b35c36317fc65ffa7ca1b26c",
+      "bytes": 11286
+    },
+    "experiments/deepseek_v32_mfu/src/analyze_nsys.py": {
+      "path": "experiments/cache_manager_performance/output/data/cache_full_graph_transition_20261006_03/analysis_sources/experiments/deepseek_v32_mfu/src/analyze_nsys.py",
+      "sha256": "fd1277d1be4e164ff99027ffe4f7a37dbec272d987ff39c0074b71b908f45089",
+      "bytes": 26035
+    },
+    "experiments/deepseek_v32_mfu/src/full_graph_profile.py": {
+      "path": "experiments/cache_manager_performance/output/data/cache_full_graph_transition_20261006_03/analysis_sources/experiments/deepseek_v32_mfu/src/full_graph_profile.py",
+      "sha256": "6192332f4d1ffbfecd990dc00b3297d69aae97a05f20869f5880bc9afba4d9d6",
+      "bytes": 7291
+    },
+    "experiments/deepseek_v32_mfu/src/launch_gap.py": {
+      "path": "experiments/cache_manager_performance/output/data/cache_full_graph_transition_20261006_03/analysis_sources/experiments/deepseek_v32_mfu/src/launch_gap.py",
+      "sha256": "a8f95f34f7108e85eba51a43eb22372a696cc8986e3399d815acf2e7521a25dc",
+      "bytes": 31328
+    },
+    "experiments/deepseek_v32_mfu/src/operator_report.py": {
+      "path": "experiments/cache_manager_performance/output/data/cache_full_graph_transition_20261006_03/analysis_sources/experiments/deepseek_v32_mfu/src/operator_report.py",
+      "sha256": "b9e938616d41cbf80d15b14ffac5b8e149c489fbd9a1494330ab1c57a22e10b9",
+      "bytes": 19971
+    },
+    "experiments/deepseek_v32_mfu/src/timeline.py": {
+      "path": "experiments/cache_manager_performance/output/data/cache_full_graph_transition_20261006_03/analysis_sources/experiments/deepseek_v32_mfu/src/timeline.py",
+      "sha256": "898d09d79c5443b98b9c947f7b0e5d89804854519eacf743bf558cca243a8371",
+      "bytes": 39418
+    },
+    "experiments/deepseek_v32_motivation/src/graph_attribution.py": {
+      "path": "experiments/cache_manager_performance/output/data/cache_full_graph_transition_20261006_03/analysis_sources/experiments/deepseek_v32_motivation/src/graph_attribution.py",
+      "sha256": "475647c4bf4a93d0c1f301cd8bd0e60d87dd8229603f7752e9d746fe80b94578",
+      "bytes": 6423
+    },
+    "experiments/deepseek_v32_motivation/src/graph_instrumentation.py": {
+      "path": "experiments/cache_manager_performance/output/data/cache_full_graph_transition_20261006_03/analysis_sources/experiments/deepseek_v32_motivation/src/graph_instrumentation.py",
+      "sha256": "0d55238bc3c8ae4b84c9c0495c758066b81e16c24c3d53987ee473419c03f71e",
+      "bytes": 12951
+    }
+  },
+  "notes": [
+    "Read-only analysis of intrusive NSYS samples; profiler overhead remains.",
+    "CPU submission, GPU service, actual IO and idle are separate overlapping views; do not add them.",
+    "The measured interval starts at GPU exact top-k completion and ends at the first real MLA kernel start; indexer, top-k and MLA computation are outside it.",
+    "Independent replay executes the real MLA wrapper and validates its output against resident replay; complete-model captures remain a separate source kind.",
+    "GPU idle is observed inactivity, not proven Python, operating-system, or hardware latency.",
+    "CPU API scopes preserve launch attribution; later CPU work overlapping a GPU gap is not its cause.",
+    "Only ordinary persistent extend is covered; no GR transient candidate or split-query consumer."
+  ],
+  "schema": "cache-manager-model-transition-provenance-v3",
+  "artifact_path_base": "repository root; absolute paths for external numerical acceptance evidence",
   "summary": {
-    "bytes": 1599771,
-    "path": "experiments/cache_manager_performance/output/data/cache_attention_transition_model_20261006_02/summary.json",
-    "sha256": "07f7e55d2d0cc7facff9108bbfab02bf755436dbfaea639c86ab4f36ac663b07"
+    "path": "experiments/cache_manager_performance/output/data/cache_full_graph_transition_20261006_03/summary.json",
+    "sha256": "8386ecba2538e7d6e229df0768123b014dbeefa43b39d0f42f07d0b7c6b9d015",
+    "bytes": 664466
+  },
+  "profile_run_id": "deepseek_full_graph_cold_profile_20261006_02",
+  "new_gpu_run": false,
+  "independent_audit": {
+    "path": "experiments/cache_manager_performance/output/data/cache_full_graph_transition_20261006_03/independent_validation/transition_audit_03.json",
+    "sha256": "35f1a63f41d758c7f033e215f1318f2e0b8cc3434136461c349c7c54e29c1df5",
+    "bytes": 12348
   }
 }

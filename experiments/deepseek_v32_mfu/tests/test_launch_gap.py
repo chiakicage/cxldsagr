@@ -19,6 +19,7 @@ from experiments.deepseek_v32_mfu.src.timeline import (
     draw,
     extract,
     select_forward_activities,
+    select_forward_apis,
     select_layer,
 )
 
@@ -31,6 +32,20 @@ def activity(start, end, *, stage="q_a_proj", kind="kernel", name="gemm"):
         "name": name,
         "scope": {"stage": stage},
     }
+
+
+def test_forward_api_selection_excludes_unattributed_warmup_but_keeps_measured_launch():
+    boundary = {"measured_start_ns": 100, "measured_end_ns": 200}
+    warmup = {"start": 1, "end": 2, "name": "cudaGraphLaunch", "scope": None}
+    measured = {"start": 110, "end": 120, "name": "cudaGraphLaunch", "scope": {"id": 1}}
+    assert select_forward_apis([warmup, measured], boundary) == [measured]
+    for broken in (
+        {**measured, "scope": None},
+        {**measured, "start": 99},
+        {**measured, "end": 201},
+    ):
+        with pytest.raises(ValueError, match="fully inside an attributed forward"):
+            select_forward_apis([warmup, broken], boundary)
 
 
 def test_gap_includes_control_and_idle_but_keeps_compute_overlapped_with_io():
@@ -49,17 +64,26 @@ def test_gap_includes_control_and_idle_but_keeps_compute_overlapped_with_io():
     assert not result["conservative_gate_pass"]
 
 
-def test_fused_compute_io_produces_bounds_without_assuming_an_io_fraction():
+def test_fused_compute_io_remains_productive_in_one_definite_ratio():
     rows = [
         activity(10, 40),
         activity(30, 80, name="sm90_fp8_mqa_logits_fuse_prefetch"),
         activity(75, 90, kind="memcpy", name="Device-to-Host"),
     ]
     result = summarize_window(rows, 0, 100)
-    # Gap [0,10]+[90,100]; known IO-only [80,90]; potentially IO [40,90].
+    # Gap [0,10]+[90,100]; standalone IO-only [80,90]. Fused [30,80] stays productive.
+    assert result["gap_no_io_percent"] == pytest.approx(100 * 20 / 90)
     assert result["gap_no_io_percent_lower_bound"] == pytest.approx(100 * 20 / 90)
-    assert result["gap_no_io_percent_upper_bound"] == pytest.approx(100 * 20 / 50)
+    assert result["gap_no_io_percent_upper_bound"] == pytest.approx(100 * 20 / 90)
     assert result["fused_io_separately_identifiable"] is False
+
+
+def test_fused_work_can_pass_without_removing_it_from_the_denominator():
+    rows = [activity(0, 96, name="sm90_fp8_mqa_logits_fuse_prefetch")]
+    window = summarize_window(rows, 0, 100)
+    assert window["gap_no_io_percent"] == 4
+    assert window["non_io_window_ms"] == pytest.approx(100 / 1e6)
+    assert window["gap_below_threshold"]
 
 
 def test_control_overlapping_compute_does_not_double_count_gap():
@@ -514,7 +538,7 @@ def test_unresolved_gathers_cannot_certify_an_otherwise_passing_gate(counts):
     assert summarize_window(rows, 20, 100)["gate_certifiable"]
 
 
-def test_positive_multiple_fused_calls_keep_their_conservative_bounds():
+def test_positive_multiple_fused_calls_are_wholly_productive():
     rows = [activity(0, 99), transport(10, 11, family="fused"), transport(11, 12, family="fused")]
     launch_gap.annotate_actual_io(
         rows, [transport_counts(prefetched=1)], "echo", "prefill_annotated"

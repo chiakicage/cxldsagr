@@ -31,6 +31,7 @@ from experiments.deepseek_v32_mfu.src.run_contract import (
     execution_identity,
     receipt_binding,
 )
+from models.deepseek_v32.execution.extend_graph import EXTEND_GRAPH_POLICY_REVISION
 from models.deepseek_v32.model import DeepSeekEchoModel
 from models.deepseek_v32.nonmatrix import rms_norm
 from operators.deepseek_v32.indexer.echo import build_info
@@ -54,10 +55,37 @@ def write_json(path, value):
     path.write_text(json.dumps(value, indent=2, ensure_ascii=False, allow_nan=False) + "\n")
 
 
+def differing_identity_paths(before, after, path="backend_provenance"):
+    """Describe exact identity differences without printing environment values."""
+    if type(before) is not type(after):
+        return [path]
+    if isinstance(before, dict):
+        return [
+            item
+            for key in sorted(before.keys() | after.keys())
+            for item in (
+                differing_identity_paths(before[key], after[key], f"{path}.{key}")
+                if key in before and key in after
+                else [f"{path}.{key}"]
+            )
+        ]
+    if isinstance(before, list):
+        if len(before) != len(after):
+            return [path]
+        return [
+            item
+            for index, (left, right) in enumerate(zip(before, after, strict=True))
+            for item in differing_identity_paths(left, right, f"{path}[{index}]")
+        ]
+    return [] if before == after else [path]
+
+
 def sources():
     result = source_manifest()
     for name in (
         "profile_layers.py",
+        "extend_graph_validation.py",
+        "full_graph_profile.py",
         "operator_instrumentation.py",
         "operator_flops.py",
         "profile_hardware.py",
@@ -135,7 +163,8 @@ def annotate(model, ids, mode, phase, nsys):
     if nsys:
         torch.cuda.cudart().cudaProfilerStart()
     operators = InstrumentOperators(model, scopes)
-    bank = getattr(model, "_compute_graphs", None)
+    full_graph = getattr(model, "_extend_graph", None) if phase == "extend_annotated" else None
+    bank = getattr(model, "_compute_graphs", None) if full_graph is None else None
     if bank is not None:
         from experiments.deepseek_v32_motivation.src.graph_instrumentation import (
             instrument_graph_queries,
@@ -145,9 +174,9 @@ def annotate(model, ids, mode, phase, nsys):
     else:
         query_context = nullcontext()
     with operators, query_context, ExitStack() as hooks:
-        if bank is None:
+        if bank is None and full_graph is None:
             hooks.enter_context(patch.object(model.blocks[-1], "forward", remember))
-        else:
+        elif bank is not None:
             original_graph = bank.forward_block
 
             def remember_graph(layer, *args, **kwargs):
@@ -163,6 +192,8 @@ def annotate(model, ids, mode, phase, nsys):
         wall = (time.perf_counter() - begin) * 1000
     if nsys:
         torch.cuda.cudart().cudaProfilerStop()
+    if full_graph is not None:
+        block_outputs = [(full_graph.last_hidden, full_graph.last_residual)]
     normalized = None
     if block_outputs:
         normalized = torch.cat(
@@ -173,8 +204,12 @@ def annotate(model, ids, mode, phase, nsys):
                 for hidden, residual in block_outputs
             ]
         ).cpu()
-    capture = getattr(model, "_profile_graph_capture", None)
-    if capture is not None:
+    for capture in (
+        getattr(model, "_profile_graph_capture", None),
+        getattr(model, "_profile_full_graph_capture", None),
+    ):
+        if capture is None:
+            continue
         expanded = []
         next_id = len(scopes.calls)
         for call in scopes.calls:
@@ -194,6 +229,9 @@ def cache_metrics(model, snapshot, prefix_metrics):
         "cache_resource_plan": getattr(model, "_cache_resource_plan", None),
         "prefix_cache_per_layer": prefix_metrics,
         "extend_cache_per_layer": [block.cache.metrics() for block in model.blocks],
+        "extend_graph_runtime": getattr(model, "_extend_graph", None).describe()
+        if getattr(model, "_extend_graph", None) is not None
+        else None,
     }
 
 
@@ -201,6 +239,32 @@ def restore_extend_prefix(model, snapshot, args):
     model.restore_prefix(snapshot)
     if args.extend_residency == "cold" and model.offload:
         model.evict_prefix_residency()
+
+
+def prepare_extend_graph(model, ids, args, *, return_hidden=False, capture_scope=None):
+    """Prepare after restoration and before any measured forward scope."""
+    if not getattr(args, "extend_graph", False):
+        return None
+    return model.prepare_extend_graph(ids, return_hidden=return_hidden, capture_scope=capture_scope)
+
+
+def profile_extend_graph(model, ids, args, result, method, *, record_operators=False):
+    """Record graph construction separately from the measured extend replay."""
+    if not getattr(args, "extend_graph", False):
+        return None
+    from experiments.deepseek_v32_mfu.src.full_graph_profile import FullExtendGraphCapture
+    from experiments.deepseek_v32_mfu.src.gap_profile import profiler_capture
+
+    with profiler_capture():
+        capture = FullExtendGraphCapture(method, record_operators=record_operators)
+        with InstrumentOperators(model, capture) if record_operators else nullcontext():
+            graph = prepare_extend_graph(model, ids, args, capture_scope=capture)
+        template = capture.finalize(graph)
+    model._profile_full_graph_capture = capture
+    result["nsys_capture_order"].append(f"{method}/extend_graph_setup")
+    result.setdefault("full_extend_graph_templates", []).append(template)
+    write_json(args.output / "full_graph_templates.json", result["full_extend_graph_templates"])
+    return capture
 
 
 def run_benchmark(model, ids, args, result):
@@ -213,6 +277,8 @@ def run_benchmark(model, ids, args, result):
             prefix_times.append(elapsed)
         prefix_metrics = [block.cache.metrics() for block in model.blocks]
         snapshot = model.snapshot_prefix()
+        restore_extend_prefix(model, snapshot, args)
+        prepare_extend_graph(model, ids[args.prefix :], args)
         extend_times = []
         for _ in range(args.repeats):
             restore_extend_prefix(model, snapshot, args)
@@ -234,9 +300,13 @@ def run_check(model, ids, args, result):
         select_cache_method(model, mode)
         prefixes[mode] = model.forward(ids[: args.prefix]).cpu()
         snapshot = model.snapshot_prefix()
+        if getattr(args, "extend_graph", False):
+            _check_extend_graph(model, ids[args.prefix :], snapshot, args, result, mode)
         restore_extend_prefix(model, snapshot, args)
+        prepare_extend_graph(model, ids[args.prefix :], args)
         default = model.forward(ids[args.prefix :]).cpu()
         restore_extend_prefix(model, snapshot, args)
+        prepare_extend_graph(model, ids[args.prefix :], args, return_hidden=True)
         control = {
             key: value.cpu()
             for key, value in model.forward(ids[args.prefix :], return_hidden=True).items()
@@ -262,8 +332,70 @@ def run_check(model, ids, args, result):
         )
 
 
+def _check_extend_graph(model, ids, snapshot, args, result, mode):
+    from experiments.deepseek_v32_mfu.src.extend_graph_validation import (
+        cache_state,
+        compare_cache_state,
+    )
+
+    checks = {}
+    restore_extend_prefix(model, snapshot, args)
+    expected = {
+        key: value.cpu()
+        for key, value in model.forward(ids, return_hidden=True, use_extend_graph=False).items()
+    }
+    expected_cache = cache_state(model)
+    restore_extend_prefix(model, snapshot, args)
+    prepare_extend_graph(model, ids, args)
+    default = model.forward(ids).cpu()
+    checks["default_graph_logits"] = comparison(default, expected["logits"])
+    checks["default_graph_cache"] = compare_cache_state(cache_state(model), expected_cache)
+    restore_extend_prefix(model, snapshot, args)
+    graph = prepare_extend_graph(model, ids, args, return_hidden=True)
+    for repetition in range(2):
+        restore_extend_prefix(model, snapshot, args)
+        actual = {key: value.cpu() for key, value in model.forward(ids, return_hidden=True).items()}
+        for key in ("hidden", "logits"):
+            checks[f"replay_{repetition}_{key}"] = comparison(actual[key], expected[key])
+        checks[f"replay_{repetition}_cache"] = compare_cache_state(
+            cache_state(model), expected_cache
+        )
+    changed = list(ids)
+    changed[-1] = (int(changed[-1]) + 1) % model.cfg.vocab_size
+    restore_extend_prefix(model, snapshot, args)
+    changed_expected = {
+        key: value.cpu()
+        for key, value in model.forward(changed, return_hidden=True, use_extend_graph=False).items()
+    }
+    changed_cache = cache_state(model)
+    restore_extend_prefix(model, snapshot, args)
+    changed_actual = {
+        key: value.cpu() for key, value in model.forward(changed, return_hidden=True).items()
+    }
+    for key in ("hidden", "logits"):
+        checks[f"changed_input_{key}"] = comparison(changed_actual[key], changed_expected[key])
+    checks["changed_input_cache"] = compare_cache_state(cache_state(model), changed_cache)
+    torch.save(
+        {
+            "baseline": expected,
+            "changed_baseline": changed_expected,
+            "changed_graph": changed_actual,
+        },
+        args.output / f"{mode}_extend_graph_check.pt",
+    )
+    result.setdefault("extend_graph_checks", {})[mode] = {
+        "checks": checks,
+        "baseline_cache": expected_cache,
+        "changed_baseline_cache": changed_cache,
+        "runtime": graph.describe(),
+        "baseline": "same model.forward(use_extend_graph=False), same restored prefix and residency",
+    }
+
+
 def run_profile(model, ids, args, result, receipt):
     calls = []
+    result["nsys_capture_order"] = ["graph_setup"] if args.compute_graphs else []
+    result["profile_detail"] = "matrix_api_node_ownership"
     result["correctness"].update(receipt["checks"]["comparisons"])
     for mode in METHODS:
         control = torch.load(
@@ -278,6 +410,7 @@ def run_profile(model, ids, args, result, receipt):
         annotated_prefix, _, records, prefix_wall = annotate(
             model, ids[: args.prefix], mode, "prefill_annotated", args.nsys
         )
+        result["nsys_capture_order"].append(f"{mode}/prefill_annotated")
         calls.extend(records)
         result["correctness"][mode + "_profile_prefix_logits"] = comparison(
             annotated_prefix, prefix_control
@@ -285,9 +418,11 @@ def run_profile(model, ids, args, result, receipt):
         prefix_metrics = [block.cache.metrics() for block in model.blocks]
         snapshot = model.snapshot_prefix()
         restore_extend_prefix(model, snapshot, args)
+        profile_extend_graph(model, ids[args.prefix :], args, result, mode, record_operators=True)
         annotated, hidden, records, extend_wall = annotate(
             model, ids[args.prefix :], mode, "extend_annotated", args.nsys
         )
+        result["nsys_capture_order"].append(f"{mode}/extend_annotated")
         calls.extend(records)
         for key, actual in (("logits", annotated), ("hidden", hidden)):
             result["correctness"][mode + "_profile_extend_" + key] = comparison(
@@ -334,7 +469,12 @@ def capture_kernel_inputs(model, ids, snapshot, args):
 
         block.attention.capture_hook = capture
     try:
-        model.forward(ids)
+        if getattr(args, "extend_graph", False):
+            # Saved operator inputs need the real Python hooks to run. This
+            # explicit diagnostic is outside every measured profiler capture.
+            model.forward(ids, use_extend_graph=False)
+        else:
+            model.forward(ids)
     finally:
         for block in model.blocks:
             block.attention.capture_hook = None
@@ -409,6 +549,7 @@ def parse_run_args(mode=None, argv=None):
     parser.add_argument("--chunk-size", type=int, default=1024)
     parser.add_argument("--extend-residency", choices=("cold", "warm"), default="cold")
     parser.add_argument("--compute-graphs", action=argparse.BooleanOptionalAction, default=True)
+    parser.add_argument("--extend-graph", action=argparse.BooleanOptionalAction, default=False)
     parser.add_argument("--warmups", type=int, default=1)
     parser.add_argument("--repeats", type=int, default=5)
     parser.add_argument("--prefill-repeats", type=int, default=3)
@@ -428,6 +569,8 @@ def parse_run_args(mode=None, argv=None):
     mode = mode or args.mode
     if args.extend_chunk_size is None:
         args.extend_chunk_size = args.extend
+    if args.extend_graph and args.extend_chunk_size != args.extend:
+        parser.error("full extend graph requires one complete extend chunk")
     if (
         mode == "profile"
         and args.compute_graphs
@@ -477,6 +620,8 @@ def parse_run_args(mode=None, argv=None):
 
 def run(mode=None, argv=None, *, profile_runner=None):
     mode, args = parse_run_args(mode, argv)
+    if mode == "profile" and args.extend_graph and not args.nsys:
+        raise ValueError("full extend graph operator profiling requires --nsys node tracing")
     args.output.mkdir(parents=True, exist_ok=False)
     torch.set_num_threads(8)
     torch.manual_seed(args.seed)
@@ -533,6 +678,7 @@ def run(mode=None, argv=None, *, profile_runner=None):
     )
 
     backend_identity = collect_backend_provenance()
+    write_json(args.output / "backend_provenance_before.json", backend_identity)
     ids = request["input_ids"]
     result = {
         "schema_version": 3,
@@ -555,6 +701,8 @@ def run(mode=None, argv=None, *, profile_runner=None):
         "methods": list(METHODS),
         "extend_residency": args.extend_residency,
         "compute_graphs": args.compute_graphs,
+        "extend_graph": args.extend_graph,
+        "extend_graph_policy_revision": EXTEND_GRAPH_POLICY_REVISION if args.extend_graph else None,
         "pool_scope": "model_device_per_layer",
         "sparse_pool_tokens": args.slots,
         "host_arena_tokens": args.host_arena_tokens or (args.prefix + args.extend + 63) // 64 * 64,
@@ -641,6 +789,7 @@ def run(mode=None, argv=None, *, profile_runner=None):
             model.forward(ids[: args.prefix])
             snapshot = model.snapshot_prefix()
             restore_extend_prefix(model, snapshot, args)
+            prepare_extend_graph(model, ids[args.prefix :], args)
             model.forward(ids[args.prefix :])
             del snapshot
     result["execution_runtime_artifacts"] = collect_flashinfer_runtime_artifacts(
@@ -667,8 +816,12 @@ def run(mode=None, argv=None, *, profile_runner=None):
         raise RuntimeError("Checkpoint identity changed during execution")
     if sources() != manifest:
         raise RuntimeError("Implementation changed during measurement")
-    if collect_backend_provenance() != backend_identity:
-        raise RuntimeError("Official backend libraries changed during measurement")
+    backend_after = collect_backend_provenance()
+    write_json(args.output / "backend_provenance_after.json", backend_after)
+    if backend_after != backend_identity:
+        differences = differing_identity_paths(backend_identity, backend_after)
+        write_json(args.output / "backend_provenance_differences.json", differences)
+        raise RuntimeError(f"Official backend libraries changed during measurement: {differences}")
     result["flashinfer_runtime_artifacts"] = collect_flashinfer_runtime_artifacts(
         require_local_native=True
     )
@@ -684,7 +837,11 @@ def run(mode=None, argv=None, *, profile_runner=None):
             args.output / "receipt.json",
             kind=RECEIPT_KIND,
             identity=result["execution_identity"],
-            checks={"passed": True, "comparisons": result["correctness"]},
+            checks={
+                "passed": True,
+                "comparisons": result["correctness"],
+                **({"extend_graph": result["extend_graph_checks"]} if args.extend_graph else {}),
+            },
             artifacts={path.name: path for path in args.output.iterdir() if path.is_file()},
         )
     print(

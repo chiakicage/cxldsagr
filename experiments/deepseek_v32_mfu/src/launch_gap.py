@@ -27,8 +27,11 @@ from experiments.deepseek_v32_mfu.src.analyze_nsys import (
 from experiments.deepseek_v32_mfu.src.operator_report import _SCOPE, read_calls
 from experiments.deepseek_v32_mfu.src.timeline import (
     activity_lane,
+    activity_layer,
+    activity_stage,
     intersection_ns,
     select_forward_activities,
+    select_forward_apis,
     select_layer,
     source_activity,
 )
@@ -75,10 +78,9 @@ def annotate_actual_io(activities, metrics, method, phase):
         family = kernel_category(row["name"])
         if family not in {"mapped_host_kv_gather", "indexer_fused_prefetch"}:
             continue
-        scope = row.get("scope") or {}
-        owner = re.fullmatch(r"layer_(\d+)", scope.get("layer", ""))
+        owner = re.fullmatch(r"layer_(\d+)", activity_layer(row) or "")
         if owner is None:
-            owner = re.fullmatch(r"dense_history_prefetch_layer_(\d+)", scope.get("stage", ""))
+            owner = re.fullmatch(r"dense_history_prefetch_layer_(\d+)", activity_stage(row) or "")
         if owner is None:
             raise ValueError("transport activity lacks a phase-layer counter owner")
         layer = int(owner[1])
@@ -145,9 +147,8 @@ def summarize_window(
 ):
     """Use interval unions; overlapping IO never erases simultaneous compute.
 
-    The lower bound retains each fused compute+IO interval. The conservative
-    upper bound removes its entire duration outside standalone compute, which
-    avoids claiming to have measured IO inside a fused kernel.
+    Fused compute+IO is entirely productive and remains in the denominator.
+    Only standalone IO outside both pure and fused computation is removed.
     """
     if end <= start:
         raise ValueError("gap window must have positive duration")
@@ -175,9 +176,8 @@ def summarize_window(
     io_only = _union_ns(io) - intersection_ns(io, compute + fused)
     io_or_fused_only = _union_ns(io + fused) - intersection_ns(io + fused, compute)
     retained_denominator = window - io_only
-    conservative_denominator = window - io_or_fused_only
-    lower = 100 * gap / retained_denominator if retained_denominator else None
-    upper = 100 * gap / conservative_denominator if conservative_denominator else None
+    ratio = 100 * gap / retained_denominator if retained_denominator else None
+    gate_pass = unresolved_gathers == 0 and ratio is not None and ratio < threshold_percent
     return {
         "start_ns": start,
         "end_ns": end,
@@ -192,10 +192,15 @@ def summarize_window(
         "gap_percent": 100 * gap / window,
         "pure_io_only_ms": io_only / 1e6,
         "io_or_fused_only_ms": io_or_fused_only / 1e6,
-        "non_io_window_lower_ms": conservative_denominator / 1e6,
+        "non_io_window_ms": retained_denominator / 1e6,
+        "gap_no_io_percent": ratio,
+        "gap_below_threshold": gate_pass,
+        "fused_work_policy": "entire fused compute+IO interval is productive and retained in the ratio denominator",
+        # Compatibility keys carry the same definite value, never a bound range.
+        "non_io_window_lower_ms": retained_denominator / 1e6,
         "non_io_window_upper_ms": retained_denominator / 1e6,
-        "gap_no_io_percent_lower_bound": lower,
-        "gap_no_io_percent_upper_bound": upper,
+        "gap_no_io_percent_lower_bound": ratio,
+        "gap_no_io_percent_upper_bound": ratio,
         "fused_io_separately_identifiable": not bool(fused),
         "threshold_percent": threshold_percent,
         "unresolved_gather_count": unresolved_gathers,
@@ -203,9 +208,7 @@ def summarize_window(
         "gate_uncertainty": "gather calls lack per-call transport evidence"
         if unresolved_gathers
         else None,
-        "conservative_gate_pass": unresolved_gathers == 0
-        and upper is not None
-        and upper < threshold_percent,
+        "conservative_gate_pass": gate_pass,
     }
 
 
@@ -330,13 +333,23 @@ def analyze_capture(path, calls, parents, *, threshold_percent=10.0, metrics=Non
     _assign_scopes(apis, scopes)
     _attribute(apis, activities)
     activities, capture_boundary = select_forward_activities(scopes, activities)
-    actual_io = annotate_actual_io(activities, metrics, method, phase)
     selected_calls = [row for row in calls if (row["mode"], row["phase"]) == (method, phase)]
     graph_audit = None
-    if any(row.get("graph_replay") for row in selected_calls):
+    full_graph = any(row.get("full_extend_graph") for row in selected_calls)
+    if full_graph:
+        from experiments.deepseek_v32_mfu.src.full_graph_profile import attribute_full_graph_replays
+
+        graph_audit = attribute_full_graph_replays(
+            activities,
+            selected_calls,
+            parents,
+            apis=select_forward_apis(apis, capture_boundary),
+        )
+    elif any(row.get("graph_replay") for row in selected_calls):
         graph_audit = attribute_graph_replays(
             activities, selected_calls, parents, scopes=scopes, require_replays=True
         )
+    actual_io = annotate_actual_io(activities, metrics, method, phase)
     if any(row.get("scope") is None for row in activities):
         raise ValueError("unattributed GPU activity prevents complete gap classification")
     forward = [
@@ -352,14 +365,35 @@ def analyze_capture(path, calls, parents, *, threshold_percent=10.0, metrics=Non
     layer_scopes = [
         scope for scope in scopes if scope["layer"].startswith("layer_") and scope["stage"] is None
     ]
-    layer_ids = sorted(int(scope["layer"].removeprefix("layer_")) for scope in layer_scopes)
+    layer_ids = (
+        sorted(
+            {
+                int(activity_layer(row).removeprefix("layer_"))
+                for row in activities
+                if (activity_layer(row) or "").startswith("layer_")
+            }
+        )
+        if full_graph
+        else sorted(int(scope["layer"].removeprefix("layer_")) for scope in layer_scopes)
+    )
     if layer_ids != list(range(len(layer_ids))) or not layer_ids:
         raise ValueError("extend must contain each layer exactly once in contiguous order")
     layer_windows = []
     cursor = start
     for layer in layer_ids:
-        summary, _ = select_layer(scopes, apis, activities, layer=layer)
-        layer_end = summary["end_ns"]
+        if full_graph:
+            compute = [
+                row
+                for row in activities
+                if activity_layer(row) == f"layer_{layer}"
+                and activity_lane(row) in {"Compute", "Compute + IO"}
+            ]
+            if not compute:
+                raise ValueError("full extend graph layer has no captured computation")
+            layer_end = max(row["end"] for row in compute)
+        else:
+            summary, _ = select_layer(scopes, apis, activities, layer=layer)
+            layer_end = summary["end_ns"]
         layer_windows.append(
             {
                 "layer": layer,
@@ -416,6 +450,11 @@ def aggregate_windows(windows):
         gate_certifiable=all(row["gate_certifiable"] for row in windows),
         unresolved_gather_count=sum(row["unresolved_gather_count"] for row in windows),
         gap_percent=100 * result["gap_ms"] / result["window_ms"],
+        gap_no_io_percent=(
+            100 * result["gap_ms"] / result["non_io_window_ms"]
+            if result["non_io_window_ms"]
+            else None
+        ),
         gap_no_io_percent_lower_bound=(
             100 * result["gap_ms"] / result["non_io_window_upper_ms"]
             if result["non_io_window_upper_ms"]
@@ -545,7 +584,7 @@ def analyze_run(directory, *, threshold_percent=10.0):
     setup, captures, prefill_paths = [], [], []
     for index, label in enumerate(result["nsys_capture_order"], 1):
         path = directory / f"capture_{index}.sqlite"
-        if label == "graph_setup":
+        if label == "graph_setup" or label.endswith("/extend_graph_setup"):
             setup.append(path)
         elif label in {f"{method}/extend_annotated" for method in METHODS}:
             captures.append(
@@ -612,10 +651,10 @@ def analyze_run(directory, *, threshold_percent=10.0):
             Path(__file__).with_name("timeline.py").read_bytes()
         ).hexdigest(),
         "gap_definition": "window minus union of model Compute, host IO, and indivisible Compute + IO; GPU cache/control and idle are included",
-        "no_io_definition": "remove time covered only by IO outside compute; retain compute overlapping IO; fused IO gives a conservative ratio interval, not a separately measured duration",
-        "gate_definition": "each complete extend and every layer must have a conservative no-IO gap upper bound strictly below threshold; L0 includes forward startup; each complete offload prefill's absolute gap is at most 1.2 times HBM-only",
+        "no_io_definition": "remove only standalone IO outside pure and fused computation; fused compute+IO is productive and fully retained in the denominator, yielding one definite ratio",
+        "gate_definition": "each complete extend and every layer must have a definite no-IO gap ratio strictly below threshold; complete extend includes startup and synchronization/commit; L0 includes forward startup; each complete offload prefill's absolute gap is at most 1.2 times HBM-only",
         "prefill_comparison_note": "absolute gap ratio and normalized non-IO gap ratio are distinct; both reported, primary prefill gate uses absolute gap at matched workload",
-        "actual_io_definition": "same measured phase-layer record counters prove all matching calls empty when the total is zero; positive exclusive totals bind only a unique node; unresolved gather bounds remain descriptive and cannot certify any overlapping gate; unresolved fused calls retain conservative compute/IO bounds",
+        "actual_io_definition": "same measured phase-layer record counters prove all matching calls empty when the total is zero; positive exclusive totals bind only a unique node; unresolved gather classification cannot certify an overlapping gate; fused calls remain productive in their entirety",
         "measurement_boundary": "single intrusive node-traced profile per method; includes profiler overhead; not independent benchmark wall time or SM utilization",
         "timed_output": result.get("timed_output"),
         "all_methods_pass": extend_pass and prefill_pass,

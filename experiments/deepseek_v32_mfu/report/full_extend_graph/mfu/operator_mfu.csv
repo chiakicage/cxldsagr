@@ -1,0 +1,238 @@
+mode,phase,layer,stage,scope_count,metadata_call_count,metadata_call_count_matches,useful_flops,precision,dense_peak_tflops,kernel_mfu_percent,mfu_unavailable_reason,scope_host_union_ms,scope_host_duration_sum_ms,api_thread_union_ms,api_count,runtime_api_count,driver_api_count,kernel_launch_count,useful_tflops,kernel_count,kernel_ns,kernel_ms,memcpy_count,memcpy_ns,memcpy_ms,memset_count,memset_ns,memset_ms
+dense_prefetch,extend_annotated,all_layers,extend_graph_inputs,2,2,True,,,,,N/A (no matrix multiply),0.62934,0.62934,0.381605,3,3,0,0,,0,0,0.0,2,1824,0.001824,0,0,0.0
+dense_prefetch,extend_annotated,all_layers,extend_graph_replay_q_128,1,1,True,,,,,N/A (no matrix multiply),0.641328,0.641328,0.625042,1,1,0,1,,105,406303,0.406303,12,4152694,4.152694,0,0,0.0
+dense_prefetch,extend_annotated,all_layers,forward_misc,1,1,True,,,,,N/A (no matrix multiply),6.856182,6.856182,4.596188,17,17,0,0,,0,0,0.0,0,0,0.0,0,0,0.0
+dense_prefetch,extend_annotated,all_layers,index_k_proj,3,3,True,704643072,FP8,1979.0,0.8733814947053957,,0.0,0.0,0.0,0,0,0,1,17.28421978021978,9,40768,0.040768,0,0,0.0,0,0,0.0
+dense_prefetch,extend_annotated,all_layers,index_q_proj,3,3,True,9663676416,FP8,1979.0,13.935818699080066,,0.0,0.0,0.0,0,0,0,1,275.7898520547945,9,35040,0.03504,0,0,0.0,0,0,0.0
+dense_prefetch,extend_annotated,all_layers,index_weights_proj,3,3,True,352321536,FP32,67.0,11.986074006335935,,0.0,0.0,0.0,0,0,0,1,8.030669584245077,6,43872,0.043872,0,0,0.0,0,0,0.0
+dense_prefetch,extend_annotated,all_layers,indexer_qk,3,3,True,412722659328,FP8,1979.0,26.136910858766637,,0.0,0.0,0.0,0,0,0,1,517.2494658949918,12,797918,0.797918,0,0,0.0,0,0,0.0
+dense_prefetch,extend_annotated,all_layers,kv_a_proj,3,3,True,3170893824,FP8,1979.0,3.8605212869283214,,0.0,0.0,0.0,0,0,0,1,76.3997162683115,9,41504,0.041504,0,0,0.0,0,0,0.0
+dense_prefetch,extend_annotated,all_layers,lm_head,1,1,True,1853358080,BF16,989.5,0.4471859272786248,,0.0,0.0,0.0,0,0,0,1,4.424904750421992,1,418847,0.418847,0,0,0.0,1,1376,0.001376
+dense_prefetch,extend_annotated,all_layers,mla_qk_pv,3,3,True,219043332096,BF16,989.5,60.719550179427785,,0.0,0.0,0.0,0,0,0,1,600.819949025438,3,364574,0.364574,0,0,0.0,0,0,0.0
+dense_prefetch,extend_annotated,all_layers,mlp_down,3,3,True,101468602368,FP8,1979.0,31.343324626892226,,0.0,0.0,0.0,0,0,0,1,620.2843943661971,9,163584,0.163584,0,0,0.0,0,0,0.0
+dense_prefetch,extend_annotated,all_layers,mlp_gate,3,3,True,101468602368,FP8,1979.0,39.27134203251791,,0.0,0.0,0.0,0,0,0,1,777.1798588235295,9,130560,0.13056,0,0,0.0,0,0,0.0
+dense_prefetch,extend_annotated,all_layers,mlp_up,3,3,True,101468602368,FP8,1979.0,40.75987674705496,,0.0,0.0,0.0,0,0,0,1,806.6379608242178,6,125792,0.125792,0,0,0.0,0,0,0.0
+dense_prefetch,extend_annotated,all_layers,o_proj,3,3,True,90194313216,FP8,1979.0,30.245076896283347,,0.0,0.0,0.0,0,0,0,1,598.5500717774474,9,150688,0.150688,0,0,0.0,0,0,0.0
+dense_prefetch,extend_annotated,all_layers,q_a_proj,3,3,True,8455716864,FP8,1979.0,9.817835508129477,,0.0,0.0,0.0,0,0,0,1,194.29496470588236,9,43520,0.04352,0,0,0.0,0,0,0.0
+dense_prefetch,extend_annotated,all_layers,q_absorb,3,3,True,6442450944,BF16,989.5,21.417152948059893,,0.0,0.0,0.0,0,0,0,1,211.92272842105262,3,30400,0.0304,0,0,0.0,0,0,0.0
+dense_prefetch,extend_annotated,all_layers,q_b_proj,3,3,True,28991029248,FP8,1979.0,24.678794839071706,,0.0,0.0,0.0,0,0,0,1,488.3933498652291,9,59360,0.05936,0,0,0.0,0,0,0.0
+dense_prefetch,extend_annotated,all_layers,v_expand,3,3,True,6442450944,BF16,989.5,20.184816766524698,,0.0,0.0,0.0,0,0,0,1,199.7287619047619,3,32256,0.032256,0,0,0.0,0,0,0.0
+dense_prefetch,prefill_annotated,all_layers,attention_output,192,192,True,,,,,N/A (no matrix multiply),33.274339,33.274339,0.0,0,0,0,0,,0,0,0.0,0,0,0.0,0,0,0.0
+dense_prefetch,prefill_annotated,all_layers,attention_projection,192,192,True,,,,,N/A (no matrix multiply),158.256661,158.256661,0.0,0,0,0,0,,0,0,0.0,0,0,0.0,0,0,0.0
+dense_prefetch,prefill_annotated,all_layers,cache_write,192,192,True,,,,,N/A (no matrix multiply),39.524227,39.524227,4.218563,2493,2493,0,192,,192,901629,0.901629,192,5337527,5.337527,0,0,0.0
+dense_prefetch,prefill_annotated,all_layers,compute_graph_finish_layer_0_q_1024,64,64,True,,,,,N/A (no matrix multiply),2.632843,2.632843,2.241286,64,64,0,64,,128,2790429,2.790429,0,0,0.0,0,0,0.0
+dense_prefetch,prefill_annotated,all_layers,compute_graph_finish_layer_1_q_1024,64,64,True,,,,,N/A (no matrix multiply),2.593727,2.593727,2.206382,64,64,0,64,,128,2784571,2.784571,0,0,0.0,0,0,0.0
+dense_prefetch,prefill_annotated,all_layers,compute_graph_finish_layer_2_q_1024,64,64,True,,,,,N/A (no matrix multiply),2.542448,2.542448,2.165116,64,64,0,64,,128,2777141,2.777141,0,0,0.0,0,0,0.0
+dense_prefetch,prefill_annotated,all_layers,compute_graph_owned_writeback_source,192,192,True,,,,,N/A (no matrix multiply),7.426099,7.426099,2.495555,192,192,0,0,,0,0,0.0,192,273568,0.273568,0,0,0.0
+dense_prefetch,prefill_annotated,all_layers,compute_graph_projection_inputs,192,192,True,,,,,N/A (no matrix multiply),2.902995,2.902995,1.282865,192,192,0,64,,64,51711,0.051711,64,399039,0.399039,0,0,0.0
+dense_prefetch,prefill_annotated,all_layers,compute_graph_projection_layer_0_q_1024,64,64,True,,,,,N/A (no matrix multiply),5.66335,5.66335,5.286294,64,64,0,64,,1600,6243920,6.24392,0,0,0.0,0,0,0.0
+dense_prefetch,prefill_annotated,all_layers,compute_graph_projection_layer_1_q_1024,64,64,True,,,,,N/A (no matrix multiply),5.407819,5.407819,5.008796,64,64,0,64,,1600,6582734,6.582734,0,0,0.0,0,0,0.0
+dense_prefetch,prefill_annotated,all_layers,compute_graph_projection_layer_2_q_1024,64,64,True,,,,,N/A (no matrix multiply),5.589862,5.589862,5.235793,64,64,0,64,,1600,6602726,6.602726,0,0,0.0,0,0,0.0
+dense_prefetch,prefill_annotated,all_layers,compute_graph_value_expansion,192,192,True,,,,,N/A (no matrix multiply),19.92873,19.92873,0.0,0,0,0,0,,0,0,0.0,0,0,0.0,0,0,0.0
+dense_prefetch,prefill_annotated,all_layers,dense_history_prefetch_layer_0,64,64,True,,,,,N/A (no matrix multiply),6.415905,6.415905,0.542083,576,576,0,64,,64,149760,0.14976,0,0,0.0,0,0,0.0
+dense_prefetch,prefill_annotated,all_layers,dense_history_prefetch_layer_1,64,64,True,,,,,N/A (no matrix multiply),4.811624,4.811624,0.474131,576,576,0,64,,64,118144,0.118144,0,0,0.0,0,0,0.0
+dense_prefetch,prefill_annotated,all_layers,dense_history_prefetch_layer_2,64,64,True,,,,,N/A (no matrix multiply),5.967205,5.967205,0.595287,576,576,0,64,,64,141920,0.14192,0,0,0.0,0,0,0.0
+dense_prefetch,prefill_annotated,all_layers,dense_history_wait_layer_0,64,64,True,,,,,N/A (no matrix multiply),0.908574,0.908574,0.03984,128,128,0,0,,0,0,0.0,0,0,0.0,0,0,0.0
+dense_prefetch,prefill_annotated,all_layers,dense_history_wait_layer_1,64,64,True,,,,,N/A (no matrix multiply),1.137248,1.137248,0.05305,128,128,0,0,,0,0,0.0,0,0,0.0,0,0,0.0
+dense_prefetch,prefill_annotated,all_layers,dense_history_wait_layer_2,64,64,True,,,,,N/A (no matrix multiply),1.141736,1.141736,0.05142,128,128,0,0,,0,0,0.0,0,0,0.0,0,0,0.0
+dense_prefetch,prefill_annotated,all_layers,embedding,64,64,True,,,,,N/A (no matrix multiply),3.399958,3.399958,0.535032,128,128,0,64,,64,422975,0.422975,0,0,0.0,0,0,0.0
+dense_prefetch,prefill_annotated,all_layers,exact_topk,192,192,True,,,,,N/A (no matrix multiply),19.010263,19.010263,3.606867,768,768,0,768,,768,55854730,55.85473,0,0,0.0,0,0,0.0
+dense_prefetch,prefill_annotated,all_layers,final_norm_lm_head,1,1,True,,,,,N/A (no matrix multiply),0.292189,0.292189,0.007821,2,2,0,1,,1,3808,0.003808,0,0,0.0,0,0,0.0
+dense_prefetch,prefill_annotated,all_layers,forward_misc,1,1,True,,,,,N/A (no matrix multiply),747.330487,747.330487,9.16125,16,16,0,0,,0,0,0.0,1,12256,0.012256,0,0,0.0
+dense_prefetch,prefill_annotated,all_layers,hidden_transfer,192,192,True,,,,,N/A (no matrix multiply),1.0612,1.0612,0.0,0,0,0,0,,0,0,0.0,0,0,0.0,0,0,0.0
+dense_prefetch,prefill_annotated,all_layers,index_cache_write,192,192,True,,,,,N/A (no matrix multiply),7.52694,7.52694,2.471944,576,576,0,0,,0,0,0.0,384,503903,0.503903,0,0,0.0
+dense_prefetch,prefill_annotated,all_layers,index_k_proj,192,192,True,360777252864,FP8,1979.0,5.088626881657214,,0.0,0.0,0.0,0,0,0,192,100.70392598799627,576,3582554,3.582554,0,0,0.0,0,0,0.0
+dense_prefetch,prefill_annotated,all_layers,index_q_proj,192,192,True,4947802324992,FP8,1979.0,45.15480227278624,,0.0,0.0,0.0,0,0,0,192,893.6135369784397,576,5536848,5.536848,0,0,0.0,0,0,0.0
+dense_prefetch,prefill_annotated,all_layers,index_weights_proj,192,192,True,180388626432,FP32,67.0,34.74808187201245,,0.0,0.0,0.0,0,0,0,192,23.28121485424834,384,7748248,7.748248,0,0,0.0,0,0,0.0
+dense_prefetch,prefill_annotated,all_layers,indexer_aux,192,192,True,,,,,N/A (no matrix multiply),68.722607,68.722607,0.0,0,0,0,0,,0,0,0.0,0,0,0.0,0,0,0.0
+dense_prefetch,prefill_annotated,all_layers,indexer_qk,192,192,True,105554726879232,FP8,1979.0,49.07992357179982,,43.106738,43.106738,20.688935,1216,1216,0,384,971.2916874859184,384,108674591,108.674591,0,0,0.0,0,0,0.0
+dense_prefetch,prefill_annotated,all_layers,kv_a_proj,192,192,True,1623497637888,FP8,1979.0,15.47428031646545,,0.0,0.0,0.0,0,0,0,192,306.23600746285126,576,5301459,5.301459,0,0,0.0,0,0,0.0
+dense_prefetch,prefill_annotated,all_layers,layer_misc,192,192,True,,,,,N/A (no matrix multiply),694.076058,694.076058,0.174425,576,576,0,0,,0,0,0.0,0,0,0.0,0,0,0.0
+dense_prefetch,prefill_annotated,all_layers,lm_head,1,1,True,1853358080,BF16,989.5,0.44517923177979046,,0.076203,0.076203,0.013228,4,4,0,1,4.405048498461027,1,420735,0.420735,0,0,0.0,1,800,0.0008
+dense_prefetch,prefill_annotated,all_layers,mla_qk_pv,192,192,True,110398695014400,BF16,989.5,62.45681997082946,,18.20734,18.20734,5.532203,964,964,0,192,618.0102336113574,192,178635707,178.635707,0,0,0.0,0,0,0.0
+dense_prefetch,prefill_annotated,all_layers,mlp_down,192,192,True,51951924412416,FP8,1979.0,57.15823661854932,,0.0,0.0,0.0,0,0,0,192,1131.161502681091,576,45927946,45.927946,0,0,0.0,0,0,0.0
+dense_prefetch,prefill_annotated,all_layers,mlp_gate,192,192,True,51951924412416,FP8,1979.0,59.80511478296787,,0.0,0.0,0.0,0,0,0,192,1183.543221554934,576,43895249,43.895249,0,0,0.0,0,0,0.0
+dense_prefetch,prefill_annotated,all_layers,mlp_up,192,192,True,51951924412416,FP8,1979.0,60.863574805270616,,0.0,0.0,0.0,0,0,0,192,1204.4901453963055,384,43131880,43.13188,0,0,0.0,0,0,0.0
+dense_prefetch,prefill_annotated,all_layers,o_proj,192,192,True,46179488366592,FP8,1979.0,56.9077729831184,,0.0,0.0,0.0,0,0,0,192,1126.2048273359133,576,41004520,41.00452,0,0,0.0,0,0,0.0
+dense_prefetch,prefill_annotated,all_layers,offload_exact_recall,192,192,True,,,,,N/A (no matrix multiply),16.27322,16.27322,2.419791,1536,1536,0,384,,384,3615385,3.615385,0,0,0.0,0,0,0.0
+dense_prefetch,prefill_annotated,all_layers,offload_prepare,192,192,True,,,,,N/A (no matrix multiply),0.219245,0.219245,0.0,0,0,0,0,,0,0,0.0,0,0,0.0,0,0,0.0
+dense_prefetch,prefill_annotated,all_layers,offload_source_reservation,192,192,True,,,,,N/A (no matrix multiply),282.798779,282.798779,0.152645,576,576,0,0,,0,0,0.0,0,0,0.0,0,0,0.0
+dense_prefetch,prefill_annotated,all_layers,q_a_proj,192,192,True,4329327034368,FP8,1979.0,42.0885996160721,,0.0,0.0,0.0,0,0,0,192,832.933386402067,576,5197687,5.197687,0,0,0.0,0,0,0.0
+dense_prefetch,prefill_annotated,all_layers,q_absorb,192,192,True,3298534883328,BF16,989.5,30.407124593025898,,0.0,0.0,0.0,0,0,0,192,300.87849784799124,192,10963013,10.963013,0,0,0.0,192,172608,0.172608
+dense_prefetch,prefill_annotated,all_layers,q_b_proj,192,192,True,14843406974976,FP8,1979.0,58.94609794886525,,0.0,0.0,0.0,0,0,0,192,1166.5432784080433,576,12724266,12.724266,0,0,0.0,0,0,0.0
+dense_prefetch,prefill_annotated,all_layers,residual_rms_norm,1,1,True,,,,,N/A (no matrix multiply),0.109769,0.109769,0.011048,2,2,0,1,,1,2848,0.002848,0,0,0.0,0,0,0.0
+dense_prefetch,prefill_annotated,all_layers,sparse_mla_aux,192,192,True,,,,,N/A (no matrix multiply),28.068297,28.068297,0.0,0,0,0,0,,0,0,0.0,0,0,0.0,0,0,0.0
+dense_prefetch,prefill_annotated,all_layers,v_expand,192,192,True,3298534883328,BF16,989.5,33.655864925522536,,11.032103,11.032103,2.894965,768,768,0,192,333.02478343804546,192,9904773,9.904773,0,0,0.0,192,186079,0.186079
+echo,extend_annotated,all_layers,extend_graph_inputs,2,2,True,,,,,N/A (no matrix multiply),0.644922,0.644922,0.404253,3,3,0,0,,0,0,0.0,2,1792,0.001792,0,0,0.0
+echo,extend_annotated,all_layers,extend_graph_replay_q_128,1,1,True,,,,,N/A (no matrix multiply),0.760447,0.760447,0.745749,1,1,0,1,,165,652639,0.652639,12,26464,0.026464,15,17760,0.01776
+echo,extend_annotated,all_layers,forward_misc,1,1,True,,,,,N/A (no matrix multiply),6.907087,6.907087,4.470518,17,17,0,0,,0,0,0.0,0,0,0.0,0,0,0.0
+echo,extend_annotated,all_layers,index_k_proj,3,3,True,704643072,FP8,1979.0,0.8618807314133803,,0.0,0.0,0.0,0,0,0,1,17.0566196746708,9,41312,0.041312,0,0,0.0,0,0,0.0
+echo,extend_annotated,all_layers,index_q_proj,3,3,True,9663676416,FP8,1979.0,13.859874183008786,,0.0,0.0,0.0,0,0,0,1,274.2869100817439,9,35232,0.035232,0,0,0.0,0,0,0.0
+echo,extend_annotated,all_layers,index_weights_proj,3,3,True,352321536,FP32,67.0,12.091911304405127,,0.0,0.0,0.0,0,0,0,1,8.101580573951434,6,43488,0.043488,0,0,0.0,0,0,0.0
+echo,extend_annotated,all_layers,indexer_fused,3,3,True,412722659328,FP8,1979.0,8.470105880267075,,0.0,0.0,0.0,0,0,0,1,167.62339537048544,12,2462202,2.462202,0,0,0.0,0,0,0.0
+echo,extend_annotated,all_layers,kv_a_proj,3,3,True,3170893824,FP8,1979.0,3.7478264290015217,,0.0,0.0,0.0,0,0,0,1,74.16948502994012,9,42752,0.042752,0,0,0.0,0,0,0.0
+echo,extend_annotated,all_layers,lm_head,1,1,True,1853358080,BF16,989.5,0.43860744354232317,,0.0,0.0,0.0,0,0,0,1,4.340020653851288,1,427039,0.427039,0,0,0.0,1,1408,0.001408
+echo,extend_annotated,all_layers,mla_qk_pv,3,3,True,219043332096,BF16,989.5,61.0784072242923,,0.0,0.0,0.0,0,0,0,1,604.3708394843723,3,362432,0.362432,0,0,0.0,0,0,0.0
+echo,extend_annotated,all_layers,mlp_down,3,3,True,101468602368,FP8,1979.0,31.31881850912296,,0.0,0.0,0.0,0,0,0,1,619.7994182955434,9,163712,0.163712,0,0,0.0,0,0,0.0
+echo,extend_annotated,all_layers,mlp_gate,3,3,True,101468602368,FP8,1979.0,39.92700610333244,,0.0,0.0,0.0,0,0,0,1,790.1554507849489,9,128416,0.128416,0,0,0.0,0,0,0.0
+echo,extend_annotated,all_layers,mlp_up,3,3,True,101468602368,FP8,1979.0,41.83474555944466,,0.0,0.0,0.0,0,0,0,1,827.9096146214099,6,122560,0.12256,0,0,0.0,0,0,0.0
+echo,extend_annotated,all_layers,o_proj,3,3,True,90194313216,FP8,1979.0,30.655820294393216,,0.0,0.0,0.0,0,0,0,1,606.6786836260418,9,148669,0.148669,0,0,0.0,0,0,0.0
+echo,extend_annotated,all_layers,q_a_proj,3,3,True,8455716864,FP8,1979.0,9.868629926870724,,0.0,0.0,0.0,0,0,0,1,195.30018625277162,9,43296,0.043296,0,0,0.0,0,0,0.0
+echo,extend_annotated,all_layers,q_absorb,3,3,True,6442450944,BF16,989.5,20.762187876559224,,0.0,0.0,0.0,0,0,0,1,205.44184903855353,3,31359,0.031359,0,0,0.0,0,0,0.0
+echo,extend_annotated,all_layers,q_b_proj,3,3,True,28991029248,FP8,1979.0,24.893509747948897,,0.0,0.0,0.0,0,0,0,1,492.6425579119086,9,58848,0.058848,0,0,0.0,0,0,0.0
+echo,extend_annotated,all_layers,v_expand,3,3,True,6442450944,BF16,989.5,20.124921167810978,,0.0,0.0,0.0,0,0,0,1,199.13609495548963,3,32352,0.032352,0,0,0.0,0,0,0.0
+echo,prefill_annotated,all_layers,attention_output,192,192,True,,,,,N/A (no matrix multiply),33.435701,33.435701,0.0,0,0,0,0,,0,0,0.0,0,0,0.0,0,0,0.0
+echo,prefill_annotated,all_layers,attention_projection,192,192,True,,,,,N/A (no matrix multiply),33.593747,33.593747,0.0,0,0,0,0,,0,0,0.0,0,0,0.0,0,0,0.0
+echo,prefill_annotated,all_layers,cache_write,192,192,True,,,,,N/A (no matrix multiply),37.112252,37.112252,4.626003,2411,2411,0,228,,228,1053021,1.053021,198,5345139,5.345139,30,28128,0.028128
+echo,prefill_annotated,all_layers,compute_graph_finish_layer_0_q_1024,64,64,True,,,,,N/A (no matrix multiply),2.595741,2.595741,2.201825,64,64,0,64,,128,2784411,2.784411,0,0,0.0,0,0,0.0
+echo,prefill_annotated,all_layers,compute_graph_finish_layer_1_q_1024,64,64,True,,,,,N/A (no matrix multiply),2.578056,2.578056,2.190712,64,64,0,64,,128,2787156,2.787156,0,0,0.0,0,0,0.0
+echo,prefill_annotated,all_layers,compute_graph_finish_layer_2_q_1024,64,64,True,,,,,N/A (no matrix multiply),2.525625,2.525625,2.135898,64,64,0,64,,128,2782650,2.78265,0,0,0.0,0,0,0.0
+echo,prefill_annotated,all_layers,compute_graph_owned_writeback_source,192,192,True,,,,,N/A (no matrix multiply),7.040557,7.040557,2.346249,192,192,0,0,,0,0,0.0,192,273119,0.273119,0,0,0.0
+echo,prefill_annotated,all_layers,compute_graph_projection_inputs,192,192,True,,,,,N/A (no matrix multiply),2.792619,2.792619,1.26292,192,192,0,64,,64,52064,0.052064,64,397949,0.397949,0,0,0.0
+echo,prefill_annotated,all_layers,compute_graph_projection_layer_0_q_1024,64,64,True,,,,,N/A (no matrix multiply),5.524719,5.524719,5.030726,64,64,0,64,,1600,6278574,6.278574,0,0,0.0,0,0,0.0
+echo,prefill_annotated,all_layers,compute_graph_projection_layer_1_q_1024,64,64,True,,,,,N/A (no matrix multiply),5.102877,5.102877,4.75665,64,64,0,64,,1600,6618190,6.61819,0,0,0.0,0,0,0.0
+echo,prefill_annotated,all_layers,compute_graph_projection_layer_2_q_1024,64,64,True,,,,,N/A (no matrix multiply),5.137159,5.137159,4.801455,64,64,0,64,,1600,6634418,6.634418,0,0,0.0,0,0,0.0
+echo,prefill_annotated,all_layers,compute_graph_value_expansion,192,192,True,,,,,N/A (no matrix multiply),20.215533,20.215533,0.0,0,0,0,0,,0,0,0.0,0,0,0.0,0,0,0.0
+echo,prefill_annotated,all_layers,embedding,64,64,True,,,,,N/A (no matrix multiply),3.25946,3.25946,0.478899,128,128,0,64,,64,423584,0.423584,0,0,0.0,0,0,0.0
+echo,prefill_annotated,all_layers,exact_topk,192,192,True,,,,,N/A (no matrix multiply),17.568933,17.568933,3.351598,768,768,0,768,,768,56544185,56.544185,0,0,0.0,0,0,0.0
+echo,prefill_annotated,all_layers,final_norm_lm_head,1,1,True,,,,,N/A (no matrix multiply),0.279366,0.279366,0.007661,2,2,0,1,,1,3808,0.003808,0,0,0.0,0,0,0.0
+echo,prefill_annotated,all_layers,forward_misc,1,1,True,,,,,N/A (no matrix multiply),638.853744,638.853744,9.010012,19,19,0,0,,0,0,0.0,4,14560,0.01456,0,0,0.0
+echo,prefill_annotated,all_layers,hidden_transfer,192,192,True,,,,,N/A (no matrix multiply),0.991349,0.991349,0.0,0,0,0,0,,0,0,0.0,0,0,0.0,0,0,0.0
+echo,prefill_annotated,all_layers,index_cache_write,192,192,True,,,,,N/A (no matrix multiply),6.967781,6.967781,2.329391,576,576,0,0,,0,0,0.0,384,507743,0.507743,0,0,0.0
+echo,prefill_annotated,all_layers,index_k_proj,192,192,True,360777252864,FP8,1979.0,5.040317938635304,,0.0,0.0,0.0,0,0,0,192,99.74789200559265,576,3616891,3.616891,0,0,0.0,0,0,0.0
+echo,prefill_annotated,all_layers,index_q_proj,192,192,True,4947802324992,FP8,1979.0,44.64489152659092,,0.0,0.0,0.0,0,0,0,192,883.5224033112343,576,5600087,5.600087,0,0,0.0,0,0,0.0
+echo,prefill_annotated,all_layers,index_weights_proj,192,192,True,180388626432,FP32,67.0,34.46657971000265,,0.0,0.0,0.0,0,0,0,192,23.092608405701775,384,7811531,7.811531,0,0,0.0,0,0,0.0
+echo,prefill_annotated,all_layers,indexer_aux,192,192,True,,,,,N/A (no matrix multiply),56.487846,56.487846,0.0,0,0,0,0,,0,0,0.0,0,0,0.0,0,0,0.0
+echo,prefill_annotated,all_layers,indexer_qk,192,192,True,105554726879232,FP8,1979.0,48.05712524349568,,31.137177,31.137177,8.925023,1216,1216,0,384,951.0505085687796,384,110987509,110.987509,0,0,0.0,0,0,0.0
+echo,prefill_annotated,all_layers,kv_a_proj,192,192,True,1623497637888,FP8,1979.0,15.322590840963276,,0.0,0.0,0.0,0,0,0,192,303.2340727426633,576,5353942,5.353942,0,0,0.0,0,0,0.0
+echo,prefill_annotated,all_layers,layer_misc,192,192,True,,,,,N/A (no matrix multiply),613.299862,613.299862,0.309813,765,765,0,0,,0,0,0.0,0,0,0.0,0,0,0.0
+echo,prefill_annotated,all_layers,lm_head,1,1,True,1853358080,BF16,989.5,0.4452130935193477,,0.066547,0.066547,0.012479,4,4,0,1,4.405383560373945,1,420703,0.420703,0,0,0.0,1,800,0.0008
+echo,prefill_annotated,all_layers,mla_qk_pv,192,192,True,110398695014400,BF16,989.5,61.4558878429333,,13.70528,13.70528,2.106141,964,964,0,192,608.106010205825,192,181545147,181.545147,0,0,0.0,0,0,0.0
+echo,prefill_annotated,all_layers,mlp_down,192,192,True,51951924412416,FP8,1979.0,56.74053447121498,,0.0,0.0,0.0,0,0,0,192,1122.8951771853444,576,46266050,46.26605,0,0,0.0,0,0,0.0
+echo,prefill_annotated,all_layers,mlp_gate,192,192,True,51951924412416,FP8,1979.0,59.32292666095865,,0.0,0.0,0.0,0,0,0,192,1174.0007186203718,576,44252038,44.252038,0,0,0.0,0,0,0.0
+echo,prefill_annotated,all_layers,mlp_up,192,192,True,51951924412416,FP8,1979.0,60.65903072449713,,0.0,0.0,0.0,0,0,0,192,1200.4422180377983,384,43277322,43.277322,0,0,0.0,0,0,0.0
+echo,prefill_annotated,all_layers,o_proj,192,192,True,46179488366592,FP8,1979.0,56.41842189025783,,0.0,0.0,0.0,0,0,0,192,1116.5205692082025,576,41360177,41.360177,0,0,0.0,0,0,0.0
+echo,prefill_annotated,all_layers,offload_exact_recall,192,192,True,,,,,N/A (no matrix multiply),15.286193,15.286193,2.335486,1344,1344,0,384,,384,3644377,3.644377,0,0,0.0,0,0,0.0
+echo,prefill_annotated,all_layers,offload_prepare,192,192,True,,,,,N/A (no matrix multiply),14.193576,14.193576,1.56875,1152,1152,0,192,,192,136480,0.13648,0,0,0.0,0,0,0.0
+echo,prefill_annotated,all_layers,offload_source_reservation,192,192,True,,,,,N/A (no matrix multiply),332.870877,332.870877,0.153728,576,576,0,0,,0,0,0.0,0,0,0.0,0,0,0.0
+echo,prefill_annotated,all_layers,prefetch_hint,3,3,True,,,,,N/A (no matrix multiply),0.465824,0.465824,0.075068,15,15,0,9,,9,25376,0.025376,0,0,0.0,3,3456,0.003456
+echo,prefill_annotated,all_layers,q_a_proj,192,192,True,4329327034368,FP8,1979.0,41.7310223814669,,0.0,0.0,0.0,0,0,0,192,825.8569329292301,576,5242224,5.242224,0,0,0.0,0,0,0.0
+echo,prefill_annotated,all_layers,q_absorb,192,192,True,3298534883328,BF16,989.5,30.2981503205981,,0.0,0.0,0.0,0,0,0,192,299.80019742231815,192,11002444,11.002444,0,0,0.0,192,173344,0.173344
+echo,prefill_annotated,all_layers,q_b_proj,192,192,True,14843406974976,FP8,1979.0,58.53939932751049,,0.0,0.0,0.0,0,0,0,192,1158.4947126914326,576,12812667,12.812667,0,0,0.0,0,0,0.0
+echo,prefill_annotated,all_layers,residual_rms_norm,1,1,True,,,,,N/A (no matrix multiply),0.112146,0.112146,0.010532,2,2,0,1,,1,2560,0.00256,0,0,0.0,0,0,0.0
+echo,prefill_annotated,all_layers,sparse_mla_aux,192,192,True,,,,,N/A (no matrix multiply),23.243786,23.243786,0.0,0,0,0,0,,0,0,0.0,0,0,0.0,0,0,0.0
+echo,prefill_annotated,all_layers,v_expand,192,192,True,3298534883328,BF16,989.5,33.77202562592668,,10.846052,10.846052,2.797659,768,768,0,192,334.1741935685445,192,9870705,9.870705,0,0,0.0,192,175456,0.175456
+hbm,extend_annotated,all_layers,extend_graph_inputs,2,2,True,,,,,N/A (no matrix multiply),0.642984,0.642984,0.379854,3,3,0,0,,0,0,0.0,2,1600,0.0016,0,0,0.0
+hbm,extend_annotated,all_layers,extend_graph_replay_q_128,1,1,True,,,,,N/A (no matrix multiply),0.543931,0.543931,0.529727,1,1,0,1,,96,343488,0.343488,15,16032,0.016032,0,0,0.0
+hbm,extend_annotated,all_layers,forward_misc,1,1,True,,,,,N/A (no matrix multiply),4.77623,4.77623,2.911357,4,4,0,0,,0,0,0.0,0,0,0.0,0,0,0.0
+hbm,extend_annotated,all_layers,index_k_proj,3,3,True,704643072,FP8,1979.0,0.8679313761736928,,0.0,0.0,0.0,0,0,0,1,17.17636193447738,9,41024,0.041024,0,0,0.0,0,0,0.0
+hbm,extend_annotated,all_layers,index_q_proj,3,3,True,9663676416,FP8,1979.0,13.480319324640169,,0.0,0.0,0.0,0,0,0,1,266.77551943462896,9,36224,0.036224,0,0,0.0,0,0,0.0
+hbm,extend_annotated,all_layers,index_weights_proj,3,3,True,352321536,FP32,67.0,12.118663320565314,,0.0,0.0,0.0,0,0,0,1,8.11950442477876,6,43392,0.043392,0,0,0.0,0,0,0.0
+hbm,extend_annotated,all_layers,indexer_qk,3,3,True,412722659328,FP8,1979.0,26.078375557365685,,0.0,0.0,0.0,0,0,0,1,516.0910522802669,12,799709,0.799709,0,0,0.0,0,0,0.0
+hbm,extend_annotated,all_layers,kv_a_proj,3,3,True,3170893824,FP8,1979.0,3.8694714908392838,,0.0,0.0,0.0,0,0,0,1,76.57684080370943,9,41408,0.041408,0,0,0.0,0,0,0.0
+hbm,extend_annotated,all_layers,lm_head,1,1,True,1853358080,BF16,989.5,0.4462653685104039,,0.0,0.0,0.0,0,0,0,1,4.4157958214104465,1,419711,0.419711,0,0,0.0,1,1088,0.001088
+hbm,extend_annotated,all_layers,mla_qk_pv,3,3,True,219043332096,BF16,989.5,61.463708593721414,,0.0,0.0,0.0,0,0,0,1,608.1833965348734,3,360160,0.36016,0,0,0.0,0,0,0.0
+hbm,extend_annotated,all_layers,mlp_down,3,3,True,101468602368,FP8,1979.0,31.349648829817845,,0.0,0.0,0.0,0,0,0,1,620.4095503420951,9,163551,0.163551,0,0,0.0,0,0,0.0
+hbm,extend_annotated,all_layers,mlp_gate,3,3,True,101468602368,FP8,1979.0,39.719463739691356,,0.0,0.0,0.0,0,0,0,1,786.0481874084919,9,129087,0.129087,0,0,0.0,0,0,0.0
+hbm,extend_annotated,all_layers,mlp_up,3,3,True,101468602368,FP8,1979.0,42.27697039665511,,0.0,0.0,0.0,0,0,0,1,836.6612441498046,6,121278,0.121278,0,0,0.0,0,0,0.0
+hbm,extend_annotated,all_layers,o_proj,3,3,True,90194313216,FP8,1979.0,31.01569405587942,,0.0,0.0,0.0,0,0,0,1,613.8005853658536,9,146944,0.146944,0,0,0.0,0,0,0.0
+hbm,extend_annotated,all_layers,q_a_proj,3,3,True,8455716864,FP8,1979.0,9.767561295578703,,0.0,0.0,0.0,0,0,0,1,193.30003803950257,9,43744,0.043744,0,0,0.0,0,0,0.0
+hbm,extend_annotated,all_layers,q_absorb,3,3,True,6442450944,BF16,989.5,20.69816409019013,,0.0,0.0,0.0,0,0,0,1,204.80833367243133,3,31456,0.031456,0,0,0.0,0,0,0.0
+hbm,extend_annotated,all_layers,q_b_proj,3,3,True,28991029248,FP8,1979.0,24.69210594739915,,0.0,0.0,0.0,0,0,0,1,488.65677669902914,9,59328,0.059328,0,0,0.0,0,0,0.0
+hbm,extend_annotated,all_layers,v_expand,3,3,True,6442450944,BF16,989.5,20.06537998092396,,0.0,0.0,0.0,0,0,0,1,198.5469349112426,3,32448,0.032448,0,0,0.0,0,0,0.0
+hbm,prefill_annotated,all_layers,attention_output,192,192,True,,,,,N/A (no matrix multiply),69.983707,69.983707,0.0,0,0,0,0,,0,0,0.0,0,0,0.0,0,0,0.0
+hbm,prefill_annotated,all_layers,attention_projection,192,192,True,,,,,N/A (no matrix multiply),25.89543,25.89543,0.0,0,0,0,0,,0,0,0.0,0,0,0.0,0,0,0.0
+hbm,prefill_annotated,all_layers,cache_write,192,192,True,,,,,N/A (no matrix multiply),87.658439,87.658439,75.401972,1344,1344,0,384,,384,483936,0.483936,576,661693,0.661693,0,0,0.0
+hbm,prefill_annotated,all_layers,compute_graph_finish_layer_0_q_1024,64,64,True,,,,,N/A (no matrix multiply),14.425884,14.425884,14.0455,64,64,0,64,,128,2794745,2.794745,0,0,0.0,0,0,0.0
+hbm,prefill_annotated,all_layers,compute_graph_finish_layer_1_q_1024,64,64,True,,,,,N/A (no matrix multiply),15.347863,15.347863,14.987575,64,64,0,64,,128,2787611,2.787611,0,0,0.0,0,0,0.0
+hbm,prefill_annotated,all_layers,compute_graph_finish_layer_2_q_1024,64,64,True,,,,,N/A (no matrix multiply),16.019463,16.019463,15.668014,64,64,0,64,,128,2792025,2.792025,0,0,0.0,0,0,0.0
+hbm,prefill_annotated,all_layers,compute_graph_projection_inputs,192,192,True,,,,,N/A (no matrix multiply),2.714055,2.714055,1.358148,192,192,0,64,,64,52160,0.05216,64,404064,0.404064,0,0,0.0
+hbm,prefill_annotated,all_layers,compute_graph_projection_layer_0_q_1024,64,64,True,,,,,N/A (no matrix multiply),6.125481,6.125481,5.803501,64,64,0,64,,1600,6305131,6.305131,0,0,0.0,0,0,0.0
+hbm,prefill_annotated,all_layers,compute_graph_projection_layer_1_q_1024,64,64,True,,,,,N/A (no matrix multiply),5.665242,5.665242,5.331276,64,64,0,64,,1600,6660208,6.660208,0,0,0.0,0,0,0.0
+hbm,prefill_annotated,all_layers,compute_graph_projection_layer_2_q_1024,64,64,True,,,,,N/A (no matrix multiply),5.810576,5.810576,5.493222,64,64,0,64,,1600,6666963,6.666963,0,0,0.0,0,0,0.0
+hbm,prefill_annotated,all_layers,compute_graph_value_expansion,192,192,True,,,,,N/A (no matrix multiply),18.823193,18.823193,0.0,0,0,0,0,,0,0,0.0,0,0,0.0,0,0,0.0
+hbm,prefill_annotated,all_layers,embedding,64,64,True,,,,,N/A (no matrix multiply),2.982431,2.982431,0.477888,128,128,0,64,,64,427678,0.427678,0,0,0.0,0,0,0.0
+hbm,prefill_annotated,all_layers,exact_topk,192,192,True,,,,,N/A (no matrix multiply),86.567342,86.567342,73.031402,768,768,0,768,,768,56884153,56.884153,0,0,0.0,0,0,0.0
+hbm,prefill_annotated,all_layers,final_norm_lm_head,1,1,True,,,,,N/A (no matrix multiply),0.30221,0.30221,0.007268,2,2,0,1,,1,3968,0.003968,0,0,0.0,0,0,0.0
+hbm,prefill_annotated,all_layers,forward_misc,1,1,True,,,,,N/A (no matrix multiply),637.416167,637.416167,185.756201,7,7,0,0,,0,0,0.0,1,12608,0.012608,0,0,0.0
+hbm,prefill_annotated,all_layers,hidden_transfer,192,192,True,,,,,N/A (no matrix multiply),0.89889,0.89889,0.0,0,0,0,0,,0,0,0.0,0,0,0.0,0,0,0.0
+hbm,prefill_annotated,all_layers,index_cache_write,192,192,True,,,,,N/A (no matrix multiply),7.078705,7.078705,3.126992,384,384,0,0,,0,0,0.0,384,505855,0.505855,0,0,0.0
+hbm,prefill_annotated,all_layers,index_k_proj,192,192,True,360777252864,FP8,1979.0,5.016488553168066,,0.0,0.0,0.0,0,0,0,192,99.27630846719603,576,3634072,3.634072,0,0,0.0,0,0,0.0
+hbm,prefill_annotated,all_layers,index_q_proj,192,192,True,4947802324992,FP8,1979.0,44.47341739976117,,0.0,0.0,0.0,0,0,0,192,880.1289303412735,576,5621679,5.621679,0,0,0.0,0,0,0.0
+hbm,prefill_annotated,all_layers,index_weights_proj,192,192,True,180388626432,FP32,67.0,34.332550780711095,,0.0,0.0,0.0,0,0,0,192,23.002809023076434,384,7842026,7.842026,0,0,0.0,0,0,0.0
+hbm,prefill_annotated,all_layers,indexer_aux,192,192,True,,,,,N/A (no matrix multiply),92.482515,92.482515,0.0,0,0,0,0,,0,0,0.0,0,0,0.0,0,0,0.0
+hbm,prefill_annotated,all_layers,indexer_qk,192,192,True,105554726879232,FP8,1979.0,47.7609708853499,,66.51809,66.51809,46.774851,1216,1216,0,384,945.1896138210745,384,111675716,111.675716,0,0,0.0,0,0,0.0
+hbm,prefill_annotated,all_layers,kv_a_proj,192,192,True,1623497637888,FP8,1979.0,15.281119590872153,,0.0,0.0,0.0,0,0,0,192,302.4133567033599,576,5368472,5.368472,0,0,0.0,0,0,0.0
+hbm,prefill_annotated,all_layers,layer_misc,192,192,True,,,,,N/A (no matrix multiply),435.44012,435.44012,0.0,0,0,0,0,,0,0,0.0,0,0,0.0,0,0,0.0
+hbm,prefill_annotated,all_layers,lm_head,1,1,True,1853358080,BF16,989.5,0.43602624056985323,,0.071091,0.071091,0.013877,4,4,0,1,4.314479650438698,1,429567,0.429567,0,0,0.0,1,800,0.0008
+hbm,prefill_annotated,all_layers,mla_qk_pv,192,192,True,110398695014400,BF16,989.5,61.09163902002555,,25.52344,25.52344,15.254609,964,964,0,192,604.5017681031529,192,182627580,182.62758,0,0,0.0,0,0,0.0
+hbm,prefill_annotated,all_layers,mlp_down,192,192,True,51951924412416,FP8,1979.0,56.51969912757336,,0.0,0.0,0.0,0,0,0,192,1118.524845734677,576,46446822,46.446822,0,0,0.0,0,0,0.0
+hbm,prefill_annotated,all_layers,mlp_gate,192,192,True,51951924412416,FP8,1979.0,59.097467851241234,,0.0,0.0,0.0,0,0,0,192,1169.538888776064,576,44420861,44.420861,0,0,0.0,0,0,0.0
+hbm,prefill_annotated,all_layers,mlp_up,192,192,True,51951924412416,FP8,1979.0,60.483436220437746,,0.0,0.0,0.0,0,0,0,192,1196.967202802463,384,43402964,43.402964,0,0,0.0,0,0,0.0
+hbm,prefill_annotated,all_layers,o_proj,192,192,True,46179488366592,FP8,1979.0,56.20888162108469,,0.0,0.0,0.0,0,0,0,192,1112.373767281266,576,41514363,41.514363,0,0,0.0,0,0,0.0
+hbm,prefill_annotated,all_layers,offload_prepare,192,192,True,,,,,N/A (no matrix multiply),0.219398,0.219398,0.0,0,0,0,0,,0,0,0.0,0,0,0.0,0,0,0.0
+hbm,prefill_annotated,all_layers,offload_source_reservation,192,192,True,,,,,N/A (no matrix multiply),0.299945,0.299945,0.0,0,0,0,0,,0,0,0.0,0,0,0.0,0,0,0.0
+hbm,prefill_annotated,all_layers,q_a_proj,192,192,True,4329327034368,FP8,1979.0,41.58222276571944,,0.0,0.0,0.0,0,0,0,192,822.9121885335877,576,5260983,5.260983,0,0,0.0,0,0,0.0
+hbm,prefill_annotated,all_layers,q_absorb,192,192,True,3298534883328,BF16,989.5,30.22125979287698,,0.0,0.0,0.0,0,0,0,192,299.03936565051777,192,11030437,11.030437,0,0,0.0,192,170622,0.170622
+hbm,prefill_annotated,all_layers,q_b_proj,192,192,True,14843406974976,FP8,1979.0,58.308539204065234,,0.0,0.0,0.0,0,0,0,192,1153.925990848451,576,12863396,12.863396,0,0,0.0,0,0,0.0
+hbm,prefill_annotated,all_layers,residual_rms_norm,1,1,True,,,,,N/A (no matrix multiply),0.139894,0.139894,0.010335,2,2,0,1,,1,2624,0.002624,0,0,0.0,0,0,0.0
+hbm,prefill_annotated,all_layers,sparse_mla_aux,192,192,True,,,,,N/A (no matrix multiply),34.399295,34.399295,0.0,0,0,0,0,,0,0,0.0,0,0,0.0,0,0,0.0
+hbm,prefill_annotated,all_layers,v_expand,192,192,True,3298534883328,BF16,989.5,33.774359209290864,,10.183273,10.183273,2.730601,768,768,0,192,334.19728437593307,192,9870023,9.870023,0,0,0.0,192,195903,0.195903
+serial_sparse,extend_annotated,all_layers,extend_graph_inputs,2,2,True,,,,,N/A (no matrix multiply),0.683546,0.683546,0.400127,3,3,0,0,,0,0,0.0,2,1792,0.001792,0,0,0.0
+serial_sparse,extend_annotated,all_layers,extend_graph_replay_q_128,1,1,True,,,,,N/A (no matrix multiply),0.65773,0.65773,0.642139,1,1,0,1,,126,935966,0.935966,9,25216,0.025216,0,0,0.0
+serial_sparse,extend_annotated,all_layers,forward_misc,1,1,True,,,,,N/A (no matrix multiply),5.542939,5.542939,3.154666,17,17,0,0,,0,0,0.0,0,0,0.0,0,0,0.0
+serial_sparse,extend_annotated,all_layers,index_k_proj,3,3,True,704643072,FP8,1979.0,0.8727178797556208,,0.0,0.0,0.0,0,0,0,1,17.271086840363733,9,40799,0.040799,0,0,0.0,0,0,0.0
+serial_sparse,extend_annotated,all_layers,index_q_proj,3,3,True,9663676416,FP8,1979.0,13.73512284022743,,0.0,0.0,0.0,0,0,0,1,271.8180810081008,9,35552,0.035552,0,0,0.0,0,0,0.0
+serial_sparse,extend_annotated,all_layers,index_weights_proj,3,3,True,352321536,FP32,67.0,12.118663320565314,,0.0,0.0,0.0,0,0,0,1,8.11950442477876,6,43392,0.043392,0,0,0.0,0,0,0.0
+serial_sparse,extend_annotated,all_layers,indexer_qk,3,3,True,412722659328,FP8,1979.0,26.216784986562143,,0.0,0.0,0.0,0,0,0,1,518.8301748840647,12,795487,0.795487,0,0,0.0,0,0,0.0
+serial_sparse,extend_annotated,all_layers,kv_a_proj,3,3,True,3170893824,FP8,1979.0,3.830984016179061,,0.0,0.0,0.0,0,0,0,1,75.81517368018363,9,41824,0.041824,0,0,0.0,0,0,0.0
+serial_sparse,extend_annotated,all_layers,lm_head,1,1,True,1853358080,BF16,989.5,0.4305101560041238,,0.0,0.0,0.0,0,0,0,1,4.259897993660805,1,435071,0.435071,0,0,0.0,1,1184,0.001184
+serial_sparse,extend_annotated,all_layers,mla_qk_pv,3,3,True,219043332096,BF16,989.5,61.15416825407465,,0.0,0.0,0.0,0,0,0,1,605.1204948740686,3,361983,0.361983,0,0,0.0,0,0,0.0
+serial_sparse,extend_annotated,all_layers,mlp_down,3,3,True,101468602368,FP8,1979.0,31.411107055433945,,0.0,0.0,0.0,0,0,0,1,621.6258086270377,9,163231,0.163231,0,0,0.0,0,0,0.0
+serial_sparse,extend_annotated,all_layers,mlp_gate,3,3,True,101468602368,FP8,1979.0,39.4745197074829,,0.0,0.0,0.0,0,0,0,1,781.2007450110865,9,129888,0.129888,0,0,0.0,0,0,0.0
+serial_sparse,extend_annotated,all_layers,mlp_up,3,3,True,101468602368,FP8,1979.0,41.41304613405869,,0.0,0.0,0.0,0,0,0,1,819.5641829930214,6,123808,0.123808,0,0,0.0,0,0,0.0
+serial_sparse,extend_annotated,all_layers,o_proj,3,3,True,90194313216,FP8,1979.0,30.452216963091377,,0.0,0.0,0.0,0,0,0,1,602.6493736995784,9,149663,0.149663,0,0,0.0,0,0,0.0
+serial_sparse,extend_annotated,all_layers,q_a_proj,3,3,True,8455716864,FP8,1979.0,9.846796674820125,,0.0,0.0,0.0,0,0,0,1,194.86810619469026,9,43392,0.043392,0,0,0.0,0,0,0.0
+serial_sparse,extend_annotated,all_layers,q_absorb,3,3,True,6442450944,BF16,989.5,21.216157769193845,,0.0,0.0,0.0,0,0,0,1,209.9338811261731,3,30688,0.030688,0,0,0.0,0,0,0.0
+serial_sparse,extend_annotated,all_layers,q_b_proj,3,3,True,28991029248,FP8,1979.0,24.705431422815984,,0.0,0.0,0.0,0,0,0,1,488.9204878575283,9,59296,0.059296,0,0,0.0,0,0,0.0
+serial_sparse,extend_annotated,all_layers,v_expand,3,3,True,6442450944,BF16,989.5,20.5103783272751,,0.0,0.0,0.0,0,0,0,1,202.9501935483871,3,31744,0.031744,0,0,0.0,0,0,0.0
+serial_sparse,prefill_annotated,all_layers,attention_output,192,192,True,,,,,N/A (no matrix multiply),32.811956,32.811956,0.0,0,0,0,0,,0,0,0.0,0,0,0.0,0,0,0.0
+serial_sparse,prefill_annotated,all_layers,attention_projection,192,192,True,,,,,N/A (no matrix multiply),35.103765,35.103765,0.0,0,0,0,0,,0,0,0.0,0,0,0.0,0,0,0.0
+serial_sparse,prefill_annotated,all_layers,cache_write,192,192,True,,,,,N/A (no matrix multiply),39.387912,39.387912,4.541832,2409,2409,0,228,,228,1049980,1.04998,198,5334003,5.334003,30,29152,0.029152
+serial_sparse,prefill_annotated,all_layers,compute_graph_finish_layer_0_q_1024,64,64,True,,,,,N/A (no matrix multiply),2.638735,2.638735,2.244304,64,64,0,64,,128,2790709,2.790709,0,0,0.0,0,0,0.0
+serial_sparse,prefill_annotated,all_layers,compute_graph_finish_layer_1_q_1024,64,64,True,,,,,N/A (no matrix multiply),2.595561,2.595561,2.205435,64,64,0,64,,128,2787674,2.787674,0,0,0.0,0,0,0.0
+serial_sparse,prefill_annotated,all_layers,compute_graph_finish_layer_2_q_1024,64,64,True,,,,,N/A (no matrix multiply),2.543959,2.543959,2.162528,64,64,0,64,,128,2776668,2.776668,0,0,0.0,0,0,0.0
+serial_sparse,prefill_annotated,all_layers,compute_graph_owned_writeback_source,192,192,True,,,,,N/A (no matrix multiply),7.412438,7.412438,2.480665,192,192,0,0,,0,0,0.0,192,271456,0.271456,0,0,0.0
+serial_sparse,prefill_annotated,all_layers,compute_graph_projection_inputs,192,192,True,,,,,N/A (no matrix multiply),2.835176,2.835176,1.271878,192,192,0,64,,64,51968,0.051968,64,398047,0.398047,0,0,0.0
+serial_sparse,prefill_annotated,all_layers,compute_graph_projection_layer_0_q_1024,64,64,True,,,,,N/A (no matrix multiply),5.496463,5.496463,5.131297,64,64,0,64,,1600,6289683,6.289683,0,0,0.0,0,0,0.0
+serial_sparse,prefill_annotated,all_layers,compute_graph_projection_layer_1_q_1024,64,64,True,,,,,N/A (no matrix multiply),5.834864,5.834864,5.457147,64,64,0,64,,1600,6642545,6.642545,0,0,0.0,0,0,0.0
+serial_sparse,prefill_annotated,all_layers,compute_graph_projection_layer_2_q_1024,64,64,True,,,,,N/A (no matrix multiply),5.326609,5.326609,4.99004,64,64,0,64,,1600,6654702,6.654702,0,0,0.0,0,0,0.0
+serial_sparse,prefill_annotated,all_layers,compute_graph_value_expansion,192,192,True,,,,,N/A (no matrix multiply),19.661679,19.661679,0.0,0,0,0,0,,0,0,0.0,0,0,0.0,0,0,0.0
+serial_sparse,prefill_annotated,all_layers,embedding,64,64,True,,,,,N/A (no matrix multiply),3.380287,3.380287,0.534309,128,128,0,64,,64,423967,0.423967,0,0,0.0,0,0,0.0
+serial_sparse,prefill_annotated,all_layers,exact_topk,192,192,True,,,,,N/A (no matrix multiply),18.509733,18.509733,3.434823,768,768,0,768,,768,56687611,56.687611,0,0,0.0,0,0,0.0
+serial_sparse,prefill_annotated,all_layers,final_norm_lm_head,1,1,True,,,,,N/A (no matrix multiply),0.277201,0.277201,0.007395,2,2,0,1,,1,3968,0.003968,0,0,0.0,0,0,0.0
+serial_sparse,prefill_annotated,all_layers,forward_misc,1,1,True,,,,,N/A (no matrix multiply),639.221443,639.221443,9.113226,16,16,0,0,,0,0,0.0,1,12640,0.01264,0,0,0.0
+serial_sparse,prefill_annotated,all_layers,hidden_transfer,192,192,True,,,,,N/A (no matrix multiply),1.021224,1.021224,0.0,0,0,0,0,,0,0,0.0,0,0,0.0,0,0,0.0
+serial_sparse,prefill_annotated,all_layers,index_cache_write,192,192,True,,,,,N/A (no matrix multiply),7.151248,7.151248,2.400699,576,576,0,0,,0,0,0.0,384,510398,0.510398,0,0,0.0
+serial_sparse,prefill_annotated,all_layers,index_k_proj,192,192,True,360777252864,FP8,1979.0,5.031066450834178,,0.0,0.0,0.0,0,0,0,192,99.56480506200839,576,3623542,3.623542,0,0,0.0,0,0,0.0
+serial_sparse,prefill_annotated,all_layers,index_q_proj,192,192,True,4947802324992,FP8,1979.0,44.62246112005385,,0.0,0.0,0.0,0,0,0,192,883.0785055658657,576,5602902,5.602902,0,0,0.0,0,0,0.0
+serial_sparse,prefill_annotated,all_layers,index_weights_proj,192,192,True,180388626432,FP32,67.0,34.37023870505932,,0.0,0.0,0.0,0,0,0,192,23.028059932389745,384,7833427,7.833427,0,0,0.0,0,0,0.0
+serial_sparse,prefill_annotated,all_layers,indexer_aux,192,192,True,,,,,N/A (no matrix multiply),57.469175,57.469175,0.0,0,0,0,0,,0,0,0.0,0,0,0.0,0,0,0.0
+serial_sparse,prefill_annotated,all_layers,indexer_qk,192,192,True,105554726879232,FP8,1979.0,48.02386864954388,,32.230385,32.230385,9.47782,1216,1216,0,384,950.3923605744734,384,111064368,111.064368,0,0,0.0,0,0,0.0
+serial_sparse,prefill_annotated,all_layers,kv_a_proj,192,192,True,1623497637888,FP8,1979.0,15.314358640433804,,0.0,0.0,0.0,0,0,0,192,303.071157494185,576,5356820,5.35682,0,0,0.0,0,0,0.0
+serial_sparse,prefill_annotated,all_layers,layer_misc,192,192,True,,,,,N/A (no matrix multiply),613.308458,613.308458,0.215816,576,576,0,0,,0,0,0.0,0,0,0.0,0,0,0.0
+serial_sparse,prefill_annotated,all_layers,lm_head,1,1,True,1853358080,BF16,989.5,0.44362714043791346,,0.067391,0.067391,0.01207,4,4,0,1,4.3896905546331535,1,422207,0.422207,0,0,0.0,1,800,0.0008
+serial_sparse,prefill_annotated,all_layers,mla_qk_pv,192,192,True,110398695014400,BF16,989.5,61.30946322007139,,14.124347,14.124347,2.312254,964,964,0,192,606.6571385626064,192,181978729,181.978729,0,0,0.0,0,0,0.0
+serial_sparse,prefill_annotated,all_layers,mlp_down,192,192,True,51951924412416,FP8,1979.0,56.64593857409146,,0.0,0.0,0.0,0,0,0,192,1121.02312438127,576,46343312,46.343312,0,0,0.0,0,0,0.0
+serial_sparse,prefill_annotated,all_layers,mlp_gate,192,192,True,51951924412416,FP8,1979.0,59.27370295492527,,0.0,0.0,0.0,0,0,0,192,1173.026581477971,576,44288787,44.288787,0,0,0.0,0,0,0.0
+serial_sparse,prefill_annotated,all_layers,mlp_up,192,192,True,51951924412416,FP8,1979.0,60.62874949729032,,0.0,0.0,0.0,0,0,0,192,1199.8429525513757,384,43298937,43.298937,0,0,0.0,0,0,0.0
+serial_sparse,prefill_annotated,all_layers,o_proj,192,192,True,46179488366592,FP8,1979.0,56.35443344895924,,0.0,0.0,0.0,0,0,0,192,1115.2542379549034,576,41407140,41.40714,0,0,0.0,0,0,0.0
+serial_sparse,prefill_annotated,all_layers,offload_exact_recall,192,192,True,,,,,N/A (no matrix multiply),15.660008,15.660008,2.335759,1344,1344,0,384,,384,3651765,3.651765,0,0,0.0,0,0,0.0
+serial_sparse,prefill_annotated,all_layers,offload_prepare,192,192,True,,,,,N/A (no matrix multiply),0.204413,0.204413,0.0,0,0,0,0,,0,0,0.0,0,0,0.0,0,0,0.0
+serial_sparse,prefill_annotated,all_layers,offload_source_reservation,192,192,True,,,,,N/A (no matrix multiply),341.382121,341.382121,0.161569,576,576,0,0,,0,0,0.0,0,0,0.0,0,0,0.0
+serial_sparse,prefill_annotated,all_layers,q_a_proj,192,192,True,4329327034368,FP8,1979.0,41.678564651775766,,0.0,0.0,0.0,0,0,0,192,824.8187944586423,576,5248822,5.248822,0,0,0.0,0,0,0.0
+serial_sparse,prefill_annotated,all_layers,q_absorb,192,192,True,3298534883328,BF16,989.5,30.24926736570532,,0.0,0.0,0.0,0,0,0,192,299.3165005836542,192,11020224,11.020224,0,0,0.0,192,172384,0.172384
+serial_sparse,prefill_annotated,all_layers,q_b_proj,192,192,True,14843406974976,FP8,1979.0,58.416094532604454,,0.0,0.0,0.0,0,0,0,192,1156.0545108002423,576,12839712,12.839712,0,0,0.0,0,0,0.0
+serial_sparse,prefill_annotated,all_layers,residual_rms_norm,1,1,True,,,,,N/A (no matrix multiply),0.109815,0.109815,0.009807,2,2,0,1,,1,2784,0.002784,0,0,0.0,0,0,0.0
+serial_sparse,prefill_annotated,all_layers,sparse_mla_aux,192,192,True,,,,,N/A (no matrix multiply),23.775629,23.775629,0.0,0,0,0,0,,0,0,0.0,0,0,0.0,0,0,0.0
+serial_sparse,prefill_annotated,all_layers,v_expand,192,192,True,3298534883328,BF16,989.5,33.61154282335867,,11.033135,11.033135,2.827876,768,768,0,192,332.586216237134,192,9917834,9.917834,0,0,0.0,192,185119,0.185119

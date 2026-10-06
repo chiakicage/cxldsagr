@@ -42,45 +42,44 @@ Prefix 只通过生产 append 构建，不重放此前的模型选择。每个�
 
 ## 当前结果
 
-### 完整模型 V10：top-k 结束到 MLA 开始
+### 完整模型单次 CUDA Graph：top-k 结束到 MLA 开始
 
-[逐层诊断](report/transition/results.md)保留
-`deepseek_gap_v10_a128_minimal_20261006_01` 的六个真实模型区间。它们来自已有 NSYS
-SQLite 的重新分析，没有重跑 GPU。V10 使用真实 checkpoint 的前三层、H=65,536、
-A=128、P=65,664、cold 主 KV 驻留，执行普通持久 append。每方案只有一个侵入式
-profile 样本，不能代替无 profiler 的计时。
+[逐层诊断](report/transition/results.md)来自新 profile
+`deepseek_full_graph_cold_profile_20261006_02`，分析 ID 为
+`cache_full_graph_transition_20261006_03`。真实 checkpoint 的前三层使用 H=65,536、
+A=128、P=65,664、cold 主 KV 驻留，执行普通持久 append。ECHO 和 serial sparse
+均以一次 CUDA Graph replay 执行完整 extend；图内阶段由捕获节点及其 lineage 验证。
+每方案在 capture 内预热一次、测量一次，六个逐层区间均为侵入式 profile 数据。
+运行环境、完整模型验收和无 profiler 计时见 [MFU 实验](../deepseek_v32_mfu/README.md)。
 
 起点以 exact top-k 的无效 ID mask 完成为准，终点为首个实际 MLA 计算 kernel
 开始。下表单位为 µs；实际 IO 包括追加 KV 的 D2H 和 recall 的 host 读取。
 
 | 方案 | 层 | 总区间 | 实际 IO | 暴露的 GPU control | GPU idle | 非 IO gap |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| ECHO | 0 | 134.367 | 68.640 | 40.480 | 25.247 | 65.727 |
-| ECHO | 1 | 78.784 | 17.440 | 37.376 | 23.968 | 61.344 |
-| ECHO | 2 | 106.815 | 44.544 | 39.488 | 22.783 | 62.271 |
-| Serial sparse | 0 | 465.695 | 222.111 | 35.616 | 207.968 | 243.584 |
-| Serial sparse | 1 | 222.848 | 78.208 | 31.040 | 113.600 | 144.640 |
-| Serial sparse | 2 | 363.519 | 199.295 | 34.016 | 130.208 | 164.224 |
+| ECHO | 0 | 135.872 | 68.256 | 43.008 | 24.608 | 67.616 |
+| ECHO | 1 | 68.992 | 16.448 | 40.032 | 12.512 | 52.544 |
+| ECHO | 2 | 99.936 | 44.544 | 39.744 | 15.648 | 55.392 |
+| Serial sparse | 0 | 271.839 | 220.991 | 31.872 | 18.976 | 50.848 |
+| Serial sparse | 1 | 116.832 | 78.336 | 31.744 | 6.752 | 38.496 |
+| Serial sparse | 2 | 245.151 | 199.711 | 32.064 | 13.376 | 45.440 |
 
-三层区间之和分别为 ECHO 319.966 µs、serial sparse 1,052.062 µs，不是完整请求时延。
-这段时间依次用于：ECHO 更新下一次使用的 prefetch hint；追加当前 KV、分配空槽、
-更新元数据并提交 D2H；对精确选择构建并集、识别 miss、分配与搬运缺页、发布映射；
-最后由 MLA wrapper 检查输入、准备输出及 TMA descriptor，并提交 attention。
-Serial sparse 不执行 ECHO hint 更新。V10 trace 的 MLA wrapper 没有 GPU 布局拷贝；
-其他输入若触发这类准备操作，也须计入首个计算 kernel 之前的区间。
+三层区间之和分别为 ECHO 304.800 µs、serial sparse 633.822 µs，不是完整请求时延。
+区间保留 ECHO hint 更新、当前 KV append 及 D2H、精确选择并集、miss 识别、缺页搬运
+与映射发布，以及这些 GPU 活动间的空闲。Serial sparse 不执行 ECHO hint 更新。
+实际 IO、暴露的 control 与 idle 按时间并集统计，三者之和等于各层总区间。
 
-ECHO 的 MLA launch API 比 top-k GPU 完成早 73.695–160.602 µs，说明 CPU 已提前
-提交，后面的 GPU 区间仍在执行排队的 cache 工作。Serial sparse 的 launch API
-则晚 214.642–347.688 µs；其中至少 164.106、80.454、86.220 µs 的逐层 idle
-发生在结束该空闲段的同 stream kernel 尚未开始提交时。主要位置在 append 后到
-union 开始、classify 后到分配开始，以及 L1 的映射完成到 MLA 提交。这个证据只能确认
-提交尚未发生，不能将未插桩的主机时间全部归为 Python。CPU scope 总时长与 GPU 区间
-重叠，不能相加。
+两种方案均在各层 top-k 结束前完成整张 graph 的提交，以上 GPU idle 全部发生在
+`cudaGraphLaunch` 返回之后。重放时没有逐阶段 CPU scope，也没有独立的 MLA launch；
+对应 JSON 字段为 `null`，CSV 留空，不能当作零耗时。单独记录的 graph launch offset
+描述整张图的提交时间，不能据此把图内 idle 归因于逐 kernel 的 Python 提交、设备调度
+或某个硬件原因。
 
 [区间表](report/transition/windows.csv)、[阶段表](report/transition/stages.csv)及
 [独立审查](report/transition/audit.json)保留核验依据；来源、分析 ID 和
-发布文件哈希见[清单](report/transition/publication.json)。这些诊断继承 V10 未单独
-归档 resident mask live JIT/CUBIN 的限制，不新增完整模型验收结论。
+发布文件哈希见[清单](report/transition/publication.json)。独立审查直接读取原始 SQL，
+核对六个边界、GPU 活动及整数纳秒的 IO/control/idle 分解。本诊断复用新 profile 的
+实现身份与验收收据，不额外证明各个 live JIT/CUBIN 文件。
 
 ### 独立 top-k 结束到 MLA 开始的计时
 
@@ -209,13 +208,13 @@ NSYS 保存在 `output/profile/<run_id>/`，日志保存在 `output/log/<run_id>
 Check 默认保存在 `/tmp/cxldsagr-checks/cache_manager_performance/`。
 
 重读实际 MLA profile 时可调用 `src.transition`；`--manager-run` 接受本轮执行真实
-MLA 的新格式，`--model-run` 用于单独分析完整模型。以下命令只重读已有 V10 capture：
+MLA 的新格式，`--model-run` 用于单独分析完整模型。以下命令重读完整 graph capture：
 
 ```bash
 CUDA_VISIBLE_DEVICES= .venv/bin/python -m experiments.cache_manager_performance.src.transition \
-  --model-run experiments/deepseek_v32_mfu/output/data/deepseek_gap_v10_a128_minimal_20261006_01 \
-  --run-id cache_attention_v10_posttopk_new \
-  --output-dir experiments/cache_manager_performance/output/data/cache_attention_v10_posttopk_new
+  --model-run experiments/deepseek_v32_mfu/output/data/deepseek_full_graph_cold_profile_20261006_02 \
+  --run-id cache_full_graph_transition_new \
+  --output-dir experiments/cache_manager_performance/output/data/cache_full_graph_transition_new
 ```
 
 通过 `python -m experiments.cache_manager_performance.src.report --help` 查看发布入口。

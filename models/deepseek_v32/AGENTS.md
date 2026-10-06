@@ -115,7 +115,8 @@ pool 保留原页分配与 FIFO 策略，不套用 dense 的连续布局。
 
 ## 计算图与模型生命周期
 
-计算图策略为 `deepseek-compute-islands-v4-bound-inputs`，只捕获 projection 和
+纯计算图策略为 `deepseek-compute-islands-v4-bound-inputs`，用于 prefill 和现有 C10
+路径，只捕获 projection 和
 finish 的纯计算，cache 事务、选择、召回与 IO 留在图外。projection 用同一个动态
 整数位置生成 RoPE 与 exclusive causal ends，并持有不可变的零 starts；
 indexer 借用这些 bounds。同一 query shape 的层共享 positions、零 starts
@@ -126,6 +127,27 @@ allocated/reserved 分别报告。真实模型 graph bank 仅支持单 GPU 的 d
 层，跨方法和 cache 重建复用同一权重的计算图，不称为完整 offload graph capture。
 replay 必须核验 capture 时的精度策略、权重身份、query shape 和 residual 分支。
 持久 offload 的异步 D2H 写回源须独立持有，不能被后续 replay 覆盖。
+
+真实前三层另提供显式准备的 `deepseek-full-extend-graph-v2-dense-late-wait`：一个图覆盖 embedding、
+全部层的计算、cache 操作、实际 IO、ECHO hint 备份、final norm 和 LM head。
+输入校验与 staging、事务开始、完成同步和主机提交留在图外。该入口只支持单 GPU
+的 dense 层前缀、单个 session 和一次完整 query batch；offload 要求 H+A<=P。
+图绑定固定 H/A、输出模式、cache generation/storage、clock、驻留及追加证明。
+每次 replay 前须恢复匹配的 prefix；cold/warm 状态或其他绑定变化时直接报错，
+不能自动切换到图外执行。不得据此声称支持任意增长的历史、C10 或 NOSA 完整图。
+
+该完整图的 dense 路径允许本层 projection、indexer 和 top-k 与本层历史 H2D 重叠。
+在 append 修改映射及主 attention 消费 KV 前，须等待 H2D 与映射发布完成，随后发起
+下一层预取。跨层预取前须释放当前层 cache lease，之后重新取得当前层 lease 才能
+append、recall 和执行 MLA；不能在未完成预取时读取或修改主 KV 映射。
+这项调度仅由真实三层 dense 完整图及其准备阶段显式启用，普通 forward、prefill、
+C10 与其他方法保留原调度。图结束前仍须汇合全部 H2D/D2H，保留所有被引用的 storage。
+
+共享 pool 的 capture 只在显式授权作用域内开放。结束 capture 前须汇合全部 IO
+stream，保留图引用的 host/device storage 和写回源，并计入 graph private pool；
+选择的规划上限、实际 allocated/reserved 和设备已用量分别报告。Replay 同步成功
+后才应用捕获的主机状态增量，再统一提交所有层；GPU 计数不能重复累计。
+Cache 重建或释放前先销毁图。完成状态不明时保留 owner/storage 并禁用复用。
 
 模型 poisoned 或 closed 后，graph 准备与执行、cache 分配或切换、prefix
 eviction、snapshot/restore 和 forward 均须在使用资源前失败。`synchronize()` 和

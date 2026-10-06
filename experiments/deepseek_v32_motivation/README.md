@@ -1,15 +1,15 @@
 # DeepSeek V3.2 Motivation
 
-当前先优化四方案的 extend cache 管理与 launch 开销，并按新的 gap 定义验收：
-计算与 IO 区间并集之外的时间都计入 gap。达到扣除纯 IO 时间后小于 10% 的目标后，
-将在 MFU 实验中发布优化后的时间、MFU 和带计算用途标签的 timeline，再重测完整 motivation。
-以下已发布数据保留原实现身份，不代表当前优化版本的性能。
+研究者已决定本轮优化到此为止。真实前三层的一次完整 CUDA Graph extend、独立
+计时和逐算子 MFU 已发布在 [MFU 实验](../deepseek_v32_mfu/README.md)；C10 motivation
+补测继续暂缓，不以 gap 全部低于 10% 为继续优化或启动本实验的前置安排。
+以下 C10 数据保留原实现身份，不代表当前完整图路径的性能。
 旧 ECHO 路径包含后来确认的融合 indexer scale stage 提前释放问题；原保存输出的
-数值对照不替代修正后验收。受影响的 ECHO 性能、流量及派生 simulation 将随本轮
-补测更新，旧数据不用于修正后实现的结论。
+数值对照不替代修正后验收。受影响的 ECHO 性能与流量不用于修正后实现的结论；
+直接使用旧 MFU 输入的单层 simulation 已撤回，本轮没有重算。
 
-Dense prefetch 正在改用连续 Host DRAM/HBM 地址上的 `cudaMemcpyAsync`。下述结果
-保留原 run ID 和 mapped-host gather 实现身份，新 DMA 路径尚未完成正式补测。
+真实前三层已使用连续 Host DRAM/HBM 地址上的 `cudaMemcpyAsync`。下述 C10 结果
+保留原 run ID 和 mapped-host gather 实现身份，C10 的 DMA 路径尚未完成正式补测。
 
 本实验属于论文 motivation：在相同 P/NH 配额下比较 HBM-only、ECHO、sparse fetch
 和 dense prefetch，观察固定历史复用、稀疏召回和完整历史预取对请求延迟、流量及
@@ -23,63 +23,13 @@ hidden/logits，其中 96 组 offload/HBM 对照逐位一致；check 与 bench �
 
 ## 单层 simulation
 
-`deepseek_compute_io_simulation_20261006_04` 使用
-[MFU 实验](../deepseek_v32_mfu/README.md)已发布的计算与 I/O 成本，按本实验的
-H=65,536、A=128、history chunk=1,024 设置模拟 L1（从 0 编号）。测量来源是
-`deepseek_mfu_dma_a128_profile_20261006_01` 的真实前三层路径；这里不推算完整
-十层请求，也不将其 token、激活或 cache 状态视为某个 C10 请求。
+旧运行 `deepseek_compute_io_simulation_20261006_04` 使用的 MFU 输入已被替换，
+其中 ECHO 融合 indexer 还包含已确认的 scale stage 提前释放问题。该模拟的数值、
+图表和运行产物已撤回。当前完整图尚未重新提取并验证 simulation 输入；本轮只补
+MFU，不将新测量数字代入旧模拟，也不启动 C10 补测。
 
-模拟排除独立的 cache 管理、CPU launch、D2D/control 和原时间线空隙，保留 KV
-未到齐产生的依赖等待。解析方案共用 HBM 计算成本；ECHO 行替换为已测 fused
-indexer/prefetch、causal mask 和 residual recall，融合内部操作随整体时长保留。
-假设计算和搬运互不减速，candidate 按 discard 处理，排除其持久 D2H。
-
-| Extend 模拟方案 | L1 输出就绪 ms | 调度 MFU |
-| --- | ---: | ---: |
-| HBM 已驻留 | 0.821120 | 27.33% |
-| 串行 sparse fetch | 0.893088 | 25.13% |
-| 理想 sparse overlap（oracle） | 0.821120 | 27.33% |
-| ECHO 已测 fused + recall | 1.350686 | 16.62% |
-| Dense prefetch，逐层串接 DMA | 1.370143 | 16.38% |
-
-Oracle 行假设 indexer 开始时已获知精确搬运集合，用于估算重叠收益上限，不是
-ECHO 的实测或已实现时序。Dense 行按 L0→L1→L2 串接 DMA，令 L0 projection
-与 L0 DMA 同时启动，图中以 L1 projection 开始为 t=0。
-L0 的 projection/indexer/top-k 合计 0.493728 ms，attention/finish
-合计 0.328223 ms，L0 DMA 为 1.373758 ms；由此得到 L1 DMA 从 −0.328223 ms
-开始，到 1.046271 ms 完成。L1 前三阶段在 0.497248 ms 完成，attention 还须
-等待 0.549023 ms，最终输出在 1.370143 ms 就绪。
-
-同一行画出 L1 DMA 的剩余区间，以及 L2 DMA 从 1.046271 ms 开始、截至
-L1 输出时的部分。L2 区间只交代连续预取的上下文，不延长 L1 的完成时间。
-通信量和带宽仍按完整 L1 搬运计算：72 MiB、1.374494 ms、54.927 GB/s，
-不按图中可见区间截短。
-
-纯计算 MFU 为 prefill **45.76%**、extend **27.33%**，使用选定 chunk/layer 的
-FLOPs 按各精度峰值分别归一化；调度 MFU 还将必要的 I/O 等待计入分母。
-ECHO fused 区间无法拆出纯计算时间，整行纯计算 MFU 记为 N/A。
-
-| I/O | 通信量 MiB | 完整搬运时间 ms | 有效带宽 GB/s |
-| --- | ---: | ---: | ---: |
-| Prefill L1 D2H | 1.125000 | 0.026720 | 44.149 |
-| Extend sparse L1 H2D | 3.158569 | 0.071968 | 46.020 |
-| Extend dense L1 H2D | 72.000000 | 1.374494 | 54.927 |
-| ECHO residual recall | 0.295532 | 0.011008 | 28.151 |
-
-ECHO fused kernel 在 0.775775 ms 内预取 2.863037 MiB，覆盖 90.64% 的历史 miss，
-recall 补齐剩余 9.36%。融合区间 MFU 为 8.96%，包含计算与 I/O；其内部通信时间
-不可分解，不单独报告通信带宽。各图已标出阶段 MFU、通信量、带宽及完整融合区间。
-
-![Extend 单层模拟时间线](report/simulation/simulation_extend.svg)
-
-Prefill 选最后一个 chunk（63）。纯计算为 3.913017 ms，串行加入主 KV 写回后为
-3.939737 ms；理想重叠可隐藏全部 26.720 µs 写回。该数字只覆盖这一个 chunk 和层。
-
-![Prefill 单层模拟时间线](report/simulation/simulation_prefill.svg)
-
-完整假设、公式、来源、输入、CSV 和复现命令见
-[simulation 报告](report/simulation/results.md)。本次运行只做 CPU simulation，
-下述硬件实测结果仍保留原测量边界。
+纯调度计算函数和测试保留。输入提取须显式指定来源，拒绝已撤回的 profile；
+完整图输入适配尚未完成。已有保存的旧输入也不能重新发布为 simulation 报告。
 
 ## 工作负载与方案
 

@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import json
 from contextlib import ExitStack, nullcontext
+from functools import partial
 from pathlib import Path
+from types import SimpleNamespace
 
 import torch
 from torch.nn import functional as F
@@ -177,6 +179,9 @@ class DeepSeekEchoModel:
         self._pool_prefetch = {}
         self._compute_graphs = None
         self._graph_reservation_bytes = 0
+        self._extend_graphs = {}
+        self._extend_graph = None
+        self._extend_graph_reservation_bytes = 0
         self.cache_method = "echo" if offload else "hbm"
         self._cache_generation = 0
         self._poisoned = False
@@ -264,6 +269,7 @@ class DeepSeekEchoModel:
                 dram, metadata_workspace, ticket_workspace = 0, 0, 0
             hbm += self.execution_reservation.hbm
             hbm += getattr(self, "_graph_reservation_bytes", 0)
+            hbm += getattr(self, "_extend_graph_reservation_bytes", 0)
             dram += self.execution_reservation.dram
             if hbm > self.hbm_cache_budget_bytes:
                 raise CacheBudgetExceeded(
@@ -279,6 +285,9 @@ class DeepSeekEchoModel:
                 "indexer_workspace_bytes": self.execution_reservation.indexer_bytes,
                 "copy_source_bytes": self.execution_reservation.copy_source_bytes,
                 "compute_graph_reservation_bytes": getattr(self, "_graph_reservation_bytes", 0),
+                "extend_graph_reservation_bytes": getattr(
+                    self, "_extend_graph_reservation_bytes", 0
+                ),
                 **self.execution_reservation.cpu_workspace_metadata,
             }
             total_dram += dram
@@ -388,12 +397,18 @@ class DeepSeekEchoModel:
         self._check_usable()
         if dense_contiguous and not offload:
             raise ValueError("contiguous dense history requires offloaded cache storage")
-        planned = self._plan_cache_resources(offload)
+        previous_reservation = getattr(self, "_extend_graph_reservation_bytes", 0)
+        self._extend_graph_reservation_bytes = 0
+        try:
+            planned = self._plan_cache_resources(offload)
+        finally:
+            self._extend_graph_reservation_bytes = previous_reservation
         try:
             self.synchronize()
         except BaseException:
             self._poisoned = True
             raise
+        self._close_extend_graphs()
         attentions = [block.attention.attention for block in self.blocks]
         self._release_shared_caches()
         # Drop every old cache before the new plan's buffers are allocated.
@@ -519,6 +534,81 @@ class DeepSeekEchoModel:
             self._poisoned = True
             raise
 
+    @torch.inference_mode()
+    def prepare_extend_graph(
+        self,
+        token_ids,
+        *,
+        all_logits=False,
+        return_hidden=False,
+        capture_scope=None,
+    ):
+        """Prepare one complete graph for a restored, fixed-length prefix.
+
+        Preparation warms the ordinary kernels and restores the original prefix
+        outside execution timing. Output tensors are borrowed until the next
+        replay of this graph; copy results which must survive that replay.
+        """
+        self._check_usable()
+        from models.deepseek_v32.execution.extend_graph import DeepSeekExtendGraph
+
+        if (
+            len(self.devices) != 1
+            or not 1 <= self.num_layers <= 3
+            or any(block.is_moe for block in self.blocks)
+        ):
+            raise ValueError("complete extend graphs require a single-device dense prefix 0-2")
+        if not self.length or any(block.cache._step_end is not None for block in self.blocks):
+            raise RuntimeError("complete extend graph preparation requires a committed prefix")
+        ids = prepare_token_ids(
+            token_ids,
+            device=self.devices[0],
+            vocab_size=self.cfg.vocab_size,
+            max_tokens=self.capacity - self.length,
+        )
+        count = len(ids)
+        if count > self.workspace_query_tokens or (
+            self.extend_chunk_size is not None and self.extend_chunk_size < count
+        ):
+            raise ValueError("complete extend graph requires one reserved query batch")
+        if self.offload and self.length + count > self.slots:
+            raise ValueError("complete offload extend graph requires H + A <= P")
+        key = (count, bool(all_logits), bool(return_hidden))
+        graphs = getattr(self, "_extend_graphs", {})
+        self._extend_graphs = graphs
+        if key in graphs:
+            graphs[key].validate()
+            self._extend_graph = graphs[key]
+            return graphs[key]
+        graph = DeepSeekExtendGraph(self, count, all_logits, return_hidden)
+        previous_reservation = getattr(self, "_extend_graph_reservation_bytes", 0)
+        self._extend_graph_reservation_bytes = previous_reservation + graph.reservation_bytes
+        try:
+            plan = self._plan_cache_resources(self.offload)
+        except BaseException:
+            self._extend_graph_reservation_bytes = previous_reservation
+            raise
+        self._cache_resource_plan = plan
+        # Hold even a partial graph until its asynchronous owners can be drained.
+        graphs[key] = self._extend_graph = graph
+        try:
+            graph.allocate(ids, capture_scope=capture_scope)
+        except BaseException:
+            self._poisoned = True
+            raise
+        return graph
+
+    def _close_extend_graphs(self):
+        for key, graph in tuple(getattr(self, "_extend_graphs", {}).items()):
+            try:
+                graph.close()
+            except BaseException:
+                self._poisoned = True
+                raise
+            del self._extend_graphs[key]
+        self._extend_graph = None
+        self._extend_graph_reservation_bytes = 0
+
     def evict_prefix_residency(self):
         """Reset only main-KV residency for an explicitly cold extend experiment."""
         self._check_usable()
@@ -545,6 +635,7 @@ class DeepSeekEchoModel:
             return
         try:
             self.synchronize()
+            self._close_extend_graphs()
             bank = getattr(self, "_compute_graphs", None)
             if bank is not None:
                 bank.close()
@@ -558,9 +649,18 @@ class DeepSeekEchoModel:
         self._closed = True
 
     @torch.inference_mode()
-    def forward(self, token_ids, *, scope=None, all_logits=False, return_hidden=False):
+    def forward(
+        self,
+        token_ids,
+        *,
+        scope=None,
+        all_logits=False,
+        return_hidden=False,
+        use_extend_graph=True,
+    ):
         self._check_usable()
-        bank = getattr(self, "_compute_graphs", None)
+        complete = use_extend_graph and self.length and getattr(self, "_extend_graphs", {})
+        bank = None if complete else getattr(self, "_compute_graphs", None)
         try:
             with bank.execution() if bank is not None else nullcontext(), ExitStack() as hints:
                 for block in self.blocks:
@@ -570,13 +670,29 @@ class DeepSeekEchoModel:
                     if defer is not None:
                         hints.enter_context(defer())
                 return self._forward(
-                    token_ids, scope=scope, all_logits=all_logits, return_hidden=return_hidden
+                    token_ids,
+                    scope=scope,
+                    all_logits=all_logits,
+                    return_hidden=return_hidden,
+                    use_extend_graph=use_extend_graph,
                 )
         finally:
             if bank is not None and bank.failed:
                 self._poisoned = True
+            if any(graph.failed for graph in getattr(self, "_extend_graphs", {}).values()):
+                self._poisoned = True
 
-    def _forward(self, token_ids, *, scope=None, all_logits=False, return_hidden=False):
+    def _forward(
+        self,
+        token_ids,
+        *,
+        scope=None,
+        all_logits=False,
+        return_hidden=False,
+        use_extend_graph=True,
+        use_compute_graphs=True,
+        dense_history_after_selection=False,
+    ):
         """Execute a cache step, optionally returning every token's normalized hidden.
 
         The default returns last-token logits, or all logits with ``all_logits``.
@@ -587,12 +703,18 @@ class DeepSeekEchoModel:
         """
         self._check_usable()
         scope = scope or (lambda _: nullcontext())
-        ids = prepare_token_ids(
-            token_ids,
-            device=self.devices[0],
-            vocab_size=self.cfg.vocab_size,
-            max_tokens=self.capacity - self.length,
+        input_scope = (
+            scope("extend_graph_inputs")
+            if use_extend_graph and self.length and getattr(self, "_extend_graphs", {})
+            else nullcontext()
         )
+        with input_scope:
+            ids = prepare_token_ids(
+                token_ids,
+                device=self.devices[0],
+                vocab_size=self.cfg.vocab_size,
+                max_tokens=self.capacity - self.length,
+            )
         query_chunk = (
             self.chunk_size if not self.length else getattr(self, "extend_chunk_size", None)
         ) or len(ids)
@@ -600,103 +722,50 @@ class DeepSeekEchoModel:
             raise ValueError("query batch exceeds reserved workspace_query_tokens")
         if getattr(self, "offload", False) and query_chunk > self.slots:
             raise ValueError("query batch exceeds usable pool; configure extend_chunk_size")
+        extend_graph = None
+        graphs = getattr(self, "_extend_graphs", {})
+        if use_extend_graph and graphs and self.length:
+            key = (len(ids), bool(all_logits), bool(return_hidden))
+            if key not in graphs:
+                raise ValueError("no prepared extend graph matches query shape and output mode")
+            extend_graph = graphs[key]
+            extend_graph.validate()
         started = []
         offsets = []
+        graph_completed = False
         try:
-            for block in self.blocks:
-                offsets.append(
-                    block.attention.offset.clone()
-                    if hasattr(block, "attention")
-                    and getattr(block.attention, "mutates_prefetch_hint", True)
-                    else None
-                )
+            if extend_graph is not None:
+                offsets = extend_graph.saved_offsets
+            else:
+                for block in self.blocks:
+                    offsets.append(
+                        block.attention.offset.clone()
+                        if hasattr(block, "attention")
+                        and getattr(block.attention, "mutates_prefetch_hint", True)
+                        else None
+                    )
             for block in self.blocks:
                 block.cache.begin_step(ids.numel())
                 started.append(block.cache)
-            logits_parts = []
-            hidden_parts = []
-            for chunk_start in range(0, ids.numel(), query_chunk):
-                chunk_stop = min(ids.numel(), chunk_start + query_chunk)
-                with torch.cuda.device(self.devices[0]), scope("embedding"):
-                    hidden = F.embedding(ids[chunk_start:chunk_stop], self.embedding_weight)
-                    residual = None
-                tickets = {}
-                helpers = getattr(self, "_pool_prefetch", {})
-                if helpers:
-                    for device, helper in helpers.items():
-                        first = self.placement.index(device)
-                        with (
-                            torch.cuda.device(device),
-                            scope(f"dense_history_prefetch_layer_{first}"),
-                        ):
-                            tickets[first] = helper.prefetch(self.blocks[first].cache)
-                for layer, (block, device) in enumerate(zip(self.blocks, self.placement)):
-                    with torch.cuda.device(device):
-                        helper = helpers.get(device)
-                        if helper is not None:
-                            with scope(f"dense_history_wait_layer_{layer}"):
-                                helper.wait(tickets.pop(layer))
-                            next_layer = next(
-                                (
-                                    i
-                                    for i in range(layer + 1, len(self.blocks))
-                                    if self.placement[i] == device
-                                ),
-                                None,
-                            )
-                            if next_layer is not None:
-                                with scope(f"dense_history_prefetch_layer_{next_layer}"):
-                                    tickets[next_layer] = helper.prefetch(
-                                        self.blocks[next_layer].cache
-                                    )
-                        with scope("hidden_transfer"):
-                            hidden = hidden.to(device, non_blocking=True)
-                            if residual is not None:
-                                residual = residual.to(device, non_blocking=True)
-                        # Outer scheduling owns the full layer batch, including
-                        # norm/MLP geometry for independently configured extend.
-                        block.chunk_size = len(hidden)
-                        with scope(f"layer_{layer}"):
-                            bank = getattr(self, "_compute_graphs", None)
-                            if bank is not None and bank.supports(layer, hidden, residual):
-                                hidden, residual = bank.forward_block(
-                                    layer, block.attention, hidden, residual, scope=scope
-                                )
-                            else:
-                                if bank is not None:
-                                    bank.eager_fallbacks += 1
-                                hidden, residual = block.forward(hidden, residual, scope=scope)
-                if return_hidden or all_logits or chunk_stop == ids.numel():
-                    with torch.cuda.device(self.devices[-1]), scope("final_norm_lm_head"):
-                        hidden = hidden.to(self.devices[-1], non_blocking=True)
-                        residual = residual.to(self.devices[-1], non_blocking=True)
-                        all_hidden = return_hidden or all_logits
-                        selected = hidden if all_hidden else hidden[-1:]
-                        selected_residual = residual if all_hidden else residual[-1:]
-                        normalized, _ = residual_rms_norm(
-                            selected,
-                            selected_residual,
-                            self.final_norm,
-                            self.cfg.norm_eps,
-                        )
-                        if return_hidden:
-                            hidden_parts.append(normalized)
-                        if all_logits or chunk_stop == ids.numel():
-                            head_input = normalized if all_logits else normalized[-1:]
-                            logits_parts.append(F.linear(head_input, self.head_weight).float())
-                for helper in helpers.values():
-                    helper.drain()
-            output = logits_parts[0] if len(logits_parts) == 1 else torch.cat(logits_parts)
-            if return_hidden:
-                output = {
-                    "hidden": hidden_parts[0]
-                    if len(hidden_parts) == 1
-                    else torch.cat(hidden_parts),
-                    "logits": output,
-                }
+            if extend_graph is None:
+                output = self._execute_gpu_body(
+                    ids,
+                    query_chunk,
+                    scope=scope,
+                    all_logits=all_logits,
+                    return_hidden=return_hidden,
+                    use_compute_graphs=use_compute_graphs,
+                    dense_history_after_selection=dense_history_after_selection,
+                )
+            else:
+                self._extend_graph = extend_graph
+                output = extend_graph.replay(ids, scope=scope)
             # Synchronization surfaces asynchronous execution failures before
             # advancing valid length for any layer.
             self.synchronize()
+            if extend_graph is not None:
+                graph_completed = True
+                extend_graph.apply()
             if any(
                 cache._step_end is None or cache.written != cache._step_end for cache in started
             ):
@@ -706,6 +775,9 @@ class DeepSeekEchoModel:
             self.length += ids.numel()
             return output
         except BaseException as error:
+            if extend_graph is not None and (extend_graph.pending or graph_completed):
+                extend_graph.failed = True
+                self._poisoned = True
             try:
                 self.synchronize()
             except BaseException as synchronization_error:  # noqa: BLE001 -- retain unsafe backing
@@ -726,7 +798,8 @@ class DeepSeekEchoModel:
                         cache.rollback()
                     except BaseException as rollback_error:  # noqa: BLE001 -- attempt every layer
                         cleanup_errors.append(rollback_error)
-            for block, offset in zip(self.blocks, offsets):
+            recover_offsets = offsets if extend_graph is None or graph_completed else []
+            for block, offset in zip(self.blocks, recover_offsets):
                 if offset is not None:
                     try:
                         block.attention.offset.copy_(offset)
@@ -738,6 +811,135 @@ class DeepSeekEchoModel:
                     "DeepSeek model execution and rollback both failed", [error, *cleanup_errors]
                 ) from None
             raise
+
+    def _wait_dense_history(self, helper, tickets, layer, scope):
+        with scope(f"dense_history_wait_layer_{layer}"):
+            helper.wait(tickets.pop(layer))
+        next_layer = next(
+            (
+                i
+                for i in range(layer + 1, len(self.blocks))
+                if self.placement[i] == self.placement[layer]
+            ),
+            None,
+        )
+        if next_layer is not None:
+            with scope(f"dense_history_prefetch_layer_{next_layer}"):
+                tickets[next_layer] = helper.prefetch(self.blocks[next_layer].cache)
+
+    def _execute_gpu_body(
+        self,
+        ids,
+        query_chunk,
+        *,
+        scope=None,
+        all_logits=False,
+        return_hidden=False,
+        use_compute_graphs=True,
+        retained=None,
+        dense_history_after_selection=False,
+    ):
+        """Submit the model body; the caller owns validation and cache transactions."""
+        scope = scope or (lambda _: nullcontext())
+        if dense_history_after_selection and (
+            getattr(self, "cache_method", None) != "dense_prefetch"
+            or not self.length
+            or len(self.blocks) != 3
+            or len(self.devices) != 1
+            or not getattr(self, "_pool_prefetch", {})
+            or use_compute_graphs
+            or query_chunk < ids.numel()
+        ):
+            raise ValueError(
+                "deferred dense history wait requires a direct three-layer full extend"
+            )
+        logits_parts = []
+        hidden_parts = []
+        for chunk_start in range(0, ids.numel(), query_chunk):
+            chunk_stop = min(ids.numel(), chunk_start + query_chunk)
+            with torch.cuda.device(self.devices[0]), scope("embedding"):
+                hidden = F.embedding(ids[chunk_start:chunk_stop], self.embedding_weight)
+                residual = None
+            tickets = {}
+            helpers = getattr(self, "_pool_prefetch", {})
+            if helpers:
+                for device, helper in helpers.items():
+                    first = self.placement.index(device)
+                    with (
+                        torch.cuda.device(device),
+                        scope(f"dense_history_prefetch_layer_{first}"),
+                    ):
+                        tickets[first] = helper.prefetch(self.blocks[first].cache)
+            for layer, (block, device) in enumerate(zip(self.blocks, self.placement)):
+                with torch.cuda.device(device):
+                    helper = helpers.get(device)
+                    deferred_attention = None
+                    if helper is not None:
+                        if dense_history_after_selection:
+                            deferred_attention = SimpleNamespace(
+                                attention=block.attention.attention,
+                                forward=partial(
+                                    block.attention.forward,
+                                    before_kv_consume=partial(
+                                        self._wait_dense_history, helper, tickets, layer, scope
+                                    ),
+                                ),
+                            )
+                        else:
+                            self._wait_dense_history(helper, tickets, layer, scope)
+                    with scope("hidden_transfer"):
+                        hidden = hidden.to(device, non_blocking=True)
+                        if residual is not None:
+                            residual = residual.to(device, non_blocking=True)
+                    # Outer scheduling owns the full layer batch, including
+                    # norm/MLP geometry for independently configured extend.
+                    block.chunk_size = len(hidden)
+                    with scope(f"layer_{layer}"):
+                        bank = (
+                            getattr(self, "_compute_graphs", None) if use_compute_graphs else None
+                        )
+                        if bank is not None and bank.supports(layer, hidden, residual):
+                            hidden, residual = bank.forward_block(
+                                layer, block.attention, hidden, residual, scope=scope
+                            )
+                        else:
+                            if bank is not None:
+                                bank.eager_fallbacks += 1
+                            if deferred_attention is None:
+                                hidden, residual = block.forward(hidden, residual, scope=scope)
+                            else:
+                                hidden, residual = block.forward(
+                                    hidden, residual, scope=scope, attention=deferred_attention
+                                )
+            if return_hidden or all_logits or chunk_stop == ids.numel():
+                with torch.cuda.device(self.devices[-1]), scope("final_norm_lm_head"):
+                    hidden = hidden.to(self.devices[-1], non_blocking=True)
+                    residual = residual.to(self.devices[-1], non_blocking=True)
+                    all_hidden = return_hidden or all_logits
+                    selected = hidden if all_hidden else hidden[-1:]
+                    selected_residual = residual if all_hidden else residual[-1:]
+                    normalized, _ = residual_rms_norm(
+                        selected,
+                        selected_residual,
+                        self.final_norm,
+                        self.cfg.norm_eps,
+                    )
+                    if return_hidden:
+                        hidden_parts.append(normalized)
+                    if all_logits or chunk_stop == ids.numel():
+                        head_input = normalized if all_logits else normalized[-1:]
+                        logits_parts.append(F.linear(head_input, self.head_weight).float())
+            for helper in helpers.values():
+                helper.drain()
+        if retained is not None:
+            retained["hidden"], retained["residual"] = hidden, residual
+        output = logits_parts[0] if len(logits_parts) == 1 else torch.cat(logits_parts)
+        if return_hidden:
+            output = {
+                "hidden": hidden_parts[0] if len(hidden_parts) == 1 else torch.cat(hidden_parts),
+                "logits": output,
+            }
+        return output
 
     def snapshot_prefix(self):
         """Snapshot shared pools once; diagnostic CPU storage is not serving capacity."""

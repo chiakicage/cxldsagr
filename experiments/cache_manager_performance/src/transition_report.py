@@ -53,11 +53,13 @@ def render(report, output):
             for key in ("source_kind", "run_id", "scheme", "phase", "layer", "sample")
         }
         gpu, cpu = sample["gpu_topk_to_consumer"], sample["cpu_topk_to_consumer"]
+        graph = sample.get("execution_kind") == "complete_cuda_graph"
         if gpu["compute_union_ms"] != 0 or gpu["fused_union_ms"] != 0:
             raise ValueError("measured post-top-k window contains unexpected model computation")
         windows.append(
             {
                 **identity,
+                "submission_kind": "complete_cuda_graph" if graph else "individual_kernel",
                 "topk_end_ns": gpu["start_ns"],
                 "mla_start_ns": gpu["end_ns"],
                 "topk_to_mla_us": gpu["window_ms"] * 1000,
@@ -65,17 +67,34 @@ def render(report, output):
                 "exposed_control_us": gpu["exposed_control_ms"] * 1000,
                 "gpu_idle_us": gpu["gpu_idle_ms"] * 1000,
                 "non_io_gap_us": gpu["gap_ms"] * 1000,
-                "idle_before_paired_launch_us": sample["post_topk_idle_submission"][
-                    "idle_before_next_launch_api_ms"
-                ]
-                * 1000,
-                "cpu_topk_to_wrapper_us": cpu["wall_ms"] * 1000,
-                "cpu_api_union_us": cpu["api_union_ms"] * 1000,
-                "cpu_non_api_residual_us": cpu["non_api_residual_ms"] * 1000,
-                "mla_launch_minus_topk_end_us": sample["boundaries"][
-                    "attention_launch_start_minus_topk_end_ms"
-                ]
-                * 1000,
+                "idle_before_paired_launch_us": (
+                    sample["post_topk_idle_submission"]["idle_before_next_launch_api_ms"] * 1000
+                    if not graph
+                    else None
+                ),
+                "idle_before_graph_launch_us": (
+                    sample["post_topk_idle_submission"]["idle_before_graph_launch_ms"] * 1000
+                    if graph
+                    else None
+                ),
+                "idle_after_graph_launch_us": (
+                    sample["post_topk_idle_submission"]["idle_after_graph_launch_ms"] * 1000
+                    if graph
+                    else None
+                ),
+                "cpu_topk_to_wrapper_us": cpu["wall_ms"] * 1000 if cpu else None,
+                "cpu_api_union_us": cpu["api_union_ms"] * 1000 if cpu else None,
+                "cpu_non_api_residual_us": cpu["non_api_residual_ms"] * 1000 if cpu else None,
+                "mla_launch_minus_topk_end_us": (
+                    sample["boundaries"]["attention_launch_start_minus_topk_end_ms"] * 1000
+                    if not graph
+                    else None
+                ),
+                "graph_launch_minus_topk_end_us": (
+                    sample["boundaries"]["graph_launch_start_minus_topk_end_ms"] * 1000
+                    if graph
+                    else None
+                ),
             }
         )
         for stage in sample["stages"]:
@@ -90,9 +109,14 @@ def render(report, output):
                 {
                     **identity,
                     "stage": stage["stage"],
-                    "cpu_scope_us": stage["cpu"]["wall_ms"] * 1000,
-                    "cpu_api_union_us": stage["cpu"]["api_union_ms"] * 1000,
-                    "cpu_non_api_residual_us": stage["cpu"]["non_api_residual_ms"] * 1000,
+                    "stage_ownership": stage.get("stage_ownership", "cpu_scope_correlation"),
+                    "cpu_scope_us": stage["cpu"]["wall_ms"] * 1000 if stage["cpu"] else None,
+                    "cpu_api_union_us": (
+                        stage["cpu"]["api_union_ms"] * 1000 if stage["cpu"] else None
+                    ),
+                    "cpu_non_api_residual_us": (
+                        stage["cpu"]["non_api_residual_ms"] * 1000 if stage["cpu"] else None
+                    ),
                     "gpu_busy_in_window_us": stage["gpu_in_post_topk"]["gpu_busy_union_ms"] * 1000,
                     "gpu_io_in_window_us": stage["gpu_in_post_topk"]["io_union_ms"] * 1000,
                     "gpu_control_in_window_us": stage["gpu_in_post_topk"]["gpu_control_union_ms"]
@@ -165,6 +189,13 @@ def render(report, output):
                 "counts only idle ending at a unique main-stream kernel, before its correlated launch API begins. "
                 "Other-stream endings remain unassigned. This does not attribute host residual time to Python, C++ checks, "
                 "allocation or scheduling."
+            ),
+            "",
+            (
+                "For complete CUDA Graph replay, stage ownership is verified through captured node lineage. "
+                "All stages share the one graph launch. CPU stage times and the separate MLA launch offset are absent "
+                "(blank CSV cells / null JSON), not zero. The signed graph-launch offset and idle before/after its return "
+                "refer to submission of the entire graph; they do not measure a per-kernel Python or wrapper launch."
             ),
             "",
             (

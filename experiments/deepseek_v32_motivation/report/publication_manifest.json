@@ -4,7 +4,7 @@
   "report_run_id": "deepseek_mfu_c10_report_20261006_01",
   "bench_run_id": "deepseek_mfu_c10_bench_20261006_01",
   "profile_run_id": "deepseek_mfu_c10_profile_20261006_02",
-  "readme_sha256": "cd1bcf13bb5b10742b83ef733089fd718cb8a4375e9ea191628a05a3e0f4a9b9",
+  "readme_sha256": "ef9563f06e01724f6d77b2d68ff6eecb996604978ef69be1b668cae9119bcd15",
   "artifacts_sha256": {
     "diagnosis/cuda_apis.csv": "f25b6cd4ae5089fc33dd58e2b4d26a6558ba537635ce51501e20446c3269010e",
     "diagnosis/gap_context.json": "e3ff4eb4b9f98440937fac28aa52725a97ad263203724e230bb2ee5ef170e4db",
@@ -61,13 +61,15 @@
   "source_artifacts": "experiments/deepseek_v32_motivation/output/data/deepseek_mfu_c10_report_20261006_01",
   "validation": "Independent full-output byte comparison, cache/lifecycle equality, source/native/runtime checks, raw interval and memcpy-byte audit, figure visual review, and discrete observer review passed. Chinese prose reviewed with humanizer-zh.",
   "readme_transition": {
-    "updated_utc": "2026-10-05T17:38:22.759099+00:00",
+    "updated_utc": "2026-10-06T13:05:16.140539+00:00",
     "original_published_readme_path": "experiments/deepseek_v32_motivation/output/data/deepseek_mfu_c10_report_20261006_01/README.md",
     "original_published_readme_sha256": "41853bcd027892fcb636a6995fecaa737ee1e4be4eaa4f8371f9af37400d64b1",
     "original_publication_manifest_path": "experiments/deepseek_v32_motivation/output/data/deepseek_mfu_c10_report_20261006_01/publication/publication_manifest.json",
     "original_publication_manifest_sha256": "820fd1e52d97fec99d37faa7e65884fbc33bb2147e485edcf0428868949e428c",
-    "change_scope": "Added a pending-DMA remeasurement note. Existing run IDs, mapped-host gather implementation identity, numerical results, measurement boundaries and all 51 report artifact hashes remain unchanged.",
+    "change_scope": "Document the completed full-extend graph MFU supplement and the user decision to stop optimization; withdraw only the simulation derived from the replaced MFU profile. C10 remeasurement remains paused; all 51 C10 report artifacts, run IDs and measurement boundaries are preserved.",
     "current_dense_dma_status": "Formal remeasurement pending; current published numerical evidence uses mapped-host gather.",
-    "numerical_artifacts_unchanged": true
+    "numerical_artifacts_unchanged": true,
+    "withdrawn_simulation_run_id": "deepseek_compute_io_simulation_20261006_04",
+    "replacement_mfu_report": "experiments/deepseek_v32_mfu/report/full_extend_graph/mfu"
   }
 }

@@ -1,0 +1,535 @@
+{
+  "passed": true,
+  "profile_run_id": "deepseek_dense_late_wait_profile_20261006_01",
+  "measurement": "Independent CPU interval-union audit; no GPU work or reclassification",
+  "inputs_and_analyzer_sha256": {
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_dense_late_wait_timeline_20261006_02/window_rows.json": "4f89be39af3a2bcd3f4b3d5287b3cf0dfeeeee41b2c0811403ae7939f5fe566b",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_dense_late_wait_timeline_20261006_02/compact_receipt.json": "c89d25e83f22fca257ded21a1b2713720466fa377699e27dbdceb7edebffd4d9",
+    "/tmp/deepseek_dense_timeline_boundary/audit_layer_gap.py": "4dfaddecd53b28e85ce2bf9b5e559bf45e0abdaaa1450d64602dcc7415b2676c"
+  },
+  "productive_lanes": [
+    "Compute",
+    "Compute + IO",
+    "IO"
+  ],
+  "ratio": "gap / (window - standalone IO-only union); fused intervals remain productive and in denominator",
+  "windows": [
+    {
+      "phase": "prefill",
+      "method": "hbm",
+      "overall": {
+        "start_ns": 1310979736,
+        "end_ns": 1322940379,
+        "window_ms": 11.960643,
+        "gap_ms": 0.325696,
+        "gap_percent_excluding_pure_io": 2.7230643034826807,
+        "gpu_idle_ms": 0.194144,
+        "control_only_ms": 0.131552,
+        "pure_io_only_ms": 0.0,
+        "non_io_window_ms": 11.960643,
+        "gap_below_threshold": true
+      },
+      "layers": [
+        {
+          "method": "hbm",
+          "layer": 0,
+          "start_ns": 1310979736,
+          "end_ns": 1314953710,
+          "window_ms": 3.973974,
+          "gap_ms": 0.104768,
+          "gap_percent_excluding_pure_io": 2.636353433615821,
+          "gpu_idle_ms": 0.060736,
+          "control_only_ms": 0.044032,
+          "pure_io_only_ms": 0.0,
+          "non_io_window_ms": 3.973974,
+          "gap_below_threshold": true,
+          "boundary": "L0 first compute to this layer final compute end"
+        },
+        {
+          "method": "hbm",
+          "layer": 1,
+          "start_ns": 1314953710,
+          "end_ns": 1318942597,
+          "window_ms": 3.988887,
+          "gap_ms": 0.109696,
+          "gap_percent_excluding_pure_io": 2.7500402994619804,
+          "gpu_idle_ms": 0.065888,
+          "control_only_ms": 0.043808,
+          "pure_io_only_ms": 0.0,
+          "non_io_window_ms": 3.988887,
+          "gap_below_threshold": true,
+          "boundary": "Previous layer final compute end to this layer final compute end"
+        },
+        {
+          "method": "hbm",
+          "layer": 2,
+          "start_ns": 1318942597,
+          "end_ns": 1322940379,
+          "window_ms": 3.997782,
+          "gap_ms": 0.111232,
+          "gap_percent_excluding_pure_io": 2.782342809087639,
+          "gpu_idle_ms": 0.06752,
+          "control_only_ms": 0.043712,
+          "pure_io_only_ms": 0.0,
+          "non_io_window_ms": 3.997782,
+          "gap_below_threshold": true,
+          "boundary": "Previous layer final compute end to this layer final compute end"
+        }
+      ],
+      "all_windows_below_10_percent": true
+    },
+    {
+      "phase": "prefill",
+      "method": "echo",
+      "overall": {
+        "start_ns": 1375557492,
+        "end_ns": 1387555832,
+        "window_ms": 11.99834,
+        "gap_ms": 0.367968,
+        "gap_percent_excluding_pure_io": 3.0822375640164377,
+        "gpu_idle_ms": 0.199008,
+        "control_only_ms": 0.16896,
+        "pure_io_only_ms": 0.06,
+        "non_io_window_ms": 11.93834,
+        "gap_below_threshold": true
+      },
+      "layers": [
+        {
+          "method": "echo",
+          "layer": 0,
+          "start_ns": 1375557492,
+          "end_ns": 1379552011,
+          "window_ms": 3.994519,
+          "gap_ms": 0.116832,
+          "gap_percent_excluding_pure_io": 2.942060061519556,
+          "gpu_idle_ms": 0.06128,
+          "control_only_ms": 0.055552,
+          "pure_io_only_ms": 0.023424,
+          "non_io_window_ms": 3.971095,
+          "gap_below_threshold": true,
+          "boundary": "L0 first compute to this layer final compute end"
+        },
+        {
+          "method": "echo",
+          "layer": 1,
+          "start_ns": 1379552011,
+          "end_ns": 1383557569,
+          "window_ms": 4.005558,
+          "gap_ms": 0.12192,
+          "gap_percent_excluding_pure_io": 3.059929133727838,
+          "gpu_idle_ms": 0.067648,
+          "control_only_ms": 0.054272,
+          "pure_io_only_ms": 0.021152,
+          "non_io_window_ms": 3.984406,
+          "gap_below_threshold": true,
+          "boundary": "Previous layer final compute end to this layer final compute end"
+        },
+        {
+          "method": "echo",
+          "layer": 2,
+          "start_ns": 1383557569,
+          "end_ns": 1387555832,
+          "window_ms": 3.998263,
+          "gap_ms": 0.129216,
+          "gap_percent_excluding_pure_io": 3.244318939329458,
+          "gpu_idle_ms": 0.07008,
+          "control_only_ms": 0.059136,
+          "pure_io_only_ms": 0.015424,
+          "non_io_window_ms": 3.982839,
+          "gap_below_threshold": true,
+          "boundary": "Previous layer final compute end to this layer final compute end"
+        }
+      ],
+      "all_windows_below_10_percent": true
+    },
+    {
+      "phase": "prefill",
+      "method": "serial_sparse",
+      "overall": {
+        "start_ns": 1319898868,
+        "end_ns": 1331843193,
+        "window_ms": 11.944325,
+        "gap_ms": 0.316927,
+        "gap_percent_excluding_pure_io": 2.666262288558553,
+        "gpu_idle_ms": 0.178015,
+        "control_only_ms": 0.138912,
+        "pure_io_only_ms": 0.05776,
+        "non_io_window_ms": 11.886565,
+        "gap_below_threshold": true
+      },
+      "layers": [
+        {
+          "method": "serial_sparse",
+          "layer": 0,
+          "start_ns": 1319898868,
+          "end_ns": 1323879147,
+          "window_ms": 3.980279,
+          "gap_ms": 0.106175,
+          "gap_percent_excluding_pure_io": 2.6804998213841653,
+          "gpu_idle_ms": 0.056799,
+          "control_only_ms": 0.049376,
+          "pure_io_only_ms": 0.019264,
+          "non_io_window_ms": 3.961015,
+          "gap_below_threshold": true,
+          "boundary": "L0 first compute to this layer final compute end"
+        },
+        {
+          "method": "serial_sparse",
+          "layer": 1,
+          "start_ns": 1323879147,
+          "end_ns": 1327857346,
+          "window_ms": 3.978199,
+          "gap_ms": 0.10656,
+          "gap_percent_excluding_pure_io": 2.691763521905817,
+          "gpu_idle_ms": 0.061248,
+          "control_only_ms": 0.045312,
+          "pure_io_only_ms": 0.019456,
+          "non_io_window_ms": 3.958743,
+          "gap_below_threshold": true,
+          "boundary": "Previous layer final compute end to this layer final compute end"
+        },
+        {
+          "method": "serial_sparse",
+          "layer": 2,
+          "start_ns": 1327857346,
+          "end_ns": 1331843193,
+          "window_ms": 3.985847,
+          "gap_ms": 0.104192,
+          "gap_percent_excluding_pure_io": 2.6265961515143035,
+          "gpu_idle_ms": 0.059968,
+          "control_only_ms": 0.044224,
+          "pure_io_only_ms": 0.01904,
+          "non_io_window_ms": 3.966807,
+          "gap_below_threshold": true,
+          "boundary": "Previous layer final compute end to this layer final compute end"
+        }
+      ],
+      "all_windows_below_10_percent": true
+    },
+    {
+      "phase": "prefill",
+      "method": "dense_prefetch",
+      "overall": {
+        "start_ns": 1321654958,
+        "end_ns": 1333822227,
+        "window_ms": 12.167269,
+        "gap_ms": 0.328094,
+        "gap_percent_excluding_pure_io": 2.7090549733535916,
+        "gpu_idle_ms": 0.182686,
+        "control_only_ms": 0.145408,
+        "pure_io_only_ms": 0.056256,
+        "non_io_window_ms": 12.111013,
+        "gap_below_threshold": true
+      },
+      "layers": [
+        {
+          "method": "dense_prefetch",
+          "layer": 0,
+          "start_ns": 1321654958,
+          "end_ns": 1325705541,
+          "window_ms": 4.050583,
+          "gap_ms": 0.104703,
+          "gap_percent_excluding_pure_io": 2.598414937852014,
+          "gpu_idle_ms": 0.056735,
+          "control_only_ms": 0.047968,
+          "pure_io_only_ms": 0.021088,
+          "non_io_window_ms": 4.029495,
+          "gap_below_threshold": true,
+          "boundary": "L0 first compute to this layer final compute end"
+        },
+        {
+          "method": "dense_prefetch",
+          "layer": 1,
+          "start_ns": 1325705541,
+          "end_ns": 1329769052,
+          "window_ms": 4.063511,
+          "gap_ms": 0.110656,
+          "gap_percent_excluding_pure_io": 2.736631605552699,
+          "gpu_idle_ms": 0.062528,
+          "control_only_ms": 0.048128,
+          "pure_io_only_ms": 0.02,
+          "non_io_window_ms": 4.043511,
+          "gap_below_threshold": true,
+          "boundary": "Previous layer final compute end to this layer final compute end"
+        },
+        {
+          "method": "dense_prefetch",
+          "layer": 2,
+          "start_ns": 1329769052,
+          "end_ns": 1333822227,
+          "window_ms": 4.053175,
+          "gap_ms": 0.112735,
+          "gap_percent_excluding_pure_io": 2.79184756242374,
+          "gpu_idle_ms": 0.063423,
+          "control_only_ms": 0.049312,
+          "pure_io_only_ms": 0.015168,
+          "non_io_window_ms": 4.038007,
+          "gap_below_threshold": true,
+          "boundary": "Previous layer final compute end to this layer final compute end"
+        }
+      ],
+      "all_windows_below_10_percent": true
+    },
+    {
+      "phase": "extend",
+      "method": "hbm",
+      "overall": {
+        "start_ns": 33810763,
+        "end_ns": 36286884,
+        "window_ms": 2.476121,
+        "gap_ms": 0.202464,
+        "gap_percent_excluding_pure_io": 8.176660187446414,
+        "gpu_idle_ms": 0.09552,
+        "control_only_ms": 0.106944,
+        "pure_io_only_ms": 0.0,
+        "non_io_window_ms": 2.476121,
+        "gap_below_threshold": true
+      },
+      "layers": [
+        {
+          "method": "hbm",
+          "layer": 0,
+          "start_ns": 33810763,
+          "end_ns": 34631273,
+          "window_ms": 0.82051,
+          "gap_ms": 0.067552,
+          "gap_percent_excluding_pure_io": 8.232928300691034,
+          "gpu_idle_ms": 0.031872,
+          "control_only_ms": 0.03568,
+          "pure_io_only_ms": 0.0,
+          "non_io_window_ms": 0.82051,
+          "gap_below_threshold": true,
+          "boundary": "L0 first compute to this layer final compute end"
+        },
+        {
+          "method": "hbm",
+          "layer": 1,
+          "start_ns": 34631273,
+          "end_ns": 35460967,
+          "window_ms": 0.829694,
+          "gap_ms": 0.068288,
+          "gap_percent_excluding_pure_io": 8.230504258196396,
+          "gpu_idle_ms": 0.032512,
+          "control_only_ms": 0.035776,
+          "pure_io_only_ms": 0.0,
+          "non_io_window_ms": 0.829694,
+          "gap_below_threshold": true,
+          "boundary": "Previous layer final compute end to this layer final compute end"
+        },
+        {
+          "method": "hbm",
+          "layer": 2,
+          "start_ns": 35460967,
+          "end_ns": 36286884,
+          "window_ms": 0.825917,
+          "gap_ms": 0.066624,
+          "gap_percent_excluding_pure_io": 8.066670137556196,
+          "gpu_idle_ms": 0.031136,
+          "control_only_ms": 0.035488,
+          "pure_io_only_ms": 0.0,
+          "non_io_window_ms": 0.825917,
+          "gap_below_threshold": true,
+          "boundary": "Previous layer final compute end to this layer final compute end"
+        }
+      ],
+      "all_windows_below_10_percent": true
+    },
+    {
+      "phase": "extend",
+      "method": "echo",
+      "overall": {
+        "start_ns": 83602643,
+        "end_ns": 88147784,
+        "window_ms": 4.545141,
+        "gap_ms": 0.489025,
+        "gap_percent_excluding_pure_io": 11.074123767953486,
+        "gpu_idle_ms": 0.186274,
+        "control_only_ms": 0.302751,
+        "pure_io_only_ms": 0.129216,
+        "non_io_window_ms": 4.415925,
+        "gap_below_threshold": false
+      },
+      "layers": [
+        {
+          "method": "echo",
+          "layer": 0,
+          "start_ns": 83602643,
+          "end_ns": 85169231,
+          "window_ms": 1.566588,
+          "gap_ms": 0.167073,
+          "gap_percent_excluding_pure_io": 11.153696201923205,
+          "gpu_idle_ms": 0.067233,
+          "control_only_ms": 0.09984,
+          "pure_io_only_ms": 0.068672,
+          "non_io_window_ms": 1.497916,
+          "gap_below_threshold": false,
+          "boundary": "L0 first compute to this layer final compute end"
+        },
+        {
+          "method": "echo",
+          "layer": 1,
+          "start_ns": 85169231,
+          "end_ns": 86634698,
+          "window_ms": 1.465467,
+          "gap_ms": 0.156191,
+          "gap_percent_excluding_pure_io": 10.781228537250877,
+          "gpu_idle_ms": 0.054784,
+          "control_only_ms": 0.101407,
+          "pure_io_only_ms": 0.016736,
+          "non_io_window_ms": 1.448731,
+          "gap_below_threshold": false,
+          "boundary": "Previous layer final compute end to this layer final compute end"
+        },
+        {
+          "method": "echo",
+          "layer": 2,
+          "start_ns": 86634698,
+          "end_ns": 88147784,
+          "window_ms": 1.513086,
+          "gap_ms": 0.165761,
+          "gap_percent_excluding_pure_io": 11.281799632200306,
+          "gpu_idle_ms": 0.064257,
+          "control_only_ms": 0.101504,
+          "pure_io_only_ms": 0.043808,
+          "non_io_window_ms": 1.469278,
+          "gap_below_threshold": false,
+          "boundary": "Previous layer final compute end to this layer final compute end"
+        }
+      ],
+      "all_windows_below_10_percent": false
+    },
+    {
+      "phase": "extend",
+      "method": "serial_sparse",
+      "overall": {
+        "start_ns": 82938551,
+        "end_ns": 86033935,
+        "window_ms": 3.095384,
+        "gap_ms": 0.308769,
+        "gap_percent_excluding_pure_io": 11.894207963833047,
+        "gpu_idle_ms": 0.117153,
+        "control_only_ms": 0.191616,
+        "pure_io_only_ms": 0.499423,
+        "non_io_window_ms": 2.595961,
+        "gap_below_threshold": false
+      },
+      "layers": [
+        {
+          "method": "serial_sparse",
+          "layer": 0,
+          "start_ns": 82938551,
+          "end_ns": 84024853,
+          "window_ms": 1.086302,
+          "gap_ms": 0.10832,
+          "gap_percent_excluding_pure_io": 12.526858964128682,
+          "gpu_idle_ms": 0.04688,
+          "control_only_ms": 0.06144,
+          "pure_io_only_ms": 0.2216,
+          "non_io_window_ms": 0.864702,
+          "gap_below_threshold": false,
+          "boundary": "L0 first compute to this layer final compute end"
+        },
+        {
+          "method": "serial_sparse",
+          "layer": 1,
+          "start_ns": 84024853,
+          "end_ns": 84963731,
+          "window_ms": 0.938878,
+          "gap_ms": 0.097314,
+          "gap_percent_excluding_pure_io": 11.299210678482106,
+          "gpu_idle_ms": 0.033826,
+          "control_only_ms": 0.063488,
+          "pure_io_only_ms": 0.077632,
+          "non_io_window_ms": 0.861246,
+          "gap_below_threshold": false,
+          "boundary": "Previous layer final compute end to this layer final compute end"
+        },
+        {
+          "method": "serial_sparse",
+          "layer": 2,
+          "start_ns": 84963731,
+          "end_ns": 86033935,
+          "window_ms": 1.070204,
+          "gap_ms": 0.103135,
+          "gap_percent_excluding_pure_io": 11.854420566129471,
+          "gpu_idle_ms": 0.036447,
+          "control_only_ms": 0.066688,
+          "pure_io_only_ms": 0.200191,
+          "non_io_window_ms": 0.870013,
+          "gap_below_threshold": false,
+          "boundary": "Previous layer final compute end to this layer final compute end"
+        }
+      ],
+      "all_windows_below_10_percent": false
+    },
+    {
+      "phase": "extend",
+      "method": "dense_prefetch",
+      "overall": {
+        "start_ns": 84603610,
+        "end_ns": 89138544,
+        "window_ms": 4.534934,
+        "gap_ms": 0.093248,
+        "gap_percent_excluding_pure_io": 3.9184145481561417,
+        "gpu_idle_ms": 0.042528,
+        "control_only_ms": 0.05072,
+        "pure_io_only_ms": 2.155196,
+        "non_io_window_ms": 2.379738,
+        "gap_below_threshold": true
+      },
+      "layers": [
+        {
+          "method": "dense_prefetch",
+          "layer": 0,
+          "start_ns": 84603610,
+          "end_ns": 86361622,
+          "window_ms": 1.758012,
+          "gap_ms": 0.031808,
+          "gap_percent_excluding_pure_io": 3.9866943074798145,
+          "gpu_idle_ms": 0.020576,
+          "control_only_ms": 0.011232,
+          "pure_io_only_ms": 0.960158,
+          "non_io_window_ms": 0.797854,
+          "gap_below_threshold": true,
+          "boundary": "L0 first compute to this layer final compute end"
+        },
+        {
+          "method": "dense_prefetch",
+          "layer": 1,
+          "start_ns": 86361622,
+          "end_ns": 87744435,
+          "window_ms": 1.382813,
+          "gap_ms": 0.017408,
+          "gap_percent_excluding_pure_io": 2.2463616631954393,
+          "gpu_idle_ms": 0.004896,
+          "control_only_ms": 0.012512,
+          "pure_io_only_ms": 0.607871,
+          "non_io_window_ms": 0.774942,
+          "gap_below_threshold": true,
+          "boundary": "Previous layer final compute end to this layer final compute end"
+        },
+        {
+          "method": "dense_prefetch",
+          "layer": 2,
+          "start_ns": 87744435,
+          "end_ns": 89138544,
+          "window_ms": 1.394109,
+          "gap_ms": 0.044032,
+          "gap_percent_excluding_pure_io": 5.456649920316454,
+          "gpu_idle_ms": 0.017056,
+          "control_only_ms": 0.026976,
+          "pure_io_only_ms": 0.587167,
+          "non_io_window_ms": 0.806942,
+          "gap_below_threshold": true,
+          "boundary": "Previous layer final compute end to this layer final compute end"
+        }
+      ],
+      "all_windows_below_10_percent": true
+    }
+  ],
+  "artifacts_sha256": {
+    "timeline_layer_gap.csv": "1e7b797d26356b539ae07e1d89f2860563f93474fb8efa40e26dcba4a3a90ed2",
+    "timeline_overall_gap.csv": "58ece5383ea9a0bda45f1fa140078974c86ec9d7e4f74c24971af69ddd2422b0",
+    "timeline_prefill_layer_gap.csv": "05cb83ecb09023e2f503af2ead6b48f91d9700e3f6d56e32038e3107721919d1"
+  }
+}

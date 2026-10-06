@@ -1,49 +1,49 @@
 {
-  "analysis_directory": "experiments/cache_manager_performance/output/data/cache_attention_transition_model_20261006_02",
-  "analysis_id": "cache_attention_transition_model_20261006_02",
-  "analysis_summary_sha256": "07f7e55d2d0cc7facff9108bbfab02bf755436dbfaea639c86ab4f36ac663b07",
-  "artifact_path_base": "publication directory for files; repository root for analysis directory",
-  "files": {
-    "audit.json": {
-      "bytes": 13533,
-      "sha256": "65c39a5ff0e5abbabfe6bb5808ca0257ba1717a2a598b2d0669e52efe556742b"
-    },
-    "latency.csv": {
-      "bytes": 1235,
-      "sha256": "a9301a8726ad8de58e100ad50bfbefa369dd50a59bce813b29d95778fd4b3206"
-    },
-    "provenance.json": {
-      "bytes": 18837,
-      "sha256": "fb3ea134e24eaa9bb2fcdf2ce299689f09705c9189ddcc1afcdc72e620c490c8"
-    },
-    "results.md": {
-      "bytes": 2783,
-      "sha256": "f8bd5482332ee097b76413952fb41e8e173e5adbe3833a5b037d3eaede395d43"
-    },
-    "stages.csv": {
-      "bytes": 3411,
-      "sha256": "228b267b3c50885945292489d05047917b7f4c00ca90c55acf234246aa1644c5"
-    },
-    "transition.png": {
-      "bytes": 39288,
-      "sha256": "b15fa980f3c7a670fcc1ccab3d9c9d3dd07afdc8c51ff76e2ed9a392ade35076"
-    },
-    "transition.svg": {
-      "bytes": 46426,
-      "sha256": "2a365a9f271f2ba3c8fd244635faf98d6fd92a2b9f3fd379e2cbfdc384601dca"
-    },
-    "windows.csv": {
-      "bytes": 1439,
-      "sha256": "8b2ef8dea907ca56c6273c2e4a8b6d77fc78fb3c86b3ae66c0ed393c6db6eec8"
-    }
-  },
-  "new_gpu_run": false,
-  "profile_run_id": "deepseek_gap_v10_a128_minimal_20261006_01",
-  "published_at_utc": "2026-10-06T11:29:03.276362+00:00",
-  "reproduce": "CUDA_VISIBLE_DEVICES= .venv/bin/python -m experiments.cache_manager_performance.src.transition --model-run experiments/deepseek_v32_mfu/output/data/deepseek_gap_v10_a128_minimal_20261006_01 --run-id cache_attention_transition_model_new --output-dir experiments/cache_manager_performance/output/data/cache_attention_transition_model_new",
-  "schema": "cache-manager-model-transition-publication-v2",
-  "scope": "Six V10 cold persistent-extend layer intervals; top-k GPU completion to actual MLA kernel start; independent replay published separately.",
+  "schema": "cache-manager-model-transition-publication-v3",
+  "analysis_id": "cache_full_graph_transition_20261006_03",
+  "analysis_directory": "experiments/cache_manager_performance/output/data/cache_full_graph_transition_20261006_03",
+  "analysis_summary_sha256": "8386ecba2538e7d6e229df0768123b014dbeefa43b39d0f42f07d0b7c6b9d015",
+  "profile_run_id": "deepseek_full_graph_cold_profile_20261006_02",
   "source_kind": "complete_model",
   "status": "published_diagnostic",
-  "validation": "Unchanged standard-library raw-SQL audit rerun; all six endpoints, launch anchors, partitions, CPU/GPU stage rows and CSV statistics match prior independent audit."
+  "new_gpu_run": false,
+  "published_at_utc": "2026-10-06T12:34:23.773146+00:00",
+  "artifact_path_base": "publication directory for files; repository root for analysis directory",
+  "scope": "Six cold persistent-extend windows from one complete CUDA Graph per method; last exact-top-k GPU node end to actual MLA compute start. Independent cache-manager replay is published separately.",
+  "validation": "Fresh independent raw SQL audit directly binds CPU analysis _03 and matches all six native boundaries, GPU activity multisets, integer interval unions, and CSV windows. Archived/current analyzer identities and formatting-only AST equality verified.",
+  "reproduce": "CUDA_VISIBLE_DEVICES= .venv/bin/python -m experiments.cache_manager_performance.src.transition --model-run experiments/deepseek_v32_mfu/output/data/deepseek_full_graph_cold_profile_20261006_02 --run-id cache_full_graph_transition_new --output-dir experiments/cache_manager_performance/output/data/cache_full_graph_transition_new",
+  "files": {
+    "audit.json": {
+      "sha256": "547267bc5eec04fce997cb3ab703f327bd9458209c9b9a653f4e208c84674dc0",
+      "bytes": 16516
+    },
+    "latency.csv": {
+      "sha256": "b696dba153ef806290614125761dad5ae5a51ecde6371ca8bd9e230d6e66bae3",
+      "bytes": 1309
+    },
+    "provenance.json": {
+      "sha256": "ead34ac00e6db031230b230ec844929bced7accdd4fe6e7faae6c360350e9e9f",
+      "bytes": 23412
+    },
+    "results.md": {
+      "sha256": "8b5a733a8d8f3536053cc2c2c26be57625f3212cf544c31ec4e636a1aea79efb",
+      "bytes": 3173
+    },
+    "stages.csv": {
+      "sha256": "c36a00d4f590d9ed1d1e096560ac72115a8568662309161ed68e14b00baaa7c1",
+      "bytes": 3492
+    },
+    "transition.png": {
+      "sha256": "08d15e85c3a6e5a46e3cf4f577ddd9a49a910fafb0dd65805ccf53eafbd79edc",
+      "bytes": 39429
+    },
+    "transition.svg": {
+      "sha256": "ef605afcdc0776191a1603c57ae2ddc06718d13dbd8b90bdb067587d832d1131",
+      "bytes": 46063
+    },
+    "windows.csv": {
+      "sha256": "940ffe130df4f9deab8c3eb9284c3d9c229be71ce1aafd847fddd02a752fc154",
+      "bytes": 1620
+    }
+  }
 }

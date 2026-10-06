@@ -1,0 +1,2539 @@
+{
+  "schema": "deepseek-fullgraph-mfu-independent-profile-v1",
+  "run_id": "deepseek_dense_late_wait_mfu_profile_20261006_01",
+  "methods": [
+    {
+      "method": "hbm",
+      "setup_sqlite_sha256": "4a086b1710ac7108a260847752c59aba04c18fdf06965f6159123e364c4ed83a",
+      "replay_sqlite_sha256": "2fbd4c8e6ebf6c9eb76e7ffa8d9df6fa44bacd367b8c90d0ce070b9663c913e9",
+      "graph_launch_count": 1,
+      "graph_gpu_node_count": 218,
+      "complete_unique_native_membership": true,
+      "outside_graph_inputs": [
+        {
+          "kind": "memcpy",
+          "name": "Host-to-Device",
+          "bytes": 1024
+        },
+        {
+          "kind": "memcpy",
+          "name": "Device-to-Device",
+          "bytes": 1024
+        }
+      ],
+      "matrix_api_count": 43,
+      "matrix_api_gpu_node_count": 107,
+      "exact_operator_kernel_denominators_match": true,
+      "operators": [
+        {
+          "layer": "layer_0",
+          "stage": "q_a_proj",
+          "graph_node_ids": [
+            210453397508,
+            210453397509,
+            210453397510
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 14848,
+          "useful_flops": 2818572288,
+          "precision": "FP8",
+          "mfu_percent": 9.592138140126501
+        },
+        {
+          "layer": "layer_0",
+          "stage": "q_b_proj",
+          "graph_node_ids": [
+            210453397517,
+            210453397518,
+            210453397519
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 20576,
+          "useful_flops": 9663676416,
+          "precision": "FP8",
+          "mfu_percent": 23.73207072393884
+        },
+        {
+          "layer": "layer_0",
+          "stage": "q_absorb",
+          "graph_node_ids": [
+            210453397520
+          ],
+          "kernel_count": 1,
+          "kernel_ns": 11232,
+          "useful_flops": 2147483648,
+          "precision": "BF16",
+          "mfu_percent": 19.322217759408257
+        },
+        {
+          "layer": "layer_0",
+          "stage": "kv_a_proj",
+          "graph_node_ids": [
+            210453397521,
+            210453397522,
+            210453397523
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 13920,
+          "useful_flops": 1056964608,
+          "precision": "FP8",
+          "mfu_percent": 3.8368552560506
+        },
+        {
+          "layer": "layer_0",
+          "stage": "index_q_proj",
+          "graph_node_ids": [
+            210453397527,
+            210453397528,
+            210453397529
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 11936,
+          "useful_flops": 3221225472,
+          "precision": "FP8",
+          "mfu_percent": 13.636927145212397
+        },
+        {
+          "layer": "layer_0",
+          "stage": "index_k_proj",
+          "graph_node_ids": [
+            210453397530,
+            210453397531,
+            210453397532
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 13536,
+          "useful_flops": 234881024,
+          "precision": "FP8",
+          "mfu_percent": 0.8768227141486793
+        },
+        {
+          "layer": "layer_0",
+          "stage": "index_weights_proj",
+          "graph_node_ids": [
+            210453397540,
+            210453397541
+          ],
+          "kernel_count": 2,
+          "kernel_ns": 14336,
+          "useful_flops": 117440512,
+          "precision": "FP32",
+          "mfu_percent": 12.226865671641791
+        },
+        {
+          "layer": "layer_0",
+          "stage": "indexer_qk",
+          "graph_node_ids": [
+            210453397548,
+            210453397549,
+            210453397550,
+            210453397551
+          ],
+          "kernel_count": 4,
+          "kernel_ns": 263135,
+          "useful_flops": 137574219776,
+          "precision": "FP8",
+          "mfu_percent": 26.418773175499723
+        },
+        {
+          "layer": "layer_0",
+          "stage": "mla_qk_pv",
+          "graph_node_ids": [
+            210453397561
+          ],
+          "kernel_count": 1,
+          "kernel_ns": 120384,
+          "useful_flops": 73014444032,
+          "precision": "BF16",
+          "mfu_percent": 61.29488217458218
+        },
+        {
+          "layer": "layer_0",
+          "stage": "v_expand",
+          "graph_node_ids": [
+            210453397562
+          ],
+          "kernel_count": 1,
+          "kernel_ns": 10560,
+          "useful_flops": 2147483648,
+          "precision": "BF16",
+          "mfu_percent": 20.551813435006967
+        },
+        {
+          "layer": "layer_0",
+          "stage": "o_proj",
+          "graph_node_ids": [
+            210453397563,
+            210453397564,
+            210453397565
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 48928,
+          "useful_flops": 30064771072,
+          "precision": "FP8",
+          "mfu_percent": 31.049502311881028
+        },
+        {
+          "layer": "layer_0",
+          "stage": "mlp_gate",
+          "graph_node_ids": [
+            210453397567,
+            210453397568,
+            210453397569
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 42656,
+          "useful_flops": 33822867456,
+          "precision": "FP8",
+          "mfu_percent": 40.06678556956066
+        },
+        {
+          "layer": "layer_0",
+          "stage": "mlp_up",
+          "graph_node_ids": [
+            210453397570,
+            210453397571
+          ],
+          "kernel_count": 2,
+          "kernel_ns": 41503,
+          "useful_flops": 33822867456,
+          "precision": "FP8",
+          "mfu_percent": 41.17988591801025
+        },
+        {
+          "layer": "layer_0",
+          "stage": "mlp_down",
+          "graph_node_ids": [
+            210453397573,
+            210453397574,
+            210453397575
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 54208,
+          "useful_flops": 33822867456,
+          "precision": "FP8",
+          "mfu_percent": 31.528350155976597
+        },
+        {
+          "layer": "layer_1",
+          "stage": "q_a_proj",
+          "graph_node_ids": [
+            210453397579,
+            210453397580,
+            210453397581
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 14496,
+          "useful_flops": 2818572288,
+          "precision": "FP8",
+          "mfu_percent": 9.825059816818314
+        },
+        {
+          "layer": "layer_1",
+          "stage": "q_b_proj",
+          "graph_node_ids": [
+            210453397588,
+            210453397589,
+            210453397590
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 19392,
+          "useful_flops": 9663676416,
+          "precision": "FP8",
+          "mfu_percent": 25.181058540416952
+        },
+        {
+          "layer": "layer_1",
+          "stage": "q_absorb",
+          "graph_node_ids": [
+            210453397591
+          ],
+          "kernel_count": 1,
+          "kernel_ns": 10176,
+          "useful_flops": 2147483648,
+          "precision": "BF16",
+          "mfu_percent": 21.327353564629874
+        },
+        {
+          "layer": "layer_1",
+          "stage": "kv_a_proj",
+          "graph_node_ids": [
+            210453397592,
+            210453397593,
+            210453397594
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 13664,
+          "useful_flops": 1056964608,
+          "precision": "FP8",
+          "mfu_percent": 3.9087401320421806
+        },
+        {
+          "layer": "layer_1",
+          "stage": "index_q_proj",
+          "graph_node_ids": [
+            210453397598,
+            210453397599,
+            210453397600
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 11616,
+          "useful_flops": 3221225472,
+          "precision": "FP8",
+          "mfu_percent": 14.01260006932293
+        },
+        {
+          "layer": "layer_1",
+          "stage": "index_k_proj",
+          "graph_node_ids": [
+            210453397601,
+            210453397602,
+            210453397603
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 13824,
+          "useful_flops": 234881024,
+          "precision": "FP8",
+          "mfu_percent": 0.8585555742705818
+        },
+        {
+          "layer": "layer_1",
+          "stage": "index_weights_proj",
+          "graph_node_ids": [
+            210453397611,
+            210453397612
+          ],
+          "kernel_count": 2,
+          "kernel_ns": 14560,
+          "useful_flops": 117440512,
+          "precision": "FP32",
+          "mfu_percent": 12.038760045924226
+        },
+        {
+          "layer": "layer_1",
+          "stage": "indexer_qk",
+          "graph_node_ids": [
+            210453397619,
+            210453397620,
+            210453397621,
+            210453397622
+          ],
+          "kernel_count": 4,
+          "kernel_ns": 270271,
+          "useful_flops": 137574219776,
+          "precision": "FP8",
+          "mfu_percent": 25.72123490694569
+        },
+        {
+          "layer": "layer_1",
+          "stage": "mla_qk_pv",
+          "graph_node_ids": [
+            210453397632
+          ],
+          "kernel_count": 1,
+          "kernel_ns": 118976,
+          "useful_flops": 73014444032,
+          "precision": "BF16",
+          "mfu_percent": 62.02026539558315
+        },
+        {
+          "layer": "layer_1",
+          "stage": "v_expand",
+          "graph_node_ids": [
+            210453397633
+          ],
+          "kernel_count": 1,
+          "kernel_ns": 11264,
+          "useful_flops": 2147483648,
+          "precision": "BF16",
+          "mfu_percent": 19.26732509531903
+        },
+        {
+          "layer": "layer_1",
+          "stage": "o_proj",
+          "graph_node_ids": [
+            210453397634,
+            210453397635,
+            210453397636
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 48640,
+          "useful_flops": 30064771072,
+          "precision": "FP8",
+          "mfu_percent": 31.233348049254012
+        },
+        {
+          "layer": "layer_1",
+          "stage": "mlp_gate",
+          "graph_node_ids": [
+            210453397638,
+            210453397639,
+            210453397640
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 42400,
+          "useful_flops": 33822867456,
+          "precision": "FP8",
+          "mfu_percent": 40.30869823715046
+        },
+        {
+          "layer": "layer_1",
+          "stage": "mlp_up",
+          "graph_node_ids": [
+            210453397641,
+            210453397642
+          ],
+          "kernel_count": 2,
+          "kernel_ns": 40127,
+          "useful_flops": 33822867456,
+          "precision": "FP8",
+          "mfu_percent": 42.59199056134721
+        },
+        {
+          "layer": "layer_1",
+          "stage": "mlp_down",
+          "graph_node_ids": [
+            210453397644,
+            210453397645,
+            210453397646
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 54208,
+          "useful_flops": 33822867456,
+          "precision": "FP8",
+          "mfu_percent": 31.528350155976597
+        },
+        {
+          "layer": "layer_2",
+          "stage": "q_a_proj",
+          "graph_node_ids": [
+            210453397650,
+            210453397651,
+            210453397652
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 14400,
+          "useful_flops": 2818572288,
+          "precision": "FP8",
+          "mfu_percent": 9.890560215597102
+        },
+        {
+          "layer": "layer_2",
+          "stage": "q_b_proj",
+          "graph_node_ids": [
+            210453397659,
+            210453397660,
+            210453397661
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 19360,
+          "useful_flops": 9663676416,
+          "precision": "FP8",
+          "mfu_percent": 25.222680124781277
+        },
+        {
+          "layer": "layer_2",
+          "stage": "q_absorb",
+          "graph_node_ids": [
+            210453397662
+          ],
+          "kernel_count": 1,
+          "kernel_ns": 10048,
+          "useful_flops": 2147483648,
+          "precision": "BF16",
+          "mfu_percent": 21.599039597300315
+        },
+        {
+          "layer": "layer_2",
+          "stage": "kv_a_proj",
+          "graph_node_ids": [
+            210453397663,
+            210453397664,
+            210453397665
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 13824,
+          "useful_flops": 1056964608,
+          "precision": "FP8",
+          "mfu_percent": 3.8635000842176184
+        },
+        {
+          "layer": "layer_2",
+          "stage": "index_q_proj",
+          "graph_node_ids": [
+            210453397669,
+            210453397670,
+            210453397671
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 12672,
+          "useful_flops": 3221225472,
+          "precision": "FP8",
+          "mfu_percent": 12.844883396879355
+        },
+        {
+          "layer": "layer_2",
+          "stage": "index_k_proj",
+          "graph_node_ids": [
+            210453397672,
+            210453397673,
+            210453397674
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 13664,
+          "useful_flops": 234881024,
+          "precision": "FP8",
+          "mfu_percent": 0.8686089182315957
+        },
+        {
+          "layer": "layer_2",
+          "stage": "index_weights_proj",
+          "graph_node_ids": [
+            210453397682,
+            210453397683
+          ],
+          "kernel_count": 2,
+          "kernel_ns": 14496,
+          "useful_flops": 117440512,
+          "precision": "FP32",
+          "mfu_percent": 12.091911304405127
+        },
+        {
+          "layer": "layer_2",
+          "stage": "indexer_qk",
+          "graph_node_ids": [
+            210453397690,
+            210453397691,
+            210453397692,
+            210453397693
+          ],
+          "kernel_count": 4,
+          "kernel_ns": 266303,
+          "useful_flops": 137574219776,
+          "precision": "FP8",
+          "mfu_percent": 26.10448954587488
+        },
+        {
+          "layer": "layer_2",
+          "stage": "mla_qk_pv",
+          "graph_node_ids": [
+            210453397703
+          ],
+          "kernel_count": 1,
+          "kernel_ns": 120800,
+          "useful_flops": 73014444032,
+          "precision": "BF16",
+          "mfu_percent": 61.083800461133286
+        },
+        {
+          "layer": "layer_2",
+          "stage": "v_expand",
+          "graph_node_ids": [
+            210453397704
+          ],
+          "kernel_count": 1,
+          "kernel_ns": 10624,
+          "useful_flops": 2147483648,
+          "precision": "BF16",
+          "mfu_percent": 20.428007329976804
+        },
+        {
+          "layer": "layer_2",
+          "stage": "o_proj",
+          "graph_node_ids": [
+            210453397705,
+            210453397706,
+            210453397707
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 49376,
+          "useful_flops": 30064771072,
+          "precision": "FP8",
+          "mfu_percent": 30.767782913069407
+        },
+        {
+          "layer": "layer_2",
+          "stage": "mlp_gate",
+          "graph_node_ids": [
+            210453397709,
+            210453397710,
+            210453397711
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 44031,
+          "useful_flops": 33822867456,
+          "precision": "FP8",
+          "mfu_percent": 38.815580051672214
+        },
+        {
+          "layer": "layer_2",
+          "stage": "mlp_up",
+          "graph_node_ids": [
+            210453397712,
+            210453397713
+          ],
+          "kernel_count": 2,
+          "kernel_ns": 39648,
+          "useful_flops": 33822867456,
+          "precision": "FP8",
+          "mfu_percent": 43.10655784037478
+        },
+        {
+          "layer": "layer_2",
+          "stage": "mlp_down",
+          "graph_node_ids": [
+            210453397715,
+            210453397716,
+            210453397717
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 55135,
+          "useful_flops": 33822867456,
+          "precision": "FP8",
+          "mfu_percent": 30.998255287116706
+        },
+        {
+          "layer": "shared",
+          "stage": "lm_head",
+          "graph_node_ids": [
+            210453397719,
+            210453397720
+          ],
+          "kernel_count": 1,
+          "kernel_ns": 419711,
+          "useful_flops": 1853358080,
+          "precision": "BF16",
+          "mfu_percent": 0.4462653685104039
+        }
+      ]
+    },
+    {
+      "method": "echo",
+      "setup_sqlite_sha256": "914d96d3f05e7ed6b135b08eebde0a1207195001f929bf79608765b89d26ba33",
+      "replay_sqlite_sha256": "8060d64e257cecba60d39151a7adf0f7e07cb3a73ba40a864d80d42b9a0a747f",
+      "graph_launch_count": 1,
+      "graph_gpu_node_count": 299,
+      "complete_unique_native_membership": true,
+      "outside_graph_inputs": [
+        {
+          "kind": "memcpy",
+          "name": "Host-to-Device",
+          "bytes": 1024
+        },
+        {
+          "kind": "memcpy",
+          "name": "Device-to-Device",
+          "bytes": 1024
+        }
+      ],
+      "matrix_api_count": 43,
+      "matrix_api_gpu_node_count": 107,
+      "exact_operator_kernel_denominators_match": true,
+      "operators": [
+        {
+          "layer": "layer_0",
+          "stage": "q_a_proj",
+          "graph_node_ids": [
+            223338299399,
+            223338299400,
+            223338299401
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 14688,
+          "useful_flops": 2818572288,
+          "precision": "FP8",
+          "mfu_percent": 9.696627662350101
+        },
+        {
+          "layer": "layer_0",
+          "stage": "q_b_proj",
+          "graph_node_ids": [
+            223338299408,
+            223338299409,
+            223338299410
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 19648,
+          "useful_flops": 9663676416,
+          "precision": "FP8",
+          "mfu_percent": 24.852966572463636
+        },
+        {
+          "layer": "layer_0",
+          "stage": "q_absorb",
+          "graph_node_ids": [
+            223338299411
+          ],
+          "kernel_count": 1,
+          "kernel_ns": 10240,
+          "useful_flops": 2147483648,
+          "precision": "BF16",
+          "mfu_percent": 21.194057604850936
+        },
+        {
+          "layer": "layer_0",
+          "stage": "kv_a_proj",
+          "graph_node_ids": [
+            223338299412,
+            223338299413,
+            223338299414
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 14048,
+          "useful_flops": 1056964608,
+          "precision": "FP8",
+          "mfu_percent": 3.801895299275652
+        },
+        {
+          "layer": "layer_0",
+          "stage": "index_q_proj",
+          "graph_node_ids": [
+            223338299418,
+            223338299419,
+            223338299420
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 11808,
+          "useful_flops": 3221225472,
+          "precision": "FP8",
+          "mfu_percent": 13.784752913724185
+        },
+        {
+          "layer": "layer_0",
+          "stage": "index_k_proj",
+          "graph_node_ids": [
+            223338299421,
+            223338299422,
+            223338299423
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 13472,
+          "useful_flops": 234881024,
+          "precision": "FP8",
+          "mfu_percent": 0.880988142719457
+        },
+        {
+          "layer": "layer_0",
+          "stage": "index_weights_proj",
+          "graph_node_ids": [
+            223338299431,
+            223338299432
+          ],
+          "kernel_count": 2,
+          "kernel_ns": 14304,
+          "useful_flops": 117440512,
+          "precision": "FP32",
+          "mfu_percent": 12.254218838692443
+        },
+        {
+          "layer": "layer_0",
+          "stage": "indexer_fused",
+          "graph_node_ids": [
+            223338299449,
+            223338299450,
+            223338299451,
+            223338299452
+          ],
+          "kernel_count": 4,
+          "kernel_ns": 857982,
+          "useful_flops": 137574219776,
+          "precision": "FP8",
+          "mfu_percent": 8.102388954005
+        },
+        {
+          "layer": "layer_0",
+          "stage": "mla_qk_pv",
+          "graph_node_ids": [
+            223338299478
+          ],
+          "kernel_count": 1,
+          "kernel_ns": 120928,
+          "useful_flops": 73014444032,
+          "precision": "BF16",
+          "mfu_percent": 61.019144414072024
+        },
+        {
+          "layer": "layer_0",
+          "stage": "v_expand",
+          "graph_node_ids": [
+            223338299479
+          ],
+          "kernel_count": 1,
+          "kernel_ns": 10688,
+          "useful_flops": 2147483648,
+          "precision": "BF16",
+          "mfu_percent": 20.305683932791315
+        },
+        {
+          "layer": "layer_0",
+          "stage": "o_proj",
+          "graph_node_ids": [
+            223338299480,
+            223338299481,
+            223338299482
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 49407,
+          "useful_flops": 30064771072,
+          "precision": "FP8",
+          "mfu_percent": 30.74847793057087
+        },
+        {
+          "layer": "layer_0",
+          "stage": "mlp_gate",
+          "graph_node_ids": [
+            223338299484,
+            223338299485,
+            223338299486
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 43648,
+          "useful_flops": 33822867456,
+          "precision": "FP8",
+          "mfu_percent": 39.156176806616095
+        },
+        {
+          "layer": "layer_0",
+          "stage": "mlp_up",
+          "graph_node_ids": [
+            223338299487,
+            223338299488
+          ],
+          "kernel_count": 2,
+          "kernel_ns": 39776,
+          "useful_flops": 33822867456,
+          "precision": "FP8",
+          "mfu_percent": 42.967840035578725
+        },
+        {
+          "layer": "layer_0",
+          "stage": "mlp_down",
+          "graph_node_ids": [
+            223338299490,
+            223338299491,
+            223338299492
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 54912,
+          "useful_flops": 33822867456,
+          "precision": "FP8",
+          "mfu_percent": 31.124140538592282
+        },
+        {
+          "layer": "layer_1",
+          "stage": "q_a_proj",
+          "graph_node_ids": [
+            223338299496,
+            223338299497,
+            223338299498
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 14464,
+          "useful_flops": 2818572288,
+          "precision": "FP8",
+          "mfu_percent": 9.846796674820125
+        },
+        {
+          "layer": "layer_1",
+          "stage": "q_b_proj",
+          "graph_node_ids": [
+            223338299505,
+            223338299506,
+            223338299507
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 19872,
+          "useful_flops": 9663676416,
+          "precision": "FP8",
+          "mfu_percent": 24.57282041142137
+        },
+        {
+          "layer": "layer_1",
+          "stage": "q_absorb",
+          "graph_node_ids": [
+            223338299508
+          ],
+          "kernel_count": 1,
+          "kernel_ns": 10272,
+          "useful_flops": 2147483648,
+          "precision": "BF16",
+          "mfu_percent": 21.12803250327819
+        },
+        {
+          "layer": "layer_1",
+          "stage": "kv_a_proj",
+          "graph_node_ids": [
+            223338299509,
+            223338299510,
+            223338299511
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 14624,
+          "useful_flops": 1056964608,
+          "precision": "FP8",
+          "mfu_percent": 3.652148876109434
+        },
+        {
+          "layer": "layer_1",
+          "stage": "index_q_proj",
+          "graph_node_ids": [
+            223338299515,
+            223338299516,
+            223338299517
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 11744,
+          "useful_flops": 3221225472,
+          "precision": "FP8",
+          "mfu_percent": 13.859874183008786
+        },
+        {
+          "layer": "layer_1",
+          "stage": "index_k_proj",
+          "graph_node_ids": [
+            223338299518,
+            223338299519,
+            223338299520
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 13696,
+          "useful_flops": 234881024,
+          "precision": "FP8",
+          "mfu_percent": 0.8665794581422696
+        },
+        {
+          "layer": "layer_1",
+          "stage": "index_weights_proj",
+          "graph_node_ids": [
+            223338299528,
+            223338299529
+          ],
+          "kernel_count": 2,
+          "kernel_ns": 14592,
+          "useful_flops": 117440512,
+          "precision": "FP32",
+          "mfu_percent": 12.01235925634983
+        },
+        {
+          "layer": "layer_1",
+          "stage": "indexer_fused",
+          "graph_node_ids": [
+            223338299546,
+            223338299547,
+            223338299548,
+            223338299549
+          ],
+          "kernel_count": 4,
+          "kernel_ns": 797566,
+          "useful_flops": 137574219776,
+          "precision": "FP8",
+          "mfu_percent": 8.716148731935814
+        },
+        {
+          "layer": "layer_1",
+          "stage": "mla_qk_pv",
+          "graph_node_ids": [
+            223338299575
+          ],
+          "kernel_count": 1,
+          "kernel_ns": 119488,
+          "useful_flops": 73014444032,
+          "precision": "BF16",
+          "mfu_percent": 61.75451171418804
+        },
+        {
+          "layer": "layer_1",
+          "stage": "v_expand",
+          "graph_node_ids": [
+            223338299576
+          ],
+          "kernel_count": 1,
+          "kernel_ns": 10912,
+          "useful_flops": 2147483648,
+          "precision": "BF16",
+          "mfu_percent": 19.888851711297065
+        },
+        {
+          "layer": "layer_1",
+          "stage": "o_proj",
+          "graph_node_ids": [
+            223338299577,
+            223338299578,
+            223338299579
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 50495,
+          "useful_flops": 30064771072,
+          "precision": "FP8",
+          "mfu_percent": 30.08595007655639
+        },
+        {
+          "layer": "layer_1",
+          "stage": "mlp_gate",
+          "graph_node_ids": [
+            223338299581,
+            223338299582,
+            223338299583
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 43104,
+          "useful_flops": 33822867456,
+          "precision": "FP8",
+          "mfu_percent": 39.65035275740487
+        },
+        {
+          "layer": "layer_1",
+          "stage": "mlp_up",
+          "graph_node_ids": [
+            223338299584,
+            223338299585
+          ],
+          "kernel_count": 2,
+          "kernel_ns": 42112,
+          "useful_flops": 33822867456,
+          "precision": "FP8",
+          "mfu_percent": 40.5843656263103
+        },
+        {
+          "layer": "layer_1",
+          "stage": "mlp_down",
+          "graph_node_ids": [
+            223338299587,
+            223338299588,
+            223338299589
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 54368,
+          "useful_flops": 33822867456,
+          "precision": "FP8",
+          "mfu_percent": 31.43556513491722
+        },
+        {
+          "layer": "layer_2",
+          "stage": "q_a_proj",
+          "graph_node_ids": [
+            223338299593,
+            223338299594,
+            223338299595
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 14144,
+          "useful_flops": 2818572288,
+          "precision": "FP8",
+          "mfu_percent": 10.069574880132796
+        },
+        {
+          "layer": "layer_2",
+          "stage": "q_b_proj",
+          "graph_node_ids": [
+            223338299602,
+            223338299603,
+            223338299604
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 19328,
+          "useful_flops": 9663676416,
+          "precision": "FP8",
+          "mfu_percent": 25.26443952896138
+        },
+        {
+          "layer": "layer_2",
+          "stage": "q_absorb",
+          "graph_node_ids": [
+            223338299605
+          ],
+          "kernel_count": 1,
+          "kernel_ns": 10847,
+          "useful_flops": 2147483648,
+          "precision": "BF16",
+          "mfu_percent": 20.008034467933395
+        },
+        {
+          "layer": "layer_2",
+          "stage": "kv_a_proj",
+          "graph_node_ids": [
+            223338299606,
+            223338299607,
+            223338299608
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 14080,
+          "useful_flops": 1056964608,
+          "precision": "FP8",
+          "mfu_percent": 3.7932546281409345
+        },
+        {
+          "layer": "layer_2",
+          "stage": "index_q_proj",
+          "graph_node_ids": [
+            223338299612,
+            223338299613,
+            223338299614
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 11680,
+          "useful_flops": 3221225472,
+          "precision": "FP8",
+          "mfu_percent": 13.935818699080066
+        },
+        {
+          "layer": "layer_2",
+          "stage": "index_k_proj",
+          "graph_node_ids": [
+            223338299615,
+            223338299616,
+            223338299617
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 14144,
+          "useful_flops": 234881024,
+          "precision": "FP8",
+          "mfu_percent": 0.8391312400110664
+        },
+        {
+          "layer": "layer_2",
+          "stage": "index_weights_proj",
+          "graph_node_ids": [
+            223338299625,
+            223338299626
+          ],
+          "kernel_count": 2,
+          "kernel_ns": 14592,
+          "useful_flops": 117440512,
+          "precision": "FP32",
+          "mfu_percent": 12.01235925634983
+        },
+        {
+          "layer": "layer_2",
+          "stage": "indexer_fused",
+          "graph_node_ids": [
+            223338299643,
+            223338299644,
+            223338299645,
+            223338299646
+          ],
+          "kernel_count": 4,
+          "kernel_ns": 806654,
+          "useful_flops": 137574219776,
+          "precision": "FP8",
+          "mfu_percent": 8.61795004987903
+        },
+        {
+          "layer": "layer_2",
+          "stage": "mla_qk_pv",
+          "graph_node_ids": [
+            223338299672
+          ],
+          "kernel_count": 1,
+          "kernel_ns": 122016,
+          "useful_flops": 73014444032,
+          "precision": "BF16",
+          "mfu_percent": 60.47504504085449
+        },
+        {
+          "layer": "layer_2",
+          "stage": "v_expand",
+          "graph_node_ids": [
+            223338299673
+          ],
+          "kernel_count": 1,
+          "kernel_ns": 10752,
+          "useful_flops": 2147483648,
+          "precision": "BF16",
+          "mfu_percent": 20.184816766524698
+        },
+        {
+          "layer": "layer_2",
+          "stage": "o_proj",
+          "graph_node_ids": [
+            223338299674,
+            223338299675,
+            223338299676
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 48767,
+          "useful_flops": 30064771072,
+          "precision": "FP8",
+          "mfu_percent": 31.15200953750928
+        },
+        {
+          "layer": "layer_2",
+          "stage": "mlp_gate",
+          "graph_node_ids": [
+            223338299678,
+            223338299679,
+            223338299680
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 41664,
+          "useful_flops": 33822867456,
+          "precision": "FP8",
+          "mfu_percent": 41.0207566545502
+        },
+        {
+          "layer": "layer_2",
+          "stage": "mlp_up",
+          "graph_node_ids": [
+            223338299681,
+            223338299682
+          ],
+          "kernel_count": 2,
+          "kernel_ns": 40672,
+          "useful_flops": 33822867456,
+          "precision": "FP8",
+          "mfu_percent": 42.02126291441727
+        },
+        {
+          "layer": "layer_2",
+          "stage": "mlp_down",
+          "graph_node_ids": [
+            223338299684,
+            223338299685,
+            223338299686
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 54432,
+          "useful_flops": 33822867456,
+          "precision": "FP8",
+          "mfu_percent": 31.39860385903842
+        },
+        {
+          "layer": "shared",
+          "stage": "lm_head",
+          "graph_node_ids": [
+            223338299688,
+            223338299689
+          ],
+          "kernel_count": 1,
+          "kernel_ns": 427039,
+          "useful_flops": 1853358080,
+          "precision": "BF16",
+          "mfu_percent": 0.43860744354232317
+        }
+      ]
+    },
+    {
+      "method": "serial_sparse",
+      "setup_sqlite_sha256": "5f5ca8eaf2306f062d119347ee481001d193327bae34a2a25a5054affde5df06",
+      "replay_sqlite_sha256": "7fcdf416bcb8ac6b0d4f3b6d4be97de68fb04fa3cb949ec045e68fe44d506bcc",
+      "graph_launch_count": 1,
+      "graph_gpu_node_count": 242,
+      "complete_unique_native_membership": true,
+      "outside_graph_inputs": [
+        {
+          "kind": "memcpy",
+          "name": "Host-to-Device",
+          "bytes": 1024
+        },
+        {
+          "kind": "memcpy",
+          "name": "Device-to-Device",
+          "bytes": 1024
+        }
+      ],
+      "matrix_api_count": 43,
+      "matrix_api_gpu_node_count": 107,
+      "exact_operator_kernel_denominators_match": true,
+      "operators": [
+        {
+          "layer": "layer_0",
+          "stage": "q_a_proj",
+          "graph_node_ids": [
+            236223201284,
+            236223201285,
+            236223201286
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 14208,
+          "useful_flops": 2818572288,
+          "precision": "FP8",
+          "mfu_percent": 10.024216434726792
+        },
+        {
+          "layer": "layer_0",
+          "stage": "q_b_proj",
+          "graph_node_ids": [
+            236223201293,
+            236223201294,
+            236223201295
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 20128,
+          "useful_flops": 9663676416,
+          "precision": "FP8",
+          "mfu_percent": 24.260288514296775
+        },
+        {
+          "layer": "layer_0",
+          "stage": "q_absorb",
+          "graph_node_ids": [
+            236223201296
+          ],
+          "kernel_count": 1,
+          "kernel_ns": 10176,
+          "useful_flops": 2147483648,
+          "precision": "BF16",
+          "mfu_percent": 21.327353564629874
+        },
+        {
+          "layer": "layer_0",
+          "stage": "kv_a_proj",
+          "graph_node_ids": [
+            236223201297,
+            236223201298,
+            236223201299
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 13760,
+          "useful_flops": 1056964608,
+          "precision": "FP8",
+          "mfu_percent": 3.8814698520511883
+        },
+        {
+          "layer": "layer_0",
+          "stage": "index_q_proj",
+          "graph_node_ids": [
+            236223201303,
+            236223201304,
+            236223201305
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 11840,
+          "useful_flops": 3221225472,
+          "precision": "FP8",
+          "mfu_percent": 13.747496824768174
+        },
+        {
+          "layer": "layer_0",
+          "stage": "index_k_proj",
+          "graph_node_ids": [
+            236223201306,
+            236223201307,
+            236223201308
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 13344,
+          "useful_flops": 234881024,
+          "precision": "FP8",
+          "mfu_percent": 0.889438868309092
+        },
+        {
+          "layer": "layer_0",
+          "stage": "index_weights_proj",
+          "graph_node_ids": [
+            236223201316,
+            236223201317
+          ],
+          "kernel_count": 2,
+          "kernel_ns": 14272,
+          "useful_flops": 117440512,
+          "precision": "FP32",
+          "mfu_percent": 12.281694665685027
+        },
+        {
+          "layer": "layer_0",
+          "stage": "indexer_qk",
+          "graph_node_ids": [
+            236223201324,
+            236223201325,
+            236223201326,
+            236223201327
+          ],
+          "kernel_count": 4,
+          "kernel_ns": 266783,
+          "useful_flops": 137574219776,
+          "precision": "FP8",
+          "mfu_percent": 26.05752195430413
+        },
+        {
+          "layer": "layer_0",
+          "stage": "mla_qk_pv",
+          "graph_node_ids": [
+            236223201345
+          ],
+          "kernel_count": 1,
+          "kernel_ns": 120415,
+          "useful_flops": 73014444032,
+          "precision": "BF16",
+          "mfu_percent": 61.27910223564258
+        },
+        {
+          "layer": "layer_0",
+          "stage": "v_expand",
+          "graph_node_ids": [
+            236223201346
+          ],
+          "kernel_count": 1,
+          "kernel_ns": 10432,
+          "useful_flops": 2147483648,
+          "precision": "BF16",
+          "mfu_percent": 20.803982925007052
+        },
+        {
+          "layer": "layer_0",
+          "stage": "o_proj",
+          "graph_node_ids": [
+            236223201347,
+            236223201348,
+            236223201349
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 49888,
+          "useful_flops": 30064771072,
+          "precision": "FP8",
+          "mfu_percent": 30.45201349253758
+        },
+        {
+          "layer": "layer_0",
+          "stage": "mlp_gate",
+          "graph_node_ids": [
+            236223201351,
+            236223201352,
+            236223201353
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 42688,
+          "useful_flops": 33822867456,
+          "precision": "FP8",
+          "mfu_percent": 40.03675049791931
+        },
+        {
+          "layer": "layer_0",
+          "stage": "mlp_up",
+          "graph_node_ids": [
+            236223201354,
+            236223201355
+          ],
+          "kernel_count": 2,
+          "kernel_ns": 41600,
+          "useful_flops": 33822867456,
+          "precision": "FP8",
+          "mfu_percent": 41.08386551094181
+        },
+        {
+          "layer": "layer_0",
+          "stage": "mlp_down",
+          "graph_node_ids": [
+            236223201357,
+            236223201358,
+            236223201359
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 54528,
+          "useful_flops": 33822867456,
+          "precision": "FP8",
+          "mfu_percent": 31.343324626892226
+        },
+        {
+          "layer": "layer_1",
+          "stage": "q_a_proj",
+          "graph_node_ids": [
+            236223201363,
+            236223201364,
+            236223201365
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 14752,
+          "useful_flops": 2818572288,
+          "precision": "FP8",
+          "mfu_percent": 9.65455986338112
+        },
+        {
+          "layer": "layer_1",
+          "stage": "q_b_proj",
+          "graph_node_ids": [
+            236223201372,
+            236223201373,
+            236223201374
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 19360,
+          "useful_flops": 9663676416,
+          "precision": "FP8",
+          "mfu_percent": 25.222680124781277
+        },
+        {
+          "layer": "layer_1",
+          "stage": "q_absorb",
+          "graph_node_ids": [
+            236223201375
+          ],
+          "kernel_count": 1,
+          "kernel_ns": 10240,
+          "useful_flops": 2147483648,
+          "precision": "BF16",
+          "mfu_percent": 21.194057604850936
+        },
+        {
+          "layer": "layer_1",
+          "stage": "kv_a_proj",
+          "graph_node_ids": [
+            236223201376,
+            236223201377,
+            236223201378
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 13984,
+          "useful_flops": 1056964608,
+          "precision": "FP8",
+          "mfu_percent": 3.8192952777620395
+        },
+        {
+          "layer": "layer_1",
+          "stage": "index_q_proj",
+          "graph_node_ids": [
+            236223201382,
+            236223201383,
+            236223201384
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 11872,
+          "useful_flops": 3221225472,
+          "precision": "FP8",
+          "mfu_percent": 13.710441577262062
+        },
+        {
+          "layer": "layer_1",
+          "stage": "index_k_proj",
+          "graph_node_ids": [
+            236223201385,
+            236223201386,
+            236223201387
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 13759,
+          "useful_flops": 234881024,
+          "precision": "FP8",
+          "mfu_percent": 0.8626115458039482
+        },
+        {
+          "layer": "layer_1",
+          "stage": "index_weights_proj",
+          "graph_node_ids": [
+            236223201395,
+            236223201396
+          ],
+          "kernel_count": 2,
+          "kernel_ns": 14528,
+          "useful_flops": 117440512,
+          "precision": "FP32",
+          "mfu_percent": 12.065277138536393
+        },
+        {
+          "layer": "layer_1",
+          "stage": "indexer_qk",
+          "graph_node_ids": [
+            236223201403,
+            236223201404,
+            236223201405,
+            236223201406
+          ],
+          "kernel_count": 4,
+          "kernel_ns": 264768,
+          "useful_flops": 137574219776,
+          "precision": "FP8",
+          "mfu_percent": 26.25583106544265
+        },
+        {
+          "layer": "layer_1",
+          "stage": "mla_qk_pv",
+          "graph_node_ids": [
+            236223201424
+          ],
+          "kernel_count": 1,
+          "kernel_ns": 119744,
+          "useful_flops": 73014444032,
+          "precision": "BF16",
+          "mfu_percent": 61.622487103361344
+        },
+        {
+          "layer": "layer_1",
+          "stage": "v_expand",
+          "graph_node_ids": [
+            236223201425
+          ],
+          "kernel_count": 1,
+          "kernel_ns": 10496,
+          "useful_flops": 2147483648,
+          "precision": "BF16",
+          "mfu_percent": 20.67712937058628
+        },
+        {
+          "layer": "layer_1",
+          "stage": "o_proj",
+          "graph_node_ids": [
+            236223201426,
+            236223201427,
+            236223201428
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 49568,
+          "useful_flops": 30064771072,
+          "precision": "FP8",
+          "mfu_percent": 30.648604928899996
+        },
+        {
+          "layer": "layer_1",
+          "stage": "mlp_gate",
+          "graph_node_ids": [
+            236223201430,
+            236223201431,
+            236223201432
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 44480,
+          "useful_flops": 33822867456,
+          "precision": "FP8",
+          "mfu_percent": 38.42375911095278
+        },
+        {
+          "layer": "layer_1",
+          "stage": "mlp_up",
+          "graph_node_ids": [
+            236223201433,
+            236223201434
+          ],
+          "kernel_count": 2,
+          "kernel_ns": 40640,
+          "useful_flops": 33822867456,
+          "precision": "FP8",
+          "mfu_percent": 42.0543505230113
+        },
+        {
+          "layer": "layer_1",
+          "stage": "mlp_down",
+          "graph_node_ids": [
+            236223201436,
+            236223201437,
+            236223201438
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 54528,
+          "useful_flops": 33822867456,
+          "precision": "FP8",
+          "mfu_percent": 31.343324626892226
+        },
+        {
+          "layer": "layer_2",
+          "stage": "q_a_proj",
+          "graph_node_ids": [
+            236223201442,
+            236223201443,
+            236223201444
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 14432,
+          "useful_flops": 2818572288,
+          "precision": "FP8",
+          "mfu_percent": 9.868629926870724
+        },
+        {
+          "layer": "layer_2",
+          "stage": "q_b_proj",
+          "graph_node_ids": [
+            236223201451,
+            236223201452,
+            236223201453
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 19808,
+          "useful_flops": 9663676416,
+          "precision": "FP8",
+          "mfu_percent": 24.65221563084438
+        },
+        {
+          "layer": "layer_2",
+          "stage": "q_absorb",
+          "graph_node_ids": [
+            236223201454
+          ],
+          "kernel_count": 1,
+          "kernel_ns": 10272,
+          "useful_flops": 2147483648,
+          "precision": "BF16",
+          "mfu_percent": 21.12803250327819
+        },
+        {
+          "layer": "layer_2",
+          "stage": "kv_a_proj",
+          "graph_node_ids": [
+            236223201455,
+            236223201456,
+            236223201457
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 14080,
+          "useful_flops": 1056964608,
+          "precision": "FP8",
+          "mfu_percent": 3.7932546281409345
+        },
+        {
+          "layer": "layer_2",
+          "stage": "index_q_proj",
+          "graph_node_ids": [
+            236223201461,
+            236223201462,
+            236223201463
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 11840,
+          "useful_flops": 3221225472,
+          "precision": "FP8",
+          "mfu_percent": 13.747496824768174
+        },
+        {
+          "layer": "layer_2",
+          "stage": "index_k_proj",
+          "graph_node_ids": [
+            236223201464,
+            236223201465,
+            236223201466
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 13696,
+          "useful_flops": 234881024,
+          "precision": "FP8",
+          "mfu_percent": 0.8665794581422696
+        },
+        {
+          "layer": "layer_2",
+          "stage": "index_weights_proj",
+          "graph_node_ids": [
+            236223201474,
+            236223201475
+          ],
+          "kernel_count": 2,
+          "kernel_ns": 14592,
+          "useful_flops": 117440512,
+          "precision": "FP32",
+          "mfu_percent": 12.01235925634983
+        },
+        {
+          "layer": "layer_2",
+          "stage": "indexer_qk",
+          "graph_node_ids": [
+            236223201482,
+            236223201483,
+            236223201484,
+            236223201485
+          ],
+          "kernel_count": 4,
+          "kernel_ns": 263936,
+          "useful_flops": 137574219776,
+          "precision": "FP8",
+          "mfu_percent": 26.338596779276486
+        },
+        {
+          "layer": "layer_2",
+          "stage": "mla_qk_pv",
+          "graph_node_ids": [
+            236223201503
+          ],
+          "kernel_count": 1,
+          "kernel_ns": 121824,
+          "useful_flops": 73014444032,
+          "precision": "BF16",
+          "mfu_percent": 60.57035638055639
+        },
+        {
+          "layer": "layer_2",
+          "stage": "v_expand",
+          "graph_node_ids": [
+            236223201504
+          ],
+          "kernel_count": 1,
+          "kernel_ns": 10816,
+          "useful_flops": 2147483648,
+          "precision": "BF16",
+          "mfu_percent": 20.06537998092396
+        },
+        {
+          "layer": "layer_2",
+          "stage": "o_proj",
+          "graph_node_ids": [
+            236223201505,
+            236223201506,
+            236223201507
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 50207,
+          "useful_flops": 30064771072,
+          "precision": "FP8",
+          "mfu_percent": 30.25853066535971
+        },
+        {
+          "layer": "layer_2",
+          "stage": "mlp_gate",
+          "graph_node_ids": [
+            236223201509,
+            236223201510,
+            236223201511
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 42720,
+          "useful_flops": 33822867456,
+          "precision": "FP8",
+          "mfu_percent": 40.006760422639964
+        },
+        {
+          "layer": "layer_2",
+          "stage": "mlp_up",
+          "graph_node_ids": [
+            236223201512,
+            236223201513
+          ],
+          "kernel_count": 2,
+          "kernel_ns": 41568,
+          "useful_flops": 33822867456,
+          "precision": "FP8",
+          "mfu_percent": 41.11549281310574
+        },
+        {
+          "layer": "layer_2",
+          "stage": "mlp_down",
+          "graph_node_ids": [
+            236223201515,
+            236223201516,
+            236223201517
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 54175,
+          "useful_flops": 33822867456,
+          "precision": "FP8",
+          "mfu_percent": 31.547555242366027
+        },
+        {
+          "layer": "shared",
+          "stage": "lm_head",
+          "graph_node_ids": [
+            236223201519,
+            236223201520
+          ],
+          "kernel_count": 1,
+          "kernel_ns": 435071,
+          "useful_flops": 1853358080,
+          "precision": "BF16",
+          "mfu_percent": 0.4305101560041238
+        }
+      ]
+    },
+    {
+      "method": "dense_prefetch",
+      "setup_sqlite_sha256": "876904bfd59c1f8754d6701bbdeffbf13c88e36e77d796a8aa643b95fea26073",
+      "replay_sqlite_sha256": "d4c93e5489f79a51fa243505d7bfadaa67dfce153fab24d007bf9e64cd267d06",
+      "graph_launch_count": 1,
+      "graph_gpu_node_count": 224,
+      "complete_unique_native_membership": true,
+      "outside_graph_inputs": [
+        {
+          "kind": "memcpy",
+          "name": "Host-to-Device",
+          "bytes": 1024
+        },
+        {
+          "kind": "memcpy",
+          "name": "Device-to-Device",
+          "bytes": 1024
+        }
+      ],
+      "matrix_api_count": 43,
+      "matrix_api_gpu_node_count": 107,
+      "exact_operator_kernel_denominators_match": true,
+      "operators": [
+        {
+          "layer": "layer_0",
+          "stage": "q_a_proj",
+          "graph_node_ids": [
+            249108103175,
+            249108103176,
+            249108103177
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 14560,
+          "useful_flops": 2818572288,
+          "precision": "FP8",
+          "mfu_percent": 9.78187274070043
+        },
+        {
+          "layer": "layer_0",
+          "stage": "q_b_proj",
+          "graph_node_ids": [
+            249108103184,
+            249108103185,
+            249108103186
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 20416,
+          "useful_flops": 9663676416,
+          "precision": "FP8",
+          "mfu_percent": 23.91805873901673
+        },
+        {
+          "layer": "layer_0",
+          "stage": "q_absorb",
+          "graph_node_ids": [
+            249108103187
+          ],
+          "kernel_count": 1,
+          "kernel_ns": 10048,
+          "useful_flops": 2147483648,
+          "precision": "BF16",
+          "mfu_percent": 21.599039597300315
+        },
+        {
+          "layer": "layer_0",
+          "stage": "kv_a_proj",
+          "graph_node_ids": [
+            249108103188,
+            249108103189,
+            249108103190
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 13632,
+          "useful_flops": 1056964608,
+          "precision": "FP8",
+          "mfu_percent": 3.9179155783615283
+        },
+        {
+          "layer": "layer_0",
+          "stage": "index_q_proj",
+          "graph_node_ids": [
+            249108103194,
+            249108103195,
+            249108103196
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 11872,
+          "useful_flops": 3221225472,
+          "precision": "FP8",
+          "mfu_percent": 13.710441577262062
+        },
+        {
+          "layer": "layer_0",
+          "stage": "index_k_proj",
+          "graph_node_ids": [
+            249108103197,
+            249108103198,
+            249108103199
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 13376,
+          "useful_flops": 234881024,
+          "precision": "FP8",
+          "mfu_percent": 0.8873110241265343
+        },
+        {
+          "layer": "layer_0",
+          "stage": "index_weights_proj",
+          "graph_node_ids": [
+            249108103207,
+            249108103208
+          ],
+          "kernel_count": 2,
+          "kernel_ns": 14592,
+          "useful_flops": 117440512,
+          "precision": "FP32",
+          "mfu_percent": 12.01235925634983
+        },
+        {
+          "layer": "layer_0",
+          "stage": "indexer_qk",
+          "graph_node_ids": [
+            249108103215,
+            249108103216,
+            249108103217,
+            249108103218
+          ],
+          "kernel_count": 4,
+          "kernel_ns": 263647,
+          "useful_flops": 137574219776,
+          "precision": "FP8",
+          "mfu_percent": 26.36746816590031
+        },
+        {
+          "layer": "layer_0",
+          "stage": "mla_qk_pv",
+          "graph_node_ids": [
+            249108103230
+          ],
+          "kernel_count": 1,
+          "kernel_ns": 121311,
+          "useful_flops": 73014444032,
+          "precision": "BF16",
+          "mfu_percent": 60.82649632518816
+        },
+        {
+          "layer": "layer_0",
+          "stage": "v_expand",
+          "graph_node_ids": [
+            249108103231
+          ],
+          "kernel_count": 1,
+          "kernel_ns": 10720,
+          "useful_flops": 2147483648,
+          "precision": "BF16",
+          "mfu_percent": 20.245069950902387
+        },
+        {
+          "layer": "layer_0",
+          "stage": "o_proj",
+          "graph_node_ids": [
+            249108103232,
+            249108103233,
+            249108103234
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 50528,
+          "useful_flops": 30064771072,
+          "precision": "FP8",
+          "mfu_percent": 30.066300845387012
+        },
+        {
+          "layer": "layer_0",
+          "stage": "mlp_gate",
+          "graph_node_ids": [
+            249108103236,
+            249108103237,
+            249108103238
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 44000,
+          "useful_flops": 33822867456,
+          "precision": "FP8",
+          "mfu_percent": 38.84292739216317
+        },
+        {
+          "layer": "layer_0",
+          "stage": "mlp_up",
+          "graph_node_ids": [
+            249108103239,
+            249108103240
+          ],
+          "kernel_count": 2,
+          "kernel_ns": 41952,
+          "useful_flops": 33822867456,
+          "precision": "FP8",
+          "mfu_percent": 40.73914962946175
+        },
+        {
+          "layer": "layer_0",
+          "stage": "mlp_down",
+          "graph_node_ids": [
+            249108103242,
+            249108103243,
+            249108103244
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 54592,
+          "useful_flops": 33822867456,
+          "precision": "FP8",
+          "mfu_percent": 31.306579814902907
+        },
+        {
+          "layer": "layer_1",
+          "stage": "q_a_proj",
+          "graph_node_ids": [
+            249108103248,
+            249108103249,
+            249108103250
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 14336,
+          "useful_flops": 2818572288,
+          "precision": "FP8",
+          "mfu_percent": 9.934714502273875
+        },
+        {
+          "layer": "layer_1",
+          "stage": "q_b_proj",
+          "graph_node_ids": [
+            249108103257,
+            249108103258,
+            249108103259
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 19136,
+          "useful_flops": 9663676416,
+          "precision": "FP8",
+          "mfu_percent": 25.517928888783736
+        },
+        {
+          "layer": "layer_1",
+          "stage": "q_absorb",
+          "graph_node_ids": [
+            249108103260
+          ],
+          "kernel_count": 1,
+          "kernel_ns": 10080,
+          "useful_flops": 2147483648,
+          "precision": "BF16",
+          "mfu_percent": 21.530471217626346
+        },
+        {
+          "layer": "layer_1",
+          "stage": "kv_a_proj",
+          "graph_node_ids": [
+            249108103261,
+            249108103262,
+            249108103263
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 13888,
+          "useful_flops": 1056964608,
+          "precision": "FP8",
+          "mfu_percent": 3.845695936364081
+        },
+        {
+          "layer": "layer_1",
+          "stage": "index_q_proj",
+          "graph_node_ids": [
+            249108103267,
+            249108103268,
+            249108103269
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 11456,
+          "useful_flops": 3221225472,
+          "precision": "FP8",
+          "mfu_percent": 14.208306774201743
+        },
+        {
+          "layer": "layer_1",
+          "stage": "index_k_proj",
+          "graph_node_ids": [
+            249108103270,
+            249108103271,
+            249108103272
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 13632,
+          "useful_flops": 234881024,
+          "precision": "FP8",
+          "mfu_percent": 0.870647906302562
+        },
+        {
+          "layer": "layer_1",
+          "stage": "index_weights_proj",
+          "graph_node_ids": [
+            249108103280,
+            249108103281
+          ],
+          "kernel_count": 2,
+          "kernel_ns": 14592,
+          "useful_flops": 117440512,
+          "precision": "FP32",
+          "mfu_percent": 12.01235925634983
+        },
+        {
+          "layer": "layer_1",
+          "stage": "indexer_qk",
+          "graph_node_ids": [
+            249108103288,
+            249108103289,
+            249108103290,
+            249108103291
+          ],
+          "kernel_count": 4,
+          "kernel_ns": 267231,
+          "useful_flops": 137574219776,
+          "precision": "FP8",
+          "mfu_percent": 26.013837764088443
+        },
+        {
+          "layer": "layer_1",
+          "stage": "mla_qk_pv",
+          "graph_node_ids": [
+            249108103303
+          ],
+          "kernel_count": 1,
+          "kernel_ns": 120991,
+          "useful_flops": 73014444032,
+          "precision": "BF16",
+          "mfu_percent": 60.98737175248491
+        },
+        {
+          "layer": "layer_1",
+          "stage": "v_expand",
+          "graph_node_ids": [
+            249108103304
+          ],
+          "kernel_count": 1,
+          "kernel_ns": 10848,
+          "useful_flops": 2147483648,
+          "precision": "BF16",
+          "mfu_percent": 20.00619006947581
+        },
+        {
+          "layer": "layer_1",
+          "stage": "o_proj",
+          "graph_node_ids": [
+            249108103305,
+            249108103306,
+            249108103307
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 50752,
+          "useful_flops": 30064771072,
+          "precision": "FP8",
+          "mfu_percent": 29.933599643673453
+        },
+        {
+          "layer": "layer_1",
+          "stage": "mlp_gate",
+          "graph_node_ids": [
+            249108103309,
+            249108103310,
+            249108103311
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 43840,
+          "useful_flops": 33822867456,
+          "precision": "FP8",
+          "mfu_percent": 38.984689900893684
+        },
+        {
+          "layer": "layer_1",
+          "stage": "mlp_up",
+          "graph_node_ids": [
+            249108103312,
+            249108103313
+          ],
+          "kernel_count": 2,
+          "kernel_ns": 42656,
+          "useful_flops": 33822867456,
+          "precision": "FP8",
+          "mfu_percent": 40.06678556956066
+        },
+        {
+          "layer": "layer_1",
+          "stage": "mlp_down",
+          "graph_node_ids": [
+            249108103315,
+            249108103316,
+            249108103317
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 54304,
+          "useful_flops": 33822867456,
+          "precision": "FP8",
+          "mfu_percent": 31.472613532247706
+        },
+        {
+          "layer": "layer_2",
+          "stage": "q_a_proj",
+          "graph_node_ids": [
+            249108103321,
+            249108103322,
+            249108103323
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 14624,
+          "useful_flops": 2818572288,
+          "precision": "FP8",
+          "mfu_percent": 9.739063669625155
+        },
+        {
+          "layer": "layer_2",
+          "stage": "q_b_proj",
+          "graph_node_ids": [
+            249108103330,
+            249108103331,
+            249108103332
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 19808,
+          "useful_flops": 9663676416,
+          "precision": "FP8",
+          "mfu_percent": 24.65221563084438
+        },
+        {
+          "layer": "layer_2",
+          "stage": "q_absorb",
+          "graph_node_ids": [
+            249108103333
+          ],
+          "kernel_count": 1,
+          "kernel_ns": 10272,
+          "useful_flops": 2147483648,
+          "precision": "BF16",
+          "mfu_percent": 21.12803250327819
+        },
+        {
+          "layer": "layer_2",
+          "stage": "kv_a_proj",
+          "graph_node_ids": [
+            249108103334,
+            249108103335,
+            249108103336
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 13984,
+          "useful_flops": 1056964608,
+          "precision": "FP8",
+          "mfu_percent": 3.8192952777620395
+        },
+        {
+          "layer": "layer_2",
+          "stage": "index_q_proj",
+          "graph_node_ids": [
+            249108103340,
+            249108103341,
+            249108103342
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 11712,
+          "useful_flops": 3221225472,
+          "precision": "FP8",
+          "mfu_percent": 13.897742691705531
+        },
+        {
+          "layer": "layer_2",
+          "stage": "index_k_proj",
+          "graph_node_ids": [
+            249108103343,
+            249108103344,
+            249108103345
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 13760,
+          "useful_flops": 234881024,
+          "precision": "FP8",
+          "mfu_percent": 0.8625488560113753
+        },
+        {
+          "layer": "layer_2",
+          "stage": "index_weights_proj",
+          "graph_node_ids": [
+            249108103353,
+            249108103354
+          ],
+          "kernel_count": 2,
+          "kernel_ns": 14688,
+          "useful_flops": 117440512,
+          "precision": "FP32",
+          "mfu_percent": 11.933847104347544
+        },
+        {
+          "layer": "layer_2",
+          "stage": "indexer_qk",
+          "graph_node_ids": [
+            249108103361,
+            249108103362,
+            249108103363,
+            249108103364
+          ],
+          "kernel_count": 4,
+          "kernel_ns": 267040,
+          "useful_flops": 137574219776,
+          "precision": "FP8",
+          "mfu_percent": 26.032444126479625
+        },
+        {
+          "layer": "layer_2",
+          "stage": "mla_qk_pv",
+          "graph_node_ids": [
+            249108103373
+          ],
+          "kernel_count": 1,
+          "kernel_ns": 122272,
+          "useful_flops": 73014444032,
+          "precision": "BF16",
+          "mfu_percent": 60.34842887746091
+        },
+        {
+          "layer": "layer_2",
+          "stage": "v_expand",
+          "graph_node_ids": [
+            249108103374
+          ],
+          "kernel_count": 1,
+          "kernel_ns": 10688,
+          "useful_flops": 2147483648,
+          "precision": "BF16",
+          "mfu_percent": 20.305683932791315
+        },
+        {
+          "layer": "layer_2",
+          "stage": "o_proj",
+          "graph_node_ids": [
+            249108103375,
+            249108103376,
+            249108103377
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 49408,
+          "useful_flops": 30064771072,
+          "precision": "FP8",
+          "mfu_percent": 30.747855592529856
+        },
+        {
+          "layer": "layer_2",
+          "stage": "mlp_gate",
+          "graph_node_ids": [
+            249108103379,
+            249108103380,
+            249108103381
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 42720,
+          "useful_flops": 33822867456,
+          "precision": "FP8",
+          "mfu_percent": 40.006760422639964
+        },
+        {
+          "layer": "layer_2",
+          "stage": "mlp_up",
+          "graph_node_ids": [
+            249108103382,
+            249108103383
+          ],
+          "kernel_count": 2,
+          "kernel_ns": 41184,
+          "useful_flops": 33822867456,
+          "precision": "FP8",
+          "mfu_percent": 41.49885405145638
+        },
+        {
+          "layer": "layer_2",
+          "stage": "mlp_down",
+          "graph_node_ids": [
+            249108103385,
+            249108103386,
+            249108103387
+          ],
+          "kernel_count": 3,
+          "kernel_ns": 54688,
+          "useful_flops": 33822867456,
+          "precision": "FP8",
+          "mfu_percent": 31.251623852676623
+        },
+        {
+          "layer": "shared",
+          "stage": "lm_head",
+          "graph_node_ids": [
+            249108103389,
+            249108103390
+          ],
+          "kernel_count": 1,
+          "kernel_ns": 418847,
+          "useful_flops": 1853358080,
+          "precision": "BF16",
+          "mfu_percent": 0.4471859272786248
+        }
+      ]
+    }
+  ],
+  "saved_output_comparisons": [
+    {
+      "name": "hbm/hidden",
+      "bitwise_equal": true,
+      "max_abs": 0.0,
+      "rtol": 0.01,
+      "atol": 0.02,
+      "accepted": true
+    },
+    {
+      "name": "hbm/logits",
+      "bitwise_equal": true,
+      "max_abs": 0.0,
+      "rtol": 0.01,
+      "atol": 0.02,
+      "accepted": true
+    },
+    {
+      "name": "echo/hidden",
+      "bitwise_equal": true,
+      "max_abs": 0.0,
+      "rtol": 0.01,
+      "atol": 0.02,
+      "accepted": true
+    },
+    {
+      "name": "echo/logits",
+      "bitwise_equal": true,
+      "max_abs": 0.0,
+      "rtol": 0.01,
+      "atol": 0.02,
+      "accepted": true
+    },
+    {
+      "name": "serial_sparse/hidden",
+      "bitwise_equal": true,
+      "max_abs": 0.0,
+      "rtol": 0.01,
+      "atol": 0.02,
+      "accepted": true
+    },
+    {
+      "name": "serial_sparse/logits",
+      "bitwise_equal": true,
+      "max_abs": 0.0,
+      "rtol": 0.01,
+      "atol": 0.02,
+      "accepted": true
+    },
+    {
+      "name": "dense_prefetch/hidden",
+      "bitwise_equal": true,
+      "max_abs": 0.0,
+      "rtol": 0.01,
+      "atol": 0.02,
+      "accepted": true
+    },
+    {
+      "name": "dense_prefetch/logits",
+      "bitwise_equal": true,
+      "max_abs": 0.0,
+      "rtol": 0.01,
+      "atol": 0.02,
+      "accepted": true
+    }
+  ],
+  "all_saved_outputs_bitwise_equal": true,
+  "runtime_profile_comparisons": 12,
+  "sources": {
+    "count": 1289,
+    "archive_matches": true,
+    "current_source_changes": [],
+    "manifest_sha256": "f407a5e4e3badbb47076c3707a56d0fce382e5d83e061392c778b0b6f3b8adcf"
+  },
+  "observer": {
+    "samples": 38,
+    "exit_code": 0,
+    "owned_pids": [
+      660978
+    ],
+    "foreign": [],
+    "exit_races": [],
+    "monitor_errors": [],
+    "maximum_sample_gap_seconds": 3.441524028778076,
+    "command": [
+      "bash",
+      "experiments/deepseek_v32_mfu/scripts/profile_layers.sh",
+      "--physical-device",
+      "3",
+      "--model",
+      "/preset-models",
+      "--extend-graph",
+      "--extend-residency",
+      "cold",
+      "--validation-receipt",
+      "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_dense_late_wait_cold_check_20261006_01/receipt.json",
+      "--benchmark-run",
+      "experiments/deepseek_v32_mfu/output/data/deepseek_dense_late_wait_bench_20261006_01"
+    ],
+    "run_id": "deepseek_dense_late_wait_mfu_profile_20261006_01",
+    "boundary": "Discrete GPU observations only; CPU affinity is command evidence, no CPU exclusivity or continuous GPU isolation claim."
+  },
+  "input_sha256": {
+    "experiments/deepseek_v32_mfu/output/data/deepseek_dense_late_wait_mfu_profile_20261006_01/result.json": "5e522b6766324363b98ffe39a6268dfaa742f2af46239bf9f93ade7c2ba3929a",
+    "experiments/deepseek_v32_mfu/output/data/deepseek_dense_late_wait_mfu_profile_20261006_01/operator_calls.json": "cb397920d4fdff6374de54c73c6278a54f62a27009ae3eb45f8e2879b1999ad0",
+    "experiments/deepseek_v32_mfu/output/data/deepseek_dense_late_wait_mfu_profile_20261006_01/full_graph_templates.json": "d709a74861b02e9bdaf25e8d7a3779416e1411cab6ef9a72a6c1559bf1298a52",
+    "experiments/deepseek_v32_mfu/output/data/deepseek_dense_late_wait_mfu_profile_20261006_01/analysis/analysis.json": "a348594daf7664443500ad55822780ebdbe58b856e294f99166eed28d57e64ea",
+    "/tmp/deepseek_dense_late_wait_audit_20261006_01/audit_mfu_profile.py": "f0a7f135b15b17c5310f1d2bfbf882f93db2e41b694adfafab8dcb567c88c5ee",
+    "/tmp/deepseek_dense_late_wait_audit_20261006_01/native_reader.py": "5317afd562fa8e8059b025848212a06ee38c4c650607f64ef642b53d11a49464",
+    "/tmp/deepseek_dense_late_wait_audit_20261006_01/audit_check.py": "1170ba8aef246ce19572ea3a1eb0fc659fc45cb330db1bbf7643441064a7da2d"
+  },
+  "cuda_initialized": false,
+  "boundary": "Native SQLite independently verifies one complete extend launch, every graph node and all 43 matrix API kernel denominators per method. Saved extend hidden/logits are reread; prefill logits and additional diagnostics remain runtime comparison evidence. FLOPs are checked against capture metadata here; independent shape/formula verification belongs to the publication audit. No new gap or utilization counters are inferred."
+}

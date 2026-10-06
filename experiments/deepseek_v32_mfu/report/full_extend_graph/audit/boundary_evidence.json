@@ -1,0 +1,109 @@
+{
+  "events": [
+    {
+      "method": "serial_sparse",
+      "capture": 10,
+      "raw": {
+        "kind": "kernel",
+        "name": "void deep_gemm::sm90_fp8_gemm_1d2d_impl<(cute::UMMA::Major)0, (unsigned int)0, (unsigned int)7168, (unsigned int)18432, (unsigned int)1, (unsigned int)64, (unsigned int)112, (unsigned int)128, (unsigned int)128, (unsigned int)128, (unsigned int)32, (unsigned int)9, (unsigned int)128, (unsigned int)128, (unsigned int)1, (bool)0, (unsigned int)132, (deep_gemm::GemmType)0, cutlass::bfloat16_t>(float *, int *, unsigned int, unsigned int, unsigned int, CUtensorMap_st, CUtensorMap_st, CUtensorMap_st, CUtensorMap_st)",
+        "start": 83976661,
+        "end": 84024853,
+        "process": 292483011444736,
+        "device": 0,
+        "stream": 166,
+        "graph_id": 56,
+        "graph_node_id": 240518168655
+      },
+      "capture_node": 236223201359,
+      "capture_owner": {
+        "stage": "mlp",
+        "source_stage": "dense_mlp",
+        "stage_path": [
+          "extend_graph_body",
+          "layer_0",
+          "dense_mlp"
+        ],
+        "layer": "layer_0"
+      }
+    },
+    {
+      "method": "serial_sparse",
+      "capture": 10,
+      "raw": {
+        "kind": "kernel",
+        "name": "kernel_cutlass_kernel_operatorsdeepseek_v32norm_fusedLocalFusedRMSNorm_object_at__tensorptrbf16gmemalign128oi64716871681_tensorptrbf16gmemalign128oi64716871681_tensorptrf32gmemalign16o716_0",
+        "start": 84024789,
+        "end": 84028021,
+        "process": 292483011444736,
+        "device": 0,
+        "stream": 166,
+        "graph_id": 56,
+        "graph_node_id": 240518168656
+      },
+      "capture_node": 236223201360,
+      "capture_owner": {
+        "stage": "residual_rms_norm",
+        "source_stage": "input_residual_norm",
+        "stage_path": [
+          "extend_graph_body",
+          "layer_1",
+          "input_residual_norm"
+        ],
+        "layer": "layer_1"
+      }
+    },
+    {
+      "method": "dense_prefetch",
+      "capture": 13,
+      "raw": {
+        "kind": "kernel",
+        "name": "void deep_gemm::sm90_fp8_gemm_1d2d_impl<(cute::UMMA::Major)0, (unsigned int)0, (unsigned int)7168, (unsigned int)18432, (unsigned int)1, (unsigned int)64, (unsigned int)112, (unsigned int)128, (unsigned int)128, (unsigned int)128, (unsigned int)32, (unsigned int)9, (unsigned int)128, (unsigned int)128, (unsigned int)1, (bool)0, (unsigned int)132, (deep_gemm::GemmType)0, cutlass::bfloat16_t>(float *, int *, unsigned int, unsigned int, unsigned int, CUtensorMap_st, CUtensorMap_st, CUtensorMap_st, CUtensorMap_st)",
+        "start": 86312982,
+        "end": 86361622,
+        "process": 292483011444736,
+        "device": 0,
+        "stream": 168,
+        "graph_id": 59,
+        "graph_node_id": 253403070540
+      },
+      "capture_node": 249108103244,
+      "capture_owner": {
+        "stage": "mlp",
+        "source_stage": "dense_mlp",
+        "stage_path": [
+          "extend_graph_body",
+          "layer_0",
+          "dense_mlp"
+        ],
+        "layer": "layer_0"
+      }
+    },
+    {
+      "method": "dense_prefetch",
+      "capture": 13,
+      "raw": {
+        "kind": "kernel",
+        "name": "kernel_cutlass_kernel_operatorsdeepseek_v32norm_fusedLocalFusedRMSNorm_object_at__tensorptrbf16gmemalign128oi64716871681_tensorptrbf16gmemalign128oi64716871681_tensorptrf32gmemalign16o716_0",
+        "start": 86361398,
+        "end": 86364598,
+        "process": 292483011444736,
+        "device": 0,
+        "stream": 168,
+        "graph_id": 59,
+        "graph_node_id": 253403070541
+      },
+      "capture_node": 249108103245,
+      "capture_owner": {
+        "stage": "residual_rms_norm",
+        "source_stage": "input_residual_norm",
+        "stage_path": [
+          "extend_graph_body",
+          "layer_1",
+          "input_residual_norm"
+        ],
+        "layer": "layer_1"
+      }
+    }
+  ],
+  "interpretation": "Raw CUPTI timestamps intersect across adjacent dependent layers by 64 ns for serial and 224 ns for dense. No timestamp adjustment or tolerance is applied; layer starts and ends individually increase. Overall window remains first L0 computation start to final L2 computation end; sequential layer accounting uses previous layer final computation end to current final computation end, so the tiny prefix overlap is clipped only by that declared accounting window. This is not evidence of independent cross-layer model execution."
+}

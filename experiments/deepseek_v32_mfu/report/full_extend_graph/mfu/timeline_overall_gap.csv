@@ -1,0 +1,9 @@
+phase,method,start_ns,end_ns,window_ms,gap_ms,gap_percent_excluding_pure_io,gpu_idle_ms,control_only_ms,pure_io_only_ms,non_io_window_ms,gap_below_threshold,boundary
+prefill,hbm,1310979736,1322940379,11.960643,0.325696,2.7230643034826807,0.194144,0.131552,0.0,11.960643,True,L0 first compute kernel start to L2 last compute kernel end
+prefill,echo,1375557492,1387555832,11.99834,0.367968,3.0822375640164377,0.199008,0.16896,0.06,11.93834,True,L0 first compute kernel start to L2 last compute kernel end
+prefill,serial_sparse,1319898868,1331843193,11.944325,0.316927,2.666262288558553,0.178015,0.138912,0.05776,11.886565,True,L0 first compute kernel start to L2 last compute kernel end
+prefill,dense_prefetch,1321654958,1333822227,12.167269,0.328094,2.7090549733535916,0.182686,0.145408,0.056256,12.111013,True,L0 first compute kernel start to L2 last compute kernel end
+extend,hbm,33810763,36286884,2.476121,0.202464,8.176660187446414,0.09552,0.106944,0.0,2.476121,True,L0 first compute kernel start to L2 last compute kernel end
+extend,echo,83602643,88147784,4.545141,0.489025,11.074123767953486,0.186274,0.302751,0.129216,4.415925,False,L0 first compute kernel start to L2 last compute kernel end
+extend,serial_sparse,82938551,86033935,3.095384,0.308769,11.894207963833047,0.117153,0.191616,0.499423,2.595961,False,L0 first compute kernel start to L2 last compute kernel end
+extend,dense_prefetch,84603610,89138544,4.534934,0.093248,3.9184145481561417,0.042528,0.05072,2.155196,2.379738,True,Earlier of L0 first compute kernel start and L0 history H2D start (when present) to L2 last compute kernel end

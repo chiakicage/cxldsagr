@@ -263,3 +263,143 @@ def test_ledger_validation_and_cli_preserve_input_and_existing_outputs(tmp_path)
     calls_path.write_text(json.dumps(calls))
     with pytest.raises(ValueError, match="nonnegative"):
         read_calls(calls_path)
+
+
+def full_graph_capture(path):
+    """One graph launch owns two matrix APIs and separate cache-control work."""
+    prefix = "echo/echo/extend_annotated/shared/"
+    forward = prefix + "forward_misc/call_0"
+    replay = prefix + "extend_graph_replay_q_128/call_1"
+    with sqlite3.connect(path) as db:
+        db.executescript(
+            """
+            CREATE TABLE StringIds(id INTEGER PRIMARY KEY, value TEXT);
+            CREATE TABLE NVTX_EVENTS(start INTEGER, end INTEGER, text TEXT, globalTid INTEGER);
+            CREATE TABLE CUPTI_ACTIVITY_KIND_RUNTIME(start INTEGER, end INTEGER, globalTid INTEGER, correlationId INTEGER, nameId INTEGER);
+            CREATE TABLE CUPTI_ACTIVITY_KIND_KERNEL(start INTEGER, end INTEGER, deviceId INTEGER, streamId INTEGER, globalPid INTEGER, correlationId INTEGER, demangledName INTEGER, graphId INTEGER, graphNodeId INTEGER);
+            CREATE TABLE CUDA_GRAPH_NODE_EVENTS(graphNodeId INTEGER, originalGraphNodeId INTEGER, globalTid INTEGER);
+            """
+        )
+        db.executemany(
+            "INSERT INTO StringIds VALUES (?,?)",
+            [
+                (1, "cudaGraphLaunch_v10000"),
+                (11, "quantize_activation"),
+                (12, "gemm"),
+                (13, "sm90_fp8_mqa_logits_fuse_prefetch"),
+                (14, "prepare_cache"),
+            ],
+        )
+        db.executemany(
+            "INSERT INTO NVTX_EVENTS VALUES (?,?,?,?)",
+            [(0, 500000, forward, TID), (40000, 70000, replay, TID)],
+        )
+        db.execute("INSERT INTO CUPTI_ACTIVITY_KIND_RUNTIME VALUES (50000,60000,?,1,1)", (TID,))
+        db.executemany(
+            "INSERT INTO CUPTI_ACTIVITY_KIND_KERNEL VALUES (?,?,?,?,?,?,?,?,?)",
+            [
+                (100000, 105000, 0, 1, PID, 1, 11, 19, 101),
+                (110000, 205000, 0, 1, PID, 1, 12, 19, 102),
+                (210000, 410000, 0, 1, PID, 1, 13, 19, 103),
+                (412000, 422000, 0, 1, PID, 1, 14, 19, 104),
+            ],
+        )
+        db.executemany(
+            "INSERT INTO CUDA_GRAPH_NODE_EVENTS VALUES (?,?,?)",
+            [(100 + node, node, TID) for node in range(1, 5)],
+        )
+    common = {"mode": "echo", "phase": "extend_annotated", "layer": "shared"}
+    calls = [
+        {
+            **common,
+            "stage": "forward_misc",
+            "nvtx": forward,
+            "useful_flops": None,
+            "precision": None,
+            "formula": "N/A (no matrix multiply)",
+        },
+        {
+            **common,
+            "stage": "extend_graph_replay_q_128",
+            "nvtx": replay,
+            "graph_replay": True,
+            "full_extend_graph": True,
+            "graph_id": 19,
+            "graph_gpu_node_ids": [1, 2, 3, 4],
+            "graph_node_owners": {
+                str(node): {"stage": stage, "layer": "layer_0"}
+                for node, stage in (
+                    (1, "attention_projection"),
+                    (2, "attention_projection"),
+                    (3, "indexer_fused"),
+                    (4, "offload_prepare"),
+                )
+            },
+            "useful_flops": None,
+            "precision": None,
+            "formula": "N/A (no matrix multiply)",
+        },
+    ]
+    for index, (stage, nodes, precision, flops) in enumerate(
+        (
+            ("q_a_proj", [1, 2], "BF16", 50_000_000_000),
+            ("indexer_fused", [3], "FP8", 200_000_000_000),
+        )
+    ):
+        calls.append(
+            {
+                **common,
+                "layer": "layer_0",
+                "stage": stage,
+                "nvtx": f"{replay}/graph_api_{index}_{stage}",
+                "graph_replay": False,
+                "full_extend_graph": False,
+                "graph_api": True,
+                "graph_replay_nvtx": replay,
+                "graph_node_ids": nodes,
+                "useful_flops": flops,
+                "precision": precision,
+            }
+        )
+    return path, calls
+
+
+def test_full_graph_matrix_apis_preserve_quantization_and_fused_prefetch_time(tmp_path):
+    path, calls = full_graph_capture(tmp_path / "full.sqlite")
+    result = analyze_captures([path], calls, peaks=PEAKS, graph_setup_paths=[path])
+    rows = {(row["layer"], row["stage"]): row for row in result["operators_by_layer"]}
+    linear = rows["layer_0", "q_a_proj"]
+    assert linear["kernel_count"] == 2
+    assert linear["kernel_ns"] == 100000  # The activation quantization remains in the API.
+    assert linear["kernel_mfu_percent"] == pytest.approx(50)
+    assert linear["scope_host_union_ms"] == linear["api_count"] == 0
+    fused = rows["layer_0", "indexer_fused"]
+    assert fused["kernel_ns"] == 200000  # No inferred prefetch duration is subtracted.
+    assert fused["kernel_mfu_percent"] == pytest.approx(50)
+    control = rows["shared", "extend_graph_replay_q_128"]
+    assert control["kernel_ns"] == 10000
+    assert control["kernel_mfu_percent"] is None
+    summary = result["captures"][0]
+    assert summary["graph_attribution"]["replays"] == 1
+    assert summary["graph_attribution"]["every_replay_gpu_node_verified"]
+    assert summary["audit"]["kernel_count_and_time_conserved"]
+    assert summary["audit"]["metadata_call_counts_match"]
+    assert summary["audit"]["inventory_kernel_ns"] == 310000
+
+
+def test_full_graph_gap_only_metadata_cannot_become_an_operator_mfu_report(tmp_path):
+    path, calls = full_graph_capture(tmp_path / "full.sqlite")
+    with pytest.raises(ValueError, match="capture-time matrix API metadata"):
+        analyze_captures([path], calls[:2], peaks=PEAKS, graph_setup_paths=[path])
+
+
+@pytest.mark.parametrize("mutation", ["missing_node", "extra_launch"])
+def test_full_graph_operator_attribution_rejects_incomplete_or_multiple_replay(tmp_path, mutation):
+    path, calls = full_graph_capture(tmp_path / "full.sqlite")
+    with sqlite3.connect(path) as db:
+        if mutation == "missing_node":
+            db.execute("DELETE FROM CUPTI_ACTIVITY_KIND_KERNEL WHERE graphNodeId=104")
+        else:
+            db.execute("INSERT INTO CUPTI_ACTIVITY_KIND_RUNTIME VALUES (61000,62000,?,2,1)", (TID,))
+    with pytest.raises(ValueError, match="missing or duplicate|exactly one CUDA graph launch"):
+        analyze_captures([path], calls, peaks=PEAKS, graph_setup_paths=[path])
