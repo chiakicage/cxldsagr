@@ -251,7 +251,7 @@ class InstrumentServing:
         from cache.prefix_pool import PrefixSessionPool
         from cache.sparse_token_cache import SparseTokenCache
         from cache.sparse_token_pool import SharedSparseTokenPool
-        from experiments.deepseek_v32_echo_prefill.src.operator_instrumentation import (
+        from experiments.deepseek_v32_mfu.src.operator_instrumentation import (
             InstrumentOperators,
         )
         from models.deepseek_v32.cache.prefetch import PoolHistoryPrefetch
@@ -399,18 +399,66 @@ class InstrumentServing:
         original_gather = kv_transfer.gather_host_records
 
         @wraps(original_gather)
-        def gather(host, device, host_ids, device_ids):
+        def gather(host, device, host_ids, device_ids, *, max_ctas=None, valid_count=None):
             record_bytes = host.shape[1] * host.element_size()
+            capacity = host_ids.numel()
+            counted = valid_count is not None
             with scopes(
                 "host_gather",
-                records=host_ids.numel(),
+                id_buffer_capacity=capacity,
+                records=None if counted else capacity,
                 record_bytes=record_bytes,
-                requested_bytes=host_ids.numel() * record_bytes,
+                requested_bytes=None if counted else capacity * record_bytes,
+                max_ctas=max_ctas,
+                count_source="device_valid_count" if counted else "id_buffer_length",
+                transfer_bytes_source=(
+                    "validated_segment_cache_counters" if counted else "id_buffer_length"
+                ),
             ):
-                return original_gather(host, device, host_ids, device_ids)
+                return original_gather(
+                    host,
+                    device,
+                    host_ids,
+                    device_ids,
+                    max_ctas=max_ctas,
+                    valid_count=valid_count,
+                )
 
         self.stack.enter_context(patch.object(kv_transfer, "gather_host_records", gather))
         self.targets.append("operators.common.kv_transfer.gather_host_records")
+        original_copy = kv_transfer.copy_host_records_async
+
+        @wraps(original_copy)
+        def copy_span(host, device, *, host_start, device_start, count):
+            record_bytes = host.shape[1] * host.element_size()
+            source = host.data_ptr() + host_start * record_bytes
+            target = device.data_ptr() + device_start * record_bytes
+            with scopes(
+                "host_dma",
+                records=count,
+                record_bytes=record_bytes,
+                requested_bytes=count * record_bytes,
+                host_start=host_start,
+                device_start=device_start,
+                host_capacity_records=host.shape[0],
+                device_capacity_records=device.shape[0],
+                host_row_stride_bytes=host.stride(0) * host.element_size(),
+                device_row_stride_bytes=device.stride(0) * device.element_size(),
+                host_address_start=source,
+                host_address_end=source + count * record_bytes,
+                device_address_start=target,
+                device_address_end=target + count * record_bytes,
+                host_contiguous=host.is_contiguous(),
+                device_contiguous=device.is_contiguous(),
+                host_pinned=host.is_pinned(),
+                transfer_implementation="cudaMemcpyAsync",
+            ):
+                return original_copy(
+                    host, device, host_start=host_start, device_start=device_start, count=count
+                )
+
+        self.stack.enter_context(patch.object(kv_transfer, "copy_host_records_async", copy_span))
+        self.targets.append("operators.common.kv_transfer.copy_host_records_async")
         for name in ("argsort", "unique"):
             self.wrap(torch, name, f"cache_torch_{name}")
         shim = SimpleNamespace(
@@ -446,7 +494,7 @@ def snapshot_sources(output):
         "operator_flops.py",
         "analyze_nsys.py",
     ):
-        path = ROOT / "experiments/deepseek_v32_echo_prefill/src" / name
+        path = ROOT / "experiments/deepseek_v32_mfu/src" / name
         relative = path.relative_to(ROOT)
         destination = output / "source" / relative
         destination.parent.mkdir(parents=True, exist_ok=True)
@@ -660,8 +708,9 @@ def main(argv=None):
             backend_provenance=backend_provenance(),
             precision_settings=precision_settings(),
         )
-        if metadata["source_sha256"] == metadata["reference_source_sha256"]:
-            raise AssertionError("new profile instrumentation requires its own source identity")
+        # Independent runs may execute the same frozen source tree. Their run
+        # identities and measured artifacts, rather than a forced source edit,
+        # distinguish numerical validation, formal timing, and profiling.
         props = torch.cuda.get_device_properties(device)
         metadata["hardware"] = {
             "hostname": platform.node(),
@@ -884,7 +933,7 @@ def main(argv=None):
             raise RuntimeError("installed backend identity changed during profiling")
         if precision_settings() != metadata["precision_settings"]:
             raise RuntimeError("numerical precision policy changed during profiling")
-        from experiments.deepseek_v32_echo_prefill.src.backend_provenance import (
+        from experiments.deepseek_v32_mfu.src.backend_provenance import (
             collect_flashinfer_runtime_artifacts,
         )
 

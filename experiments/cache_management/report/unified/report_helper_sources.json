@@ -124,8 +124,8 @@
       "modules": [
         "evaluation.provenance"
       ],
-      "sha256": "0fde027cf65530a75072893c88c522cc85ea990b72e67ce7515b74dbb6d2fa67",
-      "size_bytes": 9629,
+      "sha256": "20593da3fcbaf8b720d507ee857799fde6ba297064fba505e7fec1054ec2295f",
+      "size_bytes": 9575,
       "snapshot_path": "source/report_helpers/evaluation/provenance.py"
     },
     "evaluation/validation.py": {
@@ -140,8 +140,8 @@
       "modules": [
         "experiments.cache_management.src.capacity_probe"
       ],
-      "sha256": "45285b6bb590a9f50d640d7dbf88d0bbba10cd47c962b5863dc1ae79205ccc79",
-      "size_bytes": 26508,
+      "sha256": "f71de8f83b29798d9230c33a8d143e91700118d02794d00f0efd0fc5555a07e8",
+      "size_bytes": 26492,
       "snapshot_path": "source/report_helpers/experiments/cache_management/src/capacity_probe.py"
     },
     "experiments/cache_management/src/capacity_report.py": {
@@ -173,8 +173,8 @@
       "modules": [
         "experiments.deepseek_v32_motivation.src.measure"
       ],
-      "sha256": "f40173938998813fbca017470f6253c7e9ecd4a752fe2a4f6b06b7d4df3f9273",
-      "size_bytes": 33146,
+      "sha256": "1a752b593e2297163291dcc11d1271c38063846125b3d770feeace56ed93955c",
+      "size_bytes": 33128,
       "snapshot_path": "source/report_helpers/experiments/deepseek_v32_motivation/src/measure.py"
     },
     "experiments/deepseek_v32_motivation/src/report.py": {
@@ -213,7 +213,7 @@
       "modules": [
         "experiments.nosa_motivation.src.measure"
       ],
-      "sha256": "ca627a4d98581535014a807f322426b6d56e9f515811d0b3ab067612b810e583",
+      "sha256": "3d1f71a0ea3ba9be0ecaa2fcf07bc94c95dce6cdbd8aaad00448fdaa134c6135",
       "size_bytes": 26343,
       "snapshot_path": "source/report_helpers/experiments/nosa_motivation/src/measure.py"
     },
@@ -221,8 +221,8 @@
       "modules": [
         "experiments.nosa_motivation.src.provenance"
       ],
-      "sha256": "ac157475a603db676426e35a76c6a3b0aea67fce7a8dfefb55942c927971ceb7",
-      "size_bytes": 15308,
+      "sha256": "ab523c5d933c82368f1a82a6b4d55cb0f6b6777ceae51fe5ab61690150362123",
+      "size_bytes": 15330,
       "snapshot_path": "source/report_helpers/experiments/nosa_motivation/src/provenance.py"
     },
     "experiments/nosa_motivation/src/report.py": {
@@ -237,8 +237,8 @@
       "modules": [
         "experiments.nosa_motivation.src.validation"
       ],
-      "sha256": "b4638f3102877f3b6e2e249b4f8909a8d187e6b2fdc63e834bbf56b6fadd8c22",
-      "size_bytes": 9995,
+      "sha256": "03fc94db01330d67ed9a0589b1c69c46e87399a4d362230d2255cf3752204b64",
+      "size_bytes": 9986,
       "snapshot_path": "source/report_helpers/experiments/nosa_motivation/src/validation.py"
     },
     "models/deepseek_v32/request_format.py": {
@@ -293,8 +293,8 @@
       "modules": [
         "models.nosa.infer"
       ],
-      "sha256": "4bc01669b4c2c3896115407a56b19ef496f8be3a18f49692878fa5cb3a69a84f",
-      "size_bytes": 13228,
+      "sha256": "ccc521d3686048658c2b03800b5c62987226f7df687aaffe9ebf4a73cd5eb99e",
+      "size_bytes": 13210,
       "snapshot_path": "source/report_helpers/models/nosa/infer.py"
     },
     "models/nosa/request_format.py": {
@@ -324,7 +324,6 @@
     "evaluation",
     "executor",
     "experiments",
-    "layers",
     "models",
     "operators",
     "scripts",
@@ -339,25 +338,23 @@
       "-m",
       "experiments.cache_management.src.report",
       "--run-id",
-      "cache_unified_20261005_02",
+      "cache_unified_dma_20261006_01",
       "--nosa-plan",
-      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_nosa_fixed_20261005_02",
+      "experiments/cache_management/output/data/cache_nosa_fixed_20261005_02",
       "--deepseek-plans",
-      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_nh_20261005_02",
-      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_base_20261005_02",
-      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_base_headroom_20261005_02",
-      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_nhmax_20261005_02",
-      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_nhmax_headroom_20261005_02",
+      "experiments/cache_management/output/data/cache_deepseek_nh_20261006_01",
+      "experiments/cache_management/output/data/cache_deepseek_p_base_20261006_01",
+      "experiments/cache_management/output/data/cache_deepseek_p_base_headroom_20261006_01",
+      "experiments/cache_management/output/data/cache_deepseek_p_nhmax_20261006_01",
+      "experiments/cache_management/output/data/cache_deepseek_p_nhmax_headroom_20261006_01",
       "--nosa-run",
-      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/nosa_motivation/output/data/refactor_final_nosa_bench_20261005_01",
+      "experiments/nosa_motivation/output/data/refactor_final_nosa_bench_20261005_01",
       "--deepseek-run",
-      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_bench_20261005_01",
-      "--nosa-receipt",
-      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/docs/agents/acceptance/unified_runtime_20261005/nosa_final/receipt.json",
+      "experiments/deepseek_v32_motivation/output/data/deepseek_dma_c10_bench_20261006_01",
       "--deepseek-receipt",
-      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/docs/agents/acceptance/unified_runtime_20261005/deepseek_final/receipt.json",
+      "/tmp/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_dma_c10_check_20261006_01/receipt.json",
       "--output-dir",
-      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_unified_20261005_02"
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_unified_dma_20261006_01"
     ],
     "python": {
       "executable": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin/python",

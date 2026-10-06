@@ -1,0 +1,57 @@
+{
+  "scope": "Host recall dispatch integration and measurement provenance; not a new capacity experiment",
+  "compared_against": "cache_manager_profile_20261006_04",
+  "source_sha256": {
+    "cache/sparse_token_pool.py": "b34c8cfbc43e58881bd14aa2af314ce7fe612cbbd906ca8573f4259d937e5650",
+    "cache/sparse_token_cache.py": "f400242ba854236f1d829c926aff4580b501447bb1e389dcf4840d72a1a5fe94",
+    "evaluation/local_native.py": "63681bbe626c0de97747ecf21d784b44e70530bb2c67f2d0fa2231baf54a03c8",
+    "operators/deepseek_v32/indexer/cache_ops.py": "20f075a0fcbe7a4f59894447ee6139eb8194a102c5c96d96c4367e355d7d6a5b",
+    "operators/deepseek_v32/indexer/recall_dispatch.py": "854b89912a1b6766c9d2eed62a908cc43ac5be9c35fb27e8fc61b39294991721",
+    "operators/deepseek_v32/indexer/csrc/echo_recall_dispatch.cpp": "8d81e018bdd227dd068544368480635f410eb50428dc843574a9814e0818ac74"
+  },
+  "capacity_method_ast_unchanged": {
+    "estimate_shared_bytes": true,
+    "estimate_session_bytes": true,
+    "estimate_execution_workspace_bytes": true,
+    "shared_bytes": true
+  },
+  "affected_experiments": [
+    "cache_manager_performance: fresh production recall and complete replay check/bench/profile required",
+    "deepseek_v32_mfu: fresh complete model check/bench/profile and full+layer gap gates required",
+    "deepseek_v32_motivation: fresh C10 check/bench/profile, memory and simulation required",
+    "cache_management: pure tensor planning formulas unchanged; runtime memory observations require corresponding new C10 evidence"
+  ],
+  "nosa": "No imports/usages of SharedSparseTokenPool, SparseTokenCache, recall_dispatch or local_native in NOSA model/operator paths or NOSA motivation/MFU/offload experiments. No NOSA runtime numerical change is claimed. Global CPU regression passed: 4171 tests and 58 subtests; 1373 GPU/optional cases skipped.",
+  "memory_boundary": "No planned tensor storage change. New host bridge/module initialization can change process or device overhead; planned capacities alone do not certify actual complete-request memory.",
+  "global_cpu_validation": {
+    "command": "source /tmp/deepseek_mfu_env.sh; numactl --physcpubind=32-39 --membind=0 bash scripts/run_tests.sh cpu",
+    "exit_code": 0,
+    "passed": 4171,
+    "subtests_passed": 58,
+    "skipped": 1373,
+    "warnings": 1,
+    "duration_seconds": 90.58,
+    "stdout": "/tmp/deepseek_cache_cpu_regression_20261006_02.stdout",
+    "stdout_sha256": "649dcfd8b2a6aef215dd2817796a0ab85c061b6b0179df6b203897f8fc4e8a76",
+    "boundary": "CPU regression only; skipped GPU and optional checkpoint cases are not accepted."
+  },
+  "production_gpu_validation": {
+    "new_tests": {
+      "passed": 14,
+      "skipped": 0,
+      "result": "/tmp/production_recall_dispatch_gpu_new_20261006_02",
+      "receipt_file_sha256": "6cbdeca23bb1de2b9d10d96fd2c1bb6a4999826826dd4a5260ba4617edbed459"
+    },
+    "affected_regression": {
+      "passed": 504,
+      "skipped": 0,
+      "result": "/tmp/production_recall_dispatch_gpu_regression_20261006_02",
+      "receipt_file_sha256": "08cfc0f214d30afad4e910e0cf4f33df24aa2afad3e75b3586a6d8fc7d2f6804"
+    },
+    "audit": {
+      "path": "/tmp/production_recall_dispatch_gpu_harness_20261006_01/final_audit_02.json",
+      "sha256": "adec06de05cf6624db900a5a6a3a8129dfe7a46900f3a82e69e7cbafd0211e66"
+    },
+    "boundary": "Correctness only. Three production DSOs and build identity unchanged within each run. The new-test run additionally loaded one fault-injection test DSO. Command used CPU24-31/membind0; Mems_allowed_list is an allowed-node set, not the active NUMA policy. Formal production performance and full-model gates remain pending."
+  }
+}

@@ -1,5 +1,5 @@
 import json
-from contextlib import nullcontext
+from contextlib import contextmanager, nullcontext
 from types import SimpleNamespace
 
 import pytest
@@ -195,6 +195,124 @@ def test_chunked_prefill_and_extend_preserve_causal_history_and_logit_selection(
     assert all(block.cache.length == block.cache.written == 8 for block in chunked.blocks)
     assert chunked.sync_observations == [[(0, 5)] * 3, [(5, 8)] * 3]
     assert all(block.cache.commits == 2 for block in chunked.blocks)
+
+
+def test_graph_completion_failure_poison_model_after_successful_transaction(fake_model_factory):
+    model = fake_model_factory()
+    failure = RuntimeError("completion event failed")
+
+    class Bank:
+        failed = False
+        eager_fallbacks = 0
+
+        def supports(self, *args):
+            return False
+
+        @contextmanager
+        def execution(self):
+            yield
+            self.failed = True
+            raise failure
+
+    bank = model._compute_graphs = Bank()
+    with pytest.raises(RuntimeError) as raised:
+        model.forward([1, 2])
+    assert raised.value is failure
+    assert model._poisoned and model._compute_graphs is bank
+    assert all(block.cache.commits == 1 for block in model.blocks)
+    with pytest.raises(RuntimeError, match="poisoned"):
+        model.set_cache_mode(False)
+
+
+def test_cold_eviction_drain_failure_disables_storage_reuse(fake_model_factory):
+    model = fake_model_factory()
+    model.offload, model._poisoned = True, False
+    failure = RuntimeError("eviction drain failed")
+
+    def fail():
+        raise failure
+
+    model.synchronize = fail
+    with pytest.raises(RuntimeError) as raised:
+        model.evict_prefix_residency()
+    assert raised.value is failure and model._poisoned
+    assert all(block.cache.commits == block.cache.rollbacks == 0 for block in model.blocks)
+
+
+def test_model_close_retains_graph_and_cache_owners_when_drain_fails(fake_model_factory):
+    model = fake_model_factory()
+    bank = model._compute_graphs = object()
+    pool = model._shared_pools = {"retained": object()}
+    failure = RuntimeError("close drain failed")
+
+    def fail():
+        raise failure
+
+    model.synchronize = fail
+    with pytest.raises(RuntimeError) as raised:
+        model.close()
+    assert raised.value is failure and model._poisoned
+    assert model._compute_graphs is bank and model._shared_pools is pool
+
+
+@pytest.mark.parametrize("state", ["poisoned", "closed"])
+@pytest.mark.parametrize(
+    "entry,args",
+    [
+        ("forward", ([1, 2],)),
+        ("prepare_compute_graphs", ([2],)),
+        ("evict_prefix_residency", ()),
+        ("snapshot_prefix", ()),
+        ("restore_prefix", ({},)),
+        ("set_cache_mode", (True,)),
+        ("set_cache_method", ("echo",)),
+        ("_allocate_shared_caches", ()),
+    ],
+)
+def test_unusable_model_rejects_cache_and_graph_work_before_touching_owners(
+    fake_model_factory, state, entry, args
+):
+    model = fake_model_factory()
+    model._poisoned, model._closed = state == "poisoned", state == "closed"
+    model.offload = True
+
+    def unexpected(*_args, **_kwargs):
+        raise AssertionError("unusable model touched an execution or cache owner")
+
+    model.synchronize = unexpected
+    bank = model._compute_graphs = SimpleNamespace(execution=unexpected)
+    pool = model._shared_pools = {"retained": object()}
+    sessions = model._shared_sessions = {"retained": object()}
+    helper = model._pool_prefetch = {"retained": object()}
+    caches = [block.cache for block in model.blocks]
+    with pytest.raises(RuntimeError, match=state):
+        getattr(model, entry)(*args)
+    assert model._compute_graphs is bank
+    assert model._shared_pools is pool and model._shared_sessions is sessions
+    assert model._pool_prefetch is helper
+    assert [block.cache for block in model.blocks] == caches
+    assert all(cache.commits == cache.rollbacks == cache.written == 0 for cache in caches)
+
+
+def test_normal_model_close_releases_cache_references_after_all_owners_drain(fake_model_factory):
+    model = fake_model_factory()
+    events = []
+    model._poisoned = model._closed = False
+    model.synchronize = lambda: events.append("synchronize")
+    model._compute_graphs = SimpleNamespace(close=lambda: events.append("graph"))
+    model._pool_prefetch = {"cpu": SimpleNamespace(close=lambda: events.append("prefetch"))}
+    model._shared_sessions = {"cpu": SimpleNamespace(release=lambda: events.append("session"))}
+    model._shared_pools = {"cpu": SimpleNamespace(close=lambda: events.append("pool"))}
+
+    model.close()
+
+    assert events == ["synchronize", "graph", "prefetch", "session", "pool"]
+    assert model._closed and not model._poisoned
+    assert model._compute_graphs is None
+    assert model._pool_prefetch == model._shared_sessions == model._shared_pools == {}
+    assert all(block.cache is None and block.attention is None for block in model.blocks)
+    model.close()
+    assert events == ["synchronize", "graph", "prefetch", "session", "pool"]
 
 
 @pytest.mark.parametrize("all_logits", [False, True])

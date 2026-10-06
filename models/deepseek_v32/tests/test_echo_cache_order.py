@@ -1,5 +1,6 @@
 """Cross-phase model contracts exercised with the generic CPU cache oracle."""
 
+from contextlib import nullcontext
 from types import SimpleNamespace
 
 import pytest
@@ -11,12 +12,15 @@ from models.deepseek_v32.attention import EchoAttentionRunner
 
 
 @pytest.mark.parametrize("compute_callbacks", [False, True])
+@pytest.mark.parametrize("hint_mode", ["standalone", "joined", "deferred"])
+@pytest.mark.parametrize("slots", [6, 8])
 def test_one_outer_batch_preserves_prefetch_topk_append_recall_order(
-    monkeypatch, compute_callbacks
+    monkeypatch, compute_callbacks, hint_mode, slots
 ):
+    import models.deepseek_v32.attention as module
     import operators.deepseek_v32.indexer.echo as indexer
 
-    pool = SharedSparseTokenPool(64, 4, 1, 8, device="cpu")
+    pool = SharedSparseTokenPool(64, 4, 1, slots, device="cpu")
     session = pool.allocate_session(16)
     cache = session.layer(0)
     cfg = SimpleNamespace(
@@ -39,7 +43,9 @@ def test_one_outer_batch_preserves_prefetch_topk_append_recall_order(
     attention = SimpleNamespace(
         cfg=cfg, device=torch.device("cpu"), project=project, output=lambda value: value
     )
-    runner = EchoAttentionRunner(attention, 16, offload=True, slots=8, chunk_size=2, cache=cache)
+    runner = EchoAttentionRunner(
+        attention, 16, offload=True, slots=slots, chunk_size=2, cache=cache
+    )
 
     def logits(q, k, weights, scales, start, prefetch=None):
         calls.append((start, len(q)))
@@ -64,6 +70,14 @@ def test_one_outer_batch_preserves_prefetch_topk_append_recall_order(
         return q
 
     monkeypatch.setattr(indexer, "logits", logits)
+    hint_writes = []
+    original_hint = module.update_prefetch_hint
+
+    def hint(scores, offset):
+        hint_writes.append(scores.shape)
+        original_hint(scores, offset)
+
+    monkeypatch.setattr(module, "update_prefetch_hint", hint)
     runner._consume = consume
     callbacks = {}
     if compute_callbacks:
@@ -76,15 +90,25 @@ def test_one_outer_batch_preserves_prefetch_topk_append_recall_order(
             "project_callback": project,
             "output_callback": lambda value: (value, value.clone()),
         }
-    for count in (6, 2):
-        cache.begin_step(count)
-        result = runner.forward(
-            torch.zeros(count, 2, dtype=torch.bfloat16), capture_indices=True, **callbacks
-        )
-        if compute_callbacks:
-            assert isinstance(result, tuple) and len(result) == 2
-            torch.testing.assert_close(result[0], result[1], rtol=0, atol=0)
+    if hint_mode != "standalone":
+        cache.begin_step(8)
+    with runner.defer_unused_prefill_hints() if hint_mode == "deferred" else nullcontext():
+        for count in (6, 2):
+            if hint_mode == "standalone":
+                cache.begin_step(count)
+            result = runner.forward(
+                torch.zeros(count, 2, dtype=torch.bfloat16), capture_indices=True, **callbacks
+            )
+            if compute_callbacks:
+                assert isinstance(result, tuple) and len(result) == 2
+                torch.testing.assert_close(result[0], result[1], rtol=0, atol=0)
+            if hint_mode == "standalone":
+                cache.commit()
+    if hint_mode != "standalone":
         cache.commit()
+    assert len(hint_writes) == (1 if hint_mode == "deferred" and slots == 8 else 2)
+    torch.testing.assert_close(runner.offset[0], torch.tensor(49.0 / 15), rtol=0, atol=0)
+    assert not getattr(runner, "_defer_prefill_hints", False)
     assert calls == [(0, 6), (6, 2)]  # No hidden scoring split at runner.chunk_size=2.
     assert cache.metrics()["recalled_records"] == 0
     assert cache.metrics()["written_records"] == 8

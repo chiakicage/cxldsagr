@@ -34,11 +34,11 @@ def test_graph_plan_is_allocation_free_and_has_no_session_multiplier(monkeypatch
     plan = plan_compute_graphs(cfg, 10, 1024, 65536, 128, 12 * 2**30)
     assert plan["compute_graph_query_sizes"] == [128, 1024]
     assert plan["compute_graph_count"] == 40
-    # Finish borrows the projection's saved tensor; only expanded values need
-    # static finish storage. Six layers also have incoming residual inputs.
-    per_token = 10 * (cfg.dim * 2 + cfg.n_heads * cfg.v_head_dim * 2 + 8)
-    per_token += 6 * cfg.dim * 2
-    assert plan["compute_graph_static_storage_bytes"] == (1024 + 128) * per_token + 20 * 8
+    # Layers 1/2 borrow both preceding finish outputs. Repeated source layers
+    # keep independent activation inputs; positions are shared per query size.
+    per_token = 8 * cfg.dim * 2 + 10 * cfg.n_heads * cfg.v_head_dim * 2 + 8 + 4
+    per_token += 4 * cfg.dim * 2
+    assert plan["compute_graph_static_storage_bytes"] == (1024 + 128) * per_token + 2 * 8
     assert plan["compute_graph_reserved_limit_bytes"] == (
         plan["compute_graph_static_allocation_limit_bytes"] + 12 * 2**30
     )
@@ -55,10 +55,14 @@ def test_graph_private_capacity_counts_inactive_segments(monkeypatch):
         "compute_graph_private_limit_bytes": 8 * 2**20,
         "compute_graph_static_allocation_limit_bytes": 512,
     }
+    bank._shared_inputs = {}
     graph = SimpleNamespace(pool=lambda: (4, 0))
     bank.pairs = {
         (0, 1): SimpleNamespace(
-            inputs={"hidden": static}, projection_graph=graph, finish_graph=graph
+            inputs={"hidden": static},
+            owned_inputs={"hidden": static},
+            projection_graph=graph,
+            finish_graph=graph,
         )
     }
     snapshot = [
@@ -224,6 +228,19 @@ def test_graph_positions_outputs_and_delayed_owned_writeback(graph_checkpoint, r
     class Runner:
         def forward(self, hidden, *, project_callback, output_callback, **kwargs):
             projected = project_callback(hidden, cache.written, normalized=False)
+            starts, ends = kwargs["indexer_bounds"]
+            torch.testing.assert_close(starts, torch.zeros_like(starts), rtol=0, atol=0)
+            torch.testing.assert_close(
+                ends,
+                torch.arange(
+                    cache.written + 1,
+                    cache.written + len(hidden) + 1,
+                    device=hidden.device,
+                    dtype=torch.int32,
+                ),
+                rtol=0,
+                atol=0,
+            )
             sources.append(projected.kv)
             if cache.transient_start is None:
                 ready = torch.cuda.Event()
@@ -328,11 +345,84 @@ def test_graph_positions_outputs_and_delayed_owned_writeback(graph_checkpoint, r
         bank._audit_capacity()
         assert bank.shared_bytes() == before
         assert pair.projection_replays == pair.finish_replays == 4
+        assert bank.position_updates == 1
         assert not bank.supports(layer, hidden[0][:3], incoming[0])
         with pytest.raises(RuntimeError, match="execution stream"):
             bank.forward_block(layer, runner, hidden[0], incoming[0])
     finally:
         stream.synchronize()
+        bank.close()
+
+
+@pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA required")
+@torch.inference_mode()
+def test_graph_chain_borrows_outputs_without_repacking_or_scalar_rewrites(graph_checkpoint):
+    if torch.cuda.get_device_capability() != (9, 0):
+        pytest.fail("DeepSeek compute graph validation requires Hopper SM90")
+    path, _ = graph_checkpoint
+    blocks = [
+        CheckpointBlock(path, 0, "cuda", capacity=16, chunk_size=5, linear_backend="bf16")
+        for _ in range(4)
+    ]
+    metadata = plan_compute_graphs(blocks[0].cfg, 4, 5, 10, 2, 512 * 2**20)
+    bank = DeepSeekComputeGraphs(
+        [block.attention.attention for block in blocks], blocks, "cuda", metadata
+    )
+
+    class Runner:
+        def __init__(self, attention):
+            self.attention = attention
+            self.cache = SimpleNamespace(offload=False, written=5)
+
+        def forward(self, hidden, *, project_callback, output_callback, **kwargs):
+            projected = project_callback(hidden, self.cache.written, normalized=False)
+            return output_callback(projected.q[..., : self.attention.cfg.kv_lora_rank])
+
+    runners = [Runner(block.attention.attention) for block in blocks]
+    expected, seeds = [], []
+    for _ in range(2):
+        hidden = torch.randn(5, blocks[0].cfg.dim, device="cuda").bfloat16()
+        seeds.append(hidden)
+        residual = None
+        states = []
+        for layer, block in enumerate(blocks):
+            if layer == 3:
+                hidden, residual = seeds[-1].clone(), None
+            attention = block.attention.attention
+            normalized, saved = residual_rms_norm(
+                hidden, residual, attention.input_norm_weight, block.cfg.norm_eps
+            )
+            projected = attention.project(normalized, 5, normalized=True)
+            attention_output = attention.output(projected.q[..., : block.cfg.kv_lora_rank])
+            normalized, residual = residual_rms_norm(
+                saved, attention_output, block.post_norm_weight, block.cfg.norm_eps
+            )
+            hidden = block.mlp(normalized)
+            states.append((hidden, residual))
+        expected.append(states)
+    try:
+        bank.allocate()
+        for layer in (1, 2):
+            pair = bank.pairs[layer, 5]
+            assert pair.inputs["hidden"] is bank.pairs[layer - 1, 5].output[0]
+            assert pair.inputs["residual"] is bank.pairs[layer - 1, 5].output[1]
+        assert bank.pairs[3, 5].inputs["hidden"] is not bank.pairs[0, 5].inputs["hidden"]
+        assert len({id(bank.pairs[layer, 5].inputs["start"]) for layer in range(4)}) == 1
+        for visit, seed in enumerate(seeds):
+            hidden, residual = seed, None
+            with bank.execution():
+                observed = []
+                for layer, runner in enumerate(runners):
+                    if layer == 3:
+                        hidden, residual = seed, None
+                    hidden, residual = bank.forward_block(layer, runner, hidden, residual)
+                    observed.append((hidden.clone(), residual.clone()))
+            torch.testing.assert_close(observed, expected[visit], rtol=0, atol=0)
+        assert bank.input_copies == 4  # Initial embedding and independent repeated input only.
+        assert bank.position_updates == 1  # All layers and the same-position revisit share it.
+        bank._audit_capacity()
+        assert bank.static_storage_bytes == metadata["compute_graph_static_storage_bytes"]
+    finally:
         bank.close()
 
 

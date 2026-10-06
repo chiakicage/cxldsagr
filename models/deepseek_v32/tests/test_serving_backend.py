@@ -79,7 +79,6 @@ def _model(layers=10, scheme="hbm", *, owner=None):
     if owner is not None:
         model.lifecycle.bind_owner(owner)
     model.pipeline = LocalPipeline()
-    model._pipeline_resources = None
     model.replay_layout = ReplayLayout.repeated_sources(layers)
     model.scheme = scheme
     model.num_layers = layers
@@ -129,6 +128,56 @@ def test_source_inputs_are_replayed_with_independent_cache_and_storage():
             assert session.runners[layer].cache is not session.runners[layer % 3].cache
         assert all(block.attention is None and block.cache is None for block in model.blocks)
     assert session.length == 7
+
+
+def test_graph_replay_copies_source_once_and_eager_fallback_remains_independent():
+    model, session = _model()
+    reference, reference_session = _model()
+
+    class CopyingGraphs:
+        failed = False
+        eager_fallbacks = 0
+
+        @contextmanager
+        def execution(self):
+            yield
+
+        def supports(self, layer, hidden, residual):
+            # Exercise mixed graph/eager source copies, including source zero's
+            # absent residual after a layer that did return a residual tensor.
+            return layer != 7 and (residual is None) == (layer % 3 == 0)
+
+        def forward_block(self, layer, runner, hidden, residual, *, scope):
+            if layer >= 3:
+                source = model.blocks[layer % 3].inputs[-1]
+                # Base graph input copies are owned independently. Its incoming
+                # tensor is recorded separately, just as the real graph bank.
+                original = incoming[layer % 3]
+                assert hidden is original[0] and residual is original[1]
+                assert hidden.data_ptr() != source[0].data_ptr()
+            incoming[layer] = (hidden, residual)
+            return model.blocks[layer].forward(
+                hidden.clone(),
+                residual.clone() if residual is not None else None,
+                scope=scope,
+                attention=runner,
+                chunk_size=len(hidden),
+            )
+
+    incoming = {}
+    model._compute_graphs = CopyingGraphs()
+    output = model.extend(session, [1, 4, 2])
+    expected = reference.extend(reference_session, [1, 4, 2])
+    torch.testing.assert_close(output, expected, rtol=0, atol=0)
+    assert model._compute_graphs.eager_fallbacks == 1
+    for layer in range(3, 10):
+        copied = model.blocks[layer].inputs[-1]
+        source = model.blocks[layer % 3].inputs[-1]
+        for value, original in zip(copied, source, strict=True):
+            if value is not None:
+                assert value.data_ptr() != original.data_ptr()
+                torch.testing.assert_close(value, original, rtol=0, atol=0)
+    assert session.length == 3
 
 
 def test_truncate_candidate_retains_prefix_and_revisit_matches_fresh_session():
@@ -229,7 +278,7 @@ def test_session_estimate_excludes_shared_pools_and_includes_hint_backups():
     model.device = torch.device("cuda:0")  # Allocation-free estimate only.
     assert model.estimate_session_bytes(capacity) == {"hbm": 10 * (1304 * 32 + 192), "dram": 0}
     model.scheme = "serial_sparse"
-    expected = {"hbm": 10 * (132 * 32 + 192 + 56) + 4, "dram": 4}
+    expected = {"hbm": 10 * (132 * 32 + 192 + 64) + 4, "dram": 4}
     assert model.estimate_session_bytes(capacity) == expected
     model.scheme = "echo"
     model.slots = 32768

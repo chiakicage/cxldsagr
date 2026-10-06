@@ -1,0 +1,26 @@
+{
+  "schema": "deepseek-c10-publication-acceptance-v1",
+  "status": "passed",
+  "check_run_id": "deepseek_mfu_c10_check_20261006_01",
+  "bench_run_id": "deepseek_mfu_c10_bench_20261006_01",
+  "profile_run_id": "deepseek_mfu_c10_profile_20261006_02",
+  "bench_requests": 128,
+  "bench_check_output_sets": 128,
+  "offload_vs_hbm_exact_comparisons": 96,
+  "profile_exact_output_sets": 80,
+  "bench_memory_samples_verified": 270,
+  "profile_captures": 12,
+  "request_captures": 8,
+  "single_layer_and_prefill_raw_intervals_conserved": true,
+  "artifact_audit_sha256": {
+    "independent_bench_audit.json": "635395fab97e5a3db34a544f5066a102d4bca0ca810b12a73e91db052197fa9f",
+    "diagnosis/independent_numerical_audit.json": "9510cf5d88402ec547918f3960175b00479035615dcf0ce73abbad6c853b766f",
+    "diagnosis/independent_provenance_audit.json": "4b356f7297dd9f6ce0336d5c563fca1d7067268d6cea5f246182883d6d8acbe8",
+    "diagnosis/independent_transfer_audit.json": "1c2bbd03f53d91821313d06a11f006fac638d772df1b46c14e210a891326c849",
+    "single_layer/raw_check.json": "d5a6e66b656bb76cf7297e13aeeb985b7504ea00ccc416ea0ac7ccae6caa4922",
+    "prefill_layer/raw_check.json": "c1460212ad6c5b7233342b30aec71617a9a0eec951aebc76f65a20ad4f8b1e86",
+    "observer_summary.json": "9cdf9a243b4dfe75e253afe82169d3e30cecb98c4387ce5b63ff2d872fce8903",
+    "diagnosis/observer_summary.json": "c9a4d726b398e5163038868a63ee806c8f3168ac91c87148b587885cc9c5ae12"
+  },
+  "boundary": "Accepted for this fixed-capacity C10 workload, one formal timing trajectory and intrusive request/layer scheduling diagnostics. Does not establish task quality, full DeepSeek model performance, saturated NH capacity, all-GPU isolation, or removable unprofiled dispatch overhead."
+}

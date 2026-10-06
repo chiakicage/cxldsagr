@@ -1,0 +1,49 @@
+{
+  "analysis_directory": "experiments/cache_manager_performance/output/data/cache_attention_transition_model_20261006_02",
+  "analysis_id": "cache_attention_transition_model_20261006_02",
+  "analysis_summary_sha256": "07f7e55d2d0cc7facff9108bbfab02bf755436dbfaea639c86ab4f36ac663b07",
+  "artifact_path_base": "publication directory for files; repository root for analysis directory",
+  "files": {
+    "audit.json": {
+      "bytes": 13533,
+      "sha256": "65c39a5ff0e5abbabfe6bb5808ca0257ba1717a2a598b2d0669e52efe556742b"
+    },
+    "latency.csv": {
+      "bytes": 1235,
+      "sha256": "a9301a8726ad8de58e100ad50bfbefa369dd50a59bce813b29d95778fd4b3206"
+    },
+    "provenance.json": {
+      "bytes": 18837,
+      "sha256": "fb3ea134e24eaa9bb2fcdf2ce299689f09705c9189ddcc1afcdc72e620c490c8"
+    },
+    "results.md": {
+      "bytes": 2783,
+      "sha256": "f8bd5482332ee097b76413952fb41e8e173e5adbe3833a5b037d3eaede395d43"
+    },
+    "stages.csv": {
+      "bytes": 3411,
+      "sha256": "228b267b3c50885945292489d05047917b7f4c00ca90c55acf234246aa1644c5"
+    },
+    "transition.png": {
+      "bytes": 39288,
+      "sha256": "b15fa980f3c7a670fcc1ccab3d9c9d3dd07afdc8c51ff76e2ed9a392ade35076"
+    },
+    "transition.svg": {
+      "bytes": 46426,
+      "sha256": "2a365a9f271f2ba3c8fd244635faf98d6fd92a2b9f3fd379e2cbfdc384601dca"
+    },
+    "windows.csv": {
+      "bytes": 1439,
+      "sha256": "8b2ef8dea907ca56c6273c2e4a8b6d77fc78fb3c86b3ae66c0ed393c6db6eec8"
+    }
+  },
+  "new_gpu_run": false,
+  "profile_run_id": "deepseek_gap_v10_a128_minimal_20261006_01",
+  "published_at_utc": "2026-10-06T11:29:03.276362+00:00",
+  "reproduce": "CUDA_VISIBLE_DEVICES= .venv/bin/python -m experiments.cache_manager_performance.src.transition --model-run experiments/deepseek_v32_mfu/output/data/deepseek_gap_v10_a128_minimal_20261006_01 --run-id cache_attention_transition_model_new --output-dir experiments/cache_manager_performance/output/data/cache_attention_transition_model_new",
+  "schema": "cache-manager-model-transition-publication-v2",
+  "scope": "Six V10 cold persistent-extend layer intervals; top-k GPU completion to actual MLA kernel start; independent replay published separately.",
+  "source_kind": "complete_model",
+  "status": "published_diagnostic",
+  "validation": "Unchanged standard-library raw-SQL audit rerun; all six endpoints, launch anchors, partitions, CPU/GPU stage rows and CSV statistics match prior independent audit."
+}

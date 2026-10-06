@@ -1,0 +1,203 @@
+{
+  "analysis_id": "cache_attention_transition_model_20261006_02",
+  "artifact_path_base": "repository root; absolute paths only for external acceptance evidence",
+  "checks": {
+    "actual_launch_endpoints": true,
+    "actual_topk_and_mla_endpoints": true,
+    "all_cpu_and_gpu_stage_rows": true,
+    "all_windows_stages_latency_csv_rows": true,
+    "archive_hashes_verified": true,
+    "io_control_idle_ns_partitions": true,
+    "no_model_compute_inside": true,
+    "raw_sql_matches_prior_independent_audit": true,
+    "six_complete_model_windows_only": true,
+    "transport_bytes_and_counters": true
+  },
+  "fresh_independent_raw_sql_audit": {
+    "bytes": 178743,
+    "path": "experiments/cache_manager_performance/output/data/cache_attention_transition_model_20261006_02/independent_validation/raw_sql_audit.json",
+    "sha256": "f536f223437e8d5feb796aa65b0b89de57b6c71de0678f5061191076e1fa0302"
+  },
+  "independent_audit_script": {
+    "bytes": 19312,
+    "path": "experiments/cache_manager_performance/output/data/cache_attention_transition_model_20261006_02/independent_validation/raw_sql_audit.py",
+    "sha256": "6ae2dd17eb4519ed48b1fb935b3e506d38bcd94f07e3068c97dfa144ba4e213e"
+  },
+  "latency_rows": 8,
+  "limits": [
+    "Read-only reanalysis of the accepted V10 cold persistent-extend traces; no new GPU measurement or numerical acceptance.",
+    "One intrusive sample per method; sum across layers is not full-request latency.",
+    "The standalone replay is published separately in report/post_topk; this report contains only complete_model evidence.",
+    "Original V10 resident-mask live JIT/CUBIN archival limitation remains."
+  ],
+  "new_gpu_run": false,
+  "passed": true,
+  "prior_independent_audit": {
+    "bytes": 178627,
+    "path": "experiments/cache_manager_performance/output/data/cache_attention_transition_model_20261006_02/independent_validation/prior_raw_sql_audit.json",
+    "sha256": "e2900c63619ec5a6286b0a09dc029f7ea8b8632794ea8b4459dc1ea29b4eef42"
+  },
+  "profile_run_id": "deepseek_gap_v10_a128_minimal_20261006_01",
+  "publication_validation_script": {
+    "bytes": 13873,
+    "path": "experiments/cache_manager_performance/output/data/cache_attention_transition_model_20261006_02/independent_validation/publication_validation.py",
+    "sha256": "3f3f678f96c3c18fd1ad7c0beb3313d2d087c1daf5d0629fbfd7280d270457db"
+  },
+  "schema": "cache-manager-model-transition-audit-v2",
+  "stage_rows": 21,
+  "summary": {
+    "bytes": 1599771,
+    "path": "experiments/cache_manager_performance/output/data/cache_attention_transition_model_20261006_02/summary.json",
+    "sha256": "07f7e55d2d0cc7facff9108bbfab02bf755436dbfaea639c86ab4f36ac663b07"
+  },
+  "window_count": 6,
+  "windows": [
+    {
+      "actual_mla_kernel": "void sm90::prefill::sparse_fwd::sparse_attn_fwd_kernel<sm90::prefill::sparse_fwd::KernelTemplate<(int)576, (bool)0>, sm90::prefill::sparse_fwd::KernelTemplate<(int)576, (bool)0>::TmaParams<cute::tuple<int, int, int>, cute::TiledCopy<cute::Copy_Atom<cute::Copy_Traits<cute::SM90_TMA_LOAD, cute::C<(int)65536>, cute::AuxTmaParams<cute::tuple<cute::ScaledBasis<cute::C<(int)1>, (int)1>, cute::ScaledBasis<cute::C<(int)1>, (int)0>, cute::ScaledBasis<cute::C<(int)1>, (int)2>>, const cute::Layout<cute::tuple<cute::C<(int)64>, cute::C<(int)64>, cute::C<(int)1>>, cute::tuple<cute::ScaledBasis<cute::C<(int)1>, (int)1>, cute::ScaledBasis<cute::C<(int)1>, (int)0>, cute::ScaledBasis<cute::C<(int)1>, (int)2>>> &, const cute::Swizzle<(int)3, (int)4, (int)3> &>>, cutlass::bfloat16_t>, cute::Layout<cute::tuple<cute::C<(int)1>, cute::tuple<cute::tuple<cute::tuple<cute::C<(int)64>, cute::C<(int)64>>, cute::C<(int)9>>>>, cute::tuple<cute::C<(int)0>, cute::tuple<cute::tuple<cute::tuple<cute::C<(int)64>, cute::C<(int)1>>, cute::C<(int)4096>>>>>, cute::tuple<cute::C<(int)64>, cute::C<(int)576>>>>>(SparseAttnFwdParams, T2)",
+      "control_union_ns": 44832,
+      "end_ns": 84335686,
+      "exposed_control_ns": 40480,
+      "gpu_idle_ns": 25247,
+      "idle_before_next_same_stream_launch_api_start_ns": 0,
+      "io_union_ns": 68640,
+      "layer": 0,
+      "mla_launch_api_start_minus_topk_gpu_end_ns": -73695,
+      "non_io_residual_ns": 65727,
+      "passed": true,
+      "phase": "extend_cold",
+      "sample": 0,
+      "scheme": "echo",
+      "stages_checked": [
+        "prefetch_hint",
+        "cache_write",
+        "offload_exact_recall",
+        "sparse_mla"
+      ],
+      "start_ns": 84201319,
+      "topk_last_kernel": "mask_kernel",
+      "window_ns": 134367
+    },
+    {
+      "actual_mla_kernel": "void sm90::prefill::sparse_fwd::sparse_attn_fwd_kernel<sm90::prefill::sparse_fwd::KernelTemplate<(int)576, (bool)0>, sm90::prefill::sparse_fwd::KernelTemplate<(int)576, (bool)0>::TmaParams<cute::tuple<int, int, int>, cute::TiledCopy<cute::Copy_Atom<cute::Copy_Traits<cute::SM90_TMA_LOAD, cute::C<(int)65536>, cute::AuxTmaParams<cute::tuple<cute::ScaledBasis<cute::C<(int)1>, (int)1>, cute::ScaledBasis<cute::C<(int)1>, (int)0>, cute::ScaledBasis<cute::C<(int)1>, (int)2>>, const cute::Layout<cute::tuple<cute::C<(int)64>, cute::C<(int)64>, cute::C<(int)1>>, cute::tuple<cute::ScaledBasis<cute::C<(int)1>, (int)1>, cute::ScaledBasis<cute::C<(int)1>, (int)0>, cute::ScaledBasis<cute::C<(int)1>, (int)2>>> &, const cute::Swizzle<(int)3, (int)4, (int)3> &>>, cutlass::bfloat16_t>, cute::Layout<cute::tuple<cute::C<(int)1>, cute::tuple<cute::tuple<cute::tuple<cute::C<(int)64>, cute::C<(int)64>>, cute::C<(int)9>>>>, cute::tuple<cute::C<(int)0>, cute::tuple<cute::tuple<cute::tuple<cute::C<(int)64>, cute::C<(int)1>>, cute::C<(int)4096>>>>>, cute::tuple<cute::C<(int)64>, cute::C<(int)576>>>>>(SparseAttnFwdParams, T2)",
+      "control_union_ns": 42752,
+      "end_ns": 85840739,
+      "exposed_control_ns": 37376,
+      "gpu_idle_ns": 23968,
+      "idle_before_next_same_stream_launch_api_start_ns": 0,
+      "io_union_ns": 17440,
+      "layer": 1,
+      "mla_launch_api_start_minus_topk_gpu_end_ns": -143627,
+      "non_io_residual_ns": 61344,
+      "passed": true,
+      "phase": "extend_cold",
+      "sample": 0,
+      "scheme": "echo",
+      "stages_checked": [
+        "prefetch_hint",
+        "cache_write",
+        "offload_exact_recall",
+        "sparse_mla"
+      ],
+      "start_ns": 85761955,
+      "topk_last_kernel": "mask_kernel",
+      "window_ns": 78784
+    },
+    {
+      "actual_mla_kernel": "void sm90::prefill::sparse_fwd::sparse_attn_fwd_kernel<sm90::prefill::sparse_fwd::KernelTemplate<(int)576, (bool)0>, sm90::prefill::sparse_fwd::KernelTemplate<(int)576, (bool)0>::TmaParams<cute::tuple<int, int, int>, cute::TiledCopy<cute::Copy_Atom<cute::Copy_Traits<cute::SM90_TMA_LOAD, cute::C<(int)65536>, cute::AuxTmaParams<cute::tuple<cute::ScaledBasis<cute::C<(int)1>, (int)1>, cute::ScaledBasis<cute::C<(int)1>, (int)0>, cute::ScaledBasis<cute::C<(int)1>, (int)2>>, const cute::Layout<cute::tuple<cute::C<(int)64>, cute::C<(int)64>, cute::C<(int)1>>, cute::tuple<cute::ScaledBasis<cute::C<(int)1>, (int)1>, cute::ScaledBasis<cute::C<(int)1>, (int)0>, cute::ScaledBasis<cute::C<(int)1>, (int)2>>> &, const cute::Swizzle<(int)3, (int)4, (int)3> &>>, cutlass::bfloat16_t>, cute::Layout<cute::tuple<cute::C<(int)1>, cute::tuple<cute::tuple<cute::tuple<cute::C<(int)64>, cute::C<(int)64>>, cute::C<(int)9>>>>, cute::tuple<cute::C<(int)0>, cute::tuple<cute::tuple<cute::tuple<cute::C<(int)64>, cute::C<(int)1>>, cute::C<(int)4096>>>>>, cute::tuple<cute::C<(int)64>, cute::C<(int)576>>>>>(SparseAttnFwdParams, T2)",
+      "control_union_ns": 43392,
+      "end_ns": 87371295,
+      "exposed_control_ns": 39488,
+      "gpu_idle_ns": 22783,
+      "idle_before_next_same_stream_launch_api_start_ns": 0,
+      "io_union_ns": 44544,
+      "layer": 2,
+      "mla_launch_api_start_minus_topk_gpu_end_ns": -160602,
+      "non_io_residual_ns": 62271,
+      "passed": true,
+      "phase": "extend_cold",
+      "sample": 0,
+      "scheme": "echo",
+      "stages_checked": [
+        "prefetch_hint",
+        "cache_write",
+        "offload_exact_recall",
+        "sparse_mla"
+      ],
+      "start_ns": 87264480,
+      "topk_last_kernel": "mask_kernel",
+      "window_ns": 106815
+    },
+    {
+      "actual_mla_kernel": "void sm90::prefill::sparse_fwd::sparse_attn_fwd_kernel<sm90::prefill::sparse_fwd::KernelTemplate<(int)576, (bool)0>, sm90::prefill::sparse_fwd::KernelTemplate<(int)576, (bool)0>::TmaParams<cute::tuple<int, int, int>, cute::TiledCopy<cute::Copy_Atom<cute::Copy_Traits<cute::SM90_TMA_LOAD, cute::C<(int)65536>, cute::AuxTmaParams<cute::tuple<cute::ScaledBasis<cute::C<(int)1>, (int)1>, cute::ScaledBasis<cute::C<(int)1>, (int)0>, cute::ScaledBasis<cute::C<(int)1>, (int)2>>, const cute::Layout<cute::tuple<cute::C<(int)64>, cute::C<(int)64>, cute::C<(int)1>>, cute::tuple<cute::ScaledBasis<cute::C<(int)1>, (int)1>, cute::ScaledBasis<cute::C<(int)1>, (int)0>, cute::ScaledBasis<cute::C<(int)1>, (int)2>>> &, const cute::Swizzle<(int)3, (int)4, (int)3> &>>, cutlass::bfloat16_t>, cute::Layout<cute::tuple<cute::C<(int)1>, cute::tuple<cute::tuple<cute::tuple<cute::C<(int)64>, cute::C<(int)64>>, cute::C<(int)9>>>>, cute::tuple<cute::C<(int)0>, cute::tuple<cute::tuple<cute::tuple<cute::C<(int)64>, cute::C<(int)1>>, cute::C<(int)4096>>>>>, cute::tuple<cute::C<(int)64>, cute::C<(int)576>>>>>(SparseAttnFwdParams, T2)",
+      "control_union_ns": 35616,
+      "end_ns": 82817994,
+      "exposed_control_ns": 35616,
+      "gpu_idle_ns": 207968,
+      "idle_before_next_same_stream_launch_api_start_ns": 164106,
+      "io_union_ns": 222111,
+      "layer": 0,
+      "mla_launch_api_start_minus_topk_gpu_end_ns": 347688,
+      "non_io_residual_ns": 243584,
+      "passed": true,
+      "phase": "extend_cold",
+      "sample": 0,
+      "scheme": "serial_sparse",
+      "stages_checked": [
+        "cache_write",
+        "offload_exact_recall",
+        "sparse_mla"
+      ],
+      "start_ns": 82352299,
+      "topk_last_kernel": "mask_kernel",
+      "window_ns": 465695
+    },
+    {
+      "actual_mla_kernel": "void sm90::prefill::sparse_fwd::sparse_attn_fwd_kernel<sm90::prefill::sparse_fwd::KernelTemplate<(int)576, (bool)0>, sm90::prefill::sparse_fwd::KernelTemplate<(int)576, (bool)0>::TmaParams<cute::tuple<int, int, int>, cute::TiledCopy<cute::Copy_Atom<cute::Copy_Traits<cute::SM90_TMA_LOAD, cute::C<(int)65536>, cute::AuxTmaParams<cute::tuple<cute::ScaledBasis<cute::C<(int)1>, (int)1>, cute::ScaledBasis<cute::C<(int)1>, (int)0>, cute::ScaledBasis<cute::C<(int)1>, (int)2>>, const cute::Layout<cute::tuple<cute::C<(int)64>, cute::C<(int)64>, cute::C<(int)1>>, cute::tuple<cute::ScaledBasis<cute::C<(int)1>, (int)1>, cute::ScaledBasis<cute::C<(int)1>, (int)0>, cute::ScaledBasis<cute::C<(int)1>, (int)2>>> &, const cute::Swizzle<(int)3, (int)4, (int)3> &>>, cutlass::bfloat16_t>, cute::Layout<cute::tuple<cute::C<(int)1>, cute::tuple<cute::tuple<cute::tuple<cute::C<(int)64>, cute::C<(int)64>>, cute::C<(int)9>>>>, cute::tuple<cute::C<(int)0>, cute::tuple<cute::tuple<cute::tuple<cute::C<(int)64>, cute::C<(int)1>>, cute::C<(int)4096>>>>>, cute::tuple<cute::C<(int)64>, cute::C<(int)576>>>>>(SparseAttnFwdParams, T2)",
+      "control_union_ns": 35168,
+      "end_ns": 83877352,
+      "exposed_control_ns": 31040,
+      "gpu_idle_ns": 113600,
+      "idle_before_next_same_stream_launch_api_start_ns": 80454,
+      "io_union_ns": 78208,
+      "layer": 1,
+      "mla_launch_api_start_minus_topk_gpu_end_ns": 214642,
+      "non_io_residual_ns": 144640,
+      "passed": true,
+      "phase": "extend_cold",
+      "sample": 0,
+      "scheme": "serial_sparse",
+      "stages_checked": [
+        "cache_write",
+        "offload_exact_recall",
+        "sparse_mla"
+      ],
+      "start_ns": 83654504,
+      "topk_last_kernel": "mask_kernel",
+      "window_ns": 222848
+    },
+    {
+      "actual_mla_kernel": "void sm90::prefill::sparse_fwd::sparse_attn_fwd_kernel<sm90::prefill::sparse_fwd::KernelTemplate<(int)576, (bool)0>, sm90::prefill::sparse_fwd::KernelTemplate<(int)576, (bool)0>::TmaParams<cute::tuple<int, int, int>, cute::TiledCopy<cute::Copy_Atom<cute::Copy_Traits<cute::SM90_TMA_LOAD, cute::C<(int)65536>, cute::AuxTmaParams<cute::tuple<cute::ScaledBasis<cute::C<(int)1>, (int)1>, cute::ScaledBasis<cute::C<(int)1>, (int)0>, cute::ScaledBasis<cute::C<(int)1>, (int)2>>, const cute::Layout<cute::tuple<cute::C<(int)64>, cute::C<(int)64>, cute::C<(int)1>>, cute::tuple<cute::ScaledBasis<cute::C<(int)1>, (int)1>, cute::ScaledBasis<cute::C<(int)1>, (int)0>, cute::ScaledBasis<cute::C<(int)1>, (int)2>>> &, const cute::Swizzle<(int)3, (int)4, (int)3> &>>, cutlass::bfloat16_t>, cute::Layout<cute::tuple<cute::C<(int)1>, cute::tuple<cute::tuple<cute::tuple<cute::C<(int)64>, cute::C<(int)64>>, cute::C<(int)9>>>>, cute::tuple<cute::C<(int)0>, cute::tuple<cute::tuple<cute::tuple<cute::C<(int)64>, cute::C<(int)1>>, cute::C<(int)4096>>>>>, cute::tuple<cute::C<(int)64>, cute::C<(int)576>>>>>(SparseAttnFwdParams, T2)",
+      "control_union_ns": 34016,
+      "end_ns": 85077253,
+      "exposed_control_ns": 34016,
+      "gpu_idle_ns": 130208,
+      "idle_before_next_same_stream_launch_api_start_ns": 86220,
+      "io_union_ns": 199295,
+      "layer": 2,
+      "mla_launch_api_start_minus_topk_gpu_end_ns": 261696,
+      "non_io_residual_ns": 164224,
+      "passed": true,
+      "phase": "extend_cold",
+      "sample": 0,
+      "scheme": "serial_sparse",
+      "stages_checked": [
+        "cache_write",
+        "offload_exact_recall",
+        "sparse_mla"
+      ],
+      "start_ns": 84713734,
+      "topk_last_kernel": "mask_kernel",
+      "window_ns": 363519
+    }
+  ]
+}

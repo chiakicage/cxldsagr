@@ -1,0 +1,24 @@
+{
+  "command": [
+    "env",
+    "PATH=/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin:/usr/local/cuda/bin:/root/.codex/tmp/arg0/codex-arg0jLC2sM:/root/.cloudml-cli/bin:/root/.vscode-server/data/User/globalStorage/github.copilot-chat/debugCommand:/root/.vscode-server/data/User/globalStorage/github.copilot-chat/copilotCli:/root/.vscode-server/bin/07f806f999227108933c2e30515b26eecc1fda74/bin/remote-cli:/root/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/cuda/bin",
+    "numactl",
+    "--physcpubind=24-31",
+    "--membind=0",
+    "bash",
+    "experiments/cache_manager_performance/scripts/profile.sh",
+    "--run-id",
+    "cache_posttopk_profile_20261006_01",
+    "--capture-dir",
+    "experiments/cache_manager_performance/output/data/input_fixture_20261006_02",
+    "--validation-receipt",
+    "/tmp/cxldsagr-checks/cache_manager_performance/data/cache_posttopk_check_20261006_01/receipt.json",
+    "--repeats",
+    "7"
+  ],
+  "started_utc": "2026-10-06T11:19:36.516682+00:00",
+  "driver_sha256": "d9c70b27698a0a3a90a3202dd56c6d556110c4527386ddf24c7d303f3fa7fc7b",
+  "pid": 411361,
+  "exit_code": 0,
+  "completed_utc": "2026-10-06T11:20:21.624133+00:00"
+}

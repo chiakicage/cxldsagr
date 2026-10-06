@@ -1,5 +1,10 @@
 # DeepSeek V3.2
 
+真实前三层的四方案 MFU 已完成 H=65,536、A=128 的 DMA 版本独立验收、正式计时
+和 profile，当前结果采用每层 P=65,664、cold extend 和计算图。
+十 block C10 GR 工作负载仍为 A=128，DMA 版本已完成独立 check 和正式 bench；
+profile 按用户要求暂缓。下文保留的 motivation profile 仍对应 mapped-host 实现。
+固定历史的临时候选语义与前三层 MFU 的持久追加分开验收。
 
 独立 SM90 checkpoint 推理实现，支持 ECHO prefill/extend。完整结构包含 61 层、
 embedding、3 个 dense MLP、58 个 MoE、final norm 和 LM head。硬件算子按功能位于
@@ -8,7 +13,7 @@ embedding、3 个 dense MLP、58 个 MoE、final norm 和 LM head。硬件算子
 和末 token LM head；GR 对照另用十个独立 dense block 的输入重放工作负载。
 完整层数入口仍保留，本轮验收不等于完整 61 层验证。两条工作负载分别报告，
 真实三层的数值、性能和 profile 边界见
-[ECHO 实验](../../experiments/deepseek_v32_echo_prefill/README.md)。
+[四方案 MFU 实验](../../experiments/deepseek_v32_mfu/README.md)。
 
 | 模块 | 用途 |
 | --- | --- |
@@ -21,8 +26,10 @@ embedding、3 个 dense MLP、58 个 MoE、final norm 和 LM head。硬件算子
 | [adapter.py](execution/adapter.py) | 单卡 GR serving 的 10 个 dense block / 输入复制工作负载与可复用用户 cache session |
 | [replay.py](replay.py) | checkpoint 副本的独立加载、source 层映射及 hidden/residual 输入克隆；物理层数由入口显式指定 |
 | [session.py](cache/session.py) | 用户 session 状态与借用双缓冲的 dense cache view |
+| [prefetch.py](cache/prefetch.py) | 逐层 pool 的连续历史 DMA、异步 ticket 与拷贝 drain |
 | [planning.py](execution/planning.py) | 根据模型维度和执行上限计算固定 P/NH 或字节预算的资源计划 |
-| [pipeline.py](execution/pipeline.py)、[official.py](execution/official.py) | 本地与官方 attention/cache/resource factory；官方入口为 `build_official_backend` |
+| [compute_graphs.py](execution/compute_graphs.py) | projection/finish 计算图、动态 causal bounds 与 graph storage 审计 |
+| [pipeline.py](execution/pipeline.py) | 本地四种 serving 方案的 attention/cache factory 与指标汇总 |
 | [tests/](tests) | ECHO checkpoint / block / 全模型调度事务参考测试 |
 
 ## 运行
@@ -39,17 +46,32 @@ python -m models.deepseek_v32.infer \
   --input-ids /path/to/input_ids.json --history 65536 --chunk-size 1024 --offload --slots 16384
 ```
 
-`input_ids.json` 是单个请求的 token ID 列表，64K + 1K 场景共 66,560 项；省略
+`input_ids.json` 是单个请求的 token ID 列表，64K + 128 场景共 65,664 项；省略
 `--offload` 使用 resident 主 KV。权重常驻各 GPU，hidden/residual 在层放置边界传输。
 每个 token chunk 顺序经过全部层；所有 chunk、输出与 GPU 同步成功后才提交请求长度。
 默认只计算最后 token 的 LM head。前三层 benchmark 的输入生成与可复现命令见
-[ECHO 实验](../../experiments/deepseek_v32_echo_prefill/README.md)。
+[四方案 MFU 实验](../../experiments/deepseek_v32_mfu/README.md)。
 
 显式 `--num-layers 3 --devices 0` 只加载并顺序执行 checkpoint 第 0–2 层；实验入口
 固定使用这一范围。模型 CLI 省略 `--num-layers` 仍执行完整模型。Python 接口为
 `DeepSeekEchoModel(..., num_layers=3)`；`forward(..., return_hidden=True)` 另返回
 全部输入 token 经 final norm 后的 hidden，供数值比较。前三层顺序传播是 checkpoint
 工作负载，不能称为独立训练的三层模型或完整 61 层输出。
+
+Python 接口 `set_cache_method(method)` 接受 `hbm`、`echo`、`serial_sparse` 和
+`dense_prefetch`，每次切换创建独立空 cache。真实前三层的单 GPU dense 路径可预先调用
+`prepare_compute_graphs(query_sizes)`，跨方法和 cache 重建复用同一组 projection/finish
+计算图；cache、选择、召回与事务仍在图外。当前 graph 策略为
+`deepseek-compute-islands-v3-indexer-bounds`，projection 用同一动态位置生成 RoPE
+和 indexer causal ends。graph 的规划上限、static allocated 与 private reserved
+分别记录。模型关闭或异步失败进入 poisoned 状态后拒绝新执行和资源变更，保留
+`synchronize()`、`close()` 用于清理。
+
+MFU 默认 H=65,536、A=128、chunk=1,024、P=65,664，四方案均持久提交新增 token。
+dense 要求 `P >= session capacity`。独立 correctness 通过 `return_hidden=True`
+比较完整 hidden，正式 bench/profile 使用默认输出边界，包含阶段末的 final norm
+与末 token LM head。默认 cold extend 恢复 prefix 后仅清除 offload 主 KV 的 HBM
+驻留，保留 DRAM 与 resident indexer；warm 模式另行验收和测量。
 
 模型 CPU 回归：
 
@@ -70,6 +92,10 @@ python -m models.deepseek_v32.infer \
   host，补齐剩余 miss；GR 临时候选另按下节使用共享 GPU 尾部，不写回 host。
   过大的 query 选中并集拆分消费，
   不截短 query 的精确选择。此路径使用本地 DRAM，不包含 CXL/RDMA。
+- H<=P 的 native 精确召回由 GPU miss count 驱动最多 128 CTAs 的 gather，再在
+  同一 stream 发布映射，省去逐层 host count 读取。H>P 保留完整并集检查和 query
+  拆分。每个 session/layer 使用 8 个 int64 计数器，共 64 B，分别记录融合预取、
+  selection/eviction 和成功 recall；容量计划与实际分配均包含这些计数器。
 - Offload attention 入口消费已召回的 HBM records 与物理 ID，复用 device-only MLA。
   融合 prefetch 属于 indexer；当前 attention kernel 本身不读取 host backing。
 - 主 MLA 的 64 维位置分量用 interleaved 配对（`is_neox=False`），indexer 前 64 维用
@@ -80,8 +106,30 @@ python -m models.deepseek_v32.infer \
 
 ## 相关实验
 
+真实前三层的 dense prefetch 已改用连续布局和 `cudaMemcpyAsync`，新的独立数值、
+计时与 profile 结果已发布。C10 已完成 DMA check、正式 bench 和请求内存观测，
+其 profile 按用户要求暂缓；前三层结果不能替代 C10 验收。
+
 当前前三层 benchmark 与 profile 见
-[SM90 ECHO prefill/extend](../../experiments/deepseek_v32_echo_prefill/README.md)。
+[SM90 四方案 prefill/extend MFU](../../experiments/deepseek_v32_mfu/README.md)。
+当前 A=128 的独立正确性、正式计时和 profile 的 run ID 分别为
+`deepseek_mfu_dma_a128_check_20261006_01`、`deepseek_mfu_dma_a128_bench_20261006_01` 和
+`deepseek_mfu_dma_a128_profile_20261006_01`。独立 check 的 13 组比较和 profile 的
+25 组比较均逐位一致；profile 覆盖四方法各两个阶段及一次 graph setup，共九次
+capture。Q=128/1,024 在三个层各有 projection/finish，共 12 个图模板。
+dense extend 的下一层完整 H2D DMA 为 1.374430 ms，其中 0.690078 ms 与当前层
+独立 compute 相交，占 50.21%。原生记录确认一次 pinned Host-to-Device
+`cudaMemcpyAsync` 搬入 75,497,472 B。这是单次 trace 的实际区间，D2D 不计为 IO。
+独立正式计时的 dense extend 为 5.986 ms，低于 serial sparse 的 6.534 ms 和
+ECHO 的 8.434 ms，仍高于 HBM 的 3.761 ms；局部重叠不能替代完整阶段延迟。
+阶段最终 MFU 与逐算子数据分别
+报告，本轮没有 NCU replay。
+逐算子表、阶段最终 MFU 与 timeline 见
+[结果报告](../../experiments/deepseek_v32_mfu/report/four_methods/results.md)。
+三次测量及 observer wrapper 均以 0 退出，离散采样未观测到目标 GPU 外来进程或
+其他 GPU 进程。单次 profile 不代表稳定性能，离散采样也不能证明连续隔离、全机
+独占或 CPU 独占。详细身份与验收依据见
+[运行验收](../../experiments/deepseek_v32_mfu/report/four_methods/run_acceptance.json)。
 十 block GR 工作负载的固定 P/NH 容量检查见
 [统一 cache management 实验](../../experiments/cache_management/README.md)。
 原有 DeepSeek / SM120 实验的有效历史结果保存在
@@ -94,7 +142,8 @@ python -m models.deepseek_v32.infer \
 
 共享 ECHO cache 与模型级 chunk 调度已接入。固定 P/NH 的静态规划、实际分配和
 完整请求验收分别报告。十 block 本地四方案已完成 H65,536/A128、16 用户两轮的
-独立数值验收及三次正式计时；官方路径另按固定容差完成独立验收。这些运行没有
+DMA check 和正式 bench；profile 按用户要求暂缓。以下保留的 motivation 报告
+及 profile 仍对应原 mapped-host gather 实现。这些运行没有
 填满 NH，也不能代表任意用户数或 H/A 配置。容量范围与可核验结果见
 [统一 cache management 实验](../../experiments/cache_management/README.md)。
 旧 4 GiB / W / chunk 对照已撤回，不再据此指定默认 chunk 或给出性能排名。
@@ -122,13 +171,25 @@ pool/arena 容量执行，并记录物理显存和 DRAM 占用；cache 统计仍
 执行 lease 与失败后的资源保留。逻辑 token ID 通过 `TokenSelection` 传给 attention，
 不新增 tensor 搬运或改变 indexer/prefetch 融合顺序。`num_layers` 由调用入口显式
 传入；GR 入口与当前实验使用十个物理 block。执行时把 session 的 attention runner 和
-chunk 大小作为参数传给 block，模型不再临时挂载用户 attention/cache。官方 ECHO 由
-`build_official_backend` 装配同一 backend，直接构造官方 runner 和 cache view，并单独
-预留、核验和释放官方额外资源。数值验收、正式计时和诊断 profile 使用独立入口；
-报告中的 run ID、源码和测量边界共同标识结果。当前正式发布状态为
-本地三次 bench、独立 profile 和官方 bench/profile 已验收发布；P0/当前对照仍保留部分阶段延迟增加，当前 profile 未单独确定其原因；结果入口见
+chunk 大小作为参数传给 block，模型不再临时挂载用户 attention/cache。
+数值验收、正式计时和诊断 profile 使用独立入口；
+报告中的 run ID、源码和测量边界共同标识结果。保留报告的独立验收、正式计时和
+profile 分别为 `deepseek_mfu_c10_check_20261006_01`、
+`deepseek_mfu_c10_bench_20261006_01` 和 `deepseek_mfu_c10_profile_20261006_02`。
+旧正式计时包含四方案各 32 个请求。新的 DMA 独立 check
+`deepseek_dma_c10_check_20261006_01` 和正式轨迹
+`deepseek_dma_c10_bench_20261006_01` 已完成，其请求内存数据已纳入统一 cache
+management 报告；C10 DMA profile 按用户要求暂缓。
+本地结果入口见
 [motivation](../../experiments/deepseek_v32_motivation/README.md)和
-[官方 ECHO](../../experiments/deepseek_v32_echo_official/README.md)。
+[统一 cache management](../../experiments/cache_management/README.md)。
+
+保留的旧 C10 复访 profile 中，dense 的 L2 完整 mapped-host gather 为 1.837602 ms，其中
+1.097090 ms 与 L1 的 compute kernel 相交，占 59.70%。单层总览按 L1 窗口裁切，
+详细图保留 L2 gather 的完整尾部；D2D 与 L1 自身的 gather tail 不计入这项重叠。
+正式计时的 dense 复访请求均值为 25.462 ms，ECHO 为 23.520 ms，serial sparse
+为 17.188 ms。局部重叠尚未使 dense 快于两个 sparse 方案；单次 trace 与单条
+正式轨迹不证明性能差异稳定，也不能作为真实 GR 任务质量的证据。
 
 GR 的 `echo/serial_sparse` 在 session 计划中将保留容量设为 H，
 host pages 与私有 history indexer 都按 H 保留；`extend_candidate` 使用 backend
@@ -149,9 +210,16 @@ hidden 和末 token logits，history-only 只改变保留容量。
 
 固定 P/NH 模式已接入四方案：HBM-only 按 H 扣除独立 HBM token 配额 P，
 `echo/serial_sparse/dense_prefetch` 按 H 扣除 NH 的 host 页配额，并复用相同的逐层
-P 槽历史 cache。固定模式 dense 要求 H<=P，使用 [cache/prefetch.py](cache/prefetch.py) 在独立 stream
-提前读取下一层完整历史中的 miss，命中直接复用；每层 pool 本身提供独立拷贝目标，
-不另分配完整 layer staging。HBM-only 的 candidate 紧接 resident history，offload
+P 槽历史 cache。固定模式 dense 要求 H<=P，使用
+[cache/prefetch.py](cache/prefetch.py) 在独立 stream 通过 `cudaMemcpyAsync` 提前
+搬入下一层完整历史。每个 session 使用连续递增的 host 页，逻辑 token i 对应
+HBM slot i+1；每层 pool 直接提供连续目标，不另分配完整 layer staging。
+已认证的连续完整命中直接复用；其他驻留状态拷贝全部已初始化历史，并按实际
+字节数记账。映射失效和拷贝后的发布仍由 native kernel 执行，不能将整个 dense
+路径称为不使用 SM。ticket 借用已有 host/device storage，不分配 GPU ID/count
+scratch，对应预留为 0；消费前等待 copy event，回滚或释放前 drain，无法确认完成
+时保留 storage 并禁用复用。GPU trace 的实际交叠和完整阶段延迟分别见对应实验。
+HBM-only 的 candidate 紧接 resident history，offload
 的 candidate 使用 pool 尾部；四方案都使用共享的合并 indexer workspace，结束后
 丢弃候选。端到端对照见 [motivation 实验](../../experiments/deepseek_v32_motivation/README.md)。
 
@@ -159,18 +227,10 @@ P 槽历史 cache。固定模式 dense 要求 H<=P，使用 [cache/prefetch.py](
 host records、映射和 indexer 状态。一次完整 prefill/extend 借用双缓冲，槽位覆盖前
 等待前一个 consumer，归还前等待包括未消费预取在内的全部异步操作。
 runner 从构造到 close 绑定唯一准入 owner；其关闭只释放 session，最外层再关闭
-backend。真实三层验收 `refactor_three_layers_check_20261005_02` 在 H65,536/A1,024
-下比较完整 extend hidden、末 token logits、默认输出与 resident/offload prefix
-logits，五项比较均逐位相等；它沿真实第 0–2 层顺序传播，不使用 C10 输入重放。
-对应 bench/profile 的发布结果见
-[三层实验](../../experiments/deepseek_v32_echo_prefill/README.md)，当前状态为
-独立 bench/profile 已验收发布，当前报告覆盖真实前三层，未采集 NCU replay。
+backend。以上 C10 容量、临时候选和输入重放边界与真实前三层 MFU 分别报告。
 
-C10 本地验收 `refactor_final_deepseek_check_20261005_01` 保存 128 份完整候选输出，
-96 组 offload/HBM 对照逐位一致。官方验收
-`refactor_final_official_check_20261005_01` 保存 HBM、独立 HBM 重跑和官方 ECHO
-共 96 份输出，全部通过预先固定的数值门槛，但比较请求没有逐位相等。
-官方门槛与本地 exact 对照不能互换。模型测试与这些数值 check 不替代固定 P/NH
+C10 DMA 本地验收 `deepseek_dma_c10_check_20261006_01` 保存 128 份完整候选输出，
+96 组 offload/HBM 对照逐位一致。模型测试与这些数值 check 不替代固定 P/NH
 容量实验、正式计时或未运行的配置。
 
 `sparse_pool_tokens` 配置 backend 每层共享容量，`host_arena_tokens` 配置全局 host

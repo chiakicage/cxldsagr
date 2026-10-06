@@ -147,6 +147,12 @@ record，indexer K/scales 仍常驻 GPU。每个外层 query batch 先写 index-
 消费完成前保护其 slots。选择并集超过 pool 时只拆分 query 消费，保留完整的每-query
 选择并统计跨组重读。
 
+当池中只有一个活跃 session、`host_written_end<=P` 且 native provider 提供空槽分配
+入口时，精确 recall 在独占操作内使用三个 GPU kernel 统计并压缩 miss 与空槽，省去
+FIFO 排序和前缀扫描。该条件证明空槽足够，不代表历史已驻留；GPU 仍检查空槽数量。
+多 session 继续使用原 FIFO 分配。这条路径不增加持久 storage，独立性能与正式补测
+状态见 [cache 管理性能实验](../experiments/cache_manager_performance/README.md)。
+
 DeepSeek GR 的 `echo/serial_sparse` 使用显式 transient step。session 容量与 NH
 配额只覆盖 `padded(H)=ceil(H/64)×64`，candidate 不申请 host pages，也不写回 DRAM。
 candidate 一次整批进入各层，history prefill 的 chunk 调度保持不变。

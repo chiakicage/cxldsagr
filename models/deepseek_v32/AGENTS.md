@@ -35,10 +35,15 @@ HBM / DRAM budget 模式，不能将两种模式的容量或命中结果混用�
 
 `deepseek_v32_motivation` 单独测量固定 P/NH 的四方案端到端对照。HBM-only 通过
 独立 HBM history token 配额按 session LRU 准入；三个 offload 方案均复用逐层 P 槽的
-历史 cache，NH 只负责 DRAM 历史容量。固定模式 dense prefetch 要求 H<=P，提前在
-独立 stream 将下一层全部历史中的 miss 搬入该层 P 槽；命中不重搬，不额外分配两层
-完整 staging。消费、回滚或释放前等待对应拷贝完成。四方案 candidate 均整批 GPU
+历史 cache，NH 只负责 DRAM 历史容量。固定模式 dense prefetch 要求 H<=P，在
+独立 stream 用 `cudaMemcpyAsync` 将下一层连续历史搬入该层 P 槽。每个 dense
+session 的 host 页必须连续递增，HBM 使用逻辑 token i 对应 slot i+1 的连续布局。
+已认证的连续完整命中不重搬；未认证驻留须按实际执行的完整拷贝计费，不能称为
+只搬 miss。不额外分配两层完整 staging。消费、回滚或释放前等待对应拷贝完成。
+四方案 candidate 均整批 GPU
 临时执行，结束后 discard。通用 budget 模式的原 dense 双 staging 路径另行保留。
+真实前三层模型的四方案入口使用普通持久 append；其 dense prefetch 要求
+`P >= session capacity`，不能套用仅覆盖固定 history 的 H<=P 条件。
 观测到的 allocator 差额、规划时人为扣除的额度与实现预分配的 storage 分别描述；
 不能把旧运行差额称为当前实现的固定预留，也不能默认从指定 P/NH 实验中扣除它。
 
@@ -54,20 +59,97 @@ discard/rollback，候选始终从 GPU 尾部读取。record 宽度和 dtype 由
 host page 释放遵守 session LRU，token eviction 只失效 HBM 映射；不能将这套 DeepSeek
 token pool 的有限 HBM pool 能力或候选临时存储策略归于 NOSA。
 
+受支持的 native 精确召回在 H<=P 时以 GPU miss count 驱动有界 gather，随后在同一
+stream 发布映射，不逐层读取 host scalar。当前 sparse gather 上限为 128 CTAs。
+H>P 时仍检查完整精确并集，超出 pool 后拆分 query 消费，不裁剪单 query 的选择。
+已认证的全命中路径、时钟边界、显式 reference 和不满足 native 条件的正常分派
+继续保留；不能将局部去同步表述为整条路径没有 host 同步。没有读取 miss count
+的未认证全命中调用可以保守失效 CPU append/residency 证明，但必须保留 GPU 映射、
+record、priority/FIFO、free bitmap、clock 和流量统计的等价语义。
+
+FIFO 分配仍须先用空槽、再淘汰较低优先级的槽，并保护当前精确选择。相同优先级的
+slot 可以任意选取，不要求稳定顺序；这项放宽只适用于 cache 分配与淘汰，不改变
+indexer 的精确 top-k 或其并列规则。验收须检查实际选中 KV、双向映射、free bitmap、
+clock、计数和淘汰优先级是否合法，不能仅因并列 slot 的物理编号不同判错。若新的
+并列选择改变后续命中或搬运量，须按实际轨迹重新测量，不能沿用旧流量与性能结论。
+
+融合 ECHO indexer 的共享 KV stage 须等 WGMMA 和 scalar scale 读取都完成后才能
+归还给 TMA producer。WGMMA wait 不能单独作为 scale 读取完成的证据。调整释放
+位置时须核对实际编译指令中的数据依赖，并用跨多轮 query 的 stage 复用测试逐位
+验收分数、预取 KV、映射与计数；不能只检查单轮 query 或放宽分数容差。
+
+`sparse_selection_allocate_free` 只用于已有独占操作内、池中仅有一个活跃 session、
+且 `host_written_end<=P` 的精确召回；provider 未提供该入口时保留原分派。合法状态下，
+该 session 的已驻留记录数 L 与选中 miss 数 M 满足 `L+M<=H<=P`，因此空槽足够。
+这是容量证明，不能据此认证历史已驻留。GPU 分配前仍核验 `free>=M`，核验失败直接
+报错，不切换分配器。多 session 保留原 FIFO 分配；session 释放须清除全部相关映射并
+确认 CUDA 完成后，才能从活跃集合移除。执行失败后遵守原清理契约，不能绕过清理继续召回。
+
+普通持久 append 的 `sparse_append_free` 仅用于同样的单 session 独占操作，且新尾部
+结束位置不超过 P。它先并行核验全池 priority 并生成空槽 mask，再选择足够的实际
+空槽，沿用原 planned append 发布 record 与映射。容量条件不能代替驻留证明；
+GPU 须检查选中槽的 free bitmap、owner 与空槽数量，失败直接报错。多 session、
+超出 P 或 provider 不具备该入口时保留原正常分派。显式候选和 dense 连续槽位不走
+这条普通 append 分配路径。
+
+完整模型独占执行一个 prefill step 时，若全部待写入 token 都能放入 P，且历史已
+认证驻留，可以将中间 chunk 的 ECHO hint 更新推迟到最后一个 chunk。期间不消费
+这些 hint；最终 hint 仍按最后最多四行有限 logits 的原 FP32 归约生成。普通逐层
+调用、H>P、未认证驻留、候选及显式诊断继续即时更新，失败时退出延后更新作用域并
+按原事务规则回滚。不能仅凭 H<=P 推断历史已经驻留。
+
+每个 session/layer 的计数 slab 为 8 个 int64，共 64 B：前 3 项保存融合 prefetch
+统计，接着 4 项保存 native selection/eviction 统计，最后 1 项累计已成功发布的
+native recall。读取指标时合并这些计数，不重复累计；session 规划、离线容量、
+reset、释放和实际分配账本必须覆盖完整 slab。
+
+`cache/prefetch.py` 的 dense lookahead 使用连续 pinned host/HBM span 和
+`cudaMemcpyAsync`，不得静默退回 mapped-host gather。native 映射失效与发布按
+stream 顺序分开执行，避免旧映射清除覆盖新映射；copy event 被消费 stream 等待后
+才能认证连续驻留。同次执行的 ticket 使用同一 caller stream，消费前 wait，回滚
+或释放前 drain；异步未完成时保留 host/device storage。提交或完成失败后禁用复用。
+DMA ticket 借用已有 storage，不分配 GPU ID/count scratch，`dense_ticket_reservation`
+为 0；新增实际 storage 仍须计入容量。检查实际 H2D 活动、字节数、地址连续性和
+compute/IO 交集，不能仅由创建 stream 或异步 API 推断重叠或性能收益。普通 sparse
+pool 保留原页分配与 FIFO 策略，不套用 dense 的连续布局。
+
+## 计算图与模型生命周期
+
+计算图策略为 `deepseek-compute-islands-v4-bound-inputs`，只捕获 projection 和
+finish 的纯计算，cache 事务、选择、召回与 IO 留在图外。projection 用同一个动态
+整数位置生成 RoPE 与 exclusive causal ends，并持有不可变的零 starts；
+indexer 借用这些 bounds。同一 query shape 的层共享 positions、零 starts
+和动态 start；位置未变时不重复写入 start。第 1、2 层直接借用前一层 finish 的
+输出，后续 C10 副本仍复制 source 输入到各自独立的 graph storage。借用的输出
+计入其所属 graph private pool，不重复计入 static storage；规划上限与实际
+allocated/reserved 分别报告。真实模型 graph bank 仅支持单 GPU 的 dense 第 0–2
+层，跨方法和 cache 重建复用同一权重的计算图，不称为完整 offload graph capture。
+replay 必须核验 capture 时的精度策略、权重身份、query shape 和 residual 分支。
+持久 offload 的异步 D2H 写回源须独立持有，不能被后续 replay 覆盖。
+
+模型 poisoned 或 closed 后，graph 准备与执行、cache 分配或切换、prefix
+eviction、snapshot/restore 和 forward 均须在使用资源前失败。`synchronize()` 和
+`close()` 保留清理入口；close 先 drain owner，再释放资源并清除各层 cache/attention
+引用。无法确认异步完成时保留 owner/storage 并禁用复用；原始异常与清理异常均须
+保留，不能恢复执行或自动重试。
+
 ## 非 GR benchmark 与 GR 工作负载边界
 
 - DeepSeek V3.2 的非 GR benchmark 仅使用真实 checkpoint 第 0–2 层依次传播
   hidden/residual，包含 embedding、三个 dense MLP、final norm 与末 token LM head；
   不复制 block，不称为独立训练的三层模型，也不外推为完整模型性能。
-  `deepseek_v32_echo_prefill` 的 `measure` / `run.sh` 与 `profile_layers` 共用这一范围。
+  `deepseek_v32_mfu` 的 `measure` / `run.sh` 与 `profile_layers` 共用这一范围。
   模型实现保留完整 61 层及 grouped MoE 能力，但当前 benchmark 不要求运行完整 61 层。
   按 token chunk 依次执行选定的全部层，限制临时 hidden 显存。主 KV
   使用 BF16 512 latent + 64 RoPE record，indexer FP8 K/scales 仍 resident。融合
   indexer prefetch 后必须执行精确 top-k / residual recall；工作集超过 HBM pool 时
   拆分 query 消费，不裁剪每 query 的精确选择。全部层和 GPU 同步成功后统一提交；
-  失败只回滚本次启动的事务。前三层 resident/offload 对照从独立空 cache 构建 prefix，
-  每次 extend 恢复相同 prefix HBM residency；权重加载、编译和状态恢复不计入执行时间。
-  比较全部 extend hidden；单层或单算子正确性检查不能替代前三层完整 64K + 1K 测量。
+  失败只回滚本次启动的事务。前三层四方法对照从独立空 cache 构建 prefix，每次
+  extend 恢复相同 prefix，再按声明的 cold/warm 设置处理 HBM residency；cold 只清除
+  offload 主 KV 驻留，保留 DRAM 与 resident indexer。两种设置分别验收和测量。
+  权重加载、编译和状态恢复不计入执行时间。
+  比较全部 extend hidden；当前 MFU 范围为 H=65,536、A=128，其他 A 须单独声明并
+  验收。单层或单算子正确性检查不能替代声明范围内的前三层完整测量。
   非矩阵操作优先复用 FlashInfer；norm 保留 checkpoint FP32 权重和舍入前 FP32
   residual sum。Indexer RoPE 后直接量化，不执行 Hadamard。量化 kernel 优化遵循
   KDA，和已编译官方 DeepGEMM helper 比较完整 API 成本，逐位验收 FP8 数据与 scale；

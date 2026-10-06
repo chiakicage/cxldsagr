@@ -102,7 +102,8 @@ class SparseTokenCache:
         self._prefetch = None
         self._counter_totals = session._counter_totals[layer]
         self._prefetch_totals = self._counter_totals[:3]
-        self._native_totals = self._counter_totals[3:]
+        self._native_totals = self._counter_totals[3:7]
+        self._native_recalled = self._counter_totals[7:8]
         self._standalone = False
         self.stats = CacheStats()
         # Compatibility only: no per-chunk counter tensor list is retained.
@@ -151,6 +152,8 @@ class SparseTokenCache:
         history = self.host_written_end
         if not self._shared:
             return not self.offload
+        if self._pool.dense_contiguous:
+            return self._pool.dense_history_resident(self)
         layer = self._pool.layers[self.layer_id]
         return history == 0 or (
             history <= self.slots
@@ -340,6 +343,44 @@ class SparseTokenCache:
                         )
                         layer.clock += 1
                         self._pool.certify_append(self, start + offset + len(piece))
+                        continue
+                    if (
+                        not planned
+                        and type(self).__dict__.get("native_metadata_compatible") is True
+                        and hasattr(native, "sparse_append")
+                    ):
+                        # An uninterrupted append plan may be absent after a
+                        # recall, snapshot restore, or another session's lease.
+                        # The pending suffix is still new/unmapped; a bounded
+                        # native FIFO allocation avoids dynamic nonzero reads.
+                        self._pool.invalidate_residency(self.layer_id)
+                        layer = self._pool._clock_event(self.layer_id)
+                        append_native = native.sparse_append
+                        if (
+                            len(self._pool._sessions) == 1
+                            and start + offset + len(piece) <= self.slots
+                            and self._pool._active == (self.session.owner, self.layer_id)
+                            and self._pool._depth > 0
+                        ):
+                            # Capacity guarantees enough free slots for a new
+                            # suffix; it does not certify history residency.
+                            append_native = getattr(native, "sparse_append_free", append_native)
+                        append_native(
+                            piece,
+                            self.records,
+                            self.page_table,
+                            self.host_to_device,
+                            self.device_to_host,
+                            self.age,
+                            layer.free,
+                            layer.clock_tensor,
+                            self._native_totals[3:],
+                            self._pool.miss_scratch,
+                            self._pool.allocation_log[: self.slots],
+                            start=start + offset,
+                            timestamp=layer.clock,
+                        )
+                        layer.clock += 1
                         continue
                     global_ids = self._global_range(start + offset, start + offset + len(piece))
                     if planned:
@@ -600,18 +641,60 @@ class SparseTokenCache:
         )
         # Each event commits before subsequent fallible work, as in ensure().
         layer.clock += 1
-        missing_count = int(pool.counter.item())
-        misses = pool.allocation_log[:missing_count]
-        chosen = pool.miss_scratch[:0]
-        if missing_count:
-            layer.append_owner = None
-            pool.wait_host(self.session, self.layer_id)
-            chosen = torch.argsort(self.age[1:], stable=True)[:missing_count]
+        # H <= P bounds every possible exact union, so the GPU can consume its
+        # own miss count. A CPU scalar read here stalled every layer between
+        # selection and recall. Fixed-size IDs retain only their valid prefix.
+        misses = pool.allocation_log[: self.slots]
+        layer.append_owner = None
+        pool.wait_host(self.session, self.layer_id)
+        native_allocate = getattr(native, "sparse_selection_allocate", None)
+        free_only = False
+        # In a sole-session bounded history, every live host-backed slot belongs
+        # to this session. Live records plus selected misses cannot exceed H.
+        # This proves enough free slots without certifying residency.
+        if len(pool._sessions) == 1 and history <= self.slots:
+            absent = object()
+            free_allocate = getattr(native, "sparse_selection_allocate_free", absent)
+            if free_allocate is not absent:
+                native_allocate = free_allocate
+                free_only = True
+        if native_allocate is None:
+            chosen = torch.argsort(self.age[1:], stable=True)
             torch.cumsum(pool.free_slots, dim=0, dtype=torch.int64, out=pool.miss_scratch)
-            pool.invalidate_residency(self.layer_id)
-            # Compaction follows logical order, not host page/global-ID order.
-            # It also tombstones victims before the generic copy overwrites them.
-            native.sparse_selection_compact(
+        else:
+            chosen = torch.empty(self.slots, dtype=torch.int64, device=self.device)
+        # Without observing the device count, conservatively retire the CPU
+        # append/residency proof even if this uncertified selection has no miss.
+        # GPU maps, priorities and legal FIFO victim ranks remain exact.
+        pool.invalidate_residency(self.layer_id)
+        complete = getattr(native, "sparse_selection_complete", None)
+        if callable(complete) and callable(native_allocate):
+            complete(
+                pool.free_slots,
+                pool.miss_scratch,
+                self.page_table,
+                self.host_to_device,
+                self.device_to_host,
+                self.age,
+                layer.free,
+                self._native_totals[3:],
+                misses,
+                chosen,
+                self.host,
+                self.records,
+                pool.counter,
+                layer.clock_tensor,
+                self._native_recalled,
+                history=history,
+                timestamp=timestamp,
+                free_only=free_only,
+            )
+        else:
+            allocate = (
+                native.sparse_selection_compact if native_allocate is None else native_allocate
+            )
+            allocate(
+                *((pool.free_slots,) if native_allocate is not None else ()),
                 pool.miss_scratch,
                 self.page_table,
                 self.host_to_device,
@@ -626,19 +709,22 @@ class SparseTokenCache:
             )
             from operators.common.kv_transfer import gather_host_records
 
-            gather_host_records(self.host, self.records, misses, chosen)
-        native.sparse_selection_publish(
-            misses,
-            chosen,
-            self.host_to_device,
-            self.device_to_host,
-            self.age,
-            layer.free,
-            layer.clock_tensor,
-            timestamp=timestamp,
-        )
+            gather_host_records(
+                self.host, self.records, misses, chosen, valid_count=pool.counter, max_ctas=128
+            )
+            native.sparse_selection_publish(
+                misses,
+                chosen,
+                self.host_to_device,
+                self.device_to_host,
+                self.age,
+                layer.free,
+                layer.clock_tensor,
+                timestamp=timestamp,
+                valid_count=pool.counter,
+                recalled_totals=self._native_recalled,
+            )
         layer.clock += 1
-        self.stats.recalled_records += missing_count
         native.sparse_selection_map(
             indices,
             physical,
@@ -681,10 +767,27 @@ class SparseTokenCache:
                 return None
             self._pool.invalidate_residency(self.layer_id)
             self._pool.wait_host(self.session, self.layer_id)
-            self._pool.free_slots.copy_((torch.argsort(self.age[1:], stable=True) + 1).int())
-            self._pool.counter.zero_()
-            self._pool.allocation_log.fill_(MISSING)
-            self._pool.prefetch_stats.zero_()
+            native = self._pool.native_metadata
+            prepared = None
+            if type(self).__dict__.get("native_metadata_compatible") is True and hasattr(
+                native, "prepare_prefetch"
+            ):
+                prepared = native.prepare_prefetch(
+                    self.age,
+                    self._pool.free_slots,
+                    self._pool.allocation_log,
+                    self._pool.counter,
+                    self._pool.prefetch_stats,
+                    self._pool.miss_scratch,
+                    timestamp=self._pool.layers[self.layer_id].clock,
+                    host_capacity=self._pool.host_capacity,
+                    query_count=new_count,
+                )
+            else:
+                self._pool.free_slots.copy_((torch.argsort(self.age[1:], stable=True) + 1).int())
+                self._pool.counter.zero_()
+                self._pool.allocation_log.fill_(MISSING)
+                self._pool.prefetch_stats.zero_()
             self._pool._pending_prefetch = (self.session.owner, self.layer_id)
             self._prefetch = {
                 "host": self.host,
@@ -703,6 +806,8 @@ class SparseTokenCache:
                     limit, 8192, self.slots - (new_count if self.transient_start is None else 0)
                 ),
             }
+            if prepared is not None:
+                self._prefetch["_prepared"] = prepared
             return self._prefetch
 
     def finalize_prefetch(self, prefetch=None):
@@ -711,6 +816,8 @@ class SparseTokenCache:
             raise RuntimeError("no fused prefetch is pending")
         if prefetch is not None and prefetch is not self._prefetch:
             raise ValueError("prefetch lease belongs to another operation")
+        if self._prefetch.get("_prepared") is not None:
+            self._prefetch["_prepared"].invalidate()
         with self.operation():
             self._pool.finalize_prefetch(self.layer_id)
             self._prefetch_totals.add_(self._pool.prefetch_stats)
@@ -724,6 +831,8 @@ class SparseTokenCache:
         """
         if self._prefetch is None:
             raise RuntimeError("prepare_prefetch must precede reference candidates")
+        if self._prefetch.get("_prepared") is not None:
+            self._prefetch["_prepared"].invalidate()
         state = self._prefetch
         with self.operation():
             rank = 0
@@ -780,10 +889,21 @@ class SparseTokenCache:
     def metrics(self):
         """Read bounded counters after measurement synchronization."""
         self._check()
-        totals = self._counter_totals.tolist() if self._shared else [0] * 7
-        prefetched, fused_evictions, failed_claims, selected, resident, maximum, evicted = totals
+        totals = self._counter_totals.tolist() if self._shared else [0] * 8
+        (
+            prefetched,
+            fused_evictions,
+            failed_claims,
+            selected,
+            resident,
+            maximum,
+            evicted,
+            native_recalled,
+        ) = totals
+        recalled = self.stats.recalled_records + native_recalled
         return {
             **vars(self.stats),
+            "recalled_records": recalled,
             "host_written_records": self.stats.written_records
             - self.stats.transient_written_records
             if self.offload
@@ -794,7 +914,7 @@ class SparseTokenCache:
             "evicted_records": self.stats.evicted_records + fused_evictions + evicted,
             "prefetched_records": prefetched,
             "prefetch_capacity_failures": failed_claims,
-            "host_to_device_bytes": (prefetched + self.stats.recalled_records) * self.record_bytes,
+            "host_to_device_bytes": (prefetched + recalled) * self.record_bytes,
             "device_to_host_bytes": (
                 self.stats.written_records - self.stats.transient_written_records
             )

@@ -1,0 +1,31 @@
+{
+  "replacement_profile": "deepseek_mfu_dma_a128_profile_20261006_01",
+  "replacement_bench": "deepseek_mfu_dma_a128_bench_20261006_01",
+  "verified_publication_files": 18,
+  "reason": "Replaced prior two-method, A1024 and A128 mapped-host gather materials after independent A128 contiguous DMA validation, timing, profile and publication. No historical report archive retained.",
+  "removed": [
+    "experiments/deepseek_v32_mfu/output/data/deepseek_mfu_bench_20261006_01",
+    "experiments/deepseek_v32_mfu/output/data/deepseek_mfu_bench_20261006_02",
+    "experiments/deepseek_v32_mfu/output/data/deepseek_mfu_profile_20261006_02",
+    "experiments/deepseek_v32_mfu/output/data/refactor_three_layers_bench_20261005_01",
+    "experiments/deepseek_v32_mfu/output/data/refactor_three_layers_profile_20261005_01",
+    "experiments/deepseek_v32_mfu/output/log/deepseek_mfu_bench_20261006_01",
+    "experiments/deepseek_v32_mfu/output/log/deepseek_mfu_bench_20261006_02",
+    "experiments/deepseek_v32_mfu/output/log/deepseek_mfu_profile_20261006_02",
+    "experiments/deepseek_v32_mfu/output/log/refactor_three_layers_bench_20261005_01",
+    "experiments/deepseek_v32_mfu/output/log/refactor_three_layers_profile_20261005_01",
+    "experiments/deepseek_v32_mfu/output/log/refactor_three_layers_publication_20261005_01",
+    "experiments/deepseek_v32_mfu/output/profile/deepseek_mfu_bench_20261006_01",
+    "experiments/deepseek_v32_mfu/output/profile/deepseek_mfu_bench_20261006_02",
+    "experiments/deepseek_v32_mfu/output/profile/deepseek_mfu_profile_20261006_02",
+    "experiments/deepseek_v32_mfu/output/profile/refactor_three_layers_bench_20261005_01",
+    "experiments/deepseek_v32_mfu/output/profile/refactor_three_layers_profile_20261005_01",
+    "experiments/deepseek_v32_mfu/report/layers3",
+    "experiments/deepseek_v32_mfu/output/data/deepseek_mfu_a128_bench_20261006_01",
+    "experiments/deepseek_v32_mfu/output/log/deepseek_mfu_a128_bench_20261006_01",
+    "experiments/deepseek_v32_mfu/output/profile/deepseek_mfu_a128_bench_20261006_01",
+    "experiments/deepseek_v32_mfu/output/data/deepseek_mfu_a128_profile_20261006_01",
+    "experiments/deepseek_v32_mfu/output/log/deepseek_mfu_a128_profile_20261006_01",
+    "experiments/deepseek_v32_mfu/output/profile/deepseek_mfu_a128_profile_20261006_01"
+  ]
+}

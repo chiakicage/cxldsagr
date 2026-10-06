@@ -52,6 +52,66 @@ def _equal(pools, caches):
     assert caches[0].metrics() == caches[1].metrics()
 
 
+@pytest.mark.parametrize("clock", [0, PRIORITY_LIMIT - 1, PRIORITY_LIMIT])
+@pytest.mark.parametrize("preserve_append_plan", [False, True])
+def test_cuda_empty_fifo_event_preserves_reference_state_and_rollover(clock, preserve_append_plan):
+    pools = _pools(slots=8)
+    try:
+        caches = []
+        for pool in pools:
+            cache = pool.allocate_session(8).layer(0)
+            cache.begin_step(8)
+            cache.append(torch.ones(8, 7, device="cuda"))
+            cache.commit()
+            pool.layers[0].clock = clock
+            pool.layers[0].clock_tensor.fill_(clock)
+            with cache.operation():
+                pool.stamp(
+                    0,
+                    pool.layers[0].append_order[:0],
+                    preserve_append_plan=preserve_append_plan,
+                )
+            caches.append(cache)
+        _equal(pools, caches)
+        for pool, cache in zip(pools, caches, strict=True):
+            layer = pool.layers[0]
+            assert layer.clock == (2 if clock == PRIORITY_LIMIT else clock + 1)
+            assert layer.append_owner == (cache.session.owner if preserve_append_plan else None)
+            assert layer.resident_owner == cache.session.owner and layer.resident_end == 8
+    finally:
+        for pool in pools:
+            pool.close()
+
+
+def test_cuda_empty_fifo_event_failure_preserves_clock_and_error_identity(monkeypatch):
+    pools = _pools(slots=8)
+    try:
+        pool = pools[0]
+        cache = pool.allocate_session(8).layer(0)
+        cache.begin_step(8)
+        cache.append(torch.ones(8, 7, device="cuda"))
+        cache.commit()
+        layer = pool.layers[0]
+        before = layer.clock, layer.clock_tensor.clone(), layer.priority.clone()
+        failure = RuntimeError("injected empty FIFO launch failure")
+        calls = []
+
+        def fail(*args, **kwargs):
+            calls.append(kwargs["timestamp"])
+            raise failure
+
+        monkeypatch.setattr(cache_ops, "empty_event", fail)
+        with pytest.raises(RuntimeError) as caught, cache.operation():
+            pool.stamp(0, layer.append_order[:0], preserve_append_plan=True)
+        assert caught.value is failure and calls == [before[0]]
+        assert layer.clock == before[0] and layer.append_owner == cache.session.owner
+        torch.testing.assert_close(layer.clock_tensor, before[1], rtol=0, atol=0)
+        torch.testing.assert_close(layer.priority, before[2], rtol=0, atol=0)
+    finally:
+        for pool in pools:
+            pool.close()
+
+
 @pytest.mark.parametrize(
     "dtype,width", [(torch.uint8, 7), (torch.float32, 7), (torch.bfloat16, 576)]
 )
@@ -144,7 +204,8 @@ def test_cuda_topk_falls_back_after_competing_user_eviction_and_public_ids_stay_
 
 
 @pytest.mark.parametrize("pattern", ["random", "duplicate", "padding"])
-def test_cuda_resident_union_large_batch_matches_checked_across_cta_merges(pattern):
+@pytest.mark.parametrize("queries", [128, 1024])
+def test_cuda_resident_union_large_batch_matches_checked_across_cta_merges(pattern, queries):
     # Large selections use CTA-local unions; all CTAs can contend for one bit.
     pools = _pools(width=1, slots=65536)
     try:
@@ -155,7 +216,7 @@ def test_cuda_resident_union_large_batch_matches_checked_across_cta_merges(patte
             cache.commit()
             cache.begin_transient(35)
             cache.append(torch.zeros(35, 1, device="cuda"))
-        ids = torch.randint(-5, 163, (1024, 2048), device="cuda", dtype=torch.int32)
+        ids = torch.randint(-5, 163, (queries, 2048), device="cuda", dtype=torch.int32)
         if pattern == "duplicate":
             ids.fill_(128)
             ids[:, :128] = 3

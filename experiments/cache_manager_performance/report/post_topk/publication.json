@@ -1,0 +1,567 @@
+{
+  "check_run_id": "cache_posttopk_check_20261006_01",
+  "config": {
+    "append": 128,
+    "chunk": 1024,
+    "history": 65536,
+    "layers": 3
+  },
+  "environment": {
+    "allocator": "backend:native,pinned_use_cuda_host_register:True,pinned_num_register_threads:8",
+    "capability": [
+      9,
+      0
+    ],
+    "cpu_affinity": [
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31
+    ],
+    "cuda": "13.0",
+    "device": "NVIDIA H200",
+    "packages": {
+      "apache-tvm-ffi": "0.1.13.post3",
+      "flashinfer-python": "0.6.18",
+      "triton": "3.7.1"
+    },
+    "python": "3.12.13 (main, Jun 11 2026, 04:03:26) [Clang 22.1.3 ]",
+    "torch": "2.12.1+cu130",
+    "torch_threads": 8,
+    "uuid": "80ff95c3-176e-fd8a-728f-9c5577c4a779"
+  },
+  "execution_source_sha256": {
+    "cache/allocator/budget.py": "3fdc40173b284fbf6d4f4cb01954217657f64168820c0f00c1b1008af816fda4",
+    "cache/allocator/csrc/allocator_snapshot.cpp": "827f4a6635369a4bb8602b86ee79195fbde7744fa8744696f642b466123155bc",
+    "cache/allocator/pool_referrers.py": "9417159808a653517a8193a22577a6a6f207cfa874be0d91cc4e4a2ada8ce256",
+    "cache/allocator/snapshot.py": "be7aa6b95e620707d1032e912e3e2df7d246f37eaf0a6ddb04cc0284ea99f61f",
+    "cache/capacity.py": "ba39f57a49124b23c60552240d87fbb9804b5320275b09596eadf2f0ff8c3a96",
+    "cache/contracts.py": "58575f1c9aee3f2843b7f2bce07f1589ea8cb9a712b050991199a95639f97f73",
+    "cache/host_allocation.py": "6c6c65e166fc6a2289547482a9bc51c1da136190b9105423edd23f9732567150",
+    "cache/host_backing.py": "33ca59c06810f4fa83f1009554a8d0709838db1223f6c393162f53739fb29135",
+    "cache/indexer_cache.py": "da80484c5d2ad016b3119f80576e72d2956f8d9d1a5cc2804a0e6d668b80b2eb",
+    "cache/lifecycle.py": "4e699cedce01acd99133e19c662027fb56c9abaf01a9855d09386962d688e68f",
+    "cache/manager.py": "3f8a3129900f8e5e1af6005fcc187f5d430c5ce5156ca80c169384694dd39f91",
+    "cache/prefix_pool.py": "1a363205c74cf382c8c4294f6ddf3358c0da31b292dc0edc16f7c80b4d77a695",
+    "cache/sparse_token_cache.py": "1b3da2acfe5dc22c403b5794d6aedcebd1daaccaa9e82e54741fb0afd69c3cdf",
+    "cache/sparse_token_pool.py": "b34c8cfbc43e58881bd14aa2af314ce7fe612cbbd906ca8573f4259d937e5650",
+    "cache/staging.py": "95816259b638a9178f600479397d1c09d8ecae7a185b49ce6e85bdacf0a71c77",
+    "evaluation/local_native.py": "63681bbe626c0de97747ecf21d784b44e70530bb2c67f2d0fa2231baf54a03c8",
+    "evaluation/validation.py": "769add375a8b3b64fe0c391c1a3067f2304c4727f1d4af199b9f5a5480ca2b74",
+    "experiments/cache_manager_performance/scripts/profile.sh": "0aa20d8bace772210af6828e4eb6853af9081f979be44ab2a311d029a9f2d0f6",
+    "experiments/cache_manager_performance/scripts/recall.sh": "fc009a9dcc5b834d69611f139cde26f5d2b30fa82e13a466bd779b762385806e",
+    "experiments/cache_manager_performance/scripts/run.sh": "3fdf3a4147899c4a3976cbb1b35d82bceb1207c61b7e1455c01b550c19ff1057",
+    "experiments/cache_manager_performance/src/analyze.py": "4f6f7e093c2d1bd6daaed204b3f4c06118a9988598d29308d63bd425f159a04a",
+    "experiments/cache_manager_performance/src/measure.py": "d6ef81aa679be4fdd0592c83f403133e871b631b5766004979bee1d8722d8980",
+    "experiments/cache_manager_performance/src/recall.py": "b38855bce7c0948ac1b82007f232b7709231bd8ffa3e7343294ea65e6b916dae",
+    "experiments/cache_manager_performance/src/recall_report.py": "c57d86fe077abfe373b1a668b6ce90878813ab81ae2bd0d72f564e2bbd408bd9",
+    "experiments/cache_manager_performance/src/recall_workload.py": "498a8427b414e232e741d3a6815fef552f93a963ddb1219f81aca557bcf74244",
+    "experiments/cache_manager_performance/src/report.py": "9d5fb8efe94b7f28e8752fc57ad7d765c5ad7a8eca8ec9541d510e4f12de980f",
+    "experiments/cache_manager_performance/src/transition.py": "6195161ecaee08a2b57d40a14c300cf94e654710de712aacaedbfd536119b04e",
+    "experiments/cache_manager_performance/src/transition_metrics.py": "a80c45e25382c0b104717be37e019c8bb64faad89b0dc158528ada6dd2b1c1c2",
+    "experiments/cache_manager_performance/src/transition_report.py": "153802b33a71f7d32218ce025272f6c63ad9b80cb2e60197e97e6553989b1cfa",
+    "experiments/cache_manager_performance/src/workload.py": "738bc589f94a38dbf8562c00662d1c92c5b468a427152858aa292e38633b9a61",
+    "experiments/deepseek_v32_mfu/src/analyze_nsys.py": "fd1277d1be4e164ff99027ffe4f7a37dbec272d987ff39c0074b71b908f45089",
+    "experiments/deepseek_v32_mfu/src/backend_provenance.py": "ec756e0638b8dd956416ded6c22b7d883ef6024c5063804fc60ebb814fcfd88d",
+    "experiments/deepseek_v32_mfu/src/kernel_profile.py": "2c67b1760cd8807876c55a26992a0946c100641c33e24988056ecaac732b06a0",
+    "experiments/deepseek_v32_mfu/src/launch_gap.py": "05ccc45af59dd2762fe37d4fba40c16e510c74a8b73cb8f09f5477d37faa60b6",
+    "experiments/deepseek_v32_mfu/src/timeline.py": "2a53a3ee0ecb2dc603e7fdf644ea549eda137b2e81e1802b696c915a3eed960a",
+    "models/attention_contracts.py": "2bc7ab80d9f9dd67f0c30e7dea989be7ae8d0f3825f213e9971985bc70f32c63",
+    "models/deepseek_v32/attention.py": "492f57fd04340bd3b25c66ea087774e43cb3320ac49147db83a90705551fab64",
+    "models/deepseek_v32/cache/prefetch.py": "854a3d5081ba396a900b233ad1d1c3678d73cf6de68a0aed0a5d85315351ec31",
+    "models/deepseek_v32/cache/session.py": "50e11d659389aeafc2ed8a608915f4eca2202e953529a4ea7180d2dd0edaaad9",
+    "operators/common/csrc/kv_transfer.cu": "71821370997ee6afb92b0aa0cc7da4c813d17e407b621e2b29aeb343747e525b",
+    "operators/common/kv_transfer.py": "787cd38330ea263c5948bcb4510257d3b43fb789e93a6bee207c14a9ab5a480f",
+    "operators/deepseek_v32/attention/_config.py": "f17addb344d3d2a4098b4b22f3785c968e84614b7b7895abd39a4a2a1fa3d1cb",
+    "operators/deepseek_v32/attention/_validation.py": "9fcd9c2c39d9981374de81f2ad8ef1d40a48bbb929ba8e995d0a572dd11c535a",
+    "operators/deepseek_v32/attention/device_only/mla.py": "9075ad9955c9958110b220acf7d21e768142e19a3552154369af4cfe1ad3676c",
+    "operators/deepseek_v32/attention/offload/mla.py": "ef77dc5334139aac9cfdf0e58b1bc6d0004aec33bbeab3e3f5d8342b55e7dd56",
+    "operators/deepseek_v32/attention/reference/torch.py": "819cc165096790ac68585bcc90c8147b46ee99e6c7a2a3bf616fe01cd9f9b919",
+    "operators/deepseek_v32/indexer/cache_ops.py": "2aaccd6639e17b605f691833bfac426c35fa7ccba10d440b716822f9f215af33",
+    "operators/deepseek_v32/indexer/csrc/echo_cache.cuh": "409be4a062180a8c8e73c1fa783d3980cf3e9926bf53ef34ddbaefe46e2dcd12",
+    "operators/deepseek_v32/indexer/csrc/echo_dense_prefetch.cuh": "05805ae0aa5c5335de74958445269b9585edd97b707dcd2864af60f584960f38",
+    "operators/deepseek_v32/indexer/csrc/echo_helpers.cuh": "08c8f8db1ce344f2532c0913f18f9326769e4f2715bca48eed6bae1b1883ab21",
+    "operators/deepseek_v32/indexer/csrc/echo_indexer.cu": "c39ee55cb67ef452d6ee920c84c5852002ec8d2efd7c3115dfcb3564e9c8a255",
+    "operators/deepseek_v32/indexer/csrc/echo_logits.cuh": "562b10fbca2082948fef14a1ac1c40b8918e1c2c81717a965cad040f5293e61f",
+    "operators/deepseek_v32/indexer/csrc/echo_recall_dispatch.cpp": "8d81e018bdd227dd068544368480635f410eb50428dc843574a9814e0818ac74",
+    "operators/deepseek_v32/indexer/csrc/echo_resident.cuh": "931d978099525213ae267643822dada8697684eb4bce57b6faaa276dbe2ef340",
+    "operators/deepseek_v32/indexer/csrc/echo_sparse_append_free.cuh": "7167c5323b257c7111eaaa6095afd5e9c3929ee649d4f4d391c8627a5f16bade",
+    "operators/deepseek_v32/indexer/csrc/echo_sparse_free.cuh": "b8f64a0f166af9673cfbdbac370a8aa9ab721a5709984c714aad944cfa5fc8ed",
+    "operators/deepseek_v32/indexer/csrc/echo_sparse_recall.cuh": "a7c33da4c60eb3354e93fc77cac39faf19810d4a5b52c03283242fa61e52ff44",
+    "operators/deepseek_v32/indexer/echo.py": "de20ebc3b4905b3dddb646167fb770d27a92146e76934be3160ad1b5b149c562",
+    "operators/deepseek_v32/indexer/prefetch_hint.py": "0ba70bdc2daf4be2c385b60af69309974394ab8d237f9aaf5519fb9350b6a07c",
+    "operators/deepseek_v32/indexer/quantization.py": "083b9671efe7f5dee7e71752dda3255b2d41ee45f906e48876771db5804411ea",
+    "operators/deepseek_v32/indexer/recall_dispatch.py": "854b89912a1b6766c9d2eed62a908cc43ac5be9c35fb27e8fc61b39294991721",
+    "operators/deepseek_v32/indexer/selection.py": "0e68ecb4e16e40e9dda1541693ce3e00e41ccd4a05ea2e708d04dd2545a4dcd8",
+    "pyproject.toml": "cac6e9271538d74e99b1bdc83c2a12648bb3c76a310af21c98aff3ec2d3761d1",
+    "uv.lock": "53339af1728da3661b614d554e928408186b4fac6106a92999bd8fd69b3d2d8f"
+  },
+  "files": {
+    "acceptance_receipt.json": "6cb6febad475d1b4cfdbc52322e146f872c16d98a959afcc73a3ee93a1429f0a",
+    "audit.json": "a8a6ba70af5d9d86446263afcc2a85d5775c1973f6ee7159f6426eefba0bba29",
+    "independent_audit.json": "d19cf61eba9330401ef2d711bb867757da2fb65a7af0069a27a363fd2dc15ec3",
+    "latency.csv": "283c4d5a39ab76c782ea3233e68f6866a716003bb09660559bcb984a37d34f1e",
+    "observer_summary.json": "afa5a4564e2fc6c89f41e19a3443704da1e79dc911f619b972975c4ffcba4ea2",
+    "observers/check/gpu_monitor.jsonl": "7637aa16b3522bbc7e5e4b53371fdc36d35fc3d5935eec9b05417ecbe8baede9",
+    "observers/check/monitor_audit.json": "272c38df98630de635f953370d3bb2e79c08a24b572fb05376bd7319a32516aa",
+    "observers/check/run.json": "5f04aafcd26ca86a3e2e30d751335edefd660151e53fc06ea95ff6b059696a6a",
+    "observers/profile/gpu_monitor.jsonl": "e6d9ea2e5ae0dc11a9b93e7f2874b594e2dd63bf55969d5e08b259f5f625f04b",
+    "observers/profile/monitor_audit.json": "d681cc45a42627f2035e512f297476d2abbe32d5d97f6db0f5763f1efdd508b5",
+    "observers/profile/run.json": "0c9dda1b5b5e2f8f5ba99c77a167a817f6640332ef8f8b2c72f060d9fb68d661",
+    "results.md": "ba7d7dfdfed85b110caacd4ef2b29f155414a16cc3911d3e8deb7beaa5b2b588",
+    "stages.csv": "0d97dd66a52ba1995ca43e613687a89756c935fda162c0c0edea16d430f98cc5",
+    "transition.png": "7dc10f10bff37fd8b539def8d79efb680fc90ad704fbfd9b952b7ddfb0e61adc",
+    "transition.svg": "94ba75c45f22812796c1bc2e4911ba767c95768259cb13cbe1ee88bbb1ed7c63",
+    "windows.csv": "7644ca3196f158c665db54a401dde4770514c98d586b808a7da3bb3e4bd7b455"
+  },
+  "generation_command": [
+    ".venv/bin/python",
+    "-m",
+    "experiments.cache_manager_performance.src.report",
+    "--profile-run",
+    "experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01",
+    "--validation-receipt",
+    "/tmp/cxldsagr-checks/cache_manager_performance/data/cache_posttopk_check_20261006_01/receipt.json",
+    "--check-observer",
+    "/tmp/cache_posttopk_check_20261006_01_observer",
+    "--profile-observer",
+    "/tmp/cache_posttopk_profile_20261006_01_observer",
+    "--output-dir",
+    "experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01/report"
+  ],
+  "identity_sha256": "1f1658e376ab17d28b1ad7fe96ae03c597f39b8c5b02160972bd9467990bab55",
+  "limitations": [
+    "Profiler overhead remains; these are not full request or complete-model timings.",
+    "The replay uses append-built/restored prefixes and zero initial hint; differences from complete-model captures do not isolate wrapper cost.",
+    "Discrete GPU observations do not exclude activity between samples or unrelated CPU work.",
+    "Resident-mask source is bound; this run does not separately identify its live Triton JIT/CUBIN.",
+    "Retained recall/native append evidence uses its original identities and is not a fresh rerun."
+  ],
+  "measurement": {
+    "aggregation": "Sum layer windows within each sample, then take median and inclusive Q1/Q3.",
+    "end": "First actual MLA compute kernel start.",
+    "excluded_computation": [
+      "indexer",
+      "exact top-k",
+      "MLA"
+    ],
+    "kind": "Intrusive NSYS interval measurement; no unprofiled wall-clock benchmark.",
+    "layer_windows": 84,
+    "repeats": 7,
+    "samples": 28,
+    "start": "Last exact top-k GPU activity completion, including invalid-ID masking.",
+    "warmup": 2
+  },
+  "mla_build": {
+    "backend": "flash_mla.flash_mla_sparse_fwd",
+    "files": {
+      "interface": {
+        "path": "/root/.venv/lib/python3.12/site-packages/flash_mla/flash_mla_interface.py",
+        "sha256": "1f461f1581253eae93107a6179e18b27ab23950e4819326828058a391bde87bf"
+      },
+      "native": {
+        "path": "/root/.venv/lib/python3.12/site-packages/flash_mla/cuda.cpython-312-x86_64-linux-gnu.so",
+        "sha256": "1c9969551e8ef7ca96ca1182ab4f9347aa5402586a1ba5a5c82f86cf4b2fb9a6"
+      },
+      "package": {
+        "path": "/root/.venv/lib/python3.12/site-packages/flash_mla/__init__.py",
+        "sha256": "4345e7b57facecac586e85d2c64a7fbbaa38f92c258b739223708db6a1715b5f"
+      }
+    },
+    "package_version": "1.0.0"
+  },
+  "native_libraries": {
+    "/root/.cache/tvm-ffi/cxldsagr_echo_indexer_c8f43b73bc3d148d_1fa11185f6354333/cxldsagr_echo_indexer_c8f43b73bc3d148d.so": "09165f76c0ef4a75067939afa1c071bb68b9e8bf28e229d27681cbefdb2e0a11",
+    "/root/.cache/tvm-ffi/cxldsagr_echo_recall_dispatch_eb64373398600cd4_5eaa50b1dd428433/cxldsagr_echo_recall_dispatch_eb64373398600cd4.so": "297556386fcff78dde4750f7e4042268c5b3a4d9150cb8194a1091b6576ba66e",
+    "/root/.cache/tvm-ffi/cxldsagr_kv_transfer_672412fcb6ae32f3/cxldsagr_kv_transfer.so": "561bc3cbe14edea4930b202bc7a3ff0763864d15312d92de7e772664d04b1b66"
+  },
+  "observer_archives": {
+    "check": {
+      "driver.py": {
+        "bytes": 3763,
+        "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01/publication_sources/observers/check/driver.py",
+        "sha256": "d9c70b27698a0a3a90a3202dd56c6d556110c4527386ddf24c7d303f3fa7fc7b"
+      },
+      "gpu_monitor.jsonl": {
+        "bytes": 6631,
+        "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01/publication_sources/observers/check/gpu_monitor.jsonl",
+        "sha256": "7637aa16b3522bbc7e5e4b53371fdc36d35fc3d5935eec9b05417ecbe8baede9"
+      },
+      "monitor_audit.json": {
+        "bytes": 324,
+        "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01/publication_sources/observers/check/monitor_audit.json",
+        "sha256": "272c38df98630de635f953370d3bb2e79c08a24b572fb05376bd7319a32516aa"
+      },
+      "run.json": {
+        "bytes": 1053,
+        "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01/publication_sources/observers/check/run.json",
+        "sha256": "5f04aafcd26ca86a3e2e30d751335edefd660151e53fc06ea95ff6b059696a6a"
+      },
+      "stderr.log": {
+        "bytes": 0,
+        "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01/publication_sources/observers/check/stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout.log": {
+        "bytes": 85,
+        "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01/publication_sources/observers/check/stdout.log",
+        "sha256": "f03b5e8a98fc5a7b795934a2db91b2f24e89ce9db7ff9227ddced7e8ca17e1c1"
+      }
+    },
+    "profile": {
+      "driver.py": {
+        "bytes": 3763,
+        "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01/publication_sources/observers/profile/driver.py",
+        "sha256": "d9c70b27698a0a3a90a3202dd56c6d556110c4527386ddf24c7d303f3fa7fc7b"
+      },
+      "gpu_monitor.jsonl": {
+        "bytes": 18510,
+        "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01/publication_sources/observers/profile/gpu_monitor.jsonl",
+        "sha256": "e6d9ea2e5ae0dc11a9b93e7f2874b594e2dd63bf55969d5e08b259f5f625f04b"
+      },
+      "monitor_audit.json": {
+        "bytes": 326,
+        "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01/publication_sources/observers/profile/monitor_audit.json",
+        "sha256": "d681cc45a42627f2035e512f297476d2abbe32d5d97f6db0f5763f1efdd508b5"
+      },
+      "run.json": {
+        "bytes": 1191,
+        "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01/publication_sources/observers/profile/run.json",
+        "sha256": "0c9dda1b5b5e2f8f5ba99c77a167a817f6640332ef8f8b2c72f060d9fb68d661"
+      },
+      "stderr.log": {
+        "bytes": 0,
+        "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01/publication_sources/observers/profile/stderr.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stdout.log": {
+        "bytes": 169,
+        "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01/publication_sources/observers/profile/stdout.log",
+        "sha256": "a682bbd4b7b1ce48388635db5d712f16642fbde56dcaf90871ee5673f87a1ff8"
+      }
+    }
+  },
+  "profile_run_id": "cache_posttopk_profile_20261006_01",
+  "publication_sources": [
+    {
+      "bytes": 253328,
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01/publication_sources/cache_posttopk_independent_audit_20261006.json",
+      "sha256": "d19cf61eba9330401ef2d711bb867757da2fb65a7af0069a27a363fd2dc15ec3"
+    },
+    {
+      "bytes": 25159,
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01/publication_sources/cache_posttopk_independent_audit_20261006.py",
+      "sha256": "674d0f4fcfddf6aaf4733c73925be8670201780209c28ffeb4e6c5d93bb97598"
+    },
+    {
+      "bytes": 3763,
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01/publication_sources/observers/check/driver.py",
+      "sha256": "d9c70b27698a0a3a90a3202dd56c6d556110c4527386ddf24c7d303f3fa7fc7b"
+    },
+    {
+      "bytes": 6631,
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01/publication_sources/observers/check/gpu_monitor.jsonl",
+      "sha256": "7637aa16b3522bbc7e5e4b53371fdc36d35fc3d5935eec9b05417ecbe8baede9"
+    },
+    {
+      "bytes": 324,
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01/publication_sources/observers/check/monitor_audit.json",
+      "sha256": "272c38df98630de635f953370d3bb2e79c08a24b572fb05376bd7319a32516aa"
+    },
+    {
+      "bytes": 1053,
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01/publication_sources/observers/check/run.json",
+      "sha256": "5f04aafcd26ca86a3e2e30d751335edefd660151e53fc06ea95ff6b059696a6a"
+    },
+    {
+      "bytes": 0,
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01/publication_sources/observers/check/stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 85,
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01/publication_sources/observers/check/stdout.log",
+      "sha256": "f03b5e8a98fc5a7b795934a2db91b2f24e89ce9db7ff9227ddced7e8ca17e1c1"
+    },
+    {
+      "bytes": 3763,
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01/publication_sources/observers/profile/driver.py",
+      "sha256": "d9c70b27698a0a3a90a3202dd56c6d556110c4527386ddf24c7d303f3fa7fc7b"
+    },
+    {
+      "bytes": 18510,
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01/publication_sources/observers/profile/gpu_monitor.jsonl",
+      "sha256": "e6d9ea2e5ae0dc11a9b93e7f2874b594e2dd63bf55969d5e08b259f5f625f04b"
+    },
+    {
+      "bytes": 326,
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01/publication_sources/observers/profile/monitor_audit.json",
+      "sha256": "d681cc45a42627f2035e512f297476d2abbe32d5d97f6db0f5763f1efdd508b5"
+    },
+    {
+      "bytes": 1191,
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01/publication_sources/observers/profile/run.json",
+      "sha256": "0c9dda1b5b5e2f8f5ba99c77a167a817f6640332ef8f8b2c72f060d9fb68d661"
+    },
+    {
+      "bytes": 0,
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01/publication_sources/observers/profile/stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 169,
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01/publication_sources/observers/profile/stdout.log",
+      "sha256": "a682bbd4b7b1ce48388635db5d712f16642fbde56dcaf90871ee5673f87a1ff8"
+    },
+    {
+      "bytes": 7750,
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01/publication_sources/publish_cache_posttopk_20261006.py",
+      "sha256": "43b0f0ea62eb2a6c08908bc8274f56cca47385fe1742f83afed746c429d3525b"
+    },
+    {
+      "bytes": 17838,
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01/publication_sources/report_helpers/report.py",
+      "sha256": "303fec6d5bdde502727bd8fa26790602f7b839ccff36cef74b69b0430a28b3e0"
+    }
+  ],
+  "published_utc": "2026-10-06T11:28:41.391194+00:00",
+  "raw_artifacts": [
+    {
+      "bytes": 956160,
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01/identity.json",
+      "sha256": "c1390b48d2e51b37b69b67d15b163927cb58237a5f88f517f60029309058d408"
+    },
+    {
+      "bytes": 187352,
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01/result.json",
+      "sha256": "d14bef2dbd9e2b463cf9c5fe14cf6dfe7cb4a9dda335cf429354909837dcb357"
+    },
+    {
+      "bytes": 1785856,
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01/trace.sqlite",
+      "sha256": "86a427c6ceade83874d660c8589684dc3f6bde14e9e3319cd9396cef078ed128"
+    },
+    {
+      "bytes": 22933107,
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01/analysis/summary.json",
+      "sha256": "5db1351c2ad0332038648ca4415c731c26104ecf559a1a8af108859c1b62c13e"
+    },
+    {
+      "bytes": 53480581,
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01/extend_cold_echo_0_evidence.pt",
+      "sha256": "697dd5af71b477846f042934b85c67124bfd9ef3d96bf0e0f2ea22403c647adb"
+    },
+    {
+      "bytes": 53480581,
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01/extend_cold_echo_1_evidence.pt",
+      "sha256": "744378b625578f874b328e7d9c1513de9ded670784fe4200a7e6143e55265e88"
+    },
+    {
+      "bytes": 53480581,
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01/extend_cold_echo_2_evidence.pt",
+      "sha256": "4ce24e0d2860c07e7600b11e5fadcea7a9f8de0770d4fe5fa0142dcc91f49093"
+    },
+    {
+      "bytes": 53480581,
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01/extend_cold_echo_3_evidence.pt",
+      "sha256": "21955e01a0d9b138ecdbf7c5babc3c968e7c490814100597661c5f9f7dba871b"
+    },
+    {
+      "bytes": 53480581,
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01/extend_cold_echo_4_evidence.pt",
+      "sha256": "dd61c672c457d7164d6f2fa8fec4922dbcaa1250a8d2897a605dd3f5851e5bb7"
+    },
+    {
+      "bytes": 53480581,
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01/extend_cold_echo_5_evidence.pt",
+      "sha256": "9085f5c5074254e150cb0502cf9e85b85530e01d979576ab6d4b23e71e803797"
+    },
+    {
+      "bytes": 53480581,
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01/extend_cold_echo_6_evidence.pt",
+      "sha256": "a476f19095e6ce2d7dd1ddde6a8220f750d02de1b0518845541ec2229428f6a4"
+    },
+    {
+      "bytes": 53480689,
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01/extend_cold_serial_sparse_0_evidence.pt",
+      "sha256": "fa817ba6027ea69845771def4dad3c95847a64aa650b1085a475f7dcd5687057"
+    },
+    {
+      "bytes": 53480689,
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01/extend_cold_serial_sparse_1_evidence.pt",
+      "sha256": "cb54a0f7cfc5366c7c401a061b0a6fffe6673149c67768ed4c485c82edb3508d"
+    },
+    {
+      "bytes": 53480689,
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01/extend_cold_serial_sparse_2_evidence.pt",
+      "sha256": "e36362ff75ce69881fc9cc2e4194d46212a35b252dd85ec13a6c40d8856c6b43"
+    },
+    {
+      "bytes": 53480689,
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01/extend_cold_serial_sparse_3_evidence.pt",
+      "sha256": "6c7e47cd7f6b765a0b40cc9531141fb970315f6f8120b6b44297e5669b275a3b"
+    },
+    {
+      "bytes": 53480689,
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01/extend_cold_serial_sparse_4_evidence.pt",
+      "sha256": "e6f5d16dcd5f99f4e4e8895f569e46515d923c0d49dd3b3dce68eef89f130c10"
+    },
+    {
+      "bytes": 53480689,
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01/extend_cold_serial_sparse_5_evidence.pt",
+      "sha256": "1b78d91cb817f413cab2bcbff79c765b1d9819f2e91ad2829928a63c6d3f55b2"
+    },
+    {
+      "bytes": 53480689,
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01/extend_cold_serial_sparse_6_evidence.pt",
+      "sha256": "a87b7c4135da980451bd64681f2a4334d308b89d248bae9b6754db4fc3832e36"
+    },
+    {
+      "bytes": 53480581,
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01/extend_warm_echo_0_evidence.pt",
+      "sha256": "79496bf2464061703f68d23c4e79f41cb29a0025bca21defa3dad61cc190d99d"
+    },
+    {
+      "bytes": 53480581,
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01/extend_warm_echo_1_evidence.pt",
+      "sha256": "3971decd00a409acc38891964dafd683d60afdac64a10c1ca3188749dbe4b03e"
+    },
+    {
+      "bytes": 53480581,
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01/extend_warm_echo_2_evidence.pt",
+      "sha256": "24430fc7fd8402ba7f485b75a8c508366304a96f3395b39dce7b27e94279f2c6"
+    },
+    {
+      "bytes": 53480581,
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01/extend_warm_echo_3_evidence.pt",
+      "sha256": "143e9565fc855cbd2cdaf5c03d404598ca353060cb22f8b13b025ce0422e1459"
+    },
+    {
+      "bytes": 53480581,
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01/extend_warm_echo_4_evidence.pt",
+      "sha256": "a8ef1024d8bd16b82b2b046b90f71886671867662fcdcdd83e6ba28605fcc61a"
+    },
+    {
+      "bytes": 53480581,
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01/extend_warm_echo_5_evidence.pt",
+      "sha256": "ad1eb0e31e122e88b081f9f4dfcace5a76a96dbe92e6fbbc6799105fe28165f8"
+    },
+    {
+      "bytes": 53480581,
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01/extend_warm_echo_6_evidence.pt",
+      "sha256": "db7049344759066fdaa55bb73a292f7ef8e9deabc8c94e0ec02636d890e19ca5"
+    },
+    {
+      "bytes": 53480689,
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01/extend_warm_serial_sparse_0_evidence.pt",
+      "sha256": "813c1e0443d5b7c27acd34df1e8e50e6d254cec7e0d7a78b7a4b4b67d539f8b1"
+    },
+    {
+      "bytes": 53480689,
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01/extend_warm_serial_sparse_1_evidence.pt",
+      "sha256": "515ea8dfbfb7a7c0e2ddabb8938ac5c5623dacb1b667c2f26187354d93c4df1b"
+    },
+    {
+      "bytes": 53480689,
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01/extend_warm_serial_sparse_2_evidence.pt",
+      "sha256": "41075da090453eb28be130d45ce5eb202a629801c76c4a6fbf22f90c94d9e76f"
+    },
+    {
+      "bytes": 53480689,
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01/extend_warm_serial_sparse_3_evidence.pt",
+      "sha256": "f567f37609a68fb6e894ea29208808ceef682fe1fc825187a2bd9731e3cf6335"
+    },
+    {
+      "bytes": 53480689,
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01/extend_warm_serial_sparse_4_evidence.pt",
+      "sha256": "8961df934be359afb3edfc9dcaf1c078fabda71a71611b225022e3a73fa9c54f"
+    },
+    {
+      "bytes": 53480689,
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01/extend_warm_serial_sparse_5_evidence.pt",
+      "sha256": "4649dc9fd792d8b40da9ff32864283ac004aa9099ee0e9a2972396748507aa90"
+    },
+    {
+      "bytes": 53480689,
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01/extend_warm_serial_sparse_6_evidence.pt",
+      "sha256": "8ef13c2bc59b0f140e59164816b19b43518a26458f2b9e506b9c74a40165354e"
+    },
+    {
+      "bytes": 681925,
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/profile/cache_posttopk_profile_20261006_01/trace.nsys-rep",
+      "sha256": "951b0ea93c08999b3904ded4aff5d550b6bee93b3216222a890db71538cb3cf3"
+    },
+    {
+      "bytes": 26,
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/log/cache_posttopk_profile_20261006_01/export.log",
+      "sha256": "6262282bafd819af299d1bd7094cef0a690a5bd6166e035027cfb23c01b08d80"
+    },
+    {
+      "bytes": 8101,
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/log/cache_posttopk_profile_20261006_01/export.stderr.log",
+      "sha256": "355ec7de2cfa58d21bdf4ea428d71d66f8374dd4645008f8521b4d923f2e751a"
+    },
+    {
+      "bytes": 0,
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/log/cache_posttopk_profile_20261006_01/stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 872,
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/log/cache_posttopk_profile_20261006_01/stdout.log",
+      "sha256": "79586d27f1bbb6f92eed45e6d59f6c1b00d1f2cb7ca504a344fa8657856abbce"
+    }
+  ],
+  "reporting_only_delta": {
+    "ast_difference_is_only_wrapping_file_argument_in_Path": true,
+    "check_archive": {
+      "bytes": 17832,
+      "path": "/tmp/cxldsagr-checks/cache_manager_performance/data/cache_posttopk_check_20261006_01/source/experiments/cache_manager_performance/src/report.py",
+      "sha256": "9d5fb8efe94b7f28e8752fc57ad7d765c5ad7a8eca8ec9541d510e4f12de980f"
+    },
+    "classification": "post_run_report_generation_only",
+    "current": {
+      "bytes": 17838,
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/src/report.py",
+      "sha256": "303fec6d5bdde502727bd8fa26790602f7b839ccff36cef74b69b0430a28b3e0"
+    },
+    "fresh_gpu_run_required_for_this_delta": false,
+    "function": "generate",
+    "line": 375,
+    "measured_workload_and_analysis_sources_changed": false,
+    "native_identity_changed": false,
+    "new_expression": "file_sha256(Path(__file__))",
+    "new_sha256": "303fec6d5bdde502727bd8fa26790602f7b839ccff36cef74b69b0430a28b3e0",
+    "old_expression": "file_sha256(__file__)",
+    "old_sha256": "9d5fb8efe94b7f28e8752fc57ad7d765c5ad7a8eca8ec9541d510e4f12de980f",
+    "profile_archive": {
+      "bytes": 17832,
+      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01/source/experiments/cache_manager_performance/src/report.py",
+      "sha256": "9d5fb8efe94b7f28e8752fc57ad7d765c5ad7a8eca8ec9541d510e4f12de980f"
+    },
+    "reason": "The only change repairs the source-hash input type while generating the outer publication audit after GPU measurement; it does not execute inside the measured workload or transition analysis.",
+    "source": "experiments/cache_manager_performance/src/report.py",
+    "text_difference_is_only_that_call_argument": true
+  },
+  "schema": "cache-post-topk-publication-v1",
+  "status": "published_diagnostic",
+  "validation": {
+    "consumer_outputs": {
+      "all_attention_finite": true,
+      "exact_attention_match": true,
+      "exact_selection_match": true,
+      "profile_evidence_files": 28,
+      "profile_layer_comparisons": 84,
+      "resident_reference_files": 2
+    },
+    "cpu_tests": "165 passed before reporting-only Path correction; report CLI completed successfully after the correction.",
+    "lint": "Ruff and shell syntax passed.",
+    "raw_sql_audit": "All 84 endpoints, activity partitions, 16 summary rows, source archives and native library bindings verified independently.",
+    "visual_review": "Rendered PNG inspected for labels, readable values and sample coverage."
+  },
+  "validation_receipt_sha256": "af1cc0e6cf1a096a06c90cd1324818cfbbeabd45e08bf551a1efbac8bb480a75"
+}

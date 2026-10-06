@@ -81,12 +81,16 @@ class ReplayInputs:
     layout: ReplayLayout
     sources: list = field(default_factory=list)
 
-    def for_layer(self, layer, hidden, residual, *, scope):
+    def for_layer(self, layer, hidden, residual, *, scope, copy_source=True):
         if layer < 3:
             self.sources.append((hidden, residual))
             return hidden, residual
         with scope("replay_input_copy"):
             source_hidden, source_residual = self.sources[self.layout.source_layers[layer]]
+            if not copy_source:
+                # Graph replay copies these into the physical block's owned
+                # static inputs. Avoid cloning once here and copying again.
+                return source_hidden, source_residual
             return (
                 source_hidden.clone(),
                 source_residual.clone() if source_residual is not None else None,

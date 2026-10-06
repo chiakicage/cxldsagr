@@ -1,0 +1,131 @@
+{
+  "source_comparisons": [
+    {
+      "manifest": "experiments/nosa_motivation/output/data/refactor_final_nosa_bench_20261005_01/source_manifest.json",
+      "matched_call_path_files": [
+        "cache/host_backing.py",
+        "cache/staging.py",
+        "models/nosa/cache/fixed.py",
+        "models/nosa/cache/offload.py",
+        "models/nosa/cache/resident.py",
+        "models/nosa/execution/fixed.py",
+        "models/nosa/execution/fixed_resources.py",
+        "operators/nosa/attention/device_only/_fa3.py",
+        "operators/nosa/attention/offload/_fused.py",
+        "operators/nosa/attention/offload/csrc/nosa_offload.cu",
+        "operators/nosa/attention/offload/csrc/nosa_offload_fused.cu"
+      ],
+      "different": [
+        "models/nosa/attention.py",
+        "operators/nosa/attention/device_only/api.py",
+        "operators/nosa/attention/offload/api.py"
+      ],
+      "not_in_collected_scope": []
+    },
+    {
+      "manifest": "experiments/nosa_offload_overlap/output/data/refactor_nosa_overlap_bench_20261005_01/metadata.json",
+      "matched_call_path_files": [
+        "cache/host_backing.py",
+        "cache/staging.py",
+        "models/nosa/cache/fixed.py",
+        "models/nosa/cache/offload.py",
+        "models/nosa/cache/resident.py",
+        "models/nosa/execution/fixed.py",
+        "models/nosa/execution/fixed_resources.py",
+        "operators/nosa/attention/device_only/_fa3.py",
+        "operators/nosa/attention/offload/_fused.py",
+        "operators/nosa/attention/offload/csrc/nosa_offload.cu",
+        "operators/nosa/attention/offload/csrc/nosa_offload_fused.cu"
+      ],
+      "different": [
+        "models/nosa/attention.py",
+        "operators/nosa/attention/device_only/api.py",
+        "operators/nosa/attention/offload/api.py"
+      ],
+      "not_in_collected_scope": []
+    },
+    {
+      "manifest": "experiments/nosa_mfu/report/captured/metadata.json",
+      "matched_call_path_files": [
+        "cache/host_backing.py",
+        "cache/staging.py",
+        "models/nosa/cache/fixed.py",
+        "models/nosa/cache/offload.py",
+        "models/nosa/cache/resident.py",
+        "models/nosa/execution/fixed.py",
+        "models/nosa/execution/fixed_resources.py",
+        "operators/nosa/attention/device_only/_fa3.py",
+        "operators/nosa/attention/offload/_fused.py",
+        "operators/nosa/attention/offload/csrc/nosa_offload.cu",
+        "operators/nosa/attention/offload/csrc/nosa_offload_fused.cu"
+      ],
+      "different": [
+        "models/nosa/attention.py",
+        "operators/nosa/attention/device_only/api.py",
+        "operators/nosa/attention/offload/api.py"
+      ],
+      "not_in_collected_scope": []
+    },
+    {
+      "manifest": "experiments/nosa_mfu/report/sparse/native/metadata.json",
+      "matched_call_path_files": [
+        "cache/host_backing.py",
+        "cache/staging.py",
+        "models/nosa/cache/fixed.py",
+        "models/nosa/cache/offload.py",
+        "models/nosa/cache/resident.py",
+        "models/nosa/execution/fixed.py",
+        "models/nosa/execution/fixed_resources.py",
+        "operators/nosa/attention/device_only/_fa3.py",
+        "operators/nosa/attention/offload/_fused.py",
+        "operators/nosa/attention/offload/csrc/nosa_offload.cu",
+        "operators/nosa/attention/offload/csrc/nosa_offload_fused.cu"
+      ],
+      "different": [
+        "models/nosa/attention.py",
+        "operators/nosa/attention/device_only/api.py",
+        "operators/nosa/attention/offload/api.py"
+      ],
+      "not_in_collected_scope": []
+    },
+    {
+      "manifest": "experiments/nosa_mfu/report/dense/metadata.json",
+      "matched_call_path_files": [
+        "cache/host_backing.py",
+        "cache/staging.py",
+        "models/nosa/cache/fixed.py",
+        "models/nosa/cache/offload.py",
+        "models/nosa/cache/resident.py",
+        "models/nosa/execution/fixed.py",
+        "models/nosa/execution/fixed_resources.py",
+        "operators/nosa/attention/device_only/_fa3.py",
+        "operators/nosa/attention/offload/_fused.py",
+        "operators/nosa/attention/offload/csrc/nosa_offload.cu",
+        "operators/nosa/attention/offload/csrc/nosa_offload_fused.cu"
+      ],
+      "different": [
+        "models/nosa/attention.py",
+        "operators/nosa/attention/device_only/api.py",
+        "operators/nosa/attention/offload/api.py"
+      ],
+      "not_in_collected_scope": []
+    }
+  ],
+  "preexisting_relocations": {
+    "basis": "Prior published snapshots predate repository HEAD 0a47b67; these NOSA files have no working-tree change in the current task.",
+    "attention_definitions_unchanged": true,
+    "contract_definitions_unchanged": {
+      "BlockSelection": true,
+      "TokenSelection": false,
+      "AttentionContext": true,
+      "Indexer": true,
+      "MainAttention": true
+    },
+    "dense_adapters_unchanged": {
+      "DenseMainAttention": true,
+      "ResidentLayerView": true
+    },
+    "two_operator_api_differences": "Only BlockSelection import moved from layers.attention to models.attention_contracts; all function/class ASTs are unchanged.",
+    "token_selection_boundary": "TokenSelection lost valid_mask/invalid_id before this task; NOSA uses BlockSelection, and the audited NOSA paths do not import or construct TokenSelection. No equivalence claim is made for that separate contract change."
+  }
+}

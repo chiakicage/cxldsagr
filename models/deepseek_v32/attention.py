@@ -1,6 +1,6 @@
 """Chunked DeepSeek indexer → ECHO prefetch → exact recall → sparse MLA."""
 
-from contextlib import nullcontext
+from contextlib import contextmanager, nullcontext
 
 import torch
 
@@ -60,6 +60,37 @@ class EchoAttentionRunner:
         self.offset = torch.zeros(16, device=attention.device, dtype=torch.float32)
         self.last_indices = None
         self.capture_hook = None
+
+    @property
+    def mutates_prefetch_hint(self):
+        """Whether a successful layer call can change its retained hint."""
+        return self.fused_prefetch and self.cache.offload
+
+    @contextmanager
+    def defer_unused_prefill_hints(self):
+        """An exclusive model step may defer hints unused by its later chunks.
+
+        Standalone layer calls retain immediate updates. The per-call proof
+        below additionally requires the complete pending step to fit in P.
+        """
+        previous = getattr(self, "_defer_prefill_hints", False)
+        self._defer_prefill_hints = True
+        try:
+            yield
+        finally:
+            self._defer_prefill_hints = previous
+
+    def _needs_prefetch_hint(self, end):
+        step_end = getattr(self.cache, "_step_end", None)
+        return not (
+            getattr(self, "_defer_prefill_hints", False)
+            and self.capture_hook is None
+            and not self.collect_cache_diagnostics
+            and self.cache.transient_start is None
+            and step_end is not None
+            and end < step_end <= self.cache.slots
+            and self.cache.all_history_resident
+        )
 
     def _start_cache_diagnostics(self, position, queries):
         """Intrusive opt-in observation, kept out of formal latency runs.
@@ -207,6 +238,7 @@ class EchoAttentionRunner:
         normalized=False,
         project_callback=None,
         output_callback=None,
+        indexer_bounds=None,
     ):
         self.cache_diagnostics = None
         self._diagnostic_state = None
@@ -216,6 +248,8 @@ class EchoAttentionRunner:
                 callbacks["project_callback"] = project_callback
             if output_callback is not None:
                 callbacks["output_callback"] = output_callback
+            if indexer_bounds is not None:
+                callbacks["indexer_bounds"] = indexer_bounds
             result = self._forward(
                 hidden,
                 scope=scope,
@@ -240,6 +274,7 @@ class EchoAttentionRunner:
         normalized=False,
         project_callback=None,
         output_callback=None,
+        indexer_bounds=None,
     ):
         from operators.deepseek_v32.indexer.echo import logits as index_logits
 
@@ -277,6 +312,12 @@ class EchoAttentionRunner:
                     else None
                 )
             with scope("indexer_prefetch" if prefetch is not None else "indexer"):
+                indexer_options = {"_bounds": indexer_bounds} if indexer_bounds is not None else {}
+                if p.index_q.is_cuda and prefetch is None and end >= self.cfg.index_topk:
+                    # The official score allocation already has an aligned
+                    # stride. Expose it to top-k without repacking Q x N;
+                    # end >= k keeps the logical selection capacity unchanged.
+                    indexer_options["_pad_to_stride"] = True
                 scores = index_logits(
                     p.index_q,
                     self.index_keys[:end],
@@ -284,6 +325,7 @@ class EchoAttentionRunner:
                     self.index_scales[:end],
                     position,
                     prefetch=prefetch,
+                    **indexer_options,
                 )
             if prefetch is not None:
                 with scope("offload_finalize"):
@@ -301,10 +343,13 @@ class EchoAttentionRunner:
                     scores = scores[:, :end].masked_fill(~valid, -torch.inf)
                     values, indices = torch.topk(scores, min(self.cfg.index_topk, end), dim=-1)
                     indices = torch.where(torch.isfinite(values), indices, -1).int()
-                if self.fused_prefetch and self.cache.offload:
-                    # Preserve the hint even when this call needed no prefetch:
-                    # a later visit can consume it after another user's eviction.
-                    update_prefetch_hint(scores, self.offset)
+            if self.fused_prefetch and self.cache.offload and self._needs_prefetch_hint(end):
+                # Cache prediction is separate from the model's exact selection.
+                # A later visit can use this hint after another user's eviction.
+                with scope("prefetch_hint"):
+                    # Keep the original reduction shape/order even when
+                    # selection consumed an aligned score view.
+                    update_prefetch_hint(scores[:, :end], self.offset)
             del scores, values
             if self._diagnostic_state is not None:
                 with scope("cache_diagnostic_selection"):

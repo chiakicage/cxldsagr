@@ -33,6 +33,15 @@ def dense_staging_allocation_bytes(logical_bytes, device):
     return rounded + ((1 << 20) if rounded > 1 << 20 else 0)
 
 
+def dense_ticket_reservation(history, layers, device):
+    """DMA tickets borrow preallocated contiguous spans without tensor scratch."""
+    if any(type(value) is not int or value < 1 for value in (history, layers)):
+        raise ValueError("dense ticket history and layer count must be positive")
+    if torch.device(device).type not in ("cpu", "cuda"):
+        raise ValueError("dense history DMA supports CPU reference or CUDA")
+    return 0
+
+
 def check_dense_staging_allocation(tensor, reserved_bytes):
     """Find the owning active CUDA block and reject unreserved capacity.
 

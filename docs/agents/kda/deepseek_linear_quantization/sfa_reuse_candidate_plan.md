@@ -146,8 +146,8 @@ or dispatch geometry in the same initial S2 candidate.
    the original exhaustive fixture corpus deliberately uses offset guards.
 8. Root integrates the selected candidate and runs focused production
    dense/grouped/packed MLP checks, actual checkpoint correctness and combined
-   H64K four-scheme serving validation. Repeat affected full-serving/MFU and
-   `deepseek_v32_echo_official` measurements before replacing reports. Preserve
+   H64K four-scheme serving validation. Repeat affected full-serving/MFU
+   measurements before replacing reports. Preserve
    existing valid publication materials until the replacement passes and is
    published. Component timing does not complete the motivation objective.
 

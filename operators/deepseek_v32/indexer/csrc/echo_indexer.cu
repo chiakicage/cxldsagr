@@ -238,6 +238,8 @@ void mark_misses(TensorView ids, TensorView h2d, TensorView output) {
 } // namespace echo_native
 #include "echo_resident.cuh"
 #include "echo_sparse_recall.cuh"
+#include "echo_sparse_free.cuh"
+#include "echo_sparse_append_free.cuh"
 #include "echo_dense_prefetch.cuh"
 TVM_FFI_DLL_EXPORT_TYPED_FUNC(echo_logits, echo_native::forward);
 
@@ -247,12 +249,20 @@ TVM_FFI_DLL_EXPORT_TYPED_FUNC(echo_protect, echo_native::protect);
 TVM_FFI_DLL_EXPORT_TYPED_FUNC(echo_release_ids, echo_native::release_ids);
 TVM_FFI_DLL_EXPORT_TYPED_FUNC(echo_mark_misses, echo_native::mark_misses);
 TVM_FFI_DLL_EXPORT_TYPED_FUNC(echo_resident_selection, echo_native::resident_selection);
+TVM_FFI_DLL_EXPORT_TYPED_FUNC(echo_empty_event, echo_native::empty_event);
 TVM_FFI_DLL_EXPORT_TYPED_FUNC(echo_planned_append, echo_native::planned_append);
 TVM_FFI_DLL_EXPORT_TYPED_FUNC(echo_protect_resident_history, echo_native::protect_resident_history);
 TVM_FFI_DLL_EXPORT_TYPED_FUNC(echo_sparse_selection_classify, echo_native::sparse_selection_classify);
 TVM_FFI_DLL_EXPORT_TYPED_FUNC(echo_sparse_selection_compact, echo_native::sparse_selection_compact);
+TVM_FFI_DLL_EXPORT_TYPED_FUNC(echo_sparse_selection_workspace, echo_native::sparse_selection_workspace);
+TVM_FFI_DLL_EXPORT_TYPED_FUNC(echo_prepare_prefetch, echo_native::prepare_prefetch);
+TVM_FFI_DLL_EXPORT_TYPED_FUNC(echo_sparse_append, echo_native::sparse_append);
+TVM_FFI_DLL_EXPORT_TYPED_FUNC(echo_sparse_append_free, echo_native::free_append::append);
+TVM_FFI_DLL_EXPORT_TYPED_FUNC(echo_sparse_selection_allocate, echo_native::sparse_selection_allocate);
+TVM_FFI_DLL_EXPORT_TYPED_FUNC(echo_sparse_selection_allocate_free, echo_native::free_recall::allocate);
 TVM_FFI_DLL_EXPORT_TYPED_FUNC(echo_sparse_selection_publish, echo_native::sparse_selection_publish);
+TVM_FFI_DLL_EXPORT_TYPED_FUNC(echo_sparse_selection_publish_bounded, echo_native::sparse_selection_publish_bounded);
 TVM_FFI_DLL_EXPORT_TYPED_FUNC(echo_sparse_selection_map, echo_native::sparse_selection_map);
 
-TVM_FFI_DLL_EXPORT_TYPED_FUNC(echo_dense_history_classify, echo_native::dense_history_classify);
-TVM_FFI_DLL_EXPORT_TYPED_FUNC(echo_dense_history_reserve, echo_native::dense_history_reserve);
+TVM_FFI_DLL_EXPORT_TYPED_FUNC(echo_dense_history_clear, echo_native::dense_history_clear);
+TVM_FFI_DLL_EXPORT_TYPED_FUNC(echo_dense_history_publish, echo_native::dense_history_publish);

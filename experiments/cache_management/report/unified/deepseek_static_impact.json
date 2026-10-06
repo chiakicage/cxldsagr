@@ -1,0 +1,426 @@
+{
+  "schema": "deepseek-dma-static-plan-impact-audit-v1",
+  "started_utc": "2026-10-05T17:41:39.102661+00:00",
+  "completed_utc": "2026-10-05T17:41:39.183493+00:00",
+  "helper_sha256": "8dc13a1c3a558febd3aabffd39eb2a1683d26a38ed600db36ce0fe5a66b6c939",
+  "cpu_affinity": [
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39
+  ],
+  "thread_limits": {
+    "torch_intraop": 8,
+    "torch_interop": 8
+  },
+  "cuda_initialized": false,
+  "plans": [
+    {
+      "run_id": "cache_deepseek_nh_20261006_01",
+      "plan_sha256": "9e639d982242e87b48a1acf7fe43dab3c585f6f0899e2aba5d6ac11de7265d53",
+      "checkpoint_config_sha256": "c7fa8b191e9936d8e6a57d864baab82b792fae16a116416cdd3a75ba76bc5af1",
+      "full_current_recomputation_equal": true,
+      "selected_P": 32768,
+      "selected_NH": 29818880,
+      "selected_U": 455,
+      "sources": {
+        "models/deepseek_v32/config.py": {
+          "original_sha256": "d8f0d2aa209e2cf7a7653ef4980b60a3dca4d430eb23f2579abf00a290ff529d",
+          "current_sha256": "d8f0d2aa209e2cf7a7653ef4980b60a3dca4d430eb23f2579abf00a290ff529d",
+          "byte_identical": true
+        },
+        "models/deepseek_v32/execution/capacity.py": {
+          "original_sha256": "9844ef42c65b25a4c7358dd4975f39c1eb434ce5587b721aa660e4181e83f694",
+          "current_sha256": "9844ef42c65b25a4c7358dd4975f39c1eb434ce5587b721aa660e4181e83f694",
+          "byte_identical": true
+        },
+        "models/deepseek_v32/execution/adapter.py": {
+          "original_sha256": "66cb418b66180a1feded94a6a262ce96698fbb85bb696c16da19cdc31ba63be6",
+          "current_sha256": "92e8add4f6f9a25c9d4667ce6a3c71ec6134e0421e0fb536be187c0a67d43d98",
+          "byte_identical": false
+        },
+        "models/deepseek_v32/execution/cache_resources.py": {
+          "original_sha256": "40e791a4e3496f8baa85b50d8bdc85702b19e97b0e8b2a7cc0da58b45a8f1246",
+          "current_sha256": "571b9be5f2754142b99d15797415571164102ed1c06c761645a79e54ccbfdf13",
+          "byte_identical": false
+        },
+        "models/deepseek_v32/execution/planning.py": {
+          "original_sha256": "2ad581ffafdb337d2ea5b36c9f930270d33a4b003d2ce1f8fb15269ed6032b75",
+          "current_sha256": "185b43ae5b4733b275e3912a9a8a22646121ff71e52c407385bfad0a364508a2",
+          "byte_identical": false
+        },
+        "models/deepseek_v32/cache/session.py": {
+          "original_sha256": "50e11d659389aeafc2ed8a608915f4eca2202e953529a4ea7180d2dd0edaaad9",
+          "current_sha256": "50e11d659389aeafc2ed8a608915f4eca2202e953529a4ea7180d2dd0edaaad9",
+          "byte_identical": true
+        },
+        "cache/capacity.py": {
+          "original_sha256": "ba39f57a49124b23c60552240d87fbb9804b5320275b09596eadf2f0ff8c3a96",
+          "current_sha256": "ba39f57a49124b23c60552240d87fbb9804b5320275b09596eadf2f0ff8c3a96",
+          "byte_identical": true
+        },
+        "cache/sparse_token_pool.py": {
+          "original_sha256": "0641ca63cf359ad1ecc5817f41c342f5b99bcd6fbbd5ef5387a554bf68c8897d",
+          "current_sha256": "0c8c0482df3cfcbac62ad65f34f81c82e797de0cd605bda3144cdc3be8b87e5b",
+          "byte_identical": false
+        },
+        "cache/host_allocation.py": {
+          "original_sha256": "6c6c65e166fc6a2289547482a9bc51c1da136190b9105423edd23f9732567150",
+          "current_sha256": "6c6c65e166fc6a2289547482a9bc51c1da136190b9105423edd23f9732567150",
+          "byte_identical": true
+        },
+        "pyproject.toml": {
+          "original_sha256": "cac6e9271538d74e99b1bdc83c2a12648bb3c76a310af21c98aff3ec2d3761d1",
+          "current_sha256": "cac6e9271538d74e99b1bdc83c2a12648bb3c76a310af21c98aff3ec2d3761d1",
+          "byte_identical": true
+        },
+        "uv.lock": {
+          "original_sha256": "53339af1728da3661b614d554e928408186b4fac6106a92999bd8fd69b3d2d8f",
+          "current_sha256": "53339af1728da3661b614d554e928408186b4fac6106a92999bd8fd69b3d2d8f",
+          "byte_identical": true
+        },
+        "experiments/cache_management/src/capacity_plan.py": {
+          "original_sha256": "2621d6a144d40a4630b771cd481e12976202ab74944fb107bdbc258e5ecb899c",
+          "current_sha256": "2621d6a144d40a4630b771cd481e12976202ab74944fb107bdbc258e5ecb899c",
+          "byte_identical": true
+        }
+      },
+      "imported_resource_definitions_ast_identical": [
+        "dense_staging_allocation_bytes",
+        "execution_reservation",
+        "padded_tokens",
+        "ExecutionReservation"
+      ]
+    },
+    {
+      "run_id": "cache_deepseek_p_base_20261006_01",
+      "plan_sha256": "11830341f20d68a6343e28be55721015cd41b99d5fc8d4e61627ae2aff5d3214",
+      "checkpoint_config_sha256": "c7fa8b191e9936d8e6a57d864baab82b792fae16a116416cdd3a75ba76bc5af1",
+      "full_current_recomputation_equal": true,
+      "selected_P": 10296447,
+      "selected_NH": 1048576,
+      "selected_U": 16,
+      "sources": {
+        "models/deepseek_v32/config.py": {
+          "original_sha256": "d8f0d2aa209e2cf7a7653ef4980b60a3dca4d430eb23f2579abf00a290ff529d",
+          "current_sha256": "d8f0d2aa209e2cf7a7653ef4980b60a3dca4d430eb23f2579abf00a290ff529d",
+          "byte_identical": true
+        },
+        "models/deepseek_v32/execution/capacity.py": {
+          "original_sha256": "9844ef42c65b25a4c7358dd4975f39c1eb434ce5587b721aa660e4181e83f694",
+          "current_sha256": "9844ef42c65b25a4c7358dd4975f39c1eb434ce5587b721aa660e4181e83f694",
+          "byte_identical": true
+        },
+        "models/deepseek_v32/execution/adapter.py": {
+          "original_sha256": "66cb418b66180a1feded94a6a262ce96698fbb85bb696c16da19cdc31ba63be6",
+          "current_sha256": "92e8add4f6f9a25c9d4667ce6a3c71ec6134e0421e0fb536be187c0a67d43d98",
+          "byte_identical": false
+        },
+        "models/deepseek_v32/execution/cache_resources.py": {
+          "original_sha256": "40e791a4e3496f8baa85b50d8bdc85702b19e97b0e8b2a7cc0da58b45a8f1246",
+          "current_sha256": "571b9be5f2754142b99d15797415571164102ed1c06c761645a79e54ccbfdf13",
+          "byte_identical": false
+        },
+        "models/deepseek_v32/execution/planning.py": {
+          "original_sha256": "2ad581ffafdb337d2ea5b36c9f930270d33a4b003d2ce1f8fb15269ed6032b75",
+          "current_sha256": "185b43ae5b4733b275e3912a9a8a22646121ff71e52c407385bfad0a364508a2",
+          "byte_identical": false
+        },
+        "models/deepseek_v32/cache/session.py": {
+          "original_sha256": "50e11d659389aeafc2ed8a608915f4eca2202e953529a4ea7180d2dd0edaaad9",
+          "current_sha256": "50e11d659389aeafc2ed8a608915f4eca2202e953529a4ea7180d2dd0edaaad9",
+          "byte_identical": true
+        },
+        "cache/capacity.py": {
+          "original_sha256": "ba39f57a49124b23c60552240d87fbb9804b5320275b09596eadf2f0ff8c3a96",
+          "current_sha256": "ba39f57a49124b23c60552240d87fbb9804b5320275b09596eadf2f0ff8c3a96",
+          "byte_identical": true
+        },
+        "cache/sparse_token_pool.py": {
+          "original_sha256": "0641ca63cf359ad1ecc5817f41c342f5b99bcd6fbbd5ef5387a554bf68c8897d",
+          "current_sha256": "0c8c0482df3cfcbac62ad65f34f81c82e797de0cd605bda3144cdc3be8b87e5b",
+          "byte_identical": false
+        },
+        "cache/host_allocation.py": {
+          "original_sha256": "6c6c65e166fc6a2289547482a9bc51c1da136190b9105423edd23f9732567150",
+          "current_sha256": "6c6c65e166fc6a2289547482a9bc51c1da136190b9105423edd23f9732567150",
+          "byte_identical": true
+        },
+        "pyproject.toml": {
+          "original_sha256": "cac6e9271538d74e99b1bdc83c2a12648bb3c76a310af21c98aff3ec2d3761d1",
+          "current_sha256": "cac6e9271538d74e99b1bdc83c2a12648bb3c76a310af21c98aff3ec2d3761d1",
+          "byte_identical": true
+        },
+        "uv.lock": {
+          "original_sha256": "53339af1728da3661b614d554e928408186b4fac6106a92999bd8fd69b3d2d8f",
+          "current_sha256": "53339af1728da3661b614d554e928408186b4fac6106a92999bd8fd69b3d2d8f",
+          "byte_identical": true
+        },
+        "experiments/cache_management/src/capacity_plan.py": {
+          "original_sha256": "2621d6a144d40a4630b771cd481e12976202ab74944fb107bdbc258e5ecb899c",
+          "current_sha256": "2621d6a144d40a4630b771cd481e12976202ab74944fb107bdbc258e5ecb899c",
+          "byte_identical": true
+        }
+      },
+      "imported_resource_definitions_ast_identical": [
+        "dense_staging_allocation_bytes",
+        "execution_reservation",
+        "padded_tokens",
+        "ExecutionReservation"
+      ]
+    },
+    {
+      "run_id": "cache_deepseek_p_base_headroom_20261006_01",
+      "plan_sha256": "b051d788eaee47abf00295405eb6745a0e4046e31cf02522440336dec4651c03",
+      "checkpoint_config_sha256": "c7fa8b191e9936d8e6a57d864baab82b792fae16a116416cdd3a75ba76bc5af1",
+      "full_current_recomputation_equal": true,
+      "selected_P": 8983043,
+      "selected_NH": 1048576,
+      "selected_U": 16,
+      "sources": {
+        "models/deepseek_v32/config.py": {
+          "original_sha256": "d8f0d2aa209e2cf7a7653ef4980b60a3dca4d430eb23f2579abf00a290ff529d",
+          "current_sha256": "d8f0d2aa209e2cf7a7653ef4980b60a3dca4d430eb23f2579abf00a290ff529d",
+          "byte_identical": true
+        },
+        "models/deepseek_v32/execution/capacity.py": {
+          "original_sha256": "9844ef42c65b25a4c7358dd4975f39c1eb434ce5587b721aa660e4181e83f694",
+          "current_sha256": "9844ef42c65b25a4c7358dd4975f39c1eb434ce5587b721aa660e4181e83f694",
+          "byte_identical": true
+        },
+        "models/deepseek_v32/execution/adapter.py": {
+          "original_sha256": "66cb418b66180a1feded94a6a262ce96698fbb85bb696c16da19cdc31ba63be6",
+          "current_sha256": "92e8add4f6f9a25c9d4667ce6a3c71ec6134e0421e0fb536be187c0a67d43d98",
+          "byte_identical": false
+        },
+        "models/deepseek_v32/execution/cache_resources.py": {
+          "original_sha256": "40e791a4e3496f8baa85b50d8bdc85702b19e97b0e8b2a7cc0da58b45a8f1246",
+          "current_sha256": "571b9be5f2754142b99d15797415571164102ed1c06c761645a79e54ccbfdf13",
+          "byte_identical": false
+        },
+        "models/deepseek_v32/execution/planning.py": {
+          "original_sha256": "2ad581ffafdb337d2ea5b36c9f930270d33a4b003d2ce1f8fb15269ed6032b75",
+          "current_sha256": "185b43ae5b4733b275e3912a9a8a22646121ff71e52c407385bfad0a364508a2",
+          "byte_identical": false
+        },
+        "models/deepseek_v32/cache/session.py": {
+          "original_sha256": "50e11d659389aeafc2ed8a608915f4eca2202e953529a4ea7180d2dd0edaaad9",
+          "current_sha256": "50e11d659389aeafc2ed8a608915f4eca2202e953529a4ea7180d2dd0edaaad9",
+          "byte_identical": true
+        },
+        "cache/capacity.py": {
+          "original_sha256": "ba39f57a49124b23c60552240d87fbb9804b5320275b09596eadf2f0ff8c3a96",
+          "current_sha256": "ba39f57a49124b23c60552240d87fbb9804b5320275b09596eadf2f0ff8c3a96",
+          "byte_identical": true
+        },
+        "cache/sparse_token_pool.py": {
+          "original_sha256": "0641ca63cf359ad1ecc5817f41c342f5b99bcd6fbbd5ef5387a554bf68c8897d",
+          "current_sha256": "0c8c0482df3cfcbac62ad65f34f81c82e797de0cd605bda3144cdc3be8b87e5b",
+          "byte_identical": false
+        },
+        "cache/host_allocation.py": {
+          "original_sha256": "6c6c65e166fc6a2289547482a9bc51c1da136190b9105423edd23f9732567150",
+          "current_sha256": "6c6c65e166fc6a2289547482a9bc51c1da136190b9105423edd23f9732567150",
+          "byte_identical": true
+        },
+        "pyproject.toml": {
+          "original_sha256": "cac6e9271538d74e99b1bdc83c2a12648bb3c76a310af21c98aff3ec2d3761d1",
+          "current_sha256": "cac6e9271538d74e99b1bdc83c2a12648bb3c76a310af21c98aff3ec2d3761d1",
+          "byte_identical": true
+        },
+        "uv.lock": {
+          "original_sha256": "53339af1728da3661b614d554e928408186b4fac6106a92999bd8fd69b3d2d8f",
+          "current_sha256": "53339af1728da3661b614d554e928408186b4fac6106a92999bd8fd69b3d2d8f",
+          "byte_identical": true
+        },
+        "experiments/cache_management/src/capacity_plan.py": {
+          "original_sha256": "2621d6a144d40a4630b771cd481e12976202ab74944fb107bdbc258e5ecb899c",
+          "current_sha256": "2621d6a144d40a4630b771cd481e12976202ab74944fb107bdbc258e5ecb899c",
+          "byte_identical": true
+        }
+      },
+      "imported_resource_definitions_ast_identical": [
+        "dense_staging_allocation_bytes",
+        "execution_reservation",
+        "padded_tokens",
+        "ExecutionReservation"
+      ]
+    },
+    {
+      "run_id": "cache_deepseek_p_nhmax_20261006_01",
+      "plan_sha256": "af7c849031c956b2fa3a6e813e3139c519e83376218588e16f1fe4474bf74449",
+      "checkpoint_config_sha256": "c7fa8b191e9936d8e6a57d864baab82b792fae16a116416cdd3a75ba76bc5af1",
+      "full_current_recomputation_equal": true,
+      "selected_P": 6451364,
+      "selected_NH": 29818880,
+      "selected_U": 455,
+      "sources": {
+        "models/deepseek_v32/config.py": {
+          "original_sha256": "d8f0d2aa209e2cf7a7653ef4980b60a3dca4d430eb23f2579abf00a290ff529d",
+          "current_sha256": "d8f0d2aa209e2cf7a7653ef4980b60a3dca4d430eb23f2579abf00a290ff529d",
+          "byte_identical": true
+        },
+        "models/deepseek_v32/execution/capacity.py": {
+          "original_sha256": "9844ef42c65b25a4c7358dd4975f39c1eb434ce5587b721aa660e4181e83f694",
+          "current_sha256": "9844ef42c65b25a4c7358dd4975f39c1eb434ce5587b721aa660e4181e83f694",
+          "byte_identical": true
+        },
+        "models/deepseek_v32/execution/adapter.py": {
+          "original_sha256": "66cb418b66180a1feded94a6a262ce96698fbb85bb696c16da19cdc31ba63be6",
+          "current_sha256": "92e8add4f6f9a25c9d4667ce6a3c71ec6134e0421e0fb536be187c0a67d43d98",
+          "byte_identical": false
+        },
+        "models/deepseek_v32/execution/cache_resources.py": {
+          "original_sha256": "40e791a4e3496f8baa85b50d8bdc85702b19e97b0e8b2a7cc0da58b45a8f1246",
+          "current_sha256": "571b9be5f2754142b99d15797415571164102ed1c06c761645a79e54ccbfdf13",
+          "byte_identical": false
+        },
+        "models/deepseek_v32/execution/planning.py": {
+          "original_sha256": "2ad581ffafdb337d2ea5b36c9f930270d33a4b003d2ce1f8fb15269ed6032b75",
+          "current_sha256": "185b43ae5b4733b275e3912a9a8a22646121ff71e52c407385bfad0a364508a2",
+          "byte_identical": false
+        },
+        "models/deepseek_v32/cache/session.py": {
+          "original_sha256": "50e11d659389aeafc2ed8a608915f4eca2202e953529a4ea7180d2dd0edaaad9",
+          "current_sha256": "50e11d659389aeafc2ed8a608915f4eca2202e953529a4ea7180d2dd0edaaad9",
+          "byte_identical": true
+        },
+        "cache/capacity.py": {
+          "original_sha256": "ba39f57a49124b23c60552240d87fbb9804b5320275b09596eadf2f0ff8c3a96",
+          "current_sha256": "ba39f57a49124b23c60552240d87fbb9804b5320275b09596eadf2f0ff8c3a96",
+          "byte_identical": true
+        },
+        "cache/sparse_token_pool.py": {
+          "original_sha256": "0641ca63cf359ad1ecc5817f41c342f5b99bcd6fbbd5ef5387a554bf68c8897d",
+          "current_sha256": "0c8c0482df3cfcbac62ad65f34f81c82e797de0cd605bda3144cdc3be8b87e5b",
+          "byte_identical": false
+        },
+        "cache/host_allocation.py": {
+          "original_sha256": "6c6c65e166fc6a2289547482a9bc51c1da136190b9105423edd23f9732567150",
+          "current_sha256": "6c6c65e166fc6a2289547482a9bc51c1da136190b9105423edd23f9732567150",
+          "byte_identical": true
+        },
+        "pyproject.toml": {
+          "original_sha256": "cac6e9271538d74e99b1bdc83c2a12648bb3c76a310af21c98aff3ec2d3761d1",
+          "current_sha256": "cac6e9271538d74e99b1bdc83c2a12648bb3c76a310af21c98aff3ec2d3761d1",
+          "byte_identical": true
+        },
+        "uv.lock": {
+          "original_sha256": "53339af1728da3661b614d554e928408186b4fac6106a92999bd8fd69b3d2d8f",
+          "current_sha256": "53339af1728da3661b614d554e928408186b4fac6106a92999bd8fd69b3d2d8f",
+          "byte_identical": true
+        },
+        "experiments/cache_management/src/capacity_plan.py": {
+          "original_sha256": "2621d6a144d40a4630b771cd481e12976202ab74944fb107bdbc258e5ecb899c",
+          "current_sha256": "2621d6a144d40a4630b771cd481e12976202ab74944fb107bdbc258e5ecb899c",
+          "byte_identical": true
+        }
+      },
+      "imported_resource_definitions_ast_identical": [
+        "dense_staging_allocation_bytes",
+        "execution_reservation",
+        "padded_tokens",
+        "ExecutionReservation"
+      ]
+    },
+    {
+      "run_id": "cache_deepseek_p_nhmax_headroom_20261006_01",
+      "plan_sha256": "6be4b67bc9cb2386ee3d31e54ce14d392ce694d6ef6e072892e2e2eba2833b62",
+      "checkpoint_config_sha256": "c7fa8b191e9936d8e6a57d864baab82b792fae16a116416cdd3a75ba76bc5af1",
+      "full_current_recomputation_equal": true,
+      "selected_P": 5137960,
+      "selected_NH": 29818880,
+      "selected_U": 455,
+      "sources": {
+        "models/deepseek_v32/config.py": {
+          "original_sha256": "d8f0d2aa209e2cf7a7653ef4980b60a3dca4d430eb23f2579abf00a290ff529d",
+          "current_sha256": "d8f0d2aa209e2cf7a7653ef4980b60a3dca4d430eb23f2579abf00a290ff529d",
+          "byte_identical": true
+        },
+        "models/deepseek_v32/execution/capacity.py": {
+          "original_sha256": "9844ef42c65b25a4c7358dd4975f39c1eb434ce5587b721aa660e4181e83f694",
+          "current_sha256": "9844ef42c65b25a4c7358dd4975f39c1eb434ce5587b721aa660e4181e83f694",
+          "byte_identical": true
+        },
+        "models/deepseek_v32/execution/adapter.py": {
+          "original_sha256": "66cb418b66180a1feded94a6a262ce96698fbb85bb696c16da19cdc31ba63be6",
+          "current_sha256": "92e8add4f6f9a25c9d4667ce6a3c71ec6134e0421e0fb536be187c0a67d43d98",
+          "byte_identical": false
+        },
+        "models/deepseek_v32/execution/cache_resources.py": {
+          "original_sha256": "40e791a4e3496f8baa85b50d8bdc85702b19e97b0e8b2a7cc0da58b45a8f1246",
+          "current_sha256": "571b9be5f2754142b99d15797415571164102ed1c06c761645a79e54ccbfdf13",
+          "byte_identical": false
+        },
+        "models/deepseek_v32/execution/planning.py": {
+          "original_sha256": "2ad581ffafdb337d2ea5b36c9f930270d33a4b003d2ce1f8fb15269ed6032b75",
+          "current_sha256": "185b43ae5b4733b275e3912a9a8a22646121ff71e52c407385bfad0a364508a2",
+          "byte_identical": false
+        },
+        "models/deepseek_v32/cache/session.py": {
+          "original_sha256": "50e11d659389aeafc2ed8a608915f4eca2202e953529a4ea7180d2dd0edaaad9",
+          "current_sha256": "50e11d659389aeafc2ed8a608915f4eca2202e953529a4ea7180d2dd0edaaad9",
+          "byte_identical": true
+        },
+        "cache/capacity.py": {
+          "original_sha256": "ba39f57a49124b23c60552240d87fbb9804b5320275b09596eadf2f0ff8c3a96",
+          "current_sha256": "ba39f57a49124b23c60552240d87fbb9804b5320275b09596eadf2f0ff8c3a96",
+          "byte_identical": true
+        },
+        "cache/sparse_token_pool.py": {
+          "original_sha256": "0641ca63cf359ad1ecc5817f41c342f5b99bcd6fbbd5ef5387a554bf68c8897d",
+          "current_sha256": "0c8c0482df3cfcbac62ad65f34f81c82e797de0cd605bda3144cdc3be8b87e5b",
+          "byte_identical": false
+        },
+        "cache/host_allocation.py": {
+          "original_sha256": "6c6c65e166fc6a2289547482a9bc51c1da136190b9105423edd23f9732567150",
+          "current_sha256": "6c6c65e166fc6a2289547482a9bc51c1da136190b9105423edd23f9732567150",
+          "byte_identical": true
+        },
+        "pyproject.toml": {
+          "original_sha256": "cac6e9271538d74e99b1bdc83c2a12648bb3c76a310af21c98aff3ec2d3761d1",
+          "current_sha256": "cac6e9271538d74e99b1bdc83c2a12648bb3c76a310af21c98aff3ec2d3761d1",
+          "byte_identical": true
+        },
+        "uv.lock": {
+          "original_sha256": "53339af1728da3661b614d554e928408186b4fac6106a92999bd8fd69b3d2d8f",
+          "current_sha256": "53339af1728da3661b614d554e928408186b4fac6106a92999bd8fd69b3d2d8f",
+          "byte_identical": true
+        },
+        "experiments/cache_management/src/capacity_plan.py": {
+          "original_sha256": "2621d6a144d40a4630b771cd481e12976202ab74944fb107bdbc258e5ecb899c",
+          "current_sha256": "2621d6a144d40a4630b771cd481e12976202ab74944fb107bdbc258e5ecb899c",
+          "byte_identical": true
+        }
+      },
+      "imported_resource_definitions_ast_identical": [
+        "dense_staging_allocation_bytes",
+        "execution_reservation",
+        "padded_tokens",
+        "ExecutionReservation"
+      ]
+    }
+  ],
+  "current_source_sha256": {
+    "models/deepseek_v32/config.py": "d8f0d2aa209e2cf7a7653ef4980b60a3dca4d430eb23f2579abf00a290ff529d",
+    "models/deepseek_v32/execution/capacity.py": "9844ef42c65b25a4c7358dd4975f39c1eb434ce5587b721aa660e4181e83f694",
+    "models/deepseek_v32/execution/adapter.py": "92e8add4f6f9a25c9d4667ce6a3c71ec6134e0421e0fb536be187c0a67d43d98",
+    "models/deepseek_v32/execution/cache_resources.py": "571b9be5f2754142b99d15797415571164102ed1c06c761645a79e54ccbfdf13",
+    "models/deepseek_v32/execution/planning.py": "185b43ae5b4733b275e3912a9a8a22646121ff71e52c407385bfad0a364508a2",
+    "models/deepseek_v32/cache/session.py": "50e11d659389aeafc2ed8a608915f4eca2202e953529a4ea7180d2dd0edaaad9",
+    "cache/capacity.py": "ba39f57a49124b23c60552240d87fbb9804b5320275b09596eadf2f0ff8c3a96",
+    "cache/sparse_token_pool.py": "0c8c0482df3cfcbac62ad65f34f81c82e797de0cd605bda3144cdc3be8b87e5b",
+    "cache/host_allocation.py": "6c6c65e166fc6a2289547482a9bc51c1da136190b9105423edd23f9732567150",
+    "pyproject.toml": "cac6e9271538d74e99b1bdc83c2a12648bb3c76a310af21c98aff3ec2d3761d1",
+    "uv.lock": "53339af1728da3661b614d554e928408186b4fac6106a92999bd8fd69b3d2d8f",
+    "experiments/cache_management/src/capacity_plan.py": "2621d6a144d40a4630b771cd481e12976202ab74944fb107bdbc258e5ecb899c"
+  },
+  "retention_justification": "The five plans model ECHO/serial_sparse history-only sessions and transient candidates. EchoCapacityPlanner and its configuration/host-allocation code are byte-identical. Every imported cache_resources definition and module constant is AST-identical. The changed dense_ticket_reservation is not imported by the static planner; adapter, serving planning and shared-pool runtime files are snapshot context, not executed by the supplied-memory planning branch. Complete recomputation, including selected and next-infeasible ledgers, matches all five retained plan objects.",
+  "dma_runtime_difference": "Dense DMA tickets now borrow existing contiguous host/device storage and reserve zero private tensor bytes, replacing the prior 10,491,392-byte C10 execution allowance. Fresh C10 measurements must establish actual allocator/request memory; this static audit does not update runtime observations.",
+  "boundary": "CPU-only source-impact and arithmetic audit. Original plan IDs, source snapshots and supplied hardware/model-memory assumptions remain unchanged. No capacity-fill trace, physical peak validation, or new GPU execution is claimed.",
+  "accepted": true
+}

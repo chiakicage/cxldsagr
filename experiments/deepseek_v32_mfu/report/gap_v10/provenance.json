@@ -1,0 +1,228 @@
+{
+  "schema": "deepseek-v10-diagnostic-provenance-v1",
+  "accepted_audits": {
+    "audit_check": {
+      "path": "/tmp/deepseek_gap_v10_independent_audit_20261006_01/audit_check.json",
+      "sha256": "10884aa80a7ac0ce2426a5e96e6ebe5d49f073ddfd54f1b19de75b1b5b427292"
+    },
+    "audit_bench": {
+      "path": "/tmp/deepseek_gap_v10_independent_audit_20261006_01/audit_bench.json",
+      "sha256": "04678eb8bb9344aff7e76ac3b203a828cd8a9c5a346ff02e0e8bc2ff5c0f3bce"
+    },
+    "audit_complete": {
+      "path": "/tmp/deepseek_gap_v10_independent_audit_20261006_01/audit_complete.json",
+      "sha256": "8127dd95bf0614180da4ea8dcb2389efb813470ca9268615b49bcf24c25e3e33"
+    }
+  },
+  "accepted_binding": {
+    "path": "/tmp/deepseek_gap_v10_independent_audit_20261006_01/run_binding.json",
+    "sha256": "3fd279bbd5ab0bfe1800e4578968ab121b478a60b90f1d153b96a58c8c59b4d6"
+  },
+  "accepted_gap_data": {
+    "path": "/tmp/deepseek_gap_v10_independent_audit_20261006_01/gap_audit.json",
+    "sha256": "d502fdacf953ea2be134ef252b9d2c9318e529b9554e7d4e5f738231802228a9"
+  },
+  "figure_source_manifest": {
+    "path": "/tmp/deepseek_gap_v10_independent_audit_20261006_01/timelines/source.json",
+    "sha256": "589dcfda06fda77df2f9f3e65087fe966ce86d79670c8a4caae1f532018351b2"
+  },
+  "figure_binding": {
+    "path": "/tmp/deepseek_gap_v10_independent_audit_20261006_01/timelines/binding.json",
+    "sha256": "ac7bcb85113983dd57adfddd765da6f74a1f6f682b0d499bf7278168ee6fe054"
+  },
+  "figure_manifest": {
+    "path": "/tmp/deepseek_gap_v10_independent_audit_20261006_01/timelines/figure_manifest.json",
+    "sha256": "5e2a64b76c8780a85862cbafecd28dd434a78afb69af9612d334421041b25431"
+  },
+  "exact_renderer_source_sha256": {
+    "/tmp/deepseek_gap_v10_independent_audit_20261006_01/render_timelines.py": "43b5556a4b6105d7397ee883ec713aa478f90284b86bda5bc8a283f741dcd09c",
+    "/tmp/deepseek_gap_v10_independent_audit_20261006_01/timelines/renderer_private.py": "e453abcefa9043d92006217a3762b708b0e2ef06912759c51afd65704ae0d977",
+    "/tmp/deepseek_gap_v10_independent_audit_20261006_01/timelines/renderer_sources/accepted_timeline.py": "2a53a3ee0ecb2dc603e7fdf644ea549eda137b2e81e1802b696c915a3eed960a",
+    "/tmp/deepseek_gap_v10_independent_audit_20261006_01/timelines/renderer_sources/prior_full_renderer.py": "380853b3501bf23d8376f3b98558766b0304101619310ebb7d95cc4e71d7d1a2"
+  },
+  "figures": [
+    {
+      "source": {
+        "path": "/tmp/deepseek_gap_v10_independent_audit_20261006_01/timelines/complete_extend.svg",
+        "sha256": "eb00d5c8ef9306815b4f3f54d433f123b42abd0a8b49a570c26b05a26c6dcb7e"
+      },
+      "report_relative_path": "complete_extend.svg",
+      "sha256": "eb00d5c8ef9306815b4f3f54d433f123b42abd0a8b49a570c26b05a26c6dcb7e"
+    },
+    {
+      "source": {
+        "path": "/tmp/deepseek_gap_v10_independent_audit_20261006_01/timelines/complete_extend.png",
+        "sha256": "0778c79b8d5dc21b9626050838d7dca30a4d3ed19039b951b5d3787449278541"
+      },
+      "report_relative_path": "complete_extend.png",
+      "sha256": "0778c79b8d5dc21b9626050838d7dca30a4d3ed19039b951b5d3787449278541"
+    },
+    {
+      "source": {
+        "path": "/tmp/deepseek_gap_v10_independent_audit_20261006_01/timelines/layer_0/timeline_extend.svg",
+        "sha256": "d02c5a4b627d686a9e3708f4dcf7ff64f596fdef541eeb84ffd85671dc79dddf"
+      },
+      "report_relative_path": "layer_0/timeline_extend.svg",
+      "sha256": "d02c5a4b627d686a9e3708f4dcf7ff64f596fdef541eeb84ffd85671dc79dddf"
+    },
+    {
+      "source": {
+        "path": "/tmp/deepseek_gap_v10_independent_audit_20261006_01/timelines/layer_0/timeline_extend.png",
+        "sha256": "fb8f54d3d99d43a0d3c273261c2589abf385939df42395bcc92bc4829972697f"
+      },
+      "report_relative_path": "layer_0/timeline_extend.png",
+      "sha256": "fb8f54d3d99d43a0d3c273261c2589abf385939df42395bcc92bc4829972697f"
+    },
+    {
+      "source": {
+        "path": "/tmp/deepseek_gap_v10_independent_audit_20261006_01/timelines/layer_1/timeline_extend.svg",
+        "sha256": "ea3f3e7b3d60a75078bd10677c80d8a41e4344747c9b84c9b44c6a32714b6e5d"
+      },
+      "report_relative_path": "layer_1/timeline_extend.svg",
+      "sha256": "ea3f3e7b3d60a75078bd10677c80d8a41e4344747c9b84c9b44c6a32714b6e5d"
+    },
+    {
+      "source": {
+        "path": "/tmp/deepseek_gap_v10_independent_audit_20261006_01/timelines/layer_1/timeline_extend.png",
+        "sha256": "76b0bdc12e3e92035d1331b87a6ef637bd5b2615c5e79d8d39a1605e2238d071"
+      },
+      "report_relative_path": "layer_1/timeline_extend.png",
+      "sha256": "76b0bdc12e3e92035d1331b87a6ef637bd5b2615c5e79d8d39a1605e2238d071"
+    },
+    {
+      "source": {
+        "path": "/tmp/deepseek_gap_v10_independent_audit_20261006_01/timelines/layer_2/timeline_extend.svg",
+        "sha256": "3ba44a92669378824940fe9bb74e37c79710fd5e504b4eb68d02db5076afd9ae"
+      },
+      "report_relative_path": "layer_2/timeline_extend.svg",
+      "sha256": "3ba44a92669378824940fe9bb74e37c79710fd5e504b4eb68d02db5076afd9ae"
+    },
+    {
+      "source": {
+        "path": "/tmp/deepseek_gap_v10_independent_audit_20261006_01/timelines/layer_2/timeline_extend.png",
+        "sha256": "e0dc945b9630b0f21f4eb5e2e0dc96cd97fa88f829cfcb9da8aea031e827179c"
+      },
+      "report_relative_path": "layer_2/timeline_extend.png",
+      "sha256": "e0dc945b9630b0f21f4eb5e2e0dc96cd97fa88f829cfcb9da8aea031e827179c"
+    },
+    {
+      "source": {
+        "path": "/tmp/deepseek_gap_v10_independent_audit_20261006_01/timelines/layer_0/timeline_prefill.svg",
+        "sha256": "7cccea9d89762fecbb6076bea395a8c93caf5d0195ecee3682b2c79a25bbedc3"
+      },
+      "report_relative_path": "layer_0/timeline_prefill.svg",
+      "sha256": "7cccea9d89762fecbb6076bea395a8c93caf5d0195ecee3682b2c79a25bbedc3"
+    },
+    {
+      "source": {
+        "path": "/tmp/deepseek_gap_v10_independent_audit_20261006_01/timelines/layer_0/timeline_prefill.png",
+        "sha256": "fb8ea2c2b0c88031700b0d8e24218d0c130857055f02e1f4d745a777fcf758fa"
+      },
+      "report_relative_path": "layer_0/timeline_prefill.png",
+      "sha256": "fb8ea2c2b0c88031700b0d8e24218d0c130857055f02e1f4d745a777fcf758fa"
+    },
+    {
+      "source": {
+        "path": "/tmp/deepseek_gap_v10_independent_audit_20261006_01/timelines/layer_1/timeline_prefill.svg",
+        "sha256": "c361d7534a1cb4a3b73c51402788aaf2cfbfd63ed6626c2b146ff12b71fd2838"
+      },
+      "report_relative_path": "layer_1/timeline_prefill.svg",
+      "sha256": "c361d7534a1cb4a3b73c51402788aaf2cfbfd63ed6626c2b146ff12b71fd2838"
+    },
+    {
+      "source": {
+        "path": "/tmp/deepseek_gap_v10_independent_audit_20261006_01/timelines/layer_1/timeline_prefill.png",
+        "sha256": "3a9a3f920da66d0d5502b4aa4ba922e2b97a8b24bdf05c687a859ba600802ffe"
+      },
+      "report_relative_path": "layer_1/timeline_prefill.png",
+      "sha256": "3a9a3f920da66d0d5502b4aa4ba922e2b97a8b24bdf05c687a859ba600802ffe"
+    },
+    {
+      "source": {
+        "path": "/tmp/deepseek_gap_v10_independent_audit_20261006_01/timelines/layer_2/timeline_prefill.svg",
+        "sha256": "77763bc4d854e05320ebd04336d0b52b578b64272ad1f5973183340fa9386eca"
+      },
+      "report_relative_path": "layer_2/timeline_prefill.svg",
+      "sha256": "77763bc4d854e05320ebd04336d0b52b578b64272ad1f5973183340fa9386eca"
+    },
+    {
+      "source": {
+        "path": "/tmp/deepseek_gap_v10_independent_audit_20261006_01/timelines/layer_2/timeline_prefill.png",
+        "sha256": "11287e7f8d7312bee8a2851a0f489502937e6fca1166046df5ccd78aa8c6a916"
+      },
+      "report_relative_path": "layer_2/timeline_prefill.png",
+      "sha256": "11287e7f8d7312bee8a2851a0f489502937e6fca1166046df5ccd78aa8c6a916"
+    }
+  ],
+  "check_receipt_file_sha256": "ba73407c165e8b27ad0aaf5b9907cc878c96bf9226e711b130f636045060f55b",
+  "check_receipt_payload_signature": "48e47ed8d1e030055a17ff1a5df4f344276b2b7509891af13be67408f2681f46",
+  "execution_identity_sha256": "0affb0c3593fb8dae53b79eee2ddc3f54275cbdb87a9dd08c9e3cf0640bcf68a",
+  "native_libraries": [
+    {
+      "name": "cxldsagr_echo_indexer_c8f43b73bc3d148d.so",
+      "category": "echo_indexer",
+      "library": {
+        "path": "/root/.cache/tvm-ffi/cxldsagr_echo_indexer_c8f43b73bc3d148d_1fa11185f6354333/cxldsagr_echo_indexer_c8f43b73bc3d148d.so",
+        "sha256": "09165f76c0ef4a75067939afa1c071bb68b9e8bf28e229d27681cbefdb2e0a11",
+        "bytes": 2504784
+      }
+    },
+    {
+      "name": "cxldsagr_echo_recall_dispatch_d1a5e94d113fe319.so",
+      "category": "other_local_native",
+      "library": {
+        "path": "/root/.cache/tvm-ffi/cxldsagr_echo_recall_dispatch_d1a5e94d113fe319_5eaa50b1dd428433/cxldsagr_echo_recall_dispatch_d1a5e94d113fe319.so",
+        "sha256": "297556386fcff78dde4750f7e4042268c5b3a4d9150cb8194a1091b6576ba66e",
+        "bytes": 83384
+      }
+    },
+    {
+      "name": "cxldsagr_kv_transfer.so",
+      "category": "record_transfer",
+      "library": {
+        "path": "/root/.cache/tvm-ffi/cxldsagr_kv_transfer_672412fcb6ae32f3/cxldsagr_kv_transfer.so",
+        "sha256": "561bc3cbe14edea4930b202bc7a3ff0763864d15312d92de7e772664d04b1b66",
+        "bytes": 164496
+      }
+    }
+  ],
+  "coverage": {
+    "execution_source_records": 3855,
+    "gpu_activities": 58395,
+    "partition_windows": 788,
+    "check_saved_tensors": 12,
+    "check_independent_saved_comparisons": 9,
+    "profile_control_saved_tensors": 8,
+    "check_benchmark_profile_observer_samples": [
+      12,
+      17,
+      36
+    ]
+  },
+  "staging_sources": {
+    "/tmp/deepseek_v10_diagnostic_publication_20261006_01/stage_report.py": "69a9570667dc017a9f8b52dd33fd4dea7a6746a8ce1439262b949d4cd70b8889",
+    "/tmp/deepseek_v10_diagnostic_publication_20261006_01/README.diagnostic.md": "6befdd632ceb2bdc965264d1ca511d64d5dda795c366b09e01c299e0dfdef9b7",
+    "/tmp/deepseek_v10_diagnostic_publication_20261006_01/results.body.md": "2ac2852bb469fd1e6f91831fad48258f5bb44918c418e3104b54a70d57ee1006"
+  },
+  "runtime_artifact_limit": "The production resident-mask live JIT/CUBIN identity was not separately saved by the generic runtime collector; V10 is a qualified diagnostic. Exact production source/native identities and actual mask activities were audited, supplemented by prior private model and public operator acceptance.",
+  "runtime_boundary_evidence": {
+    "production_operator_audit": {
+      "path": "/tmp/resident_tail_mask_production_audit_20261006_02/audit.json",
+      "sha256": "11e87c91afc9328c6f742e4147a2ab50efd5138100312c25767be963315d83b3"
+    },
+    "private_model_correctness": {
+      "path": "/tmp/resident_tail_mask_model_audit_20261006_01/full01_audit.json",
+      "sha256": "0d943a489da9c15c545960685e71f62d2946458777f0149b9c34f83643441e14"
+    },
+    "private_model_timing": {
+      "path": "/tmp/resident_tail_mask_model_audit_20261006_01/bench01_decision_support.json",
+      "sha256": "e97df127f4a409f05b188e0344b6929c8a572f3e33d72bffc857db8529670cf9"
+    },
+    "native_gpu_payload_comparison": {
+      "path": "/tmp/resident_mask_native_payload_review_20261006_01/comparison.json",
+      "sha256": "434c24ea5ddac7904789a552bb0571df18b1e829f53e12b482d3381e3ebd05e7"
+    }
+  },
+  "native_payload_bridge_limit": "The unchanged .nv_fatbin bridges native GPU payload only; it does not attest to the CPU wrapper or separate Triton resident-mask CUBIN.",
+  "boundary": "Exact image copies and compact report metadata only. Raw captures, saved tensors, activity rows and source archives remain in accepted evidence directories. No raw duplication, recomputed performance claim, canonical replacement or retirement."
+}

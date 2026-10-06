@@ -17,7 +17,9 @@ def test_new_subclass_does_not_inherit_native_metadata_authorization():
 
     cache = object.__new__(DifferentLayout)
     cache._pool = SimpleNamespace(
-        native_metadata=SimpleNamespace(resident_selection=True, dense_history_classify=True)
+        native_metadata=SimpleNamespace(
+            resident_selection=True, dense_history_clear=True, dense_history_publish=True
+        )
     )
     ids = torch.tensor([[0]], dtype=torch.int32)
     calls = []
@@ -25,7 +27,8 @@ def test_new_subclass_does_not_inherit_native_metadata_authorization():
     assert cache._ensure_from_topk(ids) is ids
     assert calls == [ids]
     helper = PoolHistoryPrefetch("cpu")
-    assert helper._reserve_native(cache, None, 1) is None
+    with pytest.raises(ValueError, match="native contiguous-map metadata"):
+        helper._native(cache)
     helper.close()
 
 
@@ -35,7 +38,12 @@ def test_guarded_serving_cache_runs_native_resident_sparse_and_dense_paths(monke
 
     assert torch.cuda.get_device_capability() == (9, 0)
     calls = []
-    for name in ("resident_selection", "sparse_selection_classify", "dense_history_classify"):
+    for name in (
+        "resident_selection",
+        "sparse_selection_classify",
+        "dense_history_clear",
+        "dense_history_publish",
+    ):
         original = getattr(cache_ops, name)
 
         def observe(*args, name=name, original=original, **kwargs):
@@ -47,7 +55,9 @@ def test_guarded_serving_cache_runs_native_resident_sparse_and_dense_paths(monke
     owner = object()
     lifecycle.bind_owner(owner)
     lifecycle.allocated(object(), owner=owner)
-    pool = SharedSparseTokenPool(192, 576, 1, 64, device="cuda", metadata_ops=cache_ops)
+    pool = SharedSparseTokenPool(
+        192, 576, 1, 64, device="cuda", metadata_ops=cache_ops, dense_contiguous=True
+    )
     backing = pool.allocate_session(64)
     cache = ServingSparseTokenCache.for_layer(backing, 0)
     session = DeepSeekServingSession(64, "echo", [], SimpleNamespace(lifecycle=lifecycle))
@@ -97,7 +107,8 @@ def test_guarded_serving_cache_runs_native_resident_sparse_and_dense_paths(monke
         assert calls == [
             "resident_selection",
             "sparse_selection_classify",
-            "dense_history_classify",
+            "dense_history_clear",
+            "dense_history_publish",
         ]
     finally:
         helper.close()

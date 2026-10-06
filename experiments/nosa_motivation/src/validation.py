@@ -8,7 +8,7 @@ from pathlib import Path
 
 VALIDATION_IDENTITY_REVISION = 2
 
-# These modules run in the three receipt-using serving harnesses, including the
+# These modules run in the shared receipt-using serving harnesses, including the
 # numerical auditor invoked before publication. Source collectors limit each
 # manifest to its model; intersecting with explicit paths excludes unrelated
 # experiment profiles and plot-only helpers. Revision 1 retains its old filter.
@@ -25,11 +25,8 @@ _EXECUTION_SOURCES_V2 = frozenset(
         "experiments/deepseek_v32_motivation/src/measure.py",
         "experiments/deepseek_v32_motivation/src/report.py",
         "experiments/deepseek_v32_motivation/src/sources.py",
-        "experiments/deepseek_v32_echo_official/src/measure.py",
-        "experiments/deepseek_v32_echo_official/src/report.py",
-        "experiments/deepseek_v32_echo_official/src/sources.py",
         "experiments/cache_management/src/capacity_probe.py",
-        "experiments/deepseek_v32_echo_prefill/src/backend_provenance.py",
+        "experiments/deepseek_v32_mfu/src/backend_provenance.py",
     }
 )
 

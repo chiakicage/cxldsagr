@@ -30,8 +30,8 @@ if [[ "$mode" == cpu || "$mode" == all ]]; then
     experiments/nosa_offload_overlap/tests \
     experiments/nosa_motivation/tests \
     experiments/deepseek_v32_motivation/tests \
-    experiments/deepseek_v32_echo_official/tests \
-    experiments/deepseek_v32_echo_prefill/tests \
+    experiments/deepseek_v32_mfu/tests \
+    experiments/cache_manager_performance/tests \
     experiments/cache_management/tests \
     --import-mode=importlib -q -rs -p no:cacheprovider
 fi
@@ -56,7 +56,6 @@ PY
   # 'cuda' or 'flashinfer' in their names. Each numerical test is collected once.
   .venv/bin/python -m pytest models/nosa/tests operators/nosa \
     operators/deepseek_v32 operators/common models/deepseek_v32/tests tests/integration \
-    cache/tests/test_sparse_token_cache.py cache/tests/test_sparse_token_pool.py \
-    cache/tests/test_staging.py cache/allocator/tests \
-    -q -rs -p no:cacheprovider
+    cache/tests cache/allocator/tests \
+    --import-mode=importlib -q -rs -p no:cacheprovider
 fi

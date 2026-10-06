@@ -338,9 +338,6 @@ void sm90_fp8_mqa_logits_fuse_prefetch(const uint32_t seq_len, const uint32_t se
                     warpgroup_fence_operand(accum[i]);
                 warpgroup_wait<0>();
 
-                // Release KV empty
-                empty_kv_barriers[kv_stage_idx]->arrive();
-
                 // Reduce over the head dim and store
                 const auto& kv_offset = kv_start + kv_block_idx * BLOCK_KV + warp_offset;
                 static constexpr uint32_t kNumAccumPerReduce = kNumHeads / 2;
@@ -393,6 +390,8 @@ void sm90_fp8_mqa_logits_fuse_prefetch(const uint32_t seq_len, const uint32_t se
                     logits[q_idx * stride_kv + kv_offset + v_0_offset] = v_0[i];
                     logits[q_idx * stride_kv + kv_offset + v_1_offset] = v_1[i];
                 }
+                // Release KV only after all scale-dependent logits are written.
+                empty_kv_barriers[kv_stage_idx]->arrive();
                 full_logits_barriers[topk_stage_idx]->arrive();
             }
             num_total_kv_blocks += num_kv_blocks;

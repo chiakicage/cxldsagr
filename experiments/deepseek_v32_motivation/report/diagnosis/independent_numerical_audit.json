@@ -3,9 +3,9 @@
   "scope": "Independent CPU byte comparison of all saved profile candidate hidden/logit payloads",
   "project_validation_code_imported": false,
   "cuda_initialized": false,
-  "profile_run": "refactor_final_deepseek_profile_20261005_01",
-  "formal_run": "refactor_final_deepseek_bench_20261005_01",
-  "independent_hbm_check": "refactor_final_deepseek_check_20261005_01",
+  "profile_run": "deepseek_mfu_c10_profile_20261006_02",
+  "formal_run": "deepseek_mfu_c10_bench_20261006_01",
+  "independent_hbm_check": "deepseek_mfu_c10_check_20261006_01",
   "payloads": 80,
   "phase_counts": {
     "cold": 4,
@@ -2177,14 +2177,15 @@
     }
   ],
   "input_sha256": {
-    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_profile_20261005_01/metadata.json": "8b0cdf242ac0f2f93859cbfdf897e35d7212f286c845500e54c8db951015e9ab",
-    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_profile_20261005_01/result.json": "83d2c5141975336aeff97720370952cbfd3894aa16b687414038dcc8b3143341",
-    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_profile_20261005_01/correctness.jsonl": "01999d0280ba08afd291f50d35f2110546f864c4deaa5161dd7f6bc745a142be",
-    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_bench_20261005_01/metadata.json": "cda32f5d3a423aa124b6bdc8ee8c13d84a9b6caa92e9badd5ba5c9ddaff9290c",
-    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/docs/agents/acceptance/unified_runtime_20261005/deepseek_final/metadata.json": "877980d0861683ed291a03e0d352d4bcc635af16059fcadf65357c59fe17577d",
-    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/docs/agents/acceptance/unified_runtime_20261005/deepseek_final/measurements.jsonl": "2371d24f8461cc93a928823bdbf4dbed1e0063686ba1d6c7712acdb4eff5e95e"
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_mfu_c10_profile_20261006_02/metadata.json": "5ba26f51147acf6016748b939ea780c61341c9eca31318509714865ba79221d4",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_mfu_c10_profile_20261006_02/result.json": "1305e0630f6fdddf4766a07aca7dc0d9cf59b10854413facd9da19ca11e5c2e3",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_mfu_c10_profile_20261006_02/correctness.jsonl": "608c548ac31f00bdf0255534898a70c80f2f9c9dd543fa769c8fbd34e21f08f7",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_mfu_c10_bench_20261006_01/metadata.json": "b1a907a0490284ae1c66842506485c1720cebd1a216d3eedc06a581ee69ed58a",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_mfu_c10_bench_20261006_01/measurements.jsonl": "cab4cb4cd54db17c2dceb62caa9b9ecde27629abf994d2ddce375abcc2cb2ab2",
+    "/tmp/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_mfu_c10_check_20261006_01/metadata.json": "416d29021d13ec2ec61d8cc260abc1466ab622b2f4ad037bfab58343d7d53521",
+    "/tmp/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_mfu_c10_check_20261006_01/measurements.jsonl": "6bad6af8b14ecfab6ff3f2fc242dc583edd3682957682eb2638a8ad5f53fddd8"
   },
-  "script_sha256": "807e749deb386e87c8c6b4301c81980eee74a813f109d8252ceccf0c3de7c43b",
+  "script_sha256": "e2084509972d150ab52a17eed884ea8bb0bab238ab80fee31acb1628f2a7e76e",
   "torch": "2.12.1+cu130",
   "boundary": "Includes twelve saved warmup outputs and sixty-eight trajectory outputs; no new GPU execution or serving latency measurement."
 }

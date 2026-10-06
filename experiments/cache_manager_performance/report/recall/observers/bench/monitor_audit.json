@@ -1,0 +1,43 @@
+{
+  "exit_code": 0,
+  "samples": 5,
+  "observed_owned_pids": [
+    4189485
+  ],
+  "foreign_processes": [],
+  "exit_races": [
+    {
+      "time_utc": "2026-10-06T01:31:36.483134+00:00",
+      "pid": 4189485,
+      "prior_observation": {
+        "time_utc": "2026-10-06T01:31:34.210268+00:00",
+        "ancestry": [
+          {
+            "pid": 4189485,
+            "ppid": 4189479,
+            "start_ticks": 68861815
+          },
+          {
+            "pid": 4189479,
+            "ppid": 4189476,
+            "start_ticks": 68861814
+          },
+          {
+            "pid": 4189476,
+            "ppid": 213869,
+            "start_ticks": 68861804
+          },
+          {
+            "pid": 213869,
+            "ppid": 1,
+            "start_ticks": 31263336
+          }
+        ]
+      },
+      "reason": "Previously confirmed child disappears from /proc between nvidia-smi and ancestry query; original samples retained."
+    }
+  ],
+  "monitor_errors": [],
+  "maximum_sample_gap_seconds": 2.2728660106658936,
+  "boundary": "Discrete observations of all GPUs; this does not exclude activity between samples or unrelated CPU work."
+}

@@ -24,7 +24,6 @@ def planned_backend(*, host_tokens=256):
     # Resource estimation must not initialize CUDA or construct any device pools.
     backend.device = torch.device("cuda:0")
     backend.pipeline = LocalPipeline()
-    backend._pipeline_resources = None
     backend.chunk_size = 8
     backend.scheme = "echo"
     backend.max_seq_len = 1024
@@ -117,7 +116,12 @@ def test_fixed_hbm_and_dense_require_one_history_and_keep_transient_candidates(s
     else:
         assert plan.host_pages == 4
         assert plan.metadata["shared_token_pool"]
-        assert plan.metadata["dense_fetch_policy"] == "all_history_cache_misses_next_layer"
+        assert (
+            plan.metadata["dense_fetch_policy"]
+            == "contiguous_history_cuda_memcpy_async_next_layer_v1"
+        )
+        assert plan.metadata["dense_contiguous"] is True
+        assert plan.metadata["workspace_dense_ticket_bytes"] == 0
         assert plan.metadata.get("dense_staging_bytes", 0) == 0
     assert backend.lifecycle.plan is backend._shared_pool is None
 
@@ -324,7 +328,7 @@ def test_session_construction_failure_returns_reserved_pages(monkeypatch):
         created.append(object())
         return created[-1]
 
-    monkeypatch.setattr(backend.pipeline, "layer_cache", lambda session, layer, resources: layer)
+    monkeypatch.setattr(backend.pipeline, "layer_cache", lambda session, layer: layer)
     monkeypatch.setattr(backend.pipeline, "create_runner", failing_runner)
     with pytest.raises(RuntimeError, match="indexer allocation failure"):
         backend.create_session(128)
@@ -433,40 +437,6 @@ def test_partial_shared_allocation_failure_drains_before_dropping_traceback(monk
     assert backend.lifecycle.plan is backend._allocation_failure is None
     backend.unbind_owner(owner, rollback=True)
     assert backend.lifecycle.admission_owner is None
-
-
-def test_pipeline_audit_and_cleanup_failure_retain_provider_and_owner():
-    backend = planned_backend()
-    backend.scheme, backend.device = "hbm", torch.device("cpu")
-    plan = backend.plan_resources(CacheFootprint(1 << 28, 1 << 28), {"max_session_capacity": 128})
-    owner = object()
-    backend.bind_owner(owner)
-
-    class Resource:
-        def close(self):
-            raise RuntimeError("injected official cleanup failure")
-
-    resource = Resource()
-
-    class Pipeline(LocalPipeline):
-        def allocate_resources(self, pool, plan, scheme):
-            return resource
-
-        def audit_resources(self, resources, plan):
-            assert backend._pipeline_resources is resources is resource
-            raise ValueError("injected official reservation failure")
-
-    backend.pipeline = Pipeline()
-    with pytest.raises(ExceptionGroup) as failed:
-        backend.allocate_shared(plan, owner=owner)
-    assert isinstance(failed.value.exceptions[0], ValueError)
-    assert "reservation failure" in str(failed.value.exceptions[0])
-    assert "official cleanup failure" in str(failed.value.exceptions[1])
-    assert backend._pipeline_resources is resource
-    assert backend._allocation_failure is failed.value.exceptions[0]
-    assert backend.lifecycle.poisoned and backend.lifecycle.admission_owner is owner
-    with pytest.raises(RuntimeError, match="poisoned"):
-        backend.unbind_owner(owner, rollback=True)
 
 
 def test_native_session_plan_is_consumed_without_reestimating(monkeypatch):

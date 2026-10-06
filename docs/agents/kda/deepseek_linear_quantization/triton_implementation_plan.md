@@ -51,7 +51,7 @@ separately from live PTX/cubin specializations.
    behavior and four-scheme H64K correctness under the new production identity.
 6. Freeze the implementation and run the full 16-user, two-round four-scheme
    trajectory plus matching matrix API profiling. Continue MFU optimization from
-   those measurements, then update the official ECHO experiment. Publish accepted
+   those measurements. Publish accepted
    replacements before cleaning their superseded reports and backing outputs.
 
 The component promotion criterion remains exact output/lifetime behavior and

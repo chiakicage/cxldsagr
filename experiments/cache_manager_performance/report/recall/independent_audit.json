@@ -1,0 +1,551 @@
+{
+  "artifact_sha256": {
+    "/tmp/cache_append_publication_audit_20261006_06/recall_audit/audit_recall.py": "2e6ff2023d473668c915a12369e838fa3d88cd1a1732fadc45359fdead272493",
+    "/tmp/cache_append_publication_audit_20261006_06/recall_audit/cache_manager_audit_support_20261006_05.py": "e82cd6fe94a054c23da7405437ada2db97692f1b0150de68ef73fdf2dc16b500",
+    "/tmp/cache_append_publication_audit_20261006_06/recall_audit/observer.py": "275de22f61fe02093b7a4cd816a48821268390b9eee7b2ef747053be0d399b12",
+    "/tmp/cache_append_publication_audit_20261006_06/recall_audit/observer_reconciliation.json": "0eb079a6bf81a6c345972d07708cc2151ad7173c923589a867cbc09e27affe74",
+    "/tmp/cache_append_publication_audit_20261006_06/recall_audit/original_audit.py": "24558e71eaf34c9ea715a1f71c2f96cd83a26a20a88dcb071d3b6f3803a72385",
+    "/tmp/cache_recall_bench_20261006_04_observer/driver.py": "d9c70b27698a0a3a90a3202dd56c6d556110c4527386ddf24c7d303f3fa7fc7b",
+    "/tmp/cache_recall_bench_20261006_04_observer/gpu_monitor.jsonl": "8920607f908e9f3fd29df32466ee4d699936c10ff1f8b54d553337ab364e80c5",
+    "/tmp/cache_recall_bench_20261006_04_observer/monitor_audit.json": "8e17b5736bd4d4957681ed829d4950fe1dd648229e54db11f6fc5391860fdd5d",
+    "/tmp/cache_recall_bench_20261006_04_observer/run.json": "2a25a6e0ce277530410ee76546903170cf9510e0f57569d0b7a4127bd7ddcb13",
+    "/tmp/cache_recall_bench_20261006_04_observer/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/tmp/cache_recall_bench_20261006_04_observer/stdout.log": "781b8d7ce1cebf8c859d15c8a133d7edf541fe59b29cfaf8983e3cd1fab66883",
+    "/tmp/cache_recall_check_20261006_04_observer/driver.py": "d9c70b27698a0a3a90a3202dd56c6d556110c4527386ddf24c7d303f3fa7fc7b",
+    "/tmp/cache_recall_check_20261006_04_observer/gpu_monitor.jsonl": "66a2ff06b8513bada76935d4e3143739d0c0992d4f55954154d72145ceead22d",
+    "/tmp/cache_recall_check_20261006_04_observer/monitor_audit.json": "cfea4b323514ec3103c268de31896d9c153e1a12cbaeb5ab1bd6c2da3533b715",
+    "/tmp/cache_recall_check_20261006_04_observer/run.json": "1b65e3f3e36c3a2bf08a97b317d79a01335f1e77f957f9eee21d91665cfc176c",
+    "/tmp/cache_recall_check_20261006_04_observer/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/tmp/cache_recall_check_20261006_04_observer/stdout.log": "6cf3872873f98fd9cf4c1b72a297c4a6106c2b0d8b47828bb6b281b3f0cfa672",
+    "/tmp/cxldsagr-checks/cache_manager_recall/data/cache_recall_check_20261006_04/identity.json": "9778eb84c9c955ad82b24d24a4dc1bdd258d957ce5b64a1889a9b35e5cc262cd",
+    "/tmp/cxldsagr-checks/cache_manager_recall/data/cache_recall_check_20261006_04/receipt.json": "3768620793e94a85872053e099bd7e9878d20b6138207d0f9954313984b01bfd",
+    "/tmp/cxldsagr-checks/cache_manager_recall/data/cache_recall_check_20261006_04/result.json": "61e706c4a7d3cd616ac042ce2287c2983b4d45fe7a1b22e4ac1945a9593e5eb7",
+    "/tmp/cxldsagr-checks/cache_manager_recall/data/cache_recall_check_20261006_04/state_evidence.pt": "053365dc501b918c3fe41394e1745480f94a9d84c1db23412856fa4d525f1701",
+    "experiments/cache_manager_performance/output/data/cache_recall_bench_20261006_04/identity.json": "9778eb84c9c955ad82b24d24a4dc1bdd258d957ce5b64a1889a9b35e5cc262cd",
+    "experiments/cache_manager_performance/output/data/cache_recall_bench_20261006_04/result.json": "c05b3d3bda29d587ddae8e3cb7676b726ae3c938e30565d6651ebae9d2667aae"
+  },
+  "bench_run_id": "cache_recall_bench_20261006_04",
+  "check_observer": {
+    "boundary": "Discrete observations only; no continuous GPU or CPU exclusivity claim.",
+    "directory": "/tmp/cache_recall_check_20261006_04_observer",
+    "exit_code": 0,
+    "exit_races": [],
+    "foreign_processes": [],
+    "gpu_uuid": "GPU-80ff95c3-176e-fd8a-728f-9c5577c4a779",
+    "maximum_sample_gap_seconds": 2.2025129795074463,
+    "monitor_errors": [],
+    "observer_sha256": {
+      "driver.py": "d9c70b27698a0a3a90a3202dd56c6d556110c4527386ddf24c7d303f3fa7fc7b",
+      "gpu_monitor.jsonl": "66a2ff06b8513bada76935d4e3143739d0c0992d4f55954154d72145ceead22d",
+      "monitor_audit.json": "cfea4b323514ec3103c268de31896d9c153e1a12cbaeb5ab1bd6c2da3533b715",
+      "run.json": "1b65e3f3e36c3a2bf08a97b317d79a01335f1e77f957f9eee21d91665cfc176c",
+      "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout.log": "6cf3872873f98fd9cf4c1b72a297c4a6106c2b0d8b47828bb6b281b3f0cfa672"
+    },
+    "owned_pids": [
+      4188737
+    ],
+    "reconciliation": null,
+    "run_id": "cache_recall_check_20261006_04",
+    "samples": 6
+  },
+  "check_run_id": "cache_recall_check_20261006_04",
+  "coverage": {
+    "all_sample_counters_recomputed": 297,
+    "bench_cases": 9,
+    "bench_samples": 279,
+    "check_cases": 18,
+    "samples_per_case": 31,
+    "saved_state_maps_rechecked": 18,
+    "warmups_per_case": 2
+  },
+  "identity_sha256": "56f9478139ba8f581e29b93201fa2e867dfe9e5a70f4f9d6adab7219adb0ea35",
+  "inputs": [
+    {
+      "cold_h2d_bytes": 10263168,
+      "cold_misses": 8909,
+      "layer": 0,
+      "selection_shape": [
+        128,
+        2048
+      ],
+      "sha256": "959e799c42aca07f41516c965ddabcbf9207b86842d390745db9ac3d165a1901",
+      "unique_records": 9034
+    },
+    {
+      "cold_h2d_bytes": 3312000,
+      "cold_misses": 2875,
+      "layer": 1,
+      "selection_shape": [
+        128,
+        2048
+      ],
+      "sha256": "59475e53e323b7ec94e6e7a1170ae90b4f9b47bafc9f13a9f3008334f34ee600",
+      "unique_records": 3003
+    },
+    {
+      "cold_h2d_bytes": 9224064,
+      "cold_misses": 8007,
+      "layer": 2,
+      "selection_shape": [
+        128,
+        2048
+      ],
+      "sha256": "d5add3786c941f3022d8c36a762e3f0dc3e917a85d9f70ce56b04f2f21cc2a9c",
+      "unique_records": 8135
+    }
+  ],
+  "limitations": [
+    "P=H+A, one session/layer: free-slot allocation ties only; no live eviction or multi-owner acceptance.",
+    "Wall minus enqueue is not pure GPU compute; no IO subtraction or full-model performance claim.",
+    "Counters report successful logical transfer records; this run has no independent hardware transfer profile.",
+    "Original check executed actual before-state priority/protection oracle, selected/live KV equality and public ensure. This CPU audit rechecks saved post-state maps/counters; raw before-state maps and live KV payload were not persisted.",
+    "Original /proc-mapped local DSO path/hash/bytes and bridge build/dependency identity match check and bench; current files are rehashed without searching unloaded cache artifacts.",
+    "Discrete observer samples do not establish continuous GPU isolation or exclude unrelated CPU work."
+  ],
+  "mode": "CPU-only artifact checks plus static timer/oracle review",
+  "observer": {
+    "boundary": "Discrete observations only; no continuous GPU or CPU exclusivity claim.",
+    "directory": "/tmp/cache_recall_bench_20261006_04_observer",
+    "exit_code": 0,
+    "exit_races": [
+      {
+        "pid": 4189485,
+        "prior_observation": {
+          "ancestry": [
+            {
+              "pid": 4189485,
+              "ppid": 4189479,
+              "start_ticks": 68861815
+            },
+            {
+              "pid": 4189479,
+              "ppid": 4189476,
+              "start_ticks": 68861814
+            },
+            {
+              "pid": 4189476,
+              "ppid": 213869,
+              "start_ticks": 68861804
+            },
+            {
+              "pid": 213869,
+              "ppid": 1,
+              "start_ticks": 31263336
+            }
+          ],
+          "time_utc": "2026-10-06T01:31:34.210268+00:00"
+        },
+        "reason": "Previously confirmed child disappears from /proc between nvidia-smi and ancestry query; original samples retained.",
+        "time_utc": "2026-10-06T01:31:36.483134+00:00"
+      }
+    ],
+    "foreign_processes": [],
+    "gpu_uuid": "GPU-80ff95c3-176e-fd8a-728f-9c5577c4a779",
+    "maximum_sample_gap_seconds": 2.2728660106658936,
+    "monitor_errors": [],
+    "observer_sha256": {
+      "driver.py": "d9c70b27698a0a3a90a3202dd56c6d556110c4527386ddf24c7d303f3fa7fc7b",
+      "gpu_monitor.jsonl": "8920607f908e9f3fd29df32466ee4d699936c10ff1f8b54d553337ab364e80c5",
+      "monitor_audit.json": "8e17b5736bd4d4957681ed829d4950fe1dd648229e54db11f6fc5391860fdd5d",
+      "run.json": "2a25a6e0ce277530410ee76546903170cf9510e0f57569d0b7a4127bd7ddcb13",
+      "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout.log": "781b8d7ce1cebf8c859d15c8a133d7edf541fe59b29cfaf8983e3cd1fab66883"
+    },
+    "owned_pids": [
+      4189485
+    ],
+    "reconciliation": {
+      "accepted": true,
+      "classification": "owned_process_exit_race",
+      "consecutive_confirmed_observations": 2,
+      "following_absent_samples": 1,
+      "identity_sha256": "56f9478139ba8f581e29b93201fa2e867dfe9e5a70f4f9d6adab7219adb0ea35",
+      "limits": [
+        "The race sample has no /proc identity ticks. Attribution uses stable consecutive prior ancestry, matching GPU process record, terminal disappearance and successful completion.",
+        "Query/ancestry sampling is not an exact process-exit timestamp. The original exit_races entry remains nonempty.",
+        "Discrete observations do not establish continuous GPU isolation or exclude unrelated CPU work."
+      ],
+      "maximum_sample_gap_seconds": 2.2728660106658936,
+      "observed_owned_pid": 4189485,
+      "observer_directory": "/tmp/cache_recall_bench_20261006_04_observer",
+      "observer_files": {
+        "driver.py": "d9c70b27698a0a3a90a3202dd56c6d556110c4527386ddf24c7d303f3fa7fc7b",
+        "gpu_monitor.jsonl": "8920607f908e9f3fd29df32466ee4d699936c10ff1f8b54d553337ab364e80c5",
+        "monitor_audit.json": "8e17b5736bd4d4957681ed829d4950fe1dd648229e54db11f6fc5391860fdd5d",
+        "run.json": "2a25a6e0ce277530410ee76546903170cf9510e0f57569d0b7a4127bd7ddcb13",
+        "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout.log": "781b8d7ce1cebf8c859d15c8a133d7edf541fe59b29cfaf8983e3cd1fab66883"
+      },
+      "process_start_ticks": 68861815,
+      "race_process_record": {
+        "gpu_uuid": "GPU-80ff95c3-176e-fd8a-728f-9c5577c4a779",
+        "used_memory": "838 MiB"
+      },
+      "race_sample_index": 3,
+      "raw_evidence_unchanged": true,
+      "reconciled_exit_races": [
+        {
+          "pid": 4189485,
+          "prior_observation": {
+            "ancestry": [
+              {
+                "pid": 4189485,
+                "ppid": 4189479,
+                "start_ticks": 68861815
+              },
+              {
+                "pid": 4189479,
+                "ppid": 4189476,
+                "start_ticks": 68861814
+              },
+              {
+                "pid": 4189476,
+                "ppid": 213869,
+                "start_ticks": 68861804
+              },
+              {
+                "pid": 213869,
+                "ppid": 1,
+                "start_ticks": 31263336
+              }
+            ],
+            "time_utc": "2026-10-06T01:31:34.210268+00:00"
+          },
+          "reason": "Previously confirmed child disappears from /proc between nvidia-smi and ancestry query; original samples retained.",
+          "time_utc": "2026-10-06T01:31:36.483134+00:00"
+        }
+      ],
+      "result_path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_recall_bench_20261006_04/result.json",
+      "result_sha256": "c05b3d3bda29d587ddae8e3cb7676b726ae3c938e30565d6651ebae9d2667aae",
+      "reviewer": "/root/append_bench_audit",
+      "run_id": "cache_recall_bench_20261006_04",
+      "script_sha256": "275de22f61fe02093b7a4cd816a48821268390b9eee7b2ef747053be0d399b12"
+    },
+    "run_id": "cache_recall_bench_20261006_04",
+    "samples": 5
+  },
+  "passed": true,
+  "receipt_sha256": "85f99ee4eb49d0b84407de440b1e72016df78b11da1407e333d0053fd3f6f688",
+  "reviewer": "/root/append_bench_audit",
+  "schema": "cache-recall-independent-artifact-audit-v1",
+  "sources": {
+    "execution_files_in_each_check_bench_archive_and_live_tree": 28,
+    "native_build_shared_headers": 802,
+    "native_build_sources": 11,
+    "native_libraries": {
+      "bridge_dependency_count": 314,
+      "bridge_fingerprint": "d1a5e94d113fe319c907a027a2a6a7028ba8ed84359a9e053a5ed4ccbec508e7",
+      "mapped_library_count": 3,
+      "native_libraries": [
+        {
+          "category": "echo_indexer",
+          "library": {
+            "bytes": 2504784,
+            "path": "/root/.cache/tvm-ffi/cxldsagr_echo_indexer_cecc0a32c849c656_1fa11185f6354333/cxldsagr_echo_indexer_cecc0a32c849c656.so",
+            "sha256": "d888ee0cb2aa864ed1dcde9dee5e814a2468ce57c643b19dc138141106f2568e"
+          },
+          "name": "cxldsagr_echo_indexer_cecc0a32c849c656.so"
+        },
+        {
+          "category": "other_local_native",
+          "library": {
+            "bytes": 83384,
+            "path": "/root/.cache/tvm-ffi/cxldsagr_echo_recall_dispatch_d1a5e94d113fe319_5eaa50b1dd428433/cxldsagr_echo_recall_dispatch_d1a5e94d113fe319.so",
+            "sha256": "297556386fcff78dde4750f7e4042268c5b3a4d9150cb8194a1091b6576ba66e"
+          },
+          "name": "cxldsagr_echo_recall_dispatch_d1a5e94d113fe319.so"
+        },
+        {
+          "category": "record_transfer",
+          "library": {
+            "bytes": 164496,
+            "path": "/root/.cache/tvm-ffi/cxldsagr_kv_transfer_672412fcb6ae32f3/cxldsagr_kv_transfer.so",
+            "sha256": "561bc3cbe14edea4930b202bc7a3ff0763864d15312d92de7e772664d04b1b66"
+          },
+          "name": "cxldsagr_kv_transfer.so"
+        }
+      ],
+      "recorded_snapshot_fields": 1
+    }
+  },
+  "summary": [
+    {
+      "enqueue_ms": {
+        "iqr_inclusive": 0.0015469999999999928,
+        "maximum": 0.06898,
+        "mean": 0.06011774193548387,
+        "median": 0.059305,
+        "minimum": 0.057476,
+        "p05_nearest_rank": 0.057822,
+        "p95_nearest_rank": 0.068908,
+        "q1_inclusive": 0.0587,
+        "q3_inclusive": 0.060246999999999995
+      },
+      "host_to_device_bytes": 0,
+      "layer": 0,
+      "recalled_records": 0,
+      "samples": 31,
+      "state": "certified_resident",
+      "variant": "baseline",
+      "wall_ms": {
+        "iqr_inclusive": 0.0017614999999999992,
+        "maximum": 0.078242,
+        "mean": 0.06967345161290323,
+        "median": 0.069001,
+        "minimum": 0.067186,
+        "p05_nearest_rank": 0.067428,
+        "p95_nearest_rank": 0.078155,
+        "q1_inclusive": 0.06815750000000001,
+        "q3_inclusive": 0.06991900000000001
+      }
+    },
+    {
+      "enqueue_ms": {
+        "iqr_inclusive": 0.001301500000000004,
+        "maximum": 0.062602,
+        "mean": 0.058560483870967746,
+        "median": 0.058271,
+        "minimum": 0.05658,
+        "p05_nearest_rank": 0.056623,
+        "p95_nearest_rank": 0.061892,
+        "q1_inclusive": 0.057668,
+        "q3_inclusive": 0.0589695
+      },
+      "host_to_device_bytes": 0,
+      "layer": 1,
+      "recalled_records": 0,
+      "samples": 31,
+      "state": "certified_resident",
+      "variant": "baseline",
+      "wall_ms": {
+        "iqr_inclusive": 0.0011960000000000026,
+        "maximum": 0.070188,
+        "mean": 0.06617993548387097,
+        "median": 0.065852,
+        "minimum": 0.064328,
+        "p05_nearest_rank": 0.064606,
+        "p95_nearest_rank": 0.069556,
+        "q1_inclusive": 0.0653475,
+        "q3_inclusive": 0.0665435
+      }
+    },
+    {
+      "enqueue_ms": {
+        "iqr_inclusive": 0.001461000000000004,
+        "maximum": 0.066331,
+        "mean": 0.05987109677419355,
+        "median": 0.059292,
+        "minimum": 0.057708,
+        "p05_nearest_rank": 0.057881,
+        "p95_nearest_rank": 0.065067,
+        "q1_inclusive": 0.0586345,
+        "q3_inclusive": 0.0600955
+      },
+      "host_to_device_bytes": 0,
+      "layer": 2,
+      "recalled_records": 0,
+      "samples": 31,
+      "state": "certified_resident",
+      "variant": "baseline",
+      "wall_ms": {
+        "iqr_inclusive": 0.0014575000000000143,
+        "maximum": 0.073278,
+        "mean": 0.066879,
+        "median": 0.066244,
+        "minimum": 0.064839,
+        "p05_nearest_rank": 0.064871,
+        "p95_nearest_rank": 0.071944,
+        "q1_inclusive": 0.0655475,
+        "q3_inclusive": 0.06700500000000001
+      }
+    },
+    {
+      "enqueue_ms": {
+        "iqr_inclusive": 0.005578,
+        "maximum": 0.20865,
+        "mean": 0.16050754838709677,
+        "median": 0.158148,
+        "minimum": 0.151521,
+        "p05_nearest_rank": 0.151813,
+        "p95_nearest_rank": 0.185301,
+        "q1_inclusive": 0.1554105,
+        "q3_inclusive": 0.1609885
+      },
+      "host_to_device_bytes": 0,
+      "layer": 0,
+      "recalled_records": 0,
+      "samples": 31,
+      "state": "restored_all_hit",
+      "variant": "baseline",
+      "wall_ms": {
+        "iqr_inclusive": 0.0058314999999999895,
+        "maximum": 0.21587,
+        "mean": 0.16716645161290322,
+        "median": 0.164676,
+        "minimum": 0.157923,
+        "p05_nearest_rank": 0.158377,
+        "p95_nearest_rank": 0.192029,
+        "q1_inclusive": 0.1619295,
+        "q3_inclusive": 0.167761
+      }
+    },
+    {
+      "enqueue_ms": {
+        "iqr_inclusive": 0.006311499999999998,
+        "maximum": 0.186057,
+        "mean": 0.1596187741935484,
+        "median": 0.157939,
+        "minimum": 0.150702,
+        "p05_nearest_rank": 0.152221,
+        "p95_nearest_rank": 0.170658,
+        "q1_inclusive": 0.1557025,
+        "q3_inclusive": 0.162014
+      },
+      "host_to_device_bytes": 0,
+      "layer": 1,
+      "recalled_records": 0,
+      "samples": 31,
+      "state": "restored_all_hit",
+      "variant": "baseline",
+      "wall_ms": {
+        "iqr_inclusive": 0.006316000000000016,
+        "maximum": 0.193569,
+        "mean": 0.16652177419354838,
+        "median": 0.164513,
+        "minimum": 0.157134,
+        "p05_nearest_rank": 0.158774,
+        "p95_nearest_rank": 0.185288,
+        "q1_inclusive": 0.1623455,
+        "q3_inclusive": 0.16866150000000002
+      }
+    },
+    {
+      "enqueue_ms": {
+        "iqr_inclusive": 0.0060594999999999954,
+        "maximum": 0.199049,
+        "mean": 0.1602808387096774,
+        "median": 0.158882,
+        "minimum": 0.152872,
+        "p05_nearest_rank": 0.153386,
+        "p95_nearest_rank": 0.172613,
+        "q1_inclusive": 0.15570699999999998,
+        "q3_inclusive": 0.16176649999999998
+      },
+      "host_to_device_bytes": 0,
+      "layer": 2,
+      "recalled_records": 0,
+      "samples": 31,
+      "state": "restored_all_hit",
+      "variant": "baseline",
+      "wall_ms": {
+        "iqr_inclusive": 0.006269999999999998,
+        "maximum": 0.206428,
+        "mean": 0.16695345161290323,
+        "median": 0.165667,
+        "minimum": 0.159302,
+        "p05_nearest_rank": 0.16012,
+        "p95_nearest_rank": 0.17955,
+        "q1_inclusive": 0.162248,
+        "q3_inclusive": 0.168518
+      }
+    },
+    {
+      "enqueue_ms": {
+        "iqr_inclusive": 0.0060975000000000334,
+        "maximum": 0.188271,
+        "mean": 0.15900948387096775,
+        "median": 0.157149,
+        "minimum": 0.151063,
+        "p05_nearest_rank": 0.152988,
+        "p95_nearest_rank": 0.168715,
+        "q1_inclusive": 0.154935,
+        "q3_inclusive": 0.16103250000000002
+      },
+      "host_to_device_bytes": 10263168,
+      "layer": 0,
+      "recalled_records": 8909,
+      "samples": 31,
+      "state": "cold_sparse_miss",
+      "variant": "baseline",
+      "wall_ms": {
+        "iqr_inclusive": 0.0048960000000000115,
+        "maximum": 0.377478,
+        "mean": 0.35358774193548387,
+        "median": 0.352424,
+        "minimum": 0.347613,
+        "p05_nearest_rank": 0.348539,
+        "p95_nearest_rank": 0.361985,
+        "q1_inclusive": 0.350275,
+        "q3_inclusive": 0.355171
+      }
+    },
+    {
+      "enqueue_ms": {
+        "iqr_inclusive": 0.008303999999999978,
+        "maximum": 0.17933,
+        "mean": 0.16089809677419353,
+        "median": 0.159685,
+        "minimum": 0.152954,
+        "p05_nearest_rank": 0.153042,
+        "p95_nearest_rank": 0.175469,
+        "q1_inclusive": 0.15622350000000002,
+        "q3_inclusive": 0.1645275
+      },
+      "host_to_device_bytes": 3312000,
+      "layer": 1,
+      "recalled_records": 2875,
+      "samples": 31,
+      "state": "cold_sparse_miss",
+      "variant": "baseline",
+      "wall_ms": {
+        "iqr_inclusive": 0.006374500000000005,
+        "maximum": 0.229752,
+        "mean": 0.2121778387096774,
+        "median": 0.21216,
+        "minimum": 0.205275,
+        "p05_nearest_rank": 0.206143,
+        "p95_nearest_rank": 0.223275,
+        "q1_inclusive": 0.20786149999999998,
+        "q3_inclusive": 0.21423599999999998
+      }
+    },
+    {
+      "enqueue_ms": {
+        "iqr_inclusive": 0.008730499999999974,
+        "maximum": 0.197366,
+        "mean": 0.16025016129032257,
+        "median": 0.157537,
+        "minimum": 0.151207,
+        "p05_nearest_rank": 0.151752,
+        "p95_nearest_rank": 0.175894,
+        "q1_inclusive": 0.1553005,
+        "q3_inclusive": 0.16403099999999998
+      },
+      "host_to_device_bytes": 9224064,
+      "layer": 2,
+      "recalled_records": 8007,
+      "samples": 31,
+      "state": "cold_sparse_miss",
+      "variant": "baseline",
+      "wall_ms": {
+        "iqr_inclusive": 0.007763500000000034,
+        "maximum": 0.363062,
+        "mean": 0.3330155483870968,
+        "median": 0.33012,
+        "minimum": 0.325425,
+        "p05_nearest_rank": 0.325869,
+        "p95_nearest_rank": 0.350986,
+        "q1_inclusive": 0.328387,
+        "q3_inclusive": 0.3361505
+      }
+    }
+  ],
+  "timing_review": {
+    "excluded": "reset/prefix/snapshot/begin/append/host drain/stats reset/commit/counter read/oracles",
+    "formal_loop": "no reference invocation, tensor comparisons, before-state copies or saved outputs between timed samples",
+    "included": "production private exact recall invocation and device synchronization",
+    "indexer": "captured exact IDs consumed unchanged; no indexer arithmetic or top-k execution",
+    "statistics": "all 31 independent reset samples retained; p05/p95 use nearest rank"
+  }
+}

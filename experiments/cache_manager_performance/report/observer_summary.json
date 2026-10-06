@@ -1,0 +1,151 @@
+{
+  "bench": {
+    "audit": {
+      "boundary": "Discrete observations of all GPUs; this does not exclude activity between samples or unrelated CPU work.",
+      "exit_code": 0,
+      "exit_races": [],
+      "foreign_processes": [],
+      "maximum_sample_gap_seconds": 2.5434510707855225,
+      "monitor_errors": [],
+      "observed_owned_pids": [
+        160310
+      ],
+      "samples": 9
+    },
+    "driver_source_archive": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_manager_bench_20261006_07/source/external_observer/driver.py",
+    "files": {
+      "driver.py": "d9c70b27698a0a3a90a3202dd56c6d556110c4527386ddf24c7d303f3fa7fc7b",
+      "gpu_monitor.jsonl": "29f41689a7629ccda5cbfa166d72931dd494b585ffb2775ec45250bdd17b9f56",
+      "monitor_audit.json": "c24accf177176234c05684e8055b1cdc42b8e8c5d17fafb9d75c3a13d5c193a9",
+      "run.json": "3e8402db79328f27b484c223b704cdb332e7ca90172faaaa9872852e3da0eefb",
+      "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout.log": "4d6e21a5a6e44901922a38ec62022e61d6ea2a9d0677d734b8d16d03f6716c1c"
+    },
+    "gpu_uuid": "80ff95c3-176e-fd8a-728f-9c5577c4a779",
+    "physical_gpu_index": 3,
+    "run": {
+      "command": [
+        "env",
+        "PATH=/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin:/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin:/usr/local/cuda/bin:/usr/local/bin:/usr/bin:/bin",
+        "numactl",
+        "--physcpubind=24-31",
+        "--membind=0",
+        "bash",
+        "experiments/cache_manager_performance/scripts/run.sh",
+        "--mode",
+        "bench",
+        "--run-id",
+        "cache_manager_bench_20261006_07",
+        "--capture-dir",
+        "experiments/cache_manager_performance/output/data/input_fixture_20261006_02",
+        "--validation-receipt",
+        "/tmp/cxldsagr-checks/cache_manager_performance/data/cache_manager_check_20261006_07/receipt.json"
+      ],
+      "completed_utc": "2026-10-06T05:00:30.419589+00:00",
+      "driver_sha256": "d9c70b27698a0a3a90a3202dd56c6d556110c4527386ddf24c7d303f3fa7fc7b",
+      "exit_code": 0,
+      "pid": 160304,
+      "started_utc": "2026-10-06T05:00:12.200373+00:00"
+    },
+    "run_id": "cache_manager_bench_20261006_07",
+    "source_directory": "/tmp/cache_manager_bench_20261006_07_observer"
+  },
+  "check": {
+    "audit": {
+      "boundary": "Discrete observations of all GPUs; this does not exclude activity between samples or unrelated CPU work.",
+      "exit_code": 0,
+      "exit_races": [],
+      "foreign_processes": [],
+      "maximum_sample_gap_seconds": 2.222799062728882,
+      "monitor_errors": [],
+      "observed_owned_pids": [
+        153578
+      ],
+      "samples": 9
+    },
+    "driver_source_archive": "/tmp/cxldsagr-checks/cache_manager_performance/data/cache_manager_check_20261006_07/source/external_observer/driver.py",
+    "files": {
+      "driver.py": "d9c70b27698a0a3a90a3202dd56c6d556110c4527386ddf24c7d303f3fa7fc7b",
+      "gpu_monitor.jsonl": "a0ff3342aa92b7f37fcc6c77c2b87d1303d161bc333a76373767661a4576a334",
+      "monitor_audit.json": "8b31df265b2371fb5b10ebcd6e28f937dc578a9f846f4e6799ec2262ddca28d3",
+      "run.json": "75d7c33d2ede56701deb12c6d6044cb4957f965f226cc09537e838ef2966d1ca",
+      "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout.log": "184d1cf9c062d7c1d110e1a293c18304f3d22190daecd675f52f12793fad62fb"
+    },
+    "gpu_uuid": "80ff95c3-176e-fd8a-728f-9c5577c4a779",
+    "physical_gpu_index": 3,
+    "run": {
+      "command": [
+        "env",
+        "PATH=/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin:/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin:/usr/local/cuda/bin:/usr/local/bin:/usr/bin:/bin",
+        "numactl",
+        "--physcpubind=24-31",
+        "--membind=0",
+        "bash",
+        "experiments/cache_manager_performance/scripts/run.sh",
+        "--mode",
+        "check",
+        "--run-id",
+        "cache_manager_check_20261006_07",
+        "--capture-dir",
+        "experiments/cache_manager_performance/output/data/input_fixture_20261006_02"
+      ],
+      "completed_utc": "2026-10-06T04:49:34.330101+00:00",
+      "driver_sha256": "d9c70b27698a0a3a90a3202dd56c6d556110c4527386ddf24c7d303f3fa7fc7b",
+      "exit_code": 0,
+      "pid": 153572,
+      "started_utc": "2026-10-06T04:49:16.474745+00:00"
+    },
+    "run_id": "cache_manager_check_20261006_07",
+    "source_directory": "/tmp/cache_manager_check_20261006_07_observer"
+  },
+  "profile": {
+    "audit": {
+      "boundary": "Discrete observations of all GPUs; this does not exclude activity between samples or unrelated CPU work.",
+      "exit_code": 0,
+      "exit_races": [],
+      "foreign_processes": [],
+      "maximum_sample_gap_seconds": 3.3611900806427,
+      "monitor_errors": [],
+      "observed_owned_pids": [
+        161037
+      ],
+      "samples": 18
+    },
+    "driver_source_archive": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_manager_profile_20261006_07/source/external_observer/driver.py",
+    "files": {
+      "driver.py": "d9c70b27698a0a3a90a3202dd56c6d556110c4527386ddf24c7d303f3fa7fc7b",
+      "gpu_monitor.jsonl": "850b8739a0b29f85f456f5dd5ced6c3b2dbdeb8bae5a9fce205b209fd1899d5b",
+      "monitor_audit.json": "9ffa550d5e63ccbfa6e1f65a8781d7868f69fd9847776af101d7cc1c12fd1bc3",
+      "run.json": "a420dc59de5a41a0578350456739180d2198b55fd2a8a33106cdbfa517e06ebc",
+      "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout.log": "e6551d38321a4743f73da98610da46fd4f0ba21a00aa5ad9248c6bafee98b9cf"
+    },
+    "gpu_uuid": "80ff95c3-176e-fd8a-728f-9c5577c4a779",
+    "physical_gpu_index": 3,
+    "run": {
+      "command": [
+        "env",
+        "PATH=/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin:/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin:/usr/local/cuda/bin:/usr/local/bin:/usr/bin:/bin",
+        "numactl",
+        "--physcpubind=24-31",
+        "--membind=0",
+        "bash",
+        "experiments/cache_manager_performance/scripts/profile.sh",
+        "--run-id",
+        "cache_manager_profile_20261006_07",
+        "--capture-dir",
+        "experiments/cache_manager_performance/output/data/input_fixture_20261006_02",
+        "--validation-receipt",
+        "/tmp/cxldsagr-checks/cache_manager_performance/data/cache_manager_check_20261006_07/receipt.json"
+      ],
+      "completed_utc": "2026-10-06T05:01:19.821748+00:00",
+      "driver_sha256": "d9c70b27698a0a3a90a3202dd56c6d556110c4527386ddf24c7d303f3fa7fc7b",
+      "exit_code": 0,
+      "pid": 160966,
+      "started_utc": "2026-10-06T05:00:40.770108+00:00"
+    },
+    "run_id": "cache_manager_profile_20261006_07",
+    "source_directory": "/tmp/cache_manager_profile_20261006_07_observer"
+  }
+}

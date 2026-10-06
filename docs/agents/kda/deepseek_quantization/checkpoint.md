@@ -4,7 +4,7 @@
 新的 control01 / candidate02 和三组 NCU 报告已验收发布，旧结果在发布后清理。
 本检查点区分量化算子的逐位精确性与整组非矩阵改动后的模型数值边界；前三层
 验收不代表完整 61 层或任务质量验证。正式结果见
-[实验报告](../../../../experiments/deepseek_v32_echo_prefill/README.md)。
+[实验报告](../../../../experiments/deepseek_v32_mfu/README.md)。
 
 ## 实现与精度边界
 

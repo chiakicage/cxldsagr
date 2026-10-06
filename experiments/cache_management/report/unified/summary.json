@@ -1,6 +1,6 @@
 {
   "schema": "unified-cache-management-report-v1",
-  "run_id": "cache_unified_20261005_02",
+  "run_id": "cache_unified_dma_20261006_01",
   "nosa_static": {
     "schema": "nosa-offline-allocation-plan-v1",
     "status": "static_plan_not_execution",
@@ -15651,7 +15651,7 @@
   "deepseek_static": {
     "plans": [
       {
-        "run_id": "cache_deepseek_nh_20261005_02",
+        "run_id": "cache_deepseek_nh_20261006_01",
         "status": "static_plan_not_execution",
         "search_variable": "NH",
         "fixed_P": 32768,
@@ -15671,7 +15671,7 @@
         "retained_session_tokens": 65536,
         "noncache_headroom_note": null,
         "checkpoint_path": "/preset-models",
-        "sources_sha256": "e0b45f808ef28ea872f13d535c780b966fea6756a9df64f216007455726740fd",
+        "sources_sha256": "1c6fbf6d1bb0f164ed9d599c4ec40e03d8b174010199ce597a29b3af977029aa",
         "hbm_total_bytes": 48944687168,
         "dram_total_bytes": 343601111080,
         "total_hbm_bytes": 150121545728,
@@ -15687,7 +15687,7 @@
         "allocator_scratch_headroom_bytes": 67108864
       },
       {
-        "run_id": "cache_deepseek_p_base_20261005_02",
+        "run_id": "cache_deepseek_p_base_20261006_01",
         "status": "static_plan_not_execution",
         "search_variable": "P",
         "fixed_P": null,
@@ -15707,7 +15707,7 @@
         "retained_session_tokens": 65536,
         "noncache_headroom_note": null,
         "checkpoint_path": "/preset-models",
-        "sources_sha256": "e0b45f808ef28ea872f13d535c780b966fea6756a9df64f216007455726740fd",
+        "sources_sha256": "1c6fbf6d1bb0f164ed9d599c4ec40e03d8b174010199ce597a29b3af977029aa",
         "hbm_total_bytes": 125076590080,
         "dram_total_bytes": 21474967592,
         "total_hbm_bytes": 150121545728,
@@ -15723,7 +15723,7 @@
         "allocator_scratch_headroom_bytes": 67108864
       },
       {
-        "run_id": "cache_deepseek_p_base_headroom_20261005_02",
+        "run_id": "cache_deepseek_p_base_headroom_20261006_01",
         "status": "static_plan_not_execution",
         "search_variable": "P",
         "fixed_P": null,
@@ -15743,7 +15743,7 @@
         "retained_session_tokens": 65536,
         "noncache_headroom_note": "Conditional reuse of an old observed allocator/device difference; not preallocated storage or a validated current requirement.",
         "checkpoint_path": "/preset-models",
-        "sources_sha256": "e0b45f808ef28ea872f13d535c780b966fea6756a9df64f216007455726740fd",
+        "sources_sha256": "1c6fbf6d1bb0f164ed9d599c4ec40e03d8b174010199ce597a29b3af977029aa",
         "hbm_total_bytes": 125076608768,
         "dram_total_bytes": 21474967592,
         "total_hbm_bytes": 150121545728,
@@ -15759,7 +15759,7 @@
         "allocator_scratch_headroom_bytes": 67108864
       },
       {
-        "run_id": "cache_deepseek_p_nhmax_20261005_02",
+        "run_id": "cache_deepseek_p_nhmax_20261006_01",
         "status": "static_plan_not_execution",
         "search_variable": "P",
         "fixed_P": null,
@@ -15779,7 +15779,7 @@
         "retained_session_tokens": 65536,
         "noncache_headroom_note": null,
         "checkpoint_path": "/preset-models",
-        "sources_sha256": "e0b45f808ef28ea872f13d535c780b966fea6756a9df64f216007455726740fd",
+        "sources_sha256": "1c6fbf6d1bb0f164ed9d599c4ec40e03d8b174010199ce597a29b3af977029aa",
         "hbm_total_bytes": 125076610368,
         "dram_total_bytes": 343601111080,
         "total_hbm_bytes": 150121545728,
@@ -15795,7 +15795,7 @@
         "allocator_scratch_headroom_bytes": 67108864
       },
       {
-        "run_id": "cache_deepseek_p_nhmax_headroom_20261005_02",
+        "run_id": "cache_deepseek_p_nhmax_headroom_20261006_01",
         "status": "static_plan_not_execution",
         "search_variable": "P",
         "fixed_P": null,
@@ -15815,7 +15815,7 @@
         "retained_session_tokens": 65536,
         "noncache_headroom_note": "Conditional reuse of an old observed allocator/device difference; not preallocated storage or a validated current requirement.",
         "checkpoint_path": "/preset-models",
-        "sources_sha256": "e0b45f808ef28ea872f13d535c780b966fea6756a9df64f216007455726740fd",
+        "sources_sha256": "1c6fbf6d1bb0f164ed9d599c4ec40e03d8b174010199ce597a29b3af977029aa",
         "hbm_total_bytes": 125076611648,
         "dram_total_bytes": 343601111080,
         "total_hbm_bytes": 150121545728,
@@ -15833,68 +15833,68 @@
     ],
     "provenance": [
       {
-        "run_id": "cache_deepseek_nh_20261005_02",
-        "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_nh_20261005_02/plan.json",
-        "sha256": "25684e9c4f14fe82b6064d57c8669e3bcb89d271e2ce9031061d3a57113dc527",
+        "run_id": "cache_deepseek_nh_20261006_01",
+        "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_nh_20261006_01/plan.json",
+        "sha256": "9e639d982242e87b48a1acf7fe43dab3c585f6f0899e2aba5d6ac11de7265d53",
         "sources": {
           "models/deepseek_v32/config.py": {
             "sha256": "d8f0d2aa209e2cf7a7653ef4980b60a3dca4d430eb23f2579abf00a290ff529d",
-            "verified_from": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_nh_20261005_02/source/models/deepseek_v32/config.py"
+            "verified_from": "experiments/cache_management/output/data/cache_deepseek_nh_20261006_01/source/models/deepseek_v32/config.py"
           },
           "models/deepseek_v32/execution/capacity.py": {
-            "sha256": "8baecb09892c4806bbaf7b26e6a987c41180638cbfe1bb451e68a885c1228a54",
-            "verified_from": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_nh_20261005_02/source/models/deepseek_v32/execution/capacity.py"
+            "sha256": "9844ef42c65b25a4c7358dd4975f39c1eb434ce5587b721aa660e4181e83f694",
+            "verified_from": "experiments/cache_management/output/data/cache_deepseek_nh_20261006_01/source/models/deepseek_v32/execution/capacity.py"
           },
           "models/deepseek_v32/execution/adapter.py": {
-            "sha256": "b9dd19dd9dac73f21923bc52a9fdec0d28ad8f9137d4f51e8781a73ca7e6c04a",
-            "verified_from": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_nh_20261005_02/source/models/deepseek_v32/execution/adapter.py"
+            "sha256": "66cb418b66180a1feded94a6a262ce96698fbb85bb696c16da19cdc31ba63be6",
+            "verified_from": "experiments/cache_management/output/data/cache_deepseek_nh_20261006_01/source/models/deepseek_v32/execution/adapter.py"
           },
           "models/deepseek_v32/execution/cache_resources.py": {
-            "sha256": "a8fe8cd5f09ea71d7107707a5690e7d65619b748dc9d8fbbea0651ec81a4ed83",
-            "verified_from": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_nh_20261005_02/source/models/deepseek_v32/execution/cache_resources.py"
+            "sha256": "40e791a4e3496f8baa85b50d8bdc85702b19e97b0e8b2a7cc0da58b45a8f1246",
+            "verified_from": "experiments/cache_management/output/data/cache_deepseek_nh_20261006_01/source/models/deepseek_v32/execution/cache_resources.py"
           },
           "models/deepseek_v32/execution/planning.py": {
-            "sha256": "83eba13951b94e322b2ebf927a242a289e496159d749f30f5277bb4032623fb5",
-            "verified_from": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_nh_20261005_02/source/models/deepseek_v32/execution/planning.py"
+            "sha256": "2ad581ffafdb337d2ea5b36c9f930270d33a4b003d2ce1f8fb15269ed6032b75",
+            "verified_from": "experiments/cache_management/output/data/cache_deepseek_nh_20261006_01/source/models/deepseek_v32/execution/planning.py"
           },
           "models/deepseek_v32/cache/session.py": {
             "sha256": "50e11d659389aeafc2ed8a608915f4eca2202e953529a4ea7180d2dd0edaaad9",
-            "verified_from": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_nh_20261005_02/source/models/deepseek_v32/cache/session.py"
+            "verified_from": "experiments/cache_management/output/data/cache_deepseek_nh_20261006_01/source/models/deepseek_v32/cache/session.py"
           },
           "cache/capacity.py": {
             "sha256": "ba39f57a49124b23c60552240d87fbb9804b5320275b09596eadf2f0ff8c3a96",
-            "verified_from": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_nh_20261005_02/source/cache/capacity.py"
+            "verified_from": "experiments/cache_management/output/data/cache_deepseek_nh_20261006_01/source/cache/capacity.py"
           },
           "cache/sparse_token_pool.py": {
-            "sha256": "46efe6b59a76e39075899076a3621caf5255542c67a4fd0e03ff6567d91eb2f3",
-            "verified_from": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_nh_20261005_02/source/cache/sparse_token_pool.py"
+            "sha256": "0641ca63cf359ad1ecc5817f41c342f5b99bcd6fbbd5ef5387a554bf68c8897d",
+            "verified_from": "experiments/cache_management/output/data/cache_deepseek_nh_20261006_01/source/cache/sparse_token_pool.py"
           },
           "cache/host_allocation.py": {
             "sha256": "6c6c65e166fc6a2289547482a9bc51c1da136190b9105423edd23f9732567150",
-            "verified_from": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_nh_20261005_02/source/cache/host_allocation.py"
+            "verified_from": "experiments/cache_management/output/data/cache_deepseek_nh_20261006_01/source/cache/host_allocation.py"
           },
           "pyproject.toml": {
             "sha256": "cac6e9271538d74e99b1bdc83c2a12648bb3c76a310af21c98aff3ec2d3761d1",
-            "verified_from": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_nh_20261005_02/source/pyproject.toml"
+            "verified_from": "experiments/cache_management/output/data/cache_deepseek_nh_20261006_01/source/pyproject.toml"
           },
           "uv.lock": {
             "sha256": "53339af1728da3661b614d554e928408186b4fac6106a92999bd8fd69b3d2d8f",
-            "verified_from": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_nh_20261005_02/source/uv.lock"
+            "verified_from": "experiments/cache_management/output/data/cache_deepseek_nh_20261006_01/source/uv.lock"
           },
           "experiments/cache_management/src/capacity_plan.py": {
             "sha256": "2621d6a144d40a4630b771cd481e12976202ab74944fb107bdbc258e5ecb899c",
-            "verified_from": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_nh_20261005_02/source/experiments/cache_management/src/capacity_plan.py"
+            "verified_from": "experiments/cache_management/output/data/cache_deepseek_nh_20261006_01/source/experiments/cache_management/src/capacity_plan.py"
           }
         },
         "source_hashes": {
           "models/deepseek_v32/config.py": "d8f0d2aa209e2cf7a7653ef4980b60a3dca4d430eb23f2579abf00a290ff529d",
-          "models/deepseek_v32/execution/capacity.py": "8baecb09892c4806bbaf7b26e6a987c41180638cbfe1bb451e68a885c1228a54",
-          "models/deepseek_v32/execution/adapter.py": "b9dd19dd9dac73f21923bc52a9fdec0d28ad8f9137d4f51e8781a73ca7e6c04a",
-          "models/deepseek_v32/execution/cache_resources.py": "a8fe8cd5f09ea71d7107707a5690e7d65619b748dc9d8fbbea0651ec81a4ed83",
-          "models/deepseek_v32/execution/planning.py": "83eba13951b94e322b2ebf927a242a289e496159d749f30f5277bb4032623fb5",
+          "models/deepseek_v32/execution/capacity.py": "9844ef42c65b25a4c7358dd4975f39c1eb434ce5587b721aa660e4181e83f694",
+          "models/deepseek_v32/execution/adapter.py": "66cb418b66180a1feded94a6a262ce96698fbb85bb696c16da19cdc31ba63be6",
+          "models/deepseek_v32/execution/cache_resources.py": "40e791a4e3496f8baa85b50d8bdc85702b19e97b0e8b2a7cc0da58b45a8f1246",
+          "models/deepseek_v32/execution/planning.py": "2ad581ffafdb337d2ea5b36c9f930270d33a4b003d2ce1f8fb15269ed6032b75",
           "models/deepseek_v32/cache/session.py": "50e11d659389aeafc2ed8a608915f4eca2202e953529a4ea7180d2dd0edaaad9",
           "cache/capacity.py": "ba39f57a49124b23c60552240d87fbb9804b5320275b09596eadf2f0ff8c3a96",
-          "cache/sparse_token_pool.py": "46efe6b59a76e39075899076a3621caf5255542c67a4fd0e03ff6567d91eb2f3",
+          "cache/sparse_token_pool.py": "0641ca63cf359ad1ecc5817f41c342f5b99bcd6fbbd5ef5387a554bf68c8897d",
           "cache/host_allocation.py": "6c6c65e166fc6a2289547482a9bc51c1da136190b9105423edd23f9732567150",
           "pyproject.toml": "cac6e9271538d74e99b1bdc83c2a12648bb3c76a310af21c98aff3ec2d3761d1",
           "uv.lock": "53339af1728da3661b614d554e928408186b4fac6106a92999bd8fd69b3d2d8f",
@@ -15974,17 +15974,17 @@
                 "session_hints_reservation": 873600,
                 "session_page_tables": 1863680,
                 "session_prefetch_counters": 109200,
-                "session_native_counters": 145600,
+                "session_native_counters": 182000,
                 "merged_index_keys": 8404992,
                 "merged_index_scales": 262656,
                 "execution_indexer_workspace": 1212157952,
                 "execution_append_sources": 2359296,
                 "execution_pool_metadata_workspace": 1910505536
               },
-              "reservation_bytes": 44078184518,
-              "persistent_allocator_allowance_bytes": 4799393786,
+              "reservation_bytes": 44078220918,
+              "persistent_allocator_allowance_bytes": 4799357386,
               "scratch_allocator_headroom_bytes": 67108864,
-              "allocator_allowance_bytes": 4866502650,
+              "allocator_allowance_bytes": 4866466250,
               "cache_total_bytes": 48944687168,
               "noncache_headroom_bytes": 0,
               "total_bytes": 48944687168,
@@ -16066,17 +16066,17 @@
                 "session_hints_reservation": 875520,
                 "session_page_tables": 1867776,
                 "session_prefetch_counters": 109440,
-                "session_native_counters": 145920,
+                "session_native_counters": 182400,
                 "merged_index_keys": 8404992,
                 "merged_index_scales": 262656,
                 "execution_indexer_workspace": 1212157952,
                 "execution_append_sources": 2359296,
                 "execution_pool_metadata_workspace": 1914699840
               },
-              "reservation_bytes": 44171514358,
-              "persistent_allocator_allowance_bytes": 4809893450,
+              "reservation_bytes": 44171550838,
+              "persistent_allocator_allowance_bytes": 4809856970,
               "scratch_allocator_headroom_bytes": 67108864,
-              "allocator_allowance_bytes": 4877002314,
+              "allocator_allowance_bytes": 4876965834,
               "cache_total_bytes": 49048516672,
               "noncache_headroom_bytes": 0,
               "total_bytes": 49048516672,
@@ -16121,68 +16121,68 @@
         }
       },
       {
-        "run_id": "cache_deepseek_p_base_20261005_02",
-        "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_base_20261005_02/plan.json",
-        "sha256": "62556fee8dfa475bcf2c333cdc8abc13d21e02368992df02410c2ba42e401e72",
+        "run_id": "cache_deepseek_p_base_20261006_01",
+        "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_base_20261006_01/plan.json",
+        "sha256": "11830341f20d68a6343e28be55721015cd41b99d5fc8d4e61627ae2aff5d3214",
         "sources": {
           "models/deepseek_v32/config.py": {
             "sha256": "d8f0d2aa209e2cf7a7653ef4980b60a3dca4d430eb23f2579abf00a290ff529d",
-            "verified_from": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_base_20261005_02/source/models/deepseek_v32/config.py"
+            "verified_from": "experiments/cache_management/output/data/cache_deepseek_p_base_20261006_01/source/models/deepseek_v32/config.py"
           },
           "models/deepseek_v32/execution/capacity.py": {
-            "sha256": "8baecb09892c4806bbaf7b26e6a987c41180638cbfe1bb451e68a885c1228a54",
-            "verified_from": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_base_20261005_02/source/models/deepseek_v32/execution/capacity.py"
+            "sha256": "9844ef42c65b25a4c7358dd4975f39c1eb434ce5587b721aa660e4181e83f694",
+            "verified_from": "experiments/cache_management/output/data/cache_deepseek_p_base_20261006_01/source/models/deepseek_v32/execution/capacity.py"
           },
           "models/deepseek_v32/execution/adapter.py": {
-            "sha256": "b9dd19dd9dac73f21923bc52a9fdec0d28ad8f9137d4f51e8781a73ca7e6c04a",
-            "verified_from": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_base_20261005_02/source/models/deepseek_v32/execution/adapter.py"
+            "sha256": "66cb418b66180a1feded94a6a262ce96698fbb85bb696c16da19cdc31ba63be6",
+            "verified_from": "experiments/cache_management/output/data/cache_deepseek_p_base_20261006_01/source/models/deepseek_v32/execution/adapter.py"
           },
           "models/deepseek_v32/execution/cache_resources.py": {
-            "sha256": "a8fe8cd5f09ea71d7107707a5690e7d65619b748dc9d8fbbea0651ec81a4ed83",
-            "verified_from": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_base_20261005_02/source/models/deepseek_v32/execution/cache_resources.py"
+            "sha256": "40e791a4e3496f8baa85b50d8bdc85702b19e97b0e8b2a7cc0da58b45a8f1246",
+            "verified_from": "experiments/cache_management/output/data/cache_deepseek_p_base_20261006_01/source/models/deepseek_v32/execution/cache_resources.py"
           },
           "models/deepseek_v32/execution/planning.py": {
-            "sha256": "83eba13951b94e322b2ebf927a242a289e496159d749f30f5277bb4032623fb5",
-            "verified_from": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_base_20261005_02/source/models/deepseek_v32/execution/planning.py"
+            "sha256": "2ad581ffafdb337d2ea5b36c9f930270d33a4b003d2ce1f8fb15269ed6032b75",
+            "verified_from": "experiments/cache_management/output/data/cache_deepseek_p_base_20261006_01/source/models/deepseek_v32/execution/planning.py"
           },
           "models/deepseek_v32/cache/session.py": {
             "sha256": "50e11d659389aeafc2ed8a608915f4eca2202e953529a4ea7180d2dd0edaaad9",
-            "verified_from": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_base_20261005_02/source/models/deepseek_v32/cache/session.py"
+            "verified_from": "experiments/cache_management/output/data/cache_deepseek_p_base_20261006_01/source/models/deepseek_v32/cache/session.py"
           },
           "cache/capacity.py": {
             "sha256": "ba39f57a49124b23c60552240d87fbb9804b5320275b09596eadf2f0ff8c3a96",
-            "verified_from": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_base_20261005_02/source/cache/capacity.py"
+            "verified_from": "experiments/cache_management/output/data/cache_deepseek_p_base_20261006_01/source/cache/capacity.py"
           },
           "cache/sparse_token_pool.py": {
-            "sha256": "46efe6b59a76e39075899076a3621caf5255542c67a4fd0e03ff6567d91eb2f3",
-            "verified_from": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_base_20261005_02/source/cache/sparse_token_pool.py"
+            "sha256": "0641ca63cf359ad1ecc5817f41c342f5b99bcd6fbbd5ef5387a554bf68c8897d",
+            "verified_from": "experiments/cache_management/output/data/cache_deepseek_p_base_20261006_01/source/cache/sparse_token_pool.py"
           },
           "cache/host_allocation.py": {
             "sha256": "6c6c65e166fc6a2289547482a9bc51c1da136190b9105423edd23f9732567150",
-            "verified_from": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_base_20261005_02/source/cache/host_allocation.py"
+            "verified_from": "experiments/cache_management/output/data/cache_deepseek_p_base_20261006_01/source/cache/host_allocation.py"
           },
           "pyproject.toml": {
             "sha256": "cac6e9271538d74e99b1bdc83c2a12648bb3c76a310af21c98aff3ec2d3761d1",
-            "verified_from": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_base_20261005_02/source/pyproject.toml"
+            "verified_from": "experiments/cache_management/output/data/cache_deepseek_p_base_20261006_01/source/pyproject.toml"
           },
           "uv.lock": {
             "sha256": "53339af1728da3661b614d554e928408186b4fac6106a92999bd8fd69b3d2d8f",
-            "verified_from": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_base_20261005_02/source/uv.lock"
+            "verified_from": "experiments/cache_management/output/data/cache_deepseek_p_base_20261006_01/source/uv.lock"
           },
           "experiments/cache_management/src/capacity_plan.py": {
             "sha256": "2621d6a144d40a4630b771cd481e12976202ab74944fb107bdbc258e5ecb899c",
-            "verified_from": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_base_20261005_02/source/experiments/cache_management/src/capacity_plan.py"
+            "verified_from": "experiments/cache_management/output/data/cache_deepseek_p_base_20261006_01/source/experiments/cache_management/src/capacity_plan.py"
           }
         },
         "source_hashes": {
           "models/deepseek_v32/config.py": "d8f0d2aa209e2cf7a7653ef4980b60a3dca4d430eb23f2579abf00a290ff529d",
-          "models/deepseek_v32/execution/capacity.py": "8baecb09892c4806bbaf7b26e6a987c41180638cbfe1bb451e68a885c1228a54",
-          "models/deepseek_v32/execution/adapter.py": "b9dd19dd9dac73f21923bc52a9fdec0d28ad8f9137d4f51e8781a73ca7e6c04a",
-          "models/deepseek_v32/execution/cache_resources.py": "a8fe8cd5f09ea71d7107707a5690e7d65619b748dc9d8fbbea0651ec81a4ed83",
-          "models/deepseek_v32/execution/planning.py": "83eba13951b94e322b2ebf927a242a289e496159d749f30f5277bb4032623fb5",
+          "models/deepseek_v32/execution/capacity.py": "9844ef42c65b25a4c7358dd4975f39c1eb434ce5587b721aa660e4181e83f694",
+          "models/deepseek_v32/execution/adapter.py": "66cb418b66180a1feded94a6a262ce96698fbb85bb696c16da19cdc31ba63be6",
+          "models/deepseek_v32/execution/cache_resources.py": "40e791a4e3496f8baa85b50d8bdc85702b19e97b0e8b2a7cc0da58b45a8f1246",
+          "models/deepseek_v32/execution/planning.py": "2ad581ffafdb337d2ea5b36c9f930270d33a4b003d2ce1f8fb15269ed6032b75",
           "models/deepseek_v32/cache/session.py": "50e11d659389aeafc2ed8a608915f4eca2202e953529a4ea7180d2dd0edaaad9",
           "cache/capacity.py": "ba39f57a49124b23c60552240d87fbb9804b5320275b09596eadf2f0ff8c3a96",
-          "cache/sparse_token_pool.py": "46efe6b59a76e39075899076a3621caf5255542c67a4fd0e03ff6567d91eb2f3",
+          "cache/sparse_token_pool.py": "0641ca63cf359ad1ecc5817f41c342f5b99bcd6fbbd5ef5387a554bf68c8897d",
           "cache/host_allocation.py": "6c6c65e166fc6a2289547482a9bc51c1da136190b9105423edd23f9732567150",
           "pyproject.toml": "cac6e9271538d74e99b1bdc83c2a12648bb3c76a310af21c98aff3ec2d3761d1",
           "uv.lock": "53339af1728da3661b614d554e928408186b4fac6106a92999bd8fd69b3d2d8f",
@@ -16262,17 +16262,17 @@
                 "session_hints_reservation": 30720,
                 "session_page_tables": 65536,
                 "session_prefetch_counters": 3840,
-                "session_native_counters": 5120,
+                "session_native_counters": 6400,
                 "merged_index_keys": 8404992,
                 "merged_index_scales": 262656,
                 "execution_indexer_workspace": 1212157952,
                 "execution_append_sources": 2359296,
                 "execution_pool_metadata_workspace": 726081536
               },
-              "reservation_bytes": 124773318580,
-              "persistent_allocator_allowance_bytes": 236162636,
+              "reservation_bytes": 124773319860,
+              "persistent_allocator_allowance_bytes": 236161356,
               "scratch_allocator_headroom_bytes": 67108864,
-              "allocator_allowance_bytes": 303271500,
+              "allocator_allowance_bytes": 303270220,
               "cache_total_bytes": 125076590080,
               "noncache_headroom_bytes": 0,
               "total_bytes": 125076590080,
@@ -16354,17 +16354,17 @@
                 "session_hints_reservation": 30720,
                 "session_page_tables": 65536,
                 "session_prefetch_counters": 3840,
-                "session_native_counters": 5120,
+                "session_native_counters": 6400,
                 "merged_index_keys": 8404992,
                 "merged_index_scales": 262656,
                 "execution_indexer_workspace": 1212157952,
                 "execution_append_sources": 2359296,
                 "execution_pool_metadata_workspace": 726081600
               },
-              "reservation_bytes": 124773330438,
-              "persistent_allocator_allowance_bytes": 236176954,
+              "reservation_bytes": 124773331718,
+              "persistent_allocator_allowance_bytes": 236175674,
               "scratch_allocator_headroom_bytes": 67108864,
-              "allocator_allowance_bytes": 303285818,
+              "allocator_allowance_bytes": 303284538,
               "cache_total_bytes": 125076616256,
               "noncache_headroom_bytes": 0,
               "total_bytes": 125076616256,
@@ -16462,17 +16462,17 @@
                 "session_hints_reservation": 30720,
                 "session_page_tables": 65536,
                 "session_prefetch_counters": 3840,
-                "session_native_counters": 5120,
+                "session_native_counters": 6400,
                 "merged_index_keys": 8404992,
                 "merged_index_scales": 262656,
                 "execution_indexer_workspace": 1212157952,
                 "execution_append_sources": 2359296,
                 "execution_pool_metadata_workspace": 134217792
               },
-              "reservation_bytes": 15147899766,
-              "persistent_allocator_allowance_bytes": 235130058,
+              "reservation_bytes": 15147901046,
+              "persistent_allocator_allowance_bytes": 235128778,
               "scratch_allocator_headroom_bytes": 67108864,
-              "allocator_allowance_bytes": 302238922,
+              "allocator_allowance_bytes": 302237642,
               "cache_total_bytes": 15450138688,
               "noncache_headroom_bytes": 0,
               "total_bytes": 15450138688,
@@ -16502,68 +16502,68 @@
         }
       },
       {
-        "run_id": "cache_deepseek_p_base_headroom_20261005_02",
-        "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_base_headroom_20261005_02/plan.json",
-        "sha256": "4a74c6e319d8cbe93313602102f453e061adb24610a379b006d5db15b3e629fe",
+        "run_id": "cache_deepseek_p_base_headroom_20261006_01",
+        "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_base_headroom_20261006_01/plan.json",
+        "sha256": "b051d788eaee47abf00295405eb6745a0e4046e31cf02522440336dec4651c03",
         "sources": {
           "models/deepseek_v32/config.py": {
             "sha256": "d8f0d2aa209e2cf7a7653ef4980b60a3dca4d430eb23f2579abf00a290ff529d",
-            "verified_from": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_base_headroom_20261005_02/source/models/deepseek_v32/config.py"
+            "verified_from": "experiments/cache_management/output/data/cache_deepseek_p_base_headroom_20261006_01/source/models/deepseek_v32/config.py"
           },
           "models/deepseek_v32/execution/capacity.py": {
-            "sha256": "8baecb09892c4806bbaf7b26e6a987c41180638cbfe1bb451e68a885c1228a54",
-            "verified_from": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_base_headroom_20261005_02/source/models/deepseek_v32/execution/capacity.py"
+            "sha256": "9844ef42c65b25a4c7358dd4975f39c1eb434ce5587b721aa660e4181e83f694",
+            "verified_from": "experiments/cache_management/output/data/cache_deepseek_p_base_headroom_20261006_01/source/models/deepseek_v32/execution/capacity.py"
           },
           "models/deepseek_v32/execution/adapter.py": {
-            "sha256": "b9dd19dd9dac73f21923bc52a9fdec0d28ad8f9137d4f51e8781a73ca7e6c04a",
-            "verified_from": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_base_headroom_20261005_02/source/models/deepseek_v32/execution/adapter.py"
+            "sha256": "66cb418b66180a1feded94a6a262ce96698fbb85bb696c16da19cdc31ba63be6",
+            "verified_from": "experiments/cache_management/output/data/cache_deepseek_p_base_headroom_20261006_01/source/models/deepseek_v32/execution/adapter.py"
           },
           "models/deepseek_v32/execution/cache_resources.py": {
-            "sha256": "a8fe8cd5f09ea71d7107707a5690e7d65619b748dc9d8fbbea0651ec81a4ed83",
-            "verified_from": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_base_headroom_20261005_02/source/models/deepseek_v32/execution/cache_resources.py"
+            "sha256": "40e791a4e3496f8baa85b50d8bdc85702b19e97b0e8b2a7cc0da58b45a8f1246",
+            "verified_from": "experiments/cache_management/output/data/cache_deepseek_p_base_headroom_20261006_01/source/models/deepseek_v32/execution/cache_resources.py"
           },
           "models/deepseek_v32/execution/planning.py": {
-            "sha256": "83eba13951b94e322b2ebf927a242a289e496159d749f30f5277bb4032623fb5",
-            "verified_from": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_base_headroom_20261005_02/source/models/deepseek_v32/execution/planning.py"
+            "sha256": "2ad581ffafdb337d2ea5b36c9f930270d33a4b003d2ce1f8fb15269ed6032b75",
+            "verified_from": "experiments/cache_management/output/data/cache_deepseek_p_base_headroom_20261006_01/source/models/deepseek_v32/execution/planning.py"
           },
           "models/deepseek_v32/cache/session.py": {
             "sha256": "50e11d659389aeafc2ed8a608915f4eca2202e953529a4ea7180d2dd0edaaad9",
-            "verified_from": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_base_headroom_20261005_02/source/models/deepseek_v32/cache/session.py"
+            "verified_from": "experiments/cache_management/output/data/cache_deepseek_p_base_headroom_20261006_01/source/models/deepseek_v32/cache/session.py"
           },
           "cache/capacity.py": {
             "sha256": "ba39f57a49124b23c60552240d87fbb9804b5320275b09596eadf2f0ff8c3a96",
-            "verified_from": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_base_headroom_20261005_02/source/cache/capacity.py"
+            "verified_from": "experiments/cache_management/output/data/cache_deepseek_p_base_headroom_20261006_01/source/cache/capacity.py"
           },
           "cache/sparse_token_pool.py": {
-            "sha256": "46efe6b59a76e39075899076a3621caf5255542c67a4fd0e03ff6567d91eb2f3",
-            "verified_from": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_base_headroom_20261005_02/source/cache/sparse_token_pool.py"
+            "sha256": "0641ca63cf359ad1ecc5817f41c342f5b99bcd6fbbd5ef5387a554bf68c8897d",
+            "verified_from": "experiments/cache_management/output/data/cache_deepseek_p_base_headroom_20261006_01/source/cache/sparse_token_pool.py"
           },
           "cache/host_allocation.py": {
             "sha256": "6c6c65e166fc6a2289547482a9bc51c1da136190b9105423edd23f9732567150",
-            "verified_from": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_base_headroom_20261005_02/source/cache/host_allocation.py"
+            "verified_from": "experiments/cache_management/output/data/cache_deepseek_p_base_headroom_20261006_01/source/cache/host_allocation.py"
           },
           "pyproject.toml": {
             "sha256": "cac6e9271538d74e99b1bdc83c2a12648bb3c76a310af21c98aff3ec2d3761d1",
-            "verified_from": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_base_headroom_20261005_02/source/pyproject.toml"
+            "verified_from": "experiments/cache_management/output/data/cache_deepseek_p_base_headroom_20261006_01/source/pyproject.toml"
           },
           "uv.lock": {
             "sha256": "53339af1728da3661b614d554e928408186b4fac6106a92999bd8fd69b3d2d8f",
-            "verified_from": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_base_headroom_20261005_02/source/uv.lock"
+            "verified_from": "experiments/cache_management/output/data/cache_deepseek_p_base_headroom_20261006_01/source/uv.lock"
           },
           "experiments/cache_management/src/capacity_plan.py": {
             "sha256": "2621d6a144d40a4630b771cd481e12976202ab74944fb107bdbc258e5ecb899c",
-            "verified_from": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_base_headroom_20261005_02/source/experiments/cache_management/src/capacity_plan.py"
+            "verified_from": "experiments/cache_management/output/data/cache_deepseek_p_base_headroom_20261006_01/source/experiments/cache_management/src/capacity_plan.py"
           }
         },
         "source_hashes": {
           "models/deepseek_v32/config.py": "d8f0d2aa209e2cf7a7653ef4980b60a3dca4d430eb23f2579abf00a290ff529d",
-          "models/deepseek_v32/execution/capacity.py": "8baecb09892c4806bbaf7b26e6a987c41180638cbfe1bb451e68a885c1228a54",
-          "models/deepseek_v32/execution/adapter.py": "b9dd19dd9dac73f21923bc52a9fdec0d28ad8f9137d4f51e8781a73ca7e6c04a",
-          "models/deepseek_v32/execution/cache_resources.py": "a8fe8cd5f09ea71d7107707a5690e7d65619b748dc9d8fbbea0651ec81a4ed83",
-          "models/deepseek_v32/execution/planning.py": "83eba13951b94e322b2ebf927a242a289e496159d749f30f5277bb4032623fb5",
+          "models/deepseek_v32/execution/capacity.py": "9844ef42c65b25a4c7358dd4975f39c1eb434ce5587b721aa660e4181e83f694",
+          "models/deepseek_v32/execution/adapter.py": "66cb418b66180a1feded94a6a262ce96698fbb85bb696c16da19cdc31ba63be6",
+          "models/deepseek_v32/execution/cache_resources.py": "40e791a4e3496f8baa85b50d8bdc85702b19e97b0e8b2a7cc0da58b45a8f1246",
+          "models/deepseek_v32/execution/planning.py": "2ad581ffafdb337d2ea5b36c9f930270d33a4b003d2ce1f8fb15269ed6032b75",
           "models/deepseek_v32/cache/session.py": "50e11d659389aeafc2ed8a608915f4eca2202e953529a4ea7180d2dd0edaaad9",
           "cache/capacity.py": "ba39f57a49124b23c60552240d87fbb9804b5320275b09596eadf2f0ff8c3a96",
-          "cache/sparse_token_pool.py": "46efe6b59a76e39075899076a3621caf5255542c67a4fd0e03ff6567d91eb2f3",
+          "cache/sparse_token_pool.py": "0641ca63cf359ad1ecc5817f41c342f5b99bcd6fbbd5ef5387a554bf68c8897d",
           "cache/host_allocation.py": "6c6c65e166fc6a2289547482a9bc51c1da136190b9105423edd23f9732567150",
           "pyproject.toml": "cac6e9271538d74e99b1bdc83c2a12648bb3c76a310af21c98aff3ec2d3761d1",
           "uv.lock": "53339af1728da3661b614d554e928408186b4fac6106a92999bd8fd69b3d2d8f",
@@ -16643,17 +16643,17 @@
                 "session_hints_reservation": 30720,
                 "session_page_tables": 65536,
                 "session_prefetch_counters": 3840,
-                "session_native_counters": 5120,
+                "session_native_counters": 6400,
                 "merged_index_keys": 8404992,
                 "merged_index_scales": 262656,
                 "execution_indexer_workspace": 1212157952,
                 "execution_append_sources": 2359296,
                 "execution_pool_metadata_workspace": 642023680
               },
-              "reservation_bytes": 109204063392,
-              "persistent_allocator_allowance_bytes": 236180064,
+              "reservation_bytes": 109204064672,
+              "persistent_allocator_allowance_bytes": 236178784,
               "scratch_allocator_headroom_bytes": 67108864,
-              "allocator_allowance_bytes": 303288928,
+              "allocator_allowance_bytes": 303287648,
               "cache_total_bytes": 109507352320,
               "noncache_headroom_bytes": 15569256448,
               "total_bytes": 125076608768,
@@ -16735,17 +16735,17 @@
                 "session_hints_reservation": 30720,
                 "session_page_tables": 65536,
                 "session_prefetch_counters": 3840,
-                "session_native_counters": 5120,
+                "session_native_counters": 6400,
                 "merged_index_keys": 8404992,
                 "merged_index_scales": 262656,
                 "execution_indexer_workspace": 1212157952,
                 "execution_append_sources": 2359296,
                 "execution_pool_metadata_workspace": 642023744
               },
-              "reservation_bytes": 109204075246,
-              "persistent_allocator_allowance_bytes": 236183634,
+              "reservation_bytes": 109204076526,
+              "persistent_allocator_allowance_bytes": 236182354,
               "scratch_allocator_headroom_bytes": 67108864,
-              "allocator_allowance_bytes": 303292498,
+              "allocator_allowance_bytes": 303291218,
               "cache_total_bytes": 109507367744,
               "noncache_headroom_bytes": 15569256448,
               "total_bytes": 125076624192,
@@ -16843,17 +16843,17 @@
                 "session_hints_reservation": 30720,
                 "session_page_tables": 65536,
                 "session_prefetch_counters": 3840,
-                "session_native_counters": 5120,
+                "session_native_counters": 6400,
                 "merged_index_keys": 8404992,
                 "merged_index_scales": 262656,
                 "execution_indexer_workspace": 1212157952,
                 "execution_append_sources": 2359296,
                 "execution_pool_metadata_workspace": 134217792
               },
-              "reservation_bytes": 15147899766,
-              "persistent_allocator_allowance_bytes": 235130058,
+              "reservation_bytes": 15147901046,
+              "persistent_allocator_allowance_bytes": 235128778,
               "scratch_allocator_headroom_bytes": 67108864,
-              "allocator_allowance_bytes": 302238922,
+              "allocator_allowance_bytes": 302237642,
               "cache_total_bytes": 15450138688,
               "noncache_headroom_bytes": 15569256448,
               "total_bytes": 31019395136,
@@ -16883,68 +16883,68 @@
         }
       },
       {
-        "run_id": "cache_deepseek_p_nhmax_20261005_02",
-        "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_nhmax_20261005_02/plan.json",
-        "sha256": "10598d6986296c7e24835fdad8581c47c6a82590daa58df065e5ec73750a2347",
+        "run_id": "cache_deepseek_p_nhmax_20261006_01",
+        "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_nhmax_20261006_01/plan.json",
+        "sha256": "af7c849031c956b2fa3a6e813e3139c519e83376218588e16f1fe4474bf74449",
         "sources": {
           "models/deepseek_v32/config.py": {
             "sha256": "d8f0d2aa209e2cf7a7653ef4980b60a3dca4d430eb23f2579abf00a290ff529d",
-            "verified_from": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_nhmax_20261005_02/source/models/deepseek_v32/config.py"
+            "verified_from": "experiments/cache_management/output/data/cache_deepseek_p_nhmax_20261006_01/source/models/deepseek_v32/config.py"
           },
           "models/deepseek_v32/execution/capacity.py": {
-            "sha256": "8baecb09892c4806bbaf7b26e6a987c41180638cbfe1bb451e68a885c1228a54",
-            "verified_from": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_nhmax_20261005_02/source/models/deepseek_v32/execution/capacity.py"
+            "sha256": "9844ef42c65b25a4c7358dd4975f39c1eb434ce5587b721aa660e4181e83f694",
+            "verified_from": "experiments/cache_management/output/data/cache_deepseek_p_nhmax_20261006_01/source/models/deepseek_v32/execution/capacity.py"
           },
           "models/deepseek_v32/execution/adapter.py": {
-            "sha256": "b9dd19dd9dac73f21923bc52a9fdec0d28ad8f9137d4f51e8781a73ca7e6c04a",
-            "verified_from": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_nhmax_20261005_02/source/models/deepseek_v32/execution/adapter.py"
+            "sha256": "66cb418b66180a1feded94a6a262ce96698fbb85bb696c16da19cdc31ba63be6",
+            "verified_from": "experiments/cache_management/output/data/cache_deepseek_p_nhmax_20261006_01/source/models/deepseek_v32/execution/adapter.py"
           },
           "models/deepseek_v32/execution/cache_resources.py": {
-            "sha256": "a8fe8cd5f09ea71d7107707a5690e7d65619b748dc9d8fbbea0651ec81a4ed83",
-            "verified_from": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_nhmax_20261005_02/source/models/deepseek_v32/execution/cache_resources.py"
+            "sha256": "40e791a4e3496f8baa85b50d8bdc85702b19e97b0e8b2a7cc0da58b45a8f1246",
+            "verified_from": "experiments/cache_management/output/data/cache_deepseek_p_nhmax_20261006_01/source/models/deepseek_v32/execution/cache_resources.py"
           },
           "models/deepseek_v32/execution/planning.py": {
-            "sha256": "83eba13951b94e322b2ebf927a242a289e496159d749f30f5277bb4032623fb5",
-            "verified_from": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_nhmax_20261005_02/source/models/deepseek_v32/execution/planning.py"
+            "sha256": "2ad581ffafdb337d2ea5b36c9f930270d33a4b003d2ce1f8fb15269ed6032b75",
+            "verified_from": "experiments/cache_management/output/data/cache_deepseek_p_nhmax_20261006_01/source/models/deepseek_v32/execution/planning.py"
           },
           "models/deepseek_v32/cache/session.py": {
             "sha256": "50e11d659389aeafc2ed8a608915f4eca2202e953529a4ea7180d2dd0edaaad9",
-            "verified_from": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_nhmax_20261005_02/source/models/deepseek_v32/cache/session.py"
+            "verified_from": "experiments/cache_management/output/data/cache_deepseek_p_nhmax_20261006_01/source/models/deepseek_v32/cache/session.py"
           },
           "cache/capacity.py": {
             "sha256": "ba39f57a49124b23c60552240d87fbb9804b5320275b09596eadf2f0ff8c3a96",
-            "verified_from": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_nhmax_20261005_02/source/cache/capacity.py"
+            "verified_from": "experiments/cache_management/output/data/cache_deepseek_p_nhmax_20261006_01/source/cache/capacity.py"
           },
           "cache/sparse_token_pool.py": {
-            "sha256": "46efe6b59a76e39075899076a3621caf5255542c67a4fd0e03ff6567d91eb2f3",
-            "verified_from": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_nhmax_20261005_02/source/cache/sparse_token_pool.py"
+            "sha256": "0641ca63cf359ad1ecc5817f41c342f5b99bcd6fbbd5ef5387a554bf68c8897d",
+            "verified_from": "experiments/cache_management/output/data/cache_deepseek_p_nhmax_20261006_01/source/cache/sparse_token_pool.py"
           },
           "cache/host_allocation.py": {
             "sha256": "6c6c65e166fc6a2289547482a9bc51c1da136190b9105423edd23f9732567150",
-            "verified_from": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_nhmax_20261005_02/source/cache/host_allocation.py"
+            "verified_from": "experiments/cache_management/output/data/cache_deepseek_p_nhmax_20261006_01/source/cache/host_allocation.py"
           },
           "pyproject.toml": {
             "sha256": "cac6e9271538d74e99b1bdc83c2a12648bb3c76a310af21c98aff3ec2d3761d1",
-            "verified_from": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_nhmax_20261005_02/source/pyproject.toml"
+            "verified_from": "experiments/cache_management/output/data/cache_deepseek_p_nhmax_20261006_01/source/pyproject.toml"
           },
           "uv.lock": {
             "sha256": "53339af1728da3661b614d554e928408186b4fac6106a92999bd8fd69b3d2d8f",
-            "verified_from": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_nhmax_20261005_02/source/uv.lock"
+            "verified_from": "experiments/cache_management/output/data/cache_deepseek_p_nhmax_20261006_01/source/uv.lock"
           },
           "experiments/cache_management/src/capacity_plan.py": {
             "sha256": "2621d6a144d40a4630b771cd481e12976202ab74944fb107bdbc258e5ecb899c",
-            "verified_from": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_nhmax_20261005_02/source/experiments/cache_management/src/capacity_plan.py"
+            "verified_from": "experiments/cache_management/output/data/cache_deepseek_p_nhmax_20261006_01/source/experiments/cache_management/src/capacity_plan.py"
           }
         },
         "source_hashes": {
           "models/deepseek_v32/config.py": "d8f0d2aa209e2cf7a7653ef4980b60a3dca4d430eb23f2579abf00a290ff529d",
-          "models/deepseek_v32/execution/capacity.py": "8baecb09892c4806bbaf7b26e6a987c41180638cbfe1bb451e68a885c1228a54",
-          "models/deepseek_v32/execution/adapter.py": "b9dd19dd9dac73f21923bc52a9fdec0d28ad8f9137d4f51e8781a73ca7e6c04a",
-          "models/deepseek_v32/execution/cache_resources.py": "a8fe8cd5f09ea71d7107707a5690e7d65619b748dc9d8fbbea0651ec81a4ed83",
-          "models/deepseek_v32/execution/planning.py": "83eba13951b94e322b2ebf927a242a289e496159d749f30f5277bb4032623fb5",
+          "models/deepseek_v32/execution/capacity.py": "9844ef42c65b25a4c7358dd4975f39c1eb434ce5587b721aa660e4181e83f694",
+          "models/deepseek_v32/execution/adapter.py": "66cb418b66180a1feded94a6a262ce96698fbb85bb696c16da19cdc31ba63be6",
+          "models/deepseek_v32/execution/cache_resources.py": "40e791a4e3496f8baa85b50d8bdc85702b19e97b0e8b2a7cc0da58b45a8f1246",
+          "models/deepseek_v32/execution/planning.py": "2ad581ffafdb337d2ea5b36c9f930270d33a4b003d2ce1f8fb15269ed6032b75",
           "models/deepseek_v32/cache/session.py": "50e11d659389aeafc2ed8a608915f4eca2202e953529a4ea7180d2dd0edaaad9",
           "cache/capacity.py": "ba39f57a49124b23c60552240d87fbb9804b5320275b09596eadf2f0ff8c3a96",
-          "cache/sparse_token_pool.py": "46efe6b59a76e39075899076a3621caf5255542c67a4fd0e03ff6567d91eb2f3",
+          "cache/sparse_token_pool.py": "0641ca63cf359ad1ecc5817f41c342f5b99bcd6fbbd5ef5387a554bf68c8897d",
           "cache/host_allocation.py": "6c6c65e166fc6a2289547482a9bc51c1da136190b9105423edd23f9732567150",
           "pyproject.toml": "cac6e9271538d74e99b1bdc83c2a12648bb3c76a310af21c98aff3ec2d3761d1",
           "uv.lock": "53339af1728da3661b614d554e928408186b4fac6106a92999bd8fd69b3d2d8f",
@@ -17024,17 +17024,17 @@
                 "session_hints_reservation": 873600,
                 "session_page_tables": 1863680,
                 "session_prefetch_counters": 109200,
-                "session_native_counters": 145600,
+                "session_native_counters": 182000,
                 "merged_index_keys": 8404992,
                 "merged_index_scales": 262656,
                 "execution_indexer_workspace": 1212157952,
                 "execution_append_sources": 2359296,
                 "execution_pool_metadata_workspace": 2321295680
               },
-              "reservation_bytes": 120165023826,
-              "persistent_allocator_allowance_bytes": 4844477678,
+              "reservation_bytes": 120165060226,
+              "persistent_allocator_allowance_bytes": 4844441278,
               "scratch_allocator_headroom_bytes": 67108864,
-              "allocator_allowance_bytes": 4911586542,
+              "allocator_allowance_bytes": 4911550142,
               "cache_total_bytes": 125076610368,
               "noncache_headroom_bytes": 0,
               "total_bytes": 125076610368,
@@ -17116,17 +17116,17 @@
                 "session_hints_reservation": 873600,
                 "session_page_tables": 1863680,
                 "session_prefetch_counters": 109200,
-                "session_native_counters": 145600,
+                "session_native_counters": 182000,
                 "merged_index_keys": 8404992,
                 "merged_index_scales": 262656,
                 "execution_indexer_workspace": 1212157952,
                 "execution_append_sources": 2359296,
                 "execution_pool_metadata_workspace": 2321295744
               },
-              "reservation_bytes": 120165035680,
-              "persistent_allocator_allowance_bytes": 4844476128,
+              "reservation_bytes": 120165072080,
+              "persistent_allocator_allowance_bytes": 4844439728,
               "scratch_allocator_headroom_bytes": 67108864,
-              "allocator_allowance_bytes": 4911584992,
+              "allocator_allowance_bytes": 4911548592,
               "cache_total_bytes": 125076620672,
               "noncache_headroom_bytes": 0,
               "total_bytes": 125076620672,
@@ -17224,17 +17224,17 @@
                 "session_hints_reservation": 873600,
                 "session_page_tables": 1863680,
                 "session_prefetch_counters": 109200,
-                "session_native_counters": 145600,
+                "session_native_counters": 182000,
                 "merged_index_keys": 8404992,
                 "merged_index_scales": 262656,
                 "execution_indexer_workspace": 1212157952,
                 "execution_append_sources": 2359296,
                 "execution_pool_metadata_workspace": 2321295680
               },
-              "reservation_bytes": 120165023826,
-              "persistent_allocator_allowance_bytes": 4844477678,
+              "reservation_bytes": 120165060226,
+              "persistent_allocator_allowance_bytes": 4844441278,
               "scratch_allocator_headroom_bytes": 67108864,
-              "allocator_allowance_bytes": 4911586542,
+              "allocator_allowance_bytes": 4911550142,
               "cache_total_bytes": 125076610368,
               "noncache_headroom_bytes": 0,
               "total_bytes": 125076610368,
@@ -17264,68 +17264,68 @@
         }
       },
       {
-        "run_id": "cache_deepseek_p_nhmax_headroom_20261005_02",
-        "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_nhmax_headroom_20261005_02/plan.json",
-        "sha256": "3c3823ef74aea1430815d25ff14e80ab5455fa5d1e08bbebee072e115d0d4e1a",
+        "run_id": "cache_deepseek_p_nhmax_headroom_20261006_01",
+        "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_nhmax_headroom_20261006_01/plan.json",
+        "sha256": "6be4b67bc9cb2386ee3d31e54ce14d392ce694d6ef6e072892e2e2eba2833b62",
         "sources": {
           "models/deepseek_v32/config.py": {
             "sha256": "d8f0d2aa209e2cf7a7653ef4980b60a3dca4d430eb23f2579abf00a290ff529d",
-            "verified_from": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_nhmax_headroom_20261005_02/source/models/deepseek_v32/config.py"
+            "verified_from": "experiments/cache_management/output/data/cache_deepseek_p_nhmax_headroom_20261006_01/source/models/deepseek_v32/config.py"
           },
           "models/deepseek_v32/execution/capacity.py": {
-            "sha256": "8baecb09892c4806bbaf7b26e6a987c41180638cbfe1bb451e68a885c1228a54",
-            "verified_from": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_nhmax_headroom_20261005_02/source/models/deepseek_v32/execution/capacity.py"
+            "sha256": "9844ef42c65b25a4c7358dd4975f39c1eb434ce5587b721aa660e4181e83f694",
+            "verified_from": "experiments/cache_management/output/data/cache_deepseek_p_nhmax_headroom_20261006_01/source/models/deepseek_v32/execution/capacity.py"
           },
           "models/deepseek_v32/execution/adapter.py": {
-            "sha256": "b9dd19dd9dac73f21923bc52a9fdec0d28ad8f9137d4f51e8781a73ca7e6c04a",
-            "verified_from": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_nhmax_headroom_20261005_02/source/models/deepseek_v32/execution/adapter.py"
+            "sha256": "66cb418b66180a1feded94a6a262ce96698fbb85bb696c16da19cdc31ba63be6",
+            "verified_from": "experiments/cache_management/output/data/cache_deepseek_p_nhmax_headroom_20261006_01/source/models/deepseek_v32/execution/adapter.py"
           },
           "models/deepseek_v32/execution/cache_resources.py": {
-            "sha256": "a8fe8cd5f09ea71d7107707a5690e7d65619b748dc9d8fbbea0651ec81a4ed83",
-            "verified_from": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_nhmax_headroom_20261005_02/source/models/deepseek_v32/execution/cache_resources.py"
+            "sha256": "40e791a4e3496f8baa85b50d8bdc85702b19e97b0e8b2a7cc0da58b45a8f1246",
+            "verified_from": "experiments/cache_management/output/data/cache_deepseek_p_nhmax_headroom_20261006_01/source/models/deepseek_v32/execution/cache_resources.py"
           },
           "models/deepseek_v32/execution/planning.py": {
-            "sha256": "83eba13951b94e322b2ebf927a242a289e496159d749f30f5277bb4032623fb5",
-            "verified_from": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_nhmax_headroom_20261005_02/source/models/deepseek_v32/execution/planning.py"
+            "sha256": "2ad581ffafdb337d2ea5b36c9f930270d33a4b003d2ce1f8fb15269ed6032b75",
+            "verified_from": "experiments/cache_management/output/data/cache_deepseek_p_nhmax_headroom_20261006_01/source/models/deepseek_v32/execution/planning.py"
           },
           "models/deepseek_v32/cache/session.py": {
             "sha256": "50e11d659389aeafc2ed8a608915f4eca2202e953529a4ea7180d2dd0edaaad9",
-            "verified_from": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_nhmax_headroom_20261005_02/source/models/deepseek_v32/cache/session.py"
+            "verified_from": "experiments/cache_management/output/data/cache_deepseek_p_nhmax_headroom_20261006_01/source/models/deepseek_v32/cache/session.py"
           },
           "cache/capacity.py": {
             "sha256": "ba39f57a49124b23c60552240d87fbb9804b5320275b09596eadf2f0ff8c3a96",
-            "verified_from": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_nhmax_headroom_20261005_02/source/cache/capacity.py"
+            "verified_from": "experiments/cache_management/output/data/cache_deepseek_p_nhmax_headroom_20261006_01/source/cache/capacity.py"
           },
           "cache/sparse_token_pool.py": {
-            "sha256": "46efe6b59a76e39075899076a3621caf5255542c67a4fd0e03ff6567d91eb2f3",
-            "verified_from": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_nhmax_headroom_20261005_02/source/cache/sparse_token_pool.py"
+            "sha256": "0641ca63cf359ad1ecc5817f41c342f5b99bcd6fbbd5ef5387a554bf68c8897d",
+            "verified_from": "experiments/cache_management/output/data/cache_deepseek_p_nhmax_headroom_20261006_01/source/cache/sparse_token_pool.py"
           },
           "cache/host_allocation.py": {
             "sha256": "6c6c65e166fc6a2289547482a9bc51c1da136190b9105423edd23f9732567150",
-            "verified_from": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_nhmax_headroom_20261005_02/source/cache/host_allocation.py"
+            "verified_from": "experiments/cache_management/output/data/cache_deepseek_p_nhmax_headroom_20261006_01/source/cache/host_allocation.py"
           },
           "pyproject.toml": {
             "sha256": "cac6e9271538d74e99b1bdc83c2a12648bb3c76a310af21c98aff3ec2d3761d1",
-            "verified_from": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_nhmax_headroom_20261005_02/source/pyproject.toml"
+            "verified_from": "experiments/cache_management/output/data/cache_deepseek_p_nhmax_headroom_20261006_01/source/pyproject.toml"
           },
           "uv.lock": {
             "sha256": "53339af1728da3661b614d554e928408186b4fac6106a92999bd8fd69b3d2d8f",
-            "verified_from": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_nhmax_headroom_20261005_02/source/uv.lock"
+            "verified_from": "experiments/cache_management/output/data/cache_deepseek_p_nhmax_headroom_20261006_01/source/uv.lock"
           },
           "experiments/cache_management/src/capacity_plan.py": {
             "sha256": "2621d6a144d40a4630b771cd481e12976202ab74944fb107bdbc258e5ecb899c",
-            "verified_from": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_management/output/data/cache_deepseek_p_nhmax_headroom_20261005_02/source/experiments/cache_management/src/capacity_plan.py"
+            "verified_from": "experiments/cache_management/output/data/cache_deepseek_p_nhmax_headroom_20261006_01/source/experiments/cache_management/src/capacity_plan.py"
           }
         },
         "source_hashes": {
           "models/deepseek_v32/config.py": "d8f0d2aa209e2cf7a7653ef4980b60a3dca4d430eb23f2579abf00a290ff529d",
-          "models/deepseek_v32/execution/capacity.py": "8baecb09892c4806bbaf7b26e6a987c41180638cbfe1bb451e68a885c1228a54",
-          "models/deepseek_v32/execution/adapter.py": "b9dd19dd9dac73f21923bc52a9fdec0d28ad8f9137d4f51e8781a73ca7e6c04a",
-          "models/deepseek_v32/execution/cache_resources.py": "a8fe8cd5f09ea71d7107707a5690e7d65619b748dc9d8fbbea0651ec81a4ed83",
-          "models/deepseek_v32/execution/planning.py": "83eba13951b94e322b2ebf927a242a289e496159d749f30f5277bb4032623fb5",
+          "models/deepseek_v32/execution/capacity.py": "9844ef42c65b25a4c7358dd4975f39c1eb434ce5587b721aa660e4181e83f694",
+          "models/deepseek_v32/execution/adapter.py": "66cb418b66180a1feded94a6a262ce96698fbb85bb696c16da19cdc31ba63be6",
+          "models/deepseek_v32/execution/cache_resources.py": "40e791a4e3496f8baa85b50d8bdc85702b19e97b0e8b2a7cc0da58b45a8f1246",
+          "models/deepseek_v32/execution/planning.py": "2ad581ffafdb337d2ea5b36c9f930270d33a4b003d2ce1f8fb15269ed6032b75",
           "models/deepseek_v32/cache/session.py": "50e11d659389aeafc2ed8a608915f4eca2202e953529a4ea7180d2dd0edaaad9",
           "cache/capacity.py": "ba39f57a49124b23c60552240d87fbb9804b5320275b09596eadf2f0ff8c3a96",
-          "cache/sparse_token_pool.py": "46efe6b59a76e39075899076a3621caf5255542c67a4fd0e03ff6567d91eb2f3",
+          "cache/sparse_token_pool.py": "0641ca63cf359ad1ecc5817f41c342f5b99bcd6fbbd5ef5387a554bf68c8897d",
           "cache/host_allocation.py": "6c6c65e166fc6a2289547482a9bc51c1da136190b9105423edd23f9732567150",
           "pyproject.toml": "cac6e9271538d74e99b1bdc83c2a12648bb3c76a310af21c98aff3ec2d3761d1",
           "uv.lock": "53339af1728da3661b614d554e928408186b4fac6106a92999bd8fd69b3d2d8f",
@@ -17405,17 +17405,17 @@
                 "session_hints_reservation": 873600,
                 "session_page_tables": 1863680,
                 "session_prefetch_counters": 109200,
-                "session_native_counters": 145600,
+                "session_native_counters": 182000,
                 "merged_index_keys": 8404992,
                 "merged_index_scales": 262656,
                 "execution_indexer_workspace": 1212157952,
                 "execution_append_sources": 2359296,
                 "execution_pool_metadata_workspace": 2237237824
               },
-              "reservation_bytes": 104595768634,
-              "persistent_allocator_allowance_bytes": 4844477702,
+              "reservation_bytes": 104595805034,
+              "persistent_allocator_allowance_bytes": 4844441302,
               "scratch_allocator_headroom_bytes": 67108864,
-              "allocator_allowance_bytes": 4911586566,
+              "allocator_allowance_bytes": 4911550166,
               "cache_total_bytes": 109507355200,
               "noncache_headroom_bytes": 15569256448,
               "total_bytes": 125076611648,
@@ -17497,17 +17497,17 @@
                 "session_hints_reservation": 873600,
                 "session_page_tables": 1863680,
                 "session_prefetch_counters": 109200,
-                "session_native_counters": 145600,
+                "session_native_counters": 182000,
                 "merged_index_keys": 8404992,
                 "merged_index_scales": 262656,
                 "execution_indexer_workspace": 1212157952,
                 "execution_append_sources": 2359296,
                 "execution_pool_metadata_workspace": 2237237888
               },
-              "reservation_bytes": 104595780488,
-              "persistent_allocator_allowance_bytes": 4844476152,
+              "reservation_bytes": 104595816888,
+              "persistent_allocator_allowance_bytes": 4844439752,
               "scratch_allocator_headroom_bytes": 67108864,
-              "allocator_allowance_bytes": 4911585016,
+              "allocator_allowance_bytes": 4911548616,
               "cache_total_bytes": 109507365504,
               "noncache_headroom_bytes": 15569256448,
               "total_bytes": 125076621952,
@@ -17605,17 +17605,17 @@
                 "session_hints_reservation": 873600,
                 "session_page_tables": 1863680,
                 "session_prefetch_counters": 109200,
-                "session_native_counters": 145600,
+                "session_native_counters": 182000,
                 "merged_index_keys": 8404992,
                 "merged_index_scales": 262656,
                 "execution_indexer_workspace": 1212157952,
                 "execution_append_sources": 2359296,
                 "execution_pool_metadata_workspace": 2237237824
               },
-              "reservation_bytes": 104595768634,
-              "persistent_allocator_allowance_bytes": 4844477702,
+              "reservation_bytes": 104595805034,
+              "persistent_allocator_allowance_bytes": 4844441302,
               "scratch_allocator_headroom_bytes": 67108864,
-              "allocator_allowance_bytes": 4911586566,
+              "allocator_allowance_bytes": 4911550166,
               "cache_total_bytes": 109507355200,
               "noncache_headroom_bytes": 15569256448,
               "total_bytes": 125076611648,
@@ -21248,7 +21248,6 @@
         "independent_correctness_receipt": {
           "kind": "nosa-motivation-full-trace-v1",
           "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/docs/agents/acceptance/unified_runtime_20261005/nosa_final/receipt.json",
-          "recorded_path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/docs/agents/acceptance/unified_runtime_20261005/nosa_final/receipt.json",
           "sha256": "34ee0a120712d353bd57dc350c3667f5ce2f2fc2b8a1607aa1f1a9f00c405bc5",
           "checks": {
             "coverage": "complete four-method multi-request trace",
@@ -21526,8 +21525,8 @@
       "capacity_sweep_performed": false
     },
     "deepseek": {
-      "run_id": "refactor_final_deepseek_bench_20261005_01",
-      "directory": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_bench_20261005_01",
+      "run_id": "deepseek_dma_c10_bench_20261006_01",
+      "directory": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_dma_c10_bench_20261006_01",
       "config": {
         "num_users": 16,
         "rounds": 2,
@@ -22270,48 +22269,45 @@
           }
         }
       },
-      "source_sha256": "1319a540b7f78da9c363dd09c0f1568b450df3df5e4d3e8b60155a58c348b3dc",
+      "source_sha256": "656de7823d882e6bab6a13cac749f5d0711d26632c9e11bd1131a61daa1c4ad0",
       "source_manifest": {
-        "models/deepseek_v32/attention.py": "0ff4a5b3687079dcec8e734f54473886f706ba80c092a8547ca76fa8d349c83e",
+        "models/deepseek_v32/attention.py": "fe91615bfa9119cba1221cb1ac87be3694b5d6119b3f9ea21852fe12458b00e5",
         "models/deepseek_v32/cache/official.py": "0a9e272571495c8d99b5a6b821cc5b15ac7de70d6248464cac2b549b9135bf85",
-        "models/deepseek_v32/cache/prefetch.py": "fcee5ae3d45e20d3fdb76861f74c94421e4f5ef900aa0caf9c5739249e751a40",
+        "models/deepseek_v32/cache/prefetch.py": "854a3d5081ba396a900b233ad1d1c3678d73cf6de68a0aed0a5d85315351ec31",
         "models/deepseek_v32/cache/session.py": "50e11d659389aeafc2ed8a608915f4eca2202e953529a4ea7180d2dd0edaaad9",
         "models/deepseek_v32/checkpoint.py": "382f00612ce000d70a0a90a24e1bc5ec2c75032dbcc13bafa73d30d80565ad0f",
         "models/deepseek_v32/config.py": "d8f0d2aa209e2cf7a7653ef4980b60a3dca4d430eb23f2579abf00a290ff529d",
-        "models/deepseek_v32/execution/adapter.py": "b9dd19dd9dac73f21923bc52a9fdec0d28ad8f9137d4f51e8781a73ca7e6c04a",
-        "models/deepseek_v32/execution/cache_resources.py": "a8fe8cd5f09ea71d7107707a5690e7d65619b748dc9d8fbbea0651ec81a4ed83",
-        "models/deepseek_v32/execution/capacity.py": "8baecb09892c4806bbaf7b26e6a987c41180638cbfe1bb451e68a885c1228a54",
-        "models/deepseek_v32/execution/compute_graphs.py": "fb1e0d3b7f9f20df199dfc92bd0df47bdba7c3c4f18c8509f0c25e3c5dba23c0",
-        "models/deepseek_v32/execution/official.py": "52df7f6d6c29e65a40c2fd571089adbdf67d50013c2f3b09eb8e491740611833",
-        "models/deepseek_v32/execution/pipeline.py": "a476eaf09261ea2705fbdd2fb09646ddba53ccabc478a56b9772d6bc4f468d2e",
-        "models/deepseek_v32/execution/planning.py": "83eba13951b94e322b2ebf927a242a289e496159d749f30f5277bb4032623fb5",
+        "models/deepseek_v32/execution/adapter.py": "92e8add4f6f9a25c9d4667ce6a3c71ec6134e0421e0fb536be187c0a67d43d98",
+        "models/deepseek_v32/execution/cache_resources.py": "571b9be5f2754142b99d15797415571164102ed1c06c761645a79e54ccbfdf13",
+        "models/deepseek_v32/execution/capacity.py": "9844ef42c65b25a4c7358dd4975f39c1eb434ce5587b721aa660e4181e83f694",
+        "models/deepseek_v32/execution/compute_graphs.py": "5e03668e1a0ecc20c07205723daba2f86d6ea52efe49a867b79ac90a5b2d9bd9",
+        "models/deepseek_v32/execution/official.py": "ce9f713fa2a7061c7b1c235dc30580d6ccd00ca468dfe7be04b904fbb208f88e",
+        "models/deepseek_v32/execution/pipeline.py": "105139329035c4750e8d2c5dd8df8dbf6c79b32d4289856c5e233a8eccc757a4",
+        "models/deepseek_v32/execution/planning.py": "185b43ae5b4733b275e3912a9a8a22646121ff71e52c407385bfad0a364508a2",
         "models/deepseek_v32/infer.py": "37c860f1aaa7f37d5ea23c851f71a49340e854b6f8930bf5e65f38ad8aa1a328",
         "models/deepseek_v32/layers.py": "c24e0d977639c01e30b41f99c4d2d76ffd8fd7e9c90e1d3ef08305ca8281e2e8",
-        "models/deepseek_v32/model.py": "02157bb5221f5fedb6f16dda0a3f58eb59c94f668dfe19d7c795923119762224",
+        "models/deepseek_v32/model.py": "12d5c6df9a1fb09f9f100ec6f014155ddbda0a9ae68553ead77ac92bd7553635",
         "models/deepseek_v32/nonmatrix.py": "5699bcd6d1f3113825e9fc76aaa0317e48828c65df624c18a8fab375c2adedc9",
         "models/deepseek_v32/projections.py": "0cf9e54a9053f0a02adfec4a929058e202d6f7dc25c5d0f8c75eebb1b6f88ae9",
         "models/deepseek_v32/replay.py": "d11e626cca4420892f8b7fc48ae1ed8c50b75a5de4d115c4dc2087b9054f6c19",
         "models/deepseek_v32/request_format.py": "104fb4d7f45c2ff69885383b2ce66a45610321066c77967be2c298ebc884f88d",
         "models/deepseek_v32/rotary.py": "ed2ca2d8ef035eaeca48135435a34e0a54df7d29a59bc34fbe67911668a9f1a2",
-        "layers/attention.py": "744be3135ab18ed9bddfbdd5945949b1dea5cb0130f4a7bea250927eeac26e5a",
-        "layers/feed_forward.py": "95dcebaa67b4f2069f580ac0831ef8335fc15b022e802708e24f58c02408de4a",
-        "layers/normalization.py": "426b2cd0e1da6c944ff661a93d55eee2b064585d5c5f6c6e6a0b80ca3bc98af0",
-        "operators/common/csrc/kv_transfer.cu": "e082e3b2ef47bad7224f14213c4fe57a6d0bda7399a556230a814d145466bf1b",
-        "operators/common/kv_transfer.py": "bc65f850a908dfc4642b7f90170513881a0a564561d9902c736d8e7d7f16b919",
+        "operators/common/csrc/kv_transfer.cu": "71821370997ee6afb92b0aa0cc7da4c813d17e407b621e2b29aeb343747e525b",
+        "operators/common/kv_transfer.py": "787cd38330ea263c5948bcb4510257d3b43fb789e93a6bee207c14a9ab5a480f",
         "operators/deepseek_v32/attention/_config.py": "f17addb344d3d2a4098b4b22f3785c968e84614b7b7895abd39a4a2a1fa3d1cb",
         "operators/deepseek_v32/attention/_validation.py": "9fcd9c2c39d9981374de81f2ad8ef1d40a48bbb929ba8e995d0a572dd11c535a",
         "operators/deepseek_v32/attention/device_only/mla.py": "9075ad9955c9958110b220acf7d21e768142e19a3552154369af4cfe1ad3676c",
         "operators/deepseek_v32/attention/offload/mla.py": "ef77dc5334139aac9cfdf0e58b1bc6d0004aec33bbeab3e3f5d8342b55e7dd56",
         "operators/deepseek_v32/attention/reference/torch.py": "819cc165096790ac68585bcc90c8147b46ee99e6c7a2a3bf616fe01cd9f9b919",
-        "operators/deepseek_v32/indexer/cache_ops.py": "9283837189aeb5b8a0e55e2e6e6a25e24e08a1bb2f545edf2bf11fec2b93175c",
+        "operators/deepseek_v32/indexer/cache_ops.py": "e40a367928993726540e0dad973d9f8b3a99ee474b61e77af83ff474fbf03a71",
         "operators/deepseek_v32/indexer/csrc/echo_cache.cuh": "409be4a062180a8c8e73c1fa783d3980cf3e9926bf53ef34ddbaefe46e2dcd12",
-        "operators/deepseek_v32/indexer/csrc/echo_dense_prefetch.cuh": "30374a97873ecd7b7d87730ba40c400e111d0e3ba32feee3982efc8c508bb59d",
+        "operators/deepseek_v32/indexer/csrc/echo_dense_prefetch.cuh": "05805ae0aa5c5335de74958445269b9585edd97b707dcd2864af60f584960f38",
         "operators/deepseek_v32/indexer/csrc/echo_helpers.cuh": "08c8f8db1ce344f2532c0913f18f9326769e4f2715bca48eed6bae1b1883ab21",
-        "operators/deepseek_v32/indexer/csrc/echo_indexer.cu": "86793e7375d8204a1fe445f42ecb4efd35d7b6083fa82ee2bf4e3e0a12da3eab",
+        "operators/deepseek_v32/indexer/csrc/echo_indexer.cu": "0b8ab7eef5e0a51f414fe437fee5d6a7e6f72692f422029d76a036eb9876b53d",
         "operators/deepseek_v32/indexer/csrc/echo_logits.cuh": "d24a4e25b82fcd3501bcd2f2276b73e26466846d99a3521c5a9e23973253fab6",
         "operators/deepseek_v32/indexer/csrc/echo_resident.cuh": "670f6b3807d642bd10653dcd36d848c9b2f9e6f643b5b037b5aec2d5993b2490",
-        "operators/deepseek_v32/indexer/csrc/echo_sparse_recall.cuh": "ddad6791b1205aa931689805018ff86a285601788c620fe4fc592846e74fd39e",
-        "operators/deepseek_v32/indexer/echo.py": "30492794f10c4bd34d730c0bb926c79827095feb59e7cad35765ff0bced4c219",
+        "operators/deepseek_v32/indexer/csrc/echo_sparse_recall.cuh": "80475b9865f471c44026c84765e7c5099d6c9737d3c7ce4247b36e66f61bfdfa",
+        "operators/deepseek_v32/indexer/echo.py": "362dc6723261b4e6ffc85cda10c770337bf1c40a9e5556212a4017f48d3d4fa1",
         "operators/deepseek_v32/indexer/official.py": "1ecc833e35c756459fa693a52cc1bc60f3afa10d9d1f2b54cd13f691217adecb",
         "operators/deepseek_v32/indexer/prefetch_hint.py": "0ba70bdc2daf4be2c385b60af69309974394ab8d237f9aaf5519fb9350b6a07c",
         "operators/deepseek_v32/indexer/quantization.py": "083b9671efe7f5dee7e71752dda3255b2d41ee45f906e48876771db5804411ea",
@@ -22341,8 +22337,8 @@
         "cache/lifecycle.py": "4e699cedce01acd99133e19c662027fb56c9abaf01a9855d09386962d688e68f",
         "cache/manager.py": "3f8a3129900f8e5e1af6005fcc187f5d430c5ce5156ca80c169384694dd39f91",
         "cache/prefix_pool.py": "1a363205c74cf382c8c4294f6ddf3358c0da31b292dc0edc16f7c80b4d77a695",
-        "cache/sparse_token_cache.py": "a48f17c9fd76891d179ac71b94c1933de206b491469436c4e1ce010fd79f3967",
-        "cache/sparse_token_pool.py": "46efe6b59a76e39075899076a3621caf5255542c67a4fd0e03ff6567d91eb2f3",
+        "cache/sparse_token_cache.py": "b45cf4f080596e3e49bd0e92b0986b01e9ef4092c0a4cf3cc7715d4039cd7a04",
+        "cache/sparse_token_pool.py": "0c8c0482df3cfcbac62ad65f34f81c82e797de0cd605bda3144cdc3be8b87e5b",
         "cache/staging.py": "95816259b638a9178f600479397d1c09d8ecae7a185b49ce6e85bdacf0a71c77",
         "executor/adapters.py": "7649ee19d5ca3490480a329b9f02286dcc8e6230da0395d097f3e2f9065e4e20",
         "executor/contracts.py": "8ca7b8af35fcd935f1ce96911bb30d04757e02f0d0b4635508eff12b38705139",
@@ -22365,10 +22361,10 @@
         "GR/workload.py": "2c16eb30be6888bf19ed07670dbc37b97e1bb18527545c8d6157dc79b6c644de",
         "evaluation/cache_memory_audit.py": "b195636f72950f7d77827324c9b1cfc29cb968103a130ae3c65172b2ecb3ef86",
         "evaluation/pool_scan_provenance.py": "004b86573af85619e56a99259e4208671c9fd94a99e0ec07c4fcfd6401dc3d9d",
-        "evaluation/provenance.py": "910fca0ee93420721b53b362960798104b58c44000c178e29ba5d9cad5c1bd1b",
+        "evaluation/provenance.py": "20593da3fcbaf8b720d507ee857799fde6ba297064fba505e7fec1054ec2295f",
         "evaluation/serving_comparison.py": "e86b8ee80c13f5234626a8a611145530f7f906c27774a80dc5aeac0605f2f3dc",
         "evaluation/validation.py": "769add375a8b3b64fe0c391c1a3067f2304c4727f1d4af199b9f5a5480ca2b74",
-        "experiments/cache_management/src/capacity_probe.py": "45285b6bb590a9f50d640d7dbf88d0bbba10cd47c962b5863dc1ae79205ccc79",
+        "experiments/cache_management/src/capacity_probe.py": "f71de8f83b29798d9230c33a8d143e91700118d02794d00f0efd0fc5555a07e8",
         ".gitmodules": "07ee3a4aeb04122ad8b5effca96b6ae06857fa12d06ccc9b77ea19706bc473f6",
         "3rdparty/DeepGEMM/.gitmodules": "a8fcf997d55e91a56eb7aa10ccb22823c02c095973d5a40c2c297e052154148e",
         "3rdparty/DeepGEMM/csrc/apis/attention.hpp": "2c0cc337cf652e177b2cea0c99c2f681f1d849c33f6a341952f1878c3bde8cd2",
@@ -23544,29 +23540,31 @@
         "3rdparty/cutlass/tools/util/include/cutlass/util/reference/host/trmm_complex.h": "63c92fad58bf7e1ab569bd46c8677654ed93fbd502e90e5b367bbb82c4c710de",
         "3rdparty/cutlass/tools/util/include/cutlass/util/tensor_view_io.h": "9bfb6bcd8cf2b0a6177c589c7ec963f3f7f4b40018ca1f4a30f1a4654ca8f190",
         "3rdparty/cutlass/tools/util/include/cutlass/util/type_traits.h": "456c182930d498142d2a6185d376d2f1d7798750341a5a055f4abe4a9b624415",
-        "experiments/deepseek_v32_echo_prefill/src/backend_provenance.py": "d25c4068f18a0ab0564abfbd82aeb5a7ee1a4d9d5d7375ae39ba1c9bf5456a5c",
+        "experiments/deepseek_v32_mfu/src/backend_provenance.py": "d25c4068f18a0ab0564abfbd82aeb5a7ee1a4d9d5d7375ae39ba1c9bf5456a5c",
         "pyproject.toml": "cac6e9271538d74e99b1bdc83c2a12648bb3c76a310af21c98aff3ec2d3761d1",
         "scripts/prepare_3rdparty.py": "7bb17486553a515cab2d42a2e7eed6e74717d186f47fa262cefbba997e53e953",
         "uv.lock": "53339af1728da3661b614d554e928408186b4fac6106a92999bd8fd69b3d2d8f",
-        "experiments/deepseek_v32_motivation/scripts/profile.sh": "8f277d9578c8abd436cfc587b485c29af668455977fd6c21231b0f53e7fec166",
+        "experiments/deepseek_v32_motivation/scripts/profile.sh": "38f37123a6c758f1cc1ef721e643b6102d3c37133fda31e888eece18e68acb4f",
         "experiments/deepseek_v32_motivation/scripts/run.sh": "5432afc8865198e47b0f378992d12dcd33750bd8154a7464cb286a1b7e1c7f24",
         "experiments/deepseek_v32_motivation/src/aggregate_mfu.py": "4f02ad11255c3de4de56998617d4af91714432c3bb250d476df56cb393cb1425",
-        "experiments/deepseek_v32_motivation/src/analyze_pipeline.py": "c3f037ccb99b019c868c29ae9168ac21e196ccbeebd22a2d575a1c3a15e4b1fb",
+        "experiments/deepseek_v32_motivation/src/analyze_pipeline.py": "8a33dd597024e859bf93643d9adc7176cdd005a51c1be8cff8ecd6d8c815fa0c",
         "experiments/deepseek_v32_motivation/src/compare_versions.py": "e36aacc58120ed8eafb4f0ea6f916f63059ed42785d7787a621d64e5bdf269c2",
-        "experiments/deepseek_v32_motivation/src/flops.py": "b467df1b7dbc27d791deb86ee43aa1257a6ee74db7b1262ec5140cc3f77e30be",
-        "experiments/deepseek_v32_motivation/src/graph_attribution.py": "b92aa753f38984d59bef0c9c8cf7b1329e53bda125d707dbeca0bf73e54063de",
-        "experiments/deepseek_v32_motivation/src/graph_instrumentation.py": "24948b5fbc163b004c2dda72147801ff307ea96363d79e502ac62d50430bdbdf",
-        "experiments/deepseek_v32_motivation/src/measure.py": "f40173938998813fbca017470f6253c7e9ecd4a752fe2a4f6b06b7d4df3f9273",
-        "experiments/deepseek_v32_motivation/src/operator_mfu.py": "f2643e050a47669d45e3e8423413dba974eacb05fd08adb5a0813882f0afe4af",
+        "experiments/deepseek_v32_motivation/src/draw_layer_schedule.py": "fcd025b3bde62b1341fc4c08a6931008fa76b155974e0dd59d238a69bb7017e2",
+        "experiments/deepseek_v32_motivation/src/flops.py": "b3105e550582f54c21b84d0c45b1b0159153504ec25f92776d2adbae143328b2",
+        "experiments/deepseek_v32_motivation/src/graph_attribution.py": "47d67592db7508773eb4e978e84bd042bc53ba39241ea2a134f90bad23bb8bc8",
+        "experiments/deepseek_v32_motivation/src/graph_instrumentation.py": "0d55238bc3c8ae4b84c9c0495c758066b81e16c24c3d53987ee473419c03f71e",
+        "experiments/deepseek_v32_motivation/src/measure.py": "1a752b593e2297163291dcc11d1271c38063846125b3d770feeace56ed93955c",
+        "experiments/deepseek_v32_motivation/src/operator_mfu.py": "b8aaab03d77e93437ad2df057ef04e5333d42e98d936e6fcc5d4b86d8d56c37e",
         "experiments/deepseek_v32_motivation/src/plot.py": "28b7ed4095d4363ebd56414212b041a11c466ca3b6359c56a834bc61bb200078",
-        "experiments/deepseek_v32_motivation/src/profile.py": "4108978e5826c960301b4745c4f474169a1980f7a53da033ae5f95e3c2b7ce19",
-        "experiments/deepseek_v32_motivation/src/publish_diagnosis.py": "90505f3bb687153925168049e16c6f616bbe8961a9240038167834c6f266c25e",
+        "experiments/deepseek_v32_motivation/src/plot_prefill_timeline.py": "92c5d2193dfd80b3ff3059b0040808ecdf25a528d4cb9fcf2ac3b166802132ae",
+        "experiments/deepseek_v32_motivation/src/plot_single_layer.py": "1266e4ae02e56da080b7dc64d1b13ee1ff301535fd4d7979c2b8052fc4e6401f",
+        "experiments/deepseek_v32_motivation/src/profile.py": "c49ce8286167db089ae00698501dab4acb6953553aae2fcb4fab3805becaa7c3",
         "experiments/deepseek_v32_motivation/src/report.py": "cd640e53a46287e4e39ae9e772901b4c10c7a5d02db7309b8af7d2dced6a26a8",
         "experiments/deepseek_v32_motivation/src/report_operator_mfu.py": "618d16aaf6d1698a80750f56793aafd79111b2b6c24f06acc0eaa917b28c74d1",
         "experiments/deepseek_v32_motivation/src/verify_profile_flops.py": "64e7af768299a98fd4406ffcd24ed09d3d5751f40170d2ff97b78349d395d1ac",
         "experiments/nosa_motivation/src/cpu_environment.py": "c841e489bfb07baf80e06bf7aa9a6a28e395fa40a89809c1a1dd7100b166c936",
-        "experiments/nosa_motivation/src/provenance.py": "04a3a484be13d1e8062ba3ef372539130cf87f452689c80c497bc550c694680a",
-        "experiments/nosa_motivation/src/validation.py": "b4638f3102877f3b6e2e249b4f8909a8d187e6b2fdc63e834bbf56b6fadd8c22"
+        "experiments/nosa_motivation/src/provenance.py": "ab523c5d933c82368f1a82a6b4d55cb0f6b6777ceae51fe5ab61690150362123",
+        "experiments/nosa_motivation/src/validation.py": "03fc94db01330d67ed9a0589b1c69c46e87399a4d362230d2255cf3752204b64"
       },
       "workload_sha256": "7e4c737a86464c12238191933e707344426231bf671a29658837e676ff5284ae",
       "memory_boundary": "Each scheme resets CUDA allocator peaks after warmup resources are released, before fresh shared allocation. Peaks include loaded weights, shared allocation and the complete measured request trace. Per-request peak fields are cumulative within that scheme. Device free-memory samples are boundaries, not process peaks.",
@@ -23574,7 +23572,7 @@
       "model_boundary": "Ten independent dense checkpoint block copies replay source 0,1,2 inputs; not a trained ten-layer model or full DeepSeek V3.2. Synthetic GR inputs do not establish task quality or representativeness.",
       "model_loaded_memory": {
         "stage": "after_model_loading",
-        "unix_time": 1791151409.7112632,
+        "unix_time": 1791222434.9416964,
         "cuda_free_bytes": 139401887744,
         "cuda_total_bytes": 150121545728,
         "torch_allocated_bytes": 9866541056,
@@ -23611,7 +23609,7 @@
           "num_host_alloc": 0,
           "num_host_free": 0
         },
-        "process_max_rss_bytes": 2938880000
+        "process_max_rss_bytes": 2952003584
       },
       "ordinary_activation_peak_bytes": null,
       "activation_boundary": "Ordinary activation peaks were not isolated from cache/workspace execution. Do not infer them by subtracting reservations from process memory peaks.",
@@ -23628,16 +23626,16 @@
           "started_empty": true,
           "resource_plan": {
             "compute_graphs_enabled": true,
-            "compute_graph_policy_revision": "deepseek-compute-islands-v2",
+            "compute_graph_policy_revision": "deepseek-compute-islands-v3-indexer-bounds",
             "compute_graph_query_sizes": [
               128,
               1024
             ],
             "compute_graph_count": 40,
-            "compute_graph_static_storage_bytes": 641820832,
-            "compute_graph_static_allocation_limit_bytes": 696356864,
+            "compute_graph_static_storage_bytes": 641866912,
+            "compute_graph_static_allocation_limit_bytes": 696402944,
             "compute_graph_private_limit_bytes": 12884901888,
-            "compute_graph_reserved_limit_bytes": 13581258752,
+            "compute_graph_reserved_limit_bytes": 13581304832,
             "compute_graph_private_limit_kind": "chosen_upper_limit_not_observed_fixed_overhead",
             "resource_mode": "fixed_pools",
             "cache_policy_revision": "echo-global-pages-fifo-v1",
@@ -23665,7 +23663,7 @@
             "backend": "cpython_native",
             "fallback_reason": null,
             "requested_native": true,
-            "fingerprint": "941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf",
+            "fingerprint": "b2417ad2f63b6e963d43135e555cf21a49a8ea00fc7a0eb868733c7e635dd080",
             "build_identity": {
               "schema_version": 1,
               "python": "3.12.13 (main, Jun 11 2026, 04:03:26) [Clang 22.1.3 ]",
@@ -23697,7 +23695,7 @@
                 "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/serving/csrc/token_validation.cpp"
               ],
               "compiler_environment": {
-                "PATH": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin:/usr/local/cuda/bin:/usr/local/bin:/usr/bin:/bin",
+                "PATH": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin:/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin:/usr/local/cuda/bin:/usr/local/bin:/usr/bin:/bin",
                 "LC_ALL": "C"
               },
               "source_and_dependency_sha256": {
@@ -24012,11 +24010,11 @@
                 "/usr/libexec/gcc/x86_64-linux-gnu/13/collect2": "4d1f341ae5b763b513258ee2812422a45e063c30a2f1924a0cf63d3699f3a158"
               }
             },
-            "loaded_binary_path": "/root/.cache/cxldsagr/token-validation/941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so",
+            "loaded_binary_path": "/root/.cache/cxldsagr/token-validation/b2417ad2f63b6e963d43135e555cf21a49a8ea00fc7a0eb868733c7e635dd080/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so",
             "loaded_binary_sha256": "ed79d3e717a464379b4f638f608853277b65f602ef05ca5b293e3afa6025cd40"
           },
           "shared_reservation": {
-            "hbm": 14804443648,
+            "hbm": 14804489728,
             "dram": 40
           },
           "admission_page_capacity": 0,
@@ -24044,19 +24042,19 @@
             "linear_backend": "fp8",
             "compute_graphs": {
               "enabled": true,
-              "policy_revision": "deepseek-compute-islands-v2",
+              "policy_revision": "deepseek-compute-islands-v3-indexer-bounds",
               "allocated": true,
-              "static_storage_bytes": 641820832,
-              "static_allocated_bytes": 644173824,
+              "static_storage_bytes": 641866912,
+              "static_allocated_bytes": 644219904,
               "private_reserved_bytes": 5603590144,
               "chosen_private_limit_bytes": 12884901888,
               "memory_at_allocation": {
-                "pytorch_allocated": 12837470720,
+                "pytorch_allocated": 12837562880,
                 "pytorch_reserved": 16210984960,
                 "device_used": 17006919680,
                 "device_total": 150121545728
               },
-              "setup_seconds": 0.26791889301966876,
+              "setup_seconds": 0.3427651230012998,
               "eager_fallbacks": 0,
               "captured_precision_policy": {
                 "float32_matmul_precision": "highest",
@@ -24225,16 +24223,16 @@
             "extend_chunk_size": null,
             "resource_plan": {
               "compute_graphs_enabled": true,
-              "compute_graph_policy_revision": "deepseek-compute-islands-v2",
+              "compute_graph_policy_revision": "deepseek-compute-islands-v3-indexer-bounds",
               "compute_graph_query_sizes": [
                 128,
                 1024
               ],
               "compute_graph_count": 40,
-              "compute_graph_static_storage_bytes": 641820832,
-              "compute_graph_static_allocation_limit_bytes": 696356864,
+              "compute_graph_static_storage_bytes": 641866912,
+              "compute_graph_static_allocation_limit_bytes": 696402944,
               "compute_graph_private_limit_bytes": 12884901888,
-              "compute_graph_reserved_limit_bytes": 13581258752,
+              "compute_graph_reserved_limit_bytes": 13581304832,
               "compute_graph_private_limit_kind": "chosen_upper_limit_not_observed_fixed_overhead",
               "resource_mode": "fixed_pools",
               "cache_policy_revision": "echo-global-pages-fifo-v1",
@@ -24275,11 +24273,11 @@
             "endpoint_parameters": 1853365248,
             "total_parameters": 7827793408
           },
-          "torch_peak_allocated_bytes": 15587798528,
+          "torch_peak_allocated_bytes": 15587890688,
           "torch_peak_reserved_bytes": 25377636352,
           "before_cache_allocation": {
             "stage": "hbm/before_cache_allocation",
-            "unix_time": 1791151419.8396976,
+            "unix_time": 1791222444.9882083,
             "cuda_free_bytes": 139351556096,
             "cuda_total_bytes": 150121545728,
             "torch_allocated_bytes": 9901661184,
@@ -24303,11 +24301,11 @@
               "allocations.current": 1,
               "allocations.freed": 0,
               "allocations.peak": 1,
-              "host_alloc_time.avg": 176,
+              "host_alloc_time.avg": 214,
               "host_alloc_time.count": 1,
-              "host_alloc_time.max": 176,
-              "host_alloc_time.min": 176,
-              "host_alloc_time.total": 176,
+              "host_alloc_time.max": 214,
+              "host_alloc_time.min": 214,
+              "host_alloc_time.total": 214,
               "host_free_time.avg": 0,
               "host_free_time.count": 0,
               "host_free_time.max": 0,
@@ -24316,10 +24314,10 @@
               "num_host_alloc": 1,
               "num_host_free": 0
             },
-            "process_max_rss_bytes": 2938880000
+            "process_max_rss_bytes": 2952003584
           },
           "native_artifacts_before": {
-            "/root/.cache/cxldsagr/token-validation/941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so": {
+            "/root/.cache/cxldsagr/token-validation/b2417ad2f63b6e963d43135e555cf21a49a8ea00fc7a0eb868733c7e635dd080/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so": {
               "size": 16456,
               "sha256": "ed79d3e717a464379b4f638f608853277b65f602ef05ca5b293e3afa6025cd40"
             },
@@ -24401,7 +24399,7 @@
             }
           },
           "native_artifacts_after": {
-            "/root/.cache/cxldsagr/token-validation/941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so": {
+            "/root/.cache/cxldsagr/token-validation/b2417ad2f63b6e963d43135e555cf21a49a8ea00fc7a0eb868733c7e635dd080/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so": {
               "size": 16456,
               "sha256": "ed79d3e717a464379b4f638f608853277b65f602ef05ca5b293e3afa6025cd40"
             },
@@ -24495,22 +24493,23 @@
           "started_empty": true,
           "resource_plan": {
             "compute_graphs_enabled": true,
-            "compute_graph_policy_revision": "deepseek-compute-islands-v2",
+            "compute_graph_policy_revision": "deepseek-compute-islands-v3-indexer-bounds",
             "compute_graph_query_sizes": [
               128,
               1024
             ],
             "compute_graph_count": 40,
-            "compute_graph_static_storage_bytes": 641820832,
-            "compute_graph_static_allocation_limit_bytes": 696356864,
+            "compute_graph_static_storage_bytes": 641866912,
+            "compute_graph_static_allocation_limit_bytes": 696402944,
             "compute_graph_private_limit_bytes": 12884901888,
-            "compute_graph_reserved_limit_bytes": 13581258752,
+            "compute_graph_reserved_limit_bytes": 13581304832,
             "compute_graph_private_limit_kind": "chosen_upper_limit_not_observed_fixed_overhead",
             "cache_policy_revision": "echo-global-pages-fifo-v1",
             "resource_mode": "fixed_pools",
             "pool_scope": "backend_per_layer",
             "shared_token_pool": true,
             "dense_fetch_policy": null,
+            "dense_contiguous": false,
             "host_arena_tokens": 16777216,
             "sparse_pool_tokens": 65536,
             "max_session_capacity": 65664,
@@ -24527,13 +24526,14 @@
             "workspace_cpu_metrics_bytes": 24,
             "workspace_cpu_bytes": 40,
             "workspace_metadata_bytes": 1077936192,
+            "workspace_dense_ticket_bytes": 0,
             "max_inflight_writes": 2
           },
           "token_validation": {
             "backend": "cpython_native",
             "fallback_reason": null,
             "requested_native": true,
-            "fingerprint": "941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf",
+            "fingerprint": "b2417ad2f63b6e963d43135e555cf21a49a8ea00fc7a0eb868733c7e635dd080",
             "build_identity": {
               "schema_version": 1,
               "python": "3.12.13 (main, Jun 11 2026, 04:03:26) [Clang 22.1.3 ]",
@@ -24565,7 +24565,7 @@
                 "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/serving/csrc/token_validation.cpp"
               ],
               "compiler_environment": {
-                "PATH": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin:/usr/local/cuda/bin:/usr/local/bin:/usr/bin:/bin",
+                "PATH": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin:/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin:/usr/local/cuda/bin:/usr/local/bin:/usr/bin:/bin",
                 "LC_ALL": "C"
               },
               "source_and_dependency_sha256": {
@@ -24880,11 +24880,11 @@
                 "/usr/libexec/gcc/x86_64-linux-gnu/13/collect2": "4d1f341ae5b763b513258ee2812422a45e063c30a2f1924a0cf63d3699f3a158"
               }
             },
-            "loaded_binary_path": "/root/.cache/cxldsagr/token-validation/941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so",
+            "loaded_binary_path": "/root/.cache/cxldsagr/token-validation/b2417ad2f63b6e963d43135e555cf21a49a8ea00fc7a0eb868733c7e635dd080/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so",
             "loaded_binary_sha256": "ed79d3e717a464379b4f638f608853277b65f602ef05ca5b293e3afa6025cd40"
           },
           "shared_reservation": {
-            "hbm": 17327632502,
+            "hbm": 17327678582,
             "dram": 343598432296
           },
           "admission_page_capacity": 262144,
@@ -24912,19 +24912,19 @@
             "linear_backend": "fp8",
             "compute_graphs": {
               "enabled": true,
-              "policy_revision": "deepseek-compute-islands-v2",
+              "policy_revision": "deepseek-compute-islands-v3-indexer-bounds",
               "allocated": true,
-              "static_storage_bytes": 641820832,
-              "static_allocated_bytes": 644535296,
+              "static_storage_bytes": 641866912,
+              "static_allocated_bytes": 644581376,
               "private_reserved_bytes": 5603590144,
               "chosen_private_limit_bytes": 12884901888,
               "memory_at_allocation": {
-                "pytorch_allocated": 14283111424,
+                "pytorch_allocated": 14283203584,
                 "pytorch_reserved": 17668505600,
-                "device_used": 19139723264,
+                "device_used": 19137626112,
                 "device_total": 150121545728
               },
-              "setup_seconds": 0.269438200048171,
+              "setup_seconds": 0.2701552159851417,
               "eager_fallbacks": 0,
               "captured_precision_policy": {
                 "float32_matmul_precision": "highest",
@@ -25093,22 +25093,23 @@
             "extend_chunk_size": null,
             "resource_plan": {
               "compute_graphs_enabled": true,
-              "compute_graph_policy_revision": "deepseek-compute-islands-v2",
+              "compute_graph_policy_revision": "deepseek-compute-islands-v3-indexer-bounds",
               "compute_graph_query_sizes": [
                 128,
                 1024
               ],
               "compute_graph_count": 40,
-              "compute_graph_static_storage_bytes": 641820832,
-              "compute_graph_static_allocation_limit_bytes": 696356864,
+              "compute_graph_static_storage_bytes": 641866912,
+              "compute_graph_static_allocation_limit_bytes": 696402944,
               "compute_graph_private_limit_bytes": 12884901888,
-              "compute_graph_reserved_limit_bytes": 13581258752,
+              "compute_graph_reserved_limit_bytes": 13581304832,
               "compute_graph_private_limit_kind": "chosen_upper_limit_not_observed_fixed_overhead",
               "cache_policy_revision": "echo-global-pages-fifo-v1",
               "resource_mode": "fixed_pools",
               "pool_scope": "backend_per_layer",
               "shared_token_pool": true,
               "dense_fetch_policy": null,
+              "dense_contiguous": false,
               "host_arena_tokens": 16777216,
               "sparse_pool_tokens": 65536,
               "max_session_capacity": 65664,
@@ -25125,6 +25126,7 @@
               "workspace_cpu_metrics_bytes": 24,
               "workspace_cpu_bytes": 40,
               "workspace_metadata_bytes": 1077936192,
+              "workspace_dense_ticket_bytes": 0,
               "max_inflight_writes": 2
             },
             "dense_staging_allocated_bytes": 0,
@@ -25144,51 +25146,51 @@
             "endpoint_parameters": 1853365248,
             "total_parameters": 7827793408
           },
-          "torch_peak_allocated_bytes": 17563369472,
+          "torch_peak_allocated_bytes": 17563461632,
           "torch_peak_reserved_bytes": 26088570880,
           "before_cache_allocation": {
             "stage": "echo/before_cache_allocation",
-            "unix_time": 1791151532.0095432,
-            "cuda_free_bytes": 138676273152,
+            "unix_time": 1791222558.5426466,
+            "cuda_free_bytes": 138678370304,
             "cuda_total_bytes": 150121545728,
             "torch_allocated_bytes": 9901661184,
             "torch_reserved_bytes": 9974054912,
             "torch_peak_allocated_bytes": 9901661184,
             "torch_peak_reserved_bytes": 9974054912,
             "host_allocator_counters": {
-              "active_bytes.allocated": 343597384920,
-              "active_bytes.current": 343597384920,
+              "active_bytes.allocated": 343597384880,
+              "active_bytes.current": 343597384880,
               "active_bytes.freed": 0,
-              "active_bytes.peak": 343597384920,
-              "active_requests.allocated": 170,
-              "active_requests.current": 170,
+              "active_bytes.peak": 343597384880,
+              "active_requests.allocated": 160,
+              "active_requests.current": 160,
               "active_requests.freed": 0,
-              "active_requests.peak": 170,
-              "allocated_bytes.allocated": 343597383708,
-              "allocated_bytes.current": 343597383692,
+              "active_requests.peak": 160,
+              "allocated_bytes.allocated": 343597383704,
+              "allocated_bytes.current": 343597383688,
               "allocated_bytes.freed": 16,
-              "allocated_bytes.peak": 343597383692,
-              "allocations.allocated": 14,
-              "allocations.current": 12,
+              "allocated_bytes.peak": 343597383688,
+              "allocations.allocated": 13,
+              "allocations.current": 11,
               "allocations.freed": 2,
-              "allocations.peak": 12,
-              "host_alloc_time.avg": 2321838,
-              "host_alloc_time.count": 14,
-              "host_alloc_time.max": 3558273,
-              "host_alloc_time.min": 140,
-              "host_alloc_time.total": 32505737,
-              "host_free_time.avg": 73,
+              "allocations.peak": 11,
+              "host_alloc_time.avg": 2605008,
+              "host_alloc_time.count": 13,
+              "host_alloc_time.max": 4220959,
+              "host_alloc_time.min": 146,
+              "host_alloc_time.total": 33865109,
+              "host_free_time.avg": 80,
               "host_free_time.count": 2,
-              "host_free_time.max": 78,
-              "host_free_time.min": 68,
-              "host_free_time.total": 146,
-              "num_host_alloc": 14,
+              "host_free_time.max": 83,
+              "host_free_time.min": 77,
+              "host_free_time.total": 160,
+              "num_host_alloc": 13,
               "num_host_free": 2
             },
-            "process_max_rss_bytes": 345687289856
+            "process_max_rss_bytes": 345693028352
           },
           "native_artifacts_before": {
-            "/root/.cache/cxldsagr/token-validation/941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so": {
+            "/root/.cache/cxldsagr/token-validation/b2417ad2f63b6e963d43135e555cf21a49a8ea00fc7a0eb868733c7e635dd080/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so": {
               "size": 16456,
               "sha256": "ed79d3e717a464379b4f638f608853277b65f602ef05ca5b293e3afa6025cd40"
             },
@@ -25204,13 +25206,13 @@
               "size": 5962688,
               "sha256": "a63d4dfe772493fd9cbc6e65ec9fa92ab77564ab30ef8aef4a6f0b1dec47ffa8"
             },
-            "/root/.cache/tvm-ffi/cxldsagr_echo_indexer_513a53c54269f9bc_1fa11185f6354333/cxldsagr_echo_indexer_513a53c54269f9bc.so": {
-              "size": 1444432,
-              "sha256": "eafdc421b8227425371bba8258894111096228f2e61e68c40394a85f5fc2cfa4"
+            "/root/.cache/tvm-ffi/cxldsagr_echo_indexer_e976930a2965e6ee_1fa11185f6354333/cxldsagr_echo_indexer_e976930a2965e6ee.so": {
+              "size": 1439792,
+              "sha256": "e88701d5787afd97a9c218f928ccfddc9547a691a7cd6a24aa5ad9d4d0101f15"
             },
             "/root/.cache/tvm-ffi/cxldsagr_kv_transfer_672412fcb6ae32f3/cxldsagr_kv_transfer.so": {
-              "size": 78752,
-              "sha256": "fa7cd702d5a267e711e2caa997784d7534497830e47e1c7ae757a1ed4e8cee86"
+              "size": 164496,
+              "sha256": "561bc3cbe14edea4930b202bc7a3ff0763864d15312d92de7e772664d04b1b66"
             },
             "/root/.venv/lib/python3.12/site-packages/nvidia/cu13/lib/libcublas.so.13": {
               "size": 54177976,
@@ -25278,7 +25280,7 @@
             }
           },
           "native_artifacts_after": {
-            "/root/.cache/cxldsagr/token-validation/941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so": {
+            "/root/.cache/cxldsagr/token-validation/b2417ad2f63b6e963d43135e555cf21a49a8ea00fc7a0eb868733c7e635dd080/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so": {
               "size": 16456,
               "sha256": "ed79d3e717a464379b4f638f608853277b65f602ef05ca5b293e3afa6025cd40"
             },
@@ -25294,13 +25296,13 @@
               "size": 5962688,
               "sha256": "a63d4dfe772493fd9cbc6e65ec9fa92ab77564ab30ef8aef4a6f0b1dec47ffa8"
             },
-            "/root/.cache/tvm-ffi/cxldsagr_echo_indexer_513a53c54269f9bc_1fa11185f6354333/cxldsagr_echo_indexer_513a53c54269f9bc.so": {
-              "size": 1444432,
-              "sha256": "eafdc421b8227425371bba8258894111096228f2e61e68c40394a85f5fc2cfa4"
+            "/root/.cache/tvm-ffi/cxldsagr_echo_indexer_e976930a2965e6ee_1fa11185f6354333/cxldsagr_echo_indexer_e976930a2965e6ee.so": {
+              "size": 1439792,
+              "sha256": "e88701d5787afd97a9c218f928ccfddc9547a691a7cd6a24aa5ad9d4d0101f15"
             },
             "/root/.cache/tvm-ffi/cxldsagr_kv_transfer_672412fcb6ae32f3/cxldsagr_kv_transfer.so": {
-              "size": 78752,
-              "sha256": "fa7cd702d5a267e711e2caa997784d7534497830e47e1c7ae757a1ed4e8cee86"
+              "size": 164496,
+              "sha256": "561bc3cbe14edea4930b202bc7a3ff0763864d15312d92de7e772664d04b1b66"
             },
             "/root/.venv/lib/python3.12/site-packages/nvidia/cu13/lib/libcublas.so.13": {
               "size": 54177976,
@@ -25380,22 +25382,23 @@
           "started_empty": true,
           "resource_plan": {
             "compute_graphs_enabled": true,
-            "compute_graph_policy_revision": "deepseek-compute-islands-v2",
+            "compute_graph_policy_revision": "deepseek-compute-islands-v3-indexer-bounds",
             "compute_graph_query_sizes": [
               128,
               1024
             ],
             "compute_graph_count": 40,
-            "compute_graph_static_storage_bytes": 641820832,
-            "compute_graph_static_allocation_limit_bytes": 696356864,
+            "compute_graph_static_storage_bytes": 641866912,
+            "compute_graph_static_allocation_limit_bytes": 696402944,
             "compute_graph_private_limit_bytes": 12884901888,
-            "compute_graph_reserved_limit_bytes": 13581258752,
+            "compute_graph_reserved_limit_bytes": 13581304832,
             "compute_graph_private_limit_kind": "chosen_upper_limit_not_observed_fixed_overhead",
             "cache_policy_revision": "echo-global-pages-fifo-v1",
             "resource_mode": "fixed_pools",
             "pool_scope": "backend_per_layer",
             "shared_token_pool": true,
             "dense_fetch_policy": null,
+            "dense_contiguous": false,
             "host_arena_tokens": 16777216,
             "sparse_pool_tokens": 65536,
             "max_session_capacity": 65664,
@@ -25412,13 +25415,14 @@
             "workspace_cpu_metrics_bytes": 24,
             "workspace_cpu_bytes": 40,
             "workspace_metadata_bytes": 1077936192,
+            "workspace_dense_ticket_bytes": 0,
             "max_inflight_writes": 2
           },
           "token_validation": {
             "backend": "cpython_native",
             "fallback_reason": null,
             "requested_native": true,
-            "fingerprint": "941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf",
+            "fingerprint": "b2417ad2f63b6e963d43135e555cf21a49a8ea00fc7a0eb868733c7e635dd080",
             "build_identity": {
               "schema_version": 1,
               "python": "3.12.13 (main, Jun 11 2026, 04:03:26) [Clang 22.1.3 ]",
@@ -25450,7 +25454,7 @@
                 "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/serving/csrc/token_validation.cpp"
               ],
               "compiler_environment": {
-                "PATH": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin:/usr/local/cuda/bin:/usr/local/bin:/usr/bin:/bin",
+                "PATH": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin:/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin:/usr/local/cuda/bin:/usr/local/bin:/usr/bin:/bin",
                 "LC_ALL": "C"
               },
               "source_and_dependency_sha256": {
@@ -25765,11 +25769,11 @@
                 "/usr/libexec/gcc/x86_64-linux-gnu/13/collect2": "4d1f341ae5b763b513258ee2812422a45e063c30a2f1924a0cf63d3699f3a158"
               }
             },
-            "loaded_binary_path": "/root/.cache/cxldsagr/token-validation/941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so",
+            "loaded_binary_path": "/root/.cache/cxldsagr/token-validation/b2417ad2f63b6e963d43135e555cf21a49a8ea00fc7a0eb868733c7e635dd080/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so",
             "loaded_binary_sha256": "ed79d3e717a464379b4f638f608853277b65f602ef05ca5b293e3afa6025cd40"
           },
           "shared_reservation": {
-            "hbm": 17327632502,
+            "hbm": 17327678582,
             "dram": 343598432296
           },
           "admission_page_capacity": 262144,
@@ -25797,19 +25801,19 @@
             "linear_backend": "fp8",
             "compute_graphs": {
               "enabled": true,
-              "policy_revision": "deepseek-compute-islands-v2",
+              "policy_revision": "deepseek-compute-islands-v3-indexer-bounds",
               "allocated": true,
-              "static_storage_bytes": 641820832,
-              "static_allocated_bytes": 644535296,
+              "static_storage_bytes": 641866912,
+              "static_allocated_bytes": 644581376,
               "private_reserved_bytes": 5603590144,
               "chosen_private_limit_bytes": 12884901888,
               "memory_at_allocation": {
-                "pytorch_allocated": 14283111424,
+                "pytorch_allocated": 14283203584,
                 "pytorch_reserved": 17668505600,
-                "device_used": 19139723264,
+                "device_used": 19137626112,
                 "device_total": 150121545728
               },
-              "setup_seconds": 0.2692219540476799,
+              "setup_seconds": 0.27843812201172113,
               "eager_fallbacks": 0,
               "captured_precision_policy": {
                 "float32_matmul_precision": "highest",
@@ -25978,22 +25982,23 @@
             "extend_chunk_size": null,
             "resource_plan": {
               "compute_graphs_enabled": true,
-              "compute_graph_policy_revision": "deepseek-compute-islands-v2",
+              "compute_graph_policy_revision": "deepseek-compute-islands-v3-indexer-bounds",
               "compute_graph_query_sizes": [
                 128,
                 1024
               ],
               "compute_graph_count": 40,
-              "compute_graph_static_storage_bytes": 641820832,
-              "compute_graph_static_allocation_limit_bytes": 696356864,
+              "compute_graph_static_storage_bytes": 641866912,
+              "compute_graph_static_allocation_limit_bytes": 696402944,
               "compute_graph_private_limit_bytes": 12884901888,
-              "compute_graph_reserved_limit_bytes": 13581258752,
+              "compute_graph_reserved_limit_bytes": 13581304832,
               "compute_graph_private_limit_kind": "chosen_upper_limit_not_observed_fixed_overhead",
               "cache_policy_revision": "echo-global-pages-fifo-v1",
               "resource_mode": "fixed_pools",
               "pool_scope": "backend_per_layer",
               "shared_token_pool": true,
               "dense_fetch_policy": null,
+              "dense_contiguous": false,
               "host_arena_tokens": 16777216,
               "sparse_pool_tokens": 65536,
               "max_session_capacity": 65664,
@@ -26010,6 +26015,7 @@
               "workspace_cpu_metrics_bytes": 24,
               "workspace_cpu_bytes": 40,
               "workspace_metadata_bytes": 1077936192,
+              "workspace_dense_ticket_bytes": 0,
               "max_inflight_writes": 2
             },
             "dense_staging_allocated_bytes": 0,
@@ -26029,51 +26035,51 @@
             "endpoint_parameters": 1853365248,
             "total_parameters": 7827793408
           },
-          "torch_peak_allocated_bytes": 17565007872,
+          "torch_peak_allocated_bytes": 17565100032,
           "torch_peak_reserved_bytes": 26088570880,
           "before_cache_allocation": {
             "stage": "serial_sparse/before_cache_allocation",
-            "unix_time": 1791151578.148397,
-            "cuda_free_bytes": 138676273152,
+            "unix_time": 1791222604.5664706,
+            "cuda_free_bytes": 138678370304,
             "cuda_total_bytes": 150121545728,
             "torch_allocated_bytes": 9901661184,
             "torch_reserved_bytes": 9974054912,
             "torch_peak_allocated_bytes": 9901661184,
             "torch_peak_reserved_bytes": 9974054912,
             "host_allocator_counters": {
-              "active_bytes.allocated": 1030792153808,
-              "active_bytes.current": 1030792153828,
+              "active_bytes.allocated": 1030792153088,
+              "active_bytes.current": 1030792153108,
               "active_bytes.freed": -20,
-              "active_bytes.peak": 1030792153828,
-              "active_requests.allocated": 466,
-              "active_requests.current": 446,
+              "active_bytes.peak": 1030792153108,
+              "active_requests.allocated": 286,
+              "active_requests.current": 266,
               "active_requests.freed": 20,
-              "active_requests.peak": 446,
-              "allocated_bytes.allocated": 343597383732,
-              "allocated_bytes.current": 343597383692,
-              "allocated_bytes.freed": 40,
-              "allocated_bytes.peak": 343597383692,
-              "allocations.allocated": 18,
-              "allocations.current": 12,
-              "allocations.freed": 6,
-              "allocations.peak": 12,
-              "host_alloc_time.avg": 1805919,
-              "host_alloc_time.count": 18,
-              "host_alloc_time.max": 3558273,
-              "host_alloc_time.min": 140,
-              "host_alloc_time.total": 32506543,
-              "host_free_time.avg": 66,
-              "host_free_time.count": 6,
-              "host_free_time.max": 80,
-              "host_free_time.min": 46,
-              "host_free_time.total": 399,
-              "num_host_alloc": 18,
-              "num_host_free": 6
+              "active_requests.peak": 266,
+              "allocated_bytes.allocated": 343597383720,
+              "allocated_bytes.current": 343597383688,
+              "allocated_bytes.freed": 32,
+              "allocated_bytes.peak": 343597383688,
+              "allocations.allocated": 15,
+              "allocations.current": 11,
+              "allocations.freed": 4,
+              "allocations.peak": 11,
+              "host_alloc_time.avg": 2257695,
+              "host_alloc_time.count": 15,
+              "host_alloc_time.max": 4220959,
+              "host_alloc_time.min": 146,
+              "host_alloc_time.total": 33865433,
+              "host_free_time.avg": 80,
+              "host_free_time.count": 4,
+              "host_free_time.max": 83,
+              "host_free_time.min": 77,
+              "host_free_time.total": 321,
+              "num_host_alloc": 15,
+              "num_host_free": 4
             },
-            "process_max_rss_bytes": 345700466688
+            "process_max_rss_bytes": 345703919616
           },
           "native_artifacts_before": {
-            "/root/.cache/cxldsagr/token-validation/941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so": {
+            "/root/.cache/cxldsagr/token-validation/b2417ad2f63b6e963d43135e555cf21a49a8ea00fc7a0eb868733c7e635dd080/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so": {
               "size": 16456,
               "sha256": "ed79d3e717a464379b4f638f608853277b65f602ef05ca5b293e3afa6025cd40"
             },
@@ -26089,13 +26095,13 @@
               "size": 5962688,
               "sha256": "a63d4dfe772493fd9cbc6e65ec9fa92ab77564ab30ef8aef4a6f0b1dec47ffa8"
             },
-            "/root/.cache/tvm-ffi/cxldsagr_echo_indexer_513a53c54269f9bc_1fa11185f6354333/cxldsagr_echo_indexer_513a53c54269f9bc.so": {
-              "size": 1444432,
-              "sha256": "eafdc421b8227425371bba8258894111096228f2e61e68c40394a85f5fc2cfa4"
+            "/root/.cache/tvm-ffi/cxldsagr_echo_indexer_e976930a2965e6ee_1fa11185f6354333/cxldsagr_echo_indexer_e976930a2965e6ee.so": {
+              "size": 1439792,
+              "sha256": "e88701d5787afd97a9c218f928ccfddc9547a691a7cd6a24aa5ad9d4d0101f15"
             },
             "/root/.cache/tvm-ffi/cxldsagr_kv_transfer_672412fcb6ae32f3/cxldsagr_kv_transfer.so": {
-              "size": 78752,
-              "sha256": "fa7cd702d5a267e711e2caa997784d7534497830e47e1c7ae757a1ed4e8cee86"
+              "size": 164496,
+              "sha256": "561bc3cbe14edea4930b202bc7a3ff0763864d15312d92de7e772664d04b1b66"
             },
             "/root/.venv/lib/python3.12/site-packages/nvidia/cu13/lib/libcublas.so.13": {
               "size": 54177976,
@@ -26163,7 +26169,7 @@
             }
           },
           "native_artifacts_after": {
-            "/root/.cache/cxldsagr/token-validation/941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so": {
+            "/root/.cache/cxldsagr/token-validation/b2417ad2f63b6e963d43135e555cf21a49a8ea00fc7a0eb868733c7e635dd080/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so": {
               "size": 16456,
               "sha256": "ed79d3e717a464379b4f638f608853277b65f602ef05ca5b293e3afa6025cd40"
             },
@@ -26179,13 +26185,13 @@
               "size": 5962688,
               "sha256": "a63d4dfe772493fd9cbc6e65ec9fa92ab77564ab30ef8aef4a6f0b1dec47ffa8"
             },
-            "/root/.cache/tvm-ffi/cxldsagr_echo_indexer_513a53c54269f9bc_1fa11185f6354333/cxldsagr_echo_indexer_513a53c54269f9bc.so": {
-              "size": 1444432,
-              "sha256": "eafdc421b8227425371bba8258894111096228f2e61e68c40394a85f5fc2cfa4"
+            "/root/.cache/tvm-ffi/cxldsagr_echo_indexer_e976930a2965e6ee_1fa11185f6354333/cxldsagr_echo_indexer_e976930a2965e6ee.so": {
+              "size": 1439792,
+              "sha256": "e88701d5787afd97a9c218f928ccfddc9547a691a7cd6a24aa5ad9d4d0101f15"
             },
             "/root/.cache/tvm-ffi/cxldsagr_kv_transfer_672412fcb6ae32f3/cxldsagr_kv_transfer.so": {
-              "size": 78752,
-              "sha256": "fa7cd702d5a267e711e2caa997784d7534497830e47e1c7ae757a1ed4e8cee86"
+              "size": 164496,
+              "sha256": "561bc3cbe14edea4930b202bc7a3ff0763864d15312d92de7e772664d04b1b66"
             },
             "/root/.venv/lib/python3.12/site-packages/nvidia/cu13/lib/libcublas.so.13": {
               "size": 54177976,
@@ -26265,22 +26271,23 @@
           "started_empty": true,
           "resource_plan": {
             "compute_graphs_enabled": true,
-            "compute_graph_policy_revision": "deepseek-compute-islands-v2",
+            "compute_graph_policy_revision": "deepseek-compute-islands-v3-indexer-bounds",
             "compute_graph_query_sizes": [
               128,
               1024
             ],
             "compute_graph_count": 40,
-            "compute_graph_static_storage_bytes": 641820832,
-            "compute_graph_static_allocation_limit_bytes": 696356864,
+            "compute_graph_static_storage_bytes": 641866912,
+            "compute_graph_static_allocation_limit_bytes": 696402944,
             "compute_graph_private_limit_bytes": 12884901888,
-            "compute_graph_reserved_limit_bytes": 13581258752,
+            "compute_graph_reserved_limit_bytes": 13581304832,
             "compute_graph_private_limit_kind": "chosen_upper_limit_not_observed_fixed_overhead",
             "cache_policy_revision": "echo-global-pages-fifo-v1",
             "resource_mode": "fixed_pools",
             "pool_scope": "backend_per_layer",
             "shared_token_pool": true,
-            "dense_fetch_policy": "all_history_cache_misses_next_layer",
+            "dense_fetch_policy": "contiguous_history_cuda_memcpy_async_next_layer_v1",
+            "dense_contiguous": true,
             "host_arena_tokens": 16777216,
             "sparse_pool_tokens": 65536,
             "max_session_capacity": 65664,
@@ -26297,13 +26304,14 @@
             "workspace_cpu_metrics_bytes": 24,
             "workspace_cpu_bytes": 40,
             "workspace_metadata_bytes": 1077936192,
+            "workspace_dense_ticket_bytes": 0,
             "max_inflight_writes": 2
           },
           "token_validation": {
             "backend": "cpython_native",
             "fallback_reason": null,
             "requested_native": true,
-            "fingerprint": "941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf",
+            "fingerprint": "b2417ad2f63b6e963d43135e555cf21a49a8ea00fc7a0eb868733c7e635dd080",
             "build_identity": {
               "schema_version": 1,
               "python": "3.12.13 (main, Jun 11 2026, 04:03:26) [Clang 22.1.3 ]",
@@ -26335,7 +26343,7 @@
                 "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/serving/csrc/token_validation.cpp"
               ],
               "compiler_environment": {
-                "PATH": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin:/usr/local/cuda/bin:/usr/local/bin:/usr/bin:/bin",
+                "PATH": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin:/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin:/usr/local/cuda/bin:/usr/local/bin:/usr/bin:/bin",
                 "LC_ALL": "C"
               },
               "source_and_dependency_sha256": {
@@ -26650,11 +26658,11 @@
                 "/usr/libexec/gcc/x86_64-linux-gnu/13/collect2": "4d1f341ae5b763b513258ee2812422a45e063c30a2f1924a0cf63d3699f3a158"
               }
             },
-            "loaded_binary_path": "/root/.cache/cxldsagr/token-validation/941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so",
+            "loaded_binary_path": "/root/.cache/cxldsagr/token-validation/b2417ad2f63b6e963d43135e555cf21a49a8ea00fc7a0eb868733c7e635dd080/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so",
             "loaded_binary_sha256": "ed79d3e717a464379b4f638f608853277b65f602ef05ca5b293e3afa6025cd40"
           },
           "shared_reservation": {
-            "hbm": 17327632502,
+            "hbm": 17327678582,
             "dram": 343598432296
           },
           "admission_page_capacity": 262144,
@@ -26682,19 +26690,19 @@
             "linear_backend": "fp8",
             "compute_graphs": {
               "enabled": true,
-              "policy_revision": "deepseek-compute-islands-v2",
+              "policy_revision": "deepseek-compute-islands-v3-indexer-bounds",
               "allocated": true,
-              "static_storage_bytes": 641820832,
-              "static_allocated_bytes": 644535296,
+              "static_storage_bytes": 641866912,
+              "static_allocated_bytes": 644581376,
               "private_reserved_bytes": 5603590144,
               "chosen_private_limit_bytes": 12884901888,
               "memory_at_allocation": {
-                "pytorch_allocated": 14283111424,
+                "pytorch_allocated": 14283203584,
                 "pytorch_reserved": 17668505600,
                 "device_used": 19139723264,
                 "device_total": 150121545728
               },
-              "setup_seconds": 0.29940866597462445,
+              "setup_seconds": 0.3427113650832325,
               "eager_fallbacks": 0,
               "captured_precision_policy": {
                 "float32_matmul_precision": "highest",
@@ -26863,22 +26871,23 @@
             "extend_chunk_size": null,
             "resource_plan": {
               "compute_graphs_enabled": true,
-              "compute_graph_policy_revision": "deepseek-compute-islands-v2",
+              "compute_graph_policy_revision": "deepseek-compute-islands-v3-indexer-bounds",
               "compute_graph_query_sizes": [
                 128,
                 1024
               ],
               "compute_graph_count": 40,
-              "compute_graph_static_storage_bytes": 641820832,
-              "compute_graph_static_allocation_limit_bytes": 696356864,
+              "compute_graph_static_storage_bytes": 641866912,
+              "compute_graph_static_allocation_limit_bytes": 696402944,
               "compute_graph_private_limit_bytes": 12884901888,
-              "compute_graph_reserved_limit_bytes": 13581258752,
+              "compute_graph_reserved_limit_bytes": 13581304832,
               "compute_graph_private_limit_kind": "chosen_upper_limit_not_observed_fixed_overhead",
               "cache_policy_revision": "echo-global-pages-fifo-v1",
               "resource_mode": "fixed_pools",
               "pool_scope": "backend_per_layer",
               "shared_token_pool": true,
-              "dense_fetch_policy": "all_history_cache_misses_next_layer",
+              "dense_fetch_policy": "contiguous_history_cuda_memcpy_async_next_layer_v1",
+              "dense_contiguous": true,
               "host_arena_tokens": 16777216,
               "sparse_pool_tokens": 65536,
               "max_session_capacity": 65664,
@@ -26895,6 +26904,7 @@
               "workspace_cpu_metrics_bytes": 24,
               "workspace_cpu_bytes": 40,
               "workspace_metadata_bytes": 1077936192,
+              "workspace_dense_ticket_bytes": 0,
               "max_inflight_writes": 2
             },
             "dense_staging_allocated_bytes": 0,
@@ -26914,11 +26924,11 @@
             "endpoint_parameters": 1853365248,
             "total_parameters": 7827793408
           },
-          "torch_peak_allocated_bytes": 17565007872,
-          "torch_peak_reserved_bytes": 26096959488,
+          "torch_peak_allocated_bytes": 17565100032,
+          "torch_peak_reserved_bytes": 26086473728,
           "before_cache_allocation": {
             "stage": "dense_prefetch/before_cache_allocation",
-            "unix_time": 1791151623.3843431,
+            "unix_time": 1791222649.7010908,
             "cuda_free_bytes": 138676273152,
             "cuda_total_bytes": 150121545728,
             "torch_allocated_bytes": 9901661184,
@@ -26926,39 +26936,39 @@
             "torch_peak_allocated_bytes": 9901661184,
             "torch_peak_reserved_bytes": 9974054912,
             "host_allocator_counters": {
-              "active_bytes.allocated": 1717986922696,
-              "active_bytes.current": 1717986922736,
+              "active_bytes.allocated": 1717986921296,
+              "active_bytes.current": 1717986921336,
               "active_bytes.freed": -40,
-              "active_bytes.peak": 1717986922736,
-              "active_requests.allocated": 762,
-              "active_requests.current": 722,
+              "active_bytes.peak": 1717986921336,
+              "active_requests.allocated": 412,
+              "active_requests.current": 372,
               "active_requests.freed": 40,
-              "active_requests.peak": 722,
-              "allocated_bytes.allocated": 343597383756,
-              "allocated_bytes.current": 343597383692,
-              "allocated_bytes.freed": 64,
-              "allocated_bytes.peak": 343597383692,
-              "allocations.allocated": 22,
-              "allocations.current": 12,
-              "allocations.freed": 10,
-              "allocations.peak": 12,
-              "host_alloc_time.avg": 1477606,
-              "host_alloc_time.count": 22,
-              "host_alloc_time.max": 3558273,
-              "host_alloc_time.min": 140,
-              "host_alloc_time.total": 32507346,
-              "host_free_time.avg": 65,
-              "host_free_time.count": 10,
-              "host_free_time.max": 80,
-              "host_free_time.min": 46,
-              "host_free_time.total": 651,
-              "num_host_alloc": 22,
-              "num_host_free": 10
+              "active_requests.peak": 372,
+              "allocated_bytes.allocated": 343597383736,
+              "allocated_bytes.current": 343597383688,
+              "allocated_bytes.freed": 48,
+              "allocated_bytes.peak": 343597383688,
+              "allocations.allocated": 17,
+              "allocations.current": 11,
+              "allocations.freed": 6,
+              "allocations.peak": 11,
+              "host_alloc_time.avg": 1992102,
+              "host_alloc_time.count": 17,
+              "host_alloc_time.max": 4220959,
+              "host_alloc_time.min": 146,
+              "host_alloc_time.total": 33865747,
+              "host_free_time.avg": 79,
+              "host_free_time.count": 6,
+              "host_free_time.max": 83,
+              "host_free_time.min": 77,
+              "host_free_time.total": 479,
+              "num_host_alloc": 17,
+              "num_host_free": 6
             },
-            "process_max_rss_bytes": 345702821888
+            "process_max_rss_bytes": 345707634688
           },
           "native_artifacts_before": {
-            "/root/.cache/cxldsagr/token-validation/941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so": {
+            "/root/.cache/cxldsagr/token-validation/b2417ad2f63b6e963d43135e555cf21a49a8ea00fc7a0eb868733c7e635dd080/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so": {
               "size": 16456,
               "sha256": "ed79d3e717a464379b4f638f608853277b65f602ef05ca5b293e3afa6025cd40"
             },
@@ -26974,13 +26984,13 @@
               "size": 5962688,
               "sha256": "a63d4dfe772493fd9cbc6e65ec9fa92ab77564ab30ef8aef4a6f0b1dec47ffa8"
             },
-            "/root/.cache/tvm-ffi/cxldsagr_echo_indexer_513a53c54269f9bc_1fa11185f6354333/cxldsagr_echo_indexer_513a53c54269f9bc.so": {
-              "size": 1444432,
-              "sha256": "eafdc421b8227425371bba8258894111096228f2e61e68c40394a85f5fc2cfa4"
+            "/root/.cache/tvm-ffi/cxldsagr_echo_indexer_e976930a2965e6ee_1fa11185f6354333/cxldsagr_echo_indexer_e976930a2965e6ee.so": {
+              "size": 1439792,
+              "sha256": "e88701d5787afd97a9c218f928ccfddc9547a691a7cd6a24aa5ad9d4d0101f15"
             },
             "/root/.cache/tvm-ffi/cxldsagr_kv_transfer_672412fcb6ae32f3/cxldsagr_kv_transfer.so": {
-              "size": 78752,
-              "sha256": "fa7cd702d5a267e711e2caa997784d7534497830e47e1c7ae757a1ed4e8cee86"
+              "size": 164496,
+              "sha256": "561bc3cbe14edea4930b202bc7a3ff0763864d15312d92de7e772664d04b1b66"
             },
             "/root/.venv/lib/python3.12/site-packages/nvidia/cu13/lib/libcublas.so.13": {
               "size": 54177976,
@@ -27048,7 +27058,7 @@
             }
           },
           "native_artifacts_after": {
-            "/root/.cache/cxldsagr/token-validation/941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so": {
+            "/root/.cache/cxldsagr/token-validation/b2417ad2f63b6e963d43135e555cf21a49a8ea00fc7a0eb868733c7e635dd080/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so": {
               "size": 16456,
               "sha256": "ed79d3e717a464379b4f638f608853277b65f602ef05ca5b293e3afa6025cd40"
             },
@@ -27064,13 +27074,13 @@
               "size": 5962688,
               "sha256": "a63d4dfe772493fd9cbc6e65ec9fa92ab77564ab30ef8aef4a6f0b1dec47ffa8"
             },
-            "/root/.cache/tvm-ffi/cxldsagr_echo_indexer_513a53c54269f9bc_1fa11185f6354333/cxldsagr_echo_indexer_513a53c54269f9bc.so": {
-              "size": 1444432,
-              "sha256": "eafdc421b8227425371bba8258894111096228f2e61e68c40394a85f5fc2cfa4"
+            "/root/.cache/tvm-ffi/cxldsagr_echo_indexer_e976930a2965e6ee_1fa11185f6354333/cxldsagr_echo_indexer_e976930a2965e6ee.so": {
+              "size": 1439792,
+              "sha256": "e88701d5787afd97a9c218f928ccfddc9547a691a7cd6a24aa5ad9d4d0101f15"
             },
             "/root/.cache/tvm-ffi/cxldsagr_kv_transfer_672412fcb6ae32f3/cxldsagr_kv_transfer.so": {
-              "size": 78752,
-              "sha256": "fa7cd702d5a267e711e2caa997784d7534497830e47e1c7ae757a1ed4e8cee86"
+              "size": 164496,
+              "sha256": "561bc3cbe14edea4930b202bc7a3ff0763864d15312d92de7e772664d04b1b66"
             },
             "/root/.venv/lib/python3.12/site-packages/nvidia/cu13/lib/libcublas.so.13": {
               "size": 54177976,
@@ -27146,9 +27156,9 @@
         "all_candidate_hidden_and_logits_exact": false,
         "independent_correctness_receipt": {
           "kind": "deepseek-v32-motivation-full-trace-v1",
-          "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/docs/agents/acceptance/unified_runtime_20261005/deepseek_final/receipt.json",
-          "recorded_path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/docs/agents/acceptance/unified_runtime_20261005/deepseek_final/receipt.json",
-          "sha256": "a25cc5d08891fd6811db232de0b862831b46702c1b2f3124b2921b611574c1b3",
+          "path": "/tmp/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_dma_c10_check_20261006_01/receipt.json",
+          "recorded_path": "/tmp/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_dma_c10_check_20261006_01/receipt.json",
+          "sha256": "183825d3893f16ef1bdcc3068e51999a4dcd5a78e0c03356c0a402dc0fa6c6fc",
           "checks": {
             "coverage": "complete four-method multi-request trace",
             "does_not_establish": "failure injection, task quality, or performance",
@@ -27292,14 +27302,14 @@
                 "numerical/serial_sparse/000030.pt": "6dea76ff6cacac5001504d363aeaffc966e8b45e7defd861c823940f102697ad",
                 "numerical/serial_sparse/000031.pt": "2945b583b4c931107aaa09ce035c00e3a1ba26f9581c72c594bb87d2221d270e"
               },
-              "source_sha256": "1fc1cbaf7a97579f7094879938330a9933a82109909d2701a177e1653f0dc9f8",
+              "source_sha256": "656de7823d882e6bab6a13cac749f5d0711d26632c9e11bd1131a61daa1c4ad0",
               "status": "passed",
               "warmup_policy": "two_users_then_first_user_host_recall_v1"
             },
             "passed": true
           }
         },
-        "source_sha256": "1319a540b7f78da9c363dd09c0f1568b450df3df5e4d3e8b60155a58c348b3dc",
+        "source_sha256": "656de7823d882e6bab6a13cac749f5d0711d26632c9e11bd1131a61daa1c4ad0",
         "warmup_policy": "two_users_then_first_user_host_recall_v1",
         "checked_warmup_requests": 12,
         "host_recall_warmed_schemes": [
@@ -27310,30 +27320,30 @@
         "numerical_sha256": {}
       },
       "artifacts": {
-        "metadata.json": "cda32f5d3a423aa124b6bdc8ee8c13d84a9b6caa92e9badd5ba5c9ddaff9290c",
-        "measurements.jsonl": "fb5969da9d0db6b895a9710970254a55d5f3b30b2cd9a886542c151b923b5907",
-        "memory.json": "5f6dff3620c67d304522ab0edbffe9c943c840efaa545c5d6f1708defcf8985a",
-        "source_manifest.json": "31fc8ed1b1c242e45f565acef4c86236d0a61c71dbe68a8ae4a1ee69d18bc699"
+        "metadata.json": "fb6f9c0f8746113451c0f76958adf01bf9065e412b39cbd3af199c5f4e502669",
+        "measurements.jsonl": "c253c3c97bee0c8b406b0f10c308f2cde0f0dd4e117440386684594a3cd07992",
+        "memory.json": "85a18941a5194aafb00b32c79ee5b1a9b78badeaf107b1c6c17b756b233fcb94",
+        "source_manifest.json": "e394996fa7dd20af58c454cf1791e4fe7f1cfbe11ae18cee0b162b2f69ecd671"
       },
       "memory": [
         {
           "model": "deepseek",
           "scheme": "hbm",
-          "run_id": "refactor_final_deepseek_bench_20261005_01",
+          "run_id": "deepseek_dma_c10_bench_20261006_01",
           "requests": 32,
           "max_retained_users": 1,
           "revisit_requests": 16,
           "revisit_history_hits": 0,
-          "torch_peak_allocated_bytes": 15587798528,
+          "torch_peak_allocated_bytes": 15587890688,
           "torch_peak_reserved_bytes": 25377636352,
           "maximum_after_request_device_used_bytes": 26173571072,
-          "maximum_after_request_reserved_minus_allocated_bytes": 11682141696,
+          "maximum_after_request_reserved_minus_allocated_bytes": 11682049536,
           "maximum_after_request_device_used_minus_reserved_bytes": 795934720,
-          "maximum_cache_hbm_bytes": 7112496896,
+          "maximum_cache_hbm_bytes": 7112542976,
           "maximum_cache_dram_bytes": 0,
-          "maximum_reserved_hbm_bytes": 15660509568,
+          "maximum_reserved_hbm_bytes": 15660555648,
           "maximum_reserved_dram_bytes": 40,
-          "maximum_shared_cache_hbm_bytes": 6256431616,
+          "maximum_shared_cache_hbm_bytes": 6256477696,
           "maximum_shared_cache_dram_bytes": 0,
           "maximum_session_reserved_hbm_bytes": 856065920,
           "maximum_session_reserved_dram_bytes": 0,
@@ -27343,23 +27353,23 @@
         {
           "model": "deepseek",
           "scheme": "echo",
-          "run_id": "refactor_final_deepseek_bench_20261005_01",
+          "run_id": "deepseek_dma_c10_bench_20261006_01",
           "requests": 32,
           "max_retained_users": 16,
           "revisit_requests": 16,
           "revisit_history_hits": 16,
-          "torch_peak_allocated_bytes": 17563369472,
+          "torch_peak_allocated_bytes": 17563461632,
           "torch_peak_reserved_bytes": 26088570880,
-          "maximum_after_request_device_used_bytes": 27559788544,
-          "maximum_after_request_reserved_minus_allocated_bytes": 11675158528,
-          "maximum_after_request_device_used_minus_reserved_bytes": 1471217664,
-          "maximum_cache_hbm_bytes": 9086261046,
+          "maximum_after_request_device_used_bytes": 27557691392,
+          "maximum_after_request_reserved_minus_allocated_bytes": 11675066368,
+          "maximum_after_request_device_used_minus_reserved_bytes": 1469120512,
+          "maximum_cache_hbm_bytes": 9086308406,
           "maximum_cache_dram_bytes": 343598497792,
-          "maximum_reserved_hbm_bytes": 18711858038,
+          "maximum_reserved_hbm_bytes": 18711905398,
           "maximum_reserved_dram_bytes": 343598497832,
-          "maximum_shared_cache_hbm_bytes": 7702045750,
+          "maximum_shared_cache_hbm_bytes": 7702091830,
           "maximum_shared_cache_dram_bytes": 343598432256,
-          "maximum_session_reserved_hbm_bytes": 1384225536,
+          "maximum_session_reserved_hbm_bytes": 1384226816,
           "maximum_session_reserved_dram_bytes": 65536,
           "maximum_cache_host_pages": 16384,
           "maximum_cache_hbm_tokens": 0
@@ -27367,23 +27377,23 @@
         {
           "model": "deepseek",
           "scheme": "serial_sparse",
-          "run_id": "refactor_final_deepseek_bench_20261005_01",
+          "run_id": "deepseek_dma_c10_bench_20261006_01",
           "requests": 32,
           "max_retained_users": 16,
           "revisit_requests": 16,
           "revisit_history_hits": 16,
-          "torch_peak_allocated_bytes": 17565007872,
+          "torch_peak_allocated_bytes": 17565100032,
           "torch_peak_reserved_bytes": 26088570880,
-          "maximum_after_request_device_used_bytes": 27559788544,
-          "maximum_after_request_reserved_minus_allocated_bytes": 11675158528,
-          "maximum_after_request_device_used_minus_reserved_bytes": 1471217664,
-          "maximum_cache_hbm_bytes": 9086261046,
+          "maximum_after_request_device_used_bytes": 27557691392,
+          "maximum_after_request_reserved_minus_allocated_bytes": 11675066368,
+          "maximum_after_request_device_used_minus_reserved_bytes": 1469120512,
+          "maximum_cache_hbm_bytes": 9086308406,
           "maximum_cache_dram_bytes": 343598497792,
-          "maximum_reserved_hbm_bytes": 18711858038,
+          "maximum_reserved_hbm_bytes": 18711905398,
           "maximum_reserved_dram_bytes": 343598497832,
-          "maximum_shared_cache_hbm_bytes": 7702045750,
+          "maximum_shared_cache_hbm_bytes": 7702091830,
           "maximum_shared_cache_dram_bytes": 343598432256,
-          "maximum_session_reserved_hbm_bytes": 1384225536,
+          "maximum_session_reserved_hbm_bytes": 1384226816,
           "maximum_session_reserved_dram_bytes": 65536,
           "maximum_cache_host_pages": 16384,
           "maximum_cache_hbm_tokens": 0
@@ -27391,23 +27401,23 @@
         {
           "model": "deepseek",
           "scheme": "dense_prefetch",
-          "run_id": "refactor_final_deepseek_bench_20261005_01",
+          "run_id": "deepseek_dma_c10_bench_20261006_01",
           "requests": 32,
           "max_retained_users": 16,
           "revisit_requests": 16,
           "revisit_history_hits": 16,
-          "torch_peak_allocated_bytes": 17565007872,
-          "torch_peak_reserved_bytes": 26096959488,
-          "maximum_after_request_device_used_bytes": 27568177152,
-          "maximum_after_request_reserved_minus_allocated_bytes": 11675158528,
+          "torch_peak_allocated_bytes": 17565100032,
+          "torch_peak_reserved_bytes": 26086473728,
+          "maximum_after_request_device_used_bytes": 27557691392,
+          "maximum_after_request_reserved_minus_allocated_bytes": 11675066368,
           "maximum_after_request_device_used_minus_reserved_bytes": 1471217664,
-          "maximum_cache_hbm_bytes": 9086261046,
+          "maximum_cache_hbm_bytes": 9086308406,
           "maximum_cache_dram_bytes": 343598497792,
-          "maximum_reserved_hbm_bytes": 18711858038,
+          "maximum_reserved_hbm_bytes": 18711905398,
           "maximum_reserved_dram_bytes": 343598497832,
-          "maximum_shared_cache_hbm_bytes": 7702045750,
+          "maximum_shared_cache_hbm_bytes": 7702091830,
           "maximum_shared_cache_dram_bytes": 343598432256,
-          "maximum_session_reserved_hbm_bytes": 1384225536,
+          "maximum_session_reserved_hbm_bytes": 1384226816,
           "maximum_session_reserved_dram_bytes": 65536,
           "maximum_cache_host_pages": 16384,
           "maximum_cache_hbm_tokens": 0

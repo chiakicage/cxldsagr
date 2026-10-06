@@ -1,0 +1,70 @@
+{
+  "schema": "deepseek-observer-reconciliation-v1",
+  "run": {
+    "command": [
+      "bash",
+      "experiments/deepseek_v32_motivation/scripts/run.sh",
+      "--mode",
+      "bench",
+      "--run-id",
+      "deepseek_dma_c10_bench_20261006_01",
+      "--compute-graphs",
+      "--model-path",
+      "/preset-models",
+      "--num-users",
+      "16",
+      "--rounds",
+      "2",
+      "--history-tokens",
+      "65536",
+      "--candidate-tokens",
+      "128",
+      "--chunk-size",
+      "1024",
+      "--sparse-pool-tokens",
+      "65536",
+      "--host-arena-tokens",
+      "16777216",
+      "--seed",
+      "42",
+      "--validation-receipt",
+      "/tmp/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_dma_c10_check_20261006_01/receipt.json"
+    ],
+    "started_utc": "2026-10-05T17:46:23.489236+00:00",
+    "driver_sha256": "d9c70b27698a0a3a90a3202dd56c6d556110c4527386ddf24c7d303f3fa7fc7b",
+    "pid": 3613359,
+    "exit_code": 0,
+    "completed_utc": "2026-10-05T17:52:15.289983+00:00"
+  },
+  "original_wrapper_exit_code": 0,
+  "original_audit": {
+    "exit_code": 0,
+    "samples": 147,
+    "observed_owned_pids": [
+      3613365
+    ],
+    "foreign_processes": [],
+    "exit_races": [],
+    "monitor_errors": [],
+    "maximum_sample_gap_seconds": 30.353404998779297,
+    "boundary": "Discrete observations of all GPUs; this does not exclude activity between samples or unrelated CPU work."
+  },
+  "confirmed_owned_gpu_pids": [
+    3613365
+  ],
+  "exit_races": [],
+  "unresolved_selected_gpu_foreign": [],
+  "monitor_errors": [],
+  "other_gpu_processes": [],
+  "accepted_after_reconciliation": true,
+  "boundary": "Discrete sampling of GPU process lists and utilization; exit-race interpretation retains prior process identity and original raw evidence. Does not prove continuous isolation or CPU exclusivity.",
+  "source_sha256": "a019ae5dcb5f5359efbdeb2ca2bc09b1df96134f02a0cd6cf0b73d248d1a4ac9",
+  "evidence_sha256": {
+    "driver.py": "d9c70b27698a0a3a90a3202dd56c6d556110c4527386ddf24c7d303f3fa7fc7b",
+    "gpu_monitor.jsonl": "ac21657191333511ac9fa4c155d04c0671d3574ab362958e2e6a33d2e08321e1",
+    "run.json": "4f60bdfdc9f6f7513d258ed449ef4ea020de6f49724e249970f5cad6785d8cfc",
+    "monitor_audit.json": "0016d97c1c64e5552b5db42a918e1589ec34007486c780017380a934c765f7d4",
+    "stdout.log": "376b483b01896f2c96f43dd12135bc52f28420830637a230aa9288a5452c02e2",
+    "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

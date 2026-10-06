@@ -1,0 +1,59 @@
+{
+  "passed": true,
+  "run": "/tmp/cache_append_production_state_20261006_01",
+  "identity_sha256": "bb67826b5f20179c2b808b7a194858114b50e414f0e3344b4517664890a03cef",
+  "receipt_sha256": "92eaadf7fd233a26a0767e23c8068cdaec3de7632cac9eb5d513c8f9ca5c48f3",
+  "source_files_current_and_archived": 823,
+  "manager_identity_sha256": "03849e0d69607e1f3e3a7381c1ac96406534d7ad74212643f7ea8d016abf4d8e",
+  "same_manager_production_elf": {
+    "bytes": 2504784,
+    "path": "/root/.cache/tvm-ffi/cxldsagr_echo_indexer_cecc0a32c849c656_1fa11185f6354333/cxldsagr_echo_indexer_cecc0a32c849c656.so",
+    "sha256": "d888ee0cb2aa864ed1dcde9dee5e814a2468ce57c643b19dc138141106f2568e"
+  },
+  "cases": [
+    {
+      "resident": 0,
+      "selected_slots": 128,
+      "legal_actual_free_slots": true,
+      "complete_post_hashes_reconstructed": 11,
+      "unmodified_history_and_sentinel": true,
+      "evictions": 0,
+      "clock_after": 18
+    },
+    {
+      "resident": 8192,
+      "selected_slots": 128,
+      "legal_actual_free_slots": true,
+      "complete_post_hashes_reconstructed": 11,
+      "unmodified_history_and_sentinel": true,
+      "evictions": 0,
+      "clock_after": 18
+    },
+    {
+      "resident": 65536,
+      "selected_slots": 128,
+      "legal_actual_free_slots": true,
+      "complete_post_hashes_reconstructed": 11,
+      "unmodified_history_and_sentinel": true,
+      "evictions": 0,
+      "clock_after": 18
+    }
+  ],
+  "artifact_sha256": {
+    "/tmp/cache_append_production_state_20261006_01/after_metadata_0.pt": "e83d42bd3668f693cf6713b6fec9d7fa05551c21c563e61b1d972f6a4cbf817b",
+    "/tmp/cache_append_production_state_20261006_01/before_state_8192.pt": "892ecd35e899dd32517a1a179957281df7d48aae3e3a074536ca0e11e69ac8e7",
+    "/tmp/cache_append_production_state_20261006_01/before_state_65536.pt": "3585531cf5cbbaaa0fea46b7e90e13b8a9cf0b7fe9b76de67bcd87529265c753",
+    "/tmp/cache_append_production_state_20261006_01/native_maps_before.txt": "766de232ceb5ee2a442a710ca296448a38a09843e45e77b8e63c13a9c5985231",
+    "/tmp/cache_append_production_state_20261006_01/source_freeze.json": "5827f3841297517c5a4f4d15c2beb9cbeb450e236419cbd82d3b4d4b6055b594",
+    "/tmp/cache_append_production_state_20261006_01/result.json": "0ffae9b765dda0fad4513a2f398c4e913af058284e43b75d42697b85a54a958a",
+    "/tmp/cache_append_production_state_20261006_01/receipt.json": "dbb96c03c78f624a0b031a17f8d9b900b3a8cf533994716fd7268bd598a75d0b",
+    "/tmp/cache_append_production_state_20261006_01/runtime_before.json": "8c9c8c8019ba7f0c1a162a792160d3e2bd2e2c5a853d38686057591c0ad3d5d1",
+    "/tmp/cache_append_production_state_20261006_01/native_maps_after.txt": "3d9c34cd30622a7fa3b717c5711491e064f87c8a56920a7e6eaaddea13b77899",
+    "/tmp/cache_append_production_state_20261006_01/before_state_0.pt": "7d7c20be607b2b42d41860bfbb4291dfbd5941a730a928d90cfe41f652fe8cf0",
+    "/tmp/cache_append_production_state_20261006_01/after_metadata_8192.pt": "5663a977bb4bffd04527f6744c301c919f0feae3b53e3a3024b4f564c6c30319",
+    "/tmp/cache_append_production_state_20261006_01/after_metadata_65536.pt": "00ae7973c533dd324fe8bd062834035f93e3413189b9e182e3e2913ef5781346",
+    "/tmp/cache_append_production_state_20261006_01/runtime_after.json": "8c9c8c8019ba7f0c1a162a792160d3e2bd2e2c5a853d38686057591c0ad3d5d1"
+  },
+  "audit_script_sha256": "8a151d6e7c1a4f02ec925ec760df8853a5d2a9558441355ff6daf4b49e84abc2",
+  "boundary": "CPU reconstruction of three actual GPU before-states plus compact post-state. Scratch bytes are bound to saved actual outputs; every semantic record/map/priority/clock byte is independently reconstructed. No GPU or baseline call; subsequent manager traffic is independently reported, not measured by these native fixtures."
+}

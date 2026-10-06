@@ -1,0 +1,541 @@
+{
+  "passed": true,
+  "tensors": 72,
+  "comparisons_to_check_hbm": 72,
+  "records": [
+    {
+      "mode": "check",
+      "phase": "prefill_last_chunk",
+      "method": "hbm",
+      "layer": 0,
+      "elements": 2097152
+    },
+    {
+      "mode": "check",
+      "phase": "prefill_last_chunk",
+      "method": "hbm",
+      "layer": 1,
+      "elements": 2097152
+    },
+    {
+      "mode": "check",
+      "phase": "prefill_last_chunk",
+      "method": "hbm",
+      "layer": 2,
+      "elements": 2097152
+    },
+    {
+      "mode": "check",
+      "phase": "prefill_last_chunk",
+      "method": "echo",
+      "layer": 0,
+      "elements": 2097152
+    },
+    {
+      "mode": "check",
+      "phase": "prefill_last_chunk",
+      "method": "echo",
+      "layer": 1,
+      "elements": 2097152
+    },
+    {
+      "mode": "check",
+      "phase": "prefill_last_chunk",
+      "method": "echo",
+      "layer": 2,
+      "elements": 2097152
+    },
+    {
+      "mode": "check",
+      "phase": "prefill_last_chunk",
+      "method": "serial_sparse",
+      "layer": 0,
+      "elements": 2097152
+    },
+    {
+      "mode": "check",
+      "phase": "prefill_last_chunk",
+      "method": "serial_sparse",
+      "layer": 1,
+      "elements": 2097152
+    },
+    {
+      "mode": "check",
+      "phase": "prefill_last_chunk",
+      "method": "serial_sparse",
+      "layer": 2,
+      "elements": 2097152
+    },
+    {
+      "mode": "check",
+      "phase": "prefill_last_chunk",
+      "method": "dense_prefetch",
+      "layer": 0,
+      "elements": 2097152
+    },
+    {
+      "mode": "check",
+      "phase": "prefill_last_chunk",
+      "method": "dense_prefetch",
+      "layer": 1,
+      "elements": 2097152
+    },
+    {
+      "mode": "check",
+      "phase": "prefill_last_chunk",
+      "method": "dense_prefetch",
+      "layer": 2,
+      "elements": 2097152
+    },
+    {
+      "mode": "check",
+      "phase": "extend_cold",
+      "method": "hbm",
+      "layer": 0,
+      "elements": 262144
+    },
+    {
+      "mode": "check",
+      "phase": "extend_cold",
+      "method": "hbm",
+      "layer": 1,
+      "elements": 262144
+    },
+    {
+      "mode": "check",
+      "phase": "extend_cold",
+      "method": "hbm",
+      "layer": 2,
+      "elements": 262144
+    },
+    {
+      "mode": "check",
+      "phase": "extend_cold",
+      "method": "echo",
+      "layer": 0,
+      "elements": 262144
+    },
+    {
+      "mode": "check",
+      "phase": "extend_cold",
+      "method": "echo",
+      "layer": 1,
+      "elements": 262144
+    },
+    {
+      "mode": "check",
+      "phase": "extend_cold",
+      "method": "echo",
+      "layer": 2,
+      "elements": 262144
+    },
+    {
+      "mode": "check",
+      "phase": "extend_cold",
+      "method": "serial_sparse",
+      "layer": 0,
+      "elements": 262144
+    },
+    {
+      "mode": "check",
+      "phase": "extend_cold",
+      "method": "serial_sparse",
+      "layer": 1,
+      "elements": 262144
+    },
+    {
+      "mode": "check",
+      "phase": "extend_cold",
+      "method": "serial_sparse",
+      "layer": 2,
+      "elements": 262144
+    },
+    {
+      "mode": "check",
+      "phase": "extend_cold",
+      "method": "dense_prefetch",
+      "layer": 0,
+      "elements": 262144
+    },
+    {
+      "mode": "check",
+      "phase": "extend_cold",
+      "method": "dense_prefetch",
+      "layer": 1,
+      "elements": 262144
+    },
+    {
+      "mode": "check",
+      "phase": "extend_cold",
+      "method": "dense_prefetch",
+      "layer": 2,
+      "elements": 262144
+    },
+    {
+      "mode": "check",
+      "phase": "extend_warm",
+      "method": "hbm",
+      "layer": 0,
+      "elements": 262144
+    },
+    {
+      "mode": "check",
+      "phase": "extend_warm",
+      "method": "hbm",
+      "layer": 1,
+      "elements": 262144
+    },
+    {
+      "mode": "check",
+      "phase": "extend_warm",
+      "method": "hbm",
+      "layer": 2,
+      "elements": 262144
+    },
+    {
+      "mode": "check",
+      "phase": "extend_warm",
+      "method": "echo",
+      "layer": 0,
+      "elements": 262144
+    },
+    {
+      "mode": "check",
+      "phase": "extend_warm",
+      "method": "echo",
+      "layer": 1,
+      "elements": 262144
+    },
+    {
+      "mode": "check",
+      "phase": "extend_warm",
+      "method": "echo",
+      "layer": 2,
+      "elements": 262144
+    },
+    {
+      "mode": "check",
+      "phase": "extend_warm",
+      "method": "serial_sparse",
+      "layer": 0,
+      "elements": 262144
+    },
+    {
+      "mode": "check",
+      "phase": "extend_warm",
+      "method": "serial_sparse",
+      "layer": 1,
+      "elements": 262144
+    },
+    {
+      "mode": "check",
+      "phase": "extend_warm",
+      "method": "serial_sparse",
+      "layer": 2,
+      "elements": 262144
+    },
+    {
+      "mode": "check",
+      "phase": "extend_warm",
+      "method": "dense_prefetch",
+      "layer": 0,
+      "elements": 262144
+    },
+    {
+      "mode": "check",
+      "phase": "extend_warm",
+      "method": "dense_prefetch",
+      "layer": 1,
+      "elements": 262144
+    },
+    {
+      "mode": "check",
+      "phase": "extend_warm",
+      "method": "dense_prefetch",
+      "layer": 2,
+      "elements": 262144
+    },
+    {
+      "mode": "profile",
+      "phase": "prefill_last_chunk",
+      "method": "hbm",
+      "layer": 0,
+      "elements": 2097152
+    },
+    {
+      "mode": "profile",
+      "phase": "prefill_last_chunk",
+      "method": "hbm",
+      "layer": 1,
+      "elements": 2097152
+    },
+    {
+      "mode": "profile",
+      "phase": "prefill_last_chunk",
+      "method": "hbm",
+      "layer": 2,
+      "elements": 2097152
+    },
+    {
+      "mode": "profile",
+      "phase": "prefill_last_chunk",
+      "method": "echo",
+      "layer": 0,
+      "elements": 2097152
+    },
+    {
+      "mode": "profile",
+      "phase": "prefill_last_chunk",
+      "method": "echo",
+      "layer": 1,
+      "elements": 2097152
+    },
+    {
+      "mode": "profile",
+      "phase": "prefill_last_chunk",
+      "method": "echo",
+      "layer": 2,
+      "elements": 2097152
+    },
+    {
+      "mode": "profile",
+      "phase": "prefill_last_chunk",
+      "method": "serial_sparse",
+      "layer": 0,
+      "elements": 2097152
+    },
+    {
+      "mode": "profile",
+      "phase": "prefill_last_chunk",
+      "method": "serial_sparse",
+      "layer": 1,
+      "elements": 2097152
+    },
+    {
+      "mode": "profile",
+      "phase": "prefill_last_chunk",
+      "method": "serial_sparse",
+      "layer": 2,
+      "elements": 2097152
+    },
+    {
+      "mode": "profile",
+      "phase": "prefill_last_chunk",
+      "method": "dense_prefetch",
+      "layer": 0,
+      "elements": 2097152
+    },
+    {
+      "mode": "profile",
+      "phase": "prefill_last_chunk",
+      "method": "dense_prefetch",
+      "layer": 1,
+      "elements": 2097152
+    },
+    {
+      "mode": "profile",
+      "phase": "prefill_last_chunk",
+      "method": "dense_prefetch",
+      "layer": 2,
+      "elements": 2097152
+    },
+    {
+      "mode": "profile",
+      "phase": "extend_cold",
+      "method": "hbm",
+      "layer": 0,
+      "elements": 262144
+    },
+    {
+      "mode": "profile",
+      "phase": "extend_cold",
+      "method": "hbm",
+      "layer": 1,
+      "elements": 262144
+    },
+    {
+      "mode": "profile",
+      "phase": "extend_cold",
+      "method": "hbm",
+      "layer": 2,
+      "elements": 262144
+    },
+    {
+      "mode": "profile",
+      "phase": "extend_cold",
+      "method": "echo",
+      "layer": 0,
+      "elements": 262144
+    },
+    {
+      "mode": "profile",
+      "phase": "extend_cold",
+      "method": "echo",
+      "layer": 1,
+      "elements": 262144
+    },
+    {
+      "mode": "profile",
+      "phase": "extend_cold",
+      "method": "echo",
+      "layer": 2,
+      "elements": 262144
+    },
+    {
+      "mode": "profile",
+      "phase": "extend_cold",
+      "method": "serial_sparse",
+      "layer": 0,
+      "elements": 262144
+    },
+    {
+      "mode": "profile",
+      "phase": "extend_cold",
+      "method": "serial_sparse",
+      "layer": 1,
+      "elements": 262144
+    },
+    {
+      "mode": "profile",
+      "phase": "extend_cold",
+      "method": "serial_sparse",
+      "layer": 2,
+      "elements": 262144
+    },
+    {
+      "mode": "profile",
+      "phase": "extend_cold",
+      "method": "dense_prefetch",
+      "layer": 0,
+      "elements": 262144
+    },
+    {
+      "mode": "profile",
+      "phase": "extend_cold",
+      "method": "dense_prefetch",
+      "layer": 1,
+      "elements": 262144
+    },
+    {
+      "mode": "profile",
+      "phase": "extend_cold",
+      "method": "dense_prefetch",
+      "layer": 2,
+      "elements": 262144
+    },
+    {
+      "mode": "profile",
+      "phase": "extend_warm",
+      "method": "hbm",
+      "layer": 0,
+      "elements": 262144
+    },
+    {
+      "mode": "profile",
+      "phase": "extend_warm",
+      "method": "hbm",
+      "layer": 1,
+      "elements": 262144
+    },
+    {
+      "mode": "profile",
+      "phase": "extend_warm",
+      "method": "hbm",
+      "layer": 2,
+      "elements": 262144
+    },
+    {
+      "mode": "profile",
+      "phase": "extend_warm",
+      "method": "echo",
+      "layer": 0,
+      "elements": 262144
+    },
+    {
+      "mode": "profile",
+      "phase": "extend_warm",
+      "method": "echo",
+      "layer": 1,
+      "elements": 262144
+    },
+    {
+      "mode": "profile",
+      "phase": "extend_warm",
+      "method": "echo",
+      "layer": 2,
+      "elements": 262144
+    },
+    {
+      "mode": "profile",
+      "phase": "extend_warm",
+      "method": "serial_sparse",
+      "layer": 0,
+      "elements": 262144
+    },
+    {
+      "mode": "profile",
+      "phase": "extend_warm",
+      "method": "serial_sparse",
+      "layer": 1,
+      "elements": 262144
+    },
+    {
+      "mode": "profile",
+      "phase": "extend_warm",
+      "method": "serial_sparse",
+      "layer": 2,
+      "elements": 262144
+    },
+    {
+      "mode": "profile",
+      "phase": "extend_warm",
+      "method": "dense_prefetch",
+      "layer": 0,
+      "elements": 262144
+    },
+    {
+      "mode": "profile",
+      "phase": "extend_warm",
+      "method": "dense_prefetch",
+      "layer": 1,
+      "elements": 262144
+    },
+    {
+      "mode": "profile",
+      "phase": "extend_warm",
+      "method": "dense_prefetch",
+      "layer": 2,
+      "elements": 262144
+    }
+  ],
+  "source_and_input_sha256": {
+    "/tmp/cache_manager_root_audit_20261006_07/selection_reader.py": "629ceffd18a5197e2d91f4c029a92395851f580fef2bec0d7037751d6ae4fba1",
+    "/tmp/cxldsagr-checks/cache_manager_performance/data/cache_manager_check_20261006_07/result.json": "32d24641c98276de349aaabad56fe65b409fd6676438eccdc87faab327ac9ade",
+    "/tmp/cxldsagr-checks/cache_manager_performance/data/cache_manager_check_20261006_07/prefill_last_chunk_hbm_indices.pt": "a9787e5247c1618da9b5ef018f8b40f4aad49c91d576ab344927750d10ffb1b3",
+    "/tmp/cxldsagr-checks/cache_manager_performance/data/cache_manager_check_20261006_07/prefill_last_chunk_echo_indices.pt": "06a8785b9daf5a6d4ea1423d101259155a9c8a246f07072b70003024b2a6d014",
+    "/tmp/cxldsagr-checks/cache_manager_performance/data/cache_manager_check_20261006_07/prefill_last_chunk_serial_sparse_indices.pt": "61338f82c4528b1334b0e3caa8ec4cf2dc0924a012df4bae35d72b846e202c33",
+    "/tmp/cxldsagr-checks/cache_manager_performance/data/cache_manager_check_20261006_07/prefill_last_chunk_dense_prefetch_indices.pt": "17ffa11596fb9b10ea8d7054f91ad1192f3693df7a072c1ef2b14fdb4514b319",
+    "/tmp/cxldsagr-checks/cache_manager_performance/data/cache_manager_check_20261006_07/extend_cold_hbm_indices.pt": "6730ae62b1a9bc0f380f8f49bfa04408f628b53841eda563225a4ee8db99d760",
+    "/tmp/cxldsagr-checks/cache_manager_performance/data/cache_manager_check_20261006_07/extend_cold_echo_indices.pt": "62c1fe37f132f9d639054ae98bf6e248e79bc21e605897fd433719bda67b1c03",
+    "/tmp/cxldsagr-checks/cache_manager_performance/data/cache_manager_check_20261006_07/extend_cold_serial_sparse_indices.pt": "852ea1fc40337f3e76c4ef8a20da928e4bc9bb14d47623b58ba4e7ff48c4dae2",
+    "/tmp/cxldsagr-checks/cache_manager_performance/data/cache_manager_check_20261006_07/extend_cold_dense_prefetch_indices.pt": "7ce2d3c478cf4f635de3c1e3489399291e05ab2fa36ce255b546ed6e51b044b9",
+    "/tmp/cxldsagr-checks/cache_manager_performance/data/cache_manager_check_20261006_07/extend_warm_hbm_indices.pt": "40381c3945adaabb8debecc6114cadee69bddf1b9856e60cf257c7c6ab7ceac2",
+    "/tmp/cxldsagr-checks/cache_manager_performance/data/cache_manager_check_20261006_07/extend_warm_echo_indices.pt": "3941c263b6a945572d15d811ff77ea2c346d4a4655cef471155bc1d3e9372727",
+    "/tmp/cxldsagr-checks/cache_manager_performance/data/cache_manager_check_20261006_07/extend_warm_serial_sparse_indices.pt": "7c139e3039572b8bc58424687182ab3299c9834607f155db25e0b46a0f4717ec",
+    "/tmp/cxldsagr-checks/cache_manager_performance/data/cache_manager_check_20261006_07/extend_warm_dense_prefetch_indices.pt": "af5d8118cddaa0b6f6b047f78bde6cb6f50bb0c33dceaf2961aacd91049dec26",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_manager_profile_20261006_07/result.json": "38bbeb666f341fb795ae224641d30208029632b78aea63775ed8a033719867a5",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_manager_profile_20261006_07/prefill_last_chunk_hbm_indices.pt": "a9787e5247c1618da9b5ef018f8b40f4aad49c91d576ab344927750d10ffb1b3",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_manager_profile_20261006_07/prefill_last_chunk_echo_indices.pt": "06a8785b9daf5a6d4ea1423d101259155a9c8a246f07072b70003024b2a6d014",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_manager_profile_20261006_07/prefill_last_chunk_serial_sparse_indices.pt": "61338f82c4528b1334b0e3caa8ec4cf2dc0924a012df4bae35d72b846e202c33",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_manager_profile_20261006_07/prefill_last_chunk_dense_prefetch_indices.pt": "17ffa11596fb9b10ea8d7054f91ad1192f3693df7a072c1ef2b14fdb4514b319",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_manager_profile_20261006_07/extend_cold_hbm_indices.pt": "6730ae62b1a9bc0f380f8f49bfa04408f628b53841eda563225a4ee8db99d760",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_manager_profile_20261006_07/extend_cold_echo_indices.pt": "62c1fe37f132f9d639054ae98bf6e248e79bc21e605897fd433719bda67b1c03",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_manager_profile_20261006_07/extend_cold_serial_sparse_indices.pt": "852ea1fc40337f3e76c4ef8a20da928e4bc9bb14d47623b58ba4e7ff48c4dae2",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_manager_profile_20261006_07/extend_cold_dense_prefetch_indices.pt": "7ce2d3c478cf4f635de3c1e3489399291e05ab2fa36ce255b546ed6e51b044b9",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_manager_profile_20261006_07/extend_warm_hbm_indices.pt": "40381c3945adaabb8debecc6114cadee69bddf1b9856e60cf257c7c6ab7ceac2",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_manager_profile_20261006_07/extend_warm_echo_indices.pt": "3941c263b6a945572d15d811ff77ea2c346d4a4655cef471155bc1d3e9372727",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_manager_profile_20261006_07/extend_warm_serial_sparse_indices.pt": "7c139e3039572b8bc58424687182ab3299c9834607f155db25e0b46a0f4717ec",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_manager_profile_20261006_07/extend_warm_dense_prefetch_indices.pt": "af5d8118cddaa0b6f6b047f78bde6cb6f50bb0c33dceaf2961aacd91049dec26"
+  },
+  "boundary": "Saved check/profile exact selections are re-read for bitwise cross-method equality, shape, dtype, causal bounds, cardinality, uniqueness and recorded logical union size. Physical slots, record bytes, maps and clocks were checked by the saved executing verifier but not saved for this reader, so no independent cache-state reconstruction is claimed."
+}

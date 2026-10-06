@@ -10,8 +10,10 @@ from operators.deepseek_v32.indexer import cache_ops
 pytestmark = pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA required")
 
 
-def paired_pools(*, slots=96, candidate=129, width=7, dtype=torch.bfloat16, pages=8):
-    return [
+def paired_pools(
+    *, slots=96, candidate=129, width=7, dtype=torch.bfloat16, pages=8, dense_contiguous=False
+):
+    pools = [
         SharedSparseTokenPool(
             pages * 64,
             width,
@@ -20,9 +22,14 @@ def paired_pools(*, slots=96, candidate=129, width=7, dtype=torch.bfloat16, page
             candidate_slots=candidate,
             dtype=dtype,
             metadata_ops=native,
+            dense_contiguous=dense_contiguous,
         )
         for native in (cache_ops, None)
     ]
+    # Full-storage comparisons require defined contents in unused slots too.
+    for pool in pools:
+        pool.layers[0].records.zero_()
+    return pools
 
 
 def compare(pools, caches):
@@ -50,12 +57,30 @@ def consume_pair(caches, indices, *, checked=False):
     return results
 
 
+def protect_resident_history(cache, helper):
+    if helper is not None:
+        ticket = helper.prefetch(cache)
+        helper.wait(ticket)
+        return ticket.fetched_records
+    # The checked cache provider has no CUDA DMA adapter. Exercise its two
+    # public FIFO events for this certified all-hit history instead.
+    assert cache.all_history_resident
+    with cache.operation():
+        pool = cache._pool
+        ids = cache._global_range(0, cache.host_written_end)
+        pool.protect(cache.layer_id, ids, preserve_append_plan=True)
+        pool.stamp(
+            cache.layer_id, pool.layers[cache.layer_id].append_order[:0], preserve_append_plan=True
+        )
+    return 0
+
+
 @pytest.mark.parametrize(
     "width,dtype", [(7, torch.bfloat16), (19, torch.float32), (576, torch.bfloat16)]
 )
 def test_cuda_native_append_selection_and_dense_clock_match_checked_path(width, dtype, monkeypatch):
-    pools = paired_pools(width=width, dtype=dtype)
-    helpers = [PoolHistoryPrefetch("cuda") for _ in pools]
+    pools = paired_pools(width=width, dtype=dtype, dense_contiguous=True)
+    helpers = [PoolHistoryPrefetch("cuda"), None]
     for user in range(3):
         caches = [pool.allocate_session(64).layer(0) for pool in pools]
         values = (
@@ -76,9 +101,8 @@ def test_cuda_native_append_selection_and_dense_clock_match_checked_path(width, 
                                 AssertionError("range materialized")
                             ),
                         )
-                    ticket = helper.prefetch(cache)
-                    helper.wait(ticket)
-                assert ticket.fetched_records == 0
+                    fetched = protect_resident_history(cache, helper)
+                assert fetched == 0
             append_pair(caches, values[start:stop])
             indices = (torch.arange(256 * 17, device="cuda").reshape(256, 17) % stop).int()
             indices[:, 3] = -7
@@ -87,7 +111,8 @@ def test_cuda_native_append_selection_and_dense_clock_match_checked_path(width, 
             compare(pools, caches)
         for cache, helper in zip(caches, helpers, strict=True):
             cache.commit()
-            helper.drain()
+            if helper is not None:
+                helper.drain()
             torch.testing.assert_close(cache.host_records(), values.cpu(), rtol=0, atol=0)
         candidate = torch.full((129, width), 900.0 + user, device="cuda", dtype=dtype)
         for cache in caches:
@@ -106,14 +131,15 @@ def test_cuda_native_append_selection_and_dense_clock_match_checked_path(width, 
             cache.discard_transient()
         compare(pools, caches)
     for helper in helpers:
-        helper.close()
+        if helper is not None:
+            helper.close()
     for pool in pools:
         pool.close()
 
 
 @pytest.mark.parametrize("clock", [PRIORITY_LIMIT - 1, PRIORITY_LIMIT, PRIORITY_LIMIT + 1])
 def test_cuda_native_event_rollover_and_snapshot_reset(clock):
-    pools = paired_pools()
+    pools = paired_pools(dense_contiguous=True)
     caches = [pool.allocate_session(64).layer(0) for pool in pools]
     for cache in caches:
         cache.begin_step(64)
@@ -126,16 +152,17 @@ def test_cuda_native_event_rollover_and_snapshot_reset(clock):
     compare(pools, caches)
     for cache in caches:
         cache._clock = clock
-    helpers = [PoolHistoryPrefetch("cuda") for _ in pools]
+    helpers = [PoolHistoryPrefetch("cuda"), None]
     for helper, cache in zip(helpers, caches, strict=True):
-        helper.wait(helper.prefetch(cache))
-        helper.close()
+        assert protect_resident_history(cache, helper) == 0
+        if helper is not None:
+            helper.close()
     compare(pools, caches)
     snapshots = [pool.snapshot() for pool in pools]
     consume_pair(caches, ids)
     for pool, snapshot in zip(pools, snapshots, strict=True):
         pool.restore(snapshot)
-    consume_pair(caches, ids)  # No residency certificate after restore: checked fallback.
+    consume_pair(caches, ids)  # Restore clears the certificate; native and checked recalls agree.
     compare(pools, caches)
     for pool in pools:
         pool.close()
@@ -206,7 +233,7 @@ def test_cuda_native_fullshape_union_and_shared_allocation_accounting():
         session = next(iter(pool._sessions.values()))
         assert session.session_bytes() == pool.estimate_session_bytes(65536)
         assert session._prefetch_totals.shape == (1, 3)
-        assert session._prefetch_totals.untyped_storage().nbytes() == 7 * 8
+        assert session._prefetch_totals.untyped_storage().nbytes() == 8 * 8
         pool.close()
 
 

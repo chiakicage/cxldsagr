@@ -1,0 +1,60 @@
+{
+  "benchmark_run_id": "cache_recall_bench_20261006_04",
+  "cases": 9,
+  "check_run_id": "cache_recall_check_20261006_04",
+  "files": {
+    "independent_audit.json": "f24f32bc036ae46b82099bdc5f7e55645d5824d420a88fb6762425bb1aaa5069",
+    "latency.csv": "9a4cfc4e25485d9292da75d3e3a9db9a766f53472b8e0a2101be6ad3e00f56be",
+    "latency.png": "bbb0e242d980a97f766aae47e76246490c5bba6814672dace561ea6a89252e35",
+    "latency.svg": "8ab920a33792c55401c025e3bc2762757173fa3c5f703e2377a3a714afd2a5c2",
+    "observer_reconciliation.json": "0eb079a6bf81a6c345972d07708cc2151ad7173c923589a867cbc09e27affe74",
+    "observers/bench/driver.py": "d9c70b27698a0a3a90a3202dd56c6d556110c4527386ddf24c7d303f3fa7fc7b",
+    "observers/bench/gpu_monitor.jsonl": "8920607f908e9f3fd29df32466ee4d699936c10ff1f8b54d553337ab364e80c5",
+    "observers/bench/monitor_audit.json": "8e17b5736bd4d4957681ed829d4950fe1dd648229e54db11f6fc5391860fdd5d",
+    "observers/bench/run.json": "2a25a6e0ce277530410ee76546903170cf9510e0f57569d0b7a4127bd7ddcb13",
+    "observers/bench/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "observers/bench/stdout.log": "781b8d7ce1cebf8c859d15c8a133d7edf541fe59b29cfaf8983e3cd1fab66883",
+    "observers/check/driver.py": "d9c70b27698a0a3a90a3202dd56c6d556110c4527386ddf24c7d303f3fa7fc7b",
+    "observers/check/gpu_monitor.jsonl": "66a2ff06b8513bada76935d4e3143739d0c0992d4f55954154d72145ceead22d",
+    "observers/check/monitor_audit.json": "cfea4b323514ec3103c268de31896d9c153e1a12cbaeb5ab1bd6c2da3533b715",
+    "observers/check/run.json": "1b65e3f3e36c3a2bf08a97b317d79a01335f1e77f957f9eee21d91665cfc176c",
+    "observers/check/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "observers/check/stdout.log": "6cf3872873f98fd9cf4c1b72a297c4a6106c2b0d8b47828bb6b281b3f0cfa672",
+    "provenance.json": "73f8dc3502150589ceb9cffb71a5a5710905e94c3364fa8d8cddf2dd5837b908",
+    "report_helper_sources.json": "d2b5a038dc62ff0d545ea1386aac6cd83b77da3d2cb1a1a6fe3b35dc4deb5229",
+    "results.md": "e0839a6b01184fd4bf58e1691152626d8b756da7048f0303baa9c293c998f12a"
+  },
+  "identity_sha256": "56f9478139ba8f581e29b93201fa2e867dfe9e5a70f4f9d6adab7219adb0ea35",
+  "independent_audit_sha256": "f24f32bc036ae46b82099bdc5f7e55645d5824d420a88fb6762425bb1aaa5069",
+  "observer_boundary": "6 clean check samples; 5 bench samples including one explicitly reconciled terminal exit race. No observed foreign GPU process or monitor error; maximum bench gap 2.272866 s. Raw race retained; no continuous isolation claim.",
+  "receipt_sha256": "85f99ee4eb49d0b84407de440b1e72016df78b11da1407e333d0053fd3f6f688",
+  "replaces": [
+    "cache_recall_check_20261006_03",
+    "cache_recall_bench_20261006_03"
+  ],
+  "reporting_adapter": {
+    "purpose": "Pass the exact independently audited observer reconciliation to the existing shared report validator; plot/statistics/measurement implementation unchanged.",
+    "sha256": "e063ea3ff507525e179b8e40b50630be73fe39d8862ef59609477d18c352af09",
+    "snapshot_path": "/tmp/cache_append_publication_audit_20261006_06/recall_report_sources/external/run_recall_report.py"
+  },
+  "samples_per_case": 31,
+  "schema": "cache-recall-publication-v3",
+  "status": "published",
+  "warmup": 2,
+  "retained_original_identity": {
+    "status": "retained_unchanged_measurements",
+    "prior_nested_status": "staged_pending_root_publication",
+    "correction": "The enclosing manager06 publication already finalized recall04; only the nested status was stale. No recall timing, acceptance, plot or measured identity is replaced by manager07.",
+    "original_outer_publication_sha256": "aaff4c8887ce76e0e6f95738af725208124102d3a14b7079d97ee02834048327",
+    "original_outer_status": "published",
+    "original_outer_recall_component": {
+      "bench_run_id": "cache_recall_bench_20261006_04",
+      "check_run_id": "cache_recall_check_20261006_04",
+      "identity_sha256": "56f9478139ba8f581e29b93201fa2e867dfe9e5a70f4f9d6adab7219adb0ea35",
+      "receipt_sha256": "85f99ee4eb49d0b84407de440b1e72016df78b11da1407e333d0053fd3f6f688"
+    },
+    "original_nested_publication_sha256": "ebe723f23922aa13e651c0f23cfd1fd21b6b447f9f415acebb29a181aae3519b",
+    "source_archive": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_recall_bench_20261006_04/publication_sources_v07",
+    "scope_evidence": "../retained_scope.json"
+  }
+}

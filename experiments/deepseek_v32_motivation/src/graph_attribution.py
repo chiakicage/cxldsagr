@@ -8,7 +8,7 @@ from collections import defaultdict
 from contextlib import closing
 from pathlib import Path
 
-from experiments.deepseek_v32_echo_prefill.src.analyze_nsys import _PROCESS_MASK
+from experiments.deepseek_v32_mfu.src.analyze_nsys import _PROCESS_MASK
 from experiments.deepseek_v32_motivation.src.graph_instrumentation import REPLAY_PATTERN
 
 
@@ -67,7 +67,9 @@ def attribute_graph_replays(activities, calls, parents, *, scopes=None, require_
     if require_replays and not replays:
         raise ValueError("graph-enabled request lacks replay records")
     if scopes is not None:
-        labels = [scope["label"] for scope in scopes if REPLAY_PATTERN.fullmatch(scope["stage"])]
+        labels = [
+            scope["label"] for scope in scopes if REPLAY_PATTERN.fullmatch(scope["stage"] or "")
+        ]
         if len(labels) != len(set(labels)) or set(labels) != replays.keys():
             raise ValueError("observed NVTX graph replay scopes differ from the ledger")
     api_nodes = defaultdict(dict)

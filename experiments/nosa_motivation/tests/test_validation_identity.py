@@ -15,9 +15,8 @@ HELPERS = (
     "experiments/nosa_motivation/src/report.py",
     "experiments/nosa_motivation/src/sources.py",
     "experiments/cache_management/src/capacity_probe.py",
-    "experiments/deepseek_v32_echo_prefill/src/backend_provenance.py",
+    "experiments/deepseek_v32_mfu/src/backend_provenance.py",
     "experiments/deepseek_v32_motivation/src/report.py",
-    "experiments/deepseek_v32_echo_official/src/report.py",
 )
 
 

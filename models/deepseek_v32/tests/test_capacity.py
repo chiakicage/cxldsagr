@@ -290,7 +290,7 @@ def test_native_selection_scratch_is_shared_and_counter_slab_tracks_all_sessions
             ledger["full_sessions"] * ledger["num_layers"] * 24
         )
         assert components["session_native_counters"] == (
-            ledger["full_sessions"] * ledger["num_layers"] * 32
+            ledger["full_sessions"] * ledger["num_layers"] * 40
         )
 
 
@@ -309,9 +309,9 @@ def test_counter_allocator_allowance_uses_one_combined_slab_per_session(monkeypa
 
     def allocation_bytes(size, device):
         assert device == "cuda"
-        # Only the complete [layers, 7] slab receives this synthetic rounding
+        # Only the complete [layers, 8] slab receives this synthetic rounding
         # charge. Separately charging its views would yield a different result.
-        return size + (13 if size == 3 * 56 else 0)
+        return size + (13 if size == 3 * 64 else 0)
 
     monkeypatch.setattr(
         "models.deepseek_v32.execution.capacity.dense_staging_allocation_bytes", allocation_bytes

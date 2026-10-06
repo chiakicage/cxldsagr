@@ -1,0 +1,22 @@
+{
+  "command": [
+    "env",
+    "PATH=/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin:/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin:/usr/local/cuda/bin:/usr/local/bin:/usr/bin:/bin",
+    "numactl",
+    "--physcpubind=24-31",
+    "--membind=0",
+    "bash",
+    "experiments/cache_manager_performance/scripts/run.sh",
+    "--mode",
+    "check",
+    "--run-id",
+    "cache_manager_check_20261006_07",
+    "--capture-dir",
+    "experiments/cache_manager_performance/output/data/input_fixture_20261006_02"
+  ],
+  "started_utc": "2026-10-06T04:49:16.474745+00:00",
+  "driver_sha256": "d9c70b27698a0a3a90a3202dd56c6d556110c4527386ddf24c7d303f3fa7fc7b",
+  "pid": 153572,
+  "exit_code": 0,
+  "completed_utc": "2026-10-06T04:49:34.330101+00:00"
+}

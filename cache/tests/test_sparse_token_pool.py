@@ -239,27 +239,18 @@ def test_consumer_lease_excludes_other_layer_and_pending_prefetch_owns_workspace
 
 
 @pytest.mark.parametrize("body_fails", [False, True])
-@pytest.mark.parametrize("failure_point", ["create", "record"])
-def test_operation_retains_body_and_completion_errors_and_poisoned_owner(
-    monkeypatch, body_fails, failure_point
+def test_operation_retains_body_and_stream_tracking_errors_and_poisoned_owner(
+    monkeypatch, body_fails
 ):
     pool = make_pool()
     session = pool.allocate_session(64)
     body_error = ValueError("attention failed")
-    completion_error = KeyboardInterrupt("event failed")
-    stream = object()
+    completion_error = KeyboardInterrupt("stream tracking failed")
 
-    class Event:
-        def __init__(self):
-            if failure_point == "create":
-                raise completion_error
+    def current_stream(device):
+        raise completion_error
 
-        def record(self, actual_stream):
-            assert actual_stream is stream
-            raise completion_error
-
-    monkeypatch.setattr(torch.cuda, "current_stream", lambda device: stream)
-    monkeypatch.setattr(torch.cuda, "Event", Event)
+    monkeypatch.setattr(torch.cuda, "current_stream", current_stream)
     expected = BaseExceptionGroup if body_fails else KeyboardInterrupt
     with pytest.raises(expected) as caught, pool.operation(session, 0):
         pool.device = torch.device("cuda:0")
@@ -275,6 +266,43 @@ def test_operation_retains_body_and_completion_errors_and_poisoned_owner(
     assert pool.layers
     with pytest.raises(RuntimeError, match="poisoned"), pool.operation(session, 0):
         pass
+
+
+def test_serial_operations_record_dependency_only_on_stream_change(monkeypatch):
+    pool = make_pool(layers=2)
+    session = pool.allocate_session(64)
+    pool.device = torch.device("cuda:0")
+    calls = []
+
+    class Stream:
+        def wait_event(self, event):
+            calls.append(("wait", self, event))
+
+    class Event:
+        def record(self, stream):
+            calls.append(("record", stream, self))
+
+    first, second = Stream(), Stream()
+    current = first
+    monkeypatch.setattr(torch.cuda, "current_stream", lambda device: current)
+    monkeypatch.setattr(torch.cuda, "Event", Event)
+    monkeypatch.setattr(torch.cuda, "is_current_stream_capturing", lambda: False)
+    for layer in (0, 1, 0):
+        with pool.operation(session, layer), pool.operation(session, layer):
+            pass
+    assert calls == []
+    assert pool._last_stream is first
+    # A consumer can enqueue more work on the first stream after ensure() exits.
+    # Record at the next acquisition so the dependency includes that consumer.
+    calls.append(("consumer", first))
+    current = second
+    with pool.operation(session, 1):
+        pass
+    assert calls[0] == ("consumer", first)
+    assert calls[1][:2] == ("record", first)
+    assert calls[2] == ("wait", second, calls[1][2])
+    assert len(calls) == 3
+    assert pool._last_stream is second
 
 
 def test_failed_previous_stream_dependency_poison_retains_pool(monkeypatch):

@@ -1,0 +1,2658 @@
+{
+  "schema": "deepseek-c10-gap-context-v1",
+  "profile_run_id": "deepseek_mfu_c10_profile_20261006_02",
+  "helper_sha256": "adc971df53fa4f01a5abad171ca2f35a990dbe3c1552f4cdf2948a23936bad29",
+  "captures": [
+    {
+      "scheme": "hbm",
+      "largest_gap_context": [
+        {
+          "gap": {
+            "start_us": 21.056,
+            "end_us": 135.361,
+            "duration_us": 114.305,
+            "overlapping_cuda_apis": [
+              {
+                "name": "cudaGraphLaunch_v10000",
+                "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+                "correlation_id": 3206610,
+                "start_us": 36.181,
+                "end_us": 131.381,
+                "duration_us": 95.2,
+                "overlap_with_gap_us": 95.2
+              }
+            ]
+          },
+          "previous_gpu_activity": {
+            "group": "aux",
+            "kind": "kernel",
+            "stage": "compute_graph_projection_inputs",
+            "scope_stage": "compute_graph_projection_inputs",
+            "start_ms": "0.020128",
+            "end_ms": "0.021056",
+            "name": "void at::native::vectorized_elementwise_kernel<(int)2, at::native::FillFunctor<long>, std::array<char *, (unsigned long)1>>(int, T2, T3)"
+          },
+          "next_gpu_activity": {
+            "group": "projection",
+            "kind": "kernel",
+            "stage": "compute_graph_projection_layer_1_q_128",
+            "scope_stage": "compute_graph_projection_layer_1_q_128",
+            "start_ms": "0.135361",
+            "end_ms": "0.138657",
+            "name": "kernel_cutlass_kernel_operatorsdeepseek_v32norm_fusedLocalFusedRMSNorm_object_at__tensorptrbf16gmemalign128oi64716871681_tensorptrbf16gmemalign128oi64716871681_tensorptrf32gmemalign16o716_0"
+          },
+          "overlapping_host_nvtx_scopes": [
+            {
+              "label": "motivation/hbm/revisit/candidate/chunk_0/layer_1/compute_graph_projection_inputs",
+              "start_us": -23.344,
+              "end_us": 23.11,
+              "overlap_us": 2.054
+            },
+            {
+              "label": "motivation/hbm/revisit/candidate/chunk_0/layer_1/compute_graph_projection_layer_1_q_128",
+              "start_us": 32.162,
+              "end_us": 157.262,
+              "overlap_us": 103.199
+            },
+            {
+              "label": "motivation/hbm/revisit/candidate/chunk_0/layer_1/attention_projection",
+              "start_us": -33.888,
+              "end_us": 160.414,
+              "overlap_us": 114.305
+            },
+            {
+              "label": "motivation/hbm/revisit/candidate/chunk_0/layer_1/cache_operation",
+              "start_us": -53.275,
+              "end_us": 940.249,
+              "overlap_us": 114.305
+            },
+            {
+              "label": "motivation/hbm/revisit/candidate/chunk_0/layer_1/cache_operation",
+              "start_us": -146.603,
+              "end_us": 951.932,
+              "overlap_us": 114.305
+            },
+            {
+              "label": "motivation/hbm/revisit/candidate/chunk_0/layer_1/layer",
+              "start_us": -152.751,
+              "end_us": 954.66,
+              "overlap_us": 114.305
+            },
+            {
+              "label": "motivation/hbm/revisit/candidate/chunk_0/layer_shared/chunk",
+              "start_us": -1452.463,
+              "end_us": 10893.674,
+              "overlap_us": 114.305
+            },
+            {
+              "label": "motivation/hbm/revisit/candidate/chunk_shared/layer_shared/forward",
+              "start_us": -2049.829,
+              "end_us": 10896.154,
+              "overlap_us": 114.305
+            },
+            {
+              "label": "motivation/hbm/revisit/candidate/chunk_shared/layer_shared/candidate_extend",
+              "start_us": -2067.996,
+              "end_us": 10899.333,
+              "overlap_us": 114.305
+            },
+            {
+              "label": "motivation/hbm/revisit/request/chunk_shared/layer_shared/request",
+              "start_us": -2191652.175,
+              "end_us": 11682.518,
+              "overlap_us": 114.305
+            }
+          ]
+        },
+        {
+          "gap": {
+            "start_us": 296.257,
+            "end_us": 338.049,
+            "duration_us": 41.792,
+            "overlapping_cuda_apis": [
+              {
+                "name": "cuTensorMapEncodeTiled",
+                "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+                "correlation_id": 3206649,
+                "start_us": 314.169,
+                "end_us": 314.928,
+                "duration_us": 0.759,
+                "overlap_with_gap_us": 0.759
+              },
+              {
+                "name": "cuTensorMapEncodeTiled",
+                "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+                "correlation_id": 3206650,
+                "start_us": 315.341,
+                "end_us": 315.497,
+                "duration_us": 0.156,
+                "overlap_with_gap_us": 0.156
+              },
+              {
+                "name": "cuTensorMapEncodeTiled",
+                "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+                "correlation_id": 3206651,
+                "start_us": 315.851,
+                "end_us": 316.061,
+                "duration_us": 0.21,
+                "overlap_with_gap_us": 0.21
+              },
+              {
+                "name": "cuTensorMapEncodeTiled",
+                "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+                "correlation_id": 3206652,
+                "start_us": 317.252,
+                "end_us": 317.373,
+                "duration_us": 0.121,
+                "overlap_with_gap_us": 0.121
+              },
+              {
+                "name": "cuLaunchKernelEx",
+                "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+                "correlation_id": 3206655,
+                "start_us": 330.478,
+                "end_us": 336.511,
+                "duration_us": 6.033,
+                "overlap_with_gap_us": 6.033
+              }
+            ]
+          },
+          "previous_gpu_activity": {
+            "group": "aux",
+            "kind": "memcpy",
+            "stage": "index_cache_write",
+            "scope_stage": "index_cache_write",
+            "start_ms": "0.295425",
+            "end_ms": "0.296257",
+            "name": "Device-to-Device"
+          },
+          "next_gpu_activity": {
+            "group": "index",
+            "kind": "kernel",
+            "stage": "indexer_qk",
+            "scope_stage": "indexer_qk",
+            "start_ms": "0.338049",
+            "end_ms": "0.632417",
+            "name": "void deep_gemm::sm90_fp8_mqa_logits<(unsigned int)64, (unsigned int)128, (unsigned int)2, (unsigned int)256, (unsigned int)3, (unsigned int)3, (unsigned int)132, (unsigned int)128, (unsigned int)512, float>(unsigned int, unsigned int, unsigned int, unsigned int *, unsigned int *, T10 *, CUtensorMap_st, CUtensorMap_st, CUtensorMap_st, CUtensorMap_st)"
+          },
+          "overlapping_host_nvtx_scopes": [
+            {
+              "label": "motivation/hbm/revisit/candidate/chunk_0/layer_1/indexer_qk",
+              "start_us": 268.279,
+              "end_us": 414.065,
+              "overlap_us": 41.792
+            },
+            {
+              "label": "motivation/hbm/revisit/candidate/chunk_0/layer_1/indexer_aux",
+              "start_us": 215.197,
+              "end_us": 418.223,
+              "overlap_us": 41.792
+            },
+            {
+              "label": "motivation/hbm/revisit/candidate/chunk_0/layer_1/cache_operation",
+              "start_us": -53.275,
+              "end_us": 940.249,
+              "overlap_us": 41.792
+            },
+            {
+              "label": "motivation/hbm/revisit/candidate/chunk_0/layer_1/cache_operation",
+              "start_us": -146.603,
+              "end_us": 951.932,
+              "overlap_us": 41.792
+            },
+            {
+              "label": "motivation/hbm/revisit/candidate/chunk_0/layer_1/layer",
+              "start_us": -152.751,
+              "end_us": 954.66,
+              "overlap_us": 41.792
+            },
+            {
+              "label": "motivation/hbm/revisit/candidate/chunk_0/layer_shared/chunk",
+              "start_us": -1452.463,
+              "end_us": 10893.674,
+              "overlap_us": 41.792
+            },
+            {
+              "label": "motivation/hbm/revisit/candidate/chunk_shared/layer_shared/forward",
+              "start_us": -2049.829,
+              "end_us": 10896.154,
+              "overlap_us": 41.792
+            },
+            {
+              "label": "motivation/hbm/revisit/candidate/chunk_shared/layer_shared/candidate_extend",
+              "start_us": -2067.996,
+              "end_us": 10899.333,
+              "overlap_us": 41.792
+            },
+            {
+              "label": "motivation/hbm/revisit/request/chunk_shared/layer_shared/request",
+              "start_us": -2191652.175,
+              "end_us": 11682.518,
+              "overlap_us": 41.792
+            }
+          ]
+        },
+        {
+          "gap": {
+            "start_us": 888.641,
+            "end_us": 921.697,
+            "duration_us": 33.056,
+            "overlapping_cuda_apis": [
+              {
+                "name": "cudaGraphLaunch_v10000",
+                "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+                "correlation_id": 3206809,
+                "start_us": 873.535,
+                "end_us": 917.243,
+                "duration_us": 43.708,
+                "overlap_with_gap_us": 28.602
+              }
+            ]
+          },
+          "previous_gpu_activity": {
+            "group": "finish",
+            "kind": "kernel",
+            "stage": "v_expand",
+            "scope_stage": "v_expand",
+            "start_ms": "0.878017",
+            "end_ms": "0.888641",
+            "name": "nvjet_sm90_tst_128x128_64x6_1x1_h_bz_NNT"
+          },
+          "next_gpu_activity": {
+            "group": "finish",
+            "kind": "kernel",
+            "stage": "o_proj",
+            "scope_stage": "compute_graph_finish_layer_1_q_128",
+            "start_ms": "0.921697",
+            "end_ms": "0.924449",
+            "name": "activation_quantization"
+          },
+          "overlapping_host_nvtx_scopes": [
+            {
+              "label": "motivation/hbm/revisit/candidate/chunk_0/layer_1/compute_graph_finish_layer_1_q_128",
+              "start_us": 869.394,
+              "end_us": 934.505,
+              "overlap_us": 33.056
+            },
+            {
+              "label": "motivation/hbm/revisit/candidate/chunk_0/layer_1/attention_output",
+              "start_us": 763.655,
+              "end_us": 936.967,
+              "overlap_us": 33.056
+            },
+            {
+              "label": "motivation/hbm/revisit/candidate/chunk_0/layer_1/cache_operation",
+              "start_us": -53.275,
+              "end_us": 940.249,
+              "overlap_us": 33.056
+            },
+            {
+              "label": "motivation/hbm/revisit/candidate/chunk_0/layer_1/cache_operation",
+              "start_us": -146.603,
+              "end_us": 951.932,
+              "overlap_us": 33.056
+            },
+            {
+              "label": "motivation/hbm/revisit/candidate/chunk_0/layer_1/layer",
+              "start_us": -152.751,
+              "end_us": 954.66,
+              "overlap_us": 33.056
+            },
+            {
+              "label": "motivation/hbm/revisit/candidate/chunk_0/layer_shared/chunk",
+              "start_us": -1452.463,
+              "end_us": 10893.674,
+              "overlap_us": 33.056
+            },
+            {
+              "label": "motivation/hbm/revisit/candidate/chunk_shared/layer_shared/forward",
+              "start_us": -2049.829,
+              "end_us": 10896.154,
+              "overlap_us": 33.056
+            },
+            {
+              "label": "motivation/hbm/revisit/candidate/chunk_shared/layer_shared/candidate_extend",
+              "start_us": -2067.996,
+              "end_us": 10899.333,
+              "overlap_us": 33.056
+            },
+            {
+              "label": "motivation/hbm/revisit/request/chunk_shared/layer_shared/request",
+              "start_us": -2191652.175,
+              "end_us": 11682.518,
+              "overlap_us": 33.056
+            }
+          ]
+        },
+        {
+          "gap": {
+            "start_us": 739.841,
+            "end_us": 745.697,
+            "duration_us": 5.856,
+            "overlapping_cuda_apis": [
+              {
+                "name": "cudaLaunchKernelExC_v11060",
+                "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+                "correlation_id": 3206790,
+                "start_us": 737.161,
+                "end_us": 744.409,
+                "duration_us": 7.248,
+                "overlap_with_gap_us": 4.568
+              }
+            ]
+          },
+          "previous_gpu_activity": {
+            "group": "aux",
+            "kind": "memcpy",
+            "stage": "cache_operation",
+            "scope_stage": "cache_operation",
+            "start_ms": "0.738145",
+            "end_ms": "0.739841",
+            "name": "Device-to-Device"
+          },
+          "next_gpu_activity": {
+            "group": "attention",
+            "kind": "kernel",
+            "stage": "mla_qk_pv",
+            "scope_stage": "mla_qk_pv",
+            "start_ms": "0.745697",
+            "end_ms": "0.876641",
+            "name": "void sm90::prefill::sparse_fwd::sparse_attn_fwd_kernel<sm90::prefill::sparse_fwd::KernelTemplate<(int)576, (bool)0>, sm90::prefill::sparse_fwd::KernelTemplate<(int)576, (bool)0>::TmaParams<cute::tuple<int, int, int>, cute::TiledCopy<cute::Copy_Atom<cute::Copy_Traits<cute::SM90_TMA_LOAD, cute::C<(int)65536>, cute::AuxTmaParams<cute::tuple<cute::ScaledBasis<cute::C<(int)1>, (int)1>, cute::ScaledBasis<cute::C<(int)1>, (int)0>, cute::ScaledBasis<cute::C<(int)1>, (int)2>>, const cute::Layout<cute::tuple<cute::C<(int)64>, cute::C<(int)64>, cute::C<(int)1>>, cute::tuple<cute::ScaledBasis<cute::C<(int)1>, (int)1>, cute::ScaledBasis<cute::C<(int)1>, (int)0>, cute::ScaledBasis<cute::C<(int)1>, (int)2>>> &, const cute::Swizzle<(int)3, (int)4, (int)3> &>>, cutlass::bfloat16_t>, cute::Layout<cute::tuple<cute::C<(int)1>, cute::tuple<cute::tuple<cute::tuple<cute::C<(int)64>, cute::C<(int)64>>, cute::C<(int)9>>>>, cute::tuple<cute::C<(int)0>, cute::tuple<cute::tuple<cute::tuple<cute::C<(int)64>, cute::C<(int)1>>, cute::C<(int)4096>>>>>, cute::tuple<cute::C<(int)64>, cute::C<(int)576>>>>>(SparseAttnFwdParams, T2)"
+          },
+          "overlapping_host_nvtx_scopes": [
+            {
+              "label": "motivation/hbm/revisit/candidate/chunk_0/layer_1/mla_qk_pv",
+              "start_us": 686.949,
+              "end_us": 754.045,
+              "overlap_us": 5.856
+            },
+            {
+              "label": "motivation/hbm/revisit/candidate/chunk_0/layer_1/sparse_mla_aux",
+              "start_us": 635.358,
+              "end_us": 756.272,
+              "overlap_us": 5.856
+            },
+            {
+              "label": "motivation/hbm/revisit/candidate/chunk_0/layer_1/cache_operation",
+              "start_us": -53.275,
+              "end_us": 940.249,
+              "overlap_us": 5.856
+            },
+            {
+              "label": "motivation/hbm/revisit/candidate/chunk_0/layer_1/cache_operation",
+              "start_us": -146.603,
+              "end_us": 951.932,
+              "overlap_us": 5.856
+            },
+            {
+              "label": "motivation/hbm/revisit/candidate/chunk_0/layer_1/layer",
+              "start_us": -152.751,
+              "end_us": 954.66,
+              "overlap_us": 5.856
+            },
+            {
+              "label": "motivation/hbm/revisit/candidate/chunk_0/layer_shared/chunk",
+              "start_us": -1452.463,
+              "end_us": 10893.674,
+              "overlap_us": 5.856
+            },
+            {
+              "label": "motivation/hbm/revisit/candidate/chunk_shared/layer_shared/forward",
+              "start_us": -2049.829,
+              "end_us": 10896.154,
+              "overlap_us": 5.856
+            },
+            {
+              "label": "motivation/hbm/revisit/candidate/chunk_shared/layer_shared/candidate_extend",
+              "start_us": -2067.996,
+              "end_us": 10899.333,
+              "overlap_us": 5.856
+            },
+            {
+              "label": "motivation/hbm/revisit/request/chunk_shared/layer_shared/request",
+              "start_us": -2191652.175,
+              "end_us": 11682.518,
+              "overlap_us": 5.856
+            }
+          ]
+        },
+        {
+          "gap": {
+            "start_us": 14.432,
+            "end_us": 20.128,
+            "duration_us": 5.696,
+            "overlapping_cuda_apis": [
+              {
+                "name": "cudaLaunchKernel_v7000",
+                "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+                "correlation_id": 3206604,
+                "start_us": 12.81,
+                "end_us": 18.998,
+                "duration_us": 6.188,
+                "overlap_with_gap_us": 4.566
+              }
+            ]
+          },
+          "previous_gpu_activity": {
+            "group": "aux",
+            "kind": "memcpy",
+            "stage": "compute_graph_projection_inputs",
+            "scope_stage": "compute_graph_projection_inputs",
+            "start_ms": "0.012288",
+            "end_ms": "0.014432",
+            "name": "Device-to-Device"
+          },
+          "next_gpu_activity": {
+            "group": "aux",
+            "kind": "kernel",
+            "stage": "compute_graph_projection_inputs",
+            "scope_stage": "compute_graph_projection_inputs",
+            "start_ms": "0.020128",
+            "end_ms": "0.021056",
+            "name": "void at::native::vectorized_elementwise_kernel<(int)2, at::native::FillFunctor<long>, std::array<char *, (unsigned long)1>>(int, T2, T3)"
+          },
+          "overlapping_host_nvtx_scopes": [
+            {
+              "label": "motivation/hbm/revisit/candidate/chunk_0/layer_1/compute_graph_projection_inputs",
+              "start_us": -23.344,
+              "end_us": 23.11,
+              "overlap_us": 5.696
+            },
+            {
+              "label": "motivation/hbm/revisit/candidate/chunk_0/layer_1/attention_projection",
+              "start_us": -33.888,
+              "end_us": 160.414,
+              "overlap_us": 5.696
+            },
+            {
+              "label": "motivation/hbm/revisit/candidate/chunk_0/layer_1/cache_operation",
+              "start_us": -53.275,
+              "end_us": 940.249,
+              "overlap_us": 5.696
+            },
+            {
+              "label": "motivation/hbm/revisit/candidate/chunk_0/layer_1/cache_operation",
+              "start_us": -146.603,
+              "end_us": 951.932,
+              "overlap_us": 5.696
+            },
+            {
+              "label": "motivation/hbm/revisit/candidate/chunk_0/layer_1/layer",
+              "start_us": -152.751,
+              "end_us": 954.66,
+              "overlap_us": 5.696
+            },
+            {
+              "label": "motivation/hbm/revisit/candidate/chunk_0/layer_shared/chunk",
+              "start_us": -1452.463,
+              "end_us": 10893.674,
+              "overlap_us": 5.696
+            },
+            {
+              "label": "motivation/hbm/revisit/candidate/chunk_shared/layer_shared/forward",
+              "start_us": -2049.829,
+              "end_us": 10896.154,
+              "overlap_us": 5.696
+            },
+            {
+              "label": "motivation/hbm/revisit/candidate/chunk_shared/layer_shared/candidate_extend",
+              "start_us": -2067.996,
+              "end_us": 10899.333,
+              "overlap_us": 5.696
+            },
+            {
+              "label": "motivation/hbm/revisit/request/chunk_shared/layer_shared/request",
+              "start_us": -2191652.175,
+              "end_us": 11682.518,
+              "overlap_us": 5.696
+            }
+          ]
+        }
+      ],
+      "layer1_copy_sync_apis": [
+        {
+          "api": "cudaMemcpyAsync_v3020",
+          "innermost_scope": "motivation/hbm/revisit/candidate/chunk_0/layer_1/cache_operation",
+          "duration_us": 9.599,
+          "correlation_id": 3206564
+        },
+        {
+          "api": "cudaMemcpyAsync_v3020",
+          "innermost_scope": "motivation/hbm/revisit/candidate/chunk_0/layer_1/cache_operation",
+          "duration_us": 6.042,
+          "correlation_id": 3206578
+        },
+        {
+          "api": "cudaMemcpyAsync_v3020",
+          "innermost_scope": "motivation/hbm/revisit/candidate/chunk_0/layer_1/compute_graph_projection_inputs",
+          "duration_us": 7.019,
+          "correlation_id": 3206587
+        },
+        {
+          "api": "cudaMemcpyAsync_v3020",
+          "innermost_scope": "motivation/hbm/revisit/candidate/chunk_0/layer_1/compute_graph_projection_inputs",
+          "duration_us": 4.494,
+          "correlation_id": 3206595
+        },
+        {
+          "api": "cudaMemcpyAsync_v3020",
+          "innermost_scope": "motivation/hbm/revisit/candidate/chunk_0/layer_1/index_cache_write",
+          "duration_us": 8.04,
+          "correlation_id": 3206615
+        },
+        {
+          "api": "cudaMemcpyAsync_v3020",
+          "innermost_scope": "motivation/hbm/revisit/candidate/chunk_0/layer_1/index_cache_write",
+          "duration_us": 5.536,
+          "correlation_id": 3206623
+        },
+        {
+          "api": "cudaMemcpyAsync_v3020",
+          "innermost_scope": "motivation/hbm/revisit/candidate/chunk_0/layer_1/cache_operation",
+          "duration_us": 8.696,
+          "correlation_id": 3206753
+        }
+      ]
+    },
+    {
+      "scheme": "echo",
+      "largest_gap_context": [
+        {
+          "gap": {
+            "start_us": 691.777,
+            "end_us": 866.913,
+            "duration_us": 175.136,
+            "overlapping_cuda_apis": [
+              {
+                "name": "cudaLaunchKernel_v7000",
+                "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+                "correlation_id": 9481773,
+                "start_us": 860.006,
+                "end_us": 865.855,
+                "duration_us": 5.849,
+                "overlap_with_gap_us": 5.849
+              },
+              {
+                "name": "cuKernelGetName",
+                "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+                "correlation_id": 9481772,
+                "start_us": 859.62,
+                "end_us": 859.878,
+                "duration_us": 0.258,
+                "overlap_with_gap_us": 0.258
+              }
+            ]
+          },
+          "previous_gpu_activity": {
+            "group": "aux",
+            "kind": "kernel",
+            "stage": "pool_operation",
+            "scope_stage": "pool_operation",
+            "start_ms": "0.691009",
+            "end_ms": "0.691777",
+            "name": "void at::native::vectorized_elementwise_kernel<(int)2, at::native::FillFunctor<long>, std::array<char *, (unsigned long)1>>(int, T2, T3)"
+          },
+          "next_gpu_activity": {
+            "group": "aux",
+            "kind": "kernel",
+            "stage": "indexer_fused",
+            "scope_stage": "indexer_fused",
+            "start_ms": "0.866913",
+            "end_ms": "0.867649",
+            "name": "void at::native::vectorized_elementwise_kernel<(int)4, at::native::FillFunctor<unsigned int>, std::array<char *, (unsigned long)1>>(int, T2, T3)"
+          },
+          "overlapping_host_nvtx_scopes": [
+            {
+              "label": "motivation/echo/revisit/candidate/chunk_0/layer_1/indexer_fused",
+              "start_us": 787.504,
+              "end_us": 1040.624,
+              "overlap_us": 79.409
+            },
+            {
+              "label": "motivation/echo/revisit/candidate/chunk_0/layer_1/pool_operation",
+              "start_us": 406.833,
+              "end_us": 702.605,
+              "overlap_us": 10.828
+            },
+            {
+              "label": "motivation/echo/revisit/candidate/chunk_0/layer_1/cache_operation",
+              "start_us": 397.639,
+              "end_us": 705.344,
+              "overlap_us": 13.567
+            },
+            {
+              "label": "motivation/echo/revisit/candidate/chunk_0/layer_1/cache_prepare_prefetch",
+              "start_us": 384.603,
+              "end_us": 707.798,
+              "overlap_us": 16.021
+            },
+            {
+              "label": "motivation/echo/revisit/candidate/chunk_0/layer_1/indexer_prefetch_aux",
+              "start_us": 717.361,
+              "end_us": 1045.641,
+              "overlap_us": 149.552
+            },
+            {
+              "label": "motivation/echo/revisit/candidate/chunk_0/layer_1/offload_prepare",
+              "start_us": 365.693,
+              "end_us": 710.449,
+              "overlap_us": 18.672
+            },
+            {
+              "label": "motivation/echo/revisit/candidate/chunk_0/layer_1/pool_operation",
+              "start_us": 82.986,
+              "end_us": 2457.098,
+              "overlap_us": 175.136
+            },
+            {
+              "label": "motivation/echo/revisit/candidate/chunk_0/layer_1/cache_operation",
+              "start_us": 72.064,
+              "end_us": 2460.502,
+              "overlap_us": 175.136
+            },
+            {
+              "label": "motivation/echo/revisit/candidate/chunk_0/layer_1/pool_operation",
+              "start_us": -72.307,
+              "end_us": 2499.583,
+              "overlap_us": 175.136
+            },
+            {
+              "label": "motivation/echo/revisit/candidate/chunk_0/layer_1/cache_operation",
+              "start_us": -84.8,
+              "end_us": 2502.475,
+              "overlap_us": 175.136
+            },
+            {
+              "label": "motivation/echo/revisit/candidate/chunk_0/layer_1/layer",
+              "start_us": -92.899,
+              "end_us": 2505.446,
+              "overlap_us": 175.136
+            },
+            {
+              "label": "motivation/echo/revisit/candidate/chunk_0/layer_shared/chunk",
+              "start_us": -3345.718,
+              "end_us": 25528.501,
+              "overlap_us": 175.136
+            },
+            {
+              "label": "motivation/echo/revisit/candidate/chunk_shared/layer_shared/forward",
+              "start_us": -4701.696,
+              "end_us": 25531.545,
+              "overlap_us": 175.136
+            },
+            {
+              "label": "motivation/echo/revisit/candidate/chunk_shared/layer_shared/candidate_extend",
+              "start_us": -4717.955,
+              "end_us": 25534.875,
+              "overlap_us": 175.136
+            },
+            {
+              "label": "motivation/echo/revisit/request/chunk_shared/layer_shared/request",
+              "start_us": -7409.407,
+              "end_us": 28802.959,
+              "overlap_us": 175.136
+            }
+          ]
+        },
+        {
+          "gap": {
+            "start_us": 2107.17,
+            "end_us": 2245.058,
+            "duration_us": 137.888,
+            "overlapping_cuda_apis": [
+              {
+                "name": "cudaGetDriverEntryPointByVersion_v12050",
+                "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+                "correlation_id": 9482265,
+                "start_us": 2227.159,
+                "end_us": 2228.114,
+                "duration_us": 0.955,
+                "overlap_with_gap_us": 0.955
+              },
+              {
+                "name": "cudaGetDriverEntryPointByVersion_v12050",
+                "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+                "correlation_id": 9482267,
+                "start_us": 2229.727,
+                "end_us": 2229.967,
+                "duration_us": 0.24,
+                "overlap_with_gap_us": 0.24
+              },
+              {
+                "name": "cudaLaunchKernelExC_v11060",
+                "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+                "correlation_id": 9482271,
+                "start_us": 2236.48,
+                "end_us": 2244.069,
+                "duration_us": 7.589,
+                "overlap_with_gap_us": 7.589
+              },
+              {
+                "name": "cuTensorMapEncodeTiled",
+                "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+                "correlation_id": 9482266,
+                "start_us": 2228.523,
+                "end_us": 2229.358,
+                "duration_us": 0.835,
+                "overlap_with_gap_us": 0.835
+              },
+              {
+                "name": "cuTensorMapEncodeTiled",
+                "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+                "correlation_id": 9482268,
+                "start_us": 2230.191,
+                "end_us": 2230.407,
+                "duration_us": 0.216,
+                "overlap_with_gap_us": 0.216
+              }
+            ]
+          },
+          "previous_gpu_activity": {
+            "group": "aux",
+            "kind": "kernel",
+            "stage": "pool_operation",
+            "scope_stage": "pool_operation",
+            "start_ms": "2.100674",
+            "end_ms": "2.10717",
+            "name": "echo_native::sparse_map_kernel(const int *, int *, long, const int *, const int *, int, int, int, int)"
+          },
+          "next_gpu_activity": {
+            "group": "attention",
+            "kind": "kernel",
+            "stage": "mla_qk_pv",
+            "scope_stage": "mla_qk_pv",
+            "start_ms": "2.245058",
+            "end_ms": "2.36605",
+            "name": "void sm90::prefill::sparse_fwd::sparse_attn_fwd_kernel<sm90::prefill::sparse_fwd::KernelTemplate<(int)576, (bool)0>, sm90::prefill::sparse_fwd::KernelTemplate<(int)576, (bool)0>::TmaParams<cute::tuple<int, int, int>, cute::TiledCopy<cute::Copy_Atom<cute::Copy_Traits<cute::SM90_TMA_LOAD, cute::C<(int)65536>, cute::AuxTmaParams<cute::tuple<cute::ScaledBasis<cute::C<(int)1>, (int)1>, cute::ScaledBasis<cute::C<(int)1>, (int)0>, cute::ScaledBasis<cute::C<(int)1>, (int)2>>, const cute::Layout<cute::tuple<cute::C<(int)64>, cute::C<(int)64>, cute::C<(int)1>>, cute::tuple<cute::ScaledBasis<cute::C<(int)1>, (int)1>, cute::ScaledBasis<cute::C<(int)1>, (int)0>, cute::ScaledBasis<cute::C<(int)1>, (int)2>>> &, const cute::Swizzle<(int)3, (int)4, (int)3> &>>, cutlass::bfloat16_t>, cute::Layout<cute::tuple<cute::C<(int)1>, cute::tuple<cute::tuple<cute::tuple<cute::C<(int)64>, cute::C<(int)64>>, cute::C<(int)9>>>>, cute::tuple<cute::C<(int)0>, cute::tuple<cute::tuple<cute::tuple<cute::C<(int)64>, cute::C<(int)1>>, cute::C<(int)4096>>>>>, cute::tuple<cute::C<(int)64>, cute::C<(int)576>>>>>(SparseAttnFwdParams, T2)"
+          },
+          "overlapping_host_nvtx_scopes": [
+            {
+              "label": "motivation/echo/revisit/candidate/chunk_0/layer_1/mla_qk_pv",
+              "start_us": 2179.402,
+              "end_us": 2252.862,
+              "overlap_us": 65.656
+            },
+            {
+              "label": "motivation/echo/revisit/candidate/chunk_0/layer_1/sparse_mla_aux",
+              "start_us": 2123.208,
+              "end_us": 2255.059,
+              "overlap_us": 121.85
+            },
+            {
+              "label": "motivation/echo/revisit/candidate/chunk_0/layer_1/pool_operation",
+              "start_us": 1585.564,
+              "end_us": 2108.039,
+              "overlap_us": 0.869
+            },
+            {
+              "label": "motivation/echo/revisit/candidate/chunk_0/layer_1/cache_operation",
+              "start_us": 1568.021,
+              "end_us": 2111.685,
+              "overlap_us": 4.515
+            },
+            {
+              "label": "motivation/echo/revisit/candidate/chunk_0/layer_1/offload_exact_recall",
+              "start_us": 1556.347,
+              "end_us": 2114.85,
+              "overlap_us": 7.68
+            },
+            {
+              "label": "motivation/echo/revisit/candidate/chunk_0/layer_1/pool_operation",
+              "start_us": 82.986,
+              "end_us": 2457.098,
+              "overlap_us": 137.888
+            },
+            {
+              "label": "motivation/echo/revisit/candidate/chunk_0/layer_1/cache_operation",
+              "start_us": 72.064,
+              "end_us": 2460.502,
+              "overlap_us": 137.888
+            },
+            {
+              "label": "motivation/echo/revisit/candidate/chunk_0/layer_1/pool_operation",
+              "start_us": -72.307,
+              "end_us": 2499.583,
+              "overlap_us": 137.888
+            },
+            {
+              "label": "motivation/echo/revisit/candidate/chunk_0/layer_1/cache_operation",
+              "start_us": -84.8,
+              "end_us": 2502.475,
+              "overlap_us": 137.888
+            },
+            {
+              "label": "motivation/echo/revisit/candidate/chunk_0/layer_1/layer",
+              "start_us": -92.899,
+              "end_us": 2505.446,
+              "overlap_us": 137.888
+            },
+            {
+              "label": "motivation/echo/revisit/candidate/chunk_0/layer_shared/chunk",
+              "start_us": -3345.718,
+              "end_us": 25528.501,
+              "overlap_us": 137.888
+            },
+            {
+              "label": "motivation/echo/revisit/candidate/chunk_shared/layer_shared/forward",
+              "start_us": -4701.696,
+              "end_us": 25531.545,
+              "overlap_us": 137.888
+            },
+            {
+              "label": "motivation/echo/revisit/candidate/chunk_shared/layer_shared/candidate_extend",
+              "start_us": -4717.955,
+              "end_us": 25534.875,
+              "overlap_us": 137.888
+            },
+            {
+              "label": "motivation/echo/revisit/request/chunk_shared/layer_shared/request",
+              "start_us": -7409.407,
+              "end_us": 28802.959,
+              "overlap_us": 137.888
+            }
+          ]
+        },
+        {
+          "gap": {
+            "start_us": 164.96,
+            "end_us": 295.072,
+            "duration_us": 130.112,
+            "overlapping_cuda_apis": [
+              {
+                "name": "cudaGraphLaunch_v10000",
+                "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+                "correlation_id": 9481534,
+                "start_us": 179.62,
+                "end_us": 290.349,
+                "duration_us": 110.729,
+                "overlap_with_gap_us": 110.729
+              }
+            ]
+          },
+          "previous_gpu_activity": {
+            "group": "aux",
+            "kind": "kernel",
+            "stage": "compute_graph_projection_inputs",
+            "scope_stage": "compute_graph_projection_inputs",
+            "start_ms": "0.164192",
+            "end_ms": "0.16496",
+            "name": "void at::native::vectorized_elementwise_kernel<(int)2, at::native::FillFunctor<long>, std::array<char *, (unsigned long)1>>(int, T2, T3)"
+          },
+          "next_gpu_activity": {
+            "group": "projection",
+            "kind": "kernel",
+            "stage": "compute_graph_projection_layer_1_q_128",
+            "scope_stage": "compute_graph_projection_layer_1_q_128",
+            "start_ms": "0.295072",
+            "end_ms": "0.298208",
+            "name": "kernel_cutlass_kernel_operatorsdeepseek_v32norm_fusedLocalFusedRMSNorm_object_at__tensorptrbf16gmemalign128oi64716871681_tensorptrbf16gmemalign128oi64716871681_tensorptrf32gmemalign16o716_0"
+          },
+          "overlapping_host_nvtx_scopes": [
+            {
+              "label": "motivation/echo/revisit/candidate/chunk_0/layer_1/compute_graph_projection_inputs",
+              "start_us": 119.605,
+              "end_us": 167.078,
+              "overlap_us": 2.118
+            },
+            {
+              "label": "motivation/echo/revisit/candidate/chunk_0/layer_1/compute_graph_projection_layer_1_q_128",
+              "start_us": 175.591,
+              "end_us": 312.071,
+              "overlap_us": 119.481
+            },
+            {
+              "label": "motivation/echo/revisit/candidate/chunk_0/layer_1/attention_projection",
+              "start_us": 107.26,
+              "end_us": 316.042,
+              "overlap_us": 130.112
+            },
+            {
+              "label": "motivation/echo/revisit/candidate/chunk_0/layer_1/pool_operation",
+              "start_us": 82.986,
+              "end_us": 2457.098,
+              "overlap_us": 130.112
+            },
+            {
+              "label": "motivation/echo/revisit/candidate/chunk_0/layer_1/cache_operation",
+              "start_us": 72.064,
+              "end_us": 2460.502,
+              "overlap_us": 130.112
+            },
+            {
+              "label": "motivation/echo/revisit/candidate/chunk_0/layer_1/pool_operation",
+              "start_us": -72.307,
+              "end_us": 2499.583,
+              "overlap_us": 130.112
+            },
+            {
+              "label": "motivation/echo/revisit/candidate/chunk_0/layer_1/cache_operation",
+              "start_us": -84.8,
+              "end_us": 2502.475,
+              "overlap_us": 130.112
+            },
+            {
+              "label": "motivation/echo/revisit/candidate/chunk_0/layer_1/layer",
+              "start_us": -92.899,
+              "end_us": 2505.446,
+              "overlap_us": 130.112
+            },
+            {
+              "label": "motivation/echo/revisit/candidate/chunk_0/layer_shared/chunk",
+              "start_us": -3345.718,
+              "end_us": 25528.501,
+              "overlap_us": 130.112
+            },
+            {
+              "label": "motivation/echo/revisit/candidate/chunk_shared/layer_shared/forward",
+              "start_us": -4701.696,
+              "end_us": 25531.545,
+              "overlap_us": 130.112
+            },
+            {
+              "label": "motivation/echo/revisit/candidate/chunk_shared/layer_shared/candidate_extend",
+              "start_us": -4717.955,
+              "end_us": 25534.875,
+              "overlap_us": 130.112
+            },
+            {
+              "label": "motivation/echo/revisit/request/chunk_shared/layer_shared/request",
+              "start_us": -7409.407,
+              "end_us": 28802.959,
+              "overlap_us": 130.112
+            }
+          ]
+        },
+        {
+          "gap": {
+            "start_us": 12.992,
+            "end_us": 135.008,
+            "duration_us": 122.016,
+            "overlapping_cuda_apis": [
+              {
+                "name": "cudaStreamIsCapturing_v10000",
+                "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+                "correlation_id": 9481500,
+                "start_us": 75.887,
+                "end_us": 76.356,
+                "duration_us": 0.469,
+                "overlap_with_gap_us": 0.469
+              },
+              {
+                "name": "cudaStreamIsCapturing_v10000",
+                "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+                "correlation_id": 9481504,
+                "start_us": 86.32,
+                "end_us": 86.631,
+                "duration_us": 0.311,
+                "overlap_with_gap_us": 0.311
+              },
+              {
+                "name": "cudaStreamIsCapturing_v10000",
+                "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+                "correlation_id": 9481508,
+                "start_us": 98.656,
+                "end_us": 98.93,
+                "duration_us": 0.274,
+                "overlap_with_gap_us": 0.274
+              },
+              {
+                "name": "cudaMemcpyAsync_v3020",
+                "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+                "correlation_id": 9481511,
+                "start_us": 124.699,
+                "end_us": 133.914,
+                "duration_us": 9.215,
+                "overlap_with_gap_us": 9.215
+              }
+            ]
+          },
+          "previous_gpu_activity": {
+            "group": "aux",
+            "kind": "memcpy",
+            "stage": "pool_operation",
+            "scope_stage": "pool_operation",
+            "start_ms": "0.01152",
+            "end_ms": "0.012992",
+            "name": "Device-to-Device"
+          },
+          "next_gpu_activity": {
+            "group": "aux",
+            "kind": "memcpy",
+            "stage": "compute_graph_projection_inputs",
+            "scope_stage": "compute_graph_projection_inputs",
+            "start_ms": "0.135008",
+            "end_ms": "0.136512",
+            "name": "Device-to-Device"
+          },
+          "overlapping_host_nvtx_scopes": [
+            {
+              "label": "motivation/echo/revisit/candidate/chunk_0/layer_1/offload_source_reservation",
+              "start_us": 93.885,
+              "end_us": 101.532,
+              "overlap_us": 7.647
+            },
+            {
+              "label": "motivation/echo/revisit/candidate/chunk_0/layer_1/compute_graph_projection_inputs",
+              "start_us": 119.605,
+              "end_us": 167.078,
+              "overlap_us": 15.403
+            },
+            {
+              "label": "motivation/echo/revisit/candidate/chunk_0/layer_1/attention_projection",
+              "start_us": 107.26,
+              "end_us": 316.042,
+              "overlap_us": 27.748
+            },
+            {
+              "label": "motivation/echo/revisit/candidate/chunk_0/layer_1/pool_operation",
+              "start_us": 82.986,
+              "end_us": 2457.098,
+              "overlap_us": 52.022
+            },
+            {
+              "label": "motivation/echo/revisit/candidate/chunk_0/layer_1/cache_operation",
+              "start_us": 72.064,
+              "end_us": 2460.502,
+              "overlap_us": 62.944
+            },
+            {
+              "label": "motivation/echo/revisit/candidate/chunk_0/layer_1/pool_operation",
+              "start_us": -72.307,
+              "end_us": 2499.583,
+              "overlap_us": 122.016
+            },
+            {
+              "label": "motivation/echo/revisit/candidate/chunk_0/layer_1/cache_operation",
+              "start_us": -84.8,
+              "end_us": 2502.475,
+              "overlap_us": 122.016
+            },
+            {
+              "label": "motivation/echo/revisit/candidate/chunk_0/layer_1/layer",
+              "start_us": -92.899,
+              "end_us": 2505.446,
+              "overlap_us": 122.016
+            },
+            {
+              "label": "motivation/echo/revisit/candidate/chunk_0/layer_shared/chunk",
+              "start_us": -3345.718,
+              "end_us": 25528.501,
+              "overlap_us": 122.016
+            },
+            {
+              "label": "motivation/echo/revisit/candidate/chunk_shared/layer_shared/forward",
+              "start_us": -4701.696,
+              "end_us": 25531.545,
+              "overlap_us": 122.016
+            },
+            {
+              "label": "motivation/echo/revisit/candidate/chunk_shared/layer_shared/candidate_extend",
+              "start_us": -4717.955,
+              "end_us": 25534.875,
+              "overlap_us": 122.016
+            },
+            {
+              "label": "motivation/echo/revisit/request/chunk_shared/layer_shared/request",
+              "start_us": -7409.407,
+              "end_us": 28802.959,
+              "overlap_us": 122.016
+            }
+          ]
+        },
+        {
+          "gap": {
+            "start_us": 943.713,
+            "end_us": 1009.793,
+            "duration_us": 66.08,
+            "overlapping_cuda_apis": [
+              {
+                "name": "cudaLaunchKernel_v7000",
+                "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+                "correlation_id": 9481842,
+                "start_us": 1002.26,
+                "end_us": 1008.394,
+                "duration_us": 6.134,
+                "overlap_with_gap_us": 6.134
+              },
+              {
+                "name": "cuTensorMapEncodeTiled",
+                "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+                "correlation_id": 9481834,
+                "start_us": 992.927,
+                "end_us": 993.604,
+                "duration_us": 0.677,
+                "overlap_with_gap_us": 0.677
+              },
+              {
+                "name": "cuTensorMapEncodeTiled",
+                "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+                "correlation_id": 9481835,
+                "start_us": 993.75,
+                "end_us": 993.879,
+                "duration_us": 0.129,
+                "overlap_with_gap_us": 0.129
+              },
+              {
+                "name": "cuTensorMapEncodeTiled",
+                "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+                "correlation_id": 9481836,
+                "start_us": 993.996,
+                "end_us": 994.213,
+                "duration_us": 0.217,
+                "overlap_with_gap_us": 0.217
+              },
+              {
+                "name": "cuTensorMapEncodeTiled",
+                "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+                "correlation_id": 9481837,
+                "start_us": 994.329,
+                "end_us": 994.447,
+                "duration_us": 0.118,
+                "overlap_with_gap_us": 0.118
+              },
+              {
+                "name": "cuKernelGetName",
+                "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+                "correlation_id": 9481841,
+                "start_us": 1002.042,
+                "end_us": 1002.147,
+                "duration_us": 0.105,
+                "overlap_with_gap_us": 0.105
+              },
+              {
+                "name": "cuKernelGetName",
+                "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+                "correlation_id": 9481844,
+                "start_us": 1009.367,
+                "end_us": 1009.7,
+                "duration_us": 0.333,
+                "overlap_with_gap_us": 0.333
+              }
+            ]
+          },
+          "previous_gpu_activity": {
+            "group": "aux",
+            "kind": "kernel",
+            "stage": "indexer_fused",
+            "scope_stage": "indexer_fused",
+            "start_ms": "0.942977",
+            "end_ms": "0.943713",
+            "name": "void at::native::vectorized_elementwise_kernel<(int)4, at::native::FillFunctor<int>, std::array<char *, (unsigned long)1>>(int, T2, T3)"
+          },
+          "next_gpu_activity": {
+            "group": "fused",
+            "kind": "kernel",
+            "stage": "indexer_fused",
+            "scope_stage": "indexer_fused",
+            "start_ms": "1.009793",
+            "end_ms": "1.785601",
+            "name": "void echo_native::sm90_fp8_mqa_logits_fuse_prefetch<(unsigned int)64, (unsigned int)128, (unsigned int)576, (unsigned int)2, (unsigned int)128, (unsigned int)3, (unsigned int)3, (unsigned int)96, (unsigned int)128, (unsigned int)256, (unsigned int)256, (unsigned int)16384>(unsigned int, unsigned int, unsigned long, unsigned long, unsigned int *, unsigned int *, float *, const int *, const int *, const int *, __nv_bfloat16 *, __nv_bfloat16 *, long *, const int *, long *, int *, unsigned int *, long *, float *, unsigned int, unsigned int, unsigned int, CUtensorMap_st, CUtensorMap_st, CUtensorMap_st, CUtensorMap_st)"
+          },
+          "overlapping_host_nvtx_scopes": [
+            {
+              "label": "motivation/echo/revisit/candidate/chunk_0/layer_1/indexer_fused",
+              "start_us": 787.504,
+              "end_us": 1040.624,
+              "overlap_us": 66.08
+            },
+            {
+              "label": "motivation/echo/revisit/candidate/chunk_0/layer_1/indexer_prefetch_aux",
+              "start_us": 717.361,
+              "end_us": 1045.641,
+              "overlap_us": 66.08
+            },
+            {
+              "label": "motivation/echo/revisit/candidate/chunk_0/layer_1/pool_operation",
+              "start_us": 82.986,
+              "end_us": 2457.098,
+              "overlap_us": 66.08
+            },
+            {
+              "label": "motivation/echo/revisit/candidate/chunk_0/layer_1/cache_operation",
+              "start_us": 72.064,
+              "end_us": 2460.502,
+              "overlap_us": 66.08
+            },
+            {
+              "label": "motivation/echo/revisit/candidate/chunk_0/layer_1/pool_operation",
+              "start_us": -72.307,
+              "end_us": 2499.583,
+              "overlap_us": 66.08
+            },
+            {
+              "label": "motivation/echo/revisit/candidate/chunk_0/layer_1/cache_operation",
+              "start_us": -84.8,
+              "end_us": 2502.475,
+              "overlap_us": 66.08
+            },
+            {
+              "label": "motivation/echo/revisit/candidate/chunk_0/layer_1/layer",
+              "start_us": -92.899,
+              "end_us": 2505.446,
+              "overlap_us": 66.08
+            },
+            {
+              "label": "motivation/echo/revisit/candidate/chunk_0/layer_shared/chunk",
+              "start_us": -3345.718,
+              "end_us": 25528.501,
+              "overlap_us": 66.08
+            },
+            {
+              "label": "motivation/echo/revisit/candidate/chunk_shared/layer_shared/forward",
+              "start_us": -4701.696,
+              "end_us": 25531.545,
+              "overlap_us": 66.08
+            },
+            {
+              "label": "motivation/echo/revisit/candidate/chunk_shared/layer_shared/candidate_extend",
+              "start_us": -4717.955,
+              "end_us": 25534.875,
+              "overlap_us": 66.08
+            },
+            {
+              "label": "motivation/echo/revisit/request/chunk_shared/layer_shared/request",
+              "start_us": -7409.407,
+              "end_us": 28802.959,
+              "overlap_us": 66.08
+            }
+          ]
+        }
+      ],
+      "layer1_copy_sync_apis": [
+        {
+          "api": "cudaMemcpyAsync_v3020",
+          "innermost_scope": "motivation/echo/revisit/candidate/chunk_0/layer_1/pool_operation",
+          "duration_us": 14.829,
+          "correlation_id": 9481476
+        },
+        {
+          "api": "cudaMemcpyAsync_v3020",
+          "innermost_scope": "motivation/echo/revisit/candidate/chunk_0/layer_1/pool_operation",
+          "duration_us": 7.477,
+          "correlation_id": 9481490
+        },
+        {
+          "api": "cudaMemcpyAsync_v3020",
+          "innermost_scope": "motivation/echo/revisit/candidate/chunk_0/layer_1/compute_graph_projection_inputs",
+          "duration_us": 9.215,
+          "correlation_id": 9481511
+        },
+        {
+          "api": "cudaMemcpyAsync_v3020",
+          "innermost_scope": "motivation/echo/revisit/candidate/chunk_0/layer_1/compute_graph_projection_inputs",
+          "duration_us": 6.185,
+          "correlation_id": 9481519
+        },
+        {
+          "api": "cudaMemcpyAsync_v3020",
+          "innermost_scope": "motivation/echo/revisit/candidate/chunk_0/layer_1/index_cache_write",
+          "duration_us": 7.153,
+          "correlation_id": 9481539
+        },
+        {
+          "api": "cudaMemcpyAsync_v3020",
+          "innermost_scope": "motivation/echo/revisit/candidate/chunk_0/layer_1/index_cache_write",
+          "duration_us": 4.957,
+          "correlation_id": 9481547
+        },
+        {
+          "api": "cudaMemcpyAsync_v3020",
+          "innermost_scope": "motivation/echo/revisit/candidate/chunk_0/layer_1/cache_torch_argsort",
+          "duration_us": 6.758,
+          "correlation_id": 9481587
+        },
+        {
+          "api": "cudaMemcpyAsync_v3020",
+          "innermost_scope": "motivation/echo/revisit/candidate/chunk_0/layer_1/pool_operation",
+          "duration_us": 6.683,
+          "correlation_id": 9481714
+        },
+        {
+          "api": "cudaMemcpyAsync_v3020",
+          "innermost_scope": "motivation/echo/revisit/candidate/chunk_0/layer_1/indexer_fused",
+          "duration_us": 8.85,
+          "correlation_id": 9481809
+        },
+        {
+          "api": "cudaStreamSynchronize_v3020",
+          "innermost_scope": "motivation/echo/revisit/candidate/chunk_0/layer_1/indexer_fused",
+          "duration_us": 7.777,
+          "correlation_id": 9481810
+        },
+        {
+          "api": "cudaMemcpyAsync_v3020",
+          "innermost_scope": "motivation/echo/revisit/candidate/chunk_0/layer_1/pool_operation",
+          "duration_us": 11.263,
+          "correlation_id": 9481982
+        },
+        {
+          "api": "cudaMemcpyAsync_v3020",
+          "innermost_scope": "motivation/echo/revisit/candidate/chunk_0/layer_1/cache_torch_argsort",
+          "duration_us": 7.85,
+          "correlation_id": 9482041
+        },
+        {
+          "api": "cudaStreamSynchronize_v3020",
+          "innermost_scope": "motivation/echo/revisit/candidate/chunk_0/layer_1/pool_drain",
+          "duration_us": 2.761,
+          "correlation_id": 9489403
+        },
+        {
+          "api": "cudaStreamSynchronize_v3020",
+          "innermost_scope": "motivation/echo/revisit/candidate/chunk_0/layer_1/pool_drain",
+          "duration_us": 2.476,
+          "correlation_id": 9489407
+        }
+      ]
+    },
+    {
+      "scheme": "serial_sparse",
+      "largest_gap_context": [
+        {
+          "gap": {
+            "start_us": 1348.129,
+            "end_us": 1481.217,
+            "duration_us": 133.088,
+            "overlapping_cuda_apis": [
+              {
+                "name": "cudaGetDriverEntryPointByVersion_v12050",
+                "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+                "correlation_id": 14787188,
+                "start_us": 1463.364,
+                "end_us": 1464.203,
+                "duration_us": 0.839,
+                "overlap_with_gap_us": 0.839
+              },
+              {
+                "name": "cudaGetDriverEntryPointByVersion_v12050",
+                "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+                "correlation_id": 14787190,
+                "start_us": 1465.812,
+                "end_us": 1466.057,
+                "duration_us": 0.245,
+                "overlap_with_gap_us": 0.245
+              },
+              {
+                "name": "cudaLaunchKernelExC_v11060",
+                "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+                "correlation_id": 14787194,
+                "start_us": 1472.156,
+                "end_us": 1479.758,
+                "duration_us": 7.602,
+                "overlap_with_gap_us": 7.602
+              },
+              {
+                "name": "cuTensorMapEncodeTiled",
+                "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+                "correlation_id": 14787189,
+                "start_us": 1464.623,
+                "end_us": 1465.435,
+                "duration_us": 0.812,
+                "overlap_with_gap_us": 0.812
+              },
+              {
+                "name": "cuTensorMapEncodeTiled",
+                "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+                "correlation_id": 14787191,
+                "start_us": 1466.24,
+                "end_us": 1466.443,
+                "duration_us": 0.203,
+                "overlap_with_gap_us": 0.203
+              }
+            ]
+          },
+          "previous_gpu_activity": {
+            "group": "aux",
+            "kind": "kernel",
+            "stage": "pool_operation",
+            "scope_stage": "pool_operation",
+            "start_ms": "1.342305",
+            "end_ms": "1.348129",
+            "name": "echo_native::sparse_map_kernel(const int *, int *, long, const int *, const int *, int, int, int, int)"
+          },
+          "next_gpu_activity": {
+            "group": "attention",
+            "kind": "kernel",
+            "stage": "mla_qk_pv",
+            "scope_stage": "mla_qk_pv",
+            "start_ms": "1.481217",
+            "end_ms": "1.602401",
+            "name": "void sm90::prefill::sparse_fwd::sparse_attn_fwd_kernel<sm90::prefill::sparse_fwd::KernelTemplate<(int)576, (bool)0>, sm90::prefill::sparse_fwd::KernelTemplate<(int)576, (bool)0>::TmaParams<cute::tuple<int, int, int>, cute::TiledCopy<cute::Copy_Atom<cute::Copy_Traits<cute::SM90_TMA_LOAD, cute::C<(int)65536>, cute::AuxTmaParams<cute::tuple<cute::ScaledBasis<cute::C<(int)1>, (int)1>, cute::ScaledBasis<cute::C<(int)1>, (int)0>, cute::ScaledBasis<cute::C<(int)1>, (int)2>>, const cute::Layout<cute::tuple<cute::C<(int)64>, cute::C<(int)64>, cute::C<(int)1>>, cute::tuple<cute::ScaledBasis<cute::C<(int)1>, (int)1>, cute::ScaledBasis<cute::C<(int)1>, (int)0>, cute::ScaledBasis<cute::C<(int)1>, (int)2>>> &, const cute::Swizzle<(int)3, (int)4, (int)3> &>>, cutlass::bfloat16_t>, cute::Layout<cute::tuple<cute::C<(int)1>, cute::tuple<cute::tuple<cute::tuple<cute::C<(int)64>, cute::C<(int)64>>, cute::C<(int)9>>>>, cute::tuple<cute::C<(int)0>, cute::tuple<cute::tuple<cute::tuple<cute::C<(int)64>, cute::C<(int)1>>, cute::C<(int)4096>>>>>, cute::tuple<cute::C<(int)64>, cute::C<(int)576>>>>>(SparseAttnFwdParams, T2)"
+          },
+          "overlapping_host_nvtx_scopes": [
+            {
+              "label": "motivation/serial_sparse/revisit/candidate/chunk_0/layer_1/mla_qk_pv",
+              "start_us": 1419.317,
+              "end_us": 1488.7,
+              "overlap_us": 61.9
+            },
+            {
+              "label": "motivation/serial_sparse/revisit/candidate/chunk_0/layer_1/sparse_mla_aux",
+              "start_us": 1358.734,
+              "end_us": 1491.282,
+              "overlap_us": 122.483
+            },
+            {
+              "label": "motivation/serial_sparse/revisit/candidate/chunk_0/layer_1/offload_exact_recall",
+              "start_us": 773.741,
+              "end_us": 1348.68,
+              "overlap_us": 0.551
+            },
+            {
+              "label": "motivation/serial_sparse/revisit/candidate/chunk_0/layer_1/pool_operation",
+              "start_us": 47.098,
+              "end_us": 1682.626,
+              "overlap_us": 133.088
+            },
+            {
+              "label": "motivation/serial_sparse/revisit/candidate/chunk_0/layer_1/cache_operation",
+              "start_us": 36.584,
+              "end_us": 1685.963,
+              "overlap_us": 133.088
+            },
+            {
+              "label": "motivation/serial_sparse/revisit/candidate/chunk_0/layer_1/pool_operation",
+              "start_us": -88.422,
+              "end_us": 1724.938,
+              "overlap_us": 133.088
+            },
+            {
+              "label": "motivation/serial_sparse/revisit/candidate/chunk_0/layer_1/cache_operation",
+              "start_us": -100.541,
+              "end_us": 1727.895,
+              "overlap_us": 133.088
+            },
+            {
+              "label": "motivation/serial_sparse/revisit/candidate/chunk_0/layer_1/layer",
+              "start_us": -107.737,
+              "end_us": 1731.161,
+              "overlap_us": 133.088
+            },
+            {
+              "label": "motivation/serial_sparse/revisit/candidate/chunk_0/layer_shared/chunk",
+              "start_us": -2186.879,
+              "end_us": 18400.766,
+              "overlap_us": 133.088
+            },
+            {
+              "label": "motivation/serial_sparse/revisit/candidate/chunk_shared/layer_shared/forward",
+              "start_us": -3421.026,
+              "end_us": 18403.376,
+              "overlap_us": 133.088
+            },
+            {
+              "label": "motivation/serial_sparse/revisit/candidate/chunk_shared/layer_shared/candidate_extend",
+              "start_us": -3436.744,
+              "end_us": 18406.04,
+              "overlap_us": 133.088
+            },
+            {
+              "label": "motivation/serial_sparse/revisit/request/chunk_shared/layer_shared/request",
+              "start_us": -6014.313,
+              "end_us": 21353.196,
+              "overlap_us": 133.088
+            }
+          ]
+        },
+        {
+          "gap": {
+            "start_us": 121.024,
+            "end_us": 248.224,
+            "duration_us": 127.2,
+            "overlapping_cuda_apis": [
+              {
+                "name": "cudaLaunchKernel_v7000",
+                "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+                "correlation_id": 14786740,
+                "start_us": 112.997,
+                "end_us": 121.237,
+                "duration_us": 8.24,
+                "overlap_with_gap_us": 0.213
+              },
+              {
+                "name": "cudaGraphLaunch_v10000",
+                "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+                "correlation_id": 14786746,
+                "start_us": 139.324,
+                "end_us": 243.416,
+                "duration_us": 104.092,
+                "overlap_with_gap_us": 104.092
+              }
+            ]
+          },
+          "previous_gpu_activity": {
+            "group": "aux",
+            "kind": "kernel",
+            "stage": "compute_graph_projection_inputs",
+            "scope_stage": "compute_graph_projection_inputs",
+            "start_ms": "0.120288",
+            "end_ms": "0.121024",
+            "name": "void at::native::vectorized_elementwise_kernel<(int)2, at::native::FillFunctor<long>, std::array<char *, (unsigned long)1>>(int, T2, T3)"
+          },
+          "next_gpu_activity": {
+            "group": "projection",
+            "kind": "kernel",
+            "stage": "compute_graph_projection_layer_1_q_128",
+            "scope_stage": "compute_graph_projection_layer_1_q_128",
+            "start_ms": "0.248224",
+            "end_ms": "0.251328",
+            "name": "kernel_cutlass_kernel_operatorsdeepseek_v32norm_fusedLocalFusedRMSNorm_object_at__tensorptrbf16gmemalign128oi64716871681_tensorptrbf16gmemalign128oi64716871681_tensorptrf32gmemalign16o716_0"
+          },
+          "overlapping_host_nvtx_scopes": [
+            {
+              "label": "motivation/serial_sparse/revisit/candidate/chunk_0/layer_1/compute_graph_projection_inputs",
+              "start_us": 82.194,
+              "end_us": 126.298,
+              "overlap_us": 5.274
+            },
+            {
+              "label": "motivation/serial_sparse/revisit/candidate/chunk_0/layer_1/compute_graph_projection_layer_1_q_128",
+              "start_us": 135.379,
+              "end_us": 264.447,
+              "overlap_us": 112.845
+            },
+            {
+              "label": "motivation/serial_sparse/revisit/candidate/chunk_0/layer_1/attention_projection",
+              "start_us": 71.638,
+              "end_us": 268.677,
+              "overlap_us": 127.2
+            },
+            {
+              "label": "motivation/serial_sparse/revisit/candidate/chunk_0/layer_1/pool_operation",
+              "start_us": 47.098,
+              "end_us": 1682.626,
+              "overlap_us": 127.2
+            },
+            {
+              "label": "motivation/serial_sparse/revisit/candidate/chunk_0/layer_1/cache_operation",
+              "start_us": 36.584,
+              "end_us": 1685.963,
+              "overlap_us": 127.2
+            },
+            {
+              "label": "motivation/serial_sparse/revisit/candidate/chunk_0/layer_1/pool_operation",
+              "start_us": -88.422,
+              "end_us": 1724.938,
+              "overlap_us": 127.2
+            },
+            {
+              "label": "motivation/serial_sparse/revisit/candidate/chunk_0/layer_1/cache_operation",
+              "start_us": -100.541,
+              "end_us": 1727.895,
+              "overlap_us": 127.2
+            },
+            {
+              "label": "motivation/serial_sparse/revisit/candidate/chunk_0/layer_1/layer",
+              "start_us": -107.737,
+              "end_us": 1731.161,
+              "overlap_us": 127.2
+            },
+            {
+              "label": "motivation/serial_sparse/revisit/candidate/chunk_0/layer_shared/chunk",
+              "start_us": -2186.879,
+              "end_us": 18400.766,
+              "overlap_us": 127.2
+            },
+            {
+              "label": "motivation/serial_sparse/revisit/candidate/chunk_shared/layer_shared/forward",
+              "start_us": -3421.026,
+              "end_us": 18403.376,
+              "overlap_us": 127.2
+            },
+            {
+              "label": "motivation/serial_sparse/revisit/candidate/chunk_shared/layer_shared/candidate_extend",
+              "start_us": -3436.744,
+              "end_us": 18406.04,
+              "overlap_us": 127.2
+            },
+            {
+              "label": "motivation/serial_sparse/revisit/request/chunk_shared/layer_shared/request",
+              "start_us": -6014.313,
+              "end_us": 21353.196,
+              "overlap_us": 127.2
+            }
+          ]
+        },
+        {
+          "gap": {
+            "start_us": 9.792,
+            "end_us": 95.968,
+            "duration_us": 86.176,
+            "overlapping_cuda_apis": [
+              {
+                "name": "cudaStreamIsCapturing_v10000",
+                "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+                "correlation_id": 14786712,
+                "start_us": 39.908,
+                "end_us": 40.24,
+                "duration_us": 0.332,
+                "overlap_with_gap_us": 0.332
+              },
+              {
+                "name": "cudaStreamIsCapturing_v10000",
+                "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+                "correlation_id": 14786716,
+                "start_us": 50.615,
+                "end_us": 50.883,
+                "duration_us": 0.268,
+                "overlap_with_gap_us": 0.268
+              },
+              {
+                "name": "cudaStreamIsCapturing_v10000",
+                "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+                "correlation_id": 14786720,
+                "start_us": 63.249,
+                "end_us": 63.523,
+                "duration_us": 0.274,
+                "overlap_with_gap_us": 0.274
+              },
+              {
+                "name": "cudaMemcpyAsync_v3020",
+                "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+                "correlation_id": 14786723,
+                "start_us": 86.73,
+                "end_us": 94.162,
+                "duration_us": 7.432,
+                "overlap_with_gap_us": 7.432
+              }
+            ]
+          },
+          "previous_gpu_activity": {
+            "group": "aux",
+            "kind": "memcpy",
+            "stage": "pool_operation",
+            "scope_stage": "pool_operation",
+            "start_ms": "0.00784",
+            "end_ms": "0.009792",
+            "name": "Device-to-Device"
+          },
+          "next_gpu_activity": {
+            "group": "aux",
+            "kind": "memcpy",
+            "stage": "compute_graph_projection_inputs",
+            "scope_stage": "compute_graph_projection_inputs",
+            "start_ms": "0.095968",
+            "end_ms": "0.097536",
+            "name": "Device-to-Device"
+          },
+          "overlapping_host_nvtx_scopes": [
+            {
+              "label": "motivation/serial_sparse/revisit/candidate/chunk_0/layer_1/offload_source_reservation",
+              "start_us": 58.628,
+              "end_us": 65.935,
+              "overlap_us": 7.307
+            },
+            {
+              "label": "motivation/serial_sparse/revisit/candidate/chunk_0/layer_1/compute_graph_projection_inputs",
+              "start_us": 82.194,
+              "end_us": 126.298,
+              "overlap_us": 13.774
+            },
+            {
+              "label": "motivation/serial_sparse/revisit/candidate/chunk_0/layer_1/attention_projection",
+              "start_us": 71.638,
+              "end_us": 268.677,
+              "overlap_us": 24.33
+            },
+            {
+              "label": "motivation/serial_sparse/revisit/candidate/chunk_0/layer_1/pool_operation",
+              "start_us": 47.098,
+              "end_us": 1682.626,
+              "overlap_us": 48.87
+            },
+            {
+              "label": "motivation/serial_sparse/revisit/candidate/chunk_0/layer_1/cache_operation",
+              "start_us": 36.584,
+              "end_us": 1685.963,
+              "overlap_us": 59.384
+            },
+            {
+              "label": "motivation/serial_sparse/revisit/candidate/chunk_0/layer_1/pool_operation",
+              "start_us": -88.422,
+              "end_us": 1724.938,
+              "overlap_us": 86.176
+            },
+            {
+              "label": "motivation/serial_sparse/revisit/candidate/chunk_0/layer_1/cache_operation",
+              "start_us": -100.541,
+              "end_us": 1727.895,
+              "overlap_us": 86.176
+            },
+            {
+              "label": "motivation/serial_sparse/revisit/candidate/chunk_0/layer_1/layer",
+              "start_us": -107.737,
+              "end_us": 1731.161,
+              "overlap_us": 86.176
+            },
+            {
+              "label": "motivation/serial_sparse/revisit/candidate/chunk_0/layer_shared/chunk",
+              "start_us": -2186.879,
+              "end_us": 18400.766,
+              "overlap_us": 86.176
+            },
+            {
+              "label": "motivation/serial_sparse/revisit/candidate/chunk_shared/layer_shared/forward",
+              "start_us": -3421.026,
+              "end_us": 18403.376,
+              "overlap_us": 86.176
+            },
+            {
+              "label": "motivation/serial_sparse/revisit/candidate/chunk_shared/layer_shared/candidate_extend",
+              "start_us": -3436.744,
+              "end_us": 18406.04,
+              "overlap_us": 86.176
+            },
+            {
+              "label": "motivation/serial_sparse/revisit/request/chunk_shared/layer_shared/request",
+              "start_us": -6014.313,
+              "end_us": 21353.196,
+              "overlap_us": 86.176
+            }
+          ]
+        },
+        {
+          "gap": {
+            "start_us": 821.888,
+            "end_us": 890.4,
+            "duration_us": 68.512,
+            "overlapping_cuda_apis": [
+              {
+                "name": "cudaLaunchKernel_v7000",
+                "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+                "correlation_id": 14786938,
+                "start_us": 881.746,
+                "end_us": 889.284,
+                "duration_us": 7.538,
+                "overlap_with_gap_us": 7.538
+              },
+              {
+                "name": "cuKernelGetName",
+                "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+                "correlation_id": 14786937,
+                "start_us": 881.223,
+                "end_us": 881.571,
+                "duration_us": 0.348,
+                "overlap_with_gap_us": 0.348
+              },
+              {
+                "name": "cuKernelGetName",
+                "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+                "correlation_id": 14786940,
+                "start_us": 890.09,
+                "end_us": 890.327,
+                "duration_us": 0.237,
+                "overlap_with_gap_us": 0.237
+              }
+            ]
+          },
+          "previous_gpu_activity": {
+            "group": "aux",
+            "kind": "memcpy",
+            "stage": "pool_operation",
+            "scope_stage": "pool_operation",
+            "start_ms": "0.820416",
+            "end_ms": "0.821888",
+            "name": "Device-to-Device"
+          },
+          "next_gpu_activity": {
+            "group": "aux",
+            "kind": "kernel",
+            "stage": "pool_operation",
+            "scope_stage": "pool_operation",
+            "start_ms": "0.8904",
+            "end_ms": "0.891392",
+            "name": "echo_native::sparse_union_clear(unsigned int *, long, unsigned int *, unsigned int *)"
+          },
+          "overlapping_host_nvtx_scopes": [
+            {
+              "label": "motivation/serial_sparse/revisit/candidate/chunk_0/layer_1/pool_operation",
+              "start_us": 802.859,
+              "end_us": 1342.686,
+              "overlap_us": 68.512
+            },
+            {
+              "label": "motivation/serial_sparse/revisit/candidate/chunk_0/layer_1/cache_operation",
+              "start_us": 786.042,
+              "end_us": 1345.758,
+              "overlap_us": 68.512
+            },
+            {
+              "label": "motivation/serial_sparse/revisit/candidate/chunk_0/layer_1/offload_exact_recall",
+              "start_us": 773.741,
+              "end_us": 1348.68,
+              "overlap_us": 68.512
+            },
+            {
+              "label": "motivation/serial_sparse/revisit/candidate/chunk_0/layer_1/pool_operation",
+              "start_us": 47.098,
+              "end_us": 1682.626,
+              "overlap_us": 68.512
+            },
+            {
+              "label": "motivation/serial_sparse/revisit/candidate/chunk_0/layer_1/cache_operation",
+              "start_us": 36.584,
+              "end_us": 1685.963,
+              "overlap_us": 68.512
+            },
+            {
+              "label": "motivation/serial_sparse/revisit/candidate/chunk_0/layer_1/pool_operation",
+              "start_us": -88.422,
+              "end_us": 1724.938,
+              "overlap_us": 68.512
+            },
+            {
+              "label": "motivation/serial_sparse/revisit/candidate/chunk_0/layer_1/cache_operation",
+              "start_us": -100.541,
+              "end_us": 1727.895,
+              "overlap_us": 68.512
+            },
+            {
+              "label": "motivation/serial_sparse/revisit/candidate/chunk_0/layer_1/layer",
+              "start_us": -107.737,
+              "end_us": 1731.161,
+              "overlap_us": 68.512
+            },
+            {
+              "label": "motivation/serial_sparse/revisit/candidate/chunk_0/layer_shared/chunk",
+              "start_us": -2186.879,
+              "end_us": 18400.766,
+              "overlap_us": 68.512
+            },
+            {
+              "label": "motivation/serial_sparse/revisit/candidate/chunk_shared/layer_shared/forward",
+              "start_us": -3421.026,
+              "end_us": 18403.376,
+              "overlap_us": 68.512
+            },
+            {
+              "label": "motivation/serial_sparse/revisit/candidate/chunk_shared/layer_shared/candidate_extend",
+              "start_us": -3436.744,
+              "end_us": 18406.04,
+              "overlap_us": 68.512
+            },
+            {
+              "label": "motivation/serial_sparse/revisit/request/chunk_shared/layer_shared/request",
+              "start_us": -6014.313,
+              "end_us": 21353.196,
+              "overlap_us": 68.512
+            }
+          ]
+        },
+        {
+          "gap": {
+            "start_us": 919.648,
+            "end_us": 980.384,
+            "duration_us": 60.736,
+            "overlapping_cuda_apis": [
+              {
+                "name": "cudaMemcpyAsync_v3020",
+                "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+                "correlation_id": 14786964,
+                "start_us": 970.797,
+                "end_us": 979.152,
+                "duration_us": 8.355,
+                "overlap_with_gap_us": 8.355
+              }
+            ]
+          },
+          "previous_gpu_activity": {
+            "group": "aux",
+            "kind": "kernel",
+            "stage": "pool_operation",
+            "scope_stage": "pool_operation",
+            "start_ms": "0.91552",
+            "end_ms": "0.919648",
+            "name": "echo_native::sparse_classify_kernel(const unsigned int *, const int *, const int *, const long *, int, long *, long *, int *, unsigned int *, unsigned int *, unsigned long long *, int, int, int, long)"
+          },
+          "next_gpu_activity": {
+            "group": "aux",
+            "kind": "memcpy",
+            "stage": "cache_torch_argsort",
+            "scope_stage": "cache_torch_argsort",
+            "start_ms": "0.980384",
+            "end_ms": "0.98192",
+            "name": "Device-to-Device"
+          },
+          "overlapping_host_nvtx_scopes": [
+            {
+              "label": "motivation/serial_sparse/revisit/candidate/chunk_0/layer_1/pool_reap_writes",
+              "start_us": 929.401,
+              "end_us": 933.769,
+              "overlap_us": 4.368
+            },
+            {
+              "label": "motivation/serial_sparse/revisit/candidate/chunk_0/layer_1/pool_wait_host",
+              "start_us": 921.347,
+              "end_us": 943.478,
+              "overlap_us": 22.131
+            },
+            {
+              "label": "motivation/serial_sparse/revisit/candidate/chunk_0/layer_1/cache_torch_argsort",
+              "start_us": 957.845,
+              "end_us": 1100.294,
+              "overlap_us": 22.539
+            },
+            {
+              "label": "motivation/serial_sparse/revisit/candidate/chunk_0/layer_1/pool_operation",
+              "start_us": 802.859,
+              "end_us": 1342.686,
+              "overlap_us": 60.736
+            },
+            {
+              "label": "motivation/serial_sparse/revisit/candidate/chunk_0/layer_1/cache_operation",
+              "start_us": 786.042,
+              "end_us": 1345.758,
+              "overlap_us": 60.736
+            },
+            {
+              "label": "motivation/serial_sparse/revisit/candidate/chunk_0/layer_1/offload_exact_recall",
+              "start_us": 773.741,
+              "end_us": 1348.68,
+              "overlap_us": 60.736
+            },
+            {
+              "label": "motivation/serial_sparse/revisit/candidate/chunk_0/layer_1/pool_operation",
+              "start_us": 47.098,
+              "end_us": 1682.626,
+              "overlap_us": 60.736
+            },
+            {
+              "label": "motivation/serial_sparse/revisit/candidate/chunk_0/layer_1/cache_operation",
+              "start_us": 36.584,
+              "end_us": 1685.963,
+              "overlap_us": 60.736
+            },
+            {
+              "label": "motivation/serial_sparse/revisit/candidate/chunk_0/layer_1/pool_operation",
+              "start_us": -88.422,
+              "end_us": 1724.938,
+              "overlap_us": 60.736
+            },
+            {
+              "label": "motivation/serial_sparse/revisit/candidate/chunk_0/layer_1/cache_operation",
+              "start_us": -100.541,
+              "end_us": 1727.895,
+              "overlap_us": 60.736
+            },
+            {
+              "label": "motivation/serial_sparse/revisit/candidate/chunk_0/layer_1/layer",
+              "start_us": -107.737,
+              "end_us": 1731.161,
+              "overlap_us": 60.736
+            },
+            {
+              "label": "motivation/serial_sparse/revisit/candidate/chunk_0/layer_shared/chunk",
+              "start_us": -2186.879,
+              "end_us": 18400.766,
+              "overlap_us": 60.736
+            },
+            {
+              "label": "motivation/serial_sparse/revisit/candidate/chunk_shared/layer_shared/forward",
+              "start_us": -3421.026,
+              "end_us": 18403.376,
+              "overlap_us": 60.736
+            },
+            {
+              "label": "motivation/serial_sparse/revisit/candidate/chunk_shared/layer_shared/candidate_extend",
+              "start_us": -3436.744,
+              "end_us": 18406.04,
+              "overlap_us": 60.736
+            },
+            {
+              "label": "motivation/serial_sparse/revisit/request/chunk_shared/layer_shared/request",
+              "start_us": -6014.313,
+              "end_us": 21353.196,
+              "overlap_us": 60.736
+            }
+          ]
+        }
+      ],
+      "layer1_copy_sync_apis": [
+        {
+          "api": "cudaMemcpyAsync_v3020",
+          "innermost_scope": "motivation/serial_sparse/revisit/candidate/chunk_0/layer_1/pool_operation",
+          "duration_us": 13.14,
+          "correlation_id": 14786688
+        },
+        {
+          "api": "cudaMemcpyAsync_v3020",
+          "innermost_scope": "motivation/serial_sparse/revisit/candidate/chunk_0/layer_1/pool_operation",
+          "duration_us": 6.785,
+          "correlation_id": 14786702
+        },
+        {
+          "api": "cudaMemcpyAsync_v3020",
+          "innermost_scope": "motivation/serial_sparse/revisit/candidate/chunk_0/layer_1/compute_graph_projection_inputs",
+          "duration_us": 7.432,
+          "correlation_id": 14786723
+        },
+        {
+          "api": "cudaMemcpyAsync_v3020",
+          "innermost_scope": "motivation/serial_sparse/revisit/candidate/chunk_0/layer_1/compute_graph_projection_inputs",
+          "duration_us": 5.26,
+          "correlation_id": 14786731
+        },
+        {
+          "api": "cudaMemcpyAsync_v3020",
+          "innermost_scope": "motivation/serial_sparse/revisit/candidate/chunk_0/layer_1/index_cache_write",
+          "duration_us": 6.736,
+          "correlation_id": 14786751
+        },
+        {
+          "api": "cudaMemcpyAsync_v3020",
+          "innermost_scope": "motivation/serial_sparse/revisit/candidate/chunk_0/layer_1/index_cache_write",
+          "duration_us": 4.951,
+          "correlation_id": 14786759
+        },
+        {
+          "api": "cudaMemcpyAsync_v3020",
+          "innermost_scope": "motivation/serial_sparse/revisit/candidate/chunk_0/layer_1/pool_operation",
+          "duration_us": 8.887,
+          "correlation_id": 14786905
+        },
+        {
+          "api": "cudaMemcpyAsync_v3020",
+          "innermost_scope": "motivation/serial_sparse/revisit/candidate/chunk_0/layer_1/cache_torch_argsort",
+          "duration_us": 8.355,
+          "correlation_id": 14786964
+        },
+        {
+          "api": "cudaStreamSynchronize_v3020",
+          "innermost_scope": "motivation/serial_sparse/revisit/candidate/chunk_0/layer_1/pool_drain",
+          "duration_us": 2.635,
+          "correlation_id": 14792014
+        },
+        {
+          "api": "cudaStreamSynchronize_v3020",
+          "innermost_scope": "motivation/serial_sparse/revisit/candidate/chunk_0/layer_1/pool_drain",
+          "duration_us": 2.538,
+          "correlation_id": 14792018
+        }
+      ]
+    },
+    {
+      "scheme": "dense_prefetch",
+      "largest_gap_context": [
+        {
+          "gap": {
+            "start_us": 655.264,
+            "end_us": 656.736,
+            "duration_us": 1.472,
+            "overlapping_cuda_apis": [
+              {
+                "name": "cudaGraphLaunch_v10000",
+                "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+                "correlation_id": 20711811,
+                "start_us": 599.937,
+                "end_us": 718.708,
+                "duration_us": 118.771,
+                "overlap_with_gap_us": 1.472
+              }
+            ]
+          },
+          "previous_gpu_activity": {
+            "group": "aux",
+            "kind": "kernel",
+            "stage": "cache_torch_argsort",
+            "scope_stage": "cache_torch_argsort",
+            "start_ms": "0.653984",
+            "end_ms": "0.655264",
+            "name": "at::native::<unnamed>::fill_reverse_indices_kernel(long *, int, at::cuda::detail::IntDivider<unsigned int>)"
+          },
+          "next_gpu_activity": {
+            "group": "aux",
+            "kind": "memset",
+            "stage": "cache_torch_argsort",
+            "scope_stage": "cache_torch_argsort",
+            "start_ms": "0.656736",
+            "end_ms": "0.657728",
+            "name": "memset"
+          },
+          "overlapping_host_nvtx_scopes": [
+            {
+              "label": "motivation/dense_prefetch/revisit/candidate/chunk_0/layer_1/compute_graph_projection_layer_1_q_128",
+              "start_us": 595.267,
+              "end_us": 744.44,
+              "overlap_us": 1.472
+            },
+            {
+              "label": "motivation/dense_prefetch/revisit/candidate/chunk_0/layer_1/attention_projection",
+              "start_us": 535.416,
+              "end_us": 748.589,
+              "overlap_us": 1.472
+            },
+            {
+              "label": "motivation/dense_prefetch/revisit/candidate/chunk_0/layer_1/pool_operation",
+              "start_us": 510.347,
+              "end_us": 1991.884,
+              "overlap_us": 1.472
+            },
+            {
+              "label": "motivation/dense_prefetch/revisit/candidate/chunk_0/layer_1/cache_operation",
+              "start_us": 500.308,
+              "end_us": 1995.191,
+              "overlap_us": 1.472
+            },
+            {
+              "label": "motivation/dense_prefetch/revisit/candidate/chunk_0/layer_1/pool_operation",
+              "start_us": 371.961,
+              "end_us": 2033.924,
+              "overlap_us": 1.472
+            },
+            {
+              "label": "motivation/dense_prefetch/revisit/candidate/chunk_0/layer_1/cache_operation",
+              "start_us": 360.292,
+              "end_us": 2037.158,
+              "overlap_us": 1.472
+            },
+            {
+              "label": "motivation/dense_prefetch/revisit/candidate/chunk_0/layer_1/layer",
+              "start_us": 352.569,
+              "end_us": 2040.741,
+              "overlap_us": 1.472
+            },
+            {
+              "label": "motivation/dense_prefetch/revisit/candidate/chunk_0/layer_shared/chunk",
+              "start_us": -3781.138,
+              "end_us": 21012.89,
+              "overlap_us": 1.472
+            },
+            {
+              "label": "motivation/dense_prefetch/revisit/candidate/chunk_shared/layer_shared/forward",
+              "start_us": -5068.495,
+              "end_us": 21015.92,
+              "overlap_us": 1.472
+            },
+            {
+              "label": "motivation/dense_prefetch/revisit/candidate/chunk_shared/layer_shared/candidate_extend",
+              "start_us": -5084.189,
+              "end_us": 21018.436,
+              "overlap_us": 1.472
+            },
+            {
+              "label": "motivation/dense_prefetch/revisit/request/chunk_shared/layer_shared/request",
+              "start_us": -7737.552,
+              "end_us": 24024.222,
+              "overlap_us": 1.472
+            }
+          ]
+        },
+        {
+          "gap": {
+            "start_us": 657.728,
+            "end_us": 659.2,
+            "duration_us": 1.472,
+            "overlapping_cuda_apis": [
+              {
+                "name": "cudaGraphLaunch_v10000",
+                "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+                "correlation_id": 20711811,
+                "start_us": 599.937,
+                "end_us": 718.708,
+                "duration_us": 118.771,
+                "overlap_with_gap_us": 1.472
+              }
+            ]
+          },
+          "previous_gpu_activity": {
+            "group": "aux",
+            "kind": "memset",
+            "stage": "cache_torch_argsort",
+            "scope_stage": "cache_torch_argsort",
+            "start_ms": "0.656736",
+            "end_ms": "0.657728",
+            "name": "memset"
+          },
+          "next_gpu_activity": {
+            "group": "aux",
+            "kind": "memset",
+            "stage": "cache_torch_argsort",
+            "scope_stage": "cache_torch_argsort",
+            "start_ms": "0.6592",
+            "end_ms": "0.660096",
+            "name": "memset"
+          },
+          "overlapping_host_nvtx_scopes": [
+            {
+              "label": "motivation/dense_prefetch/revisit/candidate/chunk_0/layer_1/compute_graph_projection_layer_1_q_128",
+              "start_us": 595.267,
+              "end_us": 744.44,
+              "overlap_us": 1.472
+            },
+            {
+              "label": "motivation/dense_prefetch/revisit/candidate/chunk_0/layer_1/attention_projection",
+              "start_us": 535.416,
+              "end_us": 748.589,
+              "overlap_us": 1.472
+            },
+            {
+              "label": "motivation/dense_prefetch/revisit/candidate/chunk_0/layer_1/pool_operation",
+              "start_us": 510.347,
+              "end_us": 1991.884,
+              "overlap_us": 1.472
+            },
+            {
+              "label": "motivation/dense_prefetch/revisit/candidate/chunk_0/layer_1/cache_operation",
+              "start_us": 500.308,
+              "end_us": 1995.191,
+              "overlap_us": 1.472
+            },
+            {
+              "label": "motivation/dense_prefetch/revisit/candidate/chunk_0/layer_1/pool_operation",
+              "start_us": 371.961,
+              "end_us": 2033.924,
+              "overlap_us": 1.472
+            },
+            {
+              "label": "motivation/dense_prefetch/revisit/candidate/chunk_0/layer_1/cache_operation",
+              "start_us": 360.292,
+              "end_us": 2037.158,
+              "overlap_us": 1.472
+            },
+            {
+              "label": "motivation/dense_prefetch/revisit/candidate/chunk_0/layer_1/layer",
+              "start_us": 352.569,
+              "end_us": 2040.741,
+              "overlap_us": 1.472
+            },
+            {
+              "label": "motivation/dense_prefetch/revisit/candidate/chunk_0/layer_shared/chunk",
+              "start_us": -3781.138,
+              "end_us": 21012.89,
+              "overlap_us": 1.472
+            },
+            {
+              "label": "motivation/dense_prefetch/revisit/candidate/chunk_shared/layer_shared/forward",
+              "start_us": -5068.495,
+              "end_us": 21015.92,
+              "overlap_us": 1.472
+            },
+            {
+              "label": "motivation/dense_prefetch/revisit/candidate/chunk_shared/layer_shared/candidate_extend",
+              "start_us": -5084.189,
+              "end_us": 21018.436,
+              "overlap_us": 1.472
+            },
+            {
+              "label": "motivation/dense_prefetch/revisit/request/chunk_shared/layer_shared/request",
+              "start_us": -7737.552,
+              "end_us": 24024.222,
+              "overlap_us": 1.472
+            }
+          ]
+        },
+        {
+          "gap": {
+            "start_us": 642.144,
+            "end_us": 643.52,
+            "duration_us": 1.376,
+            "overlapping_cuda_apis": [
+              {
+                "name": "cudaGraphLaunch_v10000",
+                "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+                "correlation_id": 20711811,
+                "start_us": 599.937,
+                "end_us": 718.708,
+                "duration_us": 118.771,
+                "overlap_with_gap_us": 1.376
+              }
+            ]
+          },
+          "previous_gpu_activity": {
+            "group": "transfer",
+            "kind": "kernel",
+            "stage": "host_gather",
+            "scope_stage": "host_gather",
+            "start_ms": "0.0",
+            "end_ms": "0.642144",
+            "name": "void <unnamed>::gather_records<unsigned int>(const unsigned char *, unsigned char *, const long *, const long *, long, long, long, long, const T1 *)"
+          },
+          "next_gpu_activity": {
+            "group": "aux",
+            "kind": "kernel",
+            "stage": "pool_operation",
+            "scope_stage": "pool_operation",
+            "start_ms": "0.64352",
+            "end_ms": "0.644192",
+            "name": "echo_native::dense_miss_count_clear(unsigned int *)"
+          },
+          "overlapping_host_nvtx_scopes": [
+            {
+              "label": "motivation/dense_prefetch/revisit/candidate/chunk_0/layer_1/compute_graph_projection_layer_1_q_128",
+              "start_us": 595.267,
+              "end_us": 744.44,
+              "overlap_us": 1.376
+            },
+            {
+              "label": "motivation/dense_prefetch/revisit/candidate/chunk_0/layer_1/attention_projection",
+              "start_us": 535.416,
+              "end_us": 748.589,
+              "overlap_us": 1.376
+            },
+            {
+              "label": "motivation/dense_prefetch/revisit/candidate/chunk_0/layer_1/pool_operation",
+              "start_us": 510.347,
+              "end_us": 1991.884,
+              "overlap_us": 1.376
+            },
+            {
+              "label": "motivation/dense_prefetch/revisit/candidate/chunk_0/layer_1/cache_operation",
+              "start_us": 500.308,
+              "end_us": 1995.191,
+              "overlap_us": 1.376
+            },
+            {
+              "label": "motivation/dense_prefetch/revisit/candidate/chunk_0/layer_1/pool_operation",
+              "start_us": 371.961,
+              "end_us": 2033.924,
+              "overlap_us": 1.376
+            },
+            {
+              "label": "motivation/dense_prefetch/revisit/candidate/chunk_0/layer_1/cache_operation",
+              "start_us": 360.292,
+              "end_us": 2037.158,
+              "overlap_us": 1.376
+            },
+            {
+              "label": "motivation/dense_prefetch/revisit/candidate/chunk_0/layer_1/layer",
+              "start_us": 352.569,
+              "end_us": 2040.741,
+              "overlap_us": 1.376
+            },
+            {
+              "label": "motivation/dense_prefetch/revisit/candidate/chunk_0/layer_shared/chunk",
+              "start_us": -3781.138,
+              "end_us": 21012.89,
+              "overlap_us": 1.376
+            },
+            {
+              "label": "motivation/dense_prefetch/revisit/candidate/chunk_shared/layer_shared/forward",
+              "start_us": -5068.495,
+              "end_us": 21015.92,
+              "overlap_us": 1.376
+            },
+            {
+              "label": "motivation/dense_prefetch/revisit/candidate/chunk_shared/layer_shared/candidate_extend",
+              "start_us": -5084.189,
+              "end_us": 21018.436,
+              "overlap_us": 1.376
+            },
+            {
+              "label": "motivation/dense_prefetch/revisit/request/chunk_shared/layer_shared/request",
+              "start_us": -7737.552,
+              "end_us": 24024.222,
+              "overlap_us": 1.376
+            }
+          ]
+        },
+        {
+          "gap": {
+            "start_us": 735.936,
+            "end_us": 736.992,
+            "duration_us": 1.056,
+            "overlapping_cuda_apis": []
+          },
+          "previous_gpu_activity": {
+            "group": "aux",
+            "kind": "kernel",
+            "stage": "cache_torch_argsort",
+            "scope_stage": "cache_torch_argsort",
+            "start_ms": "0.730496",
+            "end_ms": "0.735936",
+            "name": "void at_cuda_detail::cub::detail::radix_sort::DeviceRadixSortOnesweepKernel<at_cuda_detail::cub::detail::radix::policy_hub<long, at::cuda::cub::detail::OpaqueType<(int)8>, unsigned long long>::Policy1000, (at_cuda_detail::cub::SortOrder)0, long, at::cuda::cub::detail::OpaqueType<(int)8>, unsigned long long, int, int, at_cuda_detail::cub::detail::identity_decomposer_t>(T7 *, T7 *, T5 *, const T5 *, T3 *, const T3 *, T4 *, const T4 *, T6, int, int, T8)"
+          },
+          "next_gpu_activity": {
+            "group": "aux",
+            "kind": "kernel",
+            "stage": "pool_operation",
+            "scope_stage": "pool_operation",
+            "start_ms": "0.736992",
+            "end_ms": "0.739712",
+            "name": "void at::native::unrolled_elementwise_kernel<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase &)::[lambda() (instance 3)]::operator ()() const::[lambda() (instance 4)]::operator ()() const::[lambda(long) (instance 1)], std::array<char *, (unsigned long)2>, (int)4, TrivialOffsetCalculator<(int)1, unsigned int>, TrivialOffsetCalculator<(int)1, unsigned int>, at::native::memory::LoadWithCast<(int)1>, at::native::memory::StoreWithCast<(int)1>>(int, T1, T2, T4, T5, T6, T7)"
+          },
+          "overlapping_host_nvtx_scopes": [
+            {
+              "label": "motivation/dense_prefetch/revisit/candidate/chunk_0/layer_1/compute_graph_projection_layer_1_q_128",
+              "start_us": 595.267,
+              "end_us": 744.44,
+              "overlap_us": 1.056
+            },
+            {
+              "label": "motivation/dense_prefetch/revisit/candidate/chunk_0/layer_1/attention_projection",
+              "start_us": 535.416,
+              "end_us": 748.589,
+              "overlap_us": 1.056
+            },
+            {
+              "label": "motivation/dense_prefetch/revisit/candidate/chunk_0/layer_1/pool_operation",
+              "start_us": 510.347,
+              "end_us": 1991.884,
+              "overlap_us": 1.056
+            },
+            {
+              "label": "motivation/dense_prefetch/revisit/candidate/chunk_0/layer_1/cache_operation",
+              "start_us": 500.308,
+              "end_us": 1995.191,
+              "overlap_us": 1.056
+            },
+            {
+              "label": "motivation/dense_prefetch/revisit/candidate/chunk_0/layer_1/pool_operation",
+              "start_us": 371.961,
+              "end_us": 2033.924,
+              "overlap_us": 1.056
+            },
+            {
+              "label": "motivation/dense_prefetch/revisit/candidate/chunk_0/layer_1/cache_operation",
+              "start_us": 360.292,
+              "end_us": 2037.158,
+              "overlap_us": 1.056
+            },
+            {
+              "label": "motivation/dense_prefetch/revisit/candidate/chunk_0/layer_1/layer",
+              "start_us": 352.569,
+              "end_us": 2040.741,
+              "overlap_us": 1.056
+            },
+            {
+              "label": "motivation/dense_prefetch/revisit/candidate/chunk_0/layer_shared/chunk",
+              "start_us": -3781.138,
+              "end_us": 21012.89,
+              "overlap_us": 1.056
+            },
+            {
+              "label": "motivation/dense_prefetch/revisit/candidate/chunk_shared/layer_shared/forward",
+              "start_us": -5068.495,
+              "end_us": 21015.92,
+              "overlap_us": 1.056
+            },
+            {
+              "label": "motivation/dense_prefetch/revisit/candidate/chunk_shared/layer_shared/candidate_extend",
+              "start_us": -5084.189,
+              "end_us": 21018.436,
+              "overlap_us": 1.056
+            },
+            {
+              "label": "motivation/dense_prefetch/revisit/request/chunk_shared/layer_shared/request",
+              "start_us": -7737.552,
+              "end_us": 24024.222,
+              "overlap_us": 1.056
+            }
+          ]
+        },
+        {
+          "gap": {
+            "start_us": 687.392,
+            "end_us": 688.416,
+            "duration_us": 1.024,
+            "overlapping_cuda_apis": [
+              {
+                "name": "cudaGraphLaunch_v10000",
+                "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+                "correlation_id": 20711811,
+                "start_us": 599.937,
+                "end_us": 718.708,
+                "duration_us": 118.771,
+                "overlap_with_gap_us": 1.024
+              }
+            ]
+          },
+          "previous_gpu_activity": {
+            "group": "aux",
+            "kind": "memset",
+            "stage": "cache_torch_argsort",
+            "scope_stage": "cache_torch_argsort",
+            "start_ms": "0.686432",
+            "end_ms": "0.687392",
+            "name": "memset"
+          },
+          "next_gpu_activity": {
+            "group": "aux",
+            "kind": "kernel",
+            "stage": "cache_torch_argsort",
+            "scope_stage": "cache_torch_argsort",
+            "start_ms": "0.688416",
+            "end_ms": "0.693952",
+            "name": "void at_cuda_detail::cub::detail::radix_sort::DeviceRadixSortOnesweepKernel<at_cuda_detail::cub::detail::radix::policy_hub<long, at::cuda::cub::detail::OpaqueType<(int)8>, unsigned long long>::Policy1000, (at_cuda_detail::cub::SortOrder)0, long, at::cuda::cub::detail::OpaqueType<(int)8>, unsigned long long, int, int, at_cuda_detail::cub::detail::identity_decomposer_t>(T7 *, T7 *, T5 *, const T5 *, T3 *, const T3 *, T4 *, const T4 *, T6, int, int, T8)"
+          },
+          "overlapping_host_nvtx_scopes": [
+            {
+              "label": "motivation/dense_prefetch/revisit/candidate/chunk_0/layer_1/compute_graph_projection_layer_1_q_128",
+              "start_us": 595.267,
+              "end_us": 744.44,
+              "overlap_us": 1.024
+            },
+            {
+              "label": "motivation/dense_prefetch/revisit/candidate/chunk_0/layer_1/attention_projection",
+              "start_us": 535.416,
+              "end_us": 748.589,
+              "overlap_us": 1.024
+            },
+            {
+              "label": "motivation/dense_prefetch/revisit/candidate/chunk_0/layer_1/pool_operation",
+              "start_us": 510.347,
+              "end_us": 1991.884,
+              "overlap_us": 1.024
+            },
+            {
+              "label": "motivation/dense_prefetch/revisit/candidate/chunk_0/layer_1/cache_operation",
+              "start_us": 500.308,
+              "end_us": 1995.191,
+              "overlap_us": 1.024
+            },
+            {
+              "label": "motivation/dense_prefetch/revisit/candidate/chunk_0/layer_1/pool_operation",
+              "start_us": 371.961,
+              "end_us": 2033.924,
+              "overlap_us": 1.024
+            },
+            {
+              "label": "motivation/dense_prefetch/revisit/candidate/chunk_0/layer_1/cache_operation",
+              "start_us": 360.292,
+              "end_us": 2037.158,
+              "overlap_us": 1.024
+            },
+            {
+              "label": "motivation/dense_prefetch/revisit/candidate/chunk_0/layer_1/layer",
+              "start_us": 352.569,
+              "end_us": 2040.741,
+              "overlap_us": 1.024
+            },
+            {
+              "label": "motivation/dense_prefetch/revisit/candidate/chunk_0/layer_shared/chunk",
+              "start_us": -3781.138,
+              "end_us": 21012.89,
+              "overlap_us": 1.024
+            },
+            {
+              "label": "motivation/dense_prefetch/revisit/candidate/chunk_shared/layer_shared/forward",
+              "start_us": -5068.495,
+              "end_us": 21015.92,
+              "overlap_us": 1.024
+            },
+            {
+              "label": "motivation/dense_prefetch/revisit/candidate/chunk_shared/layer_shared/candidate_extend",
+              "start_us": -5084.189,
+              "end_us": 21018.436,
+              "overlap_us": 1.024
+            },
+            {
+              "label": "motivation/dense_prefetch/revisit/request/chunk_shared/layer_shared/request",
+              "start_us": -7737.552,
+              "end_us": 24024.222,
+              "overlap_us": 1.024
+            }
+          ]
+        }
+      ],
+      "layer1_copy_sync_apis": [
+        {
+          "api": "cudaMemcpyAsync_v3020",
+          "innermost_scope": "motivation/dense_prefetch/revisit/candidate/chunk_0/layer_1/pool_operation",
+          "duration_us": 8.568,
+          "correlation_id": 20710788
+        },
+        {
+          "api": "cudaMemcpyAsync_v3020",
+          "innermost_scope": "motivation/dense_prefetch/revisit/candidate/chunk_0/layer_1/cache_torch_argsort",
+          "duration_us": 6.805,
+          "correlation_id": 20710806
+        },
+        {
+          "api": "cudaMemcpyAsync_v3020",
+          "innermost_scope": "motivation/dense_prefetch/revisit/candidate/chunk_0/layer_1/pool_operation",
+          "duration_us": 10.251,
+          "correlation_id": 20711753
+        },
+        {
+          "api": "cudaMemcpyAsync_v3020",
+          "innermost_scope": "motivation/dense_prefetch/revisit/candidate/chunk_0/layer_1/pool_operation",
+          "duration_us": 5.915,
+          "correlation_id": 20711767
+        },
+        {
+          "api": "cudaMemcpyAsync_v3020",
+          "innermost_scope": "motivation/dense_prefetch/revisit/candidate/chunk_0/layer_1/compute_graph_projection_inputs",
+          "duration_us": 7.189,
+          "correlation_id": 20711788
+        },
+        {
+          "api": "cudaMemcpyAsync_v3020",
+          "innermost_scope": "motivation/dense_prefetch/revisit/candidate/chunk_0/layer_1/compute_graph_projection_inputs",
+          "duration_us": 5.214,
+          "correlation_id": 20711796
+        },
+        {
+          "api": "cudaMemcpyAsync_v3020",
+          "innermost_scope": "motivation/dense_prefetch/revisit/candidate/chunk_0/layer_1/index_cache_write",
+          "duration_us": 7.465,
+          "correlation_id": 20711816
+        },
+        {
+          "api": "cudaMemcpyAsync_v3020",
+          "innermost_scope": "motivation/dense_prefetch/revisit/candidate/chunk_0/layer_1/index_cache_write",
+          "duration_us": 5.184,
+          "correlation_id": 20711824
+        },
+        {
+          "api": "cudaMemcpyAsync_v3020",
+          "innermost_scope": "motivation/dense_prefetch/revisit/candidate/chunk_0/layer_1/pool_operation",
+          "duration_us": 13.296,
+          "correlation_id": 20711974
+        },
+        {
+          "api": "cudaStreamSynchronize_v3020",
+          "innermost_scope": "motivation/dense_prefetch/revisit/candidate/chunk_0/layer_1/pool_drain",
+          "duration_us": 2.292,
+          "correlation_id": 20717680
+        },
+        {
+          "api": "cudaStreamSynchronize_v3020",
+          "innermost_scope": "motivation/dense_prefetch/revisit/candidate/chunk_0/layer_1/pool_drain",
+          "duration_us": 2.074,
+          "correlation_id": 20717684
+        }
+      ]
+    }
+  ],
+  "limits": "API and host NVTX scopes describe where the process was, without resolving Python call stacks, CPU scheduling, node-tracing overhead or removable unprofiled latency."
+}

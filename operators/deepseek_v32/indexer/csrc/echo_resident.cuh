@@ -29,6 +29,20 @@ __device__ __forceinline__ int resident_global(
   return int(global);
 }
 
+__global__ void empty_event_kernel(int64_t* priority, int64_t* clock, int64_t timestamp) {
+  priority[0] = INT32_MAX;
+  *clock = timestamp + 1;
+}
+
+void empty_event(TensorView priority, TensorView clock, int64_t timestamp) {
+  const int gpu = priority.device().device_id;
+  checked(cudaSetDevice(gpu));
+  auto stream = static_cast<cudaStream_t>(TVMFFIEnvGetStream(kDLCUDA, gpu));
+  empty_event_kernel<<<1,1,0,stream>>>(static_cast<int64_t*>(priority.data_ptr()),
+                                    static_cast<int64_t*>(clock.data_ptr()), timestamp);
+  checked(cudaGetLastError());
+}
+
 __global__ void resident_union_clear(uint32_t* bitmap, int64_t words, uint32_t* count) {
   for (int64_t i = int64_t(blockIdx.x) * blockDim.x + threadIdx.x;
        i < words; i += int64_t(gridDim.x) * blockDim.x)
@@ -85,7 +99,9 @@ __global__ void resident_selection_kernel(
     }
     physical[i] = slot;
     if constexpr (LocalBitmap) {
-      resident_claim_bit(local_bitmap, slot);
+      // Shared atomics already combine repeated physical bits within this CTA.
+      // Warp matching adds more work than it saves for exact top-k rows.
+      atomicOr(local_bitmap + slot / 32, uint32_t(1) << (slot % 32));
     } else {
       if (resident_claim_bit(bitmap, slot)) {
         ++unique;
@@ -140,7 +156,9 @@ void resident_selection(
       static_cast<uint32_t*>(bitmap.data_ptr()), bitmap.size(0),
       static_cast<uint32_t*>(count.data_ptr()));
   checked(cudaGetLastError());
-  const int blocks = std::max<int64_t>(1, std::min<int64_t>(128, (elements+255)/256));
+  const bool local_bitmap = elements >= (1 << 18) && bitmap.size(0) <= 4096;
+  const int grid_cap = local_bitmap ? (elements >= (1 << 20) ? 512 : 256) : 128;
+  const int blocks = std::max<int64_t>(1, std::min<int64_t>(grid_cap, (elements+255)/256));
   const auto launch = [&]<bool LocalBitmap>() {
     const size_t shared_bytes = LocalBitmap ? bitmap.size(0) * sizeof(uint32_t) : 0;
     resident_selection_kernel<LocalBitmap><<<blocks,256,shared_bytes,stream>>>(
@@ -151,14 +169,14 @@ void resident_selection(
         static_cast<unsigned long long*>(totals.data_ptr()), written, history, transient,
         priority.size(0)-1, bitmap.size(0), timestamp);
   };
-  if (elements >= (1 << 20) && bitmap.size(0) <= 4096)
+  if (local_bitmap)
     launch.template operator()<true>();
   else
     launch.template operator()<false>();
   checked(cudaGetLastError());
 }
 
-template <typename Word>
+template <typename Word, bool PackedChosen = false>
 __global__ void planned_append_kernel(
     const char* source, char* records, int count, int64_t row_bytes,
     const int* pages, const int64_t* chosen, int* h2d, int64_t* d2h,
@@ -169,7 +187,7 @@ __global__ void planned_append_kernel(
   for (int row = blockIdx.x * 8 + threadIdx.x / 32; row < count; row += gridDim.x * 8) {
     int slot = 0;
     if (lane == 0) {
-      slot = int(chosen[row]);
+      slot = PackedChosen ? int(uint32_t(chosen[row])) + 1 : int(chosen[row]);
       resident_guard(slot > 0 && slot <= slots);
       const int global = resident_global(start + row, pages, host_capacity);
       const int64_t old = d2h[slot];

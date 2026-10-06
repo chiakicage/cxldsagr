@@ -1,3 +1,5 @@
+# Report artifacts can contain source snapshots bound by publication hashes.
+exclude: ^experiments/[^/]+/report/
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.16.8

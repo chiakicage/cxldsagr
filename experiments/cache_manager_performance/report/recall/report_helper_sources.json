@@ -1,0 +1,268 @@
+{
+  "boundary": "Current loaded repository Python modules only, plus pyproject.toml and uv.lock; not captured runtime/native identity, not every possible source. Saved bytes are the files on disk at report generation, not the loaded Python bytecode.",
+  "excluded_path_components": [
+    ".cache",
+    ".git",
+    ".pytest_cache",
+    ".venv",
+    "3rdparty",
+    "__pycache__",
+    "build",
+    "dist",
+    "generated",
+    "output",
+    "report",
+    "reports",
+    "weights"
+  ],
+  "external_reporting_adapter": {
+    "purpose": "Pass the exact independently audited observer reconciliation to the existing shared report validator; plot/statistics/measurement implementation unchanged.",
+    "sha256": "e063ea3ff507525e179b8e40b50630be73fe39d8862ef59609477d18c352af09",
+    "snapshot_path": "/tmp/cache_append_publication_audit_20261006_06/recall_report_sources/external/run_recall_report.py"
+  },
+  "files": {
+    "cache/contracts.py": {
+      "modules": [
+        "cache.contracts"
+      ],
+      "sha256": "58575f1c9aee3f2843b7f2bce07f1589ea8cb9a712b050991199a95639f97f73",
+      "size_bytes": 878,
+      "snapshot_path": "/tmp/cache_append_publication_audit_20261006_06/recall_report_sources/source/report_helpers/cache/contracts.py"
+    },
+    "cache/host_allocation.py": {
+      "modules": [
+        "cache.host_allocation"
+      ],
+      "sha256": "6c6c65e166fc6a2289547482a9bc51c1da136190b9105423edd23f9732567150",
+      "size_bytes": 2528,
+      "snapshot_path": "/tmp/cache_append_publication_audit_20261006_06/recall_report_sources/source/report_helpers/cache/host_allocation.py"
+    },
+    "cache/sparse_token_cache.py": {
+      "modules": [
+        "cache.sparse_token_cache"
+      ],
+      "sha256": "1b3da2acfe5dc22c403b5794d6aedcebd1daaccaa9e82e54741fb0afd69c3cdf",
+      "size_bytes": 41580,
+      "snapshot_path": "/tmp/cache_append_publication_audit_20261006_06/recall_report_sources/source/report_helpers/cache/sparse_token_cache.py"
+    },
+    "cache/sparse_token_pool.py": {
+      "modules": [
+        "cache.sparse_token_pool"
+      ],
+      "sha256": "b34c8cfbc43e58881bd14aa2af314ce7fe612cbbd906ca8573f4259d937e5650",
+      "size_bytes": 38877,
+      "snapshot_path": "/tmp/cache_append_publication_audit_20261006_06/recall_report_sources/source/report_helpers/cache/sparse_token_pool.py"
+    },
+    "evaluation/local_native.py": {
+      "modules": [
+        "evaluation.local_native"
+      ],
+      "sha256": "63681bbe626c0de97747ecf21d784b44e70530bb2c67f2d0fa2231baf54a03c8",
+      "size_bytes": 4202,
+      "snapshot_path": "/tmp/cache_append_publication_audit_20261006_06/recall_report_sources/source/report_helpers/evaluation/local_native.py"
+    },
+    "evaluation/pool_scan_provenance.py": {
+      "modules": [
+        "evaluation.pool_scan_provenance"
+      ],
+      "sha256": "004b86573af85619e56a99259e4208671c9fd94a99e0ec07c4fcfd6401dc3d9d",
+      "size_bytes": 11765,
+      "snapshot_path": "/tmp/cache_append_publication_audit_20261006_06/recall_report_sources/source/report_helpers/evaluation/pool_scan_provenance.py"
+    },
+    "evaluation/provenance.py": {
+      "modules": [
+        "evaluation.provenance"
+      ],
+      "sha256": "20593da3fcbaf8b720d507ee857799fde6ba297064fba505e7fec1054ec2295f",
+      "size_bytes": 9575,
+      "snapshot_path": "/tmp/cache_append_publication_audit_20261006_06/recall_report_sources/source/report_helpers/evaluation/provenance.py"
+    },
+    "evaluation/validation.py": {
+      "modules": [
+        "evaluation.validation"
+      ],
+      "sha256": "769add375a8b3b64fe0c391c1a3067f2304c4727f1d4af199b9f5a5480ca2b74",
+      "size_bytes": 4803,
+      "snapshot_path": "/tmp/cache_append_publication_audit_20261006_06/recall_report_sources/source/report_helpers/evaluation/validation.py"
+    },
+    "experiments/cache_manager_performance/src/measure.py": {
+      "modules": [
+        "experiments.cache_manager_performance.src.measure"
+      ],
+      "sha256": "49c65463b69de0315ee0fbe4c3f4dac340b631118ece54ec00212fef32d270b9",
+      "size_bytes": 12480,
+      "snapshot_path": "/tmp/cache_append_publication_audit_20261006_06/recall_report_sources/source/report_helpers/experiments/cache_manager_performance/src/measure.py"
+    },
+    "experiments/cache_manager_performance/src/recall_report.py": {
+      "modules": [
+        "experiments.cache_manager_performance.src.recall_report"
+      ],
+      "sha256": "c57d86fe077abfe373b1a668b6ce90878813ab81ae2bd0d72f564e2bbd408bd9",
+      "size_bytes": 18424,
+      "snapshot_path": "/tmp/cache_append_publication_audit_20261006_06/recall_report_sources/source/report_helpers/experiments/cache_manager_performance/src/recall_report.py"
+    },
+    "experiments/cache_manager_performance/src/report.py": {
+      "modules": [
+        "experiments.cache_manager_performance.src.report"
+      ],
+      "sha256": "8070935df764c47c75921245b1ce735d877c4f6ef87fe39f0b3a1cefecbde78d",
+      "size_bytes": 25875,
+      "snapshot_path": "/tmp/cache_append_publication_audit_20261006_06/recall_report_sources/source/report_helpers/experiments/cache_manager_performance/src/report.py"
+    },
+    "experiments/cache_manager_performance/src/workload.py": {
+      "modules": [
+        "experiments.cache_manager_performance.src.workload"
+      ],
+      "sha256": "db3bbe8823870d6869bd4a8bdecce450ca9e28758945bb68523dc3626d581e77",
+      "size_bytes": 16732,
+      "snapshot_path": "/tmp/cache_append_publication_audit_20261006_06/recall_report_sources/source/report_helpers/experiments/cache_manager_performance/src/workload.py"
+    },
+    "experiments/deepseek_v32_mfu/src/backend_provenance.py": {
+      "modules": [
+        "experiments.deepseek_v32_mfu.src.backend_provenance"
+      ],
+      "sha256": "ec756e0638b8dd956416ded6c22b7d883ef6024c5063804fc60ebb814fcfd88d",
+      "size_bytes": 16910,
+      "snapshot_path": "/tmp/cache_append_publication_audit_20261006_06/recall_report_sources/source/report_helpers/experiments/deepseek_v32_mfu/src/backend_provenance.py"
+    },
+    "experiments/deepseek_v32_mfu/src/kernel_profile.py": {
+      "modules": [
+        "experiments.deepseek_v32_mfu.src.kernel_profile"
+      ],
+      "sha256": "2c67b1760cd8807876c55a26992a0946c100641c33e24988056ecaac732b06a0",
+      "size_bytes": 15389,
+      "snapshot_path": "/tmp/cache_append_publication_audit_20261006_06/recall_report_sources/source/report_helpers/experiments/deepseek_v32_mfu/src/kernel_profile.py"
+    },
+    "models/attention_contracts.py": {
+      "modules": [
+        "models.attention_contracts"
+      ],
+      "sha256": "2bc7ab80d9f9dd67f0c30e7dea989be7ae8d0f3825f213e9971985bc70f32c63",
+      "size_bytes": 1765,
+      "snapshot_path": "/tmp/cache_append_publication_audit_20261006_06/recall_report_sources/source/report_helpers/models/attention_contracts.py"
+    },
+    "models/deepseek_v32/attention.py": {
+      "modules": [
+        "models.deepseek_v32.attention"
+      ],
+      "sha256": "492f57fd04340bd3b25c66ea087774e43cb3320ac49147db83a90705551fab64",
+      "size_bytes": 16925,
+      "snapshot_path": "/tmp/cache_append_publication_audit_20261006_06/recall_report_sources/source/report_helpers/models/deepseek_v32/attention.py"
+    },
+    "models/deepseek_v32/cache/prefetch.py": {
+      "modules": [
+        "models.deepseek_v32.cache.prefetch"
+      ],
+      "sha256": "854a3d5081ba396a900b233ad1d1c3678d73cf6de68a0aed0a5d85315351ec31",
+      "size_bytes": 12091,
+      "snapshot_path": "/tmp/cache_append_publication_audit_20261006_06/recall_report_sources/source/report_helpers/models/deepseek_v32/cache/prefetch.py"
+    },
+    "operators/deepseek_v32/attention/_config.py": {
+      "modules": [
+        "operators.deepseek_v32.attention._config"
+      ],
+      "sha256": "f17addb344d3d2a4098b4b22f3785c968e84614b7b7895abd39a4a2a1fa3d1cb",
+      "size_bytes": 457,
+      "snapshot_path": "/tmp/cache_append_publication_audit_20261006_06/recall_report_sources/source/report_helpers/operators/deepseek_v32/attention/_config.py"
+    },
+    "operators/deepseek_v32/attention/_validation.py": {
+      "modules": [
+        "operators.deepseek_v32.attention._validation"
+      ],
+      "sha256": "9fcd9c2c39d9981374de81f2ad8ef1d40a48bbb929ba8e995d0a572dd11c535a",
+      "size_bytes": 1202,
+      "snapshot_path": "/tmp/cache_append_publication_audit_20261006_06/recall_report_sources/source/report_helpers/operators/deepseek_v32/attention/_validation.py"
+    },
+    "operators/deepseek_v32/attention/device_only/mla.py": {
+      "modules": [
+        "operators.deepseek_v32.attention.device_only.mla"
+      ],
+      "sha256": "9075ad9955c9958110b220acf7d21e768142e19a3552154369af4cfe1ad3676c",
+      "size_bytes": 4363,
+      "snapshot_path": "/tmp/cache_append_publication_audit_20261006_06/recall_report_sources/source/report_helpers/operators/deepseek_v32/attention/device_only/mla.py"
+    },
+    "operators/deepseek_v32/attention/offload/mla.py": {
+      "modules": [
+        "operators.deepseek_v32.attention.offload.mla"
+      ],
+      "sha256": "ef77dc5334139aac9cfdf0e58b1bc6d0004aec33bbeab3e3f5d8342b55e7dd56",
+      "size_bytes": 980,
+      "snapshot_path": "/tmp/cache_append_publication_audit_20261006_06/recall_report_sources/source/report_helpers/operators/deepseek_v32/attention/offload/mla.py"
+    },
+    "operators/deepseek_v32/indexer/cache_ops.py": {
+      "modules": [
+        "operators.deepseek_v32.indexer.cache_ops"
+      ],
+      "sha256": "2aaccd6639e17b605f691833bfac426c35fa7ccba10d440b716822f9f215af33",
+      "size_bytes": 32893,
+      "snapshot_path": "/tmp/cache_append_publication_audit_20261006_06/recall_report_sources/source/report_helpers/operators/deepseek_v32/indexer/cache_ops.py"
+    },
+    "operators/deepseek_v32/indexer/echo.py": {
+      "modules": [
+        "operators.deepseek_v32.indexer.echo"
+      ],
+      "sha256": "7f4338a96d488fbb6eca9791633ea7486a373f44ca32fdf87070109ba029a25c",
+      "size_bytes": 13545,
+      "snapshot_path": "/tmp/cache_append_publication_audit_20261006_06/recall_report_sources/source/report_helpers/operators/deepseek_v32/indexer/echo.py"
+    },
+    "operators/deepseek_v32/indexer/prefetch_hint.py": {
+      "modules": [
+        "operators.deepseek_v32.indexer.prefetch_hint"
+      ],
+      "sha256": "0ba70bdc2daf4be2c385b60af69309974394ab8d237f9aaf5519fb9350b6a07c",
+      "size_bytes": 2981,
+      "snapshot_path": "/tmp/cache_append_publication_audit_20261006_06/recall_report_sources/source/report_helpers/operators/deepseek_v32/indexer/prefetch_hint.py"
+    },
+    "operators/deepseek_v32/indexer/selection.py": {
+      "modules": [
+        "operators.deepseek_v32.indexer.selection"
+      ],
+      "sha256": "0e68ecb4e16e40e9dda1541693ce3e00e41ccd4a05ea2e708d04dd2545a4dcd8",
+      "size_bytes": 3666,
+      "snapshot_path": "/tmp/cache_append_publication_audit_20261006_06/recall_report_sources/source/report_helpers/operators/deepseek_v32/indexer/selection.py"
+    },
+    "pyproject.toml": {
+      "kind": "environment specification",
+      "sha256": "cac6e9271538d74e99b1bdc83c2a12648bb3c76a310af21c98aff3ec2d3761d1",
+      "size_bytes": 3925,
+      "snapshot_path": "/tmp/cache_append_publication_audit_20261006_06/recall_report_sources/source/report_helpers/pyproject.toml"
+    },
+    "uv.lock": {
+      "kind": "environment specification",
+      "sha256": "53339af1728da3661b614d554e928408186b4fac6106a92999bd8fd69b3d2d8f",
+      "size_bytes": 139330,
+      "snapshot_path": "/tmp/cache_append_publication_audit_20261006_06/recall_report_sources/source/report_helpers/uv.lock"
+    }
+  },
+  "included_directories": [
+    "GR",
+    "cache",
+    "evaluation",
+    "executor",
+    "experiments",
+    "models",
+    "operators",
+    "scripts",
+    "serving",
+    "tests"
+  ],
+  "invocation": {
+    "cwd": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr",
+    "orig_argv": [
+      ".venv/bin/python",
+      "/tmp/cache_append_publication_audit_20261006_06/run_recall_report.py",
+      "--audit-dir",
+      "/tmp/cache_append_publication_audit_20261006_06/recall_audit",
+      "--output",
+      "/tmp/cache_append_publication_audit_20261006_06/report/recall",
+      "--source-archive",
+      "/tmp/cache_append_publication_audit_20261006_06/recall_report_sources"
+    ],
+    "python": {
+      "executable": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin/python",
+      "version": "3.12.13 (main, Jun 11 2026, 04:03:26) [Clang 22.1.3 ]"
+    }
+  },
+  "repository_root": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr",
+  "schema": "report-helper-sources-v1"
+}

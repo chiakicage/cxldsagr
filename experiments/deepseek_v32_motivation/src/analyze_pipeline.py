@@ -10,7 +10,7 @@ import re
 from collections import defaultdict
 from pathlib import Path
 
-from experiments.deepseek_v32_echo_prefill.src.analyze_nsys import (
+from experiments.deepseek_v32_mfu.src.analyze_nsys import (
     _assign_scopes,
     _attribute,
     _read_capture,
@@ -97,6 +97,130 @@ def category(activity):
     ):
         return "cache_metadata"
     return "model_auxiliary"
+
+
+def is_host_kv_transfer(activity):
+    """Separate scoped main-KV DMA from small control H2D copies."""
+    return activity["category"] == "host_gather" or (
+        activity["kind"] == "memcpy"
+        and activity["category"] == "H2D"
+        and (activity.get("scope") or {}).get("stage") == "host_dma"
+    )
+
+
+def audit_dense_dma(metadata, capture, activities, calls):
+    """Require declared dense DMA to conserve real copy bytes and address spans."""
+    if capture["scheme"] != "dense_prefetch":
+        return None
+    cases = [case for case in metadata["cases"] if case["scheme"] == "dense_prefetch"]
+    if len(cases) != 1:
+        raise ValueError("dense profile requires exactly one resource-plan case")
+    policy = cases[0]["resource_plan"].get("dense_fetch_policy")
+    if policy != "contiguous_history_cuda_memcpy_async_next_layer_v1":
+        return None
+    copies = [activity for activity in activities if is_host_kv_transfer(activity)]
+    if any(activity["kind"] != "memcpy" for activity in copies):
+        raise ValueError("declared dense DMA path contains a mapped-host gather kernel")
+    declared = [call for call in calls if call.get("stage") == "host_dma"]
+    spans = []
+    for call in declared:
+        count, width = call["records"], call["record_bytes"]
+        if (
+            type(count) is not int
+            or count <= 0
+            or call["requested_bytes"] != count * width
+            or not call["host_contiguous"]
+            or not call["device_contiguous"]
+            or not call["host_pinned"]
+            or call["transfer_implementation"] != "cudaMemcpyAsync"
+            or call["host_row_stride_bytes"] != width
+            or call["device_row_stride_bytes"] != width
+            or not 0 <= call["host_start"] <= call["host_capacity_records"] - count
+            or call["device_start"] != 1
+            or call["device_start"] + count > call["device_capacity_records"]
+            or call["host_address_end"] - call["host_address_start"] != count * width
+            or call["device_address_end"] - call["device_address_start"] != count * width
+        ):
+            raise ValueError("dense DMA annotation does not describe one contiguous record span")
+        spans.append(
+            {
+                key: call[key]
+                for key in (
+                    "segment",
+                    "layer",
+                    "records",
+                    "record_bytes",
+                    "requested_bytes",
+                    "host_start",
+                    "device_start",
+                    "host_address_start",
+                    "host_address_end",
+                    "device_address_start",
+                    "device_address_end",
+                )
+            }
+        )
+    raw_copies = []
+    for activity in copies:
+        api = activity.get("api")
+        api_name = api["name"].lower() if api else ""
+        if not api or not any(
+            name in api_name for name in ("cudamemcpyasync", "cumemcpyhtodasync")
+        ):
+            raise ValueError("dense H2D activity lacks a correlated asynchronous copy API")
+        raw_copies.append(
+            {
+                "segment": activity["scope"]["segment"],
+                "layer": activity["scope"]["layer"],
+                "start_ns": activity["start"],
+                "end_ns": activity["end"],
+                "bytes": activity["bytes"],
+                "device_id": activity["device_id"],
+                "stream_id": activity["stream_id"],
+                "process": activity["process"],
+                "correlation_id": activity["correlation"],
+                "api_name": api["name"],
+            }
+        )
+    segments = []
+    for segment, counters in capture["segment_counters"].items():
+        for row in (*raw_copies, *spans):
+            if row["segment"] == segment and str(row["layer"]) not in {
+                str(index) for index in range(len(counters["layers"]))
+            }:
+                raise ValueError("dense DMA layer has no matching cache counter")
+        for layer_id, layer in enumerate(counters["layers"]):
+            actual = [
+                row
+                for row in raw_copies
+                if (row["segment"], str(row["layer"])) == (segment, str(layer_id))
+            ]
+            expected = [
+                row
+                for row in spans
+                if (row["segment"], str(row["layer"])) == (segment, str(layer_id))
+            ]
+            actual_bytes = sum(row["bytes"] for row in actual)
+            if (
+                actual_bytes != layer["host_to_device_bytes"]
+                or actual_bytes != sum(row["requested_bytes"] for row in expected)
+                or len(actual) != len(expected)
+            ):
+                raise ValueError("dense DMA raw bytes differ from layer counters or declared spans")
+        actual_bytes = sum(row["bytes"] for row in raw_copies if row["segment"] == segment)
+        if actual_bytes != counters["host_to_device_bytes"]:
+            raise ValueError("dense DMA total bytes differ from segment cache counters")
+        segments.append({"segment": segment, "host_to_device_bytes": actual_bytes})
+    if any(row["segment"] not in capture["segment_counters"] for row in (*raw_copies, *spans)):
+        raise ValueError("dense DMA belongs to a segment with no cache counters")
+    return {
+        "status": "passed",
+        "policy": policy,
+        "segments": segments,
+        "contiguous_address_spans": spans,
+        "raw_async_copies": raw_copies,
+        "boundary": "Each declared contiguous span matches one raw H2D memcpy and its asynchronous API through launch attribution; per-layer and aggregate bytes match validated segment counters. Addresses are runtime interception metadata, not independent CUPTI address fields.",
+    }
 
 
 def intersection_ns(left, right):
@@ -200,6 +324,15 @@ def analyze_capture(path):
         graph_paths = [metadata_path, path.parent / "operator_calls.json", *graph_paths]
     for activity in activities:
         activity["category"] = category(activity)
+    selected_capture = next(c for c in metadata["captures"] if c["sqlite"] == path.name)
+    dma_calls = graph_calls
+    if not graph_calls and scheme == "dense_prefetch":
+        dma_calls = [
+            row
+            for row in json.loads((path.parent / "operator_calls.json").read_text())
+            if row["capture_index"] == selected_capture["capture_index"]
+        ]
+    dma_audit = audit_dense_dma(metadata, selected_capture, activities, dma_calls)
     exclusive = exclusive_scope_ns(scopes)
     cpu_ranges = defaultdict(list)
     for scope in scopes:
@@ -292,6 +425,7 @@ def analyze_capture(path):
         "cpu_exclusive_conserves_thread_unions": True,
         "unattributed_gpu_count": sum(a["scope"] is None for a in activities),
         "graph_attribution": graph_audit,
+        "dense_dma_audit": dma_audit,
         "graph_input_sha256": {str(p): sha(p) for p in graph_paths},
         "nonfused_matrix_and_separate_transfer_overlap_ms": intersection_ns(compute, transfers)
         / 1e6,
@@ -374,8 +508,8 @@ def draw_timeline(summary, activities, output):
                 if scope.get("layer") not in ("0", "1", "2"):
                     continue
                 label = None
-                if a["category"] == "host_gather":
-                    label = "fetch"
+                if is_host_kv_transfer(a):
+                    label = "DMA fetch" if a["kind"] == "memcpy" else "fetch"
                 elif a["category"] == "indexer_prefetch_fused":
                     label = "index+fetch"
                 elif "mqa_logits" in a["name"]:
@@ -433,7 +567,7 @@ def main(argv=None):
                 for p in (
                     Path(__file__),
                     Path(__file__).with_name("graph_attribution.py"),
-                    Path("experiments/deepseek_v32_echo_prefill/src/analyze_nsys.py"),
+                    Path("experiments/deepseek_v32_mfu/src/analyze_nsys.py"),
                 )
             },
             "boundaries": [

@@ -9,7 +9,7 @@ deeper residual trajectory. Their KV/indexer states are independent.
 
 from __future__ import annotations
 
-from contextlib import contextmanager, nullcontext
+from contextlib import ExitStack, contextmanager, nullcontext
 from dataclasses import replace
 from pathlib import Path
 
@@ -42,7 +42,8 @@ from models.deepseek_v32.execution.planning import (
     plan_serving_resources,
     plan_session_storage,
 )
-from models.deepseek_v32.nonmatrix import rms_norm
+from models.deepseek_v32.inputs import prepare_token_ids
+from models.deepseek_v32.nonmatrix import residual_rms_norm
 from models.deepseek_v32.replay import ReplayLayout, replay_parameter_count
 
 SCHEMES = ("hbm", "echo", "serial_sparse", "dense_prefetch")
@@ -82,7 +83,6 @@ class DeepSeekServingBackend:
         scheme="hbm",
         device="cuda:0",
         num_layers,
-        pipeline=None,
         chunk_size=2048,
         extend_chunk_size=None,
         slots=None,
@@ -95,9 +95,8 @@ class DeepSeekServingBackend:
     ):
         if scheme not in SCHEMES:
             raise ValueError(f"scheme must be one of {SCHEMES}")
-        self.pipeline = LocalPipeline() if pipeline is None else pipeline
+        self.pipeline = LocalPipeline()
         self.pipeline.validate_scheme(scheme)
-        self._pipeline_resources = None
         if slots is not None:
             raise ValueError("slots was per-session; use sparse_pool_tokens for the backend pool")
         if chunk_size < 1 or sparse_pool_tokens < chunk_size:
@@ -209,8 +208,7 @@ class DeepSeekServingBackend:
 
     def plan_resources(self, budgets, limits):
         config = self._planning_config()
-        plan = plan_serving_resources(config, budgets, limits)
-        return self.pipeline.plan_resources(config, plan, budgets)
+        return plan_serving_resources(config, budgets, limits)
 
     def allocate_shared(self, plan, *, owner=None):
         self.lifecycle.check_access(owner, allow_closed=True)
@@ -242,6 +240,7 @@ class DeepSeekServingBackend:
                     max_inflight_writes=metadata["max_inflight_writes"],
                     metadata_ops=cache_ops,
                     candidate_slots=metadata["candidate_slots"],
+                    dense_contiguous=self.scheme == "dense_prefetch",
                 )
                 if self.scheme == "dense_prefetch":
                     from models.deepseek_v32.cache.prefetch import PoolHistoryPrefetch
@@ -291,12 +290,6 @@ class DeepSeekServingBackend:
                 self._compute_graphs.allocate()
             elif getattr(self, "enable_compute_graphs", False):
                 raise ValueError("enabled compute graphs are absent from the resource plan")
-            self._pipeline_resources = self.pipeline.allocate_resources(
-                self._shared_pool, plan, self.scheme
-            )
-            # Publish provider ownership before auditing: failed cleanup must
-            # retain these allocations even if the reservation was incorrect.
-            self.pipeline.audit_resources(self._pipeline_resources, plan)
             self.lifecycle.allocated(plan, owner=owner)
         except BaseException as error:
             # The traceback retains a partially constructed pool/staging object
@@ -321,6 +314,9 @@ class DeepSeekServingBackend:
             fixed = staging.shared_bytes()
             result = {name: result[name] + fixed[name] for name in result}
         pending = _storage_bytes(ticket.source for ticket in getattr(self, "_dense_sources", []))
+        prefetch = getattr(self, "_pool_prefetch", None)
+        if prefetch is not None:
+            pending["hbm" if self.device.type == "cuda" else "dram"] += prefetch.pending_bytes
         transient = _storage_bytes(
             getattr(self, name, None)
             for name in (
@@ -330,11 +326,8 @@ class DeepSeekServingBackend:
         )
         graphs = getattr(self, "_compute_graphs", None)
         compute = graphs.shared_bytes() if graphs is not None else {"hbm": 0, "dram": 0}
-        resources = self._pipeline_resources
-        extra = resources.shared_bytes() if resources is not None else {"hbm": 0, "dram": 0}
         return {
-            name: result[name] + pending[name] + transient[name] + compute[name] + extra[name]
-            for name in result
+            name: result[name] + pending[name] + transient[name] + compute[name] for name in result
         }
 
     def retained_session_capacity(self, capacity, prefix_tokens):
@@ -467,13 +460,12 @@ class DeepSeekServingBackend:
                 self.pipeline.create_runner(
                     attention,
                     capacity,
-                    resources=self._pipeline_resources,
                     scheme=self.scheme,
                     slots=self.slots,
                     chunk_size=self.chunk_size,
                     dense_backend=self if self.scheme == "dense_prefetch" else None,
                     cache=(
-                        self.pipeline.layer_cache(sparse_session, layer, self._pipeline_resources)
+                        self.pipeline.layer_cache(sparse_session, layer)
                         if sparse_session is not None
                         else ServingSparseTokenCache(
                             capacity,
@@ -689,7 +681,11 @@ class DeepSeekServingBackend:
         self._check_session(session)
         if not _capture_prefix:
             self._check_candidate_limit(token_ids)
-        with self._execution(session, owner=owner):
+        with self._execution(session, owner=owner), ExitStack() as hints:
+            for runner in session.runners:
+                defer = getattr(runner, "defer_unused_prefill_hints", None)
+                if defer is not None:
+                    hints.enter_context(defer())
             result = self._forward_leased(
                 session,
                 token_ids,
@@ -723,9 +719,7 @@ class DeepSeekServingBackend:
 
     def _prefetch_pool_history(self, cache):
         ticket = self._pool_prefetch.prefetch(cache)
-        for name in ("requested_records", "resident_records", "fetched_records"):
-            key = "dense_" + name
-            cache.dense_history_metrics[key] += getattr(ticket, name)
+        ticket.add_metrics(cache.dense_history_metrics)
         return ticket
 
     def _forward_leased(
@@ -741,15 +735,16 @@ class DeepSeekServingBackend:
         session.last_candidate_transient = False
         if transient_candidate and chunk_size is not None:
             raise ValueError("transient candidates execute in one batch")
-        ids = torch.as_tensor(token_ids, dtype=torch.long, device=self.device)
         planned = self.lifecycle.plan
         limit = (
             planned.metadata["max_session_capacity"] if transient_candidate else session.capacity
         )
-        if ids.ndim != 1 or not len(ids) or session.length + len(ids) > limit:
-            raise ValueError("nonempty token IDs must fit the session cache")
-        if int(ids.min()) < 0 or int(ids.max()) >= self.cfg.vocab_size:
-            raise ValueError("token ID is outside the checkpoint vocabulary")
+        ids = prepare_token_ids(
+            token_ids,
+            device=self.device,
+            vocab_size=self.cfg.vocab_size,
+            max_tokens=limit - session.length,
+        )
         query_chunk = len(ids) if chunk_size is None else chunk_size
         if planned is not None and query_chunk > planned.metadata["workspace_query_tokens"]:
             raise CacheBudgetExceeded("query batch exceeds reserved cache execution workspace")
@@ -758,7 +753,11 @@ class DeepSeekServingBackend:
         offsets = []
         try:
             for runner in session.runners:
-                offsets.append(runner.offset.clone() if hasattr(runner, "offset") else None)
+                offsets.append(
+                    runner.offset.clone()
+                    if hasattr(runner, "offset") and getattr(runner, "mutates_prefetch_hint", True)
+                    else None
+                )
             for runner in session.runners:
                 runner.cache.reset_stats()
                 runner.cache.dense_history_metrics = {
@@ -801,7 +800,14 @@ class DeepSeekServingBackend:
                         pool_dense.wait(ticket)
                         if layer + 1 < self.num_layers:
                             ticket = self._prefetch_pool_history(session.runners[layer + 1].cache)
-                    hidden, residual = replay_inputs.for_layer(layer, hidden, residual, scope=scope)
+                    graphs = getattr(self, "_compute_graphs", None)
+                    source_inputs = (
+                        (hidden, residual) if layer < 3 else replay_inputs.sources[layer % 3]
+                    )
+                    graph_used = graphs is not None and graphs.supports(layer, *source_inputs)
+                    hidden, residual = replay_inputs.for_layer(
+                        layer, hidden, residual, scope=scope, copy_source=not graph_used
+                    )
                     indexer_view = (
                         self._candidate_indexer_view(session, runner)
                         if transient_candidate
@@ -811,8 +817,6 @@ class DeepSeekServingBackend:
                         runner.cache.operation() if transient_candidate else nullcontext()
                     )
                     with scope(f"layer_{layer}_source_{layer % 3}"), candidate_lease, indexer_view:
-                        graphs = getattr(self, "_compute_graphs", None)
-                        graph_used = graphs is not None and graphs.supports(layer, hidden, residual)
                         if graph_used:
                             hidden, residual = graphs.forward_block(
                                 layer, runner, hidden, residual, scope=scope
@@ -836,10 +840,9 @@ class DeepSeekServingBackend:
                     if dense:
                         runner.cache.records = None
                 with scope("final_norm_lm_head"):
-                    output = rms_norm(
-                        hidden.float() + residual.float(), self.final_norm, self.cfg.norm_eps
+                    output, _ = residual_rms_norm(
+                        hidden, residual, self.final_norm, self.cfg.norm_eps
                     )
-                    output = output.bfloat16()
                     output_parts.append(output)
                     if stop == len(ids):
                         self.last_logits = F.linear(output[-1:], self.head_weight).float()
@@ -848,7 +851,7 @@ class DeepSeekServingBackend:
                     self._dense_sources.clear()
                 if pool_dense is not None:
                     pool_dense.drain()
-            output = torch.cat(output_parts)
+            output = output_parts[0] if len(output_parts) == 1 else torch.cat(output_parts)
             self.synchronize()
             if any(cache.written != cache._step_end for cache in started):
                 raise RuntimeError("one or more layers did not complete their cache step")
@@ -1042,15 +1045,12 @@ class DeepSeekServingBackend:
                 staging.close()
             if graphs is not None:
                 graphs.close()
-            if self._pipeline_resources is not None:
-                self._pipeline_resources.close()
         except BaseException as error:
             self.lifecycle.poison(error)
             raise
         self.lifecycle.drop_plan()
         self._shared_pool = self._dense_staging = None
         self._pool_prefetch = None
-        self._pipeline_resources = None
         self._compute_graphs = None
         self._merged_index_keys = self._merged_index_scales = None
         self._dense_staging_allocated_bytes = 0
@@ -1113,4 +1113,4 @@ class DeepSeekServingBackend:
             "cache_budget_excludes": "weights, ordinary model activations and GEMM workspace",
             **self.parameter_counts,
         }
-        return self.pipeline.describe(result, self._pipeline_resources)
+        return result

@@ -1,0 +1,148 @@
+{
+  "cases": {
+    "echo": {
+      "capacity": {
+        "actual_device_pool_tokens": 65664,
+        "actual_host_pool_tokens": 16777216,
+        "actual_scheduler_token_capacity": 16777216,
+        "candidate_allowance_tokens": 128,
+        "case": "echo",
+        "device_allocator_padding_tokens": 1,
+        "passed": true,
+        "requested_comparison_quotas": {
+          "NH": 16777216,
+          "P": 65536
+        }
+      },
+      "files_sha256": {
+        "echo/report.json": "3b64fb520ef0fe23121b35593b79fcf6a9ad681f0171f496d5a51c628ab0abc5",
+        "echo/report.md": "0420b0d0122481eeb65054f68b8b774b871a3b95a1fa7d41e38d8ee43858c193",
+        "echo/requests.csv": "56024a1e5c633cd20697cfabff7ca53e30a2b91f9a9fd8b3f2867aae9404b261",
+        "echo/summary.csv": "38bbf033e3c56524dfefc829ffe4c762e5a06cb574986709080f2901d90f84c8"
+      },
+      "original_report_directory": "3rdparty/ECHO/reproduction/cxldsagr/report/first3_echo_perfonly_20261006_04",
+      "original_run_directory": "3rdparty/ECHO/reproduction/cxldsagr/output/data/first3_echo_perfonly_20261006_04",
+      "report_signature": "8053ad49165a4d21fba37c556b90bc0eb791765b2dc30bfe984222a05b40d69d",
+      "run_id": "first3_echo_perfonly_20261006_04",
+      "summaries": {
+        "all": {
+          "cached_token_counts": {
+            "0": 16,
+            "65536": 16
+          },
+          "cached_tokens_sum": 1048576,
+          "history_hit_fraction": 0.5,
+          "history_hits": 16,
+          "requests": 32,
+          "timed_requests_per_second": 0.9975476438401797,
+          "wall_ms_mean": 1002.458384995407,
+          "wall_ms_median": 989.3623305251822,
+          "wall_ms_p95": 1933.17815772607,
+          "wall_ms_sum": 32078.668319853023
+        },
+        "first_visit": {
+          "cached_token_counts": {
+            "0": 16
+          },
+          "cached_tokens_sum": 0,
+          "history_hit_fraction": 0.0,
+          "history_hits": 0,
+          "requests": 16,
+          "timed_requests_per_second": 0.5180226542350744,
+          "wall_ms_mean": 1930.4175055367523,
+          "wall_ms_median": 1906.8058875272982,
+          "wall_ms_p95": 2021.201860246947,
+          "wall_ms_sum": 30886.680088588037
+        },
+        "revisit": {
+          "cached_token_counts": {
+            "65536": 16
+          },
+          "cached_tokens_sum": 1048576,
+          "history_hit_fraction": 1.0,
+          "history_hits": 16,
+          "requests": 16,
+          "timed_requests_per_second": 13.422951318084872,
+          "wall_ms_mean": 74.49926445406163,
+          "wall_ms_median": 73.663248505909,
+          "wall_ms_p95": 80.04605051246472,
+          "wall_ms_sum": 1191.988231264986
+        }
+      }
+    },
+    "hbm": {
+      "capacity": {
+        "actual_device_pool_tokens": 131072,
+        "actual_host_pool_tokens": null,
+        "actual_scheduler_token_capacity": 131072,
+        "candidate_allowance_tokens": 128,
+        "case": "resident_reference",
+        "device_allocator_padding_tokens": 64,
+        "passed": true,
+        "requested_comparison_quotas": {
+          "NH": 16777216,
+          "P": 65536
+        }
+      },
+      "files_sha256": {
+        "hbm/report.json": "13b94c5724cbbc05ce3607e7f4ce6e9f9fa8ebc4c9123f06c55704671b230557",
+        "hbm/report.md": "1eee4e0b8e3ddb751da03d7a7ffd10596098ea09e219f3dcd7b512fd3d0b0076",
+        "hbm/requests.csv": "a778eee43c9c34c8f2b88dce4ddaf048373ef9b871c9463acdbca77a37950a70",
+        "hbm/summary.csv": "c206967958c148c71698ccf2da6d75356c8f8f455a493ea959101fa985f6e395"
+      },
+      "original_report_directory": "3rdparty/ECHO/reproduction/cxldsagr/report/first3_hbm_perfonly_20261006_01",
+      "original_run_directory": "3rdparty/ECHO/reproduction/cxldsagr/output/data/first3_hbm_perfonly_20261006_01",
+      "report_signature": "539fd4f8ec6ce1edc36f57d0a6c181d97e469755cb5921e1dd127ab60f011181",
+      "run_id": "first3_hbm_perfonly_20261006_01",
+      "summaries": {
+        "all": {
+          "cached_token_counts": {
+            "0": 32
+          },
+          "cached_tokens_sum": 0,
+          "history_hit_fraction": 0.0,
+          "history_hits": 0,
+          "requests": 32,
+          "timed_requests_per_second": 0.8124414671462934,
+          "wall_ms_mean": 1230.857902308344,
+          "wall_ms_median": 1220.1672395458445,
+          "wall_ms_p95": 1233.625754172681,
+          "wall_ms_sum": 39387.452873867005
+        },
+        "first_visit": {
+          "cached_token_counts": {
+            "0": 16
+          },
+          "cached_tokens_sum": 0,
+          "history_hit_fraction": 0.0,
+          "history_hits": 0,
+          "requests": 16,
+          "timed_requests_per_second": 0.8072079962139297,
+          "wall_ms_mean": 1238.838074808882,
+          "wall_ms_median": 1216.97290049633,
+          "wall_ms_p95": 1311.721000005491,
+          "wall_ms_sum": 19821.409196942113
+        },
+        "revisit": {
+          "cached_token_counts": {
+            "0": 16
+          },
+          "cached_tokens_sum": 0,
+          "history_hit_fraction": 0.0,
+          "history_hits": 0,
+          "requests": 16,
+          "timed_requests_per_second": 0.8177432425375557,
+          "wall_ms_mean": 1222.8777298078057,
+          "wall_ms_median": 1222.7149425889365,
+          "wall_ms_p95": 1229.7553584503476,
+          "wall_ms_sum": 19566.04367692489
+        }
+      }
+    }
+  },
+  "numerical_acceptance": false,
+  "reproduction_code_in_parent_git": false,
+  "schema": "official-sglang-performance-publication-v1",
+  "scope": "Original first three FP8 checkpoint layers; two independent official SGLang runs; performance only; unequal device/host capacities. No local framework ECHO adapter.",
+  "signature": "4d2c6e7fbf7686a3742ca9a1450099865bc1ee7e4bffa7efec1b85a89aa8eb58"
+}

@@ -1,0 +1,34 @@
+{
+  "records": {
+    "v9": {
+      "library": "/root/.cache/tvm-ffi/cxldsagr_echo_indexer_cecc0a32c849c656_1fa11185f6354333/cxldsagr_echo_indexer_cecc0a32c849c656.so",
+      "library_sha256": "d888ee0cb2aa864ed1dcde9dee5e814a2468ce57c643b19dc138141106f2568e",
+      "fatbin": "/tmp/resident_mask_native_payload_review_20261006_01/v9.nv_fatbin",
+      "fatbin_bytes": 1206848,
+      "fatbin_sha256": "0f1a2b6a5f1dba3ca45c519af99088eb5c75ce45df29f9804c93381191612494",
+      "command": [
+        "objcopy",
+        "--dump-section",
+        ".nv_fatbin=/tmp/resident_mask_native_payload_review_20261006_01/v9.nv_fatbin",
+        "/root/.cache/tvm-ffi/cxldsagr_echo_indexer_cecc0a32c849c656_1fa11185f6354333/cxldsagr_echo_indexer_cecc0a32c849c656.so",
+        "/tmp/resident_mask_native_payload_review_20261006_01/v9.elf"
+      ]
+    },
+    "v10": {
+      "library": "/root/.cache/tvm-ffi/cxldsagr_echo_indexer_c8f43b73bc3d148d_1fa11185f6354333/cxldsagr_echo_indexer_c8f43b73bc3d148d.so",
+      "library_sha256": "09165f76c0ef4a75067939afa1c071bb68b9e8bf28e229d27681cbefdb2e0a11",
+      "fatbin": "/tmp/resident_mask_native_payload_review_20261006_01/v10.nv_fatbin",
+      "fatbin_bytes": 1206848,
+      "fatbin_sha256": "0f1a2b6a5f1dba3ca45c519af99088eb5c75ce45df29f9804c93381191612494",
+      "command": [
+        "objcopy",
+        "--dump-section",
+        ".nv_fatbin=/tmp/resident_mask_native_payload_review_20261006_01/v10.nv_fatbin",
+        "/root/.cache/tvm-ffi/cxldsagr_echo_indexer_c8f43b73bc3d148d_1fa11185f6354333/cxldsagr_echo_indexer_c8f43b73bc3d148d.so",
+        "/tmp/resident_mask_native_payload_review_20261006_01/v10.elf"
+      ]
+    }
+  },
+  "fatbin_bitwise_equal": true,
+  "boundary": "Read-only comparison of two retained ELF CUDA payload sections; does not prove CPU wrapper code equivalence or a specific launch occurred."
+}

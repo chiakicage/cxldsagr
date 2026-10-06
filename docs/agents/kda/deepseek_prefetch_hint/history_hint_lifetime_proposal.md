@@ -3,8 +3,7 @@
 Status: CPU source proposal, 2026-10-04. No implementation, new test run or
 CUDA work. Root requested this bounded review while C9's formal trajectory
 and matching profile were pending. Priority depends on that profile. This
-proposal applies to `DeepSeekServingBackend`'s current ECHO path; it does not
-change the separate official ECHO hint policy.
+proposal applies to `DeepSeekServingBackend`'s local ECHO path.
 
 ## Finding and scope
 
@@ -79,8 +78,7 @@ resuming normal updates cannot reconstruct the omitted preceding hint.
 Reject or exclude unsupported interleaving before entering the context.
 
 Do not apply this policy to a populated-session extend, H>P, a standalone
-`EchoAttentionRunner`, a generic externally managed cache step or the separate
-`official_serving.py` path. Do not extend it to transient candidate hint
+`EchoAttentionRunner` or a generic externally managed cache step. Do not extend it to transient candidate hint
 updates in the same change. The caller knows the final history boundary;
 the low-level runner cannot infer that boundary from `prefetch is None`.
 

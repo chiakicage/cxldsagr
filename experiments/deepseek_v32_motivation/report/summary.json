@@ -7,7 +7,7 @@
       "CXLDSAGR_SM90_BACKEND": "native",
       "TRITON_PTXAS_BLACKWELL_PATH": "/usr/local/cuda/bin/ptxas"
     },
-    "run_id": "refactor_final_deepseek_bench_20261005_01",
+    "run_id": "deepseek_mfu_c10_bench_20261006_01",
     "status": "accepted",
     "config": {
       "num_users": 16,
@@ -54,16 +54,16 @@
         "started_empty": true,
         "resource_plan": {
           "compute_graphs_enabled": true,
-          "compute_graph_policy_revision": "deepseek-compute-islands-v2",
+          "compute_graph_policy_revision": "deepseek-compute-islands-v3-indexer-bounds",
           "compute_graph_query_sizes": [
             128,
             1024
           ],
           "compute_graph_count": 40,
-          "compute_graph_static_storage_bytes": 641820832,
-          "compute_graph_static_allocation_limit_bytes": 696356864,
+          "compute_graph_static_storage_bytes": 641866912,
+          "compute_graph_static_allocation_limit_bytes": 696402944,
           "compute_graph_private_limit_bytes": 12884901888,
-          "compute_graph_reserved_limit_bytes": 13581258752,
+          "compute_graph_reserved_limit_bytes": 13581304832,
           "compute_graph_private_limit_kind": "chosen_upper_limit_not_observed_fixed_overhead",
           "resource_mode": "fixed_pools",
           "cache_policy_revision": "echo-global-pages-fifo-v1",
@@ -91,7 +91,7 @@
           "backend": "cpython_native",
           "fallback_reason": null,
           "requested_native": true,
-          "fingerprint": "941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf",
+          "fingerprint": "b2417ad2f63b6e963d43135e555cf21a49a8ea00fc7a0eb868733c7e635dd080",
           "build_identity": {
             "schema_version": 1,
             "python": "3.12.13 (main, Jun 11 2026, 04:03:26) [Clang 22.1.3 ]",
@@ -123,7 +123,7 @@
               "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/serving/csrc/token_validation.cpp"
             ],
             "compiler_environment": {
-              "PATH": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin:/usr/local/cuda/bin:/usr/local/bin:/usr/bin:/bin",
+              "PATH": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin:/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin:/usr/local/cuda/bin:/usr/local/bin:/usr/bin:/bin",
               "LC_ALL": "C"
             },
             "source_and_dependency_sha256": {
@@ -438,11 +438,11 @@
               "/usr/libexec/gcc/x86_64-linux-gnu/13/collect2": "4d1f341ae5b763b513258ee2812422a45e063c30a2f1924a0cf63d3699f3a158"
             }
           },
-          "loaded_binary_path": "/root/.cache/cxldsagr/token-validation/941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so",
+          "loaded_binary_path": "/root/.cache/cxldsagr/token-validation/b2417ad2f63b6e963d43135e555cf21a49a8ea00fc7a0eb868733c7e635dd080/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so",
           "loaded_binary_sha256": "ed79d3e717a464379b4f638f608853277b65f602ef05ca5b293e3afa6025cd40"
         },
         "shared_reservation": {
-          "hbm": 14804443648,
+          "hbm": 14804489728,
           "dram": 40
         },
         "admission_page_capacity": 0,
@@ -470,19 +470,19 @@
           "linear_backend": "fp8",
           "compute_graphs": {
             "enabled": true,
-            "policy_revision": "deepseek-compute-islands-v2",
+            "policy_revision": "deepseek-compute-islands-v3-indexer-bounds",
             "allocated": true,
-            "static_storage_bytes": 641820832,
-            "static_allocated_bytes": 644173824,
+            "static_storage_bytes": 641866912,
+            "static_allocated_bytes": 644219904,
             "private_reserved_bytes": 5603590144,
             "chosen_private_limit_bytes": 12884901888,
             "memory_at_allocation": {
-              "pytorch_allocated": 12837470720,
+              "pytorch_allocated": 12837562880,
               "pytorch_reserved": 16210984960,
               "device_used": 17006919680,
               "device_total": 150121545728
             },
-            "setup_seconds": 0.26791889301966876,
+            "setup_seconds": 0.27139573090244085,
             "eager_fallbacks": 0,
             "captured_precision_policy": {
               "float32_matmul_precision": "highest",
@@ -651,16 +651,16 @@
           "extend_chunk_size": null,
           "resource_plan": {
             "compute_graphs_enabled": true,
-            "compute_graph_policy_revision": "deepseek-compute-islands-v2",
+            "compute_graph_policy_revision": "deepseek-compute-islands-v3-indexer-bounds",
             "compute_graph_query_sizes": [
               128,
               1024
             ],
             "compute_graph_count": 40,
-            "compute_graph_static_storage_bytes": 641820832,
-            "compute_graph_static_allocation_limit_bytes": 696356864,
+            "compute_graph_static_storage_bytes": 641866912,
+            "compute_graph_static_allocation_limit_bytes": 696402944,
             "compute_graph_private_limit_bytes": 12884901888,
-            "compute_graph_reserved_limit_bytes": 13581258752,
+            "compute_graph_reserved_limit_bytes": 13581304832,
             "compute_graph_private_limit_kind": "chosen_upper_limit_not_observed_fixed_overhead",
             "resource_mode": "fixed_pools",
             "cache_policy_revision": "echo-global-pages-fifo-v1",
@@ -701,11 +701,11 @@
           "endpoint_parameters": 1853365248,
           "total_parameters": 7827793408
         },
-        "torch_peak_allocated_bytes": 15587798528,
+        "torch_peak_allocated_bytes": 15587890688,
         "torch_peak_reserved_bytes": 25377636352,
         "before_cache_allocation": {
           "stage": "hbm/before_cache_allocation",
-          "unix_time": 1791151419.8396976,
+          "unix_time": 1791218290.6508327,
           "cuda_free_bytes": 139351556096,
           "cuda_total_bytes": 150121545728,
           "torch_allocated_bytes": 9901661184,
@@ -729,11 +729,11 @@
             "allocations.current": 1,
             "allocations.freed": 0,
             "allocations.peak": 1,
-            "host_alloc_time.avg": 176,
+            "host_alloc_time.avg": 175,
             "host_alloc_time.count": 1,
-            "host_alloc_time.max": 176,
-            "host_alloc_time.min": 176,
-            "host_alloc_time.total": 176,
+            "host_alloc_time.max": 175,
+            "host_alloc_time.min": 175,
+            "host_alloc_time.total": 175,
             "host_free_time.avg": 0,
             "host_free_time.count": 0,
             "host_free_time.max": 0,
@@ -742,10 +742,10 @@
             "num_host_alloc": 1,
             "num_host_free": 0
           },
-          "process_max_rss_bytes": 2938880000
+          "process_max_rss_bytes": 2939363328
         },
         "native_artifacts_before": {
-          "/root/.cache/cxldsagr/token-validation/941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so": {
+          "/root/.cache/cxldsagr/token-validation/b2417ad2f63b6e963d43135e555cf21a49a8ea00fc7a0eb868733c7e635dd080/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so": {
             "size": 16456,
             "sha256": "ed79d3e717a464379b4f638f608853277b65f602ef05ca5b293e3afa6025cd40"
           },
@@ -827,7 +827,7 @@
           }
         },
         "native_artifacts_after": {
-          "/root/.cache/cxldsagr/token-validation/941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so": {
+          "/root/.cache/cxldsagr/token-validation/b2417ad2f63b6e963d43135e555cf21a49a8ea00fc7a0eb868733c7e635dd080/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so": {
             "size": 16456,
             "sha256": "ed79d3e717a464379b4f638f608853277b65f602ef05ca5b293e3afa6025cd40"
           },
@@ -921,16 +921,16 @@
         "started_empty": true,
         "resource_plan": {
           "compute_graphs_enabled": true,
-          "compute_graph_policy_revision": "deepseek-compute-islands-v2",
+          "compute_graph_policy_revision": "deepseek-compute-islands-v3-indexer-bounds",
           "compute_graph_query_sizes": [
             128,
             1024
           ],
           "compute_graph_count": 40,
-          "compute_graph_static_storage_bytes": 641820832,
-          "compute_graph_static_allocation_limit_bytes": 696356864,
+          "compute_graph_static_storage_bytes": 641866912,
+          "compute_graph_static_allocation_limit_bytes": 696402944,
           "compute_graph_private_limit_bytes": 12884901888,
-          "compute_graph_reserved_limit_bytes": 13581258752,
+          "compute_graph_reserved_limit_bytes": 13581304832,
           "compute_graph_private_limit_kind": "chosen_upper_limit_not_observed_fixed_overhead",
           "cache_policy_revision": "echo-global-pages-fifo-v1",
           "resource_mode": "fixed_pools",
@@ -953,13 +953,14 @@
           "workspace_cpu_metrics_bytes": 24,
           "workspace_cpu_bytes": 40,
           "workspace_metadata_bytes": 1077936192,
+          "workspace_dense_ticket_bytes": 0,
           "max_inflight_writes": 2
         },
         "token_validation": {
           "backend": "cpython_native",
           "fallback_reason": null,
           "requested_native": true,
-          "fingerprint": "941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf",
+          "fingerprint": "b2417ad2f63b6e963d43135e555cf21a49a8ea00fc7a0eb868733c7e635dd080",
           "build_identity": {
             "schema_version": 1,
             "python": "3.12.13 (main, Jun 11 2026, 04:03:26) [Clang 22.1.3 ]",
@@ -991,7 +992,7 @@
               "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/serving/csrc/token_validation.cpp"
             ],
             "compiler_environment": {
-              "PATH": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin:/usr/local/cuda/bin:/usr/local/bin:/usr/bin:/bin",
+              "PATH": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin:/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin:/usr/local/cuda/bin:/usr/local/bin:/usr/bin:/bin",
               "LC_ALL": "C"
             },
             "source_and_dependency_sha256": {
@@ -1306,11 +1307,11 @@
               "/usr/libexec/gcc/x86_64-linux-gnu/13/collect2": "4d1f341ae5b763b513258ee2812422a45e063c30a2f1924a0cf63d3699f3a158"
             }
           },
-          "loaded_binary_path": "/root/.cache/cxldsagr/token-validation/941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so",
+          "loaded_binary_path": "/root/.cache/cxldsagr/token-validation/b2417ad2f63b6e963d43135e555cf21a49a8ea00fc7a0eb868733c7e635dd080/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so",
           "loaded_binary_sha256": "ed79d3e717a464379b4f638f608853277b65f602ef05ca5b293e3afa6025cd40"
         },
         "shared_reservation": {
-          "hbm": 17327632502,
+          "hbm": 17327678582,
           "dram": 343598432296
         },
         "admission_page_capacity": 262144,
@@ -1338,19 +1339,19 @@
           "linear_backend": "fp8",
           "compute_graphs": {
             "enabled": true,
-            "policy_revision": "deepseek-compute-islands-v2",
+            "policy_revision": "deepseek-compute-islands-v3-indexer-bounds",
             "allocated": true,
-            "static_storage_bytes": 641820832,
-            "static_allocated_bytes": 644535296,
+            "static_storage_bytes": 641866912,
+            "static_allocated_bytes": 644581376,
             "private_reserved_bytes": 5603590144,
             "chosen_private_limit_bytes": 12884901888,
             "memory_at_allocation": {
-              "pytorch_allocated": 14283111424,
+              "pytorch_allocated": 14283203584,
               "pytorch_reserved": 17668505600,
-              "device_used": 19139723264,
+              "device_used": 19137626112,
               "device_total": 150121545728
             },
-            "setup_seconds": 0.269438200048171,
+            "setup_seconds": 0.2780435320455581,
             "eager_fallbacks": 0,
             "captured_precision_policy": {
               "float32_matmul_precision": "highest",
@@ -1519,16 +1520,16 @@
           "extend_chunk_size": null,
           "resource_plan": {
             "compute_graphs_enabled": true,
-            "compute_graph_policy_revision": "deepseek-compute-islands-v2",
+            "compute_graph_policy_revision": "deepseek-compute-islands-v3-indexer-bounds",
             "compute_graph_query_sizes": [
               128,
               1024
             ],
             "compute_graph_count": 40,
-            "compute_graph_static_storage_bytes": 641820832,
-            "compute_graph_static_allocation_limit_bytes": 696356864,
+            "compute_graph_static_storage_bytes": 641866912,
+            "compute_graph_static_allocation_limit_bytes": 696402944,
             "compute_graph_private_limit_bytes": 12884901888,
-            "compute_graph_reserved_limit_bytes": 13581258752,
+            "compute_graph_reserved_limit_bytes": 13581304832,
             "compute_graph_private_limit_kind": "chosen_upper_limit_not_observed_fixed_overhead",
             "cache_policy_revision": "echo-global-pages-fifo-v1",
             "resource_mode": "fixed_pools",
@@ -1551,6 +1552,7 @@
             "workspace_cpu_metrics_bytes": 24,
             "workspace_cpu_bytes": 40,
             "workspace_metadata_bytes": 1077936192,
+            "workspace_dense_ticket_bytes": 0,
             "max_inflight_writes": 2
           },
           "dense_staging_allocated_bytes": 0,
@@ -1570,51 +1572,51 @@
           "endpoint_parameters": 1853365248,
           "total_parameters": 7827793408
         },
-        "torch_peak_allocated_bytes": 17563369472,
+        "torch_peak_allocated_bytes": 17563461632,
         "torch_peak_reserved_bytes": 26088570880,
         "before_cache_allocation": {
           "stage": "echo/before_cache_allocation",
-          "unix_time": 1791151532.0095432,
-          "cuda_free_bytes": 138676273152,
+          "unix_time": 1791218408.3002222,
+          "cuda_free_bytes": 138678370304,
           "cuda_total_bytes": 150121545728,
           "torch_allocated_bytes": 9901661184,
           "torch_reserved_bytes": 9974054912,
           "torch_peak_allocated_bytes": 9901661184,
           "torch_peak_reserved_bytes": 9974054912,
           "host_allocator_counters": {
-            "active_bytes.allocated": 343597384920,
-            "active_bytes.current": 343597384920,
+            "active_bytes.allocated": 343597384880,
+            "active_bytes.current": 343597384880,
             "active_bytes.freed": 0,
-            "active_bytes.peak": 343597384920,
-            "active_requests.allocated": 170,
-            "active_requests.current": 170,
+            "active_bytes.peak": 343597384880,
+            "active_requests.allocated": 160,
+            "active_requests.current": 160,
             "active_requests.freed": 0,
-            "active_requests.peak": 170,
-            "allocated_bytes.allocated": 343597383708,
-            "allocated_bytes.current": 343597383692,
+            "active_requests.peak": 160,
+            "allocated_bytes.allocated": 343597383704,
+            "allocated_bytes.current": 343597383688,
             "allocated_bytes.freed": 16,
-            "allocated_bytes.peak": 343597383692,
-            "allocations.allocated": 14,
-            "allocations.current": 12,
+            "allocated_bytes.peak": 343597383688,
+            "allocations.allocated": 13,
+            "allocations.current": 11,
             "allocations.freed": 2,
-            "allocations.peak": 12,
-            "host_alloc_time.avg": 2321838,
-            "host_alloc_time.count": 14,
-            "host_alloc_time.max": 3558273,
-            "host_alloc_time.min": 140,
-            "host_alloc_time.total": 32505737,
-            "host_free_time.avg": 73,
+            "allocations.peak": 11,
+            "host_alloc_time.avg": 2959459,
+            "host_alloc_time.count": 13,
+            "host_alloc_time.max": 5054714,
+            "host_alloc_time.min": 150,
+            "host_alloc_time.total": 38472979,
+            "host_free_time.avg": 76,
             "host_free_time.count": 2,
             "host_free_time.max": 78,
-            "host_free_time.min": 68,
-            "host_free_time.total": 146,
-            "num_host_alloc": 14,
+            "host_free_time.min": 74,
+            "host_free_time.total": 152,
+            "num_host_alloc": 13,
             "num_host_free": 2
           },
-          "process_max_rss_bytes": 345687289856
+          "process_max_rss_bytes": 345688588288
         },
         "native_artifacts_before": {
-          "/root/.cache/cxldsagr/token-validation/941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so": {
+          "/root/.cache/cxldsagr/token-validation/b2417ad2f63b6e963d43135e555cf21a49a8ea00fc7a0eb868733c7e635dd080/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so": {
             "size": 16456,
             "sha256": "ed79d3e717a464379b4f638f608853277b65f602ef05ca5b293e3afa6025cd40"
           },
@@ -1630,13 +1632,13 @@
             "size": 5962688,
             "sha256": "a63d4dfe772493fd9cbc6e65ec9fa92ab77564ab30ef8aef4a6f0b1dec47ffa8"
           },
-          "/root/.cache/tvm-ffi/cxldsagr_echo_indexer_513a53c54269f9bc_1fa11185f6354333/cxldsagr_echo_indexer_513a53c54269f9bc.so": {
-            "size": 1444432,
-            "sha256": "eafdc421b8227425371bba8258894111096228f2e61e68c40394a85f5fc2cfa4"
+          "/root/.cache/tvm-ffi/cxldsagr_echo_indexer_58f8d78829f56eee_1fa11185f6354333/cxldsagr_echo_indexer_58f8d78829f56eee.so": {
+            "size": 1572544,
+            "sha256": "e66cc5d95b3277110cbb4007b76da5c722d5863530259b371b5dbd4442a22401"
           },
           "/root/.cache/tvm-ffi/cxldsagr_kv_transfer_672412fcb6ae32f3/cxldsagr_kv_transfer.so": {
-            "size": 78752,
-            "sha256": "fa7cd702d5a267e711e2caa997784d7534497830e47e1c7ae757a1ed4e8cee86"
+            "size": 147368,
+            "sha256": "e282691a0b88a35d67eefd22f3e9a8d059c0d4258f1ff8780ac4803ff8f44964"
           },
           "/root/.venv/lib/python3.12/site-packages/nvidia/cu13/lib/libcublas.so.13": {
             "size": 54177976,
@@ -1704,7 +1706,7 @@
           }
         },
         "native_artifacts_after": {
-          "/root/.cache/cxldsagr/token-validation/941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so": {
+          "/root/.cache/cxldsagr/token-validation/b2417ad2f63b6e963d43135e555cf21a49a8ea00fc7a0eb868733c7e635dd080/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so": {
             "size": 16456,
             "sha256": "ed79d3e717a464379b4f638f608853277b65f602ef05ca5b293e3afa6025cd40"
           },
@@ -1720,13 +1722,13 @@
             "size": 5962688,
             "sha256": "a63d4dfe772493fd9cbc6e65ec9fa92ab77564ab30ef8aef4a6f0b1dec47ffa8"
           },
-          "/root/.cache/tvm-ffi/cxldsagr_echo_indexer_513a53c54269f9bc_1fa11185f6354333/cxldsagr_echo_indexer_513a53c54269f9bc.so": {
-            "size": 1444432,
-            "sha256": "eafdc421b8227425371bba8258894111096228f2e61e68c40394a85f5fc2cfa4"
+          "/root/.cache/tvm-ffi/cxldsagr_echo_indexer_58f8d78829f56eee_1fa11185f6354333/cxldsagr_echo_indexer_58f8d78829f56eee.so": {
+            "size": 1572544,
+            "sha256": "e66cc5d95b3277110cbb4007b76da5c722d5863530259b371b5dbd4442a22401"
           },
           "/root/.cache/tvm-ffi/cxldsagr_kv_transfer_672412fcb6ae32f3/cxldsagr_kv_transfer.so": {
-            "size": 78752,
-            "sha256": "fa7cd702d5a267e711e2caa997784d7534497830e47e1c7ae757a1ed4e8cee86"
+            "size": 147368,
+            "sha256": "e282691a0b88a35d67eefd22f3e9a8d059c0d4258f1ff8780ac4803ff8f44964"
           },
           "/root/.venv/lib/python3.12/site-packages/nvidia/cu13/lib/libcublas.so.13": {
             "size": 54177976,
@@ -1806,16 +1808,16 @@
         "started_empty": true,
         "resource_plan": {
           "compute_graphs_enabled": true,
-          "compute_graph_policy_revision": "deepseek-compute-islands-v2",
+          "compute_graph_policy_revision": "deepseek-compute-islands-v3-indexer-bounds",
           "compute_graph_query_sizes": [
             128,
             1024
           ],
           "compute_graph_count": 40,
-          "compute_graph_static_storage_bytes": 641820832,
-          "compute_graph_static_allocation_limit_bytes": 696356864,
+          "compute_graph_static_storage_bytes": 641866912,
+          "compute_graph_static_allocation_limit_bytes": 696402944,
           "compute_graph_private_limit_bytes": 12884901888,
-          "compute_graph_reserved_limit_bytes": 13581258752,
+          "compute_graph_reserved_limit_bytes": 13581304832,
           "compute_graph_private_limit_kind": "chosen_upper_limit_not_observed_fixed_overhead",
           "cache_policy_revision": "echo-global-pages-fifo-v1",
           "resource_mode": "fixed_pools",
@@ -1838,13 +1840,14 @@
           "workspace_cpu_metrics_bytes": 24,
           "workspace_cpu_bytes": 40,
           "workspace_metadata_bytes": 1077936192,
+          "workspace_dense_ticket_bytes": 0,
           "max_inflight_writes": 2
         },
         "token_validation": {
           "backend": "cpython_native",
           "fallback_reason": null,
           "requested_native": true,
-          "fingerprint": "941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf",
+          "fingerprint": "b2417ad2f63b6e963d43135e555cf21a49a8ea00fc7a0eb868733c7e635dd080",
           "build_identity": {
             "schema_version": 1,
             "python": "3.12.13 (main, Jun 11 2026, 04:03:26) [Clang 22.1.3 ]",
@@ -1876,7 +1879,7 @@
               "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/serving/csrc/token_validation.cpp"
             ],
             "compiler_environment": {
-              "PATH": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin:/usr/local/cuda/bin:/usr/local/bin:/usr/bin:/bin",
+              "PATH": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin:/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin:/usr/local/cuda/bin:/usr/local/bin:/usr/bin:/bin",
               "LC_ALL": "C"
             },
             "source_and_dependency_sha256": {
@@ -2191,11 +2194,11 @@
               "/usr/libexec/gcc/x86_64-linux-gnu/13/collect2": "4d1f341ae5b763b513258ee2812422a45e063c30a2f1924a0cf63d3699f3a158"
             }
           },
-          "loaded_binary_path": "/root/.cache/cxldsagr/token-validation/941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so",
+          "loaded_binary_path": "/root/.cache/cxldsagr/token-validation/b2417ad2f63b6e963d43135e555cf21a49a8ea00fc7a0eb868733c7e635dd080/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so",
           "loaded_binary_sha256": "ed79d3e717a464379b4f638f608853277b65f602ef05ca5b293e3afa6025cd40"
         },
         "shared_reservation": {
-          "hbm": 17327632502,
+          "hbm": 17327678582,
           "dram": 343598432296
         },
         "admission_page_capacity": 262144,
@@ -2223,19 +2226,19 @@
           "linear_backend": "fp8",
           "compute_graphs": {
             "enabled": true,
-            "policy_revision": "deepseek-compute-islands-v2",
+            "policy_revision": "deepseek-compute-islands-v3-indexer-bounds",
             "allocated": true,
-            "static_storage_bytes": 641820832,
-            "static_allocated_bytes": 644535296,
+            "static_storage_bytes": 641866912,
+            "static_allocated_bytes": 644581376,
             "private_reserved_bytes": 5603590144,
             "chosen_private_limit_bytes": 12884901888,
             "memory_at_allocation": {
-              "pytorch_allocated": 14283111424,
+              "pytorch_allocated": 14283203584,
               "pytorch_reserved": 17668505600,
-              "device_used": 19139723264,
+              "device_used": 19137626112,
               "device_total": 150121545728
             },
-            "setup_seconds": 0.2692219540476799,
+            "setup_seconds": 0.2763415799709037,
             "eager_fallbacks": 0,
             "captured_precision_policy": {
               "float32_matmul_precision": "highest",
@@ -2404,16 +2407,16 @@
           "extend_chunk_size": null,
           "resource_plan": {
             "compute_graphs_enabled": true,
-            "compute_graph_policy_revision": "deepseek-compute-islands-v2",
+            "compute_graph_policy_revision": "deepseek-compute-islands-v3-indexer-bounds",
             "compute_graph_query_sizes": [
               128,
               1024
             ],
             "compute_graph_count": 40,
-            "compute_graph_static_storage_bytes": 641820832,
-            "compute_graph_static_allocation_limit_bytes": 696356864,
+            "compute_graph_static_storage_bytes": 641866912,
+            "compute_graph_static_allocation_limit_bytes": 696402944,
             "compute_graph_private_limit_bytes": 12884901888,
-            "compute_graph_reserved_limit_bytes": 13581258752,
+            "compute_graph_reserved_limit_bytes": 13581304832,
             "compute_graph_private_limit_kind": "chosen_upper_limit_not_observed_fixed_overhead",
             "cache_policy_revision": "echo-global-pages-fifo-v1",
             "resource_mode": "fixed_pools",
@@ -2436,6 +2439,7 @@
             "workspace_cpu_metrics_bytes": 24,
             "workspace_cpu_bytes": 40,
             "workspace_metadata_bytes": 1077936192,
+            "workspace_dense_ticket_bytes": 0,
             "max_inflight_writes": 2
           },
           "dense_staging_allocated_bytes": 0,
@@ -2455,51 +2459,51 @@
           "endpoint_parameters": 1853365248,
           "total_parameters": 7827793408
         },
-        "torch_peak_allocated_bytes": 17565007872,
+        "torch_peak_allocated_bytes": 17565100032,
         "torch_peak_reserved_bytes": 26088570880,
         "before_cache_allocation": {
           "stage": "serial_sparse/before_cache_allocation",
-          "unix_time": 1791151578.148397,
-          "cuda_free_bytes": 138676273152,
+          "unix_time": 1791218458.6577168,
+          "cuda_free_bytes": 138678370304,
           "cuda_total_bytes": 150121545728,
           "torch_allocated_bytes": 9901661184,
           "torch_reserved_bytes": 9974054912,
           "torch_peak_allocated_bytes": 9901661184,
           "torch_peak_reserved_bytes": 9974054912,
           "host_allocator_counters": {
-            "active_bytes.allocated": 1030792153808,
-            "active_bytes.current": 1030792153828,
+            "active_bytes.allocated": 1030792153088,
+            "active_bytes.current": 1030792153108,
             "active_bytes.freed": -20,
-            "active_bytes.peak": 1030792153828,
-            "active_requests.allocated": 466,
-            "active_requests.current": 446,
+            "active_bytes.peak": 1030792153108,
+            "active_requests.allocated": 286,
+            "active_requests.current": 266,
             "active_requests.freed": 20,
-            "active_requests.peak": 446,
-            "allocated_bytes.allocated": 343597383732,
-            "allocated_bytes.current": 343597383692,
-            "allocated_bytes.freed": 40,
-            "allocated_bytes.peak": 343597383692,
-            "allocations.allocated": 18,
-            "allocations.current": 12,
-            "allocations.freed": 6,
-            "allocations.peak": 12,
-            "host_alloc_time.avg": 1805919,
-            "host_alloc_time.count": 18,
-            "host_alloc_time.max": 3558273,
-            "host_alloc_time.min": 140,
-            "host_alloc_time.total": 32506543,
-            "host_free_time.avg": 66,
-            "host_free_time.count": 6,
-            "host_free_time.max": 80,
-            "host_free_time.min": 46,
-            "host_free_time.total": 399,
-            "num_host_alloc": 18,
-            "num_host_free": 6
+            "active_requests.peak": 266,
+            "allocated_bytes.allocated": 343597383720,
+            "allocated_bytes.current": 343597383688,
+            "allocated_bytes.freed": 32,
+            "allocated_bytes.peak": 343597383688,
+            "allocations.allocated": 15,
+            "allocations.current": 11,
+            "allocations.freed": 4,
+            "allocations.peak": 11,
+            "host_alloc_time.avg": 2564887,
+            "host_alloc_time.count": 15,
+            "host_alloc_time.max": 5054714,
+            "host_alloc_time.min": 150,
+            "host_alloc_time.total": 38473310,
+            "host_free_time.avg": 78,
+            "host_free_time.count": 4,
+            "host_free_time.max": 84,
+            "host_free_time.min": 74,
+            "host_free_time.total": 314,
+            "num_host_alloc": 15,
+            "num_host_free": 4
           },
-          "process_max_rss_bytes": 345700466688
+          "process_max_rss_bytes": 345700483072
         },
         "native_artifacts_before": {
-          "/root/.cache/cxldsagr/token-validation/941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so": {
+          "/root/.cache/cxldsagr/token-validation/b2417ad2f63b6e963d43135e555cf21a49a8ea00fc7a0eb868733c7e635dd080/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so": {
             "size": 16456,
             "sha256": "ed79d3e717a464379b4f638f608853277b65f602ef05ca5b293e3afa6025cd40"
           },
@@ -2515,13 +2519,13 @@
             "size": 5962688,
             "sha256": "a63d4dfe772493fd9cbc6e65ec9fa92ab77564ab30ef8aef4a6f0b1dec47ffa8"
           },
-          "/root/.cache/tvm-ffi/cxldsagr_echo_indexer_513a53c54269f9bc_1fa11185f6354333/cxldsagr_echo_indexer_513a53c54269f9bc.so": {
-            "size": 1444432,
-            "sha256": "eafdc421b8227425371bba8258894111096228f2e61e68c40394a85f5fc2cfa4"
+          "/root/.cache/tvm-ffi/cxldsagr_echo_indexer_58f8d78829f56eee_1fa11185f6354333/cxldsagr_echo_indexer_58f8d78829f56eee.so": {
+            "size": 1572544,
+            "sha256": "e66cc5d95b3277110cbb4007b76da5c722d5863530259b371b5dbd4442a22401"
           },
           "/root/.cache/tvm-ffi/cxldsagr_kv_transfer_672412fcb6ae32f3/cxldsagr_kv_transfer.so": {
-            "size": 78752,
-            "sha256": "fa7cd702d5a267e711e2caa997784d7534497830e47e1c7ae757a1ed4e8cee86"
+            "size": 147368,
+            "sha256": "e282691a0b88a35d67eefd22f3e9a8d059c0d4258f1ff8780ac4803ff8f44964"
           },
           "/root/.venv/lib/python3.12/site-packages/nvidia/cu13/lib/libcublas.so.13": {
             "size": 54177976,
@@ -2589,7 +2593,7 @@
           }
         },
         "native_artifacts_after": {
-          "/root/.cache/cxldsagr/token-validation/941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so": {
+          "/root/.cache/cxldsagr/token-validation/b2417ad2f63b6e963d43135e555cf21a49a8ea00fc7a0eb868733c7e635dd080/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so": {
             "size": 16456,
             "sha256": "ed79d3e717a464379b4f638f608853277b65f602ef05ca5b293e3afa6025cd40"
           },
@@ -2605,13 +2609,13 @@
             "size": 5962688,
             "sha256": "a63d4dfe772493fd9cbc6e65ec9fa92ab77564ab30ef8aef4a6f0b1dec47ffa8"
           },
-          "/root/.cache/tvm-ffi/cxldsagr_echo_indexer_513a53c54269f9bc_1fa11185f6354333/cxldsagr_echo_indexer_513a53c54269f9bc.so": {
-            "size": 1444432,
-            "sha256": "eafdc421b8227425371bba8258894111096228f2e61e68c40394a85f5fc2cfa4"
+          "/root/.cache/tvm-ffi/cxldsagr_echo_indexer_58f8d78829f56eee_1fa11185f6354333/cxldsagr_echo_indexer_58f8d78829f56eee.so": {
+            "size": 1572544,
+            "sha256": "e66cc5d95b3277110cbb4007b76da5c722d5863530259b371b5dbd4442a22401"
           },
           "/root/.cache/tvm-ffi/cxldsagr_kv_transfer_672412fcb6ae32f3/cxldsagr_kv_transfer.so": {
-            "size": 78752,
-            "sha256": "fa7cd702d5a267e711e2caa997784d7534497830e47e1c7ae757a1ed4e8cee86"
+            "size": 147368,
+            "sha256": "e282691a0b88a35d67eefd22f3e9a8d059c0d4258f1ff8780ac4803ff8f44964"
           },
           "/root/.venv/lib/python3.12/site-packages/nvidia/cu13/lib/libcublas.so.13": {
             "size": 54177976,
@@ -2691,16 +2695,16 @@
         "started_empty": true,
         "resource_plan": {
           "compute_graphs_enabled": true,
-          "compute_graph_policy_revision": "deepseek-compute-islands-v2",
+          "compute_graph_policy_revision": "deepseek-compute-islands-v3-indexer-bounds",
           "compute_graph_query_sizes": [
             128,
             1024
           ],
           "compute_graph_count": 40,
-          "compute_graph_static_storage_bytes": 641820832,
-          "compute_graph_static_allocation_limit_bytes": 696356864,
+          "compute_graph_static_storage_bytes": 641866912,
+          "compute_graph_static_allocation_limit_bytes": 696402944,
           "compute_graph_private_limit_bytes": 12884901888,
-          "compute_graph_reserved_limit_bytes": 13581258752,
+          "compute_graph_reserved_limit_bytes": 13581304832,
           "compute_graph_private_limit_kind": "chosen_upper_limit_not_observed_fixed_overhead",
           "cache_policy_revision": "echo-global-pages-fifo-v1",
           "resource_mode": "fixed_pools",
@@ -2723,13 +2727,14 @@
           "workspace_cpu_metrics_bytes": 24,
           "workspace_cpu_bytes": 40,
           "workspace_metadata_bytes": 1077936192,
+          "workspace_dense_ticket_bytes": 10491392,
           "max_inflight_writes": 2
         },
         "token_validation": {
           "backend": "cpython_native",
           "fallback_reason": null,
           "requested_native": true,
-          "fingerprint": "941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf",
+          "fingerprint": "b2417ad2f63b6e963d43135e555cf21a49a8ea00fc7a0eb868733c7e635dd080",
           "build_identity": {
             "schema_version": 1,
             "python": "3.12.13 (main, Jun 11 2026, 04:03:26) [Clang 22.1.3 ]",
@@ -2761,7 +2766,7 @@
               "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/serving/csrc/token_validation.cpp"
             ],
             "compiler_environment": {
-              "PATH": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin:/usr/local/cuda/bin:/usr/local/bin:/usr/bin:/bin",
+              "PATH": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin:/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin:/usr/local/cuda/bin:/usr/local/bin:/usr/bin:/bin",
               "LC_ALL": "C"
             },
             "source_and_dependency_sha256": {
@@ -3076,11 +3081,11 @@
               "/usr/libexec/gcc/x86_64-linux-gnu/13/collect2": "4d1f341ae5b763b513258ee2812422a45e063c30a2f1924a0cf63d3699f3a158"
             }
           },
-          "loaded_binary_path": "/root/.cache/cxldsagr/token-validation/941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so",
+          "loaded_binary_path": "/root/.cache/cxldsagr/token-validation/b2417ad2f63b6e963d43135e555cf21a49a8ea00fc7a0eb868733c7e635dd080/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so",
           "loaded_binary_sha256": "ed79d3e717a464379b4f638f608853277b65f602ef05ca5b293e3afa6025cd40"
         },
         "shared_reservation": {
-          "hbm": 17327632502,
+          "hbm": 17338169974,
           "dram": 343598432296
         },
         "admission_page_capacity": 262144,
@@ -3108,19 +3113,19 @@
           "linear_backend": "fp8",
           "compute_graphs": {
             "enabled": true,
-            "policy_revision": "deepseek-compute-islands-v2",
+            "policy_revision": "deepseek-compute-islands-v3-indexer-bounds",
             "allocated": true,
-            "static_storage_bytes": 641820832,
-            "static_allocated_bytes": 644535296,
+            "static_storage_bytes": 641866912,
+            "static_allocated_bytes": 644581376,
             "private_reserved_bytes": 5603590144,
             "chosen_private_limit_bytes": 12884901888,
             "memory_at_allocation": {
-              "pytorch_allocated": 14283111424,
+              "pytorch_allocated": 14283203584,
               "pytorch_reserved": 17668505600,
               "device_used": 19139723264,
               "device_total": 150121545728
             },
-            "setup_seconds": 0.29940866597462445,
+            "setup_seconds": 0.31441827199887484,
             "eager_fallbacks": 0,
             "captured_precision_policy": {
               "float32_matmul_precision": "highest",
@@ -3289,16 +3294,16 @@
           "extend_chunk_size": null,
           "resource_plan": {
             "compute_graphs_enabled": true,
-            "compute_graph_policy_revision": "deepseek-compute-islands-v2",
+            "compute_graph_policy_revision": "deepseek-compute-islands-v3-indexer-bounds",
             "compute_graph_query_sizes": [
               128,
               1024
             ],
             "compute_graph_count": 40,
-            "compute_graph_static_storage_bytes": 641820832,
-            "compute_graph_static_allocation_limit_bytes": 696356864,
+            "compute_graph_static_storage_bytes": 641866912,
+            "compute_graph_static_allocation_limit_bytes": 696402944,
             "compute_graph_private_limit_bytes": 12884901888,
-            "compute_graph_reserved_limit_bytes": 13581258752,
+            "compute_graph_reserved_limit_bytes": 13581304832,
             "compute_graph_private_limit_kind": "chosen_upper_limit_not_observed_fixed_overhead",
             "cache_policy_revision": "echo-global-pages-fifo-v1",
             "resource_mode": "fixed_pools",
@@ -3321,6 +3326,7 @@
             "workspace_cpu_metrics_bytes": 24,
             "workspace_cpu_bytes": 40,
             "workspace_metadata_bytes": 1077936192,
+            "workspace_dense_ticket_bytes": 10491392,
             "max_inflight_writes": 2
           },
           "dense_staging_allocated_bytes": 0,
@@ -3340,11 +3346,11 @@
           "endpoint_parameters": 1853365248,
           "total_parameters": 7827793408
         },
-        "torch_peak_allocated_bytes": 17565007872,
+        "torch_peak_allocated_bytes": 17565100032,
         "torch_peak_reserved_bytes": 26096959488,
         "before_cache_allocation": {
           "stage": "dense_prefetch/before_cache_allocation",
-          "unix_time": 1791151623.3843431,
+          "unix_time": 1791218503.7621026,
           "cuda_free_bytes": 138676273152,
           "cuda_total_bytes": 150121545728,
           "torch_allocated_bytes": 9901661184,
@@ -3352,39 +3358,39 @@
           "torch_peak_allocated_bytes": 9901661184,
           "torch_peak_reserved_bytes": 9974054912,
           "host_allocator_counters": {
-            "active_bytes.allocated": 1717986922696,
-            "active_bytes.current": 1717986922736,
+            "active_bytes.allocated": 1717986921296,
+            "active_bytes.current": 1717986921336,
             "active_bytes.freed": -40,
-            "active_bytes.peak": 1717986922736,
-            "active_requests.allocated": 762,
-            "active_requests.current": 722,
+            "active_bytes.peak": 1717986921336,
+            "active_requests.allocated": 412,
+            "active_requests.current": 372,
             "active_requests.freed": 40,
-            "active_requests.peak": 722,
-            "allocated_bytes.allocated": 343597383756,
-            "allocated_bytes.current": 343597383692,
-            "allocated_bytes.freed": 64,
-            "allocated_bytes.peak": 343597383692,
-            "allocations.allocated": 22,
-            "allocations.current": 12,
-            "allocations.freed": 10,
-            "allocations.peak": 12,
-            "host_alloc_time.avg": 1477606,
-            "host_alloc_time.count": 22,
-            "host_alloc_time.max": 3558273,
-            "host_alloc_time.min": 140,
-            "host_alloc_time.total": 32507346,
-            "host_free_time.avg": 65,
-            "host_free_time.count": 10,
-            "host_free_time.max": 80,
-            "host_free_time.min": 46,
-            "host_free_time.total": 651,
-            "num_host_alloc": 22,
-            "num_host_free": 10
+            "active_requests.peak": 372,
+            "allocated_bytes.allocated": 343597383736,
+            "allocated_bytes.current": 343597383688,
+            "allocated_bytes.freed": 48,
+            "allocated_bytes.peak": 343597383688,
+            "allocations.allocated": 17,
+            "allocations.current": 11,
+            "allocations.freed": 6,
+            "allocations.peak": 11,
+            "host_alloc_time.avg": 2263154,
+            "host_alloc_time.count": 17,
+            "host_alloc_time.max": 5054714,
+            "host_alloc_time.min": 150,
+            "host_alloc_time.total": 38473632,
+            "host_free_time.avg": 79,
+            "host_free_time.count": 6,
+            "host_free_time.max": 84,
+            "host_free_time.min": 74,
+            "host_free_time.total": 474,
+            "num_host_alloc": 17,
+            "num_host_free": 6
           },
-          "process_max_rss_bytes": 345702821888
+          "process_max_rss_bytes": 345701720064
         },
         "native_artifacts_before": {
-          "/root/.cache/cxldsagr/token-validation/941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so": {
+          "/root/.cache/cxldsagr/token-validation/b2417ad2f63b6e963d43135e555cf21a49a8ea00fc7a0eb868733c7e635dd080/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so": {
             "size": 16456,
             "sha256": "ed79d3e717a464379b4f638f608853277b65f602ef05ca5b293e3afa6025cd40"
           },
@@ -3400,13 +3406,13 @@
             "size": 5962688,
             "sha256": "a63d4dfe772493fd9cbc6e65ec9fa92ab77564ab30ef8aef4a6f0b1dec47ffa8"
           },
-          "/root/.cache/tvm-ffi/cxldsagr_echo_indexer_513a53c54269f9bc_1fa11185f6354333/cxldsagr_echo_indexer_513a53c54269f9bc.so": {
-            "size": 1444432,
-            "sha256": "eafdc421b8227425371bba8258894111096228f2e61e68c40394a85f5fc2cfa4"
+          "/root/.cache/tvm-ffi/cxldsagr_echo_indexer_58f8d78829f56eee_1fa11185f6354333/cxldsagr_echo_indexer_58f8d78829f56eee.so": {
+            "size": 1572544,
+            "sha256": "e66cc5d95b3277110cbb4007b76da5c722d5863530259b371b5dbd4442a22401"
           },
           "/root/.cache/tvm-ffi/cxldsagr_kv_transfer_672412fcb6ae32f3/cxldsagr_kv_transfer.so": {
-            "size": 78752,
-            "sha256": "fa7cd702d5a267e711e2caa997784d7534497830e47e1c7ae757a1ed4e8cee86"
+            "size": 147368,
+            "sha256": "e282691a0b88a35d67eefd22f3e9a8d059c0d4258f1ff8780ac4803ff8f44964"
           },
           "/root/.venv/lib/python3.12/site-packages/nvidia/cu13/lib/libcublas.so.13": {
             "size": 54177976,
@@ -3474,7 +3480,7 @@
           }
         },
         "native_artifacts_after": {
-          "/root/.cache/cxldsagr/token-validation/941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so": {
+          "/root/.cache/cxldsagr/token-validation/b2417ad2f63b6e963d43135e555cf21a49a8ea00fc7a0eb868733c7e635dd080/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so": {
             "size": 16456,
             "sha256": "ed79d3e717a464379b4f638f608853277b65f602ef05ca5b293e3afa6025cd40"
           },
@@ -3490,13 +3496,13 @@
             "size": 5962688,
             "sha256": "a63d4dfe772493fd9cbc6e65ec9fa92ab77564ab30ef8aef4a6f0b1dec47ffa8"
           },
-          "/root/.cache/tvm-ffi/cxldsagr_echo_indexer_513a53c54269f9bc_1fa11185f6354333/cxldsagr_echo_indexer_513a53c54269f9bc.so": {
-            "size": 1444432,
-            "sha256": "eafdc421b8227425371bba8258894111096228f2e61e68c40394a85f5fc2cfa4"
+          "/root/.cache/tvm-ffi/cxldsagr_echo_indexer_58f8d78829f56eee_1fa11185f6354333/cxldsagr_echo_indexer_58f8d78829f56eee.so": {
+            "size": 1572544,
+            "sha256": "e66cc5d95b3277110cbb4007b76da5c722d5863530259b371b5dbd4442a22401"
           },
           "/root/.cache/tvm-ffi/cxldsagr_kv_transfer_672412fcb6ae32f3/cxldsagr_kv_transfer.so": {
-            "size": 78752,
-            "sha256": "fa7cd702d5a267e711e2caa997784d7534497830e47e1c7ae757a1ed4e8cee86"
+            "size": 147368,
+            "sha256": "e282691a0b88a35d67eefd22f3e9a8d059c0d4258f1ff8780ac4803ff8f44964"
           },
           "/root/.venv/lib/python3.12/site-packages/nvidia/cu13/lib/libcublas.so.13": {
             "size": 54177976,
@@ -3755,7 +3761,7 @@
         }
       ]
     },
-    "started_unix": 1791151357.577287,
+    "started_unix": 1791218229.5842657,
     "measurement_boundary": "Synchronized runner wall latency includes admission/eviction, history construction on a miss, all candidate hidden, last-token LM head and history cleanup. Loading, request generation, three warmup requests including host recall, compute graph preparation, diagnostics and report generation are outside latency. Bench performs no full-output CPU copies, numerical comparison or output saving between requests. Check publishes no timings.",
     "diagnostics_boundary": "Cache transfer/selection counters cover the candidate forward only; history prefill counters reset before candidate execution. Prefix cache hit is a separate whole-user history-retention metric.",
     "memory_boundary": "Each scheme resets CUDA allocator peaks after warmup resources are released, before fresh shared allocation. Peaks include loaded weights, shared allocation and the complete measured request trace. Per-request peak fields are cumulative within that scheme. Device free-memory samples are boundaries, not process peaks.",
@@ -3771,9 +3777,9 @@
       "fp16_reduced_precision_reduction": true
     },
     "precision_policy": "cuda_matmul_fp32_tf32_disabled_v1",
-    "source_sha256": "1319a540b7f78da9c363dd09c0f1568b450df3df5e4d3e8b60155a58c348b3dc",
-    "git_revision": "934485bcade30b138a87e65ff87fbbbd04844fbf",
-    "git_status": "M  .gitignore\n M 3rdparty/.gitignore\n M 3rdparty/README.md\n M AGENTS.md\n M GR/README.md\n M README.md\n M cache/README.md\n M cache/prefix_pool.py\n M cache/sparse_token_cache.py\n M cache/sparse_token_pool.py\n M cache/staging.py\n M cache/tests/test_prefix_pool.py\n M cache/tests/test_sparse_token_pool.py\n M cache/tests/test_staging.py\n M docs/README.md\n M docs/agents/kda/README.md\n M docs/agents/kda/deepseek_dense_prefetch/c7b_checkpoint.md\n M docs/agents/kda/deepseek_dense_prefetch/c7b_draft.md\n M docs/agents/kda/deepseek_dense_prefetch/checkpoint.md\n M docs/agents/kda/deepseek_dense_prefetch/implementation_plan.md\n M docs/agents/kda/deepseek_dense_prefetch/validation_plan.md\n M docs/agents/kda/deepseek_norm_io/checkpoint.md\n M docs/agents/kda/deepseek_prefetch_hint/checkpoint.md\n M docs/agents/kda/deepseek_quantization/checkpoint.md\n M docs/agents/kda/deepseek_topk_wrapper/draft.md\n M docs/agents/kda/deepseek_topk_wrapper/t3_integration_checkpoint.md\n M docs/agents/kda/nosa_offload_attention/task.md\n M docs/agents/kda/nosa_sparse_attention/checkpoint.md\n M docs/agents/research-supervisor/cache_reuse_boundaries.md\n M docs/agents/research-supervisor/sources.md\n M docs/agents/research-supervisor/updates.md\n D docs/agents/system/deepseek_cleanup_audit_candidate_checkpoint.md\n D docs/agents/system/deepseek_cleanup_audit_candidate_plan.md\n D docs/agents/system/deepseek_cleanup_audit_independent_review.md\n D docs/agents/system/deepseek_cleanup_audit_integration_plan.md\n D docs/agents/system/deepseek_cleanup_audit_production_checkpoint.md\n D docs/agents/system/deepseek_cleanup_audit_v2_checkpoint.md\n D docs/agents/system/deepseek_dense_transport_bound.md\n D docs/agents/system/deepseek_echo_official_c10_validation.md\n D docs/agents/system/deepseek_echo_official_graph_enablement.md\n D docs/agents/system/deepseek_echo_official_graph_plan.md\n D docs/agents/system/deepseek_echo_official_optimization_followup.md\n D docs/agents/system/deepseek_echo_official_publication_audit.md\n D docs/agents/system/deepseek_echo_official_validation.md\n D docs/agents/system/deepseek_echo_three_layer_profile.md\n D docs/agents/system/deepseek_mfu_echo_audit.md\n D docs/agents/system/deepseek_mfu_linears.md\n D docs/agents/system/deepseek_mfu_optimization.md\n D docs/agents/system/deepseek_motivation_admission_plan.md\n D docs/agents/system/deepseek_motivation_c10_closure.md\n D docs/agents/system/deepseek_motivation_c10_execution_equivalence.json\n D docs/agents/system/deepseek_motivation_c10_execution_plan.md\n D docs/agents/system/deepseek_motivation_c10_preflight.md\n D docs/agents/system/deepseek_motivation_c10_profile.md\n D docs/agents/system/deepseek_motivation_c10_publication.json\n D docs/agents/system/deepseek_motivation_c10_validation.md\n D docs/agents/system/deepseek_motivation_c11_execution_plan.md\n D docs/agents/system/deepseek_motivation_c2_checkpoint.md\n D docs/agents/system/deepseek_motivation_c3_integration.md\n D docs/agents/system/deepseek_motivation_c4_integration.md\n D docs/agents/system/deepseek_motivation_c5_c6_graph_v2_validation.md\n D docs/agents/system/deepseek_motivation_c6_dense_profile_plan.md\n D docs/agents/system/deepseek_motivation_c6_integration.md\n D docs/agents/system/deepseek_motivation_c7_hint_integration.md\n D docs/agents/system/deepseek_motivation_c7_hint_validation.md\n D docs/agents/system/deepseek_motivation_c8_integration_plan.md\n D docs/agents/system/deepseek_motivation_c8_validation.md\n D docs/agents/system/deepseek_motivation_c9_execution_plan.md\n D docs/agents/system/deepseek_motivation_c9_integration.md\n D docs/agents/system/deepseek_motivation_c9_profile.md\n D docs/agents/system/deepseek_motivation_c9_validation.md\n D docs/agents/system/deepseek_motivation_cleanup_plan.md\n D docs/agents/system/deepseek_motivation_combined_validation.md\n D docs/agents/system/deepseek_motivation_compute_graph_plan.md\n D docs/agents/system/deepseek_motivation_compute_graph_validation.md\n D docs/agents/system/deepseek_motivation_graph_boundary_plan.md\n D docs/agents/system/deepseek_motivation_graph_profile_checkpoint.md\n D docs/agents/system/deepseek_motivation_optimization_checkpoint.md\n D docs/agents/system/deepseek_motivation_optimization_plan.md\n D docs/agents/system/deepseek_motivation_profile_checkpoint.md\n D docs/agents/system/deepseek_nonmatrix_optimization.md\n D docs/agents/system/deepseek_output_layout_checkpoint.md\n D docs/agents/system/deepseek_output_layout_plan.md\n D docs/agents/system/deepseek_request_host_overhead_proposal.md\n D docs/agents/system/deepseek_request_validation_checkpoint.md\n D docs/agents/system/deepseek_resident_selection_plan.md\n D docs/agents/system/deepseek_rotary_layout_plan.md\n D docs/agents/system/deepseek_rotary_layout_validation.md\n D docs/agents/system/echo_cache_core_checkpoint.md\n D docs/agents/system/echo_cache_default_review.json\n D docs/agents/system/echo_cache_experiment_migration.md\n D docs/agents/system/echo_cache_freeze_gate.md\n D docs/agents/system/echo_cache_implementation_checkpoint.md\n D docs/agents/system/echo_cache_implementation_plan.md\n D docs/agents/system/echo_cache_memory_audit.md\n D docs/agents/system/echo_cache_native_before.json\n D docs/agents/system/echo_cache_native_before.patch\n D docs/agents/system/echo_cache_native_checkpoint.md\n D docs/agents/system/echo_cache_publication_commands.md\n D docs/agents/system/echo_cache_publication_execution.md\n D docs/agents/system/echo_cache_publication_ledger.json\n D docs/agents/system/echo_cache_publication_scope.md\n D docs/agents/system/echo_cache_requirements_audit.md\n D docs/agents/system/echo_capacity_budget_calibration.md\n D docs/agents/system/echo_capacity_report_notes.md\n D docs/agents/system/echo_chunk_numerical_screen.md\n D docs/agents/system/echo_default_independent_assessment.json\n D docs/agents/system/echo_gr_auditor_recovery.md\n D docs/agents/system/echo_gr_diagnostics_checkpoint.md\n D docs/agents/system/echo_gr_mechanism_readout.md\n D docs/agents/system/echo_memory_formal_workload_binding.json\n D docs/agents/system/echo_pinned_allocation_checkpoint.md\n D docs/agents/system/experiment_organization.md\n D docs/agents/system/experiment_organization_retirement.json\n D docs/agents/system/gr_serving_audit_plan.md\n D docs/agents/system/gr_serving_dataset_trace.md\n D docs/agents/system/gr_serving_deepseek.md\n D docs/agents/system/gr_serving_industrial_publication.md\n D docs/agents/system/gr_serving_industrial_rerun.md\n D docs/agents/system/gr_serving_nosa.md\n D docs/agents/system/gr_serving_review.md\n D docs/agents/system/gr_serving_sequential_publication_draft.md\n D docs/agents/system/gr_serving_sequential_rerun.md\n D docs/agents/system/gr_serving_sequential_source_drift.md\n D docs/agents/system/gr_serving_task.md\n D docs/agents/system/gr_serving_workload.md\n D docs/agents/system/gr_serving_workload_feasibility.md\n D docs/agents/system/gr_serving_workload_redesign.md\n D docs/agents/system/implementation-roadmap.md\n D docs/agents/system/implementation-status.md\n D docs/agents/system/memory_acceptance_summary.json\n D docs/agents/system/nosa_allocator_guard.md\n D docs/agents/system/nosa_cache_allocation.patch\n D docs/agents/system/nosa_cache_allocation_checkpoint.md\n D docs/agents/system/nosa_cache_allocation_source.json\n D docs/agents/system/nosa_candidate_efficiency_followup.md\n D docs/agents/system/nosa_captured_copy_pilot.md\n D docs/agents/system/nosa_copy_descriptor_result.md\n D docs/agents/system/nosa_dense_staging_checkpoint.md\n D docs/agents/system/nosa_fa3_stream_wrapper_plan.md\n D docs/agents/system/nosa_fixed_cache_acceptance.md\n D docs/agents/system/nosa_gr_reporting_fix.md\n D docs/agents/system/nosa_gr_selected_source_commands.md\n D docs/agents/system/nosa_gr_selected_source_execution.md\n D docs/agents/system/nosa_guarded_copy_control.md\n D docs/agents/system/nosa_hbm_prequeue_diagnostic.md\n D docs/agents/system/nosa_indexer_dispatch_plan.md\n D docs/agents/system/nosa_motivation_experiment.md\n D docs/agents/system/nosa_motivation_hbm_audit.md\n D docs/agents/system/nosa_motivation_plan.md\n D docs/agents/system/nosa_motivation_publication.md\n D docs/agents/system/nosa_motivation_remeasurement_queue.md\n D docs/agents/system/nosa_motivation_selected_source_commands.md\n D docs/agents/system/nosa_pool_scan_optimization.md\n D docs/agents/system/nosa_pool_scan_publication.md\n D docs/agents/system/nosa_remaining_rerun_plan.md\n D docs/agents/system/nosa_shared_cache.patch\n D docs/agents/system/nosa_shared_cache_checkpoint.md\n D docs/agents/system/nosa_shared_cache_followup.patch\n D docs/agents/system/nosa_shared_cache_followup_source.json\n D docs/agents/system/nosa_shared_cache_implementation_plan.md\n D docs/agents/system/nosa_shared_cache_integration_acceptance.md\n D docs/agents/system/nosa_shared_cache_integration_evidence.json\n D docs/agents/system/nosa_shared_cache_source.json\n D docs/agents/system/nosa_shared_entrypoint_audit.md\n D docs/agents/system/nosa_shared_publication_scope.md\n D docs/agents/system/nosa_shared_workspace.patch\n D docs/agents/system/nosa_shared_workspace_checkpoint.md\n D docs/agents/system/research-context.md\n M docs/roadmap.md\n M docs/status.md\n M evaluation/pool_scan_provenance.py\n M evaluation/provenance.py\n M evaluation/tests/test_cache_memory_audit.py\n M evaluation/tests/test_pool_scan_provenance.py\n M evaluation/tests/test_provenance.py\n M executor/README.md\n D executor/serving_backend.py\n M experiments/README.md\nD  experiments/cpu_dram_bandwidth/README.md\nD  experiments/cpu_dram_bandwidth/report/all_measurements.csv\nD  experiments/cpu_dram_bandwidth/report/bandwidth_scaling.svg\nD  experiments/cpu_dram_bandwidth/report/clock_counters.json\nD  experiments/cpu_dram_bandwidth/report/hardware_evidence.json\nD  experiments/cpu_dram_bandwidth/report/imc_crosscheck.csv\nD  experiments/cpu_dram_bandwidth/report/provenance.json\nD  experiments/cpu_dram_bandwidth/report/selected_peaks.csv\nD  experiments/cpu_dram_bandwidth/scripts/run.sh\nD  experiments/cpu_dram_bandwidth/src/dram_bench.c\nD  experiments/cpu_dram_bandwidth/src/measure.py\nD  experiments/cpu_dram_bandwidth/src/probe_imc.py\nD  experiments/cpu_dram_bandwidth/src/report.py\n D experiments/deepseek_v32_echo_cache/README.md\n D experiments/deepseek_v32_echo_cache/report/capacity/cases.csv\n D experiments/deepseek_v32_echo_cache/report/capacity/plans.csv\n D experiments/deepseek_v32_echo_cache/report/capacity/report_provenance.json\n D experiments/deepseek_v32_echo_cache/report/capacity/results.md\n D experiments/deepseek_v32_echo_cache/report/capacity/summary.json\n D experiments/deepseek_v32_echo_cache/scripts/run.sh\n D experiments/deepseek_v32_echo_cache/src/capacity_plan.py\n D experiments/deepseek_v32_echo_cache/src/capacity_probe.py\n D experiments/deepseek_v32_echo_cache/src/capacity_reference.py\n D experiments/deepseek_v32_echo_cache/src/capacity_report.py\n D experiments/deepseek_v32_echo_cache/tests/test_capacity_plan.py\n D experiments/deepseek_v32_echo_cache/tests/test_capacity_probe.py\n D experiments/deepseek_v32_echo_cache/tests/test_capacity_reference.py\n D experiments/deepseek_v32_echo_cache/tests/test_capacity_report.py\n M experiments/deepseek_v32_echo_official/README.md\n M experiments/deepseek_v32_echo_official/scripts/run.sh\n M experiments/deepseek_v32_echo_official/src/measure.py\n M experiments/deepseek_v32_echo_official/src/report.py\n M experiments/deepseek_v32_echo_official/tests/test_measure.py\n M experiments/deepseek_v32_echo_official/tests/test_report.py\n M experiments/deepseek_v32_echo_prefill/README.md\n M experiments/deepseek_v32_echo_prefill/scripts/profile_layers.sh\n M experiments/deepseek_v32_echo_prefill/scripts/run.sh\n M experiments/deepseek_v32_echo_prefill/src/compare_backends.py\n M experiments/deepseek_v32_echo_prefill/src/measure.py\n M experiments/deepseek_v32_echo_prefill/src/operator_instrumentation.py\n M experiments/deepseek_v32_echo_prefill/src/postrun_audit.py\n M experiments/deepseek_v32_echo_prefill/src/profile_layers.py\n M experiments/deepseek_v32_echo_prefill/src/publish_layers.py\n M experiments/deepseek_v32_echo_prefill/src/report.py\n M experiments/deepseek_v32_echo_prefill/tests/test_execution_utilization.py\n M experiments/deepseek_v32_echo_prefill/tests/test_operator_instrumentation.py\n M experiments/deepseek_v32_echo_prefill/tests/test_profile_layers.py\n M experiments/deepseek_v32_echo_prefill/tests/test_report.py\n M experiments/deepseek_v32_echo_prefill/tests/test_scripts.py\n M experiments/deepseek_v32_motivation/README.md\n M experiments/deepseek_v32_motivation/src/flops.py\n M experiments/deepseek_v32_motivation/src/graph_instrumentation.py\n M experiments/deepseek_v32_motivation/src/measure.py\n M experiments/deepseek_v32_motivation/src/profile.py\n M experiments/deepseek_v32_motivation/src/report.py\n M experiments/deepseek_v32_motivation/tests/test_profile_validation.py\nD  experiments/legacy/README.md\nD  experiments/legacy/deepseek_v32/README.md\nD  experiments/legacy/deepseek_v32/analyze_gr_kv_coverage.py\nD  experiments/legacy/deepseek_v32/deepgemm_v32_benchmark.py\nD  experiments/legacy/deepseek_v32/deepseek_v32_decode.md\nD  experiments/legacy/deepseek_v32/deepseek_v32_extend.md\nD  experiments/legacy/deepseek_v32/deepseek_v32_two_dense.md\nD  experiments/legacy/deepseek_v32/deepseek_v32_two_dense_manifest.json\nD  experiments/legacy/deepseek_v32/docs/5080_microbench.md\nD  experiments/legacy/deepseek_v32/docs/cpu_memory_bandwidth_results.md\nD  experiments/legacy/deepseek_v32/docs/deepgemm_v32_5080_results.md\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/extend_compute_zh.md\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/extend_timeline.svg\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/extend_timeline_64k_1k.svg\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/fp8_qk_full_summary.md\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/fp8_qk_summary.md\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/gemm_precision.json\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/gr_cache_offload_sweep.md\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/gr_cache_union_64k_4k.md\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/gr_content_matrix.csv\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/gr_content_matrix.html\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/gr_content_matrix_layer0.png\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/gr_content_matrix_layer0.svg\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/gr_content_matrix_layer1.png\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/gr_content_matrix_layer1.svg\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/gr_content_matrix_layer2.png\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/gr_content_matrix_layer2.svg\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/gr_content_positions_layer0_n1024.png\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/gr_content_positions_layer0_n1024.svg\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/gr_content_positions_layer0_n128.png\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/gr_content_positions_layer0_n128.svg\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/gr_content_positions_layer0_n2048.png\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/gr_content_positions_layer0_n2048.svg\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/gr_content_positions_layer0_n256.png\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/gr_content_positions_layer0_n256.svg\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/gr_content_positions_layer0_n4096.png\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/gr_content_positions_layer0_n4096.svg\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/gr_content_positions_layer0_n512.png\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/gr_content_positions_layer0_n512.svg\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/gr_content_positions_layer0_n64.png\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/gr_content_positions_layer0_n64.svg\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/gr_content_positions_layer1_n1024.png\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/gr_content_positions_layer1_n1024.svg\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/gr_content_positions_layer1_n128.png\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/gr_content_positions_layer1_n128.svg\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/gr_content_positions_layer1_n2048.png\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/gr_content_positions_layer1_n2048.svg\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/gr_content_positions_layer1_n256.png\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/gr_content_positions_layer1_n256.svg\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/gr_content_positions_layer1_n4096.png\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/gr_content_positions_layer1_n4096.svg\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/gr_content_positions_layer1_n512.png\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/gr_content_positions_layer1_n512.svg\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/gr_content_positions_layer1_n64.png\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/gr_content_positions_layer1_n64.svg\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/gr_content_positions_layer2_n1024.png\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/gr_content_positions_layer2_n1024.svg\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/gr_content_positions_layer2_n128.png\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/gr_content_positions_layer2_n128.svg\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/gr_content_positions_layer2_n2048.png\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/gr_content_positions_layer2_n2048.svg\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/gr_content_positions_layer2_n256.png\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/gr_content_positions_layer2_n256.svg\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/gr_content_positions_layer2_n4096.png\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/gr_content_positions_layer2_n4096.svg\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/gr_content_positions_layer2_n512.png\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/gr_content_positions_layer2_n512.svg\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/gr_content_positions_layer2_n64.png\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/gr_content_positions_layer2_n64.svg\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/gr_kv_coverage_relation.md\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/gr_kv_coverage_relation.png\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/gr_kv_coverage_relation.svg\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/gr_kv_hit_distribution.md\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/gr_multilayer_kv_hits.md\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/gr_multilayer_offload_validation.md\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/launch_flops.md\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/no_hadamard_64k_1k_summary.md\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/no_hadamard_summary.md\nD  experiments/legacy/deepseek_v32/docs/extend_step_profile/summary.md\nD  experiments/legacy/deepseek_v32/docs/gpu_cpu_pcie_bandwidth_root_cause.md\nD  experiments/legacy/deepseek_v32/docs/gpu_host_direct_ld_results.md\nD  experiments/legacy/deepseek_v32/docs/model_decode_v32_detail_fp8_b1_l32768.md\nD  experiments/legacy/deepseek_v32/docs/model_decode_v32_detail_fp8_b1_l32768_iter.md\nD  experiments/legacy/deepseek_v32/docs/model_decode_v32_detail_fp8_results.md\nD  experiments/legacy/deepseek_v32/docs/model_decode_v32_nsys_summary.md\nD  experiments/legacy/deepseek_v32/docs/model_decode_v32_profile.md\nD  experiments/legacy/deepseek_v32/docs/model_decode_v32_results.md\nD  experiments/legacy/deepseek_v32/docs/sizes.txt\nD  experiments/legacy/deepseek_v32/docs/sparse_mla_sm120.md\nD  experiments/legacy/deepseek_v32/export_gr_kv_hits.py\nD  experiments/legacy/deepseek_v32/render_extend_timeline.py\nD  experiments/legacy/deepseek_v32/report_gr_content_matrix.py\nD  experiments/legacy/deepseek_v32/report_gr_mla_cache.py\nD  experiments/legacy/deepseek_v32/report_gr_multilayer_hits.py\nD  experiments/legacy/deepseek_v32/report_gr_offload_validation.py\n D experiments/nosa_baseline_performance/README.md\n D experiments/nosa_baseline_performance/report/dense/analysis.json\n D experiments/nosa_baseline_performance/report/dense/launch.csv\n D experiments/nosa_baseline_performance/report/dense/launch_environment.json\n D experiments/nosa_baseline_performance/report/dense/metadata.json\n D experiments/nosa_baseline_performance/report/dense/mfu.json\n D experiments/nosa_baseline_performance/report/dense/module_mfu.csv\n D experiments/nosa_baseline_performance/report/dense/provenance.json\n D experiments/nosa_baseline_performance/report/dense/publication.json\n D experiments/nosa_baseline_performance/report/dense/result_integrity.json\n D experiments/nosa_baseline_performance/report/dense/root_dense_audit.json\n D experiments/nosa_baseline_performance/report/dense/timings.csv\n D experiments/nosa_baseline_performance/report/sparse/comparison.csv\n D experiments/nosa_baseline_performance/report/sparse/comparison.json\n D experiments/nosa_baseline_performance/report/sparse/native/attention_launches.csv\n D experiments/nosa_baseline_performance/report/sparse/native/attention_launches.json\n D experiments/nosa_baseline_performance/report/sparse/native/kernel_dispatches.csv\n D experiments/nosa_baseline_performance/report/sparse/native/kernel_dispatches.json\n D experiments/nosa_baseline_performance/report/sparse/native/launch_environment.json\n D experiments/nosa_baseline_performance/report/sparse/native/metadata.json\n D experiments/nosa_baseline_performance/report/sparse/native/mfu.json\n D experiments/nosa_baseline_performance/report/sparse/native/module_mfu.csv\n D experiments/nosa_baseline_performance/report/sparse/native/profile_metadata.json\n D experiments/nosa_baseline_performance/report/sparse/native/score_kernels.json\n D experiments/nosa_baseline_performance/report/sparse/native/stages.csv\n D experiments/nosa_baseline_performance/report/sparse/native/timings.csv\n D experiments/nosa_baseline_performance/report/sparse/publication.json\n D experiments/nosa_baseline_performance/report/sparse/report_manifest.json\n D experiments/nosa_baseline_performance/report/sparse/result_integrity.json\n D experiments/nosa_baseline_performance/report/sparse/root_report_audit.json\n D experiments/nosa_baseline_performance/report/sparse/triton/launch_environment.json\n D experiments/nosa_baseline_performance/report/sparse/triton/metadata.json\n D experiments/nosa_baseline_performance/report/sparse/triton/mfu.json\n D experiments/nosa_baseline_performance/report/sparse/triton/module_mfu.csv\n D experiments/nosa_baseline_performance/report/sparse/triton/profile_metadata.json\n D experiments/nosa_baseline_performance/report/sparse/triton/stages.csv\n D experiments/nosa_baseline_performance/report/sparse/triton/timings.csv\n D experiments/nosa_baseline_performance/scripts/dense.sh\n D experiments/nosa_baseline_performance/scripts/sparse.sh\n D experiments/nosa_baseline_performance/scripts/sparse_bottleneck.sh\n D experiments/nosa_baseline_performance/src/acceptance.py\n D experiments/nosa_baseline_performance/src/dense/analyze.py\n D experiments/nosa_baseline_performance/src/dense/capture.py\n D experiments/nosa_baseline_performance/src/dense/instrumentation.py\n D experiments/nosa_baseline_performance/src/dense/mfu.py\n D experiments/nosa_baseline_performance/src/dense/sources.py\n D experiments/nosa_baseline_performance/src/runtime.py\n D experiments/nosa_baseline_performance/src/sparse/analyze.py\n D experiments/nosa_baseline_performance/src/sparse/bottleneck_report.py\n D experiments/nosa_baseline_performance/src/sparse/capture.py\n D experiments/nosa_baseline_performance/src/sparse/cis_bottleneck.py\n D experiments/nosa_baseline_performance/src/sparse/compare.py\n D experiments/nosa_baseline_performance/src/sparse/instrumentation.py\n D experiments/nosa_baseline_performance/src/sparse/launch_analysis.py\n D experiments/nosa_baseline_performance/src/sparse/launch_report.py\n D experiments/nosa_baseline_performance/src/sparse/mfu.py\n D experiments/nosa_baseline_performance/src/sparse/module_mfu.py\n D experiments/nosa_baseline_performance/tests/dense/test_analyze.py\n D experiments/nosa_baseline_performance/tests/dense/test_capture.py\n D experiments/nosa_baseline_performance/tests/dense/test_instrumentation.py\n D experiments/nosa_baseline_performance/tests/dense/test_mfu.py\n D experiments/nosa_baseline_performance/tests/dense/test_sources.py\n D experiments/nosa_baseline_performance/tests/sparse/test_checked_module_mfu.py\n D experiments/nosa_baseline_performance/tests/sparse/test_checkpoint_source_graph.py\n D experiments/nosa_baseline_performance/tests/sparse/test_compare.py\n D experiments/nosa_baseline_performance/tests/sparse/test_fa3_module_mfu.py\n D experiments/nosa_baseline_performance/tests/sparse/test_fa3_v3_module_mfu.py\n D experiments/nosa_baseline_performance/tests/sparse/test_launch_analysis.py\n D experiments/nosa_baseline_performance/tests/sparse/test_launch_report.py\n D experiments/nosa_baseline_performance/tests/sparse/test_pruned_module_mfu.py\n D experiments/nosa_baseline_performance/tests/sparse/test_sparse_module_mfu.py\n D experiments/nosa_baseline_performance/tests/sparse/test_sparse_profile_analyze.py\n D experiments/nosa_baseline_performance/tests/sparse/test_sparse_profile_capture.py\n D experiments/nosa_baseline_performance/tests/sparse/test_sparse_profile_instrumentation.py\n D experiments/nosa_baseline_performance/tests/sparse/test_sparse_profile_metadata.py\n D experiments/nosa_baseline_performance/tests/sparse/test_sparse_profile_mfu.py\n D experiments/nosa_baseline_performance/tests/test_acceptance.py\n D experiments/nosa_baseline_performance/tests/test_runtime.py\n M experiments/nosa_indexer_pattern_65536_1024/README.md\n M experiments/nosa_indexer_pattern_65536_1024/src/capture.py\n M experiments/nosa_indexer_pattern_65536_1024/src/sparse_capture.py\n D experiments/nosa_kernel_mfu/README.md\n D experiments/nosa_kernel_mfu/report/captured/launch_environment.json\n D experiments/nosa_kernel_mfu/report/captured/metadata.json\n D experiments/nosa_kernel_mfu/report/captured/results.json\n D experiments/nosa_kernel_mfu/report/captured/summary.csv\n D experiments/nosa_kernel_mfu/report/module_comparison.csv\n D experiments/nosa_kernel_mfu/report/module_comparison.json\n D experiments/nosa_kernel_mfu/report/modules/native/launch_environment.json\n D experiments/nosa_kernel_mfu/report/modules/native/metadata.json\n D experiments/nosa_kernel_mfu/report/modules/native/results.json\n D experiments/nosa_kernel_mfu/report/modules/triton/launch_environment.json\n D experiments/nosa_kernel_mfu/report/modules/triton/metadata.json\n D experiments/nosa_kernel_mfu/report/modules/triton/results.json\n D experiments/nosa_kernel_mfu/report/operator_comparison.csv\n D experiments/nosa_kernel_mfu/report/operator_comparison.json\n D experiments/nosa_kernel_mfu/report/publication.json\n D experiments/nosa_kernel_mfu/report/result_integrity.json\n D experiments/nosa_kernel_mfu/report/root_report_audit.json\n D experiments/nosa_kernel_mfu/report/synthetic/launch_environment.json\n D experiments/nosa_kernel_mfu/report/synthetic/metadata.json\n D experiments/nosa_kernel_mfu/report/synthetic/results.json\n D experiments/nosa_kernel_mfu/report/synthetic/summary.csv\n D experiments/nosa_kernel_mfu/scripts/capture.sh\n D experiments/nosa_kernel_mfu/scripts/modules.sh\n D experiments/nosa_kernel_mfu/scripts/run.sh\n D experiments/nosa_kernel_mfu/src/capture_inputs.py\n D experiments/nosa_kernel_mfu/src/measure.py\n D experiments/nosa_kernel_mfu/src/measure_modules.py\n D experiments/nosa_kernel_mfu/src/phases.py\n D experiments/nosa_kernel_mfu/tests/test_capture_inputs.py\n D experiments/nosa_kernel_mfu/tests/test_measure_modules.py\n D experiments/nosa_kernel_mfu/tests/test_phases.py\n M experiments/nosa_motivation/README.md\n M experiments/nosa_motivation/src/attention_reference.py\n M experiments/nosa_motivation/src/measure.py\n M experiments/nosa_motivation/src/profile.py\n M experiments/nosa_motivation/src/profile_attention_reference.py\n M experiments/nosa_motivation/src/profile_audit.py\n M experiments/nosa_motivation/src/profile_hbm.py\n M experiments/nosa_motivation/src/provenance.py\n M experiments/nosa_motivation/src/report.py\n M experiments/nosa_motivation/src/validation.py\n M experiments/nosa_motivation/tests/test_attention_reference.py\n M experiments/nosa_motivation/tests/test_nosa_motivation_report.py\n M experiments/nosa_offload_overlap/README.md\n M experiments/nosa_offload_overlap/src/measure.py\n M experiments/nosa_offload_overlap/src/report.py\n M experiments/nosa_offload_overlap/tests/test_measure.py\n M experiments/nosa_offload_overlap/tests/test_nosa_offload_report.py\n M layers/README.md\n M layers/attention.py\n M models/deepseek_v32/README.md\n D models/deepseek_v32/cache_resources.py\n D models/deepseek_v32/capacity.py\n D models/deepseek_v32/compute_graphs.py\n D models/deepseek_v32/echo_attention.py\n D models/deepseek_v32/echo_block.py\n D models/deepseek_v32/echo_infer.py\n D models/deepseek_v32/echo_model.py\n D models/deepseek_v32/official_cache.py\n D models/deepseek_v32/official_serving.py\n D models/deepseek_v32/pool_prefetch.py\n D models/deepseek_v32/serving_backend.py\n M models/deepseek_v32/tests/test_cache_resources.py\n M models/deepseek_v32/tests/test_capacity.py\n M models/deepseek_v32/tests/test_compute_graphs.py\n M models/deepseek_v32/tests/test_echo_block.py\n M models/deepseek_v32/tests/test_echo_cache_diagnostics.py\n M models/deepseek_v32/tests/test_echo_cache_order.py\n M models/deepseek_v32/tests/test_echo_checkpoint.py\n M models/deepseek_v32/tests/test_echo_infer.py\n M models/deepseek_v32/tests/test_echo_model.py\n M models/deepseek_v32/tests/test_echo_rotary.py\n M models/deepseek_v32/tests/test_official_cache.py\n M models/deepseek_v32/tests/test_official_checkpoint.py\n M models/deepseek_v32/tests/test_official_graphs.py\n M models/deepseek_v32/tests/test_official_serving.py\n M models/deepseek_v32/tests/test_output_layout.py\n M models/deepseek_v32/tests/test_packed_mlp.py\n M models/deepseek_v32/tests/test_pool_prefetch.py\n M models/deepseek_v32/tests/test_pool_prefetch_native.py\n M models/deepseek_v32/tests/test_serving_backend.py\n M models/deepseek_v32/tests/test_serving_checkpoint.py\n M models/nosa/README.md\n D models/nosa/_allocator_snapshot.py\n D models/nosa/_pool_referrers.py\n D models/nosa/allocation_budget.py\n M models/nosa/attention.py\n D models/nosa/cache.py\n D models/nosa/compute_graphs.py\n D models/nosa/csrc/allocator_snapshot.cpp\n D models/nosa/csrc/pool_referrers.c\n D models/nosa/csrc/pool_referrers_abi.json\n D models/nosa/deferred_validation.py\n D models/nosa/fixed_cache.py\n D models/nosa/fixed_resources.py\n D models/nosa/fixed_serving.py\n M models/nosa/indexer.py\n M models/nosa/infer.py\n M models/nosa/model.py\n D models/nosa/offload_cache.py\n D models/nosa/serving.py\n D models/nosa/serving_resources.py\n D models/nosa/session_budget.py\n D models/nosa/tests/test_allocation_budget.py\n D models/nosa/tests/test_allocator_snapshot.py\n M models/nosa/tests/test_cache.py\n M models/nosa/tests/test_cache_allocation_checkpoint.py\n M models/nosa/tests/test_fixed_serving.py\n M models/nosa/tests/test_fixed_serving_cuda.py\n M models/nosa/tests/test_infer.py\n M models/nosa/tests/test_native_checked_indexer.py\n M models/nosa/tests/test_native_deferred_short_indexer.py\n M models/nosa/tests/test_nosa_compute_graphs.py\n M models/nosa/tests/test_nosa_indexer_cache.py\n M models/nosa/tests/test_offload_cache.py\n M models/nosa/tests/test_offload_checkpoint.py\n M models/nosa/tests/test_offload_finite_validation.py\n M models/nosa/tests/test_offload_model.py\n D models/nosa/tests/test_pool_referrers.py\n M models/nosa/tests/test_resource_drain.py\n M models/nosa/tests/test_serving.py\n M models/nosa/tests/test_serving_owner.py\n M models/nosa/tests/test_serving_resources.py\n M models/nosa/tests/test_session_budget.py\n M models/nosa/tests/test_shared_serving_cuda.py\n M operators/README.md\n M operators/deepseek_v32/indexer/tests/test_echo_official_policy.py\n M operators/deepseek_v32/indexer/tests/test_resident_cache.py\n M operators/nosa/README.md\n M operators/nosa/attention/offload/api.py\n M operators/nosa/attention/workspace.py\n M scripts/run_tests.sh\n M serving/README.md\n M serving/persistent.py\n M serving/run_gr.py\n M serving/run_multi_user.py\n M serving/runner.py\n M serving/tests/test_persistent.py\n M serving/tests/test_run_multi_user.py\n M serving/tests/test_runner.py\n M serving/tests/test_token_input.py\n M serving/tests/test_token_validation.py\n M serving/tests/test_transient_candidate.py\n M serving/token_validation.py\n M tests/integration/test_gr_persistent.py\n M tests/integration/test_storage_accounting.py\n?? 3rdparty/AGENTS.md\n?? cache/allocator/\n?? cache/capacity.py\n?? cache/lifecycle.py\n?? cache/tests/test_capacity.py\n?? cache/tests/test_lifecycle.py\n?? docs/agents/README.md\n?? docs/agents/acceptance/\n?? docs/agents/system/README.md\n?? docs/agents/system/nosa/\n?? docs/agents/system/refactor/\n?? evaluation/serving_comparison.py\n?? evaluation/tests/test_serving_comparison.py\n?? executor/adapters.py\n?? executor/contracts.py\n?? executor/runtime.py\n?? executor/tests/test_runtime.py\n?? experiments/AGENTS.md\n?? experiments/cache_management/\n?? experiments/deepseek_v32_echo_official/scripts/profile.sh\n?? experiments/deepseek_v32_echo_official/src/profile.py\n?? experiments/deepseek_v32_echo_official/src/profile_report.py\n?? experiments/deepseek_v32_echo_official/tests/test_profile.py\n?? experiments/deepseek_v32_echo_prefill/src/run_contract.py\n?? experiments/deepseek_v32_motivation/src/compare_versions.py\n?? experiments/nosa_mfu/\n?? experiments/nosa_motivation/src/compare_versions.py\n?? experiments/nosa_motivation/tests/test_receipt_relocation.py\n?? experiments/nosa_motivation/tests/test_validation_identity.py\n?? models/deepseek_v32/AGENTS.md\n?? models/deepseek_v32/attention.py\n?? models/deepseek_v32/cache/\n?? models/deepseek_v32/checkpoint.py\n?? models/deepseek_v32/config.py\n?? models/deepseek_v32/execution/\n?? models/deepseek_v32/infer.py\n?? models/deepseek_v32/layers.py\n?? models/deepseek_v32/model.py\n?? models/deepseek_v32/projections.py\n?? models/deepseek_v32/replay.py\n?? models/deepseek_v32/rotary.py\n?? models/deepseek_v32/tests/test_native_cache_dispatch.py\n?? models/nosa/AGENTS.md\n?? models/nosa/cache/\n?? models/nosa/execution/\n?? models/nosa/tests/test_failure_propagation.py\n?? models/nosa/tests/test_runtime_session_plan.py\n?? operators/nosa/AGENTS.md\n?? operators/nosa/attention/offload/tests/test_submission_failures.py\n?? tests/integration/test_token_runtime_contract.py",
+    "source_sha256": "d1ad78fd4d8606877bf05d28e2a2cce79c6e9064cf53824bcf42c3ea8ec017fd",
+    "git_revision": "0a47b679b7edf14cca92104d172514c6f3ffde7c",
+    "git_status": "M README.md\n M cache/sparse_token_cache.py\n M cache/sparse_token_pool.py\n M cache/tests/test_sparse_recall_metadata.py\n M docs/README.md\n M docs/agents/kda/deepseek_quantization/checkpoint.md\n M evaluation/provenance.py\n M experiments/README.md\n M experiments/cache_management/README.md\n M experiments/deepseek_v32_echo_official/README.md\n M experiments/deepseek_v32_echo_official/src/measure.py\n M experiments/deepseek_v32_echo_official/src/profile_report.py\n M experiments/deepseek_v32_echo_official/tests/test_profile.py\n M experiments/deepseek_v32_echo_official/tests/test_report.py\n D experiments/deepseek_v32_echo_prefill/README.md\n D experiments/deepseek_v32_echo_prefill/report/layers3/latency.png\n D experiments/deepseek_v32_echo_prefill/report/layers3/latency.svg\n D experiments/deepseek_v32_echo_prefill/report/layers3/mfu.png\n D experiments/deepseek_v32_echo_prefill/report/layers3/mfu.svg\n D experiments/deepseek_v32_echo_prefill/report/layers3/ncu_metrics.csv\n D experiments/deepseek_v32_echo_prefill/report/layers3/nonmatrix.csv\n D experiments/deepseek_v32_echo_prefill/report/layers3/nonmatrix_by_layer.csv\n D experiments/deepseek_v32_echo_prefill/report/layers3/operator_inventory.csv\n D experiments/deepseek_v32_echo_prefill/report/layers3/operator_mfu.csv\n D experiments/deepseek_v32_echo_prefill/report/layers3/operator_mfu_by_layer.csv\n D experiments/deepseek_v32_echo_prefill/report/layers3/postrun_audit.json\n D experiments/deepseek_v32_echo_prefill/report/layers3/publication_manifest.json\n D experiments/deepseek_v32_echo_prefill/report/layers3/report_helper_sources.json\n D experiments/deepseek_v32_echo_prefill/report/layers3/results.md\n D experiments/deepseek_v32_echo_prefill/report/layers3/retirement.json\n D experiments/deepseek_v32_echo_prefill/report/layers3/run_acceptance.json\n D experiments/deepseek_v32_echo_prefill/report/layers3/source_bindings.json\n D experiments/deepseek_v32_echo_prefill/report/layers3/summary.json\n D experiments/deepseek_v32_echo_prefill/scripts/ncu.sh\n D experiments/deepseek_v32_echo_prefill/scripts/profile_layers.sh\n D experiments/deepseek_v32_echo_prefill/scripts/run.sh\n D experiments/deepseek_v32_echo_prefill/src/analyze_ncu.py\n D experiments/deepseek_v32_echo_prefill/src/analyze_nsys.py\n D experiments/deepseek_v32_echo_prefill/src/backend_provenance.py\n D experiments/deepseek_v32_echo_prefill/src/compare_backends.py\n D experiments/deepseek_v32_echo_prefill/src/compare_nonmatrix.py\n D experiments/deepseek_v32_echo_prefill/src/execution_utilization.py\n D experiments/deepseek_v32_echo_prefill/src/kernel_profile.py\n D experiments/deepseek_v32_echo_prefill/src/measure.py\n D experiments/deepseek_v32_echo_prefill/src/operator_flops.py\n D experiments/deepseek_v32_echo_prefill/src/operator_instrumentation.py\n D experiments/deepseek_v32_echo_prefill/src/operator_report.py\n D experiments/deepseek_v32_echo_prefill/src/postrun_audit.py\n D experiments/deepseek_v32_echo_prefill/src/profile_hardware.py\n D experiments/deepseek_v32_echo_prefill/src/profile_layers.py\n D experiments/deepseek_v32_echo_prefill/src/profile_summary.py\n D experiments/deepseek_v32_echo_prefill/src/publish_layers.py\n D experiments/deepseek_v32_echo_prefill/src/report.py\n D experiments/deepseek_v32_echo_prefill/src/run_contract.py\n D experiments/deepseek_v32_echo_prefill/tests/test_analyze_ncu.py\n D experiments/deepseek_v32_echo_prefill/tests/test_analyze_nsys.py\n D experiments/deepseek_v32_echo_prefill/tests/test_backend_provenance.py\n D experiments/deepseek_v32_echo_prefill/tests/test_compare_nonmatrix.py\n D experiments/deepseek_v32_echo_prefill/tests/test_comparison_audit.py\n D experiments/deepseek_v32_echo_prefill/tests/test_execution_utilization.py\n D experiments/deepseek_v32_echo_prefill/tests/test_operator_flops.py\n D experiments/deepseek_v32_echo_prefill/tests/test_operator_instrumentation.py\n D experiments/deepseek_v32_echo_prefill/tests/test_operator_report.py\n D experiments/deepseek_v32_echo_prefill/tests/test_profile_hardware.py\n D experiments/deepseek_v32_echo_prefill/tests/test_profile_layers.py\n D experiments/deepseek_v32_echo_prefill/tests/test_publish_layers.py\n D experiments/deepseek_v32_echo_prefill/tests/test_report.py\n D experiments/deepseek_v32_echo_prefill/tests/test_scopes.py\n D experiments/deepseek_v32_echo_prefill/tests/test_scripts.py\n M experiments/deepseek_v32_motivation/README.md\n M experiments/deepseek_v32_motivation/scripts/profile.sh\n M experiments/deepseek_v32_motivation/src/analyze_pipeline.py\n M experiments/deepseek_v32_motivation/src/flops.py\n M experiments/deepseek_v32_motivation/src/graph_attribution.py\n M experiments/deepseek_v32_motivation/src/graph_instrumentation.py\n M experiments/deepseek_v32_motivation/src/measure.py\n M experiments/deepseek_v32_motivation/src/operator_mfu.py\n M experiments/deepseek_v32_motivation/src/profile.py\n M experiments/deepseek_v32_motivation/tests/test_profile_validation.py\n M experiments/nosa_motivation/src/validation.py\n M experiments/nosa_motivation/tests/test_validation_identity.py\n M models/README.md\n M models/deepseek_v32/AGENTS.md\n M models/deepseek_v32/README.md\n M models/deepseek_v32/attention.py\n M models/deepseek_v32/cache/prefetch.py\n M models/deepseek_v32/execution/adapter.py\n M models/deepseek_v32/execution/cache_resources.py\n M models/deepseek_v32/execution/capacity.py\n M models/deepseek_v32/execution/compute_graphs.py\n M models/deepseek_v32/execution/official.py\n M models/deepseek_v32/execution/planning.py\n M models/deepseek_v32/model.py\n M models/deepseek_v32/tests/test_capacity.py\n M models/deepseek_v32/tests/test_compute_graphs.py\n M models/deepseek_v32/tests/test_echo_checkpoint.py\n M models/deepseek_v32/tests/test_echo_infer.py\n M models/deepseek_v32/tests/test_official_graphs.py\n M models/deepseek_v32/tests/test_official_serving.py\n M models/deepseek_v32/tests/test_pool_prefetch.py\n M models/deepseek_v32/tests/test_pool_prefetch_native.py\n M models/deepseek_v32/tests/test_serving_backend.py\n M operators/README.md\n M operators/common/csrc/kv_transfer.cu\n M operators/common/kv_transfer.py\n M operators/common/tests/test_kv_transfer.py\n M operators/deepseek_v32/README.md\n M operators/deepseek_v32/indexer/cache_ops.py\n M operators/deepseek_v32/indexer/csrc/echo_dense_prefetch.cuh\n M operators/deepseek_v32/indexer/csrc/echo_indexer.cu\n M operators/deepseek_v32/indexer/csrc/echo_sparse_recall.cuh\n M operators/deepseek_v32/indexer/echo.py\n M operators/deepseek_v32/indexer/tests/test_echo_indexer.py\n M scripts/run_tests.sh\n?? docs/agents/system/deepseek_mfu/\n?? docs/architecture.md\n?? experiments/deepseek_v32_mfu/\n?? experiments/deepseek_v32_motivation/report/prefill_layer/\n?? experiments/deepseek_v32_motivation/report/single_layer/\n?? experiments/deepseek_v32_motivation/src/draw_layer_schedule.py\n?? experiments/deepseek_v32_motivation/src/plot_prefill_timeline.py\n?? experiments/deepseek_v32_motivation/src/plot_single_layer.py",
     "backend_provenance": {
       "git_revisions": {
         "DeepGEMM": "057ca5964aae0879ff2e0eb71ee05a3cb0ba3df7",
@@ -8597,7 +8603,9 @@
           "MAX_JOBS": "8"
         }
       },
-      "jit_environment": {},
+      "jit_environment": {
+        "DG_JIT_WITH_LINEINFO": "1"
+      },
       "linear_activation_quantization": {
         "schema_version": 1,
         "backend": "handwritten_triton",
@@ -11012,7 +11020,7 @@
     },
     "model_loaded_memory": {
       "stage": "after_model_loading",
-      "unix_time": 1791151409.7112632,
+      "unix_time": 1791218280.6229863,
       "cuda_free_bytes": 139401887744,
       "cuda_total_bytes": 150121545728,
       "torch_allocated_bytes": 9866541056,
@@ -11049,53 +11057,50 @@
         "num_host_alloc": 0,
         "num_host_free": 0
       },
-      "process_max_rss_bytes": 2938880000
+      "process_max_rss_bytes": 2939363328
     },
     "validation_identity_revision": 2,
     "validation_identity": {
       "base": {
         "schema": "motivation-validation-identity-v2",
         "sources": {
-          "models/deepseek_v32/attention.py": "0ff4a5b3687079dcec8e734f54473886f706ba80c092a8547ca76fa8d349c83e",
+          "models/deepseek_v32/attention.py": "fe91615bfa9119cba1221cb1ac87be3694b5d6119b3f9ea21852fe12458b00e5",
           "models/deepseek_v32/cache/official.py": "0a9e272571495c8d99b5a6b821cc5b15ac7de70d6248464cac2b549b9135bf85",
-          "models/deepseek_v32/cache/prefetch.py": "fcee5ae3d45e20d3fdb76861f74c94421e4f5ef900aa0caf9c5739249e751a40",
+          "models/deepseek_v32/cache/prefetch.py": "fdcce39f89aa8f81acd96876f0af691e959578c23cd24bf3828f4651851d3cd4",
           "models/deepseek_v32/cache/session.py": "50e11d659389aeafc2ed8a608915f4eca2202e953529a4ea7180d2dd0edaaad9",
           "models/deepseek_v32/checkpoint.py": "382f00612ce000d70a0a90a24e1bc5ec2c75032dbcc13bafa73d30d80565ad0f",
           "models/deepseek_v32/config.py": "d8f0d2aa209e2cf7a7653ef4980b60a3dca4d430eb23f2579abf00a290ff529d",
-          "models/deepseek_v32/execution/adapter.py": "b9dd19dd9dac73f21923bc52a9fdec0d28ad8f9137d4f51e8781a73ca7e6c04a",
-          "models/deepseek_v32/execution/cache_resources.py": "a8fe8cd5f09ea71d7107707a5690e7d65619b748dc9d8fbbea0651ec81a4ed83",
-          "models/deepseek_v32/execution/capacity.py": "8baecb09892c4806bbaf7b26e6a987c41180638cbfe1bb451e68a885c1228a54",
-          "models/deepseek_v32/execution/compute_graphs.py": "fb1e0d3b7f9f20df199dfc92bd0df47bdba7c3c4f18c8509f0c25e3c5dba23c0",
-          "models/deepseek_v32/execution/official.py": "52df7f6d6c29e65a40c2fd571089adbdf67d50013c2f3b09eb8e491740611833",
-          "models/deepseek_v32/execution/pipeline.py": "a476eaf09261ea2705fbdd2fb09646ddba53ccabc478a56b9772d6bc4f468d2e",
-          "models/deepseek_v32/execution/planning.py": "83eba13951b94e322b2ebf927a242a289e496159d749f30f5277bb4032623fb5",
+          "models/deepseek_v32/execution/adapter.py": "66cb418b66180a1feded94a6a262ce96698fbb85bb696c16da19cdc31ba63be6",
+          "models/deepseek_v32/execution/cache_resources.py": "40e791a4e3496f8baa85b50d8bdc85702b19e97b0e8b2a7cc0da58b45a8f1246",
+          "models/deepseek_v32/execution/capacity.py": "9844ef42c65b25a4c7358dd4975f39c1eb434ce5587b721aa660e4181e83f694",
+          "models/deepseek_v32/execution/compute_graphs.py": "5e03668e1a0ecc20c07205723daba2f86d6ea52efe49a867b79ac90a5b2d9bd9",
+          "models/deepseek_v32/execution/official.py": "ce9f713fa2a7061c7b1c235dc30580d6ccd00ca468dfe7be04b904fbb208f88e",
+          "models/deepseek_v32/execution/pipeline.py": "105139329035c4750e8d2c5dd8df8dbf6c79b32d4289856c5e233a8eccc757a4",
+          "models/deepseek_v32/execution/planning.py": "2ad581ffafdb337d2ea5b36c9f930270d33a4b003d2ce1f8fb15269ed6032b75",
           "models/deepseek_v32/infer.py": "37c860f1aaa7f37d5ea23c851f71a49340e854b6f8930bf5e65f38ad8aa1a328",
           "models/deepseek_v32/layers.py": "c24e0d977639c01e30b41f99c4d2d76ffd8fd7e9c90e1d3ef08305ca8281e2e8",
-          "models/deepseek_v32/model.py": "02157bb5221f5fedb6f16dda0a3f58eb59c94f668dfe19d7c795923119762224",
+          "models/deepseek_v32/model.py": "27caab73c5802f808cf86cb014fa197d1f93d7becb53acf260c54873f00a4db6",
           "models/deepseek_v32/nonmatrix.py": "5699bcd6d1f3113825e9fc76aaa0317e48828c65df624c18a8fab375c2adedc9",
           "models/deepseek_v32/projections.py": "0cf9e54a9053f0a02adfec4a929058e202d6f7dc25c5d0f8c75eebb1b6f88ae9",
           "models/deepseek_v32/replay.py": "d11e626cca4420892f8b7fc48ae1ed8c50b75a5de4d115c4dc2087b9054f6c19",
           "models/deepseek_v32/request_format.py": "104fb4d7f45c2ff69885383b2ce66a45610321066c77967be2c298ebc884f88d",
           "models/deepseek_v32/rotary.py": "ed2ca2d8ef035eaeca48135435a34e0a54df7d29a59bc34fbe67911668a9f1a2",
-          "layers/attention.py": "744be3135ab18ed9bddfbdd5945949b1dea5cb0130f4a7bea250927eeac26e5a",
-          "layers/feed_forward.py": "95dcebaa67b4f2069f580ac0831ef8335fc15b022e802708e24f58c02408de4a",
-          "layers/normalization.py": "426b2cd0e1da6c944ff661a93d55eee2b064585d5c5f6c6e6a0b80ca3bc98af0",
-          "operators/common/csrc/kv_transfer.cu": "e082e3b2ef47bad7224f14213c4fe57a6d0bda7399a556230a814d145466bf1b",
-          "operators/common/kv_transfer.py": "bc65f850a908dfc4642b7f90170513881a0a564561d9902c736d8e7d7f16b919",
+          "operators/common/csrc/kv_transfer.cu": "cb3ecce2786a7b6bb274f08a9dc22f2f0dfb90434f98bb67a9f0794b337320eb",
+          "operators/common/kv_transfer.py": "be91e7d06de06d0187f67f6e19551a3c13a132871eb1d383ee435d09f4cd65b9",
           "operators/deepseek_v32/attention/_config.py": "f17addb344d3d2a4098b4b22f3785c968e84614b7b7895abd39a4a2a1fa3d1cb",
           "operators/deepseek_v32/attention/_validation.py": "9fcd9c2c39d9981374de81f2ad8ef1d40a48bbb929ba8e995d0a572dd11c535a",
           "operators/deepseek_v32/attention/device_only/mla.py": "9075ad9955c9958110b220acf7d21e768142e19a3552154369af4cfe1ad3676c",
           "operators/deepseek_v32/attention/offload/mla.py": "ef77dc5334139aac9cfdf0e58b1bc6d0004aec33bbeab3e3f5d8342b55e7dd56",
           "operators/deepseek_v32/attention/reference/torch.py": "819cc165096790ac68585bcc90c8147b46ee99e6c7a2a3bf616fe01cd9f9b919",
-          "operators/deepseek_v32/indexer/cache_ops.py": "9283837189aeb5b8a0e55e2e6e6a25e24e08a1bb2f545edf2bf11fec2b93175c",
+          "operators/deepseek_v32/indexer/cache_ops.py": "d77adbede092e08484536431675ce8e7309479adeb489e0d9334506747850b5a",
           "operators/deepseek_v32/indexer/csrc/echo_cache.cuh": "409be4a062180a8c8e73c1fa783d3980cf3e9926bf53ef34ddbaefe46e2dcd12",
-          "operators/deepseek_v32/indexer/csrc/echo_dense_prefetch.cuh": "30374a97873ecd7b7d87730ba40c400e111d0e3ba32feee3982efc8c508bb59d",
+          "operators/deepseek_v32/indexer/csrc/echo_dense_prefetch.cuh": "a7871c753f7661d989b552de4f4f655cd8eb2987fd0900d420d5d7260d38c506",
           "operators/deepseek_v32/indexer/csrc/echo_helpers.cuh": "08c8f8db1ce344f2532c0913f18f9326769e4f2715bca48eed6bae1b1883ab21",
-          "operators/deepseek_v32/indexer/csrc/echo_indexer.cu": "86793e7375d8204a1fe445f42ecb4efd35d7b6083fa82ee2bf4e3e0a12da3eab",
+          "operators/deepseek_v32/indexer/csrc/echo_indexer.cu": "fc7559181aa450356f06d4d44f7f42c9d6182b8f841cee49df3b52355fd94f1d",
           "operators/deepseek_v32/indexer/csrc/echo_logits.cuh": "d24a4e25b82fcd3501bcd2f2276b73e26466846d99a3521c5a9e23973253fab6",
           "operators/deepseek_v32/indexer/csrc/echo_resident.cuh": "670f6b3807d642bd10653dcd36d848c9b2f9e6f643b5b037b5aec2d5993b2490",
-          "operators/deepseek_v32/indexer/csrc/echo_sparse_recall.cuh": "ddad6791b1205aa931689805018ff86a285601788c620fe4fc592846e74fd39e",
-          "operators/deepseek_v32/indexer/echo.py": "30492794f10c4bd34d730c0bb926c79827095feb59e7cad35765ff0bced4c219",
+          "operators/deepseek_v32/indexer/csrc/echo_sparse_recall.cuh": "80475b9865f471c44026c84765e7c5099d6c9737d3c7ce4247b36e66f61bfdfa",
+          "operators/deepseek_v32/indexer/echo.py": "362dc6723261b4e6ffc85cda10c770337bf1c40a9e5556212a4017f48d3d4fa1",
           "operators/deepseek_v32/indexer/official.py": "1ecc833e35c756459fa693a52cc1bc60f3afa10d9d1f2b54cd13f691217adecb",
           "operators/deepseek_v32/indexer/prefetch_hint.py": "0ba70bdc2daf4be2c385b60af69309974394ab8d237f9aaf5519fb9350b6a07c",
           "operators/deepseek_v32/indexer/quantization.py": "083b9671efe7f5dee7e71752dda3255b2d41ee45f906e48876771db5804411ea",
@@ -11125,8 +11130,8 @@
           "cache/lifecycle.py": "4e699cedce01acd99133e19c662027fb56c9abaf01a9855d09386962d688e68f",
           "cache/manager.py": "3f8a3129900f8e5e1af6005fcc187f5d430c5ce5156ca80c169384694dd39f91",
           "cache/prefix_pool.py": "1a363205c74cf382c8c4294f6ddf3358c0da31b292dc0edc16f7c80b4d77a695",
-          "cache/sparse_token_cache.py": "a48f17c9fd76891d179ac71b94c1933de206b491469436c4e1ce010fd79f3967",
-          "cache/sparse_token_pool.py": "46efe6b59a76e39075899076a3621caf5255542c67a4fd0e03ff6567d91eb2f3",
+          "cache/sparse_token_cache.py": "a9f303b2d51021a99a64b627c0a954aaf5308fb7c0c036d050093292c9584e19",
+          "cache/sparse_token_pool.py": "0641ca63cf359ad1ecc5817f41c342f5b99bcd6fbbd5ef5387a554bf68c8897d",
           "cache/staging.py": "95816259b638a9178f600479397d1c09d8ecae7a185b49ce6e85bdacf0a71c77",
           "executor/adapters.py": "7649ee19d5ca3490480a329b9f02286dcc8e6230da0395d097f3e2f9065e4e20",
           "executor/contracts.py": "8ca7b8af35fcd935f1ce96911bb30d04757e02f0d0b4635508eff12b38705139",
@@ -11149,10 +11154,10 @@
           "GR/workload.py": "2c16eb30be6888bf19ed07670dbc37b97e1bb18527545c8d6157dc79b6c644de",
           "evaluation/cache_memory_audit.py": "b195636f72950f7d77827324c9b1cfc29cb968103a130ae3c65172b2ecb3ef86",
           "evaluation/pool_scan_provenance.py": "004b86573af85619e56a99259e4208671c9fd94a99e0ec07c4fcfd6401dc3d9d",
-          "evaluation/provenance.py": "910fca0ee93420721b53b362960798104b58c44000c178e29ba5d9cad5c1bd1b",
+          "evaluation/provenance.py": "20593da3fcbaf8b720d507ee857799fde6ba297064fba505e7fec1054ec2295f",
           "evaluation/serving_comparison.py": "e86b8ee80c13f5234626a8a611145530f7f906c27774a80dc5aeac0605f2f3dc",
           "evaluation/validation.py": "769add375a8b3b64fe0c391c1a3067f2304c4727f1d4af199b9f5a5480ca2b74",
-          "experiments/cache_management/src/capacity_probe.py": "45285b6bb590a9f50d640d7dbf88d0bbba10cd47c962b5863dc1ae79205ccc79",
+          "experiments/cache_management/src/capacity_probe.py": "f71de8f83b29798d9230c33a8d143e91700118d02794d00f0efd0fc5555a07e8",
           ".gitmodules": "07ee3a4aeb04122ad8b5effca96b6ae06857fa12d06ccc9b77ea19706bc473f6",
           "3rdparty/DeepGEMM/.gitmodules": "a8fcf997d55e91a56eb7aa10ccb22823c02c095973d5a40c2c297e052154148e",
           "3rdparty/DeepGEMM/csrc/apis/attention.hpp": "2c0cc337cf652e177b2cea0c99c2f681f1d849c33f6a341952f1878c3bde8cd2",
@@ -12328,15 +12333,15 @@
           "3rdparty/cutlass/tools/util/include/cutlass/util/reference/host/trmm_complex.h": "63c92fad58bf7e1ab569bd46c8677654ed93fbd502e90e5b367bbb82c4c710de",
           "3rdparty/cutlass/tools/util/include/cutlass/util/tensor_view_io.h": "9bfb6bcd8cf2b0a6177c589c7ec963f3f7f4b40018ca1f4a30f1a4654ca8f190",
           "3rdparty/cutlass/tools/util/include/cutlass/util/type_traits.h": "456c182930d498142d2a6185d376d2f1d7798750341a5a055f4abe4a9b624415",
-          "experiments/deepseek_v32_echo_prefill/src/backend_provenance.py": "d25c4068f18a0ab0564abfbd82aeb5a7ee1a4d9d5d7375ae39ba1c9bf5456a5c",
+          "experiments/deepseek_v32_mfu/src/backend_provenance.py": "d25c4068f18a0ab0564abfbd82aeb5a7ee1a4d9d5d7375ae39ba1c9bf5456a5c",
           "pyproject.toml": "cac6e9271538d74e99b1bdc83c2a12648bb3c76a310af21c98aff3ec2d3761d1",
           "scripts/prepare_3rdparty.py": "7bb17486553a515cab2d42a2e7eed6e74717d186f47fa262cefbba997e53e953",
           "uv.lock": "53339af1728da3661b614d554e928408186b4fac6106a92999bd8fd69b3d2d8f",
-          "experiments/deepseek_v32_motivation/src/measure.py": "f40173938998813fbca017470f6253c7e9ecd4a752fe2a4f6b06b7d4df3f9273",
+          "experiments/deepseek_v32_motivation/src/measure.py": "1a752b593e2297163291dcc11d1271c38063846125b3d770feeace56ed93955c",
           "experiments/deepseek_v32_motivation/src/report.py": "cd640e53a46287e4e39ae9e772901b4c10c7a5d02db7309b8af7d2dced6a26a8",
           "experiments/nosa_motivation/src/cpu_environment.py": "c841e489bfb07baf80e06bf7aa9a6a28e395fa40a89809c1a1dd7100b166c936",
-          "experiments/nosa_motivation/src/provenance.py": "04a3a484be13d1e8062ba3ef372539130cf87f452689c80c497bc550c694680a",
-          "experiments/nosa_motivation/src/validation.py": "b4638f3102877f3b6e2e249b4f8909a8d187e6b2fdc63e834bbf56b6fadd8c22"
+          "experiments/nosa_motivation/src/provenance.py": "ab523c5d933c82368f1a82a6b4d55cb0f6b6777ceae51fe5ab61690150362123",
+          "experiments/nosa_motivation/src/validation.py": "03fc94db01330d67ed9a0589b1c69c46e87399a4d362230d2255cf3752204b64"
         },
         "config": {
           "num_users": 16,
@@ -17914,7 +17919,9 @@
               "MAX_JOBS": "8"
             }
           },
-          "jit_environment": {},
+          "jit_environment": {
+            "DG_JIT_WITH_LINEINFO": "1"
+          },
           "linear_activation_quantization": {
             "schema_version": 1,
             "backend": "handwritten_triton",
@@ -19645,10 +19652,10 @@
             "linear_backend": "fp8",
             "compute_graphs": {
               "enabled": true,
-              "policy_revision": "deepseek-compute-islands-v2",
+              "policy_revision": "deepseek-compute-islands-v3-indexer-bounds",
               "allocated": true,
-              "static_storage_bytes": 641820832,
-              "static_allocated_bytes": 644173824,
+              "static_storage_bytes": 641866912,
+              "static_allocated_bytes": 644219904,
               "private_reserved_bytes": 5603590144,
               "chosen_private_limit_bytes": 12884901888,
               "captured_precision_policy": {
@@ -19778,16 +19785,16 @@
             "extend_chunk_size": null,
             "resource_plan": {
               "compute_graphs_enabled": true,
-              "compute_graph_policy_revision": "deepseek-compute-islands-v2",
+              "compute_graph_policy_revision": "deepseek-compute-islands-v3-indexer-bounds",
               "compute_graph_query_sizes": [
                 128,
                 1024
               ],
               "compute_graph_count": 40,
-              "compute_graph_static_storage_bytes": 641820832,
-              "compute_graph_static_allocation_limit_bytes": 696356864,
+              "compute_graph_static_storage_bytes": 641866912,
+              "compute_graph_static_allocation_limit_bytes": 696402944,
               "compute_graph_private_limit_bytes": 12884901888,
-              "compute_graph_reserved_limit_bytes": 13581258752,
+              "compute_graph_reserved_limit_bytes": 13581304832,
               "compute_graph_private_limit_kind": "chosen_upper_limit_not_observed_fixed_overhead",
               "resource_mode": "fixed_pools",
               "cache_policy_revision": "echo-global-pages-fifo-v1",
@@ -19829,7 +19836,7 @@
             "total_parameters": 7827793408
           },
           "native_artifacts": {
-            "/root/.cache/cxldsagr/token-validation/941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so": {
+            "/root/.cache/cxldsagr/token-validation/b2417ad2f63b6e963d43135e555cf21a49a8ea00fc7a0eb868733c7e635dd080/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so": {
               "size": 16456,
               "sha256": "ed79d3e717a464379b4f638f608853277b65f602ef05ca5b293e3afa6025cd40"
             },
@@ -19914,7 +19921,7 @@
             "backend": "cpython_native",
             "fallback_reason": null,
             "requested_native": true,
-            "fingerprint": "941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf",
+            "fingerprint": "b2417ad2f63b6e963d43135e555cf21a49a8ea00fc7a0eb868733c7e635dd080",
             "build_identity": {
               "schema_version": 1,
               "python": "3.12.13 (main, Jun 11 2026, 04:03:26) [Clang 22.1.3 ]",
@@ -19946,7 +19953,7 @@
                 "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/serving/csrc/token_validation.cpp"
               ],
               "compiler_environment": {
-                "PATH": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin:/usr/local/cuda/bin:/usr/local/bin:/usr/bin:/bin",
+                "PATH": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin:/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin:/usr/local/cuda/bin:/usr/local/bin:/usr/bin:/bin",
                 "LC_ALL": "C"
               },
               "source_and_dependency_sha256": {
@@ -20261,7 +20268,7 @@
                 "/usr/libexec/gcc/x86_64-linux-gnu/13/collect2": "4d1f341ae5b763b513258ee2812422a45e063c30a2f1924a0cf63d3699f3a158"
               }
             },
-            "loaded_binary_path": "/root/.cache/cxldsagr/token-validation/941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so",
+            "loaded_binary_path": "/root/.cache/cxldsagr/token-validation/b2417ad2f63b6e963d43135e555cf21a49a8ea00fc7a0eb868733c7e635dd080/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so",
             "loaded_binary_sha256": "ed79d3e717a464379b4f638f608853277b65f602ef05ca5b293e3afa6025cd40"
           },
           "allocator_snapshot": null
@@ -20291,10 +20298,10 @@
             "linear_backend": "fp8",
             "compute_graphs": {
               "enabled": true,
-              "policy_revision": "deepseek-compute-islands-v2",
+              "policy_revision": "deepseek-compute-islands-v3-indexer-bounds",
               "allocated": true,
-              "static_storage_bytes": 641820832,
-              "static_allocated_bytes": 644535296,
+              "static_storage_bytes": 641866912,
+              "static_allocated_bytes": 644581376,
               "private_reserved_bytes": 5603590144,
               "chosen_private_limit_bytes": 12884901888,
               "captured_precision_policy": {
@@ -20424,16 +20431,16 @@
             "extend_chunk_size": null,
             "resource_plan": {
               "compute_graphs_enabled": true,
-              "compute_graph_policy_revision": "deepseek-compute-islands-v2",
+              "compute_graph_policy_revision": "deepseek-compute-islands-v3-indexer-bounds",
               "compute_graph_query_sizes": [
                 128,
                 1024
               ],
               "compute_graph_count": 40,
-              "compute_graph_static_storage_bytes": 641820832,
-              "compute_graph_static_allocation_limit_bytes": 696356864,
+              "compute_graph_static_storage_bytes": 641866912,
+              "compute_graph_static_allocation_limit_bytes": 696402944,
               "compute_graph_private_limit_bytes": 12884901888,
-              "compute_graph_reserved_limit_bytes": 13581258752,
+              "compute_graph_reserved_limit_bytes": 13581304832,
               "compute_graph_private_limit_kind": "chosen_upper_limit_not_observed_fixed_overhead",
               "cache_policy_revision": "echo-global-pages-fifo-v1",
               "resource_mode": "fixed_pools",
@@ -20456,6 +20463,7 @@
               "workspace_cpu_metrics_bytes": 24,
               "workspace_cpu_bytes": 40,
               "workspace_metadata_bytes": 1077936192,
+              "workspace_dense_ticket_bytes": 0,
               "max_inflight_writes": 2
             },
             "dense_staging_allocated_bytes": 0,
@@ -20476,7 +20484,7 @@
             "total_parameters": 7827793408
           },
           "native_artifacts": {
-            "/root/.cache/cxldsagr/token-validation/941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so": {
+            "/root/.cache/cxldsagr/token-validation/b2417ad2f63b6e963d43135e555cf21a49a8ea00fc7a0eb868733c7e635dd080/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so": {
               "size": 16456,
               "sha256": "ed79d3e717a464379b4f638f608853277b65f602ef05ca5b293e3afa6025cd40"
             },
@@ -20492,13 +20500,13 @@
               "size": 5962688,
               "sha256": "a63d4dfe772493fd9cbc6e65ec9fa92ab77564ab30ef8aef4a6f0b1dec47ffa8"
             },
-            "/root/.cache/tvm-ffi/cxldsagr_echo_indexer_513a53c54269f9bc_1fa11185f6354333/cxldsagr_echo_indexer_513a53c54269f9bc.so": {
-              "size": 1444432,
-              "sha256": "eafdc421b8227425371bba8258894111096228f2e61e68c40394a85f5fc2cfa4"
+            "/root/.cache/tvm-ffi/cxldsagr_echo_indexer_58f8d78829f56eee_1fa11185f6354333/cxldsagr_echo_indexer_58f8d78829f56eee.so": {
+              "size": 1572544,
+              "sha256": "e66cc5d95b3277110cbb4007b76da5c722d5863530259b371b5dbd4442a22401"
             },
             "/root/.cache/tvm-ffi/cxldsagr_kv_transfer_672412fcb6ae32f3/cxldsagr_kv_transfer.so": {
-              "size": 78752,
-              "sha256": "fa7cd702d5a267e711e2caa997784d7534497830e47e1c7ae757a1ed4e8cee86"
+              "size": 147368,
+              "sha256": "e282691a0b88a35d67eefd22f3e9a8d059c0d4258f1ff8780ac4803ff8f44964"
             },
             "/root/.venv/lib/python3.12/site-packages/nvidia/cu13/lib/libcublas.so.13": {
               "size": 54177976,
@@ -20569,7 +20577,7 @@
             "backend": "cpython_native",
             "fallback_reason": null,
             "requested_native": true,
-            "fingerprint": "941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf",
+            "fingerprint": "b2417ad2f63b6e963d43135e555cf21a49a8ea00fc7a0eb868733c7e635dd080",
             "build_identity": {
               "schema_version": 1,
               "python": "3.12.13 (main, Jun 11 2026, 04:03:26) [Clang 22.1.3 ]",
@@ -20601,7 +20609,7 @@
                 "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/serving/csrc/token_validation.cpp"
               ],
               "compiler_environment": {
-                "PATH": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin:/usr/local/cuda/bin:/usr/local/bin:/usr/bin:/bin",
+                "PATH": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin:/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin:/usr/local/cuda/bin:/usr/local/bin:/usr/bin:/bin",
                 "LC_ALL": "C"
               },
               "source_and_dependency_sha256": {
@@ -20916,7 +20924,7 @@
                 "/usr/libexec/gcc/x86_64-linux-gnu/13/collect2": "4d1f341ae5b763b513258ee2812422a45e063c30a2f1924a0cf63d3699f3a158"
               }
             },
-            "loaded_binary_path": "/root/.cache/cxldsagr/token-validation/941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so",
+            "loaded_binary_path": "/root/.cache/cxldsagr/token-validation/b2417ad2f63b6e963d43135e555cf21a49a8ea00fc7a0eb868733c7e635dd080/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so",
             "loaded_binary_sha256": "ed79d3e717a464379b4f638f608853277b65f602ef05ca5b293e3afa6025cd40"
           },
           "allocator_snapshot": null
@@ -20946,10 +20954,10 @@
             "linear_backend": "fp8",
             "compute_graphs": {
               "enabled": true,
-              "policy_revision": "deepseek-compute-islands-v2",
+              "policy_revision": "deepseek-compute-islands-v3-indexer-bounds",
               "allocated": true,
-              "static_storage_bytes": 641820832,
-              "static_allocated_bytes": 644535296,
+              "static_storage_bytes": 641866912,
+              "static_allocated_bytes": 644581376,
               "private_reserved_bytes": 5603590144,
               "chosen_private_limit_bytes": 12884901888,
               "captured_precision_policy": {
@@ -21079,16 +21087,16 @@
             "extend_chunk_size": null,
             "resource_plan": {
               "compute_graphs_enabled": true,
-              "compute_graph_policy_revision": "deepseek-compute-islands-v2",
+              "compute_graph_policy_revision": "deepseek-compute-islands-v3-indexer-bounds",
               "compute_graph_query_sizes": [
                 128,
                 1024
               ],
               "compute_graph_count": 40,
-              "compute_graph_static_storage_bytes": 641820832,
-              "compute_graph_static_allocation_limit_bytes": 696356864,
+              "compute_graph_static_storage_bytes": 641866912,
+              "compute_graph_static_allocation_limit_bytes": 696402944,
               "compute_graph_private_limit_bytes": 12884901888,
-              "compute_graph_reserved_limit_bytes": 13581258752,
+              "compute_graph_reserved_limit_bytes": 13581304832,
               "compute_graph_private_limit_kind": "chosen_upper_limit_not_observed_fixed_overhead",
               "cache_policy_revision": "echo-global-pages-fifo-v1",
               "resource_mode": "fixed_pools",
@@ -21111,6 +21119,7 @@
               "workspace_cpu_metrics_bytes": 24,
               "workspace_cpu_bytes": 40,
               "workspace_metadata_bytes": 1077936192,
+              "workspace_dense_ticket_bytes": 0,
               "max_inflight_writes": 2
             },
             "dense_staging_allocated_bytes": 0,
@@ -21131,7 +21140,7 @@
             "total_parameters": 7827793408
           },
           "native_artifacts": {
-            "/root/.cache/cxldsagr/token-validation/941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so": {
+            "/root/.cache/cxldsagr/token-validation/b2417ad2f63b6e963d43135e555cf21a49a8ea00fc7a0eb868733c7e635dd080/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so": {
               "size": 16456,
               "sha256": "ed79d3e717a464379b4f638f608853277b65f602ef05ca5b293e3afa6025cd40"
             },
@@ -21147,13 +21156,13 @@
               "size": 5962688,
               "sha256": "a63d4dfe772493fd9cbc6e65ec9fa92ab77564ab30ef8aef4a6f0b1dec47ffa8"
             },
-            "/root/.cache/tvm-ffi/cxldsagr_echo_indexer_513a53c54269f9bc_1fa11185f6354333/cxldsagr_echo_indexer_513a53c54269f9bc.so": {
-              "size": 1444432,
-              "sha256": "eafdc421b8227425371bba8258894111096228f2e61e68c40394a85f5fc2cfa4"
+            "/root/.cache/tvm-ffi/cxldsagr_echo_indexer_58f8d78829f56eee_1fa11185f6354333/cxldsagr_echo_indexer_58f8d78829f56eee.so": {
+              "size": 1572544,
+              "sha256": "e66cc5d95b3277110cbb4007b76da5c722d5863530259b371b5dbd4442a22401"
             },
             "/root/.cache/tvm-ffi/cxldsagr_kv_transfer_672412fcb6ae32f3/cxldsagr_kv_transfer.so": {
-              "size": 78752,
-              "sha256": "fa7cd702d5a267e711e2caa997784d7534497830e47e1c7ae757a1ed4e8cee86"
+              "size": 147368,
+              "sha256": "e282691a0b88a35d67eefd22f3e9a8d059c0d4258f1ff8780ac4803ff8f44964"
             },
             "/root/.venv/lib/python3.12/site-packages/nvidia/cu13/lib/libcublas.so.13": {
               "size": 54177976,
@@ -21224,7 +21233,7 @@
             "backend": "cpython_native",
             "fallback_reason": null,
             "requested_native": true,
-            "fingerprint": "941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf",
+            "fingerprint": "b2417ad2f63b6e963d43135e555cf21a49a8ea00fc7a0eb868733c7e635dd080",
             "build_identity": {
               "schema_version": 1,
               "python": "3.12.13 (main, Jun 11 2026, 04:03:26) [Clang 22.1.3 ]",
@@ -21256,7 +21265,7 @@
                 "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/serving/csrc/token_validation.cpp"
               ],
               "compiler_environment": {
-                "PATH": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin:/usr/local/cuda/bin:/usr/local/bin:/usr/bin:/bin",
+                "PATH": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin:/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin:/usr/local/cuda/bin:/usr/local/bin:/usr/bin:/bin",
                 "LC_ALL": "C"
               },
               "source_and_dependency_sha256": {
@@ -21571,7 +21580,7 @@
                 "/usr/libexec/gcc/x86_64-linux-gnu/13/collect2": "4d1f341ae5b763b513258ee2812422a45e063c30a2f1924a0cf63d3699f3a158"
               }
             },
-            "loaded_binary_path": "/root/.cache/cxldsagr/token-validation/941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so",
+            "loaded_binary_path": "/root/.cache/cxldsagr/token-validation/b2417ad2f63b6e963d43135e555cf21a49a8ea00fc7a0eb868733c7e635dd080/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so",
             "loaded_binary_sha256": "ed79d3e717a464379b4f638f608853277b65f602ef05ca5b293e3afa6025cd40"
           },
           "allocator_snapshot": null
@@ -21601,10 +21610,10 @@
             "linear_backend": "fp8",
             "compute_graphs": {
               "enabled": true,
-              "policy_revision": "deepseek-compute-islands-v2",
+              "policy_revision": "deepseek-compute-islands-v3-indexer-bounds",
               "allocated": true,
-              "static_storage_bytes": 641820832,
-              "static_allocated_bytes": 644535296,
+              "static_storage_bytes": 641866912,
+              "static_allocated_bytes": 644581376,
               "private_reserved_bytes": 5603590144,
               "chosen_private_limit_bytes": 12884901888,
               "captured_precision_policy": {
@@ -21734,16 +21743,16 @@
             "extend_chunk_size": null,
             "resource_plan": {
               "compute_graphs_enabled": true,
-              "compute_graph_policy_revision": "deepseek-compute-islands-v2",
+              "compute_graph_policy_revision": "deepseek-compute-islands-v3-indexer-bounds",
               "compute_graph_query_sizes": [
                 128,
                 1024
               ],
               "compute_graph_count": 40,
-              "compute_graph_static_storage_bytes": 641820832,
-              "compute_graph_static_allocation_limit_bytes": 696356864,
+              "compute_graph_static_storage_bytes": 641866912,
+              "compute_graph_static_allocation_limit_bytes": 696402944,
               "compute_graph_private_limit_bytes": 12884901888,
-              "compute_graph_reserved_limit_bytes": 13581258752,
+              "compute_graph_reserved_limit_bytes": 13581304832,
               "compute_graph_private_limit_kind": "chosen_upper_limit_not_observed_fixed_overhead",
               "cache_policy_revision": "echo-global-pages-fifo-v1",
               "resource_mode": "fixed_pools",
@@ -21766,6 +21775,7 @@
               "workspace_cpu_metrics_bytes": 24,
               "workspace_cpu_bytes": 40,
               "workspace_metadata_bytes": 1077936192,
+              "workspace_dense_ticket_bytes": 10491392,
               "max_inflight_writes": 2
             },
             "dense_staging_allocated_bytes": 0,
@@ -21786,7 +21796,7 @@
             "total_parameters": 7827793408
           },
           "native_artifacts": {
-            "/root/.cache/cxldsagr/token-validation/941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so": {
+            "/root/.cache/cxldsagr/token-validation/b2417ad2f63b6e963d43135e555cf21a49a8ea00fc7a0eb868733c7e635dd080/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so": {
               "size": 16456,
               "sha256": "ed79d3e717a464379b4f638f608853277b65f602ef05ca5b293e3afa6025cd40"
             },
@@ -21802,13 +21812,13 @@
               "size": 5962688,
               "sha256": "a63d4dfe772493fd9cbc6e65ec9fa92ab77564ab30ef8aef4a6f0b1dec47ffa8"
             },
-            "/root/.cache/tvm-ffi/cxldsagr_echo_indexer_513a53c54269f9bc_1fa11185f6354333/cxldsagr_echo_indexer_513a53c54269f9bc.so": {
-              "size": 1444432,
-              "sha256": "eafdc421b8227425371bba8258894111096228f2e61e68c40394a85f5fc2cfa4"
+            "/root/.cache/tvm-ffi/cxldsagr_echo_indexer_58f8d78829f56eee_1fa11185f6354333/cxldsagr_echo_indexer_58f8d78829f56eee.so": {
+              "size": 1572544,
+              "sha256": "e66cc5d95b3277110cbb4007b76da5c722d5863530259b371b5dbd4442a22401"
             },
             "/root/.cache/tvm-ffi/cxldsagr_kv_transfer_672412fcb6ae32f3/cxldsagr_kv_transfer.so": {
-              "size": 78752,
-              "sha256": "fa7cd702d5a267e711e2caa997784d7534497830e47e1c7ae757a1ed4e8cee86"
+              "size": 147368,
+              "sha256": "e282691a0b88a35d67eefd22f3e9a8d059c0d4258f1ff8780ac4803ff8f44964"
             },
             "/root/.venv/lib/python3.12/site-packages/nvidia/cu13/lib/libcublas.so.13": {
               "size": 54177976,
@@ -21879,7 +21889,7 @@
             "backend": "cpython_native",
             "fallback_reason": null,
             "requested_native": true,
-            "fingerprint": "941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf",
+            "fingerprint": "b2417ad2f63b6e963d43135e555cf21a49a8ea00fc7a0eb868733c7e635dd080",
             "build_identity": {
               "schema_version": 1,
               "python": "3.12.13 (main, Jun 11 2026, 04:03:26) [Clang 22.1.3 ]",
@@ -21911,7 +21921,7 @@
                 "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/serving/csrc/token_validation.cpp"
               ],
               "compiler_environment": {
-                "PATH": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin:/usr/local/cuda/bin:/usr/local/bin:/usr/bin:/bin",
+                "PATH": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin:/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin:/usr/local/cuda/bin:/usr/local/bin:/usr/bin:/bin",
                 "LC_ALL": "C"
               },
               "source_and_dependency_sha256": {
@@ -22226,7 +22236,7 @@
                 "/usr/libexec/gcc/x86_64-linux-gnu/13/collect2": "4d1f341ae5b763b513258ee2812422a45e063c30a2f1924a0cf63d3699f3a158"
               }
             },
-            "loaded_binary_path": "/root/.cache/cxldsagr/token-validation/941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so",
+            "loaded_binary_path": "/root/.cache/cxldsagr/token-validation/b2417ad2f63b6e963d43135e555cf21a49a8ea00fc7a0eb868733c7e635dd080/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so",
             "loaded_binary_sha256": "ed79d3e717a464379b4f638f608853277b65f602ef05ca5b293e3afa6025cd40"
           },
           "allocator_snapshot": null
@@ -22234,8 +22244,8 @@
       }
     },
     "correctness_receipt": {
-      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/docs/agents/acceptance/unified_runtime_20261005/deepseek_final/receipt.json",
-      "sha256": "a25cc5d08891fd6811db232de0b862831b46702c1b2f3124b2921b611574c1b3",
+      "path": "/tmp/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_mfu_c10_check_20261006_01/receipt.json",
+      "sha256": "1db5e4b5e53c4639a42edb9d44ca9b2e790d38e6ef932b790685e1865b2b644b",
       "kind": "deepseek-v32-motivation-full-trace-v1",
       "identity": {
         "base": {
@@ -27065,7 +27075,9 @@
                 }
               }
             },
-            "jit_environment": {},
+            "jit_environment": {
+              "DG_JIT_WITH_LINEINFO": "1"
+            },
             "linear_activation_quantization": {
               "backend": "handwritten_triton",
               "compiler_environment": {
@@ -30718,65 +30730,62 @@
             "cache/lifecycle.py": "4e699cedce01acd99133e19c662027fb56c9abaf01a9855d09386962d688e68f",
             "cache/manager.py": "3f8a3129900f8e5e1af6005fcc187f5d430c5ce5156ca80c169384694dd39f91",
             "cache/prefix_pool.py": "1a363205c74cf382c8c4294f6ddf3358c0da31b292dc0edc16f7c80b4d77a695",
-            "cache/sparse_token_cache.py": "a48f17c9fd76891d179ac71b94c1933de206b491469436c4e1ce010fd79f3967",
-            "cache/sparse_token_pool.py": "46efe6b59a76e39075899076a3621caf5255542c67a4fd0e03ff6567d91eb2f3",
+            "cache/sparse_token_cache.py": "a9f303b2d51021a99a64b627c0a954aaf5308fb7c0c036d050093292c9584e19",
+            "cache/sparse_token_pool.py": "0641ca63cf359ad1ecc5817f41c342f5b99bcd6fbbd5ef5387a554bf68c8897d",
             "cache/staging.py": "95816259b638a9178f600479397d1c09d8ecae7a185b49ce6e85bdacf0a71c77",
             "evaluation/cache_memory_audit.py": "b195636f72950f7d77827324c9b1cfc29cb968103a130ae3c65172b2ecb3ef86",
             "evaluation/pool_scan_provenance.py": "004b86573af85619e56a99259e4208671c9fd94a99e0ec07c4fcfd6401dc3d9d",
-            "evaluation/provenance.py": "910fca0ee93420721b53b362960798104b58c44000c178e29ba5d9cad5c1bd1b",
+            "evaluation/provenance.py": "20593da3fcbaf8b720d507ee857799fde6ba297064fba505e7fec1054ec2295f",
             "evaluation/serving_comparison.py": "e86b8ee80c13f5234626a8a611145530f7f906c27774a80dc5aeac0605f2f3dc",
             "evaluation/validation.py": "769add375a8b3b64fe0c391c1a3067f2304c4727f1d4af199b9f5a5480ca2b74",
             "executor/adapters.py": "7649ee19d5ca3490480a329b9f02286dcc8e6230da0395d097f3e2f9065e4e20",
             "executor/contracts.py": "8ca7b8af35fcd935f1ce96911bb30d04757e02f0d0b4635508eff12b38705139",
             "executor/model_executor.py": "f585f9940d5fb506e7f8aaeafe8602f9877ac773f2183603744f2b3a2a48c919",
             "executor/runtime.py": "796d266c4faee012e8277f8c94970e37e688615f5104cb214ee03d154b833b37",
-            "experiments/cache_management/src/capacity_probe.py": "45285b6bb590a9f50d640d7dbf88d0bbba10cd47c962b5863dc1ae79205ccc79",
-            "experiments/deepseek_v32_echo_prefill/src/backend_provenance.py": "d25c4068f18a0ab0564abfbd82aeb5a7ee1a4d9d5d7375ae39ba1c9bf5456a5c",
-            "experiments/deepseek_v32_motivation/src/measure.py": "f40173938998813fbca017470f6253c7e9ecd4a752fe2a4f6b06b7d4df3f9273",
+            "experiments/cache_management/src/capacity_probe.py": "f71de8f83b29798d9230c33a8d143e91700118d02794d00f0efd0fc5555a07e8",
+            "experiments/deepseek_v32_mfu/src/backend_provenance.py": "d25c4068f18a0ab0564abfbd82aeb5a7ee1a4d9d5d7375ae39ba1c9bf5456a5c",
+            "experiments/deepseek_v32_motivation/src/measure.py": "1a752b593e2297163291dcc11d1271c38063846125b3d770feeace56ed93955c",
             "experiments/deepseek_v32_motivation/src/report.py": "cd640e53a46287e4e39ae9e772901b4c10c7a5d02db7309b8af7d2dced6a26a8",
             "experiments/nosa_motivation/src/cpu_environment.py": "c841e489bfb07baf80e06bf7aa9a6a28e395fa40a89809c1a1dd7100b166c936",
-            "experiments/nosa_motivation/src/provenance.py": "04a3a484be13d1e8062ba3ef372539130cf87f452689c80c497bc550c694680a",
-            "experiments/nosa_motivation/src/validation.py": "b4638f3102877f3b6e2e249b4f8909a8d187e6b2fdc63e834bbf56b6fadd8c22",
-            "layers/attention.py": "744be3135ab18ed9bddfbdd5945949b1dea5cb0130f4a7bea250927eeac26e5a",
-            "layers/feed_forward.py": "95dcebaa67b4f2069f580ac0831ef8335fc15b022e802708e24f58c02408de4a",
-            "layers/normalization.py": "426b2cd0e1da6c944ff661a93d55eee2b064585d5c5f6c6e6a0b80ca3bc98af0",
-            "models/deepseek_v32/attention.py": "0ff4a5b3687079dcec8e734f54473886f706ba80c092a8547ca76fa8d349c83e",
+            "experiments/nosa_motivation/src/provenance.py": "ab523c5d933c82368f1a82a6b4d55cb0f6b6777ceae51fe5ab61690150362123",
+            "experiments/nosa_motivation/src/validation.py": "03fc94db01330d67ed9a0589b1c69c46e87399a4d362230d2255cf3752204b64",
+            "models/deepseek_v32/attention.py": "fe91615bfa9119cba1221cb1ac87be3694b5d6119b3f9ea21852fe12458b00e5",
             "models/deepseek_v32/cache/official.py": "0a9e272571495c8d99b5a6b821cc5b15ac7de70d6248464cac2b549b9135bf85",
-            "models/deepseek_v32/cache/prefetch.py": "fcee5ae3d45e20d3fdb76861f74c94421e4f5ef900aa0caf9c5739249e751a40",
+            "models/deepseek_v32/cache/prefetch.py": "fdcce39f89aa8f81acd96876f0af691e959578c23cd24bf3828f4651851d3cd4",
             "models/deepseek_v32/cache/session.py": "50e11d659389aeafc2ed8a608915f4eca2202e953529a4ea7180d2dd0edaaad9",
             "models/deepseek_v32/checkpoint.py": "382f00612ce000d70a0a90a24e1bc5ec2c75032dbcc13bafa73d30d80565ad0f",
             "models/deepseek_v32/config.py": "d8f0d2aa209e2cf7a7653ef4980b60a3dca4d430eb23f2579abf00a290ff529d",
-            "models/deepseek_v32/execution/adapter.py": "b9dd19dd9dac73f21923bc52a9fdec0d28ad8f9137d4f51e8781a73ca7e6c04a",
-            "models/deepseek_v32/execution/cache_resources.py": "a8fe8cd5f09ea71d7107707a5690e7d65619b748dc9d8fbbea0651ec81a4ed83",
-            "models/deepseek_v32/execution/capacity.py": "8baecb09892c4806bbaf7b26e6a987c41180638cbfe1bb451e68a885c1228a54",
-            "models/deepseek_v32/execution/compute_graphs.py": "fb1e0d3b7f9f20df199dfc92bd0df47bdba7c3c4f18c8509f0c25e3c5dba23c0",
-            "models/deepseek_v32/execution/official.py": "52df7f6d6c29e65a40c2fd571089adbdf67d50013c2f3b09eb8e491740611833",
-            "models/deepseek_v32/execution/pipeline.py": "a476eaf09261ea2705fbdd2fb09646ddba53ccabc478a56b9772d6bc4f468d2e",
-            "models/deepseek_v32/execution/planning.py": "83eba13951b94e322b2ebf927a242a289e496159d749f30f5277bb4032623fb5",
+            "models/deepseek_v32/execution/adapter.py": "66cb418b66180a1feded94a6a262ce96698fbb85bb696c16da19cdc31ba63be6",
+            "models/deepseek_v32/execution/cache_resources.py": "40e791a4e3496f8baa85b50d8bdc85702b19e97b0e8b2a7cc0da58b45a8f1246",
+            "models/deepseek_v32/execution/capacity.py": "9844ef42c65b25a4c7358dd4975f39c1eb434ce5587b721aa660e4181e83f694",
+            "models/deepseek_v32/execution/compute_graphs.py": "5e03668e1a0ecc20c07205723daba2f86d6ea52efe49a867b79ac90a5b2d9bd9",
+            "models/deepseek_v32/execution/official.py": "ce9f713fa2a7061c7b1c235dc30580d6ccd00ca468dfe7be04b904fbb208f88e",
+            "models/deepseek_v32/execution/pipeline.py": "105139329035c4750e8d2c5dd8df8dbf6c79b32d4289856c5e233a8eccc757a4",
+            "models/deepseek_v32/execution/planning.py": "2ad581ffafdb337d2ea5b36c9f930270d33a4b003d2ce1f8fb15269ed6032b75",
             "models/deepseek_v32/infer.py": "37c860f1aaa7f37d5ea23c851f71a49340e854b6f8930bf5e65f38ad8aa1a328",
             "models/deepseek_v32/layers.py": "c24e0d977639c01e30b41f99c4d2d76ffd8fd7e9c90e1d3ef08305ca8281e2e8",
-            "models/deepseek_v32/model.py": "02157bb5221f5fedb6f16dda0a3f58eb59c94f668dfe19d7c795923119762224",
+            "models/deepseek_v32/model.py": "27caab73c5802f808cf86cb014fa197d1f93d7becb53acf260c54873f00a4db6",
             "models/deepseek_v32/nonmatrix.py": "5699bcd6d1f3113825e9fc76aaa0317e48828c65df624c18a8fab375c2adedc9",
             "models/deepseek_v32/projections.py": "0cf9e54a9053f0a02adfec4a929058e202d6f7dc25c5d0f8c75eebb1b6f88ae9",
             "models/deepseek_v32/replay.py": "d11e626cca4420892f8b7fc48ae1ed8c50b75a5de4d115c4dc2087b9054f6c19",
             "models/deepseek_v32/request_format.py": "104fb4d7f45c2ff69885383b2ce66a45610321066c77967be2c298ebc884f88d",
             "models/deepseek_v32/rotary.py": "ed2ca2d8ef035eaeca48135435a34e0a54df7d29a59bc34fbe67911668a9f1a2",
-            "operators/common/csrc/kv_transfer.cu": "e082e3b2ef47bad7224f14213c4fe57a6d0bda7399a556230a814d145466bf1b",
-            "operators/common/kv_transfer.py": "bc65f850a908dfc4642b7f90170513881a0a564561d9902c736d8e7d7f16b919",
+            "operators/common/csrc/kv_transfer.cu": "cb3ecce2786a7b6bb274f08a9dc22f2f0dfb90434f98bb67a9f0794b337320eb",
+            "operators/common/kv_transfer.py": "be91e7d06de06d0187f67f6e19551a3c13a132871eb1d383ee435d09f4cd65b9",
             "operators/deepseek_v32/attention/_config.py": "f17addb344d3d2a4098b4b22f3785c968e84614b7b7895abd39a4a2a1fa3d1cb",
             "operators/deepseek_v32/attention/_validation.py": "9fcd9c2c39d9981374de81f2ad8ef1d40a48bbb929ba8e995d0a572dd11c535a",
             "operators/deepseek_v32/attention/device_only/mla.py": "9075ad9955c9958110b220acf7d21e768142e19a3552154369af4cfe1ad3676c",
             "operators/deepseek_v32/attention/offload/mla.py": "ef77dc5334139aac9cfdf0e58b1bc6d0004aec33bbeab3e3f5d8342b55e7dd56",
             "operators/deepseek_v32/attention/reference/torch.py": "819cc165096790ac68585bcc90c8147b46ee99e6c7a2a3bf616fe01cd9f9b919",
-            "operators/deepseek_v32/indexer/cache_ops.py": "9283837189aeb5b8a0e55e2e6e6a25e24e08a1bb2f545edf2bf11fec2b93175c",
+            "operators/deepseek_v32/indexer/cache_ops.py": "d77adbede092e08484536431675ce8e7309479adeb489e0d9334506747850b5a",
             "operators/deepseek_v32/indexer/csrc/echo_cache.cuh": "409be4a062180a8c8e73c1fa783d3980cf3e9926bf53ef34ddbaefe46e2dcd12",
-            "operators/deepseek_v32/indexer/csrc/echo_dense_prefetch.cuh": "30374a97873ecd7b7d87730ba40c400e111d0e3ba32feee3982efc8c508bb59d",
+            "operators/deepseek_v32/indexer/csrc/echo_dense_prefetch.cuh": "a7871c753f7661d989b552de4f4f655cd8eb2987fd0900d420d5d7260d38c506",
             "operators/deepseek_v32/indexer/csrc/echo_helpers.cuh": "08c8f8db1ce344f2532c0913f18f9326769e4f2715bca48eed6bae1b1883ab21",
-            "operators/deepseek_v32/indexer/csrc/echo_indexer.cu": "86793e7375d8204a1fe445f42ecb4efd35d7b6083fa82ee2bf4e3e0a12da3eab",
+            "operators/deepseek_v32/indexer/csrc/echo_indexer.cu": "fc7559181aa450356f06d4d44f7f42c9d6182b8f841cee49df3b52355fd94f1d",
             "operators/deepseek_v32/indexer/csrc/echo_logits.cuh": "d24a4e25b82fcd3501bcd2f2276b73e26466846d99a3521c5a9e23973253fab6",
             "operators/deepseek_v32/indexer/csrc/echo_resident.cuh": "670f6b3807d642bd10653dcd36d848c9b2f9e6f643b5b037b5aec2d5993b2490",
-            "operators/deepseek_v32/indexer/csrc/echo_sparse_recall.cuh": "ddad6791b1205aa931689805018ff86a285601788c620fe4fc592846e74fd39e",
-            "operators/deepseek_v32/indexer/echo.py": "30492794f10c4bd34d730c0bb926c79827095feb59e7cad35765ff0bced4c219",
+            "operators/deepseek_v32/indexer/csrc/echo_sparse_recall.cuh": "80475b9865f471c44026c84765e7c5099d6c9737d3c7ce4247b36e66f61bfdfa",
+            "operators/deepseek_v32/indexer/echo.py": "362dc6723261b4e6ffc85cda10c770337bf1c40a9e5556212a4017f48d3d4fa1",
             "operators/deepseek_v32/indexer/official.py": "1ecc833e35c756459fa693a52cc1bc60f3afa10d9d1f2b54cd13f691217adecb",
             "operators/deepseek_v32/indexer/prefetch_hint.py": "0ba70bdc2daf4be2c385b60af69309974394ab8d237f9aaf5519fb9350b6a07c",
             "operators/deepseek_v32/indexer/quantization.py": "083b9671efe7f5dee7e71752dda3255b2d41ee45f906e48876771db5804411ea",
@@ -30930,11 +30939,11 @@
                     "residual_present": false
                   }
                 ],
-                "policy_revision": "deepseek-compute-islands-v2",
+                "policy_revision": "deepseek-compute-islands-v3-indexer-bounds",
                 "private_reserved_bytes": 5603590144,
                 "profiling_status": "graph_node_timing_attribution_pending",
-                "static_allocated_bytes": 644535296,
-                "static_storage_bytes": 641820832
+                "static_allocated_bytes": 644581376,
+                "static_storage_bytes": 641866912
               },
               "dense_staging_allocated_bytes": 0,
               "device": "cuda:0",
@@ -30958,16 +30967,16 @@
                 "candidate_persistence": "gpu_transient",
                 "candidate_slots": 128,
                 "compute_graph_count": 40,
-                "compute_graph_policy_revision": "deepseek-compute-islands-v2",
+                "compute_graph_policy_revision": "deepseek-compute-islands-v3-indexer-bounds",
                 "compute_graph_private_limit_bytes": 12884901888,
                 "compute_graph_private_limit_kind": "chosen_upper_limit_not_observed_fixed_overhead",
                 "compute_graph_query_sizes": [
                   128,
                   1024
                 ],
-                "compute_graph_reserved_limit_bytes": 13581258752,
-                "compute_graph_static_allocation_limit_bytes": 696356864,
-                "compute_graph_static_storage_bytes": 641820832,
+                "compute_graph_reserved_limit_bytes": 13581304832,
+                "compute_graph_static_allocation_limit_bytes": 696402944,
+                "compute_graph_static_storage_bytes": 641866912,
                 "compute_graphs_enabled": true,
                 "dense_fetch_policy": "all_history_cache_misses_next_layer",
                 "host_arena_tokens": 16777216,
@@ -30985,6 +30994,7 @@
                 "workspace_cpu_indexer_bytes": 8,
                 "workspace_cpu_metrics_bytes": 24,
                 "workspace_cpu_scalar_bytes": 8,
+                "workspace_dense_ticket_bytes": 10491392,
                 "workspace_indexer_bytes": 1212157952,
                 "workspace_metadata_bytes": 1077936192,
                 "workspace_query_tokens": 1024
@@ -31016,7 +31026,7 @@
             },
             "backend_type": "models.deepseek_v32.execution.adapter.DeepSeekServingBackend",
             "native_artifacts": {
-              "/root/.cache/cxldsagr/token-validation/941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so": {
+              "/root/.cache/cxldsagr/token-validation/b2417ad2f63b6e963d43135e555cf21a49a8ea00fc7a0eb868733c7e635dd080/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so": {
                 "sha256": "ed79d3e717a464379b4f638f608853277b65f602ef05ca5b293e3afa6025cd40",
                 "size": 16456
               },
@@ -31032,13 +31042,13 @@
                 "sha256": "a63d4dfe772493fd9cbc6e65ec9fa92ab77564ab30ef8aef4a6f0b1dec47ffa8",
                 "size": 5962688
               },
-              "/root/.cache/tvm-ffi/cxldsagr_echo_indexer_513a53c54269f9bc_1fa11185f6354333/cxldsagr_echo_indexer_513a53c54269f9bc.so": {
-                "sha256": "eafdc421b8227425371bba8258894111096228f2e61e68c40394a85f5fc2cfa4",
-                "size": 1444432
+              "/root/.cache/tvm-ffi/cxldsagr_echo_indexer_58f8d78829f56eee_1fa11185f6354333/cxldsagr_echo_indexer_58f8d78829f56eee.so": {
+                "sha256": "e66cc5d95b3277110cbb4007b76da5c722d5863530259b371b5dbd4442a22401",
+                "size": 1572544
               },
               "/root/.cache/tvm-ffi/cxldsagr_kv_transfer_672412fcb6ae32f3/cxldsagr_kv_transfer.so": {
-                "sha256": "fa7cd702d5a267e711e2caa997784d7534497830e47e1c7ae757a1ed4e8cee86",
-                "size": 78752
+                "sha256": "e282691a0b88a35d67eefd22f3e9a8d059c0d4258f1ff8780ac4803ff8f44964",
+                "size": 147368
               },
               "/root/.venv/lib/python3.12/site-packages/nvidia/cu13/lib/libcublas.so.13": {
                 "sha256": "25cde432108543626df85d887c730bf2cab96803ca16f9654e4abc8d2b45833e",
@@ -31128,7 +31138,7 @@
                 ],
                 "compiler_environment": {
                   "LC_ALL": "C",
-                  "PATH": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin:/usr/local/cuda/bin:/usr/local/bin:/usr/bin:/bin"
+                  "PATH": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin:/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin:/usr/local/cuda/bin:/usr/local/bin:/usr/bin:/bin"
                 },
                 "compiler_tools": {
                   "as": "/usr/bin/x86_64-linux-gnu-as",
@@ -31454,8 +31464,8 @@
                 }
               },
               "fallback_reason": null,
-              "fingerprint": "941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf",
-              "loaded_binary_path": "/root/.cache/cxldsagr/token-validation/941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so",
+              "fingerprint": "b2417ad2f63b6e963d43135e555cf21a49a8ea00fc7a0eb868733c7e635dd080",
+              "loaded_binary_path": "/root/.cache/cxldsagr/token-validation/b2417ad2f63b6e963d43135e555cf21a49a8ea00fc7a0eb868733c7e635dd080/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so",
               "loaded_binary_sha256": "ed79d3e717a464379b4f638f608853277b65f602ef05ca5b293e3afa6025cd40",
               "requested_native": true
             }
@@ -31585,11 +31595,11 @@
                     "residual_present": false
                   }
                 ],
-                "policy_revision": "deepseek-compute-islands-v2",
+                "policy_revision": "deepseek-compute-islands-v3-indexer-bounds",
                 "private_reserved_bytes": 5603590144,
                 "profiling_status": "graph_node_timing_attribution_pending",
-                "static_allocated_bytes": 644535296,
-                "static_storage_bytes": 641820832
+                "static_allocated_bytes": 644581376,
+                "static_storage_bytes": 641866912
               },
               "dense_staging_allocated_bytes": 0,
               "device": "cuda:0",
@@ -31613,16 +31623,16 @@
                 "candidate_persistence": "gpu_transient",
                 "candidate_slots": 128,
                 "compute_graph_count": 40,
-                "compute_graph_policy_revision": "deepseek-compute-islands-v2",
+                "compute_graph_policy_revision": "deepseek-compute-islands-v3-indexer-bounds",
                 "compute_graph_private_limit_bytes": 12884901888,
                 "compute_graph_private_limit_kind": "chosen_upper_limit_not_observed_fixed_overhead",
                 "compute_graph_query_sizes": [
                   128,
                   1024
                 ],
-                "compute_graph_reserved_limit_bytes": 13581258752,
-                "compute_graph_static_allocation_limit_bytes": 696356864,
-                "compute_graph_static_storage_bytes": 641820832,
+                "compute_graph_reserved_limit_bytes": 13581304832,
+                "compute_graph_static_allocation_limit_bytes": 696402944,
+                "compute_graph_static_storage_bytes": 641866912,
                 "compute_graphs_enabled": true,
                 "dense_fetch_policy": null,
                 "host_arena_tokens": 16777216,
@@ -31640,6 +31650,7 @@
                 "workspace_cpu_indexer_bytes": 8,
                 "workspace_cpu_metrics_bytes": 24,
                 "workspace_cpu_scalar_bytes": 8,
+                "workspace_dense_ticket_bytes": 0,
                 "workspace_indexer_bytes": 1212157952,
                 "workspace_metadata_bytes": 1077936192,
                 "workspace_query_tokens": 1024
@@ -31671,7 +31682,7 @@
             },
             "backend_type": "models.deepseek_v32.execution.adapter.DeepSeekServingBackend",
             "native_artifacts": {
-              "/root/.cache/cxldsagr/token-validation/941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so": {
+              "/root/.cache/cxldsagr/token-validation/b2417ad2f63b6e963d43135e555cf21a49a8ea00fc7a0eb868733c7e635dd080/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so": {
                 "sha256": "ed79d3e717a464379b4f638f608853277b65f602ef05ca5b293e3afa6025cd40",
                 "size": 16456
               },
@@ -31687,13 +31698,13 @@
                 "sha256": "a63d4dfe772493fd9cbc6e65ec9fa92ab77564ab30ef8aef4a6f0b1dec47ffa8",
                 "size": 5962688
               },
-              "/root/.cache/tvm-ffi/cxldsagr_echo_indexer_513a53c54269f9bc_1fa11185f6354333/cxldsagr_echo_indexer_513a53c54269f9bc.so": {
-                "sha256": "eafdc421b8227425371bba8258894111096228f2e61e68c40394a85f5fc2cfa4",
-                "size": 1444432
+              "/root/.cache/tvm-ffi/cxldsagr_echo_indexer_58f8d78829f56eee_1fa11185f6354333/cxldsagr_echo_indexer_58f8d78829f56eee.so": {
+                "sha256": "e66cc5d95b3277110cbb4007b76da5c722d5863530259b371b5dbd4442a22401",
+                "size": 1572544
               },
               "/root/.cache/tvm-ffi/cxldsagr_kv_transfer_672412fcb6ae32f3/cxldsagr_kv_transfer.so": {
-                "sha256": "fa7cd702d5a267e711e2caa997784d7534497830e47e1c7ae757a1ed4e8cee86",
-                "size": 78752
+                "sha256": "e282691a0b88a35d67eefd22f3e9a8d059c0d4258f1ff8780ac4803ff8f44964",
+                "size": 147368
               },
               "/root/.venv/lib/python3.12/site-packages/nvidia/cu13/lib/libcublas.so.13": {
                 "sha256": "25cde432108543626df85d887c730bf2cab96803ca16f9654e4abc8d2b45833e",
@@ -31783,7 +31794,7 @@
                 ],
                 "compiler_environment": {
                   "LC_ALL": "C",
-                  "PATH": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin:/usr/local/cuda/bin:/usr/local/bin:/usr/bin:/bin"
+                  "PATH": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin:/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin:/usr/local/cuda/bin:/usr/local/bin:/usr/bin:/bin"
                 },
                 "compiler_tools": {
                   "as": "/usr/bin/x86_64-linux-gnu-as",
@@ -32109,8 +32120,8 @@
                 }
               },
               "fallback_reason": null,
-              "fingerprint": "941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf",
-              "loaded_binary_path": "/root/.cache/cxldsagr/token-validation/941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so",
+              "fingerprint": "b2417ad2f63b6e963d43135e555cf21a49a8ea00fc7a0eb868733c7e635dd080",
+              "loaded_binary_path": "/root/.cache/cxldsagr/token-validation/b2417ad2f63b6e963d43135e555cf21a49a8ea00fc7a0eb868733c7e635dd080/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so",
               "loaded_binary_sha256": "ed79d3e717a464379b4f638f608853277b65f602ef05ca5b293e3afa6025cd40",
               "requested_native": true
             }
@@ -32240,11 +32251,11 @@
                     "residual_present": false
                   }
                 ],
-                "policy_revision": "deepseek-compute-islands-v2",
+                "policy_revision": "deepseek-compute-islands-v3-indexer-bounds",
                 "private_reserved_bytes": 5603590144,
                 "profiling_status": "graph_node_timing_attribution_pending",
-                "static_allocated_bytes": 644173824,
-                "static_storage_bytes": 641820832
+                "static_allocated_bytes": 644219904,
+                "static_storage_bytes": 641866912
               },
               "dense_staging_allocated_bytes": 0,
               "device": "cuda:0",
@@ -32268,16 +32279,16 @@
                 "candidate_persistence": "gpu_transient",
                 "candidate_slots": 128,
                 "compute_graph_count": 40,
-                "compute_graph_policy_revision": "deepseek-compute-islands-v2",
+                "compute_graph_policy_revision": "deepseek-compute-islands-v3-indexer-bounds",
                 "compute_graph_private_limit_bytes": 12884901888,
                 "compute_graph_private_limit_kind": "chosen_upper_limit_not_observed_fixed_overhead",
                 "compute_graph_query_sizes": [
                   128,
                   1024
                 ],
-                "compute_graph_reserved_limit_bytes": 13581258752,
-                "compute_graph_static_allocation_limit_bytes": 696356864,
-                "compute_graph_static_storage_bytes": 641820832,
+                "compute_graph_reserved_limit_bytes": 13581304832,
+                "compute_graph_static_allocation_limit_bytes": 696402944,
+                "compute_graph_static_storage_bytes": 641866912,
                 "compute_graphs_enabled": true,
                 "dense_staging_allocation_bytes": 0,
                 "dense_staging_bytes": 0,
@@ -32325,7 +32336,7 @@
             },
             "backend_type": "models.deepseek_v32.execution.adapter.DeepSeekServingBackend",
             "native_artifacts": {
-              "/root/.cache/cxldsagr/token-validation/941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so": {
+              "/root/.cache/cxldsagr/token-validation/b2417ad2f63b6e963d43135e555cf21a49a8ea00fc7a0eb868733c7e635dd080/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so": {
                 "sha256": "ed79d3e717a464379b4f638f608853277b65f602ef05ca5b293e3afa6025cd40",
                 "size": 16456
               },
@@ -32429,7 +32440,7 @@
                 ],
                 "compiler_environment": {
                   "LC_ALL": "C",
-                  "PATH": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin:/usr/local/cuda/bin:/usr/local/bin:/usr/bin:/bin"
+                  "PATH": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin:/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin:/usr/local/cuda/bin:/usr/local/bin:/usr/bin:/bin"
                 },
                 "compiler_tools": {
                   "as": "/usr/bin/x86_64-linux-gnu-as",
@@ -32755,8 +32766,8 @@
                 }
               },
               "fallback_reason": null,
-              "fingerprint": "941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf",
-              "loaded_binary_path": "/root/.cache/cxldsagr/token-validation/941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so",
+              "fingerprint": "b2417ad2f63b6e963d43135e555cf21a49a8ea00fc7a0eb868733c7e635dd080",
+              "loaded_binary_path": "/root/.cache/cxldsagr/token-validation/b2417ad2f63b6e963d43135e555cf21a49a8ea00fc7a0eb868733c7e635dd080/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so",
               "loaded_binary_sha256": "ed79d3e717a464379b4f638f608853277b65f602ef05ca5b293e3afa6025cd40",
               "requested_native": true
             }
@@ -32886,11 +32897,11 @@
                     "residual_present": false
                   }
                 ],
-                "policy_revision": "deepseek-compute-islands-v2",
+                "policy_revision": "deepseek-compute-islands-v3-indexer-bounds",
                 "private_reserved_bytes": 5603590144,
                 "profiling_status": "graph_node_timing_attribution_pending",
-                "static_allocated_bytes": 644535296,
-                "static_storage_bytes": 641820832
+                "static_allocated_bytes": 644581376,
+                "static_storage_bytes": 641866912
               },
               "dense_staging_allocated_bytes": 0,
               "device": "cuda:0",
@@ -32914,16 +32925,16 @@
                 "candidate_persistence": "gpu_transient",
                 "candidate_slots": 128,
                 "compute_graph_count": 40,
-                "compute_graph_policy_revision": "deepseek-compute-islands-v2",
+                "compute_graph_policy_revision": "deepseek-compute-islands-v3-indexer-bounds",
                 "compute_graph_private_limit_bytes": 12884901888,
                 "compute_graph_private_limit_kind": "chosen_upper_limit_not_observed_fixed_overhead",
                 "compute_graph_query_sizes": [
                   128,
                   1024
                 ],
-                "compute_graph_reserved_limit_bytes": 13581258752,
-                "compute_graph_static_allocation_limit_bytes": 696356864,
-                "compute_graph_static_storage_bytes": 641820832,
+                "compute_graph_reserved_limit_bytes": 13581304832,
+                "compute_graph_static_allocation_limit_bytes": 696402944,
+                "compute_graph_static_storage_bytes": 641866912,
                 "compute_graphs_enabled": true,
                 "dense_fetch_policy": null,
                 "host_arena_tokens": 16777216,
@@ -32941,6 +32952,7 @@
                 "workspace_cpu_indexer_bytes": 8,
                 "workspace_cpu_metrics_bytes": 24,
                 "workspace_cpu_scalar_bytes": 8,
+                "workspace_dense_ticket_bytes": 0,
                 "workspace_indexer_bytes": 1212157952,
                 "workspace_metadata_bytes": 1077936192,
                 "workspace_query_tokens": 1024
@@ -32972,7 +32984,7 @@
             },
             "backend_type": "models.deepseek_v32.execution.adapter.DeepSeekServingBackend",
             "native_artifacts": {
-              "/root/.cache/cxldsagr/token-validation/941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so": {
+              "/root/.cache/cxldsagr/token-validation/b2417ad2f63b6e963d43135e555cf21a49a8ea00fc7a0eb868733c7e635dd080/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so": {
                 "sha256": "ed79d3e717a464379b4f638f608853277b65f602ef05ca5b293e3afa6025cd40",
                 "size": 16456
               },
@@ -32988,13 +33000,13 @@
                 "sha256": "a63d4dfe772493fd9cbc6e65ec9fa92ab77564ab30ef8aef4a6f0b1dec47ffa8",
                 "size": 5962688
               },
-              "/root/.cache/tvm-ffi/cxldsagr_echo_indexer_513a53c54269f9bc_1fa11185f6354333/cxldsagr_echo_indexer_513a53c54269f9bc.so": {
-                "sha256": "eafdc421b8227425371bba8258894111096228f2e61e68c40394a85f5fc2cfa4",
-                "size": 1444432
+              "/root/.cache/tvm-ffi/cxldsagr_echo_indexer_58f8d78829f56eee_1fa11185f6354333/cxldsagr_echo_indexer_58f8d78829f56eee.so": {
+                "sha256": "e66cc5d95b3277110cbb4007b76da5c722d5863530259b371b5dbd4442a22401",
+                "size": 1572544
               },
               "/root/.cache/tvm-ffi/cxldsagr_kv_transfer_672412fcb6ae32f3/cxldsagr_kv_transfer.so": {
-                "sha256": "fa7cd702d5a267e711e2caa997784d7534497830e47e1c7ae757a1ed4e8cee86",
-                "size": 78752
+                "sha256": "e282691a0b88a35d67eefd22f3e9a8d059c0d4258f1ff8780ac4803ff8f44964",
+                "size": 147368
               },
               "/root/.venv/lib/python3.12/site-packages/nvidia/cu13/lib/libcublas.so.13": {
                 "sha256": "25cde432108543626df85d887c730bf2cab96803ca16f9654e4abc8d2b45833e",
@@ -33084,7 +33096,7 @@
                 ],
                 "compiler_environment": {
                   "LC_ALL": "C",
-                  "PATH": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin:/usr/local/cuda/bin:/usr/local/bin:/usr/bin:/bin"
+                  "PATH": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin:/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin:/usr/local/cuda/bin:/usr/local/bin:/usr/bin:/bin"
                 },
                 "compiler_tools": {
                   "as": "/usr/bin/x86_64-linux-gnu-as",
@@ -33410,8 +33422,8 @@
                 }
               },
               "fallback_reason": null,
-              "fingerprint": "941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf",
-              "loaded_binary_path": "/root/.cache/cxldsagr/token-validation/941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so",
+              "fingerprint": "b2417ad2f63b6e963d43135e555cf21a49a8ea00fc7a0eb868733c7e635dd080",
+              "loaded_binary_path": "/root/.cache/cxldsagr/token-validation/b2417ad2f63b6e963d43135e555cf21a49a8ea00fc7a0eb868733c7e635dd080/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so",
               "loaded_binary_sha256": "ed79d3e717a464379b4f638f608853277b65f602ef05ca5b293e3afa6025cd40",
               "requested_native": true
             }
@@ -33465,7 +33477,7 @@
     "cpu_environment_audit": {
       "status": "recorded_and_equal"
     },
-    "completed_unix": 1791151666.577254,
+    "completed_unix": 1791218546.7158144,
     "precision_settings_verified_after_execution": true,
     "flashinfer_runtime_artifacts": {
       "schema_version": 1,
@@ -34537,12 +34549,12 @@
       "requests": 16,
       "prefix_hits": 0,
       "evicted_users": 15,
-      "latency_mean_ms": 2192.406487665721,
-      "latency_median_ms": 2192.2041375073604,
-      "latency_p95_ms": 2199.8264477588236,
-      "latency_sum_ms": 35078.50380265154,
-      "prefix_mean_ms": 2178.3137207166874,
-      "extend_mean_ms": 10.716979173594154,
+      "latency_mean_ms": 2182.315544319863,
+      "latency_median_ms": 2179.182281543035,
+      "latency_p95_ms": 2192.457585770171,
+      "latency_sum_ms": 34917.04870911781,
+      "prefix_mean_ms": 2168.2047818540013,
+      "extend_mean_ms": 10.551728970312979,
       "candidate_host_to_device_bytes": 0,
       "candidate_device_to_host_bytes": 0,
       "candidate_selection_records": 0,
@@ -34552,7 +34564,7 @@
       "candidate_dense_resident_records": 0,
       "candidate_dense_fetched_records": 0,
       "candidate_dense_history_hit_ratio": null,
-      "max_cache_hbm_bytes": 7112496896,
+      "max_cache_hbm_bytes": 7112542976,
       "max_cache_dram_bytes": 0,
       "mean_latency_speedup_vs_hbm": 1.0
     },
@@ -34562,12 +34574,12 @@
       "requests": 16,
       "prefix_hits": 0,
       "evicted_users": 16,
-      "latency_mean_ms": 2187.3983461337048,
-      "latency_median_ms": 2187.5480750459246,
-      "latency_p95_ms": 2191.141038289061,
-      "latency_sum_ms": 34998.373538139276,
-      "prefix_mean_ms": 2173.5449093248462,
-      "extend_mean_ms": 10.72156699228799,
+      "latency_mean_ms": 2178.9922905009007,
+      "latency_median_ms": 2179.0840115281753,
+      "latency_p95_ms": 2185.061541997129,
+      "latency_sum_ms": 34863.87664801441,
+      "prefix_mean_ms": 2165.006505078054,
+      "extend_mean_ms": 10.499856238311622,
       "candidate_host_to_device_bytes": 0,
       "candidate_device_to_host_bytes": 0,
       "candidate_selection_records": 0,
@@ -34577,7 +34589,7 @@
       "candidate_dense_resident_records": 0,
       "candidate_dense_fetched_records": 0,
       "candidate_dense_history_hit_ratio": null,
-      "max_cache_hbm_bytes": 7112496896,
+      "max_cache_hbm_bytes": 7112542976,
       "max_cache_dram_bytes": 0,
       "mean_latency_speedup_vs_hbm": 1.0
     },
@@ -34587,12 +34599,12 @@
       "requests": 16,
       "prefix_hits": 0,
       "evicted_users": 0,
-      "latency_mean_ms": 2294.993853676715,
-      "latency_median_ms": 2295.142101473175,
-      "latency_p95_ms": 2299.413484928664,
-      "latency_sum_ms": 36719.90165882744,
-      "prefix_mean_ms": 2277.8403577540303,
-      "extend_mean_ms": 12.60493160225451,
+      "latency_mean_ms": 2288.304908812279,
+      "latency_median_ms": 2286.530303535983,
+      "latency_p95_ms": 2298.243107943563,
+      "latency_sum_ms": 36612.87854099646,
+      "prefix_mean_ms": 2270.778869067726,
+      "extend_mean_ms": 12.47073186095804,
       "candidate_host_to_device_bytes": 0,
       "candidate_device_to_host_bytes": 0,
       "candidate_selection_records": 1111121,
@@ -34602,9 +34614,9 @@
       "candidate_dense_resident_records": 0,
       "candidate_dense_fetched_records": 0,
       "candidate_dense_history_hit_ratio": null,
-      "max_cache_hbm_bytes": 9086261046,
+      "max_cache_hbm_bytes": 9086308406,
       "max_cache_dram_bytes": 343598497792,
-      "mean_latency_speedup_vs_hbm": 0.9552995029391287
+      "mean_latency_speedup_vs_hbm": 0.9536821495753254
     },
     {
       "scheme": "echo",
@@ -34612,12 +34624,12 @@
       "requests": 16,
       "prefix_hits": 16,
       "evicted_users": 0,
-      "latency_mean_ms": 24.530058864911553,
-      "latency_median_ms": 24.346455524209887,
-      "latency_p95_ms": 25.606684299418703,
-      "latency_sum_ms": 392.48094183858484,
-      "prefix_mean_ms": 0.00022749736672267318,
-      "extend_mean_ms": 20.86482389131561,
+      "latency_mean_ms": 23.52007837180281,
+      "latency_median_ms": 23.304419999476522,
+      "latency_p95_ms": 24.151474732207134,
+      "latency_sum_ms": 376.32125394884497,
+      "prefix_mean_ms": 0.0002776141627691686,
+      "extend_mean_ms": 19.669025001348928,
       "candidate_host_to_device_bytes": 1246814208,
       "candidate_device_to_host_bytes": 0,
       "candidate_selection_records": 1111052,
@@ -34627,9 +34639,9 @@
       "candidate_dense_resident_records": 0,
       "candidate_dense_fetched_records": 0,
       "candidate_dense_history_hit_ratio": null,
-      "max_cache_hbm_bytes": 9086261046,
+      "max_cache_hbm_bytes": 9086308406,
       "max_cache_dram_bytes": 343598497792,
-      "mean_latency_speedup_vs_hbm": 89.17216049826189
+      "mean_latency_speedup_vs_hbm": 92.64392133629958
     },
     {
       "scheme": "serial_sparse",
@@ -34637,12 +34649,12 @@
       "requests": 16,
       "prefix_hits": 0,
       "evicted_users": 0,
-      "latency_mean_ms": 2228.258201823337,
-      "latency_median_ms": 2228.0755345127545,
-      "latency_p95_ms": 2237.85788792884,
-      "latency_sum_ms": 35652.13122917339,
-      "prefix_mean_ms": 2212.304433756799,
-      "extend_mean_ms": 11.373802146408707,
+      "latency_mean_ms": 2225.482716145052,
+      "latency_median_ms": 2222.2690990311094,
+      "latency_p95_ms": 2237.4587780504953,
+      "latency_sum_ms": 35607.723458320834,
+      "prefix_mean_ms": 2209.3882743720314,
+      "extend_mean_ms": 11.350533553923015,
       "candidate_host_to_device_bytes": 0,
       "candidate_device_to_host_bytes": 0,
       "candidate_selection_records": 1111121,
@@ -34652,9 +34664,9 @@
       "candidate_dense_resident_records": 0,
       "candidate_dense_fetched_records": 0,
       "candidate_dense_history_hit_ratio": null,
-      "max_cache_hbm_bytes": 9086261046,
+      "max_cache_hbm_bytes": 9086308406,
       "max_cache_dram_bytes": 343598497792,
-      "mean_latency_speedup_vs_hbm": 0.9839104309687813
+      "mean_latency_speedup_vs_hbm": 0.9806032320484777
     },
     {
       "scheme": "serial_sparse",
@@ -34662,12 +34674,12 @@
       "requests": 16,
       "prefix_hits": 16,
       "evicted_users": 0,
-      "latency_mean_ms": 18.08383451862028,
-      "latency_median_ms": 18.044536001980305,
-      "latency_p95_ms": 18.405889539280906,
-      "latency_sum_ms": 289.34135229792446,
-      "prefix_mean_ms": 0.00025775807444006205,
-      "extend_mean_ms": 14.438622805755585,
+      "latency_mean_ms": 17.187684432428796,
+      "latency_median_ms": 17.134849505964667,
+      "latency_p95_ms": 17.488184763351455,
+      "latency_sum_ms": 275.00295091886073,
+      "prefix_mean_ms": 0.0002692031557671726,
+      "extend_mean_ms": 13.541352316678967,
       "candidate_host_to_device_bytes": 1246814208,
       "candidate_device_to_host_bytes": 0,
       "candidate_selection_records": 1111052,
@@ -34677,9 +34689,9 @@
       "candidate_dense_resident_records": 0,
       "candidate_dense_fetched_records": 0,
       "candidate_dense_history_hit_ratio": null,
-      "max_cache_hbm_bytes": 9086261046,
+      "max_cache_hbm_bytes": 9086308406,
       "max_cache_dram_bytes": 343598497792,
-      "mean_latency_speedup_vs_hbm": 120.95876811311334
+      "mean_latency_speedup_vs_hbm": 126.77637287718034
     },
     {
       "scheme": "dense_prefetch",
@@ -34687,12 +34699,12 @@
       "requests": 16,
       "prefix_hits": 0,
       "evicted_users": 0,
-      "latency_mean_ms": 2239.190480315301,
-      "latency_median_ms": 2238.5553680360317,
-      "latency_p95_ms": 2246.348913264228,
-      "latency_sum_ms": 35827.04768504482,
-      "prefix_mean_ms": 2222.9486639334937,
-      "extend_mean_ms": 11.635569739155471,
+      "latency_mean_ms": 2237.7475539178704,
+      "latency_median_ms": 2238.9377749641426,
+      "latency_p95_ms": 2244.714582746383,
+      "latency_sum_ms": 35803.960862685926,
+      "prefix_mean_ms": 2220.9340128247277,
+      "extend_mean_ms": 12.143871135776863,
       "candidate_host_to_device_bytes": 0,
       "candidate_device_to_host_bytes": 0,
       "candidate_selection_records": 1111121,
@@ -34702,9 +34714,9 @@
       "candidate_dense_resident_records": 10485760,
       "candidate_dense_fetched_records": 0,
       "candidate_dense_history_hit_ratio": 1.0,
-      "max_cache_hbm_bytes": 9086261046,
+      "max_cache_hbm_bytes": 9086308406,
       "max_cache_dram_bytes": 343598497792,
-      "mean_latency_speedup_vs_hbm": 0.9791067383231318
+      "mean_latency_speedup_vs_hbm": 0.9752286581652356
     },
     {
       "scheme": "dense_prefetch",
@@ -34712,12 +34724,12 @@
       "requests": 16,
       "prefix_hits": 16,
       "evicted_users": 0,
-      "latency_mean_ms": 33.19658924010582,
-      "latency_median_ms": 32.52787847304717,
-      "latency_p95_ms": 35.542956000426784,
-      "latency_sum_ms": 531.1454278416932,
-      "prefix_mean_ms": 0.0002524247975088656,
-      "extend_mean_ms": 29.012226324994117,
+      "latency_mean_ms": 25.461853452725336,
+      "latency_median_ms": 25.408006564248353,
+      "latency_p95_ms": 25.918164727045223,
+      "latency_sum_ms": 407.3896552436054,
+      "prefix_mean_ms": 0.00022606400307267904,
+      "extend_mean_ms": 21.796547633130103,
       "candidate_host_to_device_bytes": 12079595520,
       "candidate_device_to_host_bytes": 0,
       "candidate_selection_records": 1111052,
@@ -34727,9 +34739,9 @@
       "candidate_dense_resident_records": 0,
       "candidate_dense_fetched_records": 10485760,
       "candidate_dense_history_hit_ratio": 0.0,
-      "max_cache_hbm_bytes": 9086261046,
+      "max_cache_hbm_bytes": 9086308406,
       "max_cache_dram_bytes": 343598497792,
-      "mean_latency_speedup_vs_hbm": 65.89226171136406
+      "mean_latency_speedup_vs_hbm": 85.57869891705272
     }
   ],
   "audit": {
@@ -34739,8 +34751,8 @@
     "all_candidate_hidden_and_logits_exact": false,
     "independent_correctness_receipt": {
       "kind": "deepseek-v32-motivation-full-trace-v1",
-      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/docs/agents/acceptance/unified_runtime_20261005/deepseek_final/receipt.json",
-      "sha256": "a25cc5d08891fd6811db232de0b862831b46702c1b2f3124b2921b611574c1b3",
+      "path": "/tmp/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_mfu_c10_check_20261006_01/receipt.json",
+      "sha256": "1db5e4b5e53c4639a42edb9d44ca9b2e790d38e6ef932b790685e1865b2b644b",
       "checks": {
         "coverage": "complete four-method multi-request trace",
         "does_not_establish": "failure injection, task quality, or performance",
@@ -34884,14 +34896,14 @@
             "numerical/serial_sparse/000030.pt": "6dea76ff6cacac5001504d363aeaffc966e8b45e7defd861c823940f102697ad",
             "numerical/serial_sparse/000031.pt": "2945b583b4c931107aaa09ce035c00e3a1ba26f9581c72c594bb87d2221d270e"
           },
-          "source_sha256": "1fc1cbaf7a97579f7094879938330a9933a82109909d2701a177e1653f0dc9f8",
+          "source_sha256": "d1ad78fd4d8606877bf05d28e2a2cce79c6e9064cf53824bcf42c3ea8ec017fd",
           "status": "passed",
           "warmup_policy": "two_users_then_first_user_host_recall_v1"
         },
         "passed": true
       }
     },
-    "source_sha256": "1319a540b7f78da9c363dd09c0f1568b450df3df5e4d3e8b60155a58c348b3dc",
+    "source_sha256": "d1ad78fd4d8606877bf05d28e2a2cce79c6e9064cf53824bcf42c3ea8ec017fd",
     "warmup_policy": "two_users_then_first_user_host_recall_v1",
     "checked_warmup_requests": 12,
     "host_recall_warmed_schemes": [

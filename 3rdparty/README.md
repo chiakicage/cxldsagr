@@ -41,12 +41,11 @@ DeepGEMM 2.8.1 使用 DeepJIT 和 C++20，不再依赖 fmt。若本地保留了
 
 被 Git 忽略的本地 `ECHO/` checkout 固定为
 `bc1b75c1000010d0ac6f032ebaac283255c050b1`，供 DeepSeek GPU policy 差分测试和
-可选的 [build_official_backend](../models/deepseek_v32/execution/official.py) 装配入口使用。
-该入口为共享 DeepSeek backend 配置官方 attention、cache 和资源 factory，运行
-原始 logits、top-k、allocator 和 recall 实现。实验入口与适配边界见
-[官方 ECHO 实验](../experiments/deepseek_v32_echo_official/README.md)。
-普通模型入口不加载这套可选依赖。运行上述测试或 backend 时，独立项目 checkout
-也须提供这个目录；缺少依赖导致的失败不能计为通过。
+独立 SGLang 复现使用。官方 ECHO 不接入项目模型、cache 或 serving 框架。
+复现代码、独立环境、权重和原始产物保存在 `ECHO/reproduction/cxldsagr/`，
+不进入父项目 Git；选定报告见[官方 SGLang 复现](../experiments/deepseek_v32_echo_official/README.md)。
+普通模型入口不加载这套依赖。显式运行 policy 差分测试时需要这个本地 checkout；
+缺少依赖导致的失败不能计为通过。
 
 ECHO 不加入四个顶层子模块，也不初始化其嵌套依赖。目录尚不存在时，从仓库根目录执行：
 
@@ -59,15 +58,8 @@ git -C 3rdparty/ECHO -c submodule.recurse=false checkout --detach \
 
 已有目录应先检查 `git -C 3rdparty/ECHO status --short` 与
 `git -C 3rdparty/ECHO rev-parse HEAD`，保留上游已跟踪文件原样。
-[独立加载器](../operators/deepseek_v32/indexer/official.py)校验 ECHO 和共享 CUTLASS
-的提交及已跟踪文件状态；CUTLASS 须为 `f3fde58372d33e9a5650ba7b80fc48b3b49d40c8`。
-加载器为官方源码构建独立命名的绑定，复用顶层 CUTLASS，不安装 ECHO 自带的 DeepGEMM，
-也不替换项目环境中的 mainline `deep_gemm`。
-
-首次构建会下载固定为 `553ec11ec06fbe0beebfbb45f9dc3c9eabd83d28` 的 fmt 归档，
-校验 SHA-256 后提取头文件。fmt、绑定和 JIT 产物保存在
-`~/.cache/cxldsagr/echo-official/`；设置 `XDG_CACHE_HOME` 时，缓存根目录随之改变。
-加载器记录实际源码、头文件及 native/JIT 产物的身份，实验在计时前完成构建。
+SGLang 使用 ECHO 目录下的独立环境和依赖，不替换项目基础环境中的
+mainline `deep_gemm` 或 FlashMLA。实际版本、native 构建身份和运行命令见复现报告。
 
 项目自有的 SM90 NOSA 与 DeepSeek ECHO CUDA 内核复用顶层 `cutlass/include`，通过项目环境中的
 TVM FFI 按需编译；使用 `uv sync`，不要求安装 `legacy` 组或 EzKernelKit。

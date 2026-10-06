@@ -4,6 +4,7 @@
 
 | 文档 | 内容 | 维护者 |
 |---|---|---|
+| [系统架构](architecture.md) | 模块职责、请求与缓存生命周期、模型接入 | 编码执行者 |
 | [status.md](status.md) | 实验室四环节的当前理解、已有依据和具体缺口，可直接修改 | Supervisor 与研究者 |
 | [roadmap.md](roadmap.md) | 简短的下一步任务及对应研究条目；完成或取消后移出 | Supervisor 与研究者 |
 | [实验索引](../experiments/README.md)及各实验报告 | 实验方法、结果和结论 | 实验分析执行者 |

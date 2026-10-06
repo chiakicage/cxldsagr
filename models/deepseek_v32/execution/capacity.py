@@ -174,8 +174,8 @@ class EchoCapacityPlanner:
             (indexer_scale_bytes, users * layers),
             (64, users * layers * 3),
             (page_bytes, users),
-            # One slab contains prefetch, selection and planned-append counters.
-            (layers * 56, users),
+            # One slab contains prefetch, selection, append and recall counters.
+            (layers * 64, users),
         ]
         allocation_allowance = sum(
             (dense_staging_allocation_bytes(size, "cuda") - size) * count
@@ -199,7 +199,7 @@ class EchoCapacityPlanner:
             "session_hints_reservation": users * layers * 3 * 64,
             "session_page_tables": users * page_bytes,
             "session_prefetch_counters": users * layers * 24,
-            "session_native_counters": users * layers * 32,
+            "session_native_counters": users * layers * 40,
             "merged_index_keys": self.execution_context_tokens * self.index_head_dim,
             "merged_index_scales": self.execution_context_tokens * 4,
             "execution_indexer_workspace": self.execution.indexer_bytes,

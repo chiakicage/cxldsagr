@@ -1,4 +1,4 @@
-"""Model-specific attention and resource factories for serving assembly."""
+"""Model-specific attention and cache factories for serving assembly."""
 
 from models.attention_contracts import TokenSelection
 from models.deepseek_v32.attention import EchoAttentionRunner
@@ -51,20 +51,10 @@ class LocalPipeline:
         if scheme not in ("hbm", "echo", "serial_sparse", "dense_prefetch"):
             raise ValueError("unsupported DeepSeek serving pipeline")
 
-    def plan_resources(self, config, plan, budgets):
-        return plan
-
-    def allocate_resources(self, pool, plan, scheme):
-        return None
-
-    def audit_resources(self, resources, plan):
-        if resources is not None:
-            raise RuntimeError("local pipeline cannot own official extra resources")
-
-    def layer_cache(self, session, layer, resources):
+    def layer_cache(self, session, layer):
         return ServingSparseTokenCache.for_layer(session, layer)
 
-    def create_runner(self, attention, capacity, *, resources, **kwargs):
+    def create_runner(self, attention, capacity, **kwargs):
         return ServingAttention(attention, capacity, **kwargs)
 
     def session_metrics(self, session):
@@ -109,6 +99,3 @@ class LocalPipeline:
         }
 
         return result
-
-    def describe(self, metadata, resources):
-        return metadata

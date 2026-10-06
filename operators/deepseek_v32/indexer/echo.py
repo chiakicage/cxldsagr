@@ -89,6 +89,33 @@ def _check_tensor(tensor, shape, dtype, device, name):
         raise ValueError(f"{name} must be contiguous {dtype} {tuple(shape)} on {device}")
 
 
+class _PreparedPrefetch:
+    """One-use proof of journal reset and request metadata in borrowed scratch."""
+
+    def __init__(self, rows, free_slots, allocations, counter, stats, scratch):
+        self.rows = rows
+        self.tensors = (free_slots, allocations, counter, stats)
+        metadata = scratch.view(torch.int32)
+        self.metadata = (metadata[:1], metadata[1 : rows + 1])
+        self.used = False
+
+    def invalidate(self):
+        self.used = True
+
+    def consume(self, lease, rows):
+        actual = tuple(
+            lease[name] for name in ("free_slots", "allocation_log", "counter", "prefetch_stats")
+        )
+        if (
+            self.used
+            or rows != self.rows
+            or any(lhs is not rhs for lhs, rhs in zip(actual, self.tensors, strict=True))
+        ):
+            raise ValueError("prepared prefetch lease was consumed, replaced, or resized")
+        self.used = True
+        return self.metadata
+
+
 def _validate_prefetch(prefetch, rows, columns, device):
     """Validate lease tensor ABI without synchronizing tensor values to CPU."""
     host, pool = prefetch["host"], prefetch["device"]
@@ -125,7 +152,37 @@ def _validate_prefetch(prefetch, rows, columns, device):
         raise ValueError("max_prefetch must satisfy min(8192, P-Q), excluding sentinel slot zero")
 
 
-def logits(q, k, weights, kscale, query_start, prefetch=None):
+@cache
+def _resident_tail_mask_kernel():
+    import triton
+    import triton.language as tl
+
+    @triton.jit
+    def _resident_causal_tail_mask(
+        Scores,
+        Ends,
+        rows,
+        tail_columns,
+        query_start,
+        stride_row,
+        stride_column,
+        BLOCK: tl.constexpr,
+    ):
+        position = tl.program_id(0).to(tl.int64) * BLOCK + tl.arange(0, BLOCK)
+        row = position // tail_columns
+        column = position % tail_columns + query_start
+        inside = position < tl.cast(rows, tl.int64) * tail_columns
+        end = tl.load(Ends + row, inside, 0).to(tl.int64)
+        address = row * stride_row + column * stride_column
+        # Do not read scores or rewrite valid values or unexposed storage.
+        tl.store(Scores + address, -float("inf"), inside & (column >= end))
+
+    return _resident_causal_tail_mask
+
+
+def logits(
+    q, k, weights, kscale, query_start, prefetch=None, *, _bounds=None, _pad_to_stride=False
+):
     """Return causal FP32 ``[Q,N]`` logits with a padded physical row stride.
 
     Q/K are E4M3 indexer values, ``weights`` includes the query quantization
@@ -133,6 +190,11 @@ def logits(q, k, weights, kscale, query_start, prefetch=None):
     This model-specific implementation accepts 64 index heads of dimension 128.
     Resident execution calls official ``deep_gemm.fp8_fp4_mqa_logits``; only
     the offload path loads the local fused ECHO prefetch extension.
+
+    The private resident-only ``_pad_to_stride`` option exposes the existing
+    256-column-aligned backing as a contiguous score matrix. Every extra
+    column is -inf. Callers must preserve logical-N selection capacity and
+    pass only the logical columns to reductions such as the prefetch hint.
 
     ``prefetch`` is an exclusive shared-pool lease. It supplies pinned host
     records, physical ``device[P+1,576]`` (padding slot 0), live global maps,
@@ -154,6 +216,8 @@ def logits(q, k, weights, kscale, query_start, prefetch=None):
     if k.ndim != 2 or k.shape[1] != 128 or len(k) < 1:
         raise ValueError("ECHO requires nonempty K[token,128]")
     rows, columns, device = len(q), len(k), q.device
+    if type(_pad_to_stride) is not bool or _pad_to_stride and prefetch is not None:
+        raise ValueError("_pad_to_stride must be boolean and is resident-only")
     if type(query_start) is not int or not 0 <= query_start <= columns - rows:
         raise ValueError("query_start must place all query rows inside the visible KV sequence")
     if torch.cuda.get_device_capability(device)[0] != 9:
@@ -165,8 +229,18 @@ def logits(q, k, weights, kscale, query_start, prefetch=None):
         (kscale, (columns,), torch.float32, "kscale"),
     ):
         _check_tensor(tensor, shape, dtype, device, name)
-    starts = torch.zeros(rows, dtype=torch.int32, device=device)
-    ends = torch.arange(query_start + 1, query_start + rows + 1, dtype=torch.int32, device=device)
+    if _bounds is None:
+        starts = torch.zeros(rows, dtype=torch.int32, device=device)
+        ends = torch.arange(
+            query_start + 1, query_start + rows + 1, dtype=torch.int32, device=device
+        )
+    else:
+        # Private compute-graph metadata: values are generated from the same
+        # validated dynamic position used by RoPE. Arbitrary external bounds
+        # are outside this interface; retain ABI checks without a host read.
+        starts, ends = _bounds
+        _check_tensor(starts, (rows,), torch.int32, device, "starts")
+        _check_tensor(ends, (rows,), torch.int32, device, "ends")
     if columns % 4:
         scales = torch.nn.functional.pad(kscale, (0, 4 - columns % 4))
     else:
@@ -174,8 +248,10 @@ def logits(q, k, weights, kscale, query_start, prefetch=None):
     if prefetch is None:
         import deep_gemm
 
-        # The official API requires the logical N shape. Its SM90 TMA scale
-        # descriptor rounds N to four floats, so retain padded backing storage.
+        # K/scales keep logical N; only the output view may expose its already
+        # allocated physical stride. The SM90 TMA scale descriptor rounds N
+        # to four floats, so retain padded backing storage.
+        score_columns = (columns + 255) // 256 * 256 if _pad_to_stride else columns
         with torch.cuda.device(device):
             result = deep_gemm.fp8_fp4_mqa_logits(
                 (q, None),
@@ -183,15 +259,24 @@ def logits(q, k, weights, kscale, query_start, prefetch=None):
                 weights,
                 starts,
                 ends,
-                max_seqlen_k=columns,
+                max_seqlen_k=score_columns,
             )
             # Mainline exposes compressed logits without initialized tails.
             # All row starts are zero, so these are logical token positions;
             # explicitly mask each exclusive endpoint before exact top-k.
-            if query_start + 1 < columns:
-                positions = torch.arange(query_start, columns, device=device)
-                tail = result if query_start == 0 else result[:, query_start:]
-                tail.masked_fill_(positions[None, :] >= ends[:, None], -torch.inf)
+            if query_start + 1 < score_columns:
+                tail_columns = score_columns - query_start
+                _resident_tail_mask_kernel()[((rows * tail_columns + 255) // 256,)](
+                    result,
+                    ends,
+                    rows,
+                    tail_columns,
+                    query_start,
+                    result.stride(0),
+                    result.stride(1),
+                    BLOCK=256,
+                    num_warps=4,
+                )
             return result
 
     _validate_prefetch(prefetch, rows, columns, device)
@@ -210,12 +295,20 @@ def logits(q, k, weights, kscale, query_start, prefetch=None):
     history_length = prefetch.get("history_length", query_start)
     if type(history_length) is not int or not 0 <= history_length <= query_start:
         raise ValueError("history_length must cover only initialized history before query_start")
-    counter.zero_()
-    allocations.fill_(2**31 - 1)
-    stats.zero_()
+    prepared = prefetch.get("_prepared")
+    if prepared is None:
+        # External callers receive the full initialization contract. Internal
+        # native preparation already resets these tensors on the owning stream.
+        counter.zero_()
+        allocations.fill_(2**31 - 1)
+        stats.zero_()
+        extend_lengths = torch.tensor([rows], dtype=torch.int32, device=device)
+        query_requests = torch.zeros(rows, dtype=torch.int32, device=device)
+    else:
+        if type(prepared) is not _PreparedPrefetch:
+            raise ValueError("invalid private prefetch preparation token")
+        extend_lengths, query_requests = prepared.consume(prefetch, rows)
     page_table = prefetch["page_table"]
-    extend_lengths = torch.tensor([rows], dtype=torch.int32, device=device)
-    query_requests = torch.zeros(rows, dtype=torch.int32, device=device)
     import tvm_ffi
 
     with torch.cuda.device(device), tvm_ffi.use_torch_stream():

@@ -1,9 +1,8 @@
-"""Whole-history lookahead into the existing finite, per-layer token pool.
+"""Contiguous whole-history DMA into a finite, per-layer token pool.
 
-Metadata preparation uses the caller's pool lease. Only record copies run on
-the private stream, so they can overlap a different layer's attention without
-using the pool's shared metadata workspace. The execution owner must wait for
-each ticket before touching that layer, and drain before rollback or release.
+A dense pool maps logical history i to slot i+1. The caller clears displaced
+maps before the private stream copies one pinned-host span with cudaMemcpyAsync.
+Publication follows that copy; consumers join the ticket event before use.
 """
 
 from dataclasses import dataclass, field
@@ -11,35 +10,48 @@ from dataclasses import dataclass, field
 import torch
 
 from cache.sparse_token_cache import MISSING, WorkingSetTooLarge
-from cache.sparse_token_pool import PRIORITY_LIMIT
 
 
 @dataclass(eq=False)
 class HistoryPrefetchTicket:
     requested_records: int
-    resident_records: int
-    fetched_records: int
-    fetched_bytes: int
+    _resident_records: int
+    _fetched_records: int
+    _record_bytes: int
     _owner: object = field(repr=False)
     _cache: object = field(repr=False)
     _host: torch.Tensor = field(repr=False)
     _records: torch.Tensor = field(repr=False)
-    _host_ids: torch.Tensor = field(repr=False)
-    _slots: torch.Tensor = field(repr=False)
     _map_generation: int = field(repr=False)
     _caller_stream: object = field(default=None, repr=False)
     _ready: object = field(default=None, repr=False)
     _waited: bool = field(default=False, repr=False)
     _active: bool = field(default=True, repr=False)
 
+    @property
+    def fetched_records(self):
+        return self._fetched_records
+
+    @property
+    def resident_records(self):
+        return self._resident_records
+
+    @property
+    def fetched_bytes(self):
+        return self.fetched_records * self._record_bytes
+
+    def add_metrics(self, target):
+        for name in ("requested_records", "resident_records", "fetched_records"):
+            target["dense_" + name] += getattr(self, name)
+
 
 class PoolHistoryPrefetch:
-    """Prefetch every initialized history token, copying only HBM misses.
+    """Copy full contiguous history unless its direct layout is certified.
 
-    The helper owns no KV storage and never touches candidate tail rows. Tickets
-    retain copy inputs until drain; a failed submission terminates helper reuse.
-    All tickets in an execution must use the same caller stream. Successful drain
-    ends that execution and permits a later one to use another caller stream.
+    An unproven or partially resident history is copied in full, including any
+    resident records. Metrics count the actual copied records. Tickets borrow
+    existing host/device storage and allocate no ID/count buffers. Submission
+    failure disables reuse and retains both owners until successful drain.
     """
 
     def __init__(self, device):
@@ -60,15 +72,27 @@ class PoolHistoryPrefetch:
         if self.closed or self.failed:
             raise RuntimeError("history prefetch helper is closed or failed")
 
+    @property
+    def pending_bytes(self):
+        # Tickets retain borrowed pool storage, already charged to that pool.
+        return 0
+
     def prefetch(self, cache):
-        """Reserve the full host history on main, then launch independent copies."""
+        """Clear displaced maps, then copy and publish on the private stream."""
         self._check()
         cache._check()
         if not cache._shared or cache.device != self.device:
             raise ValueError("history prefetch requires a shared cache on the helper device")
+        if not cache._pool.dense_contiguous:
+            raise ValueError("history DMA requires a dense_contiguous pool")
         history = cache.host_written_end
         if history > cache.slots:
             raise WorkingSetTooLarge("whole-history prefetch requires H <= P")
+        runs = cache.session._host_runs
+        if len(runs) != 1 or runs[0][0] != 0 or runs[0][1] < history:
+            raise ValueError("history DMA requires one contiguous host run")
+        if not cache.host.is_contiguous() or not cache.records.is_contiguous():
+            raise ValueError("history DMA requires contiguous host and HBM record storage")
         if cache._prefetch is not None:
             raise RuntimeError("finalize fused prefetch before whole-history prefetch")
         if any(ticket._cache is cache and not ticket._waited for ticket in self._tickets):
@@ -78,135 +102,132 @@ class PoolHistoryPrefetch:
             raise RuntimeError("one history prefetch execution requires one caller stream")
         self._caller_stream = caller
         try:
-            return self._submit(cache, history, caller)
+            return self._submit(cache, history, runs[0][2], caller)
         except BaseException:
-            # Metadata reservations precede copies. A failure at any later
-            # submission boundary must disable reuse until execution cleanup.
             self.failed = True
             raise
 
-    def _reserve_native(self, cache, layer, history):
-        pool = cache._pool
-        native = pool.native_metadata
-        if type(cache).__dict__.get("native_metadata_compatible") is not True or not hasattr(
-            native, "dense_history_classify"
+    @staticmethod
+    def _native(cache):
+        native = cache._pool.native_metadata
+        if type(cache).__dict__.get("native_metadata_compatible") is not True or any(
+            not hasattr(native, name) for name in ("dense_history_clear", "dense_history_publish")
         ):
-            return None
-        layer = pool._clock_event(cache.layer_id)
-        if layer.clock == PRIORITY_LIMIT - 1:
-            return None
-        timestamp = layer.clock
-        native.dense_history_classify(
-            cache.page_table,
-            cache.host_to_device,
-            cache.device_to_host,
-            cache.age,
-            layer.clock_tensor,
-            pool.free_slots,
-            pool.counter,
-            history=history,
-            timestamp=timestamp,
-        )
-        layer.clock += 1
-        count = int(pool.counter.item())
-        victims = misses = chosen = layer.append_order[:0]
-        if count:
-            layer.append_owner = None
-            pool.wait_host(cache.session, cache.layer_id)
-            victims = torch.argsort(cache.age[1:], stable=True)
-            torch.cumsum(pool.free_slots, dim=0, dtype=torch.int64, out=pool.miss_scratch)
-            # Both ticket arrays own M elements. No view of shared scratch or
-            # the P-element sort may survive into the private copy stream.
-            misses = torch.empty(count, device=self.device, dtype=torch.int64)
-            chosen = torch.empty_like(misses)
-            pool.invalidate_residency(cache.layer_id)
-        native.dense_history_reserve(
-            pool.miss_scratch,
-            victims,
-            cache.page_table,
-            cache.host_to_device,
-            cache.device_to_host,
-            cache.age,
-            layer.free,
-            layer.clock_tensor,
-            cache._native_totals[3:],
-            misses,
-            chosen,
-            history=history,
-            timestamp=timestamp,
-        )
-        layer.clock += 1
-        return misses, chosen
+            raise ValueError("CUDA history DMA requires native contiguous-map metadata")
+        return native
 
-    def _submit(self, cache, history, caller):
+    @staticmethod
+    def _clear_reference(cache, history, host_start):
+        layer = cache._pool.layers[cache.layer_id]
+        for slot in range(1, cache.slots + 1):
+            old = int(cache.device_to_host[slot])
+            incoming = host_start <= old < host_start + history
+            if slot > history and not incoming:
+                continue
+            if old != MISSING:
+                if (
+                    not 0 <= old < cache._pool.host_capacity
+                    or int(cache.host_to_device[old]) != slot
+                ):
+                    raise RuntimeError("inconsistent dense source reverse map")
+                cache.host_to_device[old] = MISSING
+                cache.stats.evicted_records += int(not incoming)
+            cache.device_to_host[slot] = MISSING
+            cache.age[slot] = -1
+            layer.free[slot] = True
+
+    @staticmethod
+    def _publish_reference(cache, history, host_start, timestamp):
+        layer = cache._pool.layers[cache.layer_id]
+        global_ids = torch.arange(host_start, host_start + history, dtype=torch.int64)
+        slots = torch.arange(1, history + 1, dtype=torch.int32)
+        cache.host_to_device[host_start : host_start + history] = slots
+        cache.device_to_host[1 : history + 1] = global_ids
+        cache.age[1 : history + 1] = timestamp
+        layer.free[1 : history + 1] = False
+        cache.age[0] = MISSING
+        layer.clock_tensor.fill_(timestamp + 1)
+
+    def _submit(self, cache, history, host_start, caller):
+        pool = cache._pool
         with cache.operation():
-            layer = cache._pool.layers[cache.layer_id]
-            chosen = layer.append_order[:0]
-            if cache._pool.protect_resident_history(cache):
-                missing = chosen
+            layer = pool.layers[cache.layer_id]
+            resident = pool.dense_history_resident(cache)
+            native = self._native(cache) if self.device.type == "cuda" else None
+            ticket = HistoryPrefetchTicket(
+                history,
+                history if resident else 0,
+                0 if resident else history,
+                cache.record_bytes,
+                self,
+                cache,
+                cache.host,
+                cache.records,
+                layer.map_generation,
+                caller,
+            )
+            # Retain borrowed storage before any metadata or copy submission.
+            self._tickets.append(ticket)
+            if resident:
+                if not pool.protect_resident_history(cache):
+                    ids = cache._global_range(0, history)
+                    pool.protect(cache.layer_id, ids, preserve_append_plan=True)
+                    pool.stamp(cache.layer_id, layer.append_order[:0], preserve_append_plan=True)
+                return ticket
+            pool.wait_host(cache.session, cache.layer_id)
+            layer = pool._clock_event(cache.layer_id)
+            timestamp = layer.clock
+            pool.invalidate_residency(cache.layer_id)
+            ticket._map_generation = layer.map_generation
+            if native is None:
+                self._clear_reference(cache, history, host_start)
             else:
-                native_ids = self._reserve_native(cache, layer, history)
-                if native_ids is not None:
-                    missing, chosen = native_ids
-                else:
-                    global_ids = cache._global_range(0, history)
-                    missing = (
-                        layer.append_order[:0]
-                        if cache.all_history_resident
-                        else global_ids[cache.host_to_device[global_ids] == MISSING]
-                    )
-                    cache._pool.protect(
-                        cache.layer_id, global_ids, preserve_append_plan=not missing.numel()
-                    )
-                    # Maps precede copies; wait(ticket) joins target readiness.
-                    if missing.numel():
-                        cache._pool.wait_host(cache.session, cache.layer_id)
-                        chosen = cache._available_slots(global_ids, missing.numel())
-                        cache.host_to_device[missing] = chosen.int()
-                        cache.device_to_host[chosen] = missing
-                        layer.free[chosen] = False
-                    cache._pool.stamp(
-                        cache.layer_id, chosen, preserve_append_plan=not missing.numel()
-                    )
+                native.dense_history_clear(
+                    cache.page_table,
+                    cache.host_to_device,
+                    cache.device_to_host,
+                    cache.age,
+                    layer.free,
+                    layer.clock_tensor,
+                    cache._native_totals[3:],
+                    history=history,
+                    host_start=host_start,
+                    timestamp=timestamp,
+                )
+            layer.clock += 1
             metadata_ready = None
-            if caller is not None and missing.numel():
+            if caller is not None:
                 metadata_ready = torch.cuda.Event()
                 metadata_ready.record(caller)
-        ticket = HistoryPrefetchTicket(
-            history,
-            history - missing.numel(),
-            missing.numel(),
-            missing.numel() * cache.record_bytes,
-            self,
-            cache,
-            cache.host,
-            cache.records,
-            missing,
-            chosen,
-            layer.map_generation,
-            caller,
-        )
-        # Retain copy inputs even if submission fails after enqueueing work.
-        self._tickets.append(ticket)
-        if not missing.numel():
-            pass
-        elif self._copy_stream is None:
-            cache.records[chosen] = cache.host[missing]
+        if self._copy_stream is None:
+            cache.records[1 : history + 1].copy_(cache.host[host_start : host_start + history])
+            self._publish_reference(cache, history, host_start, timestamp)
         else:
-            from operators.common.kv_transfer import gather_host_records
+            from operators.common.kv_transfer import copy_host_records_async
 
             self._copy_stream.wait_event(metadata_ready)
             with torch.cuda.stream(self._copy_stream):
-                gather_host_records(cache.host, cache.records, missing, chosen)
-                missing.record_stream(self._copy_stream)
-                chosen.record_stream(self._copy_stream)
+                copy_host_records_async(
+                    cache.host, cache.records, host_start=host_start, device_start=1, count=history
+                )
+                native.dense_history_publish(
+                    cache.page_table,
+                    cache.host_to_device,
+                    cache.device_to_host,
+                    cache.age,
+                    layer.free,
+                    layer.clock_tensor,
+                    history=history,
+                    host_start=host_start,
+                    timestamp=timestamp,
+                )
                 ticket._ready = torch.cuda.Event()
                 ticket._ready.record(self._copy_stream)
-        cache.stats.recalled_records += ticket.fetched_records
+        cache.stats.recalled_records += history
         return ticket
 
     def wait(self, ticket):
-        """Order this layer's consumers after its whole-history copy completes."""
+        """Order this layer's consumers after copy and map publication complete."""
         self._check()
         if (
             not isinstance(ticket, HistoryPrefetchTicket)
@@ -215,32 +236,46 @@ class PoolHistoryPrefetch:
         ):
             raise ValueError("history prefetch ticket is foreign or expired")
         ticket._cache._check()
+        cache = ticket._cache
+        if cache._pool.layers[cache.layer_id].map_generation != ticket._map_generation:
+            self.failed = True
+            raise RuntimeError("dense history maps changed while its ticket was pending")
         if self.device.type == "cuda":
             current = torch.cuda.current_stream(self.device)
             if current != ticket._caller_stream:
                 raise RuntimeError("wait must run on the ticket's caller stream")
             if ticket._ready is not None:
-                current.wait_event(ticket._ready)
-        cache = ticket._cache
-        layer = cache._pool.layers[cache.layer_id]
-        if layer.map_generation == ticket._map_generation:
-            layer.resident_owner = cache.session.owner
-            layer.resident_end = ticket.requested_records
+                try:
+                    current.wait_event(ticket._ready)
+                except BaseException:
+                    self.failed = True
+                    raise
+        cache._pool.certify_dense_history(cache, ticket.requested_records)
         ticket._waited = True
 
     def drain(self):
-        """Join all copies, including a speculative layer with no consumer."""
+        """Join every copy, retaining owners if any completion check fails."""
+        errors = []
         if self._copy_stream is not None and (
             self.failed or any(ticket._ready is not None for ticket in self._tickets)
         ):
             try:
                 self._copy_stream.synchronize()
-            except BaseException:
-                self.failed = True
-                raise
+            except BaseException as exc:  # noqa: BLE001 - retain every cleanup exception
+                errors.append(exc)
+        if self.failed and self._caller_stream is not None:
+            try:
+                self._caller_stream.synchronize()
+            except BaseException as exc:  # noqa: BLE001 - retain every cleanup exception
+                errors.append(exc)
+        if errors:
+            self.failed = True
+            if len(errors) == 1:
+                raise errors[0]
+            raise BaseExceptionGroup("dense DMA completion checks failed", errors)
         for ticket in self._tickets:
             ticket._active = False
-            ticket._host = ticket._records = ticket._host_ids = ticket._slots = None
+            ticket._host = ticket._records = None
         self._tickets.clear()
         self._caller_stream = None
 

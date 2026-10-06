@@ -21,7 +21,7 @@ def instrument_graph_queries(bank, operators):
     metadata. The graph owns a stable Q allocation; the cache's host-visible
     written length is the same position passed to the projection callback.
     """
-    from experiments.deepseek_v32_echo_prefill.src.operator_instrumentation import QueryOrigin
+    from experiments.deepseek_v32_mfu.src.operator_instrumentation import QueryOrigin
 
     original = bank.forward_block
 
@@ -242,7 +242,7 @@ class CaptureGraphOperators:
         self.current["operators"].append({"stage": stage, **details, "graph_node_ids": nodes})
 
     def __enter__(self):
-        from experiments.deepseek_v32_echo_prefill.src.operator_instrumentation import (
+        from experiments.deepseek_v32_mfu.src.operator_instrumentation import (
             InstrumentOperators,
         )
         from models.deepseek_v32.execution.compute_graphs import DeepSeekComputeGraphs

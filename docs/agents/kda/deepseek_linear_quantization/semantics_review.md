@@ -8,7 +8,7 @@ The scalar, layout and exactness rules below apply to either implementation.
 The compiled official helper is allowed only in an
 isolated validation/timing oracle. C8 formal/profile execution is on
 hold until the replacement passes its gates. Root separately tracks the affected
-`deepseek_v32_echo_official` comparison and other dependent experiments.
+local dependent experiments.
 
 ## Source identity and oracle boundary
 

@@ -1,0 +1,533 @@
+{
+  "schema": "deepseek-v32-mfu-run-acceptance-v1",
+  "execution_identity_fields_equal": {
+    "execution_identity": true,
+    "source_sha256": true,
+    "backend_provenance": true,
+    "indexer_build": true,
+    "execution_runtime_artifacts": true,
+    "request_sha256": true,
+    "checkpoint_identity": true
+  },
+  "canonical_execution_identity_sha256": "bc72b3bf8ec9a2daa2996f705d5a537ee87b66aeb542358f1b1e4a635df4b310",
+  "validation_receipt": {
+    "receipt_path": "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_mfu_dma_a128_check_20261006_01/receipt.json",
+    "receipt_sha256": "94f396fde2c4dca6bab58b0baf7b0b2b0726e4af09882a77021d933d5111aa02"
+  },
+  "run_results": {
+    "check": {
+      "run_id": "deepseek_mfu_dma_a128_check_20261006_01",
+      "result_path": "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_mfu_dma_a128_check_20261006_01/result.json",
+      "result_sha256": "a6a794a47774fe7aa56c2fbba89dd98dccab963e91032dfa54ea2d3d048cc9fb",
+      "correctness_comparisons": 13
+    },
+    "bench": {
+      "run_id": "deepseek_mfu_dma_a128_bench_20261006_01",
+      "result_path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_mfu_dma_a128_bench_20261006_01/result.json",
+      "result_sha256": "9f851acbcc22cd293924f79c42ed47762e4431d8a3afd910e253d36a325f065d",
+      "correctness_comparisons": 0
+    },
+    "profile": {
+      "run_id": "deepseek_mfu_dma_a128_profile_20261006_01",
+      "result_path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_mfu_dma_a128_profile_20261006_01/result.json",
+      "result_sha256": "59b7f3a834449be7f679d9c06f7d394a211e0e26f80839af21acaf3859ff119c",
+      "correctness_comparisons": 25
+    }
+  },
+  "saved_profile_tensor_checks": [
+    {
+      "method": "hbm",
+      "output": "hidden",
+      "shape": [
+        128,
+        7168
+      ],
+      "bitwise_equal": true
+    },
+    {
+      "method": "hbm",
+      "output": "logits",
+      "shape": [
+        1,
+        129280
+      ],
+      "bitwise_equal": true
+    },
+    {
+      "method": "echo",
+      "output": "hidden",
+      "shape": [
+        128,
+        7168
+      ],
+      "bitwise_equal": true
+    },
+    {
+      "method": "echo",
+      "output": "logits",
+      "shape": [
+        1,
+        129280
+      ],
+      "bitwise_equal": true
+    },
+    {
+      "method": "serial_sparse",
+      "output": "hidden",
+      "shape": [
+        128,
+        7168
+      ],
+      "bitwise_equal": true
+    },
+    {
+      "method": "serial_sparse",
+      "output": "logits",
+      "shape": [
+        1,
+        129280
+      ],
+      "bitwise_equal": true
+    },
+    {
+      "method": "dense_prefetch",
+      "output": "hidden",
+      "shape": [
+        128,
+        7168
+      ],
+      "bitwise_equal": true
+    },
+    {
+      "method": "dense_prefetch",
+      "output": "logits",
+      "shape": [
+        1,
+        129280
+      ],
+      "bitwise_equal": true
+    }
+  ],
+  "current_recorded_native_artifacts": [
+    {
+      "name": "rope",
+      "kind": "library",
+      "path": "/root/.cache/flashinfer/0.6.18/90a/cached_ops/rope/rope.so",
+      "sha256": "6bd248d922781f40d746dc1dff63cd921fa7c565609ff0db271ab1cd4dce2f9c",
+      "bytes": 1485760
+    },
+    {
+      "name": "rope",
+      "kind": "build_metadata",
+      "path": "/root/.cache/flashinfer/0.6.18/90a/cached_ops/rope/build.ninja",
+      "sha256": "c5397176839768a3ca6870c4406a193adda4de9fb34db3ff247b4d2d98bd345f",
+      "bytes": 2917
+    },
+    {
+      "name": "silu_and_mul",
+      "kind": "library",
+      "path": "/root/.cache/flashinfer/0.6.18/90a/cached_ops/silu_and_mul/silu_and_mul.so",
+      "sha256": "1a0b3775bcd7a1c05944efdcc19e5cbd8d2ce5d74c120cd837fdf414f3683820",
+      "bytes": 66328
+    },
+    {
+      "name": "silu_and_mul",
+      "kind": "build_metadata",
+      "path": "/root/.cache/flashinfer/0.6.18/90a/cached_ops/silu_and_mul/build.ninja",
+      "sha256": "82dc54370565502ee07a46d2a512d541025e4fbcc9b41f2ad07ad3db0a535784",
+      "bytes": 2707
+    },
+    {
+      "name": "topk",
+      "kind": "library",
+      "path": "/root/.cache/flashinfer/0.6.18/90a/cached_ops/topk/topk.so",
+      "sha256": "a63d4dfe772493fd9cbc6e65ec9fa92ab77564ab30ef8aef4a6f0b1dec47ffa8",
+      "bytes": 5962688
+    },
+    {
+      "name": "topk",
+      "kind": "build_metadata",
+      "path": "/root/.cache/flashinfer/0.6.18/90a/cached_ops/topk/build.ninja",
+      "sha256": "92e27b973e5925965b21e7315d3b10b20701882d475d2e5d3ea2e21093d65f75",
+      "bytes": 3258
+    }
+  ],
+  "observations": {
+    "check": {
+      "run_id": "deepseek_mfu_dma_a128_check_20261006_01",
+      "command": [
+        "bash",
+        "experiments/deepseek_v32_mfu/scripts/run.sh",
+        "--mode",
+        "check",
+        "--physical-device",
+        "3",
+        "--model",
+        "/preset-models"
+      ],
+      "started_utc": "2026-10-05T17:36:50.954627+00:00",
+      "completed_utc": "2026-10-05T17:37:17.540683+00:00",
+      "child_exit_code": 0,
+      "observer_wrapper_exit_code": 0,
+      "samples": 13,
+      "first_sample_utc": "2026-10-05T17:36:51.194024+00:00",
+      "last_sample_utc": "2026-10-05T17:37:17.540566+00:00",
+      "maximum_sample_gap_seconds": 2.198559045791626,
+      "raw_selected_gpu_foreign_observations": [],
+      "unresolved_selected_gpu_foreign": [],
+      "other_gpu_process_observations": [],
+      "reconciliation": {
+        "schema": "deepseek-observer-reconciliation-v1",
+        "run": {
+          "command": [
+            "bash",
+            "experiments/deepseek_v32_mfu/scripts/run.sh",
+            "--mode",
+            "check",
+            "--physical-device",
+            "3",
+            "--model",
+            "/preset-models"
+          ],
+          "started_utc": "2026-10-05T17:36:50.954627+00:00",
+          "driver_sha256": "d9c70b27698a0a3a90a3202dd56c6d556110c4527386ddf24c7d303f3fa7fc7b",
+          "pid": 3596308,
+          "exit_code": 0,
+          "completed_utc": "2026-10-05T17:37:17.540683+00:00"
+        },
+        "original_wrapper_exit_code": 0,
+        "original_audit": {
+          "exit_code": 0,
+          "samples": 13,
+          "observed_owned_pids": [
+            3596314
+          ],
+          "foreign_processes": [],
+          "exit_races": [],
+          "monitor_errors": [],
+          "maximum_sample_gap_seconds": 2.198559045791626,
+          "boundary": "Discrete observations of all GPUs; this does not exclude activity between samples or unrelated CPU work."
+        },
+        "confirmed_owned_gpu_pids": [
+          3596314
+        ],
+        "exit_races": [],
+        "unresolved_selected_gpu_foreign": [],
+        "monitor_errors": [],
+        "other_gpu_processes": [],
+        "accepted_after_reconciliation": true,
+        "boundary": "Discrete sampling of GPU process lists and utilization; exit-race interpretation retains prior process identity and original raw evidence. Does not prove continuous isolation or CPU exclusivity.",
+        "source_sha256": "a019ae5dcb5f5359efbdeb2ca2bc09b1df96134f02a0cd6cf0b73d248d1a4ac9",
+        "evidence_sha256": {
+          "driver.py": "d9c70b27698a0a3a90a3202dd56c6d556110c4527386ddf24c7d303f3fa7fc7b",
+          "gpu_monitor.jsonl": "1090f08c099849082d4002d01a74800c8ac68bb07be7ce7100f5360b4551a4fc",
+          "run.json": "73b143291269717d44a4b7be742178f2cdd9b0bd972156a8a6af5f68342c7116",
+          "monitor_audit.json": "201022e2866fbfe35ac161797e60d77ae610afb7b1822a4d0ff7bb6bea2f0276",
+          "stdout.log": "957e77e9421d60a0dab96ed4900595686231df7d3cf2096260d4f1b21c4c6083",
+          "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "retained_evidence": {
+        "run.json": {
+          "path": "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_mfu_dma_a128_check_20261006_01/observer/run.json",
+          "sha256": "73b143291269717d44a4b7be742178f2cdd9b0bd972156a8a6af5f68342c7116",
+          "bytes": 414
+        },
+        "driver.py": {
+          "path": "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_mfu_dma_a128_check_20261006_01/observer/driver.py",
+          "sha256": "d9c70b27698a0a3a90a3202dd56c6d556110c4527386ddf24c7d303f3fa7fc7b",
+          "bytes": 3763
+        },
+        "gpu_monitor.jsonl": {
+          "path": "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_mfu_dma_a128_check_20261006_01/observer/gpu_monitor.jsonl",
+          "sha256": "1090f08c099849082d4002d01a74800c8ac68bb07be7ce7100f5360b4551a4fc",
+          "bytes": 10625
+        },
+        "stdout.log": {
+          "path": "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_mfu_dma_a128_check_20261006_01/observer/stdout.log",
+          "sha256": "957e77e9421d60a0dab96ed4900595686231df7d3cf2096260d4f1b21c4c6083",
+          "bytes": 94
+        },
+        "monitor_audit.json": {
+          "path": "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_mfu_dma_a128_check_20261006_01/observer/monitor_audit.json",
+          "sha256": "201022e2866fbfe35ac161797e60d77ae610afb7b1822a4d0ff7bb6bea2f0276",
+          "bytes": 326
+        },
+        "reconciliation.json": {
+          "path": "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_mfu_dma_a128_check_20261006_01/observer/reconciliation.json",
+          "sha256": "32ab7aac4b93eef04f28f1ada3f20df314ea0ab1e6bb76e157254451c2e66608",
+          "bytes": 1972
+        },
+        "stderr.log": {
+          "path": "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_mfu_dma_a128_check_20261006_01/observer/stderr.log",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "bytes": 0
+        },
+        "reconciliation_source.py": {
+          "path": "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_mfu_dma_a128_check_20261006_01/observer/reconciliation_source.py",
+          "sha256": "a019ae5dcb5f5359efbdeb2ca2bc09b1df96134f02a0cd6cf0b73d248d1a4ac9",
+          "bytes": 3193
+        }
+      },
+      "boundary": "Discrete samples; no claim of continuous device isolation or exclusive CPU use. Raw observer failure is preserved separately from successful measurement child."
+    },
+    "bench": {
+      "run_id": "deepseek_mfu_dma_a128_bench_20261006_01",
+      "command": [
+        "bash",
+        "experiments/deepseek_v32_mfu/scripts/run.sh",
+        "--mode",
+        "bench",
+        "--physical-device",
+        "3",
+        "--model",
+        "/preset-models",
+        "--validation-receipt",
+        "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_mfu_dma_a128_check_20261006_01/receipt.json"
+      ],
+      "started_utc": "2026-10-05T17:37:47.909043+00:00",
+      "completed_utc": "2026-10-05T17:38:25.472312+00:00",
+      "child_exit_code": 0,
+      "observer_wrapper_exit_code": 0,
+      "samples": 18,
+      "first_sample_utc": "2026-10-05T17:37:48.147749+00:00",
+      "last_sample_utc": "2026-10-05T17:38:25.472181+00:00",
+      "maximum_sample_gap_seconds": 2.2018802165985107,
+      "raw_selected_gpu_foreign_observations": [],
+      "unresolved_selected_gpu_foreign": [],
+      "other_gpu_process_observations": [],
+      "reconciliation": {
+        "schema": "deepseek-observer-reconciliation-v1",
+        "run": {
+          "command": [
+            "bash",
+            "experiments/deepseek_v32_mfu/scripts/run.sh",
+            "--mode",
+            "bench",
+            "--physical-device",
+            "3",
+            "--model",
+            "/preset-models",
+            "--validation-receipt",
+            "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_mfu_dma_a128_check_20261006_01/receipt.json"
+          ],
+          "started_utc": "2026-10-05T17:37:47.909043+00:00",
+          "driver_sha256": "d9c70b27698a0a3a90a3202dd56c6d556110c4527386ddf24c7d303f3fa7fc7b",
+          "pid": 3597779,
+          "exit_code": 0,
+          "completed_utc": "2026-10-05T17:38:25.472312+00:00"
+        },
+        "original_wrapper_exit_code": 0,
+        "original_audit": {
+          "exit_code": 0,
+          "samples": 18,
+          "observed_owned_pids": [
+            3597786
+          ],
+          "foreign_processes": [],
+          "exit_races": [],
+          "monitor_errors": [],
+          "maximum_sample_gap_seconds": 2.2018802165985107,
+          "boundary": "Discrete observations of all GPUs; this does not exclude activity between samples or unrelated CPU work."
+        },
+        "confirmed_owned_gpu_pids": [
+          3597786
+        ],
+        "exit_races": [],
+        "unresolved_selected_gpu_foreign": [],
+        "monitor_errors": [],
+        "other_gpu_processes": [],
+        "accepted_after_reconciliation": true,
+        "boundary": "Discrete sampling of GPU process lists and utilization; exit-race interpretation retains prior process identity and original raw evidence. Does not prove continuous isolation or CPU exclusivity.",
+        "source_sha256": "a019ae5dcb5f5359efbdeb2ca2bc09b1df96134f02a0cd6cf0b73d248d1a4ac9",
+        "evidence_sha256": {
+          "driver.py": "d9c70b27698a0a3a90a3202dd56c6d556110c4527386ddf24c7d303f3fa7fc7b",
+          "gpu_monitor.jsonl": "b13a2065058ec6e7d9545bb5ae11423080c7a9c5c7906ababb3b2d030f0d0361",
+          "run.json": "99baf2e2eb5a6bbdc1884f9e6678c49d9afa7d62dafe29db015b461c4d8d6a90",
+          "monitor_audit.json": "e32c17db54b396b49d3392229d1df8960c7cf5e5f1e567f44637c7d1480ab177",
+          "stdout.log": "f1258d1995cb4829c6137dc8861f4ec755d67586b698583616855c9636bbfb38",
+          "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "retained_evidence": {
+        "run.json": {
+          "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/log/deepseek_mfu_dma_a128_bench_20261006_01/observer/run.json",
+          "sha256": "99baf2e2eb5a6bbdc1884f9e6678c49d9afa7d62dafe29db015b461c4d8d6a90",
+          "bytes": 545
+        },
+        "driver.py": {
+          "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/log/deepseek_mfu_dma_a128_bench_20261006_01/observer/driver.py",
+          "sha256": "d9c70b27698a0a3a90a3202dd56c6d556110c4527386ddf24c7d303f3fa7fc7b",
+          "bytes": 3763
+        },
+        "gpu_monitor.jsonl": {
+          "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/log/deepseek_mfu_dma_a128_bench_20261006_01/observer/gpu_monitor.jsonl",
+          "sha256": "b13a2065058ec6e7d9545bb5ae11423080c7a9c5c7906ababb3b2d030f0d0361",
+          "bytes": 14273
+        },
+        "stdout.log": {
+          "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/log/deepseek_mfu_dma_a128_bench_20261006_01/observer/stdout.log",
+          "sha256": "f1258d1995cb4829c6137dc8861f4ec755d67586b698583616855c9636bbfb38",
+          "bytes": 92
+        },
+        "monitor_audit.json": {
+          "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/log/deepseek_mfu_dma_a128_bench_20261006_01/observer/monitor_audit.json",
+          "sha256": "e32c17db54b396b49d3392229d1df8960c7cf5e5f1e567f44637c7d1480ab177",
+          "bytes": 327
+        },
+        "reconciliation.json": {
+          "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/log/deepseek_mfu_dma_a128_bench_20261006_01/observer/reconciliation.json",
+          "sha256": "4789152c95c9af11f3ad44334ac089b478d707d0dd8fab6fbeff5a710e3ee63c",
+          "bytes": 2108
+        },
+        "stderr.log": {
+          "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/log/deepseek_mfu_dma_a128_bench_20261006_01/observer/stderr.log",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "bytes": 0
+        },
+        "reconciliation_source.py": {
+          "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/log/deepseek_mfu_dma_a128_bench_20261006_01/observer/reconciliation_source.py",
+          "sha256": "a019ae5dcb5f5359efbdeb2ca2bc09b1df96134f02a0cd6cf0b73d248d1a4ac9",
+          "bytes": 3193
+        }
+      },
+      "boundary": "Discrete samples; no claim of continuous device isolation or exclusive CPU use. Raw observer failure is preserved separately from successful measurement child."
+    },
+    "profile": {
+      "run_id": "deepseek_mfu_dma_a128_profile_20261006_01",
+      "command": [
+        "bash",
+        "experiments/deepseek_v32_mfu/scripts/profile_layers.sh",
+        "--physical-device",
+        "3",
+        "--model",
+        "/preset-models",
+        "--validation-receipt",
+        "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_mfu_dma_a128_check_20261006_01/receipt.json",
+        "--benchmark-run",
+        "experiments/deepseek_v32_mfu/output/data/deepseek_mfu_dma_a128_bench_20261006_01"
+      ],
+      "started_utc": "2026-10-05T17:38:53.369206+00:00",
+      "completed_utc": "2026-10-05T17:40:02.372619+00:00",
+      "child_exit_code": 0,
+      "observer_wrapper_exit_code": 0,
+      "samples": 32,
+      "first_sample_utc": "2026-10-05T17:38:53.635104+00:00",
+      "last_sample_utc": "2026-10-05T17:40:02.372452+00:00",
+      "maximum_sample_gap_seconds": 2.845689058303833,
+      "raw_selected_gpu_foreign_observations": [],
+      "unresolved_selected_gpu_foreign": [],
+      "other_gpu_process_observations": [],
+      "reconciliation": {
+        "schema": "deepseek-observer-reconciliation-v1",
+        "run": {
+          "command": [
+            "bash",
+            "experiments/deepseek_v32_mfu/scripts/profile_layers.sh",
+            "--physical-device",
+            "3",
+            "--model",
+            "/preset-models",
+            "--validation-receipt",
+            "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_mfu_dma_a128_check_20261006_01/receipt.json",
+            "--benchmark-run",
+            "experiments/deepseek_v32_mfu/output/data/deepseek_mfu_dma_a128_bench_20261006_01"
+          ],
+          "started_utc": "2026-10-05T17:38:53.369206+00:00",
+          "driver_sha256": "d9c70b27698a0a3a90a3202dd56c6d556110c4527386ddf24c7d303f3fa7fc7b",
+          "pid": 3599735,
+          "exit_code": 0,
+          "completed_utc": "2026-10-05T17:40:02.372619+00:00"
+        },
+        "original_wrapper_exit_code": 0,
+        "original_audit": {
+          "exit_code": 0,
+          "samples": 32,
+          "observed_owned_pids": [
+            3599829
+          ],
+          "foreign_processes": [],
+          "exit_races": [],
+          "monitor_errors": [],
+          "maximum_sample_gap_seconds": 2.845689058303833,
+          "boundary": "Discrete observations of all GPUs; this does not exclude activity between samples or unrelated CPU work."
+        },
+        "confirmed_owned_gpu_pids": [
+          3599829
+        ],
+        "exit_races": [],
+        "unresolved_selected_gpu_foreign": [],
+        "monitor_errors": [],
+        "other_gpu_processes": [],
+        "accepted_after_reconciliation": true,
+        "boundary": "Discrete sampling of GPU process lists and utilization; exit-race interpretation retains prior process identity and original raw evidence. Does not prove continuous isolation or CPU exclusivity.",
+        "source_sha256": "a019ae5dcb5f5359efbdeb2ca2bc09b1df96134f02a0cd6cf0b73d248d1a4ac9",
+        "evidence_sha256": {
+          "driver.py": "d9c70b27698a0a3a90a3202dd56c6d556110c4527386ddf24c7d303f3fa7fc7b",
+          "gpu_monitor.jsonl": "4e191f5b48e9549b017c7e25e01db49106e23ccd4729cf233d5b161973e09fcd",
+          "run.json": "215322fda03d1b560ff0d95fabc81e1ee22896e682dbc01059a78e6a5e4dffdf",
+          "monitor_audit.json": "6c93e15566f5775117b66bcf32e400b92eac09cf5715943896f183012484bb7d",
+          "stdout.log": "7a9dee92298f0d8d5505ab5db544cb753b41cc67013ccf47fabdbecffa3cbeb9",
+          "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      },
+      "retained_evidence": {
+        "run.json": {
+          "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/log/deepseek_mfu_dma_a128_profile_20261006_01/observer/run.json",
+          "sha256": "215322fda03d1b560ff0d95fabc81e1ee22896e682dbc01059a78e6a5e4dffdf",
+          "bytes": 640
+        },
+        "driver.py": {
+          "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/log/deepseek_mfu_dma_a128_profile_20261006_01/observer/driver.py",
+          "sha256": "d9c70b27698a0a3a90a3202dd56c6d556110c4527386ddf24c7d303f3fa7fc7b",
+          "bytes": 3763
+        },
+        "gpu_monitor.jsonl": {
+          "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/log/deepseek_mfu_dma_a128_profile_20261006_01/observer/gpu_monitor.jsonl",
+          "sha256": "4e191f5b48e9549b017c7e25e01db49106e23ccd4729cf233d5b161973e09fcd",
+          "bytes": 28320
+        },
+        "stdout.log": {
+          "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/log/deepseek_mfu_dma_a128_profile_20261006_01/observer/stdout.log",
+          "sha256": "7a9dee92298f0d8d5505ab5db544cb753b41cc67013ccf47fabdbecffa3cbeb9",
+          "bytes": 174
+        },
+        "monitor_audit.json": {
+          "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/log/deepseek_mfu_dma_a128_profile_20261006_01/observer/monitor_audit.json",
+          "sha256": "6c93e15566f5775117b66bcf32e400b92eac09cf5715943896f183012484bb7d",
+          "bytes": 326
+        },
+        "reconciliation.json": {
+          "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/log/deepseek_mfu_dma_a128_profile_20261006_01/observer/reconciliation.json",
+          "sha256": "fec8e15581fa09f9c74a15f2438078ebcf3ed48f1f17e0bd13e4246294cbc308",
+          "bytes": 2202
+        },
+        "stderr.log": {
+          "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/log/deepseek_mfu_dma_a128_profile_20261006_01/observer/stderr.log",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "bytes": 0
+        },
+        "reconciliation_source.py": {
+          "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/log/deepseek_mfu_dma_a128_profile_20261006_01/observer/reconciliation_source.py",
+          "sha256": "a019ae5dcb5f5359efbdeb2ca2bc09b1df96134f02a0cd6cf0b73d248d1a4ac9",
+          "bytes": 3193
+        }
+      },
+      "boundary": "Discrete samples; no claim of continuous device isolation or exclusive CPU use. Raw observer failure is preserved separately from successful measurement child."
+    }
+  },
+  "native_boundary": "Exact equality of recorded source/build flags, loaded backend and runtime identities; current file hashes verify the recorded FlashInfer native libraries and build metadata. Graph node attribution separately proves measured GPU ownership.",
+  "independent_dense_sql_review": {
+    "artifacts": {
+      "py": {
+        "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_mfu_dma_a128_profile_20261006_01/independent_dense_sql_audit.py",
+        "sha256": "6aa320b9b683c82c9167481e8b2b380b2fcf5b66dc8c016252d60b4233eb3144"
+      },
+      "json": {
+        "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_mfu_dma_a128_profile_20261006_01/independent_dense_sql_audit.json",
+        "sha256": "57e28017e971b3a96c462e5469350acfed7b545b0e07e48d5e4a0fa58e591811"
+      }
+    },
+    "boundary": "Independent read-only reopening of native CUPTI rows and separate interval arithmetic; does not run the model or alter original traces."
+  }
+}

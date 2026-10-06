@@ -1,5 +1,10 @@
 # NOSA 与 DeepSeek cache 管理
 
+DeepSeek dense prefetch 已改用连续布局与 `cudaMemcpyAsync`，完成新的独立验收和
+C10 正式请求计时，GPU ID/count ticket 预留为 0。统一报告使用新的请求内存观测，
+并保留经源码影响审计及完整复算确认不变的五项 DeepSeek 静态计划；NOSA 计划与
+测量不受影响。静态 P/NH 上限没有变化，本轮仍未运行容量填满轨迹。
+
 本实验为 motivation 提供容量依据，说明两模型如何准入用户、保留 history、执行
 candidate，以及怎样核对 HBM / CPU DRAM 占用。公共框架统一容量计划和生命周期；
 模型分别声明 KV 布局、派生状态与搬运方式。静态规划、完整请求中的内存观测和物理
@@ -83,12 +88,12 @@ H=65,536、A=128、C=1024，session 保留容量为 H，执行范围为 N=H+A=65
 | device→host、priority、free bitmap | 170 B | 每个 P 槽，另计 sentinel |
 | append-order metadata | 80 B | 每个 P 槽 |
 | session GPU page table | 4,096 B | 每 session |
-| session hints、prefetch/native counters | 2,480 B | 每 session |
+| session hints、prefetch/native counters | 2,560 B | 每 session |
 | 共享持久 scratch | 20P+36 B | 整个 backend 一份 |
 | resident selection bitmap | 4×ceil((P+129)/32) B | 整个 backend 一份 |
 | 各层 clock 与共享 selection count | 84 B | 整个 backend |
 
-每个 session 的私有 HBM 预留为 `10×65,536×132+2,480+4,096=86,514,096 B`。
+每个 session 的私有 HBM 预留为 `10×65,536×132+2,560+4,096=86,514,176 B`。
 主 KV 命中 HBM 后仍保留 DRAM 副本，增加 P 不会减少 DRAM 容量。候选 KV 尾部为
 `10×128×1,152=1,474,560 B`；单层合并 indexer 为 `(65,536+128)×132=8,667,648 B`，
 两项合计 10,142,208 B，均跨用户复用。合并 indexer 只有一份，不乘层数。
@@ -100,7 +105,7 @@ E(Q) = 1,184,000Q + 2,101,248 B
 E(1024) = 1,214,517,248 B
 bitmap = 4 × ceil((P+129)/32)
 HBM_base = E(1024) + 11,854P + 104NH + 11,874
-           + 86,514,096U + 10,142,208 + bitmap B
+           + 86,514,176U + 10,142,208 + bitmap B
 U = floor(NH / 65,536)
 DRAM = 10×next_power_of_two(1,152NH) + NH/16 + 4,096U + 40 B
 ```
@@ -108,8 +113,17 @@ DRAM = 10×next_power_of_two(1,152NH) + NH/16 + 4,096U + 40 B
 E 包含 indexer/selection 执行空间与两份在途 append source，后者覆盖 history
 prefill 写回，candidate D2H 仍为零。HBM_base 另含 `64(P+1)+64NH` 的 metadata
 执行预留；它不含模型、普通 activation 或 allocator allowance。当前账本包括
-append-order、native counter 与 bitmap，不能将这些既有 metadata 项的变化归因于
-本次框架重构。完整分项与舍入见新计划保存的源码和结果。
+append-order、native counter 与 bitmap。每层新增的 int64 recall counter 使十层
+session 的逻辑计数 slab 从 560 B 增至 640 B，每 session 增加 80 B；两者落在
+同一 allocator 档位，逻辑预留的增加与 allowance 的减少抵消，五项静态边界和
+舍入后总额均未改变。DMA 改动不涉及这些计划执行的公式；原始源码快照保留，
+当前源码的完整计划及下一不可行边界复算均与原计划一致，依据见
+[源码影响审计](report/unified/deepseek_static_impact.json)和[发布审计](report/unified/audit.json)。
+
+上述静态边界针对 ECHO／serial sparse。完整请求中的 dense DMA ticket 借用已有
+连续 host/HBM storage，不再分配私有 GPU ID/count，预留为 0。这比前一实现减少
+10,491,392 B 的执行预留，不等于实际 allocated 同量下降。graph static allocation
+与实际 private reservation 仍在请求账本中单列并计费。
 
 ## DeepSeek 静态边界
 
@@ -130,11 +144,11 @@ fragmentation allowance。14.5 GiB 是显式选择的额外扣减假设，来源
 
 | Plan ID | 额外扣减 GiB | P | NH | U | 有效 P `min(P,NH)` |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| `cache_deepseek_nh_20261005_02` | 0 | 32,768 | 29,818,880 | 455 | 32,768 |
-| `cache_deepseek_p_base_20261005_02` | 0 | 10,296,447 | 1,048,576 | 16 | 1,048,576 |
-| `cache_deepseek_p_base_headroom_20261005_02` | 14.5 | 8,983,043 | 1,048,576 | 16 | 1,048,576 |
-| `cache_deepseek_p_nhmax_20261005_02` | 0 | 6,451,364 | 29,818,880 | 455 | 6,451,364 |
-| `cache_deepseek_p_nhmax_headroom_20261005_02` | 14.5 | 5,137,960 | 29,818,880 | 455 | 5,137,960 |
+| `cache_deepseek_nh_20261006_01` | 0 | 32,768 | 29,818,880 | 455 | 32,768 |
+| `cache_deepseek_p_base_20261006_01` | 0 | 10,296,447 | 1,048,576 | 16 | 1,048,576 |
+| `cache_deepseek_p_base_headroom_20261006_01` | 14.5 | 8,983,043 | 1,048,576 | 16 | 1,048,576 |
+| `cache_deepseek_p_nhmax_20261006_01` | 0 | 6,451,364 | 29,818,880 | 455 | 6,451,364 |
+| `cache_deepseek_p_nhmax_headroom_20261006_01` | 14.5 | 5,137,960 | 29,818,880 | 455 | 5,137,960 |
 
 P 与 NH 共同消耗 HBM，不能同时取各自独立最大值。P>NH 只增加分配，不增加独立
 历史 token 的可驻留数量。固定 P=32,768 时，NH 上界由 pinned DRAM 档位决定：
@@ -143,15 +157,18 @@ P 与 NH 共同消耗 HBM，不能同时取各自独立最大值。P>NH 只增�
 
 ## 完整请求内存观测
 
-统一报告 `cache_unified_20261005_02` 汇入两个模型各一条正式 trace：
+统一报告 `cache_unified_dma_20261006_01` 汇入两个模型各一条正式 trace：
 `refactor_final_nosa_bench_20261005_01` 与
-`refactor_final_deepseek_bench_20261005_01`。每条 trace 含四方案各 32 个请求，
+`deepseek_dma_c10_bench_20261006_01`。每条 trace 含四方案各 32 个请求，
 使用 H=65,536、A=128、C=1024、P=65,536、NH=16,777,216、16 用户两轮访问。
-两模型均在 GPU3、CPU24–31、NUMA0 上依次计时，使用各自独立数值验收收据。
-离散 GPU 进程观测在采样时未发现其他计算进程；这些记录不提供连续独占证明，也不
-记录 CPU 活动、时钟或利用率。
-三轮计时的新旧对照见各模型 motivation 报告；本节保留预先选定的 bench01 内存观测。
-下列数值由统一报告生成器核对来源并汇总。
+两条 trace 各自在 GPU3、CPU24–31、NUMA0 上计时，使用对应的独立数值验收收据。
+DeepSeek 的测量与 observer 均以 0 退出；147 次离散采样的最大间隔为 30.353405 秒，
+未发现所选 GPU 上的未归属进程或其他 GPU 进程。这些记录不证明全机独占、连续
+隔离或 CPU 独占。完整原始观测、归属及归档核验见
+[observer 审计](report/unified/deepseek_observer_audit.json)和
+[运行归属记录](report/unified/deepseek_observer_reconciliation.json)；NOSA 仍沿用原
+trace 的观测证据。性能比较见各模型 motivation 报告；本节只汇总这两条正式 trace
+的内存。表中来源、逐请求最大值和 NOSA 数据保留情况均已独立复核。
 
 下表单位为 GiB。allocated／reserved 为正式请求轨迹中的 PyTorch 峰值；设备已用量
 取每个请求结束后的边界采样最大值，不是连续采样的进程峰值。各项均包含模型与执行
@@ -163,10 +180,10 @@ P 与 NH 共同消耗 HBM，不能同时取各自独立最大值。P>NH 只增�
 | nosa | dense_prefetch | 16 | 19.989842 | 25.330078 | 26.147522 |
 | nosa | serial_sparse | 16 | 19.989294 | 25.318359 | 26.137756 |
 | nosa | overlap | 16 | 19.989294 | 25.318359 | 26.137756 |
-| deepseek | hbm | 1 | 14.517269 | 23.634766 | 24.376038 |
-| deepseek | echo | 16 | 16.357162 | 24.296875 | 25.667053 |
-| deepseek | serial_sparse | 16 | 16.358688 | 24.296875 | 25.667053 |
-| deepseek | dense_prefetch | 16 | 16.358688 | 24.304688 | 25.674866 |
+| deepseek | hbm | 1 | 14.517354 | 23.634766 | 24.376038 |
+| deepseek | echo | 16 | 16.357248 | 24.296875 | 25.665100 |
+| deepseek | serial_sparse | 16 | 16.358774 | 24.296875 | 25.665100 |
+| deepseek | dense_prefetch | 16 | 16.358774 | 24.294922 | 25.665100 |
 
 cache 记账与计划预留单独列在下表。HBM 记账包含共享 cache/workspace、session
 storage、graph static allocated 与观测到的 graph private reserved；预留还包含所声明
@@ -178,10 +195,10 @@ storage、graph static allocated 与观测到的 graph private reserved；预留
 | nosa | dense_prefetch | 9.727347 | 11.214461 | 32.000000 | 64.000000 |
 | nosa | serial_sparse | 9.727373 | 11.214489 | 32.000000 | 64.000000 |
 | nosa | overlap | 9.727373 | 11.214489 | 32.000000 | 64.000000 |
-| deepseek | hbm | 6.624029 | 14.584986 | 0.000000 | 0.000000 |
-| deepseek | echo | 8.462240 | 17.426776 | 320.001038 | 320.001038 |
-| deepseek | serial_sparse | 8.462240 | 17.426776 | 320.001038 | 320.001038 |
-| deepseek | dense_prefetch | 8.462240 | 17.426776 | 320.001038 | 320.001038 |
+| deepseek | hbm | 6.624072 | 14.585029 | 0.000000 | 0.000000 |
+| deepseek | echo | 8.462284 | 17.426820 | 320.001038 | 320.001038 |
+| deepseek | serial_sparse | 8.462284 | 17.426820 | 320.001038 | 320.001038 |
+| deepseek | dense_prefetch | 8.462284 | 17.426820 | 320.001038 | 320.001038 |
 
 NOSA 的 16 份历史实际主 KV payload 为 32 GiB，准入保守预留为 64 GiB。DeepSeek
 在此 NH 下的全局 arena 逻辑容量为 180 GiB，每层 18 GiB pinned 分配进入 32 GiB

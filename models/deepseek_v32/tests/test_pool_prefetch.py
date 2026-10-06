@@ -10,15 +10,19 @@ from cache.sparse_token_pool import PRIORITY_LIMIT, SharedSparseTokenPool
 from models.deepseek_v32.cache.prefetch import PoolHistoryPrefetch
 
 
-def make_pool(*, slots=8, layers=1, device="cpu"):
+def make_pool(*, slots=8, layers=1, device="cpu", dense_contiguous=True):
+    from operators.deepseek_v32.indexer import cache_ops
+
     return SharedSparseTokenPool(
-        256,
+        max(256, 4 * ((slots + 63) // 64) * 64),
         7,
         layers,
         slots,
         device=device,
         dtype=torch.float32,
         candidate_slots=3,
+        dense_contiguous=dense_contiguous,
+        metadata_ops=cache_ops if torch.device(device).type == "cuda" else None,
     )
 
 
@@ -33,7 +37,33 @@ def populate(cache, count, offset=0):
     return values
 
 
-def test_full_history_prefetch_copies_only_misses_and_preserves_candidate_tail():
+def test_prefetch_rejects_pool_without_contiguous_contract():
+    pool = make_pool(dense_contiguous=False)
+    cache = pool.allocate_session(8).layer(0)
+    helper = PoolHistoryPrefetch("cpu")
+    with pytest.raises(ValueError, match="dense_contiguous"):
+        helper.prefetch(cache)
+    assert not helper._tickets and not helper.failed
+    helper.close()
+    pool.close()
+
+
+def test_prefetch_rejects_fragmented_host_layout_before_changing_maps():
+    pool = make_pool()
+    cache = pool.allocate_session(8).layer(0)
+    populate(cache, 8)
+    cache.session._host_runs = ((0, 4, 0), (4, 8, 64))
+    before = cache.host_to_device.clone()
+    helper = PoolHistoryPrefetch("cpu")
+    with pytest.raises(ValueError, match="one contiguous host run"):
+        helper.prefetch(cache)
+    torch.testing.assert_close(cache.host_to_device, before)
+    assert not helper._tickets and not helper.failed
+    helper.close()
+    pool.close()
+
+
+def test_unproven_history_copies_full_contiguous_span_and_preserves_candidate_tail():
     pool = make_pool()
     session = pool.allocate_session(8)
     cache = session.layer(0)
@@ -49,8 +79,8 @@ def test_full_history_prefetch_copies_only_misses_and_preserves_candidate_tail()
     records_pointer = cache.records.data_ptr()
     helper = PoolHistoryPrefetch("cpu")
     ticket = helper.prefetch(cache)
-    assert (ticket.requested_records, ticket.resident_records, ticket.fetched_records) == (8, 4, 4)
-    assert ticket.fetched_bytes == 4 * 7 * 4
+    assert (ticket.requested_records, ticket.resident_records, ticket.fetched_records) == (8, 0, 8)
+    assert ticket.fetched_bytes == 8 * 7 * 4
     helper.wait(ticket)
     ids = torch.arange(11)
     physical = cache.ensure(ids)
@@ -59,7 +89,7 @@ def test_full_history_prefetch_copies_only_misses_and_preserves_candidate_tail()
         cache.host.view(torch.uint8), host_before.view(torch.uint8), rtol=0, atol=0
     )
     assert physical[-3:].tolist() == [9, 10, 11]
-    assert cache.stats.recalled_records == 4
+    assert cache.stats.recalled_records == 8
     assert cache.metrics()["device_to_host_bytes"] == 0
     assert pool.shared_bytes() == pool_bytes
     assert cache.records.data_ptr() == records_pointer
@@ -150,8 +180,8 @@ def test_lookahead_tickets_are_layer_specific_and_expire_after_drain():
 
 def test_oversized_history_rejects_before_changing_metadata():
     pool = make_pool()
-    cache = pool.allocate_session(9).layer(0)
-    populate(cache, 9)
+    cache = pool.allocate_session(8).layer(0)
+    cache.length = cache.written = 9
     before = cache.host_to_device.clone(), cache.device_to_host.clone()
     helper = PoolHistoryPrefetch("cpu")
     with pytest.raises(WorkingSetTooLarge, match="H <= P"):
@@ -223,7 +253,14 @@ def test_cuda_dense_native_protection_keeps_fifo_events_and_append_order():
     checked = SimpleNamespace(
         **{
             name: getattr(cache_ops, name)
-            for name in ("protect", "mark_misses", "release_ids", "finalize_prefetch")
+            for name in (
+                "protect",
+                "mark_misses",
+                "release_ids",
+                "finalize_prefetch",
+                "dense_history_clear",
+                "dense_history_publish",
+            )
         }
     )
     pools = [make_pool(slots=193, device="cuda") for _ in range(2)]

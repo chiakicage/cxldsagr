@@ -1,0 +1,5 @@
+scheme,segment,chunk,request_id,layer,window_ms,gpu_union_ms,gpu_gap_ms,gpu_gap_fraction,largest_gap_us,raw_gpu_activity_count,compute_kernel_union_ms,separate_gather_union_ms,compute_separate_gather_overlap_ms
+hbm,candidate,,16,1,1.134402,0.909663,0.224739,0.1981123093929665,114.305,75,0.894783,0.0,0.0
+echo,candidate,,16,1,2.63213,1.536512,1.095618,0.416247677736282,175.136,145,0.533726,0.010752,0.0
+serial_sparse,candidate,,16,1,1.863457,1.025696,0.837761,0.44957356139690907,133.088,107,0.829504,0.07296,0.0
+dense_prefetch,candidate,,16,1,2.317506,2.287682,0.029824,0.012869006595883678,1.472,108,1.09709,2.201858,1.09709

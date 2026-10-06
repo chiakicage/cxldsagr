@@ -1,0 +1,148 @@
+{
+  "activity_count": 747,
+  "audit_source": "/tmp/cache_manager_root_audit_20261006_07/cache_manager_audit_20261006_05.py",
+  "audit_source_sha256": "9961f12fcd0dc0bfe3ab3e4f1af123e230635c403f8338bec8c61441afdc60fe",
+  "audit_support_sha256": "3fc1ac765a5dc25a5e3a839513de8cb27357dfa7302f0aa77d17f83820a6ba9d",
+  "boundary": "Independent original native/build/source/input/receipt/raw-activity coverage/counter/interval/sample/byte audit; execution observers remain a separate requirement. Missing original local-native evidence is rejected, never reconstructed for historical runs.",
+  "cases": [
+    {
+      "activities": 51,
+      "d2h_bytes": 442368,
+      "median_wall_ms": 4.7082,
+      "phase": "extend_cold",
+      "samples": 7,
+      "scheme": "dense_prefetch"
+    },
+    {
+      "activities": 117,
+      "d2h_bytes": 442368,
+      "median_wall_ms": 3.426455,
+      "phase": "extend_cold",
+      "samples": 7,
+      "scheme": "echo"
+    },
+    {
+      "activities": 45,
+      "d2h_bytes": 0,
+      "median_wall_ms": 1.16205,
+      "phase": "extend_cold",
+      "samples": 7,
+      "scheme": "hbm"
+    },
+    {
+      "activities": 69,
+      "d2h_bytes": 442368,
+      "median_wall_ms": 1.926094,
+      "phase": "extend_cold",
+      "samples": 7,
+      "scheme": "serial_sparse"
+    },
+    {
+      "activities": 45,
+      "d2h_bytes": 442368,
+      "median_wall_ms": 1.669608,
+      "phase": "extend_warm",
+      "samples": 7,
+      "scheme": "dense_prefetch"
+    },
+    {
+      "activities": 117,
+      "d2h_bytes": 442368,
+      "median_wall_ms": 3.025691,
+      "phase": "extend_warm",
+      "samples": 7,
+      "scheme": "echo"
+    },
+    {
+      "activities": 45,
+      "d2h_bytes": 0,
+      "median_wall_ms": 1.168217,
+      "phase": "extend_warm",
+      "samples": 7,
+      "scheme": "hbm"
+    },
+    {
+      "activities": 69,
+      "d2h_bytes": 442368,
+      "median_wall_ms": 1.738209,
+      "phase": "extend_warm",
+      "samples": 7,
+      "scheme": "serial_sparse"
+    },
+    {
+      "activities": 45,
+      "d2h_bytes": 3538944,
+      "median_wall_ms": 4.738095,
+      "phase": "prefill_last_chunk",
+      "samples": 7,
+      "scheme": "dense_prefetch"
+    },
+    {
+      "activities": 57,
+      "d2h_bytes": 3538944,
+      "median_wall_ms": 4.692034,
+      "phase": "prefill_last_chunk",
+      "samples": 7,
+      "scheme": "echo"
+    },
+    {
+      "activities": 45,
+      "d2h_bytes": 0,
+      "median_wall_ms": 4.482903,
+      "phase": "prefill_last_chunk",
+      "samples": 7,
+      "scheme": "hbm"
+    },
+    {
+      "activities": 42,
+      "d2h_bytes": 3538944,
+      "median_wall_ms": 4.585457,
+      "phase": "prefill_last_chunk",
+      "samples": 7,
+      "scheme": "serial_sparse"
+    }
+  ],
+  "identity_sha256": "213b5f9d080e3dd8576baf3878814dc2816e2e8dada3eb94b351eac8b5ac8791",
+  "native_audit": {
+    "bridge_dependency_count": 314,
+    "bridge_fingerprint": "72e5dd0d86dcacc7c1714bebecfbfc7033ead09f0223526a34fa02bb7b98c31d",
+    "mapped_library_count": 3,
+    "native_libraries": [
+      {
+        "category": "echo_indexer",
+        "library": {
+          "bytes": 2504784,
+          "path": "/root/.cache/tvm-ffi/cxldsagr_echo_indexer_c8f43b73bc3d148d_1fa11185f6354333/cxldsagr_echo_indexer_c8f43b73bc3d148d.so",
+          "sha256": "09165f76c0ef4a75067939afa1c071bb68b9e8bf28e229d27681cbefdb2e0a11"
+        },
+        "name": "cxldsagr_echo_indexer_c8f43b73bc3d148d.so"
+      },
+      {
+        "category": "other_local_native",
+        "library": {
+          "bytes": 83384,
+          "path": "/root/.cache/tvm-ffi/cxldsagr_echo_recall_dispatch_72e5dd0d86dcacc7_5eaa50b1dd428433/cxldsagr_echo_recall_dispatch_72e5dd0d86dcacc7.so",
+          "sha256": "297556386fcff78dde4750f7e4042268c5b3a4d9150cb8194a1091b6576ba66e"
+        },
+        "name": "cxldsagr_echo_recall_dispatch_72e5dd0d86dcacc7.so"
+      },
+      {
+        "category": "record_transfer",
+        "library": {
+          "bytes": 164496,
+          "path": "/root/.cache/tvm-ffi/cxldsagr_kv_transfer_672412fcb6ae32f3/cxldsagr_kv_transfer.so",
+          "sha256": "561bc3cbe14edea4930b202bc7a3ff0763864d15312d92de7e772664d04b1b66"
+        },
+        "name": "cxldsagr_kv_transfer.so"
+      }
+    ],
+    "recorded_snapshot_fields": 2
+  },
+  "passed": true,
+  "runs": [
+    "cache_manager_check_20261006_07",
+    "cache_manager_bench_20261006_07",
+    "cache_manager_profile_20261006_07"
+  ],
+  "source_hashes_checked": 168
+}

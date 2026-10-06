@@ -16,7 +16,7 @@ import struct
 from collections import Counter, defaultdict
 from pathlib import Path
 
-from experiments.deepseek_v32_echo_prefill.src.operator_flops import (
+from experiments.deepseek_v32_mfu.src.operator_flops import (
     build_operator_work,
     linear_work,
 )
@@ -46,7 +46,7 @@ SOURCE_FILES = (
     "models/attention_contracts.py",
     "operators/deepseek_v32/indexer/echo.py",
     "operators/deepseek_v32/attention/_config.py",
-    "experiments/deepseek_v32_echo_prefill/src/operator_flops.py",
+    "experiments/deepseek_v32_mfu/src/operator_flops.py",
 )
 
 
@@ -427,7 +427,7 @@ def main(argv=None):
     parser.add_argument(
         "--peak-report",
         type=Path,
-        default=ROOT / "experiments/deepseek_v32_echo_prefill/report/layers3/summary.json",
+        default=ROOT / "experiments/deepseek_v32_mfu/report/layers3/summary.json",
     )
     args = parser.parse_args(argv)
     analyze(args.run_dir, args.output_dir, args.peak_report, args.model_path)

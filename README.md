@@ -15,9 +15,10 @@ HBM 与 CPU DRAM，希望在有限 HBM 下复用更多历史 KV，并降低 offl
 保留历史避免复访重建；稀疏搬运减少复访所需的数据量，async 仍未快于 sync。
 报告给出重构前后同机三轮对照、独立 API 参考与内部重叠区间，分别说明剩余阶段开销、
 性能门槛、物理容量和场景代表性的验证边界。优化进度以研究状态为准。
-DeepSeek 真实前三层的 64K+1K 数值、独立计时和模块 profile 分别报告。
+DeepSeek 真实前三层四方法的 64K+128 数值、独立计时和模块 profile 分别报告。
 固定 P/NH、16 用户两轮的 [motivation 四方案对照](experiments/deepseek_v32_motivation/README.md)
-和[官方 ECHO 适配对照](experiments/deepseek_v32_echo_official/README.md)已发布 C10 结果。
+单独报告十 block C10 工作负载；[官方 SGLang 复现](experiments/deepseek_v32_echo_official/README.md)
+单独测量真实前三层的固定历史负载，按用户要求仅报告性能。官方 ECHO 不接入本地框架。
 [两模型 cache 管理](experiments/cache_management/README.md)汇总静态 P/NH 规划、
 各自的存储账本与完整请求观测，说明 NOSA 懒分配配额和 DeepSeek 全局 arena 的差异；
 当前没有跑满容量。旧 4 GiB / W / chunk 对照已撤回；
@@ -39,10 +40,10 @@ NOSA 支持 dense、完整 sparse policy 与显式 pinned-DRAM offload。Offload
 DeepSeek V3.2 当前非 GR benchmark 使用真实 checkpoint 第 0–2 层依次传播，包含
 embedding、final norm 和末 token LM head；这不是独立训练的三层模型。
 Indexer 融合 KV prefetch，主 KV 使用 resident 存储或有限 HBM pool 与 pinned DRAM
-backing。模型仍支持完整 61 层，当前数值验收为前三层 64K + 1K。
+backing。模型仍保留完整 61 层实现，当前数值、计时和 profile 覆盖真实前三层 64K + 128。
 DeepGEMM main 与 FlashMLA 已接入，普通算子复用 FlashInfer，indexer 量化经 KDA 优化，
-运行路径已移除 Hadamard。同 GPU、相同共享 cache 的固定负载对照及跨版本数值差异见
-[ECHO 实验](experiments/deepseek_v32_echo_prefill/README.md)；不代表任务质量等价，GR 对照单独报告。
+运行路径已移除 Hadamard。同 GPU 上四种 cache 方法的数值、阶段延迟与逐算子 MFU 见
+[DeepSeek MFU](experiments/deepseek_v32_mfu/README.md)；不代表任务质量等价，GR 对照单独报告。
 报告数字保留各自 run ID 与源码快照，目录迁移和回归检查不替代性能复测。
 
 [实验索引](experiments/README.md)按 motivation、baseline 性能合理性、sparse pattern、
@@ -93,7 +94,7 @@ CXLDSAGR_SM90_BACKEND=native python -m models.nosa.infer \
 python -m serving.run_gr --help
 python -m serving.run_multi_user --help
 python -m models.deepseek_v32.infer --model /preset-models --help
-bash experiments/deepseek_v32_echo_prefill/scripts/run.sh --help
+bash experiments/deepseek_v32_mfu/scripts/run.sh --help
 bash experiments/cache_management/scripts/run.sh --help
 ```
 
@@ -122,6 +123,7 @@ NOSA_OFFLOAD_CHECKPOINT=/mnt/ssd-wlcb/chenkaiqi/NOSA-8B \
 
 ## 文档
 
+- [系统架构](docs/architecture.md)：模块职责、请求与缓存生命周期、模型接入。
 - [文档分工](docs/README.md)、[项目内 Research Supervisor](skills/research-supervisor/SKILL.md)
 - [KDA 组件文档](docs/agents/kda/README.md)
 - [模型](models/README.md)、[算子目录与类型](operators/README.md)、[实验](experiments/README.md)

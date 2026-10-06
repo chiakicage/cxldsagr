@@ -1,193 +1,62 @@
 {
-  "passed": true,
-  "profile_run_id": "refactor_final_deepseek_profile_20261005_01",
-  "formal_run_id": "refactor_final_deepseek_bench_20261005_01",
-  "profile_source_sha256": "cb9ae48c10127178c3bf06edbfb9c4052b11c63959507a15120a819bbcc526eb",
-  "formal_source_sha256": "1319a540b7f78da9c363dd09c0f1568b450df3df5e4d3e8b60155a58c348b3dc",
-  "profile_source_files_rehashed": 1298,
-  "execution_source_files_identical": 1256,
-  "actual_quantizer_specializations_identical": 8,
-  "accepted_runtime_artifact_files_rehashed": 700,
-  "independent_check_receipt": {
-    "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/docs/agents/acceptance/unified_runtime_20261005/deepseek_final/receipt.json",
-    "sha256": "a25cc5d08891fd6811db232de0b862831b46702c1b2f3124b2921b611574c1b3",
-    "verified_artifacts": 132
-  },
-  "declared_backend_identity_and_precision_identical": true,
-  "native_flashinfer_libraries_identical": 3,
-  "norm_source_files_rehashed": 380,
-  "cute_identity_checks": [
-    {
-      "factory": "flashinfer.norm.kernels.rmsnorm._get_compiled_rmsnorm_kernel",
-      "compile_key": [
-        "float32",
-        7168,
-        0.0,
-        true,
-        90,
-        {
-          "type": "object"
-        },
-        "contiguous",
-        true
-      ],
-      "persisted_artifacts_rehashed": 0,
-      "captured_mlir_fingerprint_equal": true
-    },
-    {
-      "factory": "operators.deepseek_v32.norm._compile._get_compiled_typed_norm_kernel",
-      "compile_key": [
-        "fused",
-        7168,
-        0,
-        true,
-        "8b8a3e6128f23d6d65f6aca3993723c09c74fc9cf0c4da75f21742f1a5630b26",
-        "bf16_fp32_bf16_align128_weight16_sm90",
-        "--enable-tvm-ffi"
-      ],
-      "persisted_artifacts_rehashed": 0,
-      "captured_mlir_fingerprint_equal": true
-    },
-    {
-      "factory": "operators.deepseek_v32.norm._compile._get_compiled_typed_norm_kernel",
-      "compile_key": [
-        "plain",
-        1536,
-        0,
-        true,
-        "8b8a3e6128f23d6d65f6aca3993723c09c74fc9cf0c4da75f21742f1a5630b26",
-        "bf16_fp32_bf16_align128_weight16_sm90",
-        "--enable-tvm-ffi"
-      ],
-      "persisted_artifacts_rehashed": 0,
-      "captured_mlir_fingerprint_equal": true
-    },
-    {
-      "factory": "operators.deepseek_v32.norm._compile._get_compiled_typed_norm_kernel",
-      "compile_key": [
-        "plain",
-        512,
-        0,
-        true,
-        "8b8a3e6128f23d6d65f6aca3993723c09c74fc9cf0c4da75f21742f1a5630b26",
-        "bf16_fp32_bf16_align128_weight16_sm90",
-        "--enable-tvm-ffi"
-      ],
-      "persisted_artifacts_rehashed": 0,
-      "captured_mlir_fingerprint_equal": true
-    },
-    {
-      "factory": "operators.deepseek_v32.norm._compile._get_compiled_typed_norm_kernel",
-      "compile_key": [
-        "plain",
-        7168,
-        0,
-        true,
-        "8b8a3e6128f23d6d65f6aca3993723c09c74fc9cf0c4da75f21742f1a5630b26",
-        "bf16_fp32_bf16_align128_weight16_sm90",
-        "--enable-tvm-ffi"
-      ],
-      "persisted_artifacts_rehashed": 0,
-      "captured_mlir_fingerprint_equal": true
-    }
-  ],
-  "native_validation": [
+  "schema": "deepseek-c10-profile-provenance-v1",
+  "status": "passed",
+  "profile_run_id": "deepseek_mfu_c10_profile_20261006_02",
+  "bench_run_id": "deepseek_mfu_c10_bench_20261006_01",
+  "profile_source_sha256": "8a75ecbaa0c8c5262cbc78022d7582b8a7e82ac61927ae3f558797edeb703227",
+  "bench_source_sha256": "d1ad78fd4d8606877bf05d28e2a2cce79c6e9064cf53824bcf42c3ea8ec017fd",
+  "profile_source_files_rehashed": 1297,
+  "accepted_execution_source_files_equal": 1278,
+  "runtime_source_and_native_files_rehashed": 703,
+  "native_backend_and_precision_equal": true,
+  "runtime_artifacts_equal": true,
+  "cases": [
     {
       "scheme": "hbm",
-      "fingerprint": "941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf",
-      "path_environment_equal": true,
-      "loaded_binary_sha256": "ed79d3e717a464379b4f638f608853277b65f602ef05ca5b293e3afa6025cd40",
-      "same_binary_as_formal": true
+      "resource_plan_matches_bench": true,
+      "native_token_validator_matches_bench": true,
+      "policy": "deepseek-compute-islands-v3-indexer-bounds",
+      "eager_fallbacks": 0,
+      "static_storage_bytes": 641866912,
+      "static_allocated_bytes": 644219904,
+      "private_reserved_bytes": 5603590144
     },
     {
       "scheme": "echo",
-      "fingerprint": "941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf",
-      "path_environment_equal": true,
-      "loaded_binary_sha256": "ed79d3e717a464379b4f638f608853277b65f602ef05ca5b293e3afa6025cd40",
-      "same_binary_as_formal": true
+      "resource_plan_matches_bench": true,
+      "native_token_validator_matches_bench": true,
+      "policy": "deepseek-compute-islands-v3-indexer-bounds",
+      "eager_fallbacks": 0,
+      "static_storage_bytes": 641866912,
+      "static_allocated_bytes": 644581376,
+      "private_reserved_bytes": 5603590144
     },
     {
       "scheme": "serial_sparse",
-      "fingerprint": "941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf",
-      "path_environment_equal": true,
-      "loaded_binary_sha256": "ed79d3e717a464379b4f638f608853277b65f602ef05ca5b293e3afa6025cd40",
-      "same_binary_as_formal": true
+      "resource_plan_matches_bench": true,
+      "native_token_validator_matches_bench": true,
+      "policy": "deepseek-compute-islands-v3-indexer-bounds",
+      "eager_fallbacks": 0,
+      "static_storage_bytes": 641866912,
+      "static_allocated_bytes": 644581376,
+      "private_reserved_bytes": 5603590144
     },
     {
       "scheme": "dense_prefetch",
-      "fingerprint": "941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf",
-      "path_environment_equal": true,
-      "loaded_binary_sha256": "ed79d3e717a464379b4f638f608853277b65f602ef05ca5b293e3afa6025cd40",
-      "same_binary_as_formal": true
+      "resource_plan_matches_bench": true,
+      "native_token_validator_matches_bench": true,
+      "policy": "deepseek-compute-islands-v3-indexer-bounds",
+      "eager_fallbacks": 0,
+      "static_storage_bytes": 641866912,
+      "static_allocated_bytes": 644581376,
+      "private_reserved_bytes": 5603590144
     }
   ],
-  "graph_allocation": [
-    {
-      "scheme": "hbm",
-      "private_reserved_bytes": 5603590144,
-      "formal_private_reserved_bytes": 5603590144,
-      "static_storage_bytes": 641820832,
-      "static_allocated_bytes": 644173824,
-      "memory_at_allocation": {
-        "pytorch_allocated": 12837470720,
-        "pytorch_reserved": 16210984960,
-        "device_used": 17021599744,
-        "device_total": 150121545728
-      }
-    },
-    {
-      "scheme": "echo",
-      "private_reserved_bytes": 5603590144,
-      "formal_private_reserved_bytes": 5603590144,
-      "static_storage_bytes": 641820832,
-      "static_allocated_bytes": 644535296,
-      "memory_at_allocation": {
-        "pytorch_allocated": 14283111424,
-        "pytorch_reserved": 17668505600,
-        "device_used": 19154403328,
-        "device_total": 150121545728
-      }
-    },
-    {
-      "scheme": "serial_sparse",
-      "private_reserved_bytes": 5603590144,
-      "formal_private_reserved_bytes": 5603590144,
-      "static_storage_bytes": 641820832,
-      "static_allocated_bytes": 644535296,
-      "memory_at_allocation": {
-        "pytorch_allocated": 14283111424,
-        "pytorch_reserved": 17668505600,
-        "device_used": 19154403328,
-        "device_total": 150121545728
-      }
-    },
-    {
-      "scheme": "dense_prefetch",
-      "private_reserved_bytes": 5603590144,
-      "formal_private_reserved_bytes": 5603590144,
-      "static_storage_bytes": 641820832,
-      "static_allocated_bytes": 644535296,
-      "memory_at_allocation": {
-        "pytorch_allocated": 14283111424,
-        "pytorch_reserved": 17668505600,
-        "device_used": 19154403328,
-        "device_total": 150121545728
-      }
-    }
-  ],
-  "extra_file_sha256": {
-    "/root/.cache/flashinfer/0.6.18/90a/cached_ops/rope/rope.so": "6bd248d922781f40d746dc1dff63cd921fa7c565609ff0db271ab1cd4dce2f9c",
-    "/root/.venv/lib/python3.12/site-packages/flashinfer/data/csrc/rope.cu": "20d0f4c537d6524ff39d9a65cca4868b17ff99d6cb64ee6f04c51b2c13f249ad",
-    "/root/.venv/lib/python3.12/site-packages/flashinfer/data/csrc/flashinfer_rope_binding.cu": "0f7ca00d9d8ecc336c9ec5d58ec9cf8bd5f8ac64410a73d73b07649dcf65c97e",
-    "/root/.cache/flashinfer/0.6.18/90a/cached_ops/rope/build.ninja": "c5397176839768a3ca6870c4406a193adda4de9fb34db3ff247b4d2d98bd345f",
-    "/root/.cache/flashinfer/0.6.18/90a/cached_ops/silu_and_mul/silu_and_mul.so": "1a0b3775bcd7a1c05944efdcc19e5cbd8d2ce5d74c120cd837fdf414f3683820",
-    "/root/.cache/flashinfer/0.6.18/90a/generated/silu_and_mul.cu": "96d0b8ab5d333f41c1703f5aad1b641fb668790a5f40b70ff7f40f37e7fed649",
-    "/root/.cache/flashinfer/0.6.18/90a/cached_ops/silu_and_mul/build.ninja": "82dc54370565502ee07a46d2a512d541025e4fbcc9b41f2ad07ad3db0a535784",
-    "/root/.cache/flashinfer/0.6.18/90a/cached_ops/topk/topk.so": "a63d4dfe772493fd9cbc6e65ec9fa92ab77564ab30ef8aef4a6f0b1dec47ffa8",
-    "/root/.venv/lib/python3.12/site-packages/flashinfer/data/csrc/topk.cu": "d9189f8e562a1052b3155c4d4a47ab6ad1170d2ea73136ae45d67a555a3eeb39",
-    "/root/.venv/lib/python3.12/site-packages/flashinfer/data/csrc/flashinfer_topk_binding.cu": "a845126dd951d0efb510123af91d4ae235eaacf81433edfc48815befa3f204d4",
-    "/root/.venv/lib/python3.12/site-packages/flashinfer/data/csrc/flashinfer_fast_topk_clusters_binding.cu": "8568d686b8284deb80bedd4c7682b2a38ef4e644b6f86b4f7c289524eec803a7",
-    "/root/.cache/flashinfer/0.6.18/90a/cached_ops/topk/build.ninja": "92e27b973e5925965b21e7315d3b10b20701882d475d2e5d3ea2e21093d65f75",
+  "runtime_file_sha256": {
+    "/root/.venv/lib/python3.12/site-packages/deep_gemm/_C.cpython-312-x86_64-linux-gnu.so": "01550d180096b41b3d575e684a3e84ac43d75cf3f1275f3329523103aa9ea93a",
+    "/root/.venv/lib/python3.12/site-packages/deep_gemm/__init__.py": "8c976cea8a49c666f87ac0bdbe74605dbd8ce656f07267afdf8219817bcaf577",
+    "/root/.venv/lib/python3.12/site-packages/flash_mla/cuda.cpython-312-x86_64-linux-gnu.so": "1c9969551e8ef7ca96ca1182ab4f9347aa5402586a1ba5a5c82f86cf4b2fb9a6",
+    "/root/.venv/lib/python3.12/site-packages/flash_mla/__init__.py": "4345e7b57facecac586e85d2c64a7fbbaa38f92c258b739223708db6a1715b5f",
     "/root/.venv/lib/python3.12/site-packages/nvidia_cutlass_dsl/dsl_packages/cutlass/__init__.py": "425a1bac59af4a04062a98fe921d99b95990743a28f452ac0e2acbdf0fee72e2",
     "/root/.venv/lib/python3.12/site-packages/nvidia_cutlass_dsl/dsl_packages/cutlass/_mlir/_mlir_libs/_cutlass_ir.cu13.cpython-312-x86_64-linux-gnu.so": "bb367e30bb24541faa974ed05ff201171f61c5b18b01df9e46a406bdde5edbba",
     "/root/.venv/lib/python3.12/site-packages/nvidia_cutlass_dsl/dsl_packages/cutlass/_mlir/_mlir_libs/__init__.py": "04d819510a5a557973586defc8ef47a4f8fa1f898c84e31bc3309d04e13f183c",
@@ -565,6 +434,19 @@
     "/root/.venv/lib/python3.12/site-packages/tvm_ffi/utils/kwargs_wrapper.py": "a476d0d41d4c805e721ee37b3153cd75387286aafb1768ffe186be97594faaf5",
     "/root/.venv/lib/python3.12/site-packages/tvm_ffi/utils/lockfile.py": "5e5b941036979eb44566e64e351e7fddadd27360a9efe56c52493313be15f100",
     "/root/.venv/lib/python3.12/site-packages/tvm_ffi/utils/unpack_dataclass.py": "f38f2b85c25d06452c97993c480bc64afc16993155bea5d4a4502edf2e543439",
+    "/root/.cache/flashinfer/0.6.18/90a/cached_ops/rope/rope.so": "6bd248d922781f40d746dc1dff63cd921fa7c565609ff0db271ab1cd4dce2f9c",
+    "/root/.venv/lib/python3.12/site-packages/flashinfer/data/csrc/rope.cu": "20d0f4c537d6524ff39d9a65cca4868b17ff99d6cb64ee6f04c51b2c13f249ad",
+    "/root/.venv/lib/python3.12/site-packages/flashinfer/data/csrc/flashinfer_rope_binding.cu": "0f7ca00d9d8ecc336c9ec5d58ec9cf8bd5f8ac64410a73d73b07649dcf65c97e",
+    "/root/.cache/flashinfer/0.6.18/90a/cached_ops/rope/build.ninja": "c5397176839768a3ca6870c4406a193adda4de9fb34db3ff247b4d2d98bd345f",
+    "/root/.cache/flashinfer/0.6.18/90a/cached_ops/silu_and_mul/silu_and_mul.so": "1a0b3775bcd7a1c05944efdcc19e5cbd8d2ce5d74c120cd837fdf414f3683820",
+    "/root/.cache/flashinfer/0.6.18/90a/generated/silu_and_mul.cu": "96d0b8ab5d333f41c1703f5aad1b641fb668790a5f40b70ff7f40f37e7fed649",
+    "/root/.cache/flashinfer/0.6.18/90a/cached_ops/silu_and_mul/build.ninja": "82dc54370565502ee07a46d2a512d541025e4fbcc9b41f2ad07ad3db0a535784",
+    "/root/.cache/flashinfer/0.6.18/90a/cached_ops/topk/topk.so": "a63d4dfe772493fd9cbc6e65ec9fa92ab77564ab30ef8aef4a6f0b1dec47ffa8",
+    "/root/.venv/lib/python3.12/site-packages/flashinfer/data/csrc/topk.cu": "d9189f8e562a1052b3155c4d4a47ab6ad1170d2ea73136ae45d67a555a3eeb39",
+    "/root/.venv/lib/python3.12/site-packages/flashinfer/data/csrc/flashinfer_topk_binding.cu": "a845126dd951d0efb510123af91d4ae235eaacf81433edfc48815befa3f204d4",
+    "/root/.venv/lib/python3.12/site-packages/flashinfer/data/csrc/flashinfer_fast_topk_clusters_binding.cu": "8568d686b8284deb80bedd4c7682b2a38ef4e644b6f86b4f7c289524eec803a7",
+    "/root/.cache/flashinfer/0.6.18/90a/cached_ops/topk/build.ninja": "92e27b973e5925965b21e7315d3b10b20701882d475d2e5d3ea2e21093d65f75",
+    "/root/.cache/cxldsagr/token-validation/b2417ad2f63b6e963d43135e555cf21a49a8ea00fc7a0eb868733c7e635dd080/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so": "ed79d3e717a464379b4f638f608853277b65f602ef05ca5b293e3afa6025cd40",
     "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/serving/csrc/token_validation.cpp": "144f89b7004bd589cf18850a8ac2b0aee29ce7bdf0b6d8fa4db7ee0e02b0d1af",
     "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/serving/token_validation.py": "d2f4f9d15dbc0a435f6485efde175d144de82b5b46069db406ca7476055640f2",
     "/root/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/bin/python3.12": "d778d0b551287fb5f06c4464f78b616c086f8d42e94d8cfc209b12324cf937a1",
@@ -873,22 +755,8 @@
     "/usr/lib/gcc/x86_64-linux-gnu/13/include/stdint.h": "86a7914ab7d6a18465a6fb9a7b54f945cad604fdbf3ca0d10e4e0254e0037911",
     "/usr/lib/gcc/x86_64-linux-gnu/13/include/syslimits.h": "22dd0ab81baadd5a8d455b445855f341d419c7b0267beca235de00b7ec78e529",
     "/usr/libexec/gcc/x86_64-linux-gnu/13/cc1plus": "840b332fb62ec6f694ac77d91fe69ef7f80b0d69512ed89374af0ee7a506255d",
-    "/usr/libexec/gcc/x86_64-linux-gnu/13/collect2": "4d1f341ae5b763b513258ee2812422a45e063c30a2f1924a0cf63d3699f3a158",
-    "/root/.cache/cxldsagr/token-validation/941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf/_cxldsagr_token_validation.cpython-312-x86_64-linux-gnu.so": "ed79d3e717a464379b4f638f608853277b65f602ef05ca5b293e3afa6025cd40",
-    "/root/.cache/cxldsagr/token-validation/941b9ee190910175719bf8b41060756769b9f4da88b5efb811dd89eec44232cf/manifest.json": "bee233ac0fd073af7d061eedd88a54b37aca7fe161453faf98d4d8594d8e9876"
+    "/usr/libexec/gcc/x86_64-linux-gnu/13/collect2": "4d1f341ae5b763b513258ee2812422a45e063c30a2f1924a0cf63d3699f3a158"
   },
-  "source_and_input_sha256": {
-    "/tmp/cxldsagr_refactor_final_deepseek_20261005/analysis_sources/provenance.py": "c3ae87803664439ad7ba59e6afe30d4ccf4540d2613299d33762637c46393d92",
-    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_profile_20261005_01/metadata.json": "8b0cdf242ac0f2f93859cbfdf897e35d7212f286c845500e54c8db951015e9ab",
-    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_profile_20261005_01/source_manifest.json": "509fdc64dd3f6ec5a8dacfeaffe7b1d041e2d460ba84f5a2e01c3aaeb7c2ade9",
-    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_bench_20261005_01/metadata.json": "cda32f5d3a423aa124b6bdc8ee8c13d84a9b6caa92e9badd5ba5c9ddaff9290c",
-    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_bench_20261005_01/source_manifest.json": "31fc8ed1b1c242e45f565acef4c86236d0a61c71dbe68a8ae4a1ee69d18bc699",
-    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/docs/agents/acceptance/unified_runtime_20261005/deepseek_final/receipt.json": "a25cc5d08891fd6811db232de0b862831b46702c1b2f3124b2921b611574c1b3"
-  },
-  "boundaries": [
-    "Independent saved-source and recorded runtime identity checks; timed launch attribution is checked separately against raw SQLite.",
-    "CuTe in-memory MLIR fingerprints are recorded metadata; absent persisted bytes cannot be rehashed after process exit.",
-    "Native validation may record a different PATH under nsys; all other build inputs and loaded binary bytes must match formal C10.",
-    "Graph-private reservations are observations of this run; the chosen private limit is a separate plan bound."
-  ]
+  "auditor_sha256": "f00d5e700bbf507d293445c719d5e247899656a8136e030f8417c528b97669fb",
+  "boundary": "Saved profile source snapshots and all accepted benchmark execution-source identities match; full profile and benchmark manifests may differ in instrumentation/analysis helpers. Artifact equality does not turn profiler timings into benchmark latency."
 }

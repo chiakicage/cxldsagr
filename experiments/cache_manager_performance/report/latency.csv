@@ -1,0 +1,13 @@
+phase,scheme,samples,median_wall_ms,min_wall_ms,max_wall_ms,min_host_to_device_bytes,max_host_to_device_bytes,mfu
+extend_cold,dense_prefetch,7,4.7082,4.704728,4.720024,226492416,226492416,
+extend_cold,echo,7,3.426455,3.415631,3.489671,22799232,22799232,
+extend_cold,hbm,7,1.16205,1.150354,1.253444,0,0,
+extend_cold,serial_sparse,7,1.926094,1.889841,2.029674,22799232,22799232,
+extend_warm,dense_prefetch,7,1.669608,1.63822,1.770133,0,0,
+extend_warm,echo,7,3.025691,2.997336,3.066571,0,0,
+extend_warm,hbm,7,1.168217,1.158304,1.223116,0,0,
+extend_warm,serial_sparse,7,1.738209,1.725828,1.805149,0,0,
+prefill_last_chunk,dense_prefetch,7,4.738095,4.711043,4.753613,0,0,
+prefill_last_chunk,echo,7,4.692034,4.663121,4.705891,0,0,
+prefill_last_chunk,hbm,7,4.482903,4.457221,4.95127,0,0,
+prefill_last_chunk,serial_sparse,7,4.585457,4.573904,4.607097,0,0,

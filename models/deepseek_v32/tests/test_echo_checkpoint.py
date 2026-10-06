@@ -21,7 +21,7 @@ SEED = 314159
 
 def _sources():
     """Identify this execution's model/cache/kernel sources and local includes."""
-    from experiments.deepseek_v32_echo_prefill.src.backend_provenance import source_files
+    from experiments.deepseek_v32_mfu.src.backend_provenance import source_files
 
     paths = set(source_files())
     paths.update(
@@ -42,8 +42,8 @@ def _sources():
         "GR/dataset.py",
         "GR/heat.py",
         "GR/scheduling.py",
-        "experiments/deepseek_v32_echo_prefill/src/measure.py",
-        "experiments/deepseek_v32_echo_prefill/src/profile_layers.py",
+        "experiments/deepseek_v32_mfu/src/measure.py",
+        "experiments/deepseek_v32_mfu/src/profile_layers.py",
     ):
         paths.add(ROOT / relative)
     for directory in ("operators/deepseek_v32", "operators/common"):
@@ -112,8 +112,8 @@ def _progress(mode, phase):
 )
 def test_checkpoint_three_layers_64k_1k_independent_resident_and_offload_sparse_prefixes():
     # Once opted in, missing files, GPUs, dependencies or memory must fail.
-    from experiments.deepseek_v32_echo_prefill.src.measure import make_request
-    from experiments.deepseek_v32_echo_prefill.src.profile_layers import comparison
+    from experiments.deepseek_v32_mfu.src.measure import make_request
+    from experiments.deepseek_v32_mfu.src.profile_layers import comparison
     from models.deepseek_v32.config import Config
     from models.deepseek_v32.model import DeepSeekEchoModel
 

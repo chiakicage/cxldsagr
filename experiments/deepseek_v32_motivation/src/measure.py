@@ -245,7 +245,7 @@ def snapshot_sources(output):
         "experiments/nosa_motivation/src/provenance.py",
         "experiments/nosa_motivation/src/cpu_environment.py",
         "experiments/cache_management/src/capacity_probe.py",
-        "experiments/deepseek_v32_echo_prefill/src/backend_provenance.py",
+        "experiments/deepseek_v32_mfu/src/backend_provenance.py",
     }
 
     def executed_source(name):
@@ -688,7 +688,7 @@ def main(argv=None):
         from experiments.nosa_motivation.src.cpu_environment import finish_cpu_environment
 
         finish_cpu_environment(metadata, torch)
-        from experiments.deepseek_v32_echo_prefill.src.backend_provenance import (
+        from experiments.deepseek_v32_mfu.src.backend_provenance import (
             collect_flashinfer_runtime_artifacts,
         )
         from experiments.deepseek_v32_motivation.src.report import audit_run, write_report

@@ -12,6 +12,7 @@ from cache.staging import DoubleBufferStaging
 from models.deepseek_v32.execution.cache_resources import (
     CACHE_POLICY_REVISION,
     dense_staging_allocation_bytes,
+    dense_ticket_reservation,
     execution_reservation,
     padded_tokens,
 )
@@ -135,6 +136,11 @@ def _plan_serving_resources(config, budgets, limits):
         private["dram"],
     )
     transient_indexer_bytes = merged_indexer_bytes
+    dense_ticket_bytes = (
+        dense_ticket_reservation(history, config.num_layers, config.device)
+        if config.scheme == "dense_prefetch"
+        else 0
+    )
 
     def estimate(tokens):
         result = SharedSparseTokenPool.estimate_shared_bytes(
@@ -154,6 +160,7 @@ def _plan_serving_resources(config, budgets, limits):
             + execution.hbm
             + graph_reservation
             + metadata_workspace
+            + dense_ticket_bytes
             + (transient_indexer_bytes if config.device.type == "cuda" else 0),
             result["dram"]
             + execution.dram
@@ -200,9 +207,10 @@ def _plan_serving_resources(config, budgets, limits):
             **({"resource_mode": "fixed_pools"} if budgets is None else {}),
             "pool_scope": "backend_per_layer",
             "shared_token_pool": True,
-            "dense_fetch_policy": "all_history_cache_misses_next_layer"
+            "dense_fetch_policy": "contiguous_history_cuda_memcpy_async_next_layer_v1"
             if config.scheme == "dense_prefetch"
             else None,
+            "dense_contiguous": config.scheme == "dense_prefetch",
             "host_arena_tokens": tokens,
             "sparse_pool_tokens": config.slots,
             "max_session_capacity": capacity,
@@ -218,6 +226,7 @@ def _plan_serving_resources(config, budgets, limits):
             "workspace_metadata_bytes": SharedSparseTokenPool.estimate_execution_workspace_bytes(
                 tokens, config.slots
             ),
+            "workspace_dense_ticket_bytes": dense_ticket_bytes,
             "max_inflight_writes": 2,
         },
     )
@@ -319,6 +328,15 @@ def resource_allocations(config, plan):
                 tier="hbm",
             )
         )
+        if metadata.get("workspace_dense_ticket_bytes", 0):
+            allocations.append(
+                _reservation(
+                    "dense_ticket_execution_upper_bound",
+                    metadata["workspace_dense_ticket_bytes"],
+                    device,
+                    tier="hbm",
+                )
+            )
     elif metadata.get("dense_staging_bytes", 0):
         allocations.append(
             _allocation(
@@ -493,7 +511,7 @@ def plan_session_storage(
             _allocation(
                 "layer_counters",
                 "int64",
-                (layers, 7),
+                (layers, 8),
                 device,
                 owner="session",
                 lifetime="session",

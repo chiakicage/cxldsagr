@@ -1,5 +1,5 @@
 {
-  "run_id": "refactor_final_deepseek_bench_20261005_01",
+  "run_id": "deepseek_mfu_c10_bench_20261006_01",
   "audit": {
     "status": "passed",
     "checked_requests": 128,
@@ -7,8 +7,8 @@
     "all_candidate_hidden_and_logits_exact": false,
     "independent_correctness_receipt": {
       "kind": "deepseek-v32-motivation-full-trace-v1",
-      "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/docs/agents/acceptance/unified_runtime_20261005/deepseek_final/receipt.json",
-      "sha256": "a25cc5d08891fd6811db232de0b862831b46702c1b2f3124b2921b611574c1b3",
+      "path": "/tmp/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_mfu_c10_check_20261006_01/receipt.json",
+      "sha256": "1db5e4b5e53c4639a42edb9d44ca9b2e790d38e6ef932b790685e1865b2b644b",
       "checks": {
         "coverage": "complete four-method multi-request trace",
         "does_not_establish": "failure injection, task quality, or performance",
@@ -152,14 +152,14 @@
             "numerical/serial_sparse/000030.pt": "6dea76ff6cacac5001504d363aeaffc966e8b45e7defd861c823940f102697ad",
             "numerical/serial_sparse/000031.pt": "2945b583b4c931107aaa09ce035c00e3a1ba26f9581c72c594bb87d2221d270e"
           },
-          "source_sha256": "1fc1cbaf7a97579f7094879938330a9933a82109909d2701a177e1653f0dc9f8",
+          "source_sha256": "d1ad78fd4d8606877bf05d28e2a2cce79c6e9064cf53824bcf42c3ea8ec017fd",
           "status": "passed",
           "warmup_policy": "two_users_then_first_user_host_recall_v1"
         },
         "passed": true
       }
     },
-    "source_sha256": "1319a540b7f78da9c363dd09c0f1568b450df3df5e4d3e8b60155a58c348b3dc",
+    "source_sha256": "d1ad78fd4d8606877bf05d28e2a2cce79c6e9064cf53824bcf42c3ea8ec017fd",
     "warmup_policy": "two_users_then_first_user_host_recall_v1",
     "checked_warmup_requests": 12,
     "host_recall_warmed_schemes": [
@@ -170,12 +170,21 @@
     "numerical_sha256": {}
   },
   "input_sha256": {
-    "metadata.json": "cda32f5d3a423aa124b6bdc8ee8c13d84a9b6caa92e9badd5ba5c9ddaff9290c",
-    "measurements.jsonl": "fb5969da9d0db6b895a9710970254a55d5f3b30b2cd9a886542c151b923b5907",
-    "source_manifest.json": "31fc8ed1b1c242e45f565acef4c86236d0a61c71dbe68a8ae4a1ee69d18bc699",
-    "memory.json": "5f6dff3620c67d304522ab0edbffe9c943c840efaa545c5d6f1708defcf8985a",
+    "metadata.json": "b1a907a0490284ae1c66842506485c1720cebd1a216d3eedc06a581ee69ed58a",
+    "measurements.jsonl": "cab4cb4cd54db17c2dceb62caa9b9ecde27629abf994d2ddce375abcc2cb2ab2",
+    "source_manifest.json": "2753efef4688c28f6df8a6629096c214f568c831113aad2aca23e52c06b3008d",
+    "memory.json": "89805e9c5a07f495546e587cc18dac0d3e231ffd8ed91df6278105555a44eef1",
     "workload/requests.jsonl": "167a0af2fba4428c0b3f4bd2886a644675ee46b017c9fc08d25bb0ff50f71355",
     "workload/workload.json": "f13739cdabb79729a64c0e4d8bd4242bf9c64518bee657ab305c598ae6cf01f0"
   },
-  "report_generator_sha256": "cd640e53a46287e4e39ae9e772901b4c10c7a5d02db7309b8af7d2dced6a26a8"
+  "report_generator_sha256": "cd640e53a46287e4e39ae9e772901b4c10c7a5d02db7309b8af7d2dced6a26a8",
+  "editorial_updates": {
+    "boundary": "Generated Chinese prose was reviewed with humanizer-zh; subsequent additions report independent byte/counter/memory audits and sampled other-GPU activity without changing the formal samples.",
+    "result_sha256": "b00324d464ce882b52184a0f1576916414fc6b1ca252ed994079939dc047e9cf",
+    "additional_evidence_sha256": {
+      "independent_bench_audit.json": "635395fab97e5a3db34a544f5066a102d4bca0ca810b12a73e91db052197fa9f",
+      "memory.csv": "2b8970887d4739aa131599753191c6e014cc4f336d17ae29f6f9d9f441e1312e",
+      "observer_summary.json": "9cdf9a243b4dfe75e253afe82169d3e30cecb98c4387ce5b63ff2d872fce8903"
+    }
+  }
 }

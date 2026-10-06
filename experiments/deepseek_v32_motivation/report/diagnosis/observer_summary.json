@@ -1,0 +1,241 @@
+{
+  "schema": "deepseek-independent-observer-summary-v1",
+  "run_id": "deepseek_mfu_c10_profile_20261006_02",
+  "source_directory": "/tmp/deepseek_mfu_c10_profile_20261006_02_driver",
+  "preserved_directory": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_mfu_c10_profile_20261006_02/observer",
+  "audit_started_utc": "2026-10-05T17:16:13.306982+00:00",
+  "audit_completed_utc": "2026-10-05T17:16:13.359630+00:00",
+  "audit_helper_sha256": "1d7d1f0e8b16bcf41ad9ff143623cfeaa75807de1903df94bfd785331a8d8730",
+  "cpu_affinity": [
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39
+  ],
+  "thread_limits": {
+    "OMP_NUM_THREADS": "8",
+    "MKL_NUM_THREADS": "8",
+    "OPENBLAS_NUM_THREADS": "8"
+  },
+  "run_child_pid": 3519691,
+  "run_exit_code": 0,
+  "original_wrapper_exit_code": 0,
+  "claimed_samples": 305,
+  "independently_parsed_samples": 305,
+  "first_sample_utc": "2026-10-05T16:54:19.644132+00:00",
+  "last_sample_utc": "2026-10-05T17:06:14.986967+00:00",
+  "claimed_maximum_sample_gap_seconds": 31.677917003631592,
+  "maximum_sample_gap_seconds": 31.677917,
+  "maximum_gap_from_utc": "2026-10-05T17:05:29.098752+00:00",
+  "maximum_gap_to_utc": "2026-10-05T17:06:00.776669+00:00",
+  "run_start_to_first_sample_seconds": 0.258623,
+  "last_sample_to_run_completion_seconds": 0.000158,
+  "selected_gpu_uuid": "GPU-80ff95c3-176e-fd8a-728f-9c5577c4a779",
+  "observed_owned_gpu_pids": [
+    3519836
+  ],
+  "ownership_basis": "Observed process ancestry contains run.json child PID; PID start_ticks are stable across observations.",
+  "selected_gpu_foreign_process_observations": [],
+  "foreign_process_observation_count": 32,
+  "foreign_observation_counts_by_pid": {
+    "3514704": 4,
+    "3529416": 21,
+    "3537273": 7
+  },
+  "unresolved_ancestry": [],
+  "monitor_errors": [],
+  "nonempty_process_query_stderr_samples": [],
+  "observed_pid_start_ticks": {
+    "3514704": [
+      65750229
+    ],
+    "3519836": [
+      65759162
+    ],
+    "3529416": [
+      65793907
+    ],
+    "3537273": [
+      65822000
+    ]
+  },
+  "all_gpu_statistics": [
+    {
+      "gpu_uuid": "GPU-1bdee8b4-22ac-536c-208b-bfb4ed38b878",
+      "gpu_index": 0,
+      "selected": false,
+      "pids": [],
+      "owned_pids": [],
+      "foreign_pids": [],
+      "process_observations": 0,
+      "utilization_samples": 305,
+      "samples_with_positive_gpu_utilization": 0,
+      "observed_gpu_utilization_max_percent": 0.0,
+      "observed_memory_utilization_max_percent": 0.0
+    },
+    {
+      "gpu_uuid": "GPU-a2226185-cb05-a411-80da-f365154128fe",
+      "gpu_index": 1,
+      "selected": false,
+      "pids": [
+        3514704,
+        3529416,
+        3537273
+      ],
+      "owned_pids": [],
+      "foreign_pids": [
+        3514704,
+        3529416,
+        3537273
+      ],
+      "process_observations": 32,
+      "utilization_samples": 305,
+      "samples_with_positive_gpu_utilization": 6,
+      "observed_gpu_utilization_max_percent": 73.0,
+      "observed_memory_utilization_max_percent": 11.0
+    },
+    {
+      "gpu_uuid": "GPU-72f87cfe-1a24-f69c-8b5d-71f1d8414a34",
+      "gpu_index": 2,
+      "selected": false,
+      "pids": [],
+      "owned_pids": [],
+      "foreign_pids": [],
+      "process_observations": 0,
+      "utilization_samples": 305,
+      "samples_with_positive_gpu_utilization": 0,
+      "observed_gpu_utilization_max_percent": 0.0,
+      "observed_memory_utilization_max_percent": 0.0
+    },
+    {
+      "gpu_uuid": "GPU-80ff95c3-176e-fd8a-728f-9c5577c4a779",
+      "gpu_index": 3,
+      "selected": true,
+      "pids": [
+        3519836
+      ],
+      "owned_pids": [
+        3519836
+      ],
+      "foreign_pids": [],
+      "process_observations": 295,
+      "utilization_samples": 305,
+      "samples_with_positive_gpu_utilization": 82,
+      "observed_gpu_utilization_max_percent": 100.0,
+      "observed_memory_utilization_max_percent": 22.0
+    },
+    {
+      "gpu_uuid": "GPU-f8efa4fd-5a9d-cdde-c13b-0e230e2082af",
+      "gpu_index": 4,
+      "selected": false,
+      "pids": [],
+      "owned_pids": [],
+      "foreign_pids": [],
+      "process_observations": 0,
+      "utilization_samples": 305,
+      "samples_with_positive_gpu_utilization": 0,
+      "observed_gpu_utilization_max_percent": 0.0,
+      "observed_memory_utilization_max_percent": 0.0
+    },
+    {
+      "gpu_uuid": "GPU-a5cd5bab-33a4-a7e2-4a3c-78c2b08a8872",
+      "gpu_index": 5,
+      "selected": false,
+      "pids": [],
+      "owned_pids": [],
+      "foreign_pids": [],
+      "process_observations": 0,
+      "utilization_samples": 305,
+      "samples_with_positive_gpu_utilization": 0,
+      "observed_gpu_utilization_max_percent": 0.0,
+      "observed_memory_utilization_max_percent": 0.0
+    },
+    {
+      "gpu_uuid": "GPU-62334366-b9c1-a3c1-6f89-49f5cf38fb00",
+      "gpu_index": 6,
+      "selected": false,
+      "pids": [],
+      "owned_pids": [],
+      "foreign_pids": [],
+      "process_observations": 0,
+      "utilization_samples": 305,
+      "samples_with_positive_gpu_utilization": 0,
+      "observed_gpu_utilization_max_percent": 0.0,
+      "observed_memory_utilization_max_percent": 0.0
+    },
+    {
+      "gpu_uuid": "GPU-5c6220cc-a8ef-ca97-91bb-cb61a278faf8",
+      "gpu_index": 7,
+      "selected": false,
+      "pids": [],
+      "owned_pids": [],
+      "foreign_pids": [],
+      "process_observations": 0,
+      "utilization_samples": 305,
+      "samples_with_positive_gpu_utilization": 0,
+      "observed_gpu_utilization_max_percent": 0.0,
+      "observed_memory_utilization_max_percent": 0.0
+    }
+  ],
+  "other_gpu_processes": [
+    {
+      "gpu_uuid": "GPU-a2226185-cb05-a411-80da-f365154128fe",
+      "pids": [
+        3514704,
+        3529416,
+        3537273
+      ],
+      "observed_gpu_utilization_max_percent": 73.0
+    }
+  ],
+  "source_sha256": {
+    "driver.py": "d9c70b27698a0a3a90a3202dd56c6d556110c4527386ddf24c7d303f3fa7fc7b",
+    "gpu_monitor.jsonl": "ce473a99023227dda2351d74a0969c63fe41a32423d5845943d26a1e2d35420d",
+    "monitor_audit.json": "75967760537f385b7755462aaeabaf431680aaa5831484872cf0cf2280f46c54",
+    "reconciliation.json": "e0445cdddbdedc9a4bfe697436c3e0f67b4c63ea74b0373a157e491f3021c063",
+    "run.json": "9f745609e92e6efaffebdc3da82c44005beed05d824c5ffcae2cd6f3fd25a30e",
+    "stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout.log": "2ff2329b0d7f625bfa1b2af894187bf4ad792c6bf87ff148b9bf8c59d200da96"
+  },
+  "claimed_reconciliation_helper_sha256": "a019ae5dcb5f5359efbdeb2ca2bc09b1df96134f02a0cd6cf0b73d248d1a4ac9",
+  "reconciliation_helper_hash_verification": "Not independently verified: reconciliation.json records a digest but no helper path or helper copy.",
+  "reconciliation_evidence_hashes_verified": true,
+  "copy_hashes_verified": true,
+  "copy_file_and_directory_mtime_ns_preserved": true,
+  "preserved_source_file_metadata": {
+    "driver.py": {
+      "size_bytes": 3763,
+      "mtime_ns": 1791217868593973773
+    },
+    "gpu_monitor.jsonl": {
+      "size_bytes": 319667,
+      "mtime_ns": 1791219974986003888
+    },
+    "monitor_audit.json": {
+      "size_bytes": 4074,
+      "mtime_ns": 1791219974987003868
+    },
+    "reconciliation.json": {
+      "size_bytes": 6327,
+      "mtime_ns": 1791220041515679611
+    },
+    "run.json": {
+      "size_bytes": 500,
+      "mtime_ns": 1791219974986003888
+    },
+    "stderr.log": {
+      "size_bytes": 0,
+      "mtime_ns": 1791219259432181425
+    },
+    "stdout.log": {
+      "size_bytes": 215,
+      "mtime_ns": 1791219972949044434
+    }
+  },
+  "independent_audit_passed": true,
+  "boundary": "Discrete process-list and utilization observations of all eight GPUs, collected by separate nvidia-smi queries. No selected-GPU foreign process was observed. GPU1 had other processes and reached 73% sampled utilization. The 31.677917-second maximum sample gap, query timing skew, and unsampled intervals prevent a claim of continuous GPU isolation. No CPU-isolation or whole-machine-exclusivity claim is supported. GPU utilization is device-wide and cannot be assigned to one PID from these samples."
+}

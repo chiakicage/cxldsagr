@@ -1,0 +1,33 @@
+method,category,description,exposed_us
+hbm,scale_transpose,DeepGEMM scale transpose,59.776
+hbm,projection_layout,Projection metadata / layout,26.208
+hbm,cache_write,Cache / index write and writeback source,19.872
+hbm,exact_recall,Exact recall / resident selection metadata,0.0
+hbm,echo_prepare,ECHO prefetch preparation,0.0
+hbm,echo_finalize,ECHO prefetch finalization,0.0
+hbm,prefetch_hint,Prefetch hint update,0.0
+hbm,dense_mapping,Dense mapping clear / publish,0.0
+echo,scale_transpose,DeepGEMM scale transpose,59.776
+echo,projection_layout,Projection metadata / layout,26.048
+echo,cache_write,Cache / index write and writeback source,33.088
+echo,exact_recall,Exact recall / resident selection metadata,65.792
+echo,echo_prepare,ECHO prefetch preparation,65.536
+echo,echo_finalize,ECHO prefetch finalization,15.712
+echo,prefetch_hint,Prefetch hint update,26.784
+echo,dense_mapping,Dense mapping clear / publish,0.0
+serial_sparse,scale_transpose,DeepGEMM scale transpose,59.552
+serial_sparse,projection_layout,Projection metadata / layout,25.92
+serial_sparse,cache_write,Cache / index write and writeback source,33.312
+serial_sparse,exact_recall,Exact recall / resident selection metadata,75.936
+serial_sparse,echo_prepare,ECHO prefetch preparation,0.0
+serial_sparse,echo_finalize,ECHO prefetch finalization,0.0
+serial_sparse,prefetch_hint,Prefetch hint update,0.0
+serial_sparse,dense_mapping,Dense mapping clear / publish,0.0
+dense_prefetch,scale_transpose,DeepGEMM scale transpose,19.808
+dense_prefetch,projection_layout,Projection metadata / layout,8.704
+dense_prefetch,cache_write,Cache / index write and writeback source,7.072
+dense_prefetch,exact_recall,Exact recall / resident selection metadata,7.104
+dense_prefetch,echo_prepare,ECHO prefetch preparation,0.0
+dense_prefetch,echo_finalize,ECHO prefetch finalization,0.0
+dense_prefetch,prefetch_hint,Prefetch hint update,0.0
+dense_prefetch,dense_mapping,Dense mapping clear / publish,10.08

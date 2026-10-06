@@ -1,0 +1,26 @@
+{
+  "schema": "deepseek-c10-observer-summary-v1",
+  "sample_count": 148,
+  "selected_gpu_index": 3,
+  "selected_gpu_foreign_processes": [],
+  "other_gpu_processes": [
+    {
+      "gpu_index": 1,
+      "gpu_uuid": "GPU-a2226185-cb05-a411-80da-f365154128fe",
+      "pid": 3486827,
+      "observations": 24
+    }
+  ],
+  "maximum_sampled_gpu_utilization_percent": {
+    "0": 0,
+    "1": 25,
+    "2": 0,
+    "3": 100,
+    "4": 0,
+    "5": 0,
+    "6": 0,
+    "7": 0
+  },
+  "maximum_sample_gap_seconds": 30.617866039276123,
+  "boundary": "Discrete nvidia-smi observations, not continuous exclusivity; unrelated CPU activity is not monitored. Other-GPU utilization and activity are recorded without attributing any effect on selected-GPU latency."
+}

@@ -1,0 +1,114 @@
+{
+  "schema": "unified-cache-publication-audit-v2",
+  "run_id": "cache_unified_dma_20261006_01",
+  "accepted": true,
+  "generator_exit_code": 0,
+  "nosa_static_and_memory_unchanged": true,
+  "memory_rows_verified_against_raw_requests": 8,
+  "requests_per_scheme": 32,
+  "loaded_helper_files_verified": 38,
+  "deepseek_static_plans": [
+    {
+      "run_id": "cache_deepseek_nh_20261006_01",
+      "source_files_verified": 12,
+      "checkpoint_config_sha256": "c7fa8b191e9936d8e6a57d864baab82b792fae16a116416cdd3a75ba76bc5af1",
+      "complete_plan_recomputation_unchanged": true
+    },
+    {
+      "run_id": "cache_deepseek_p_base_20261006_01",
+      "source_files_verified": 12,
+      "checkpoint_config_sha256": "c7fa8b191e9936d8e6a57d864baab82b792fae16a116416cdd3a75ba76bc5af1",
+      "complete_plan_recomputation_unchanged": true
+    },
+    {
+      "run_id": "cache_deepseek_p_base_headroom_20261006_01",
+      "source_files_verified": 12,
+      "checkpoint_config_sha256": "c7fa8b191e9936d8e6a57d864baab82b792fae16a116416cdd3a75ba76bc5af1",
+      "complete_plan_recomputation_unchanged": true
+    },
+    {
+      "run_id": "cache_deepseek_p_nhmax_20261006_01",
+      "source_files_verified": 12,
+      "checkpoint_config_sha256": "c7fa8b191e9936d8e6a57d864baab82b792fae16a116416cdd3a75ba76bc5af1",
+      "complete_plan_recomputation_unchanged": true
+    },
+    {
+      "run_id": "cache_deepseek_p_nhmax_headroom_20261006_01",
+      "source_files_verified": 12,
+      "checkpoint_config_sha256": "c7fa8b191e9936d8e6a57d864baab82b792fae16a116416cdd3a75ba76bc5af1",
+      "complete_plan_recomputation_unchanged": true
+    }
+  ],
+  "static_boundary_audit": {
+    "file": "deepseek_static_impact.json",
+    "sha256": "7e89f0bb92c79bcf4a4fa5bd0ae18fba6c2f5349b459ee48d7113250ebe34201",
+    "helper_file": "deepseek_static_impact.py",
+    "helper_sha256": "8dc13a1c3a558febd3aabffd39eb2a1683d26a38ed600db36ce0fe5a66b6c939"
+  },
+  "dense_ticket_reserved_bytes": 0,
+  "dense_and_serial_total_hbm_reservation_equal": true,
+  "deepseek_observer": {
+    "samples": 147,
+    "maximum_sample_gap_seconds": 30.353404998779297,
+    "selected_gpu_uuid": "GPU-80ff95c3-176e-fd8a-728f-9c5577c4a779",
+    "selected_gpu_owned_pids": [
+      3613365
+    ],
+    "selected_gpu_unresolved_foreign_processes": [],
+    "other_gpu_processes": [],
+    "raw_evidence_directory": "experiments/cache_management/output/data/cache_unified_dma_20261006_01/observer/deepseek",
+    "files": {
+      "run.json": {
+        "sha256": "4f60bdfdc9f6f7513d258ed449ef4ea020de6f49724e249970f5cad6785d8cfc",
+        "bytes": 875,
+        "original_mtime_ns": 1791222735289455022,
+        "archived_filesystem_mtime_ns": 1791222735000000002
+      },
+      "driver.py": {
+        "sha256": "d9c70b27698a0a3a90a3202dd56c6d556110c4527386ddf24c7d303f3fa7fc7b",
+        "bytes": 3763,
+        "original_mtime_ns": 1791217868593973773,
+        "archived_filesystem_mtime_ns": 1791217868000000002
+      },
+      "gpu_monitor.jsonl": {
+        "sha256": "ac21657191333511ac9fa4c155d04c0671d3574ab362958e2e6a33d2e08321e1",
+        "bytes": 133516,
+        "original_mtime_ns": 1791222735289455022,
+        "archived_filesystem_mtime_ns": 1791222735000000002
+      },
+      "stdout.log": {
+        "sha256": "376b483b01896f2c96f43dd12135bc52f28420830637a230aa9288a5452c02e2",
+        "bytes": 290,
+        "original_mtime_ns": 1791222734941462193,
+        "archived_filesystem_mtime_ns": 1791222734000000002
+      },
+      "monitor_audit.json": {
+        "sha256": "0016d97c1c64e5552b5db42a918e1589ec34007486c780017380a934c765f7d4",
+        "bytes": 328,
+        "original_mtime_ns": 1791222735290455002,
+        "archived_filesystem_mtime_ns": 1791222735000000002
+      },
+      "reconciliation.json": {
+        "sha256": "71e1421e0b3415d4bcca7ac0fb503be59df50aeb2dd18b254edda63903e8f3c9",
+        "bytes": 2473,
+        "original_mtime_ns": 1791222791342247127,
+        "archived_filesystem_mtime_ns": 1791222791000000002
+      },
+      "stderr.log": {
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0,
+        "original_mtime_ns": 1791222383536264140,
+        "archived_filesystem_mtime_ns": 1791222383000000001
+      }
+    },
+    "original_timestamp_archive": {
+      "path": "experiments/cache_management/output/data/cache_unified_dma_20261006_01/observer_deepseek.tar",
+      "sha256": "68768625e41cd3e3f3d4112e3f93e454e918b2f8aae69c1a5f57bfc28002c811",
+      "format": "PAX tar with exact original nanosecond mtime strings"
+    },
+    "timestamp_boundary": "The destination filesystem truncates copied mtimes below one second. Original mtimes are retained explicitly in this manifest and verified in PAX tar metadata; raw file bytes are unchanged.",
+    "boundary": "Process lists, ancestry and utilization are discrete samples. No continuous isolation, whole-machine exclusivity or CPU exclusivity is established."
+  },
+  "physical_capacity_fill_run": false,
+  "audit_helper_sha256": "b05e126cdefd95e7af64c81547231ad5bd792d366e06e636a281736dd6e22622"
+}

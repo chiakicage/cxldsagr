@@ -86,6 +86,19 @@ def test_cuda_fused_residual_norm_uses_unrounded_sum_and_owns_buffers(dtype):
         assert wrong_error > 1e-3
 
 
+@pytest.mark.parametrize("rows", [1, 128, 1024])
+@torch.inference_mode()
+def test_cuda_fused_final_norm_matches_explicit_fp32_sum_bitwise(rows):
+    require_hopper()
+    torch.manual_seed(42)
+    hidden = torch.randn(rows, 7168, device="cuda", dtype=torch.bfloat16)
+    residual = torch.randn_like(hidden)
+    weight = torch.randn(7168, device="cuda", dtype=torch.float32)
+    expected = rms_norm(hidden.float() + residual.float(), weight, 1e-6).bfloat16()
+    actual, _ = residual_rms_norm(hidden, residual, weight, 1e-6)
+    torch.testing.assert_close(actual, expected, rtol=0, atol=0)
+
+
 @pytest.mark.parametrize("shape", [(5, 2048), (128, 18432), (17, 8, 2048)])
 @torch.inference_mode()
 def test_cuda_silu_mul_keeps_fp32_intermediate_and_route_dimensions(shape):

@@ -17,6 +17,7 @@ import torch
 from cache.sparse_token_pool import MISSING, SharedSparseTokenPool
 from operators.deepseek_v32.indexer import cache_ops
 from operators.deepseek_v32.indexer.echo import UPSTREAM_REVISION
+from operators.deepseek_v32.indexer.prefetch_hint import update_prefetch_hint
 from operators.deepseek_v32.indexer.tests.test_echo_cache_ops import _official_function
 
 ROOT = Path(__file__).resolve().parents[4]
@@ -199,45 +200,34 @@ def test_cuda_selected_protection_and_victims_match_official_free_helper(
     pool.close()
 
 
-def _hint_statements(path, *, official):
+def _official_hint_statements(path):
     tree = ast.parse(path.read_text())
-    if official:
-        # Execute the exact upstream offset initialization and request loop from
-        # _get_topk_ragged, without importing the SGLang scheduler or model.
-        method = next(
-            node
-            for node in ast.walk(tree)
-            if isinstance(node, ast.FunctionDef) and node.name == "_get_topk_ragged"
-        )
-        for parent in ast.walk(method):
-            body = getattr(parent, "body", [])
-            if not isinstance(body, list):
-                continue
-            for index, node in enumerate(body):
-                if (
-                    isinstance(node, ast.For)
-                    and "extend_logits_offsets" in ast.unparse(node)
-                    and "torch.mean" in ast.unparse(node)
-                ):
-                    return body[index - 1 : index + 1]
-    else:
-        # Extract the runtime tail/finite/offset assignments themselves. This
-        # is not another handwritten implementation of the local formula.
-        for parent in ast.walk(tree):
-            body = getattr(parent, "body", [])
-            if not isinstance(body, list):
-                continue
-            for index, node in enumerate(body):
-                if isinstance(node, ast.Assign) and ast.unparse(node).startswith("tail = scores["):
-                    return body[index : index + 3]
+    # Execute the exact upstream offset initialization and request loop from
+    # _get_topk_ragged, without importing the SGLang scheduler or model.
+    method = next(
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.FunctionDef) and node.name == "_get_topk_ragged"
+    )
+    for parent in ast.walk(method):
+        body = getattr(parent, "body", [])
+        if not isinstance(body, list):
+            continue
+        for index, node in enumerate(body):
+            if (
+                isinstance(node, ast.For)
+                and "extend_logits_offsets" in ast.unparse(node)
+                and "torch.mean" in ast.unparse(node)
+            ):
+                return body[index - 1 : index + 1]
     raise AssertionError(f"could not locate the real hint update in {path}")
 
 
 @pytest.mark.parametrize("rows", [1, 2, 4, 7])
-def test_cuda_finite_hint_update_matches_pinned_official_last_four_row_mean(rows):
+@pytest.mark.parametrize("grad_enabled", [False, True])
+def test_cuda_finite_hint_update_matches_pinned_official_last_four_row_mean(rows, grad_enabled):
     require_reference_gpu()
     reference_path = OFFICIAL / "sglang/python/sglang/srt/layers/attention/nsa/nsa_indexer.py"
-    local_path = ROOT / "models/deepseek_v32/attention.py"
     scores = torch.arange(rows * 13, device="cuda", dtype=torch.float32).reshape(rows, 13)
     scores = (scores.remainder(19) - 7) * 0.25
     official_self = SimpleNamespace(
@@ -245,22 +235,18 @@ def test_cuda_finite_hint_update_matches_pinned_official_last_four_row_mean(rows
         extend_logits_offsets=torch.full((1, 16), 999.0, device="cuda"),
     )
     local_self = SimpleNamespace(offset=torch.full((16,), 999.0, device="cuda"))
-    contexts = (
-        (
-            reference_path,
-            True,
-            {
-                "torch": torch,
-                "self": official_self,
-                "forward_batch": SimpleNamespace(batch_size=1),
-                "extend_seq_lens_cpu": [rows],
-                "logits": scores,
-            },
-        ),
-        (local_path, False, {"torch": torch, "self": local_self, "scores": scores}),
-    )
-    for path, official, namespace in contexts:
-        module = ast.Module(body=_hint_statements(path, official=official), type_ignores=[])
-        exec(compile(module, str(path), "exec"), namespace)  # noqa: S102 — pinned/read-only source differential
+    namespace = {
+        "torch": torch,
+        "self": official_self,
+        "forward_batch": SimpleNamespace(batch_size=1),
+        "extend_seq_lens_cpu": [rows],
+        "logits": scores,
+    }
+    module = ast.Module(body=_official_hint_statements(reference_path), type_ignores=[])
+    exec(compile(module, str(reference_path), "exec"), namespace)  # noqa: S102 — pinned/read-only source differential
+    # Call the production helper, covering its inference-native and explicit
+    # grad-enabled reference dispatch without reproducing either formula.
+    with torch.set_grad_enabled(grad_enabled):
+        update_prefetch_hint(scores, local_self.offset)
     torch.testing.assert_close(local_self.offset[0], official_self.extend_logits_offsets[0, 0])
     assert local_self.offset[1:].eq(999).all()  # Only offset zero is consumed locally.

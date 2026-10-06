@@ -7,7 +7,7 @@ from types import SimpleNamespace
 import pytest
 import torch
 
-from experiments.deepseek_v32_echo_prefill.src import operator_instrumentation
+from experiments.deepseek_v32_mfu.src import operator_instrumentation
 from experiments.deepseek_v32_motivation.src.profile import InstrumentServing, Scopes
 from serving import token_validation
 from serving.persistent import PersistentGRRunner
@@ -386,3 +386,111 @@ def test_late_instrumentation_observes_existing_diagnostics_and_preserves_owner(
         "truncate",
         "release",
     ]
+
+
+@pytest.mark.parametrize("max_ctas,counted", [(None, False), (80, True), (128, True)])
+def test_gather_instrumentation_preserves_counted_dispatch_without_scalar_read(
+    monkeypatch, max_ctas, counted
+):
+    from torch.utils._python_dispatch import TorchDispatchMode
+
+    from operators.common import kv_transfer
+
+    class RejectScalarRead(TorchDispatchMode):
+        def __torch_dispatch__(self, function, types, args=(), kwargs=None):
+            if function is torch.ops.aten._local_scalar_dense.default:
+                raise AssertionError("profile must not read the device record count")
+            return function(*args, **(kwargs or {}))
+
+    forwarded = []
+    expected_result = object()
+
+    def gather(host, device, host_ids, device_ids, *, max_ctas=None, valid_count=None):
+        forwarded.append((host, device, host_ids, device_ids, max_ctas, valid_count))
+        return expected_result
+
+    monkeypatch.setattr(kv_transfer, "gather_host_records", gather)
+    monkeypatch.setattr(operator_instrumentation, "InstrumentOperators", lambda *_: nullcontext())
+    backend = Backend()
+    backend._forward = lambda *args, **kwargs: None
+    backend.extend_candidate = backend.extend
+    backend.session_metrics = lambda *_: {}
+    backend.attentions, backend.blocks = (), ()
+    backend.head_weight = torch.empty(0)
+    host, device = torch.empty((64, 576), dtype=torch.bfloat16), torch.empty((64, 576))
+    host_ids, device_ids = torch.empty(64, dtype=torch.int64), torch.empty(64, dtype=torch.int64)
+    count = torch.tensor(3, dtype=torch.int32) if counted else None
+    scopes = Scopes("dense_prefetch" if max_ctas == 80 else "echo", "revisit", 1, nvtx=False)
+    with (
+        PersistentGRRunner(backend, hbm_budget_bytes=64, dram_budget_bytes=64) as runner,
+        InstrumentServing(backend, scopes, runner),
+        RejectScalarRead(),
+    ):
+        result = kv_transfer.gather_host_records(
+            host, device, host_ids, device_ids, max_ctas=max_ctas, valid_count=count
+        )
+    assert result is expected_result
+    assert len(forwarded) == 1
+    for actual, expected in zip(
+        forwarded[0], (host, device, host_ids, device_ids, max_ctas, count)
+    ):
+        assert actual is expected
+    assert kv_transfer.gather_host_records is gather
+    call = next(row for row in scopes.calls if row["stage"] == "host_gather")
+    assert call["id_buffer_capacity"] == 64 and call["record_bytes"] == 1152
+    assert call["max_ctas"] == max_ctas
+    assert call["records"] == (None if counted else 64)
+    assert call["requested_bytes"] == (None if counted else 64 * 1152)
+    assert call["count_source"] == ("device_valid_count" if counted else "id_buffer_length")
+
+
+def test_dma_instrumentation_preserves_exact_contiguous_addresses_without_scalar_read(monkeypatch):
+    from torch.utils._python_dispatch import TorchDispatchMode
+
+    from operators.common import kv_transfer
+
+    class RejectScalarRead(TorchDispatchMode):
+        def __torch_dispatch__(self, function, types, args=(), kwargs=None):
+            if function is torch.ops.aten._local_scalar_dense.default:
+                raise AssertionError("DMA annotations must not read a device scalar")
+            return function(*args, **(kwargs or {}))
+
+    forwarded = []
+    expected_result = object()
+
+    def copy(host, device, *, host_start, device_start, count):
+        forwarded.append((host, device, host_start, device_start, count))
+        return expected_result
+
+    monkeypatch.setattr(kv_transfer, "copy_host_records_async", copy)
+    monkeypatch.setattr(operator_instrumentation, "InstrumentOperators", lambda *_: nullcontext())
+    backend = Backend()
+    backend._forward = lambda *args, **kwargs: None
+    backend.extend_candidate = backend.extend
+    backend.session_metrics = lambda *_: {}
+    backend.attentions, backend.blocks = (), ()
+    backend.head_weight = torch.empty(0)
+    host, device = (torch.empty((64, 576), dtype=torch.bfloat16) for _ in range(2))
+    scopes = Scopes("dense_prefetch", "revisit", 1, nvtx=False)
+    with (
+        PersistentGRRunner(backend, hbm_budget_bytes=64, dram_budget_bytes=64) as runner,
+        InstrumentServing(backend, scopes, runner),
+        RejectScalarRead(),
+    ):
+        result = kv_transfer.copy_host_records_async(
+            host, device, host_start=4, device_start=1, count=8
+        )
+    assert result is expected_result
+    assert len(forwarded) == 1
+    assert forwarded[0][0] is host and forwarded[0][1] is device
+    assert forwarded[0][2:] == (4, 1, 8)
+    assert kv_transfer.copy_host_records_async is copy
+    call = next(row for row in scopes.calls if row["stage"] == "host_dma")
+    assert call["records"] == 8 and call["record_bytes"] == 1152
+    assert call["requested_bytes"] == 8 * 1152
+    assert call["host_address_start"] == host.data_ptr() + 4 * 1152
+    assert call["host_address_end"] == host.data_ptr() + 12 * 1152
+    assert call["device_address_start"] == device.data_ptr() + 1152
+    assert call["device_address_end"] == device.data_ptr() + 9 * 1152
+    assert call["host_contiguous"] and call["device_contiguous"]
+    assert call["transfer_implementation"] == "cudaMemcpyAsync"

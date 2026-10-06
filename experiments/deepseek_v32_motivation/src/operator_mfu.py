@@ -7,7 +7,7 @@ import json
 from collections import defaultdict
 from pathlib import Path
 
-from experiments.deepseek_v32_echo_prefill.src.analyze_nsys import (
+from experiments.deepseek_v32_mfu.src.analyze_nsys import (
     _assign_scopes,
     _attribute,
     _read_capture,
@@ -260,7 +260,7 @@ def analyze(profile, flops, output):
                     Path(__file__),
                     Path(__file__).with_name("analyze_pipeline.py"),
                     Path(__file__).with_name("graph_attribution.py"),
-                    Path("experiments/deepseek_v32_echo_prefill/src/analyze_nsys.py"),
+                    Path("experiments/deepseek_v32_mfu/src/analyze_nsys.py"),
                 )
             },
             "definitions": {

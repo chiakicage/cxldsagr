@@ -3,6 +3,8 @@
 Cache allocation, indexing, selection, recall, writeback and transactions remain
 eager. Graph outputs are borrowed; persistent KV writes receive an owned copy.
 Value expansion writes directly into the finish graph's smaller static input.
+The first three blocks pass activations through graph-owned output storage;
+all layers share immutable positions and one dynamic start per query shape.
 """
 
 from contextlib import contextmanager, nullcontext
@@ -16,7 +18,7 @@ from models.deepseek_v32.execution.cache_resources import dense_staging_allocati
 from models.deepseek_v32.nonmatrix import residual_rms_norm
 
 DEFAULT_PRIVATE_LIMIT_BYTES = 12 * 2**30
-GRAPH_POLICY_REVISION = "deepseek-compute-islands-v2"
+GRAPH_POLICY_REVISION = "deepseek-compute-islands-v4-bound-inputs"
 
 
 def _precision_policy():
@@ -43,15 +45,25 @@ def _precision_policy():
     return result
 
 
-def _input_shapes(cfg, queries, residual_present):
-    shapes = {
-        "hidden": ((queries, cfg.dim), torch.bfloat16),
+def _shared_input_shapes(queries):
+    return {
         "start": ((), torch.int64),
         "positions": ((queries,), torch.int64),
+        "index_starts": ((queries,), torch.int32),
+    }
+
+
+def _owned_input_shapes(cfg, queries, layer):
+    shapes = {
         "expanded": ((queries, cfg.n_heads, cfg.v_head_dim), torch.bfloat16),
     }
-    if residual_present:
-        shapes["residual"] = ((queries, cfg.dim), torch.bfloat16)
+    # Layers 1 and 2 consume the previous finish graph's retained outputs.
+    # A caller supplying independent activations can still copy into that
+    # borrowed storage; graph outputs have always been borrowed, not durable.
+    if layer not in (1, 2):
+        shapes["hidden"] = ((queries, cfg.dim), torch.bfloat16)
+        if layer % 3 != 0:
+            shapes["residual"] = ((queries, cfg.dim), torch.bfloat16)
     return shapes
 
 
@@ -66,9 +78,11 @@ def plan_compute_graphs(cfg, layers, chunk_size, history, candidate, private_lim
     if history % chunk_size:
         queries.add(history % chunk_size)
     static_storage = static_limit = 0
-    for layer in range(layers):
-        for count in queries:
-            for shape, dtype in _input_shapes(cfg, count, layer % 3 != 0).values():
+    for count in queries:
+        shape_groups = [_shared_input_shapes(count)]
+        shape_groups.extend(_owned_input_shapes(cfg, count, layer) for layer in range(layers))
+        for shapes in shape_groups:
+            for shape, dtype in shapes.values():
                 elements = 1
                 for size in shape:
                     elements *= size
@@ -94,10 +108,12 @@ class _GraphPair:
     queries: int
     residual_present: bool
     inputs: dict
+    owned_inputs: dict
     projection_graph: object = None
     finish_graph: object = None
     projected: object = None
     saved: object = None
+    indexer_bounds: object = None
     output: object = None
     projection_replays: int = 0
     finish_replays: int = 0
@@ -118,6 +134,8 @@ class DeepSeekComputeGraphs:
             self.device = torch.device("cuda", torch.cuda.current_device())
         self.metadata = dict(metadata)
         self.pairs = {}
+        self._shared_inputs = {}
+        self._start_positions = {}
         self.allocated = False
         self.closed = False
         self.failed = False
@@ -128,6 +146,7 @@ class DeepSeekComputeGraphs:
         self.memory_at_allocation = None
         self.setup_seconds = None
         self.eager_fallbacks = 0
+        self.input_copies = self.position_updates = 0
         self.precision_policy = None
 
     def _check(self):
@@ -148,20 +167,28 @@ class DeepSeekComputeGraphs:
         self.precision_policy = _precision_policy()
         self._capture_stream = torch.cuda.Stream(device=self.device)
         try:
+            for queries in self.metadata["compute_graph_query_sizes"]:
+                inputs = self._shared_inputs[queries] = {}
+                for name, (shape, dtype) in _shared_input_shapes(queries).items():
+                    inputs[name] = torch.zeros(shape, dtype=dtype, device=self.device)
+                inputs["positions"].copy_(torch.arange(queries, device=self.device))
+                self._start_positions[queries] = 0
             for layer, (attention, block) in enumerate(
                 zip(self.attentions, self.blocks, strict=True)
             ):
                 if block.is_moe:
                     raise ValueError("serving compute graphs require dense checkpoint blocks")
                 for queries in self.metadata["compute_graph_query_sizes"]:
-                    inputs = {
+                    owned_inputs = {
                         name: torch.zeros(shape, dtype=dtype, device=self.device)
-                        for name, (shape, dtype) in _input_shapes(
-                            attention.cfg, queries, layer % 3 != 0
+                        for name, (shape, dtype) in _owned_input_shapes(
+                            attention.cfg, queries, layer
                         ).items()
                     }
-                    inputs["positions"].copy_(torch.arange(queries, device=self.device))
-                    pair = _GraphPair(layer, queries, layer % 3 != 0, inputs)
+                    inputs = {**self._shared_inputs[queries], **owned_inputs}
+                    if layer in (1, 2):
+                        inputs["hidden"], inputs["residual"] = self.pairs[layer - 1, queries].output
+                    pair = _GraphPair(layer, queries, layer % 3 != 0, inputs, owned_inputs)
                     # Retain every partial allocation before any warmup/capture can fail.
                     self.pairs[layer, queries] = pair
                     self._capture_pair(pair, attention, block)
@@ -193,8 +220,13 @@ class DeepSeekComputeGraphs:
                 attention.input_norm_weight,
                 attention.cfg.norm_eps,
             )
-            positions = (inputs["positions"] + inputs["start"]).float()
-            return attention.project_positions(normalized, positions, normalized=True), saved
+            logical_positions = inputs["positions"] + inputs["start"]
+            positions = logical_positions.float()
+            # The same dynamic start drives RoPE and the exclusive causal ends.
+            # Computing these inside the projection graph avoids two eager
+            # metadata launches before every indexer, including HBM-only.
+            ends = (logical_positions + 1).to(torch.int32)
+            return attention.project_positions(normalized, positions, normalized=True), saved, ends
 
         def finish():
             output = attention.wo(inputs["expanded"].reshape(pair.queries, -1))
@@ -214,7 +246,8 @@ class DeepSeekComputeGraphs:
             torch.cuda.graph(pair.projection_graph, stream=self._capture_stream),
             self._capture_scope(pair, "projection"),
         ):
-            pair.projected, pair.saved = project()
+            pair.projected, pair.saved, ends = project()
+            pair.indexer_bounds = (inputs["index_starts"], ends)
         # Only the projection capture owns the saved tensor bound by finish.
         # Its no-residual branch aliases static hidden; otherwise it lives in
         # the projection's private pool. Both remain valid through finish.
@@ -259,8 +292,11 @@ class DeepSeekComputeGraphs:
         }
         storages = {
             tensor.untyped_storage().data_ptr(): tensor.untyped_storage().nbytes()
-            for pair in self.pairs.values()
-            for tensor in pair.inputs.values()
+            for inputs in (
+                *self._shared_inputs.values(),
+                *(pair.owned_inputs for pair in self.pairs.values()),
+            )
+            for tensor in inputs.values()
         }
         if not storages.keys() <= blocks.keys():
             raise RuntimeError("cannot identify every static compute graph input allocation")
@@ -352,10 +388,16 @@ class DeepSeekComputeGraphs:
             ):
                 raise ValueError("Residual must match hidden shape, device, and BF16 dtype")
             with scope("compute_graph_projection_inputs"):
-                pair.inputs["hidden"].copy_(hidden)
-                if residual is not None:
+                if pair.inputs["hidden"] is not hidden:
+                    pair.inputs["hidden"].copy_(hidden)
+                    self.input_copies += 1
+                if residual is not None and pair.inputs["residual"] is not residual:
                     pair.inputs["residual"].copy_(residual)
-                pair.inputs["start"].fill_(position)
+                    self.input_copies += 1
+                if self._start_positions[pair.queries] != position:
+                    pair.inputs["start"].fill_(position)
+                    self._start_positions[pair.queries] = position
+                    self.position_updates += 1
             with scope(f"compute_graph_projection_layer_{layer}_q_{len(hidden)}"):
                 pair.projection_graph.replay()
             pair.projection_replays += 1
@@ -380,6 +422,7 @@ class DeepSeekComputeGraphs:
             normalized=False,
             project_callback=project,
             output_callback=finish,
+            indexer_bounds=pair.indexer_bounds,
         )
 
     def shared_bytes(self):
@@ -397,6 +440,8 @@ class DeepSeekComputeGraphs:
             "memory_at_allocation": self.memory_at_allocation,
             "setup_seconds": self.setup_seconds,
             "eager_fallbacks": self.eager_fallbacks,
+            "input_copies": self.input_copies,
+            "position_updates": self.position_updates,
             "captured_precision_policy": self.precision_policy,
             "profiling_status": "graph_node_timing_attribution_pending",
             "graphs": [
@@ -422,6 +467,8 @@ class DeepSeekComputeGraphs:
             self.failed = True
             raise
         self.pairs.clear()
+        self._shared_inputs.clear()
+        self._start_positions.clear()
         self._capture_stream = self._last_stream = self._last_event = None
         self.static_storage_bytes = self.static_allocated_bytes = self.private_reserved_bytes = 0
         self.allocated = False

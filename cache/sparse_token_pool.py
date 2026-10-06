@@ -1,8 +1,8 @@
 """Shared fixed-width host arena and per-layer token pools.
 
 The pool is deliberately serial. A layer lease covers indexer, append, recall,
-and attention, and records the last consumer event before another lease may
-reuse records or workspace. Sessions own host pages; device eviction does not
+and attention. A stream change records the last consumer dependency before
+the next lease can reuse records or workspace. Sessions own host pages; device eviction does not
 return those pages to the host allocator.
 """
 
@@ -67,6 +67,9 @@ class _LayerPool:
     resident_end: int = 0
     append_owner: int | None = None
     append_cursor: int = 0
+    dense_owner: int | None = None
+    dense_end: int = 0
+    dense_generation: int = -1
 
 
 @dataclass
@@ -157,7 +160,7 @@ class SharedSparseTokenPool:
         if type(capacity) is not int or capacity < 1 or layers < 1:
             raise ValueError("capacity and layers must be positive")
         page_bytes = ((capacity + PAGE_SIZE - 1) // PAGE_SIZE) * 4
-        size = page_bytes + layers * 7 * 8
+        size = page_bytes + layers * 8 * 8
         return (
             {"hbm": size, "dram": page_bytes}
             if torch.device(device).type == "cuda"
@@ -176,11 +179,21 @@ class SharedSparseTokenPool:
         max_inflight_writes=2,
         metadata_ops=None,
         candidate_slots=0,
+        dense_contiguous=False,
     ):
         self._validate(host_capacity, width, layers, slots, candidate_slots)
+        if type(dense_contiguous) is not bool:
+            raise ValueError("dense_contiguous must be a boolean")
         if type(max_inflight_writes) is not int or max_inflight_writes < 1:
             raise ValueError("max_inflight_writes must be positive")
         self.device = _device(device)
+        if self.device.type == "cuda" and metadata_ops is not None:
+            absent = object()
+            initialize = getattr(metadata_ops, "initialize", absent)
+            if initialize is not absent:
+                if not callable(initialize):
+                    raise TypeError("an explicit metadata initializer must be callable")
+                initialize(self.device)
         self.host_capacity, self.width, self.num_layers, self.slots = (
             host_capacity,
             width,
@@ -191,9 +204,11 @@ class SharedSparseTokenPool:
         self.candidate_slots = candidate_slots
         self.max_inflight_writes = max_inflight_writes
         self.metadata_ops = metadata_ops
+        self.dense_contiguous = dense_contiguous
         self.host_page_capacity = host_capacity // PAGE_SIZE
         self._free_pages = torch.arange(self.host_page_capacity - 1, -1, -1, dtype=torch.int32)
         self._free_page_count = self.host_page_capacity
+        self._dense_free_runs = ((0, self.host_page_capacity),) if dense_contiguous else ()
         self.layers = []
         for _ in range(layers):
             host = allocate_host_tensor(
@@ -216,7 +231,9 @@ class SharedSparseTokenPool:
                     priority,
                     free,
                     torch.zeros(1, device=self.device, dtype=torch.int64),
-                    torch.empty(slots, device=self.device, dtype=torch.int64),
+                    torch.arange(1, slots + 1, device=self.device, dtype=torch.int64)
+                    if dense_contiguous
+                    else torch.empty(slots, device=self.device, dtype=torch.int64),
                 )
             )
         # One workspace is shared across serial layer operations and sessions.
@@ -239,7 +256,6 @@ class SharedSparseTokenPool:
         self._pending_prefetch = None
         self._transient_owners = {}
         self._depth = 0
-        self._last_event = None
         self._last_stream = None
         self._writes = deque()
         self._copy_stream = (
@@ -317,15 +333,35 @@ class SharedSparseTokenPool:
             raise RuntimeError("session allocation requires a quiescent pool")
         if type(capacity) is not int or capacity < 1:
             raise ValueError("session capacity must be positive")
+        if self.dense_contiguous and capacity > self.slots:
+            raise ValueError("dense contiguous session capacity must not exceed P")
         pages = (capacity + PAGE_SIZE - 1) // PAGE_SIZE
         if pages > self.free_host_pages:
             raise ValueError("insufficient host pages for session capacity")
         # Construct metadata before mutating the allocator: allocation failure
         # must leave the current session set and host page ownership unchanged.
-        selected = self._free_pages[self._free_page_count - pages : self._free_page_count].flip(0)
+        next_runs = self._dense_free_runs
+        if self.dense_contiguous:
+            for index, (first, stop) in enumerate(self._dense_free_runs):
+                if stop - first >= pages:
+                    selected = torch.arange(first, first + pages, dtype=torch.int32)
+                    replacement = ((first + pages, stop),) if first + pages < stop else ()
+                    next_runs = (
+                        self._dense_free_runs[:index]
+                        + replacement
+                        + self._dense_free_runs[index + 1 :]
+                    )
+                    break
+            else:
+                raise ValueError("insufficient contiguous host pages for dense session capacity")
+        else:
+            selected = self._free_pages[self._free_page_count - pages : self._free_page_count].flip(
+                0
+            )
         owner = self._next_owner
         session = SparseTokenSession(self, owner, capacity, selected)
         self._free_page_count -= pages
+        self._dense_free_runs = next_runs
         self._next_owner += 1
         self._sessions[owner] = session
         self._topology += 1
@@ -347,8 +383,6 @@ class SharedSparseTokenPool:
                     event = torch.cuda.Event()
                     event.record(self._last_stream)
                     current.wait_event(event)
-                if self._last_event is not None:
-                    current.wait_event(self._last_event)
             except BaseException:
                 self.poisoned = True
                 raise
@@ -384,14 +418,17 @@ class SharedSparseTokenPool:
             if outer:
                 if self.device.type == "cuda":
                     try:
+                        # Stream order is sufficient while a serial caller stays
+                        # on this stream. _wait_previous records the dependency
+                        # only when another stream actually acquires the pool;
+                        # that later event also covers consumers submitted after
+                        # a standalone ensure() lease returned.
                         self._last_stream = torch.cuda.current_stream(self.device)
-                        self._last_event = torch.cuda.Event()
-                        self._last_event.record(self._last_stream)
                     except BaseException as completion_error:
                         self.poisoned = True
                         if body_error is not None:
                             raise BaseExceptionGroup(
-                                "token-pool execution and completion recording failed",
+                                "token-pool execution and stream tracking failed",
                                 [body_error, completion_error],
                             ) from None
                         raise
@@ -487,6 +524,40 @@ class SharedSparseTokenPool:
         layer.map_generation += 1
         layer.resident_owner = layer.append_owner = None
         layer.resident_end = layer.append_cursor = 0
+        layer.dense_owner = None
+        layer.dense_end = 0
+        layer.dense_generation = -1
+
+    def dense_history_resident(self, cache, end=None):
+        """Prove the complete prefix occupies logical row i at physical i + 1.
+
+        A competing owner or untracked map change invalidates the whole proof.
+        Remaining physical hits do not qualify as a partially reusable DMA span.
+        """
+        cache._check()
+        if not self.dense_contiguous or cache._pool is not self:
+            return False
+        history = cache.host_written_end if end is None else end
+        if type(history) is not int or not 0 <= history <= min(cache.capacity, self.slots):
+            return False
+        layer = self.layers[cache.layer_id]
+        return history == 0 or (
+            layer.dense_owner == cache.session.owner
+            and layer.dense_end >= history
+            and layer.dense_generation == layer.map_generation
+        )
+
+    def certify_dense_history(self, cache, end):
+        """Publish a direct-layout proof after ordered append or DMA completion."""
+        cache._check()
+        if not self.dense_contiguous or cache._pool is not self:
+            raise ValueError("dense history certification requires this dense contiguous pool")
+        if type(end) is not int or not 0 <= end <= min(cache.capacity, self.slots):
+            raise ValueError("dense history endpoint exceeds the session or device pool")
+        layer = self.layers[cache.layer_id]
+        layer.dense_owner = layer.resident_owner = cache.session.owner
+        layer.dense_end = layer.resident_end = end
+        layer.dense_generation = layer.map_generation
 
     def append_slots(self, cache, start, count):
         """Reuse stable FIFO order only during an uninterrupted cold build.
@@ -496,6 +567,16 @@ class SharedSparseTokenPool:
         holds, so it cannot change the next victim. No victim is evicted here.
         """
         layer = self.layers[cache.layer_id]
+        if self.dense_contiguous:
+            if start + count > self.slots:
+                raise ValueError("dense contiguous append exceeds P")
+            if start and not self.dense_history_resident(cache, end=start):
+                raise RuntimeError("dense append requires a resident contiguous prefix")
+            if start == 0:
+                self.invalidate_residency(cache.layer_id)
+            layer.append_owner = cache.session.owner
+            layer.append_cursor = start
+            return layer.append_order[start : start + count]
         if start == 0 and count <= self.slots:
             layer.append_order.copy_(torch.argsort(layer.priority[1:], stable=True) + 1)
             layer.append_owner = cache.session.owner
@@ -513,6 +594,8 @@ class SharedSparseTokenPool:
         layer = self.layers[cache.layer_id]
         layer.resident_owner = layer.append_owner = cache.session.owner
         layer.resident_end = layer.append_cursor = end
+        if self.dense_contiguous:
+            self.certify_dense_history(cache, end)
 
     def protect_resident_history(self, cache):
         """Run both all-hit dense FIFO events without materializing a range."""
@@ -539,6 +622,11 @@ class SharedSparseTokenPool:
         layer = self._clock_event(layer_id)
         if not preserve_append_plan:
             layer.append_owner = None
+        native = self.native_metadata
+        if physical.numel() == 0 and hasattr(native, "empty_event"):
+            native.empty_event(layer.priority, layer.clock_tensor, timestamp=layer.clock)
+            layer.clock += 1
+            return
         layer.priority[physical] = layer.clock
         layer.clock += 1
         layer.clock_tensor.fill_(layer.clock)
@@ -621,9 +709,21 @@ class SharedSparseTokenPool:
         if self.device.type == "cuda":
             torch.cuda.current_stream(self.device).synchronize()
         pages = len(session._pages)
-        self._free_pages[self._free_page_count : self._free_page_count + pages].copy_(
-            session._pages
-        )
+        if self.dense_contiguous:
+            first = session._host_runs[0][2] // PAGE_SIZE
+            merged = []
+            for begin, end in sorted((*self._dense_free_runs, (first, first + pages))):
+                if merged and begin < merged[-1][1]:
+                    raise RuntimeError("dense host page ownership overlaps an existing free run")
+                if merged and begin == merged[-1][1]:
+                    merged[-1] = (merged[-1][0], end)
+                else:
+                    merged.append((begin, end))
+            self._dense_free_runs = tuple(merged)
+        else:
+            self._free_pages[self._free_page_count : self._free_page_count + pages].copy_(
+                session._pages
+            )
         self._free_page_count += pages
         del self._sessions[session.owner]
         session.released = True
@@ -639,6 +739,7 @@ class SharedSparseTokenPool:
                 "_prefetch_totals",
                 "_counter_totals",
                 "_native_totals",
+                "_native_recalled",
             ):
                 setattr(cache, name, None)
         session._layers.clear()
@@ -671,6 +772,11 @@ class SharedSparseTokenPool:
                 )
             }
             state["clock"] = layer.clock
+            if self.dense_contiguous:
+                state["dense_owner"] = (
+                    layer.dense_owner if layer.dense_generation == layer.map_generation else None
+                )
+                state["dense_end"] = layer.dense_end
             tensors.extend(value for value in state.values() if isinstance(value, torch.Tensor))
             layers.append(state)
         sessions = {}
@@ -727,6 +833,14 @@ class SharedSparseTokenPool:
         for owner, session in self._sessions.items():
             for i, state in enumerate(snapshot.sessions[owner]["layers"]):
                 session.layer(i)._restore_state(state)
+        if self.dense_contiguous:
+            for layer_id, state in enumerate(snapshot.layers):
+                owner = state["dense_owner"]
+                if owner is not None:
+                    self.certify_dense_history(
+                        self._sessions[owner].layer(layer_id), state["dense_end"]
+                    )
+                    self.layers[layer_id].lease_owner = owner
         self.allocation_log.fill_(MISSING)
         self.counter.zero_()
         self.prefetch_stats.zero_()
@@ -756,6 +870,7 @@ class SharedSparseTokenPool:
         ):
             setattr(self, name, None)
         self._free_page_count = 0
+        self._dense_free_runs = ()
         self.closed = True
 
 
@@ -778,7 +893,7 @@ class SparseTokenSession:
         self._layers = {}
         # All per-layer counter storage is reserved at session admission.
         self._counter_totals = torch.zeros(
-            (pool.num_layers, 7), device=pool.device, dtype=torch.int64
+            (pool.num_layers, 8), device=pool.device, dtype=torch.int64
         )
         self._prefetch_totals = self._counter_totals[:, :3]
         self.released = False

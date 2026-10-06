@@ -76,6 +76,141 @@ def verify_records_and_maps(lease):
     assert lease["allocation_log"][0].item() == MISSING
 
 
+@pytest.mark.parametrize("slots", [8, 193, 65536])
+@pytest.mark.parametrize("timestamp", [0, 17, 9_000_000])
+def test_cuda_prefetch_preparation_preserves_fifo_and_only_resets_journal(slots, timestamp):
+    from torch.utils._python_dispatch import TorchDispatchMode
+
+    require_sm90()
+    priority = torch.arange(slots + 1, dtype=torch.int64) % min(timestamp + 1, 13) - 1
+    priority[0] = MISSING
+    if timestamp:
+        priority[-1] = timestamp
+    expected = (priority[1:].argsort(stable=True) + 1).int()
+    device_priority = priority.cuda()
+    free_slots = torch.full((slots,), -123, dtype=torch.int32, device="cuda")
+    allocation_log = torch.arange(slots + 1, dtype=torch.int64, device="cuda")
+    counter = torch.tensor([23], dtype=torch.uint32, device="cuda")
+    stats = torch.tensor([31, 7, 5], dtype=torch.int64, device="cuda")
+    keys = torch.empty(slots, dtype=torch.int64, device="cuda")
+    stream = torch.cuda.Stream()
+    stream.wait_stream(torch.cuda.current_stream())
+
+    class NoHostScalar(TorchDispatchMode):
+        def __torch_dispatch__(self, function, types, args=(), kwargs=None):
+            assert function != torch.ops.aten._local_scalar_dense.default
+            return function(*args, **(kwargs or {}))
+
+    with torch.cuda.stream(stream), NoHostScalar():
+        cache_ops.prepare_prefetch(
+            device_priority,
+            free_slots,
+            allocation_log,
+            counter,
+            stats,
+            keys,
+            timestamp=timestamp,
+            host_capacity=4 * slots + 256,
+        )
+    torch.cuda.current_stream().wait_stream(stream)
+    torch.testing.assert_close(free_slots.cpu(), expected, rtol=0, atol=0)
+    torch.testing.assert_close(device_priority.cpu(), priority, rtol=0, atol=0)
+    torch.testing.assert_close(
+        allocation_log.cpu(), torch.full((slots + 1,), MISSING, dtype=torch.int64), rtol=0, atol=0
+    )
+    assert counter.item() == 0 and stats.tolist() == [0, 0, 0]
+
+
+@pytest.mark.parametrize(
+    "slots,dtype,width",
+    [
+        (8, torch.uint8, 7),
+        (193, torch.float32, 7),
+        (193, torch.bfloat16, 576),
+        (65536, torch.bfloat16, 576),
+    ],
+)
+@pytest.mark.parametrize("occupancy", ["empty", "partial", "full"])
+def test_cuda_sparse_append_matches_stable_fifo_without_host_scalar(slots, dtype, width, occupancy):
+    from torch.utils._python_dispatch import TorchDispatchMode
+
+    require_sm90()
+    count, start, timestamp = min(slots, 71), slots + 3, 17
+    host_capacity = ((4 * slots + 319) // 64) * 64
+    pages = torch.arange((start + count + 63) // 64 - 1, -1, -1, dtype=torch.int32)
+    logical = torch.arange(start, start + count)
+    incoming_ids = pages[logical // 64].long() * 64 + logical % 64
+    physical = torch.arange(1, slots + 1)
+    occupied = physical[
+        torch.zeros(slots, dtype=torch.bool)
+        if occupancy == "empty"
+        else physical % 3 != 0
+        if occupancy == "partial"
+        else torch.ones(slots, dtype=torch.bool)
+    ]
+    previous_ids = host_capacity - slots + occupied - 1
+    cpu = {
+        "records": (torch.arange((slots + 1) * width).reshape(slots + 1, width) % 197).to(dtype),
+        "host_to_device": torch.full((host_capacity,), MISSING, dtype=torch.int32),
+        "device_to_host": torch.full((slots + 1,), MISSING, dtype=torch.int64),
+        "priority": torch.full((slots + 1,), -1, dtype=torch.int64),
+        "free_bitmap": torch.ones(slots + 1, dtype=torch.bool),
+        "clock": torch.tensor([timestamp], dtype=torch.int64),
+        "evictions": torch.tensor([11], dtype=torch.int64),
+    }
+    cpu["host_to_device"][previous_ids] = occupied.int()
+    cpu["device_to_host"][occupied] = previous_ids
+    cpu["priority"][occupied] = occupied % 5 + 2  # Equal ages require ascending-slot ties.
+    cpu["priority"][0] = MISSING
+    cpu["free_bitmap"][occupied] = False
+    cpu["free_bitmap"][0] = False
+    gpu = {name: value.cuda() for name, value in cpu.items()}
+    source = (torch.arange(count * width).reshape(count, width) % 193 + 1).to(dtype)
+    chosen = torch.argsort(cpu["priority"][1:], stable=True)[:count] + 1
+    old = cpu["device_to_host"][chosen]
+    evicted = old[old != MISSING]
+    cpu["host_to_device"][evicted] = MISSING
+    cpu["host_to_device"][incoming_ids] = chosen.int()
+    cpu["device_to_host"][chosen] = incoming_ids
+    cpu["records"][chosen] = source
+    cpu["priority"][chosen] = timestamp
+    cpu["free_bitmap"][chosen] = False
+    cpu["clock"][0] = timestamp + 1
+    cpu["evictions"][0] += len(evicted)
+
+    class NoDynamicHostReads(TorchDispatchMode):
+        def __torch_dispatch__(self, function, types, args=(), kwargs=None):
+            assert function not in (
+                torch.ops.aten._local_scalar_dense.default,
+                torch.ops.aten.nonzero.default,
+            ), "bounded append must not materialize a device count on the host"
+            return function(*args, **(kwargs or {}))
+
+    with NoDynamicHostReads():
+        cache_ops.sparse_append(
+            source.cuda(),
+            gpu["records"],
+            pages.cuda(),
+            *(
+                gpu[name]
+                for name in (
+                    "host_to_device",
+                    "device_to_host",
+                    "priority",
+                    "free_bitmap",
+                    "clock",
+                    "evictions",
+                )
+            ),
+            torch.empty(slots, device="cuda", dtype=torch.int64),
+            torch.empty(slots, device="cuda", dtype=torch.int64),
+            start=start,
+            timestamp=timestamp,
+        )
+    for name, expected in cpu.items():
+        torch.testing.assert_close(gpu[name].cpu(), expected, rtol=0, atol=0)
+
+
 @pytest.mark.parametrize("resident", [0, 17, 64])
 def test_cuda_prefetch_actual_victims_and_duplicate_global_claims(resident):
     require_sm90()

@@ -1,0 +1,60 @@
+{
+  "benchmark_run_id": "cache_manager_bench_20261006_07",
+  "checks": {
+    "all_cases": true,
+    "all_repeats": true,
+    "analysis_run_result_sqlite_binding": true,
+    "observer_processes_accepted": true,
+    "profile_all_cases": true,
+    "profile_attribution": true,
+    "raw_profile_writeback_bytes": true,
+    "same_execution_identity": true,
+    "source_snapshot_hashes": true,
+    "writeback_bytes": true
+  },
+  "identity_sha256": "213b5f9d080e3dd8576baf3878814dc2816e2e8dada3eb94b351eac8b5ac8791",
+  "inputs": {
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_manager_bench_20261006_07/identity.json": "dc1c7c4b16c546574b703b57c4ce333c92bbe766652601d2f48c4a021cc3dfc2",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_manager_bench_20261006_07/result.json": "00b23385efa2b0374c07b75659ac3149f822e633300e13d860615a23be3e8b00",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_manager_profile_20261006_07/analysis/activities.csv": "e6f8eed0512dbbacd7484fd7953398c48540fe2962e7ba90c04587b14350f6b5",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_manager_profile_20261006_07/analysis/summary.json": "b6d1983cca7ec32be975cc164b3574d2804f46dcd4b2c41a37c777c188f887ee",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_manager_profile_20261006_07/identity.json": "dc1c7c4b16c546574b703b57c4ce333c92bbe766652601d2f48c4a021cc3dfc2",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_manager_profile_20261006_07/result.json": "38bbeb666f341fb795ae224641d30208029632b78aea63775ed8a033719867a5",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_manager_profile_20261006_07/trace.sqlite": "ee2e755d9b39f6199b5c0b048e9d788a08d4d949d4973f99b133630a4d31e595"
+  },
+  "limitations": [
+    "No complete model gate",
+    "No task quality evaluation",
+    "Synthetic prefill queries",
+    "No fused internal IO decomposition"
+  ],
+  "profile_run_id": "cache_manager_profile_20261006_07",
+  "receipt_sha256": "fd74c45f9a6fb2f0b2a6be69ef82ebe4fefe5ce62a51210685410cd266ff7c86",
+  "report_files": {
+    "acceptance_receipt.json": "e7ce6058242874d0e8605cc4827e398fa22d08dd96560908cc8be6d838a50fd8",
+    "activities.csv": "e6f8eed0512dbbacd7484fd7953398c48540fe2962e7ba90c04587b14350f6b5",
+    "latency.csv": "4dd453891198c484568e84d52e0be10419936cf2fdbb18029dbab5b3ecb22904",
+    "latency.png": "f286b17f3525754e7c2d2027e0d33d6cbfff2acc9c48e3e33a0ab74be4737ed6",
+    "latency.svg": "62db03d0dedac8b764ca672c9b2edf609ef152cd70e1d715bb05e8cfcb04ace4",
+    "observer_summary.json": "37d4ca960135189471ea276ca03803564b77aa3f9007b3b49419e7aa55fa7358",
+    "observers/bench/gpu_monitor.jsonl": "29f41689a7629ccda5cbfa166d72931dd494b585ffb2775ec45250bdd17b9f56",
+    "observers/bench/monitor_audit.json": "c24accf177176234c05684e8055b1cdc42b8e8c5d17fafb9d75c3a13d5c193a9",
+    "observers/bench/run.json": "3e8402db79328f27b484c223b704cdb332e7ca90172faaaa9872852e3da0eefb",
+    "observers/bench/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "observers/bench/stdout.log": "4d6e21a5a6e44901922a38ec62022e61d6ea2a9d0677d734b8d16d03f6716c1c",
+    "observers/check/gpu_monitor.jsonl": "a0ff3342aa92b7f37fcc6c77c2b87d1303d161bc333a76373767661a4576a334",
+    "observers/check/monitor_audit.json": "8b31df265b2371fb5b10ebcd6e28f937dc578a9f846f4e6799ec2262ddca28d3",
+    "observers/check/run.json": "75d7c33d2ede56701deb12c6d6044cb4957f965f226cc09537e838ef2966d1ca",
+    "observers/check/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "observers/check/stdout.log": "184d1cf9c062d7c1d110e1a293c18304f3d22190daecd675f52f12793fad62fb",
+    "observers/profile/gpu_monitor.jsonl": "850b8739a0b29f85f456f5dd5ced6c3b2dbdeb8bae5a9fce205b209fd1899d5b",
+    "observers/profile/monitor_audit.json": "9ffa550d5e63ccbfa6e1f65a8781d7868f69fd9847776af101d7cc1c12fd1bc3",
+    "observers/profile/run.json": "a420dc59de5a41a0578350456739180d2198b55fd2a8a33106cdbfa517e06ebc",
+    "observers/profile/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "observers/profile/stdout.log": "e6551d38321a4743f73da98610da46fd4f0ba21a00aa5ad9248c6bafee98b9cf",
+    "profile_metrics.csv": "5fa844a560ad0c5c2be31f46a942a0cbf8b6651f3f7313911b648e3c5523d5e4",
+    "profile_summary.json": "8244c7f0b9765a46a367f7394011bfc56e8e8680b94d2c915ebd515159ddb03a",
+    "report_helper_sources.json": "4a5a8e7e1d915375c82f9e2187467d953ced00bcdc16de94c61a049dde5c67ba",
+    "results.md": "9d3aa21e1096caf8a081bb0b335382b7cca7b536c34627bc7051be18c9aa1d78"
+  }
+}

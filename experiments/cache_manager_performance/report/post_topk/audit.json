@@ -1,0 +1,29 @@
+{
+  "analysis_directory": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01/analysis",
+  "analysis_sha256": "5db1351c2ad0332038648ca4415c731c26104ecf559a1a8af108859c1b62c13e",
+  "checks": {
+    "actual_mla_endpoints": true,
+    "all_layer_samples_present": true,
+    "matching_receipt": true,
+    "observers_accepted": true,
+    "partitions_reconcile": true,
+    "raw_capture_bound": true,
+    "saved_consumer_outputs_verified": true,
+    "source_snapshots_match": true
+  },
+  "consumer_evidence": {
+    "all_attention_finite": true,
+    "exact_attention_match": true,
+    "exact_selection_match": true,
+    "profile_evidence_files": 28,
+    "profile_layer_comparisons": 84,
+    "resident_reference_files": 2
+  },
+  "layer_windows": 84,
+  "measurement": "intrusive NSYS top-k GPU completion to MLA GPU start; no indexer/top-k/MLA computation or whole-replay wall timing",
+  "profile_run": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/cache_manager_performance/output/data/cache_posttopk_profile_20261006_01",
+  "profile_samples": 28,
+  "report_source_sha256": "303fec6d5bdde502727bd8fa26790602f7b839ccff36cef74b69b0430a28b3e0",
+  "run_id": "cache_posttopk_profile_20261006_01",
+  "schema": "post-topk-profile-report-v2"
+}

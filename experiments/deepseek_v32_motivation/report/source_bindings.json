@@ -1,96 +1,17 @@
 {
-  "schema": "deepseek-publication-source-bindings-v1",
-  "kind": "motivation",
-  "created_utc": "2026-10-05T00:44:25.279909+00:00",
-  "publication_output": "experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_publication_20261005_01",
-  "binding_stage": "Later CPU-only publication source selection and verification",
-  "helper_boundary": "Loaded module files were collected now from current on-disk bytes, not at prior analysis execution. Importing these modules does not rerun the earlier analyses or establish complete historical loaded-code identity. Runtime/native identities remain in the original accepted runs.",
-  "helper_manifest_sha256": "b7e84d7d335b2088e303235ecfc6066a3d54a30d66574cbc46c888a22a775f94",
-  "helper_file_count": 19,
-  "generators": [
-    {
-      "module": "experiments.deepseek_v32_motivation.src.report",
-      "path": "experiments/deepseek_v32_motivation/src/report.py",
-      "sha256": "cd640e53a46287e4e39ae9e772901b4c10c7a5d02db7309b8af7d2dced6a26a8",
-      "snapshot_path": "source/generators/experiments/deepseek_v32_motivation/src/report.py",
-      "captured_profile_copy_exists": true,
-      "captured_profile_sha256": "cd640e53a46287e4e39ae9e772901b4c10c7a5d02db7309b8af7d2dced6a26a8",
-      "matches_captured_profile_copy": true
-    },
-    {
-      "module": "experiments.deepseek_v32_motivation.src.plot",
-      "path": "experiments/deepseek_v32_motivation/src/plot.py",
-      "sha256": "28b7ed4095d4363ebd56414212b041a11c466ca3b6359c56a834bc61bb200078",
-      "snapshot_path": "source/generators/experiments/deepseek_v32_motivation/src/plot.py",
-      "captured_profile_copy_exists": true,
-      "captured_profile_sha256": "28b7ed4095d4363ebd56414212b041a11c466ca3b6359c56a834bc61bb200078",
-      "matches_captured_profile_copy": true
-    },
-    {
-      "module": "experiments.deepseek_v32_motivation.src.flops",
-      "path": "experiments/deepseek_v32_motivation/src/flops.py",
-      "sha256": "b467df1b7dbc27d791deb86ee43aa1257a6ee74db7b1262ec5140cc3f77e30be",
-      "snapshot_path": "source/generators/experiments/deepseek_v32_motivation/src/flops.py",
-      "captured_profile_copy_exists": true,
-      "captured_profile_sha256": "b467df1b7dbc27d791deb86ee43aa1257a6ee74db7b1262ec5140cc3f77e30be",
-      "matches_captured_profile_copy": true
-    },
-    {
-      "module": "experiments.deepseek_v32_motivation.src.analyze_pipeline",
-      "path": "experiments/deepseek_v32_motivation/src/analyze_pipeline.py",
-      "sha256": "c3f037ccb99b019c868c29ae9168ac21e196ccbeebd22a2d575a1c3a15e4b1fb",
-      "snapshot_path": "source/generators/experiments/deepseek_v32_motivation/src/analyze_pipeline.py",
-      "captured_profile_copy_exists": true,
-      "captured_profile_sha256": "c3f037ccb99b019c868c29ae9168ac21e196ccbeebd22a2d575a1c3a15e4b1fb",
-      "matches_captured_profile_copy": true
-    },
-    {
-      "module": "experiments.deepseek_v32_motivation.src.verify_profile_flops",
-      "path": "experiments/deepseek_v32_motivation/src/verify_profile_flops.py",
-      "sha256": "64e7af768299a98fd4406ffcd24ed09d3d5751f40170d2ff97b78349d395d1ac",
-      "snapshot_path": "source/generators/experiments/deepseek_v32_motivation/src/verify_profile_flops.py",
-      "captured_profile_copy_exists": true,
-      "captured_profile_sha256": "64e7af768299a98fd4406ffcd24ed09d3d5751f40170d2ff97b78349d395d1ac",
-      "matches_captured_profile_copy": true
-    },
-    {
-      "module": "experiments.deepseek_v32_motivation.src.operator_mfu",
-      "path": "experiments/deepseek_v32_motivation/src/operator_mfu.py",
-      "sha256": "f2643e050a47669d45e3e8423413dba974eacb05fd08adb5a0813882f0afe4af",
-      "snapshot_path": "source/generators/experiments/deepseek_v32_motivation/src/operator_mfu.py",
-      "captured_profile_copy_exists": true,
-      "captured_profile_sha256": "f2643e050a47669d45e3e8423413dba974eacb05fd08adb5a0813882f0afe4af",
-      "matches_captured_profile_copy": true
-    },
-    {
-      "module": "experiments.deepseek_v32_motivation.src.report_operator_mfu",
-      "path": "experiments/deepseek_v32_motivation/src/report_operator_mfu.py",
-      "sha256": "618d16aaf6d1698a80750f56793aafd79111b2b6c24f06acc0eaa917b28c74d1",
-      "snapshot_path": "source/generators/experiments/deepseek_v32_motivation/src/report_operator_mfu.py",
-      "captured_profile_copy_exists": true,
-      "captured_profile_sha256": "618d16aaf6d1698a80750f56793aafd79111b2b6c24f06acc0eaa917b28c74d1",
-      "matches_captured_profile_copy": true
-    },
-    {
-      "module": "experiments.deepseek_v32_motivation.src.aggregate_mfu",
-      "path": "experiments/deepseek_v32_motivation/src/aggregate_mfu.py",
-      "sha256": "4f02ad11255c3de4de56998617d4af91714432c3bb250d476df56cb393cb1425",
-      "snapshot_path": "source/generators/experiments/deepseek_v32_motivation/src/aggregate_mfu.py",
-      "captured_profile_copy_exists": true,
-      "captured_profile_sha256": "4f02ad11255c3de4de56998617d4af91714432c3bb250d476df56cb393cb1425",
-      "matches_captured_profile_copy": true
-    }
-  ],
-  "source_snapshots_location": "experiments/deepseek_v32_motivation/output/data/refactor_final_deepseek_publication_20261005_01/source",
-  "later_provenance_helper_delta": {
-    "captured_sha256": "910fca0ee93420721b53b362960798104b58c44000c178e29ba5d9cad5c1bd1b",
-    "publication_sha256": "0fde027cf65530a75072893c88c522cc85ea990b72e67ce7515b74dbb6d2fa67",
-    "all_preexisting_functions_ast_equal": true,
-    "only_added_function": "snapshot_report_helpers",
-    "only_added_import": "sys",
-    "boundary": "The new function was not called by the completed earlier analysis commands. The full current module hash must not be substituted for the captured helper hash. The AST audit confirms the existing functions and other module statements are unchanged."
+  "schema": "deepseek-c10-source-bindings-v1",
+  "bench": {
+    "run_id": "deepseek_mfu_c10_bench_20261006_01",
+    "source_sha256": "d1ad78fd4d8606877bf05d28e2a2cce79c6e9064cf53824bcf42c3ea8ec017fd",
+    "metadata_sha256": "b1a907a0490284ae1c66842506485c1720cebd1a216d3eedc06a581ee69ed58a",
+    "source_manifest_sha256": "2753efef4688c28f6df8a6629096c214f568c831113aad2aca23e52c06b3008d"
   },
-  "analysis_completion_receipt_sha256": "6e410cdf859e2b111000bd877b55481f141b5b114eef20a127a650143d195fb7",
-  "analysis_command_count": 13,
-  "binding_driver_sha256": "2a8c640dd717ca8204d9a31ac3c2b516d75c33f9b21d5a79d4ea4a6422acb984"
+  "profile": {
+    "run_id": "deepseek_mfu_c10_profile_20261006_02",
+    "source_sha256": "8a75ecbaa0c8c5262cbc78022d7582b8a7e82ac61927ae3f558797edeb703227",
+    "metadata_sha256": "5ba26f51147acf6016748b939ea780c61341c9eca31318509714865ba79221d4",
+    "source_manifest_sha256": "4da06b0881940fa2869418d1cebaea63ec8c8a6ab186343a0294d720509ca088"
+  },
+  "independent_check_receipt_sha256": "1db5e4b5e53c4639a42edb9d44ca9b2e790d38e6ef932b790685e1865b2b644b",
+  "execution_sources_equal": 1278
 }

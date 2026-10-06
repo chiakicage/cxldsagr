@@ -1,0 +1,4265 @@
+{
+  "schema": "deepseek-c10-raw-window-audit-v1",
+  "status": "passed",
+  "timeline": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_mfu_c10_profile_20261006_02/analysis/single_layer/timeline.json",
+  "timeline_sha256": "77e1b12582c4ee654889a5c85e3ab191059263076ccd24e0265af30b2a0bc856",
+  "intervals_sha256": "fae63d754e7abfd456cd3acba43e4aaf2c0fa76f5bbb1447cedc32d89d8f92eb",
+  "auditor_sha256": "8462415673646a083ee22f28710f91d74e61c5da92e0d8a7920bae4fb7fd5589",
+  "boundary": "All raw GPU kernels, memcpy and memset intersecting each declared layer window; intervals clipped to the window only for unions. CUDA APIs overlapping gaps are descriptive and do not establish causality or removable unprofiled overhead.",
+  "compute_boundary": "Projection, index, top-k, attention and finish kernels. Auxiliary/cache work and fused ECHO indexer/prefetch are excluded from the separate compute-gather overlap because fused internal intervals are unknown.",
+  "captures": [
+    {
+      "scheme": "hbm",
+      "profile_run_id": "deepseek_mfu_c10_profile_20261006_02",
+      "request_id": 16,
+      "layer": 1,
+      "segment": "candidate",
+      "chunk": null,
+      "sqlite": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_mfu_c10_profile_20261006_02/capture_3.sqlite",
+      "sqlite_sha256": "dd656aac972a23fe84ccb419734fd5ad220a8ffca022229e4957e41c56ea702b",
+      "all_raw_intervals_conserved": true,
+      "raw_gpu_activity_count": 75,
+      "gpu_streams": [
+        7
+      ],
+      "window_ms": 1.134402,
+      "gpu_union_ms": 0.909663,
+      "gpu_gap_ms": 0.224739,
+      "gpu_gap_fraction": 0.1981123093929665,
+      "gpu_gap_count": 74,
+      "largest_gap_us": 114.305,
+      "compute_kernel_union_ms": 0.894783,
+      "separate_gather_union_ms": 0.0,
+      "compute_separate_gather_overlap_ms": 0.0,
+      "dense_next_layer_overlap": null,
+      "gaps_descending": [
+        {
+          "start_us": 21.056,
+          "end_us": 135.361,
+          "duration_us": 114.305,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaGraphLaunch_v10000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 3206610,
+              "start_us": 36.181,
+              "end_us": 131.381,
+              "duration_us": 95.2,
+              "overlap_with_gap_us": 95.2
+            }
+          ]
+        },
+        {
+          "start_us": 296.257,
+          "end_us": 338.049,
+          "duration_us": 41.792,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cuTensorMapEncodeTiled",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 3206649,
+              "start_us": 314.169,
+              "end_us": 314.928,
+              "duration_us": 0.759,
+              "overlap_with_gap_us": 0.759
+            },
+            {
+              "name": "cuTensorMapEncodeTiled",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 3206650,
+              "start_us": 315.341,
+              "end_us": 315.497,
+              "duration_us": 0.156,
+              "overlap_with_gap_us": 0.156
+            },
+            {
+              "name": "cuTensorMapEncodeTiled",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 3206651,
+              "start_us": 315.851,
+              "end_us": 316.061,
+              "duration_us": 0.21,
+              "overlap_with_gap_us": 0.21
+            },
+            {
+              "name": "cuTensorMapEncodeTiled",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 3206652,
+              "start_us": 317.252,
+              "end_us": 317.373,
+              "duration_us": 0.121,
+              "overlap_with_gap_us": 0.121
+            },
+            {
+              "name": "cuLaunchKernelEx",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 3206655,
+              "start_us": 330.478,
+              "end_us": 336.511,
+              "duration_us": 6.033,
+              "overlap_with_gap_us": 6.033
+            }
+          ]
+        },
+        {
+          "start_us": 888.641,
+          "end_us": 921.697,
+          "duration_us": 33.056,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaGraphLaunch_v10000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 3206809,
+              "start_us": 873.535,
+              "end_us": 917.243,
+              "duration_us": 43.708,
+              "overlap_with_gap_us": 28.602
+            }
+          ]
+        },
+        {
+          "start_us": 739.841,
+          "end_us": 745.697,
+          "duration_us": 5.856,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaLaunchKernelExC_v11060",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 3206790,
+              "start_us": 737.161,
+              "end_us": 744.409,
+              "duration_us": 7.248,
+              "overlap_with_gap_us": 4.568
+            }
+          ]
+        },
+        {
+          "start_us": 14.432,
+          "end_us": 20.128,
+          "duration_us": 5.696,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaLaunchKernel_v7000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 3206604,
+              "start_us": 12.81,
+              "end_us": 18.998,
+              "duration_us": 6.188,
+              "overlap_with_gap_us": 4.566
+            }
+          ]
+        },
+        {
+          "start_us": 718.241,
+          "end_us": 720.001,
+          "duration_us": 1.76,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 292.033,
+          "end_us": 293.409,
+          "duration_us": 1.376,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 876.641,
+          "end_us": 878.017,
+          "duration_us": 1.376,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaGraphLaunch_v10000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 3206809,
+              "start_us": 873.535,
+              "end_us": 917.243,
+              "duration_us": 43.708,
+              "overlap_with_gap_us": 1.376
+            }
+          ]
+        },
+        {
+          "start_us": 0.0,
+          "end_us": 1.28,
+          "duration_us": 1.28,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 638.689,
+          "end_us": 639.937,
+          "duration_us": 1.248,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 669.089,
+          "end_us": 670.273,
+          "duration_us": 1.184,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 705.153,
+          "end_us": 706.273,
+          "duration_us": 1.12,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 632.417,
+          "end_us": 633.505,
+          "duration_us": 1.088,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 294.401,
+          "end_us": 295.425,
+          "duration_us": 1.024,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 734.977,
+          "end_us": 735.969,
+          "duration_us": 0.992,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 6.368,
+          "end_us": 7.328,
+          "duration_us": 0.96,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 634.273,
+          "end_us": 635.201,
+          "duration_us": 0.928,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 11.392,
+          "end_us": 12.288,
+          "duration_us": 0.896,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cuKernelGetName",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 3206603,
+              "start_us": 12.22,
+              "end_us": 12.528,
+              "duration_us": 0.308,
+              "overlap_with_gap_us": 0.068
+            }
+          ]
+        },
+        {
+          "start_us": 642.305,
+          "end_us": 643.201,
+          "duration_us": 0.896,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 737.249,
+          "end_us": 738.145,
+          "duration_us": 0.896,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaLaunchKernelExC_v11060",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 3206790,
+              "start_us": 737.161,
+              "end_us": 744.409,
+              "duration_us": 7.248,
+              "overlap_with_gap_us": 0.896
+            }
+          ]
+        },
+        {
+          "start_us": 8.864,
+          "end_us": 9.728,
+          "duration_us": 0.864,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 191.233,
+          "end_us": 191.713,
+          "duration_us": 0.48,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaMemcpyAsync_v3020",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 3206623,
+              "start_us": 190.432,
+              "end_us": 195.968,
+              "duration_us": 5.536,
+              "overlap_with_gap_us": 0.48
+            }
+          ]
+        },
+        {
+          "start_us": 977.473,
+          "end_us": 977.889,
+          "duration_us": 0.416,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 220.161,
+          "end_us": 220.449,
+          "duration_us": 0.288,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 159.905,
+          "end_us": 160.129,
+          "duration_us": 0.224,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 269.985,
+          "end_us": 270.145,
+          "duration_us": 0.16,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 138.657,
+          "end_us": 138.785,
+          "duration_us": 0.128,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 144.129,
+          "end_us": 144.257,
+          "duration_us": 0.128,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 162.369,
+          "end_us": 162.497,
+          "duration_us": 0.128,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 164.001,
+          "end_us": 164.129,
+          "duration_us": 0.128,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 164.961,
+          "end_us": 165.089,
+          "duration_us": 0.128,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 168.673,
+          "end_us": 168.801,
+          "duration_us": 0.128,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 170.113,
+          "end_us": 170.241,
+          "duration_us": 0.128,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 217.537,
+          "end_us": 217.665,
+          "duration_us": 0.128,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 255.425,
+          "end_us": 255.553,
+          "duration_us": 0.128,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 264.737,
+          "end_us": 264.865,
+          "duration_us": 0.128,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 266.113,
+          "end_us": 266.241,
+          "duration_us": 0.128,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 286.017,
+          "end_us": 286.145,
+          "duration_us": 0.128,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 287.265,
+          "end_us": 287.393,
+          "duration_us": 0.128,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 288.545,
+          "end_us": 288.673,
+          "duration_us": 0.128,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 289.729,
+          "end_us": 289.857,
+          "duration_us": 0.128,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 981.345,
+          "end_us": 981.473,
+          "duration_us": 0.128,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 983.553,
+          "end_us": 983.681,
+          "duration_us": 0.128,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 140.097,
+          "end_us": 140.193,
+          "duration_us": 0.096,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 141.601,
+          "end_us": 141.697,
+          "duration_us": 0.096,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 142.817,
+          "end_us": 142.913,
+          "duration_us": 0.096,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 146.305,
+          "end_us": 146.401,
+          "duration_us": 0.096,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 148.417,
+          "end_us": 148.513,
+          "duration_us": 0.096,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 166.817,
+          "end_us": 166.913,
+          "duration_us": 0.096,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 172.161,
+          "end_us": 172.257,
+          "duration_us": 0.096,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 173.793,
+          "end_us": 173.889,
+          "duration_us": 0.096,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 202.497,
+          "end_us": 202.593,
+          "duration_us": 0.096,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 224.769,
+          "end_us": 224.865,
+          "duration_us": 0.096,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 237.281,
+          "end_us": 237.377,
+          "duration_us": 0.096,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 252.289,
+          "end_us": 252.385,
+          "duration_us": 0.096,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 258.849,
+          "end_us": 258.945,
+          "duration_us": 0.096,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 260.129,
+          "end_us": 260.225,
+          "duration_us": 0.096,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 262.817,
+          "end_us": 262.913,
+          "duration_us": 0.096,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 282.433,
+          "end_us": 282.529,
+          "duration_us": 0.096,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 985.729,
+          "end_us": 985.825,
+          "duration_us": 0.096,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 205.569,
+          "end_us": 205.633,
+          "duration_us": 0.064,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 207.713,
+          "end_us": 207.777,
+          "duration_us": 0.064,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 221.953,
+          "end_us": 222.017,
+          "duration_us": 0.064,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 227.585,
+          "end_us": 227.649,
+          "duration_us": 0.064,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 229.185,
+          "end_us": 229.249,
+          "duration_us": 0.064,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 240.353,
+          "end_us": 240.417,
+          "duration_us": 0.064,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 242.465,
+          "end_us": 242.529,
+          "duration_us": 0.064,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 924.449,
+          "end_us": 924.513,
+          "duration_us": 0.064,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 928.385,
+          "end_us": 928.449,
+          "duration_us": 0.064,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 1073.121,
+          "end_us": 1073.185,
+          "duration_us": 0.064,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 1075.873,
+          "end_us": 1075.937,
+          "duration_us": 0.064,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 1080.193,
+          "end_us": 1080.257,
+          "duration_us": 0.064,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 1024.608,
+          "end_us": 1024.609,
+          "duration_us": 0.001,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaMemcpyAsync_v3020",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 3206834,
+              "start_us": 1022.811,
+              "end_us": 1028.386,
+              "duration_us": 5.575,
+              "overlap_with_gap_us": 0.001
+            }
+          ]
+        },
+        {
+          "start_us": 1027.072,
+          "end_us": 1027.073,
+          "duration_us": 0.001,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaMemcpyAsync_v3020",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 3206834,
+              "start_us": 1022.811,
+              "end_us": 1028.386,
+              "duration_us": 5.575,
+              "overlap_with_gap_us": 0.001
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "scheme": "echo",
+      "profile_run_id": "deepseek_mfu_c10_profile_20261006_02",
+      "request_id": 16,
+      "layer": 1,
+      "segment": "candidate",
+      "chunk": null,
+      "sqlite": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_mfu_c10_profile_20261006_02/capture_6.sqlite",
+      "sqlite_sha256": "93844a99320dc6444035e05ce30bc7b8021a7f4cc2a2c8b4402ab4afbbf42c94",
+      "all_raw_intervals_conserved": true,
+      "raw_gpu_activity_count": 145,
+      "gpu_streams": [
+        7
+      ],
+      "window_ms": 2.63213,
+      "gpu_union_ms": 1.536512,
+      "gpu_gap_ms": 1.095618,
+      "gpu_gap_fraction": 0.416247677736282,
+      "gpu_gap_count": 145,
+      "largest_gap_us": 175.136,
+      "compute_kernel_union_ms": 0.533726,
+      "separate_gather_union_ms": 0.010752,
+      "compute_separate_gather_overlap_ms": 0.0,
+      "dense_next_layer_overlap": null,
+      "gaps_descending": [
+        {
+          "start_us": 691.777,
+          "end_us": 866.913,
+          "duration_us": 175.136,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaLaunchKernel_v7000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481773,
+              "start_us": 860.006,
+              "end_us": 865.855,
+              "duration_us": 5.849,
+              "overlap_with_gap_us": 5.849
+            },
+            {
+              "name": "cuKernelGetName",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481772,
+              "start_us": 859.62,
+              "end_us": 859.878,
+              "duration_us": 0.258,
+              "overlap_with_gap_us": 0.258
+            }
+          ]
+        },
+        {
+          "start_us": 2107.17,
+          "end_us": 2245.058,
+          "duration_us": 137.888,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaGetDriverEntryPointByVersion_v12050",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9482265,
+              "start_us": 2227.159,
+              "end_us": 2228.114,
+              "duration_us": 0.955,
+              "overlap_with_gap_us": 0.955
+            },
+            {
+              "name": "cudaGetDriverEntryPointByVersion_v12050",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9482267,
+              "start_us": 2229.727,
+              "end_us": 2229.967,
+              "duration_us": 0.24,
+              "overlap_with_gap_us": 0.24
+            },
+            {
+              "name": "cudaLaunchKernelExC_v11060",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9482271,
+              "start_us": 2236.48,
+              "end_us": 2244.069,
+              "duration_us": 7.589,
+              "overlap_with_gap_us": 7.589
+            },
+            {
+              "name": "cuTensorMapEncodeTiled",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9482266,
+              "start_us": 2228.523,
+              "end_us": 2229.358,
+              "duration_us": 0.835,
+              "overlap_with_gap_us": 0.835
+            },
+            {
+              "name": "cuTensorMapEncodeTiled",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9482268,
+              "start_us": 2230.191,
+              "end_us": 2230.407,
+              "duration_us": 0.216,
+              "overlap_with_gap_us": 0.216
+            }
+          ]
+        },
+        {
+          "start_us": 164.96,
+          "end_us": 295.072,
+          "duration_us": 130.112,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaGraphLaunch_v10000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481534,
+              "start_us": 179.62,
+              "end_us": 290.349,
+              "duration_us": 110.729,
+              "overlap_with_gap_us": 110.729
+            }
+          ]
+        },
+        {
+          "start_us": 12.992,
+          "end_us": 135.008,
+          "duration_us": 122.016,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaStreamIsCapturing_v10000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481500,
+              "start_us": 75.887,
+              "end_us": 76.356,
+              "duration_us": 0.469,
+              "overlap_with_gap_us": 0.469
+            },
+            {
+              "name": "cudaStreamIsCapturing_v10000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481504,
+              "start_us": 86.32,
+              "end_us": 86.631,
+              "duration_us": 0.311,
+              "overlap_with_gap_us": 0.311
+            },
+            {
+              "name": "cudaStreamIsCapturing_v10000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481508,
+              "start_us": 98.656,
+              "end_us": 98.93,
+              "duration_us": 0.274,
+              "overlap_with_gap_us": 0.274
+            },
+            {
+              "name": "cudaMemcpyAsync_v3020",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481511,
+              "start_us": 124.699,
+              "end_us": 133.914,
+              "duration_us": 9.215,
+              "overlap_with_gap_us": 9.215
+            }
+          ]
+        },
+        {
+          "start_us": 943.713,
+          "end_us": 1009.793,
+          "duration_us": 66.08,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaLaunchKernel_v7000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481842,
+              "start_us": 1002.26,
+              "end_us": 1008.394,
+              "duration_us": 6.134,
+              "overlap_with_gap_us": 6.134
+            },
+            {
+              "name": "cuTensorMapEncodeTiled",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481834,
+              "start_us": 992.927,
+              "end_us": 993.604,
+              "duration_us": 0.677,
+              "overlap_with_gap_us": 0.677
+            },
+            {
+              "name": "cuTensorMapEncodeTiled",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481835,
+              "start_us": 993.75,
+              "end_us": 993.879,
+              "duration_us": 0.129,
+              "overlap_with_gap_us": 0.129
+            },
+            {
+              "name": "cuTensorMapEncodeTiled",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481836,
+              "start_us": 993.996,
+              "end_us": 994.213,
+              "duration_us": 0.217,
+              "overlap_with_gap_us": 0.217
+            },
+            {
+              "name": "cuTensorMapEncodeTiled",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481837,
+              "start_us": 994.329,
+              "end_us": 994.447,
+              "duration_us": 0.118,
+              "overlap_with_gap_us": 0.118
+            },
+            {
+              "name": "cuKernelGetName",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481841,
+              "start_us": 1002.042,
+              "end_us": 1002.147,
+              "duration_us": 0.105,
+              "overlap_with_gap_us": 0.105
+            },
+            {
+              "name": "cuKernelGetName",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481844,
+              "start_us": 1009.367,
+              "end_us": 1009.7,
+              "duration_us": 0.333,
+              "overlap_with_gap_us": 0.333
+            }
+          ]
+        },
+        {
+          "start_us": 2377.346,
+          "end_us": 2435.202,
+          "duration_us": 57.856,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaGraphLaunch_v10000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9482290,
+              "start_us": 2386.313,
+              "end_us": 2431.741,
+              "duration_us": 45.428,
+              "overlap_with_gap_us": 45.428
+            }
+          ]
+        },
+        {
+          "start_us": 446.4,
+          "end_us": 484.768,
+          "duration_us": 38.368,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaMemcpyAsync_v3020",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481587,
+              "start_us": 476.424,
+              "end_us": 483.182,
+              "duration_us": 6.758,
+              "overlap_with_gap_us": 6.758
+            }
+          ]
+        },
+        {
+          "start_us": 2039.298,
+          "end_us": 2069.634,
+          "duration_us": 30.336,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaLaunchKernel_v7000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9482229,
+              "start_us": 2062.722,
+              "end_us": 2067.926,
+              "duration_us": 5.204,
+              "overlap_with_gap_us": 5.204
+            },
+            {
+              "name": "cuKernelGetName",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9482228,
+              "start_us": 2062.388,
+              "end_us": 2062.612,
+              "duration_us": 0.224,
+              "overlap_with_gap_us": 0.224
+            }
+          ]
+        },
+        {
+          "start_us": 914.497,
+          "end_us": 942.977,
+          "duration_us": 28.48,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaStreamSynchronize_v3020",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481810,
+              "start_us": 913.296,
+              "end_us": 921.073,
+              "duration_us": 7.777,
+              "overlap_with_gap_us": 6.576
+            },
+            {
+              "name": "cudaLaunchKernel_v7000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481824,
+              "start_us": 936.389,
+              "end_us": 941.434,
+              "duration_us": 5.045,
+              "overlap_with_gap_us": 5.045
+            },
+            {
+              "name": "cuKernelGetName",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481823,
+              "start_us": 935.997,
+              "end_us": 936.3,
+              "duration_us": 0.303,
+              "overlap_with_gap_us": 0.303
+            }
+          ]
+        },
+        {
+          "start_us": 885.313,
+          "end_us": 913.761,
+          "duration_us": 28.448,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaStreamIsCapturing_v10000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481807,
+              "start_us": 902.82,
+              "end_us": 903.337,
+              "duration_us": 0.517,
+              "overlap_with_gap_us": 0.517
+            },
+            {
+              "name": "cudaMemcpyAsync_v3020",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481809,
+              "start_us": 903.974,
+              "end_us": 912.824,
+              "duration_us": 8.85,
+              "overlap_with_gap_us": 8.85
+            },
+            {
+              "name": "cudaStreamSynchronize_v3020",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481810,
+              "start_us": 913.296,
+              "end_us": 921.073,
+              "duration_us": 7.777,
+              "overlap_with_gap_us": 0.465
+            }
+          ]
+        },
+        {
+          "start_us": 2072.738,
+          "end_us": 2100.674,
+          "duration_us": 27.936,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaLaunchKernel_v7000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9482237,
+              "start_us": 2094.19,
+              "end_us": 2099.166,
+              "duration_us": 4.976,
+              "overlap_with_gap_us": 4.976
+            },
+            {
+              "name": "cuKernelGetName",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9482236,
+              "start_us": 2093.888,
+              "end_us": 2094.017,
+              "duration_us": 0.129,
+              "overlap_with_gap_us": 0.129
+            }
+          ]
+        },
+        {
+          "start_us": 628.417,
+          "end_us": 646.785,
+          "duration_us": 18.368,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaLaunchKernel_v7000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481707,
+              "start_us": 639.528,
+              "end_us": 645.123,
+              "duration_us": 5.595,
+              "overlap_with_gap_us": 5.595
+            },
+            {
+              "name": "cuKernelGetName",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481706,
+              "start_us": 639.123,
+              "end_us": 639.426,
+              "duration_us": 0.303,
+              "overlap_with_gap_us": 0.303
+            }
+          ]
+        },
+        {
+          "start_us": 611.361,
+          "end_us": 627.201,
+          "duration_us": 15.84,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaLaunchKernel_v7000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481693,
+              "start_us": 620.46,
+              "end_us": 625.562,
+              "duration_us": 5.102,
+              "overlap_with_gap_us": 5.102
+            },
+            {
+              "name": "cuKernelGetName",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481692,
+              "start_us": 619.999,
+              "end_us": 620.368,
+              "duration_us": 0.369,
+              "overlap_with_gap_us": 0.369
+            }
+          ]
+        },
+        {
+          "start_us": 149.184,
+          "end_us": 164.192,
+          "duration_us": 15.008,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaLaunchKernel_v7000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481528,
+              "start_us": 156.147,
+              "end_us": 163.226,
+              "duration_us": 7.079,
+              "overlap_with_gap_us": 7.079
+            },
+            {
+              "name": "cuKernelGetName",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481527,
+              "start_us": 155.483,
+              "end_us": 155.823,
+              "duration_us": 0.34,
+              "overlap_with_gap_us": 0.34
+            }
+          ]
+        },
+        {
+          "start_us": 659.361,
+          "end_us": 672.257,
+          "duration_us": 12.896,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaLaunchKernel_v7000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481724,
+              "start_us": 665.83,
+              "end_us": 670.492,
+              "duration_us": 4.662,
+              "overlap_with_gap_us": 4.662
+            },
+            {
+              "name": "cuKernelGetName",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481723,
+              "start_us": 665.566,
+              "end_us": 665.72,
+              "duration_us": 0.154,
+              "overlap_with_gap_us": 0.154
+            }
+          ]
+        },
+        {
+          "start_us": 498.016,
+          "end_us": 510.24,
+          "duration_us": 12.224,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaMemsetAsync_v3020",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481607,
+              "start_us": 501.373,
+              "end_us": 508.545,
+              "duration_us": 7.172,
+              "overlap_with_gap_us": 7.172
+            },
+            {
+              "name": "cudaMemsetAsync_v3020",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481609,
+              "start_us": 508.944,
+              "end_us": 514.265,
+              "duration_us": 5.321,
+              "overlap_with_gap_us": 1.296
+            }
+          ]
+        },
+        {
+          "start_us": 2017.794,
+          "end_us": 2028.546,
+          "duration_us": 10.752,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaLaunchKernel_v7000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9482221,
+              "start_us": 2021.471,
+              "end_us": 2027.047,
+              "duration_us": 5.576,
+              "overlap_with_gap_us": 5.576
+            }
+          ]
+        },
+        {
+          "start_us": 136.512,
+          "end_us": 147.136,
+          "duration_us": 10.624,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaMemcpyAsync_v3020",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481519,
+              "start_us": 139.293,
+              "end_us": 145.478,
+              "duration_us": 6.185,
+              "overlap_with_gap_us": 6.185
+            }
+          ]
+        },
+        {
+          "start_us": 516.8,
+          "end_us": 527.392,
+          "duration_us": 10.592,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaLaunchKernel_v7000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481618,
+              "start_us": 520.457,
+              "end_us": 525.345,
+              "duration_us": 4.888,
+              "overlap_with_gap_us": 4.888
+            },
+            {
+              "name": "cudaLaunchKernel_v7000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481623,
+              "start_us": 527.139,
+              "end_us": 531.484,
+              "duration_us": 4.345,
+              "overlap_with_gap_us": 0.253
+            },
+            {
+              "name": "cuKernelGetName",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481617,
+              "start_us": 520.155,
+              "end_us": 520.249,
+              "duration_us": 0.094,
+              "overlap_with_gap_us": 0.094
+            },
+            {
+              "name": "cuKernelGetName",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481622,
+              "start_us": 526.809,
+              "end_us": 526.929,
+              "duration_us": 0.12,
+              "overlap_with_gap_us": 0.12
+            }
+          ]
+        },
+        {
+          "start_us": 486.4,
+          "end_us": 496.704,
+          "duration_us": 10.304,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaLaunchKernel_v7000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481594,
+              "start_us": 488.755,
+              "end_us": 495.632,
+              "duration_us": 6.877,
+              "overlap_with_gap_us": 6.877
+            },
+            {
+              "name": "cuKernelGetName",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481593,
+              "start_us": 488.129,
+              "end_us": 488.557,
+              "duration_us": 0.428,
+              "overlap_with_gap_us": 0.428
+            }
+          ]
+        },
+        {
+          "start_us": 673.025,
+          "end_us": 683.201,
+          "duration_us": 10.176,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaLaunchKernel_v7000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481733,
+              "start_us": 677.126,
+              "end_us": 681.205,
+              "duration_us": 4.079,
+              "overlap_with_gap_us": 4.079
+            },
+            {
+              "name": "cuKernelGetName",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481732,
+              "start_us": 676.821,
+              "end_us": 676.937,
+              "duration_us": 0.116,
+              "overlap_with_gap_us": 0.116
+            }
+          ]
+        },
+        {
+          "start_us": 648.609,
+          "end_us": 658.273,
+          "duration_us": 9.664,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaMemcpyAsync_v3020",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481714,
+              "start_us": 650.016,
+              "end_us": 656.699,
+              "duration_us": 6.683,
+              "overlap_with_gap_us": 6.683
+            }
+          ]
+        },
+        {
+          "start_us": 867.649,
+          "end_us": 877.249,
+          "duration_us": 9.6,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaLaunchKernel_v7000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481782,
+              "start_us": 871.668,
+              "end_us": 875.489,
+              "duration_us": 3.821,
+              "overlap_with_gap_us": 3.821
+            },
+            {
+              "name": "cuKernelGetName",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481781,
+              "start_us": 871.446,
+              "end_us": 871.582,
+              "duration_us": 0.136,
+              "overlap_with_gap_us": 0.136
+            }
+          ]
+        },
+        {
+          "start_us": 684.129,
+          "end_us": 691.009,
+          "duration_us": 6.88,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaLaunchKernel_v7000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481741,
+              "start_us": 685.238,
+              "end_us": 688.939,
+              "duration_us": 3.701,
+              "overlap_with_gap_us": 3.701
+            },
+            {
+              "name": "cuKernelGetName",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481740,
+              "start_us": 684.93,
+              "end_us": 685.045,
+              "duration_us": 0.115,
+              "overlap_with_gap_us": 0.115
+            }
+          ]
+        },
+        {
+          "start_us": 878.081,
+          "end_us": 884.577,
+          "duration_us": 6.496,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaLaunchKernel_v7000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481790,
+              "start_us": 879.476,
+              "end_us": 882.631,
+              "duration_us": 3.155,
+              "overlap_with_gap_us": 3.155
+            },
+            {
+              "name": "cuKernelGetName",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481789,
+              "start_us": 879.291,
+              "end_us": 879.394,
+              "duration_us": 0.103,
+              "overlap_with_gap_us": 0.103
+            }
+          ]
+        },
+        {
+          "start_us": 6.208,
+          "end_us": 11.52,
+          "duration_us": 5.312,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaMemcpyAsync_v3020",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481490,
+              "start_us": 1.426,
+              "end_us": 8.903,
+              "duration_us": 7.477,
+              "overlap_with_gap_us": 2.695
+            }
+          ]
+        },
+        {
+          "start_us": 511.04,
+          "end_us": 515.936,
+          "duration_us": 4.896,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaMemsetAsync_v3020",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481609,
+              "start_us": 508.944,
+              "end_us": 514.265,
+              "duration_us": 5.321,
+              "overlap_with_gap_us": 3.225
+            }
+          ]
+        },
+        {
+          "start_us": 538.752,
+          "end_us": 543.008,
+          "duration_us": 4.256,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaLaunchKernel_v7000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481630,
+              "start_us": 536.804,
+              "end_us": 541.073,
+              "duration_us": 4.269,
+              "overlap_with_gap_us": 2.321
+            },
+            {
+              "name": "cudaMemsetAsync_v3020",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481634,
+              "start_us": 541.865,
+              "end_us": 545.037,
+              "duration_us": 3.172,
+              "overlap_with_gap_us": 1.143
+            }
+          ]
+        },
+        {
+          "start_us": 530.752,
+          "end_us": 534.144,
+          "duration_us": 3.392,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaLaunchKernel_v7000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481623,
+              "start_us": 527.139,
+              "end_us": 531.484,
+              "duration_us": 4.345,
+              "overlap_with_gap_us": 0.732
+            },
+            {
+              "name": "cudaMemsetAsync_v3020",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481627,
+              "start_us": 532.254,
+              "end_us": 535.882,
+              "duration_us": 3.628,
+              "overlap_with_gap_us": 1.89
+            }
+          ]
+        },
+        {
+          "start_us": 535.328,
+          "end_us": 537.792,
+          "duration_us": 2.464,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaMemsetAsync_v3020",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481627,
+              "start_us": 532.254,
+              "end_us": 535.882,
+              "duration_us": 3.628,
+              "overlap_with_gap_us": 0.554
+            },
+            {
+              "name": "cudaLaunchKernel_v7000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481630,
+              "start_us": 536.804,
+              "end_us": 541.073,
+              "duration_us": 4.269,
+              "overlap_with_gap_us": 0.988
+            },
+            {
+              "name": "cuKernelGetName",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481629,
+              "start_us": 536.617,
+              "end_us": 536.717,
+              "duration_us": 0.1,
+              "overlap_with_gap_us": 0.1
+            }
+          ]
+        },
+        {
+          "start_us": 1919.265,
+          "end_us": 1921.281,
+          "duration_us": 2.016,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 1916.001,
+          "end_us": 1917.985,
+          "duration_us": 1.984,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 1867.841,
+          "end_us": 1869.761,
+          "duration_us": 1.92,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 1876.065,
+          "end_us": 1877.985,
+          "duration_us": 1.92,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 1928.801,
+          "end_us": 1930.657,
+          "duration_us": 1.856,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 1945.025,
+          "end_us": 1946.817,
+          "duration_us": 1.792,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 1922.241,
+          "end_us": 1923.713,
+          "duration_us": 1.472,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 1873.825,
+          "end_us": 1875.265,
+          "duration_us": 1.44,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 0.0,
+          "end_us": 1.28,
+          "duration_us": 1.28,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 442.496,
+          "end_us": 443.776,
+          "duration_us": 1.28,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 1785.601,
+          "end_us": 1786.785,
+          "duration_us": 1.184,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaLaunchKernel_v7000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9482072,
+              "start_us": 1785.524,
+              "end_us": 1790.16,
+              "duration_us": 4.636,
+              "overlap_with_gap_us": 1.184
+            }
+          ]
+        },
+        {
+          "start_us": 551.744,
+          "end_us": 552.832,
+          "duration_us": 1.088,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaMemsetAsync_v3020",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481641,
+              "start_us": 549.837,
+              "end_us": 552.858,
+              "duration_us": 3.021,
+              "overlap_with_gap_us": 1.088
+            }
+          ]
+        },
+        {
+          "start_us": 1802.529,
+          "end_us": 1803.617,
+          "duration_us": 1.088,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaLaunchKernel_v7000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9482084,
+              "start_us": 1801.04,
+              "end_us": 1805.152,
+              "duration_us": 4.112,
+              "overlap_with_gap_us": 1.088
+            }
+          ]
+        },
+        {
+          "start_us": 1980.162,
+          "end_us": 1981.25,
+          "duration_us": 1.088,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 2009.058,
+          "end_us": 2010.146,
+          "duration_us": 1.088,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 562.88,
+          "end_us": 563.936,
+          "duration_us": 1.056,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaLaunchKernel_v7000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481651,
+              "start_us": 561.035,
+              "end_us": 564.266,
+              "duration_us": 3.231,
+              "overlap_with_gap_us": 1.056
+            }
+          ]
+        },
+        {
+          "start_us": 594.56,
+          "end_us": 595.616,
+          "duration_us": 1.056,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 1961.25,
+          "end_us": 1962.306,
+          "duration_us": 1.056,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaLaunchKernel_v7000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9482207,
+              "start_us": 1958.288,
+              "end_us": 1963.12,
+              "duration_us": 4.832,
+              "overlap_with_gap_us": 1.056
+            }
+          ]
+        },
+        {
+          "start_us": 2013.186,
+          "end_us": 2014.242,
+          "duration_us": 1.056,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 2366.05,
+          "end_us": 2367.106,
+          "duration_us": 1.056,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 553.824,
+          "end_us": 554.848,
+          "duration_us": 1.024,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaLaunchKernel_v7000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481644,
+              "start_us": 553.497,
+              "end_us": 556.723,
+              "duration_us": 3.226,
+              "overlap_with_gap_us": 1.024
+            }
+          ]
+        },
+        {
+          "start_us": 579.584,
+          "end_us": 580.608,
+          "duration_us": 1.024,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaMemsetAsync_v3020",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481669,
+              "start_us": 579.908,
+              "end_us": 582.82,
+              "duration_us": 2.912,
+              "overlap_with_gap_us": 0.7
+            }
+          ]
+        },
+        {
+          "start_us": 586.08,
+          "end_us": 587.104,
+          "duration_us": 1.024,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaLaunchKernel_v7000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481672,
+              "start_us": 583.435,
+              "end_us": 586.76,
+              "duration_us": 3.325,
+              "overlap_with_gap_us": 0.68
+            }
+          ]
+        },
+        {
+          "start_us": 588.064,
+          "end_us": 589.088,
+          "duration_us": 1.024,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaMemsetAsync_v3020",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481676,
+              "start_us": 587.504,
+              "end_us": 590.448,
+              "duration_us": 2.944,
+              "overlap_with_gap_us": 1.024
+            }
+          ]
+        },
+        {
+          "start_us": 1840.865,
+          "end_us": 1841.889,
+          "duration_us": 1.024,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaLaunchKernel_v7000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9482119,
+              "start_us": 1840.985,
+              "end_us": 1844.242,
+              "duration_us": 3.257,
+              "overlap_with_gap_us": 0.904
+            },
+            {
+              "name": "cuKernelGetName",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9482118,
+              "start_us": 1840.802,
+              "end_us": 1840.893,
+              "duration_us": 0.091,
+              "overlap_with_gap_us": 0.028
+            }
+          ]
+        },
+        {
+          "start_us": 1913.249,
+          "end_us": 1914.273,
+          "duration_us": 1.024,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 1978.178,
+          "end_us": 1979.202,
+          "duration_us": 1.024,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 1986.69,
+          "end_us": 1987.714,
+          "duration_us": 1.024,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 2003.426,
+          "end_us": 2004.45,
+          "duration_us": 1.024,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 560.928,
+          "end_us": 561.92,
+          "duration_us": 0.992,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaLaunchKernel_v7000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481651,
+              "start_us": 561.035,
+              "end_us": 564.266,
+              "duration_us": 3.231,
+              "overlap_with_gap_us": 0.885
+            },
+            {
+              "name": "cuKernelGetName",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481650,
+              "start_us": 560.849,
+              "end_us": 560.95,
+              "duration_us": 0.101,
+              "overlap_with_gap_us": 0.022
+            }
+          ]
+        },
+        {
+          "start_us": 1800.801,
+          "end_us": 1801.793,
+          "duration_us": 0.992,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaLaunchKernel_v7000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9482084,
+              "start_us": 1801.04,
+              "end_us": 1805.152,
+              "duration_us": 4.112,
+              "overlap_with_gap_us": 0.753
+            },
+            {
+              "name": "cuKernelGetName",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9482083,
+              "start_us": 1800.762,
+              "end_us": 1800.855,
+              "duration_us": 0.093,
+              "overlap_with_gap_us": 0.054
+            }
+          ]
+        },
+        {
+          "start_us": 1969.73,
+          "end_us": 1970.722,
+          "duration_us": 0.992,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 1995.074,
+          "end_us": 1996.066,
+          "duration_us": 0.992,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 2007.17,
+          "end_us": 2008.162,
+          "duration_us": 0.992,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 444.704,
+          "end_us": 445.664,
+          "duration_us": 0.96,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 596.576,
+          "end_us": 597.536,
+          "duration_us": 0.96,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 603.04,
+          "end_us": 604.0,
+          "duration_us": 0.96,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 1806.401,
+          "end_us": 1807.361,
+          "duration_us": 0.96,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaMemsetAsync_v3020",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9482088,
+              "start_us": 1805.964,
+              "end_us": 1809.296,
+              "duration_us": 3.332,
+              "overlap_with_gap_us": 0.96
+            }
+          ]
+        },
+        {
+          "start_us": 1808.129,
+          "end_us": 1809.089,
+          "duration_us": 0.96,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaMemsetAsync_v3020",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9482088,
+              "start_us": 1805.964,
+              "end_us": 1809.296,
+              "duration_us": 3.332,
+              "overlap_with_gap_us": 0.96
+            }
+          ]
+        },
+        {
+          "start_us": 1853.025,
+          "end_us": 1853.985,
+          "duration_us": 0.96,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaMemsetAsync_v3020",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9482130,
+              "start_us": 1852.677,
+              "end_us": 1855.794,
+              "duration_us": 3.117,
+              "overlap_with_gap_us": 0.96
+            }
+          ]
+        },
+        {
+          "start_us": 1885.249,
+          "end_us": 1886.209,
+          "duration_us": 0.96,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaLaunchKernel_v7000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9482151,
+              "start_us": 1881.604,
+              "end_us": 1887.31,
+              "duration_us": 5.706,
+              "overlap_with_gap_us": 0.96
+            }
+          ]
+        },
+        {
+          "start_us": 1887.553,
+          "end_us": 1888.513,
+          "duration_us": 0.96,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 1889.473,
+          "end_us": 1890.433,
+          "duration_us": 0.96,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 1908.001,
+          "end_us": 1908.961,
+          "duration_us": 0.96,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaLaunchKernel_v7000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9482190,
+              "start_us": 1905.762,
+              "end_us": 1909.8,
+              "duration_us": 4.038,
+              "overlap_with_gap_us": 0.96
+            }
+          ]
+        },
+        {
+          "start_us": 1931.777,
+          "end_us": 1932.737,
+          "duration_us": 0.96,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 1933.665,
+          "end_us": 1934.625,
+          "duration_us": 0.96,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 1943.105,
+          "end_us": 1944.065,
+          "duration_us": 0.96,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 1952.897,
+          "end_us": 1953.857,
+          "duration_us": 0.96,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 1963.298,
+          "end_us": 1964.258,
+          "duration_us": 0.96,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 577.696,
+          "end_us": 578.624,
+          "duration_us": 0.928,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaLaunchKernel_v7000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481665,
+              "start_us": 576.024,
+              "end_us": 579.185,
+              "duration_us": 3.161,
+              "overlap_with_gap_us": 0.928
+            }
+          ]
+        },
+        {
+          "start_us": 1871.105,
+          "end_us": 1872.033,
+          "duration_us": 0.928,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 1882.881,
+          "end_us": 1883.809,
+          "duration_us": 0.928,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaLaunchKernel_v7000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9482151,
+              "start_us": 1881.604,
+              "end_us": 1887.31,
+              "duration_us": 5.706,
+              "overlap_with_gap_us": 0.928
+            }
+          ]
+        },
+        {
+          "start_us": 1954.817,
+          "end_us": 1955.745,
+          "duration_us": 0.928,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 1971.682,
+          "end_us": 1972.61,
+          "duration_us": 0.928,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 1988.674,
+          "end_us": 1989.602,
+          "duration_us": 0.928,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 1997.026,
+          "end_us": 1997.954,
+          "duration_us": 0.928,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 569.344,
+          "end_us": 570.24,
+          "duration_us": 0.896,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaLaunchKernel_v7000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481658,
+              "start_us": 568.514,
+              "end_us": 571.885,
+              "duration_us": 3.371,
+              "overlap_with_gap_us": 0.896
+            }
+          ]
+        },
+        {
+          "start_us": 571.232,
+          "end_us": 572.128,
+          "duration_us": 0.896,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaLaunchKernel_v7000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481658,
+              "start_us": 568.514,
+              "end_us": 571.885,
+              "duration_us": 3.371,
+              "overlap_with_gap_us": 0.653
+            }
+          ]
+        },
+        {
+          "start_us": 604.992,
+          "end_us": 605.888,
+          "duration_us": 0.896,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 1810.401,
+          "end_us": 1811.297,
+          "duration_us": 0.896,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaLaunchKernel_v7000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9482091,
+              "start_us": 1809.986,
+              "end_us": 1813.404,
+              "duration_us": 3.418,
+              "overlap_with_gap_us": 0.896
+            }
+          ]
+        },
+        {
+          "start_us": 1924.577,
+          "end_us": 1925.473,
+          "duration_us": 0.896,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 347.68,
+          "end_us": 348.128,
+          "duration_us": 0.448,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaMemcpyAsync_v3020",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481547,
+              "start_us": 344.386,
+              "end_us": 349.343,
+              "duration_us": 4.957,
+              "overlap_with_gap_us": 0.448
+            }
+          ]
+        },
+        {
+          "start_us": 375.072,
+          "end_us": 375.52,
+          "duration_us": 0.448,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 318.08,
+          "end_us": 318.304,
+          "duration_us": 0.224,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 2484.93,
+          "end_us": 2485.122,
+          "duration_us": 0.192,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaEventDestroy_v3020",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9482295,
+              "start_us": 2484.962,
+              "end_us": 2486.368,
+              "duration_us": 1.406,
+              "overlap_with_gap_us": 0.16
+            }
+          ]
+        },
+        {
+          "start_us": 405.792,
+          "end_us": 405.952,
+          "duration_us": 0.16,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 298.208,
+          "end_us": 298.336,
+          "duration_us": 0.128,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 299.68,
+          "end_us": 299.808,
+          "duration_us": 0.128,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 305.728,
+          "end_us": 305.856,
+          "duration_us": 0.128,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 320.32,
+          "end_us": 320.448,
+          "duration_us": 0.128,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 321.856,
+          "end_us": 321.984,
+          "duration_us": 0.128,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 324.448,
+          "end_us": 324.576,
+          "duration_us": 0.128,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 396.768,
+          "end_us": 396.896,
+          "duration_us": 0.128,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 408.736,
+          "end_us": 408.864,
+          "duration_us": 0.128,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 417.216,
+          "end_us": 417.344,
+          "duration_us": 0.128,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 422.272,
+          "end_us": 422.4,
+          "duration_us": 0.128,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 436.992,
+          "end_us": 437.12,
+          "duration_us": 0.128,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 439.392,
+          "end_us": 439.52,
+          "duration_us": 0.128,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 440.48,
+          "end_us": 440.608,
+          "duration_us": 0.128,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 2576.45,
+          "end_us": 2576.578,
+          "duration_us": 0.128,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 2579.01,
+          "end_us": 2579.138,
+          "duration_us": 0.128,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 301.312,
+          "end_us": 301.408,
+          "duration_us": 0.096,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 302.432,
+          "end_us": 302.528,
+          "duration_us": 0.096,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 303.68,
+          "end_us": 303.776,
+          "duration_us": 0.096,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 307.712,
+          "end_us": 307.808,
+          "duration_us": 0.096,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 322.752,
+          "end_us": 322.848,
+          "duration_us": 0.096,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 326.24,
+          "end_us": 326.336,
+          "duration_us": 0.096,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 327.616,
+          "end_us": 327.712,
+          "duration_us": 0.096,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 372.64,
+          "end_us": 372.736,
+          "duration_us": 0.096,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 379.712,
+          "end_us": 379.808,
+          "duration_us": 0.096,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 411.744,
+          "end_us": 411.84,
+          "duration_us": 0.096,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 412.96,
+          "end_us": 413.056,
+          "duration_us": 0.096,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 415.456,
+          "end_us": 415.552,
+          "duration_us": 0.096,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 418.528,
+          "end_us": 418.624,
+          "duration_us": 0.096,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 433.632,
+          "end_us": 433.728,
+          "duration_us": 0.096,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 438.176,
+          "end_us": 438.272,
+          "duration_us": 0.096,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 2583.074,
+          "end_us": 2583.17,
+          "duration_us": 0.096,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 329.568,
+          "end_us": 329.632,
+          "duration_us": 0.064,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 331.104,
+          "end_us": 331.168,
+          "duration_us": 0.064,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaMemcpyAsync_v3020",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9481539,
+              "start_us": 330.556,
+              "end_us": 337.709,
+              "duration_us": 7.153,
+              "overlap_with_gap_us": 0.064
+            }
+          ]
+        },
+        {
+          "start_us": 358.24,
+          "end_us": 358.304,
+          "duration_us": 0.064,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 361.44,
+          "end_us": 361.504,
+          "duration_us": 0.064,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 363.424,
+          "end_us": 363.488,
+          "duration_us": 0.064,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 376.96,
+          "end_us": 377.024,
+          "duration_us": 0.064,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 384.064,
+          "end_us": 384.128,
+          "duration_us": 0.064,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 391.712,
+          "end_us": 391.776,
+          "duration_us": 0.064,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 394.816,
+          "end_us": 394.88,
+          "duration_us": 0.064,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 2441.442,
+          "end_us": 2441.506,
+          "duration_us": 0.064,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 2488.482,
+          "end_us": 2488.546,
+          "duration_us": 0.064,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 2490.562,
+          "end_us": 2490.626,
+          "duration_us": 0.064,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaEventCreateWithFlags_v3020",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9482299,
+              "start_us": 2489.11,
+              "end_us": 2490.806,
+              "duration_us": 1.696,
+              "overlap_with_gap_us": 0.064
+            }
+          ]
+        },
+        {
+          "start_us": 2492.61,
+          "end_us": 2492.674,
+          "duration_us": 0.064,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaStreamIsCapturing_v10000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 9482304,
+              "start_us": 2492.346,
+              "end_us": 2492.847,
+              "duration_us": 0.501,
+              "overlap_with_gap_us": 0.064
+            }
+          ]
+        },
+        {
+          "start_us": 2571.554,
+          "end_us": 2571.618,
+          "duration_us": 0.064,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 382.592,
+          "end_us": 382.624,
+          "duration_us": 0.032,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 2437.858,
+          "end_us": 2437.89,
+          "duration_us": 0.032,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 2531.073,
+          "end_us": 2531.074,
+          "duration_us": 0.001,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 2533.249,
+          "end_us": 2533.25,
+          "duration_us": 0.001,
+          "overlapping_cuda_apis": []
+        }
+      ]
+    },
+    {
+      "scheme": "serial_sparse",
+      "profile_run_id": "deepseek_mfu_c10_profile_20261006_02",
+      "request_id": 16,
+      "layer": 1,
+      "segment": "candidate",
+      "chunk": null,
+      "sqlite": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_mfu_c10_profile_20261006_02/capture_9.sqlite",
+      "sqlite_sha256": "b2191477c27d4fb8d8826504bebba3ce341e8d281c5ac42be868c14f93df4064",
+      "all_raw_intervals_conserved": true,
+      "raw_gpu_activity_count": 107,
+      "gpu_streams": [
+        7
+      ],
+      "window_ms": 1.863457,
+      "gpu_union_ms": 1.025696,
+      "gpu_gap_ms": 0.837761,
+      "gpu_gap_fraction": 0.44957356139690907,
+      "gpu_gap_count": 107,
+      "largest_gap_us": 133.088,
+      "compute_kernel_union_ms": 0.829504,
+      "separate_gather_union_ms": 0.07296,
+      "compute_separate_gather_overlap_ms": 0.0,
+      "dense_next_layer_overlap": null,
+      "gaps_descending": [
+        {
+          "start_us": 1348.129,
+          "end_us": 1481.217,
+          "duration_us": 133.088,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaGetDriverEntryPointByVersion_v12050",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14787188,
+              "start_us": 1463.364,
+              "end_us": 1464.203,
+              "duration_us": 0.839,
+              "overlap_with_gap_us": 0.839
+            },
+            {
+              "name": "cudaGetDriverEntryPointByVersion_v12050",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14787190,
+              "start_us": 1465.812,
+              "end_us": 1466.057,
+              "duration_us": 0.245,
+              "overlap_with_gap_us": 0.245
+            },
+            {
+              "name": "cudaLaunchKernelExC_v11060",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14787194,
+              "start_us": 1472.156,
+              "end_us": 1479.758,
+              "duration_us": 7.602,
+              "overlap_with_gap_us": 7.602
+            },
+            {
+              "name": "cuTensorMapEncodeTiled",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14787189,
+              "start_us": 1464.623,
+              "end_us": 1465.435,
+              "duration_us": 0.812,
+              "overlap_with_gap_us": 0.812
+            },
+            {
+              "name": "cuTensorMapEncodeTiled",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14787191,
+              "start_us": 1466.24,
+              "end_us": 1466.443,
+              "duration_us": 0.203,
+              "overlap_with_gap_us": 0.203
+            }
+          ]
+        },
+        {
+          "start_us": 121.024,
+          "end_us": 248.224,
+          "duration_us": 127.2,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaLaunchKernel_v7000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14786740,
+              "start_us": 112.997,
+              "end_us": 121.237,
+              "duration_us": 8.24,
+              "overlap_with_gap_us": 0.213
+            },
+            {
+              "name": "cudaGraphLaunch_v10000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14786746,
+              "start_us": 139.324,
+              "end_us": 243.416,
+              "duration_us": 104.092,
+              "overlap_with_gap_us": 104.092
+            }
+          ]
+        },
+        {
+          "start_us": 9.792,
+          "end_us": 95.968,
+          "duration_us": 86.176,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaStreamIsCapturing_v10000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14786712,
+              "start_us": 39.908,
+              "end_us": 40.24,
+              "duration_us": 0.332,
+              "overlap_with_gap_us": 0.332
+            },
+            {
+              "name": "cudaStreamIsCapturing_v10000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14786716,
+              "start_us": 50.615,
+              "end_us": 50.883,
+              "duration_us": 0.268,
+              "overlap_with_gap_us": 0.268
+            },
+            {
+              "name": "cudaStreamIsCapturing_v10000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14786720,
+              "start_us": 63.249,
+              "end_us": 63.523,
+              "duration_us": 0.274,
+              "overlap_with_gap_us": 0.274
+            },
+            {
+              "name": "cudaMemcpyAsync_v3020",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14786723,
+              "start_us": 86.73,
+              "end_us": 94.162,
+              "duration_us": 7.432,
+              "overlap_with_gap_us": 7.432
+            }
+          ]
+        },
+        {
+          "start_us": 821.888,
+          "end_us": 890.4,
+          "duration_us": 68.512,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaLaunchKernel_v7000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14786938,
+              "start_us": 881.746,
+              "end_us": 889.284,
+              "duration_us": 7.538,
+              "overlap_with_gap_us": 7.538
+            },
+            {
+              "name": "cuKernelGetName",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14786937,
+              "start_us": 881.223,
+              "end_us": 881.571,
+              "duration_us": 0.348,
+              "overlap_with_gap_us": 0.348
+            },
+            {
+              "name": "cuKernelGetName",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14786940,
+              "start_us": 890.09,
+              "end_us": 890.327,
+              "duration_us": 0.237,
+              "overlap_with_gap_us": 0.237
+            }
+          ]
+        },
+        {
+          "start_us": 919.648,
+          "end_us": 980.384,
+          "duration_us": 60.736,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaMemcpyAsync_v3020",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14786964,
+              "start_us": 970.797,
+              "end_us": 979.152,
+              "duration_us": 8.355,
+              "overlap_with_gap_us": 8.355
+            }
+          ]
+        },
+        {
+          "start_us": 1208.001,
+          "end_us": 1263.841,
+          "duration_us": 55.84,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaLaunchKernel_v7000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14787144,
+              "start_us": 1256.67,
+              "end_us": 1262.056,
+              "duration_us": 5.386,
+              "overlap_with_gap_us": 5.386
+            },
+            {
+              "name": "cuKernelGetName",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14787143,
+              "start_us": 1256.303,
+              "end_us": 1256.562,
+              "duration_us": 0.259,
+              "overlap_with_gap_us": 0.259
+            }
+          ]
+        },
+        {
+          "start_us": 1151.265,
+          "end_us": 1202.657,
+          "duration_us": 51.392,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaLaunchKernel_v7000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14787130,
+              "start_us": 1195.632,
+              "end_us": 1200.672,
+              "duration_us": 5.04,
+              "overlap_with_gap_us": 5.04
+            },
+            {
+              "name": "cuKernelGetName",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14787129,
+              "start_us": 1195.374,
+              "end_us": 1195.524,
+              "duration_us": 0.15,
+              "overlap_with_gap_us": 0.15
+            }
+          ]
+        },
+        {
+          "start_us": 1615.073,
+          "end_us": 1661.409,
+          "duration_us": 46.336,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaGraphLaunch_v10000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14787213,
+              "start_us": 1615.988,
+              "end_us": 1657.007,
+              "duration_us": 41.019,
+              "overlap_with_gap_us": 41.019
+            }
+          ]
+        },
+        {
+          "start_us": 415.232,
+          "end_us": 453.248,
+          "duration_us": 38.016,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cuTensorMapEncodeTiled",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14786789,
+              "start_us": 429.544,
+              "end_us": 430.356,
+              "duration_us": 0.812,
+              "overlap_with_gap_us": 0.812
+            },
+            {
+              "name": "cuTensorMapEncodeTiled",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14786790,
+              "start_us": 430.751,
+              "end_us": 430.897,
+              "duration_us": 0.146,
+              "overlap_with_gap_us": 0.146
+            },
+            {
+              "name": "cuTensorMapEncodeTiled",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14786791,
+              "start_us": 431.253,
+              "end_us": 431.472,
+              "duration_us": 0.219,
+              "overlap_with_gap_us": 0.219
+            },
+            {
+              "name": "cuTensorMapEncodeTiled",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14786792,
+              "start_us": 431.853,
+              "end_us": 431.976,
+              "duration_us": 0.123,
+              "overlap_with_gap_us": 0.123
+            },
+            {
+              "name": "cuLaunchKernelEx",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14786795,
+              "start_us": 445.602,
+              "end_us": 451.826,
+              "duration_us": 6.224,
+              "overlap_with_gap_us": 6.224
+            }
+          ]
+        },
+        {
+          "start_us": 1109.824,
+          "end_us": 1125.152,
+          "duration_us": 15.328,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaLaunchKernel_v7000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14787074,
+              "start_us": 1117.756,
+              "end_us": 1123.221,
+              "duration_us": 5.465,
+              "overlap_with_gap_us": 5.465
+            },
+            {
+              "name": "cuKernelGetName",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14787073,
+              "start_us": 1117.322,
+              "end_us": 1117.65,
+              "duration_us": 0.328,
+              "overlap_with_gap_us": 0.328
+            }
+          ]
+        },
+        {
+          "start_us": 993.504,
+          "end_us": 1005.6,
+          "duration_us": 12.096,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaMemsetAsync_v3020",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14786984,
+              "start_us": 996.336,
+              "end_us": 1003.866,
+              "duration_us": 7.53,
+              "overlap_with_gap_us": 7.53
+            },
+            {
+              "name": "cudaMemsetAsync_v3020",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14786986,
+              "start_us": 1004.271,
+              "end_us": 1009.74,
+              "duration_us": 5.469,
+              "overlap_with_gap_us": 1.329
+            }
+          ]
+        },
+        {
+          "start_us": 108.288,
+          "end_us": 120.288,
+          "duration_us": 12.0,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaLaunchKernel_v7000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14786740,
+              "start_us": 112.997,
+              "end_us": 121.237,
+              "duration_us": 8.24,
+              "overlap_with_gap_us": 7.291
+            },
+            {
+              "name": "cuKernelGetName",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14786739,
+              "start_us": 112.442,
+              "end_us": 112.768,
+              "duration_us": 0.326,
+              "overlap_with_gap_us": 0.326
+            }
+          ]
+        },
+        {
+          "start_us": 1127.904,
+          "end_us": 1139.232,
+          "duration_us": 11.328,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaLaunchKernel_v7000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14787101,
+              "start_us": 1132.6,
+              "end_us": 1137.314,
+              "duration_us": 4.714,
+              "overlap_with_gap_us": 4.714
+            },
+            {
+              "name": "cuKernelGetName",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14787100,
+              "start_us": 1132.317,
+              "end_us": 1132.514,
+              "duration_us": 0.197,
+              "overlap_with_gap_us": 0.197
+            }
+          ]
+        },
+        {
+          "start_us": 1012.224,
+          "end_us": 1022.88,
+          "duration_us": 10.656,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaLaunchKernel_v7000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14786995,
+              "start_us": 1016.174,
+              "end_us": 1020.993,
+              "duration_us": 4.819,
+              "overlap_with_gap_us": 4.819
+            },
+            {
+              "name": "cudaLaunchKernel_v7000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14787000,
+              "start_us": 1022.811,
+              "end_us": 1027.176,
+              "duration_us": 4.365,
+              "overlap_with_gap_us": 0.069
+            },
+            {
+              "name": "cuKernelGetName",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14786994,
+              "start_us": 1015.874,
+              "end_us": 1015.977,
+              "duration_us": 0.103,
+              "overlap_with_gap_us": 0.103
+            },
+            {
+              "name": "cuKernelGetName",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14786999,
+              "start_us": 1022.548,
+              "end_us": 1022.726,
+              "duration_us": 0.178,
+              "overlap_with_gap_us": 0.178
+            }
+          ]
+        },
+        {
+          "start_us": 981.92,
+          "end_us": 992.224,
+          "duration_us": 10.304,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaLaunchKernel_v7000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14786971,
+              "start_us": 984.445,
+              "end_us": 990.236,
+              "duration_us": 5.791,
+              "overlap_with_gap_us": 5.791
+            },
+            {
+              "name": "cuKernelGetName",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14786970,
+              "start_us": 984.075,
+              "end_us": 984.345,
+              "duration_us": 0.27,
+              "overlap_with_gap_us": 0.27
+            }
+          ]
+        },
+        {
+          "start_us": 97.536,
+          "end_us": 106.208,
+          "duration_us": 8.672,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaMemcpyAsync_v3020",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14786731,
+              "start_us": 99.051,
+              "end_us": 104.311,
+              "duration_us": 5.26,
+              "overlap_with_gap_us": 5.26
+            }
+          ]
+        },
+        {
+          "start_us": 1139.968,
+          "end_us": 1148.033,
+          "duration_us": 8.065,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaLaunchKernel_v7000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14787113,
+              "start_us": 1141.73,
+              "end_us": 1146.061,
+              "duration_us": 4.331,
+              "overlap_with_gap_us": 4.331
+            },
+            {
+              "name": "cuKernelGetName",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14787112,
+              "start_us": 1141.545,
+              "end_us": 1141.65,
+              "duration_us": 0.105,
+              "overlap_with_gap_us": 0.105
+            }
+          ]
+        },
+        {
+          "start_us": 891.392,
+          "end_us": 896.864,
+          "duration_us": 5.472,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaLaunchKernel_v7000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14786941,
+              "start_us": 890.418,
+              "end_us": 895.081,
+              "duration_us": 4.663,
+              "overlap_with_gap_us": 3.689
+            },
+            {
+              "name": "cudaLaunchKernel_v7000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14786944,
+              "start_us": 896.066,
+              "end_us": 900.484,
+              "duration_us": 4.418,
+              "overlap_with_gap_us": 0.798
+            },
+            {
+              "name": "cuKernelGetName",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14786943,
+              "start_us": 895.778,
+              "end_us": 895.881,
+              "duration_us": 0.103,
+              "overlap_with_gap_us": 0.103
+            }
+          ]
+        },
+        {
+          "start_us": 1006.4,
+          "end_us": 1011.36,
+          "duration_us": 4.96,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaMemsetAsync_v3020",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14786986,
+              "start_us": 1004.271,
+              "end_us": 1009.74,
+              "duration_us": 5.469,
+              "overlap_with_gap_us": 3.34
+            }
+          ]
+        },
+        {
+          "start_us": 1034.624,
+          "end_us": 1039.136,
+          "duration_us": 4.512,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaLaunchKernel_v7000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14787007,
+              "start_us": 1032.524,
+              "end_us": 1037.014,
+              "duration_us": 4.49,
+              "overlap_with_gap_us": 2.39
+            },
+            {
+              "name": "cudaMemsetAsync_v3020",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14787011,
+              "start_us": 1037.77,
+              "end_us": 1041.222,
+              "duration_us": 3.452,
+              "overlap_with_gap_us": 1.366
+            }
+          ]
+        },
+        {
+          "start_us": 1030.336,
+          "end_us": 1033.632,
+          "duration_us": 3.296,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaMemsetAsync_v3020",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14787004,
+              "start_us": 1027.939,
+              "end_us": 1031.518,
+              "duration_us": 3.579,
+              "overlap_with_gap_us": 1.182
+            },
+            {
+              "name": "cudaLaunchKernel_v7000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14787007,
+              "start_us": 1032.524,
+              "end_us": 1037.014,
+              "duration_us": 4.49,
+              "overlap_with_gap_us": 1.108
+            },
+            {
+              "name": "cuKernelGetName",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14787006,
+              "start_us": 1032.282,
+              "end_us": 1032.406,
+              "duration_us": 0.124,
+              "overlap_with_gap_us": 0.124
+            }
+          ]
+        },
+        {
+          "start_us": 1026.144,
+          "end_us": 1029.184,
+          "duration_us": 3.04,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaLaunchKernel_v7000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14787000,
+              "start_us": 1022.811,
+              "end_us": 1027.176,
+              "duration_us": 4.365,
+              "overlap_with_gap_us": 1.032
+            },
+            {
+              "name": "cudaMemsetAsync_v3020",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14787004,
+              "start_us": 1027.939,
+              "end_us": 1031.518,
+              "duration_us": 3.579,
+              "overlap_with_gap_us": 1.245
+            }
+          ]
+        },
+        {
+          "start_us": 0.0,
+          "end_us": 1.856,
+          "duration_us": 1.856,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 410.912,
+          "end_us": 412.48,
+          "duration_us": 1.568,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 725.76,
+          "end_us": 727.232,
+          "duration_us": 1.472,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaStreamIsCapturing_v10000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14786899,
+              "start_us": 725.779,
+              "end_us": 726.043,
+              "duration_us": 0.264,
+              "overlap_with_gap_us": 0.264
+            }
+          ]
+        },
+        {
+          "start_us": 719.392,
+          "end_us": 720.8,
+          "duration_us": 1.408,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 1602.401,
+          "end_us": 1603.809,
+          "duration_us": 1.408,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 754.848,
+          "end_us": 756.16,
+          "duration_us": 1.312,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 816.8,
+          "end_us": 818.016,
+          "duration_us": 1.216,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 1068.032,
+          "end_us": 1069.248,
+          "duration_us": 1.216,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaLaunchKernel_v7000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14787035,
+              "start_us": 1066.056,
+              "end_us": 1069.623,
+              "duration_us": 3.567,
+              "overlap_with_gap_us": 1.216
+            }
+          ]
+        },
+        {
+          "start_us": 1103.104,
+          "end_us": 1104.288,
+          "duration_us": 1.184,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 721.472,
+          "end_us": 722.624,
+          "duration_us": 1.152,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 819.264,
+          "end_us": 820.416,
+          "duration_us": 1.152,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 1065.888,
+          "end_us": 1067.04,
+          "duration_us": 1.152,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaLaunchKernel_v7000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14787035,
+              "start_us": 1066.056,
+              "end_us": 1069.623,
+              "duration_us": 3.567,
+              "overlap_with_gap_us": 0.984
+            },
+            {
+              "name": "cuKernelGetName",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14787034,
+              "start_us": 1065.882,
+              "end_us": 1065.973,
+              "duration_us": 0.091,
+              "overlap_with_gap_us": 0.085
+            }
+          ]
+        },
+        {
+          "start_us": 1074.784,
+          "end_us": 1075.936,
+          "duration_us": 1.152,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaLaunchKernel_v7000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14787042,
+              "start_us": 1074.182,
+              "end_us": 1077.581,
+              "duration_us": 3.399,
+              "overlap_with_gap_us": 1.152
+            }
+          ]
+        },
+        {
+          "start_us": 1100.96,
+          "end_us": 1102.112,
+          "duration_us": 1.152,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 729.344,
+          "end_us": 730.464,
+          "duration_us": 1.12,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 789.152,
+          "end_us": 790.272,
+          "duration_us": 1.12,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 914.4,
+          "end_us": 915.52,
+          "duration_us": 1.12,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 1059.168,
+          "end_us": 1060.288,
+          "duration_us": 1.12,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaLaunchKernel_v7000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14787028,
+              "start_us": 1058.023,
+              "end_us": 1061.77,
+              "duration_us": 3.747,
+              "overlap_with_gap_us": 1.12
+            }
+          ]
+        },
+        {
+          "start_us": 1092.256,
+          "end_us": 1093.376,
+          "duration_us": 1.12,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaLaunchKernel_v7000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14787056,
+              "start_us": 1089.642,
+              "end_us": 1093.142,
+              "duration_us": 3.5,
+              "overlap_with_gap_us": 0.886
+            }
+          ]
+        },
+        {
+          "start_us": 1094.336,
+          "end_us": 1095.456,
+          "duration_us": 1.12,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 1336.801,
+          "end_us": 1337.921,
+          "duration_us": 1.12,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 1341.185,
+          "end_us": 1342.305,
+          "duration_us": 1.12,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 6.752,
+          "end_us": 7.84,
+          "duration_us": 1.088,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 1047.776,
+          "end_us": 1048.864,
+          "duration_us": 1.088,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaMemsetAsync_v3020",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14787018,
+              "start_us": 1045.96,
+              "end_us": 1049.191,
+              "duration_us": 3.231,
+              "overlap_with_gap_us": 1.088
+            }
+          ]
+        },
+        {
+          "start_us": 1057.12,
+          "end_us": 1058.208,
+          "duration_us": 1.088,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaMemsetAsync_v3020",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14787025,
+              "start_us": 1054.083,
+              "end_us": 1057.351,
+              "duration_us": 3.268,
+              "overlap_with_gap_us": 0.231
+            },
+            {
+              "name": "cudaLaunchKernel_v7000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14787028,
+              "start_us": 1058.023,
+              "end_us": 1061.77,
+              "duration_us": 3.747,
+              "overlap_with_gap_us": 0.185
+            },
+            {
+              "name": "cuKernelGetName",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14787027,
+              "start_us": 1057.849,
+              "end_us": 1057.939,
+              "duration_us": 0.09,
+              "overlap_with_gap_us": 0.09
+            }
+          ]
+        },
+        {
+          "start_us": 1076.928,
+          "end_us": 1078.016,
+          "duration_us": 1.088,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaLaunchKernel_v7000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14787042,
+              "start_us": 1074.182,
+              "end_us": 1077.581,
+              "duration_us": 3.399,
+              "overlap_with_gap_us": 0.653
+            }
+          ]
+        },
+        {
+          "start_us": 1083.552,
+          "end_us": 1084.608,
+          "duration_us": 1.056,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaLaunchKernel_v7000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14787049,
+              "start_us": 1081.998,
+              "end_us": 1085.338,
+              "duration_us": 3.34,
+              "overlap_with_gap_us": 1.056
+            }
+          ]
+        },
+        {
+          "start_us": 1085.6,
+          "end_us": 1086.656,
+          "duration_us": 1.056,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaMemsetAsync_v3020",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14787053,
+              "start_us": 1086.059,
+              "end_us": 1089.028,
+              "duration_us": 2.969,
+              "overlap_with_gap_us": 0.597
+            }
+          ]
+        },
+        {
+          "start_us": 413.44,
+          "end_us": 414.464,
+          "duration_us": 1.024,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 801.792,
+          "end_us": 802.816,
+          "duration_us": 1.024,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 1049.856,
+          "end_us": 1050.848,
+          "duration_us": 0.992,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaLaunchKernel_v7000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14787021,
+              "start_us": 1049.798,
+              "end_us": 1053.332,
+              "duration_us": 3.534,
+              "overlap_with_gap_us": 0.992
+            }
+          ]
+        },
+        {
+          "start_us": 360.32,
+          "end_us": 361.088,
+          "duration_us": 0.768,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 306.24,
+          "end_us": 306.976,
+          "duration_us": 0.736,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 1712.577,
+          "end_us": 1713.249,
+          "duration_us": 0.672,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 273.504,
+          "end_us": 274.144,
+          "duration_us": 0.64,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 336.544,
+          "end_us": 337.184,
+          "duration_us": 0.64,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 1801.409,
+          "end_us": 1802.049,
+          "duration_us": 0.64,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 279.296,
+          "end_us": 279.872,
+          "duration_us": 0.576,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 408.512,
+          "end_us": 409.056,
+          "duration_us": 0.544,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 1760.257,
+          "end_us": 1760.769,
+          "duration_us": 0.512,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 283.456,
+          "end_us": 283.936,
+          "duration_us": 0.48,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaMemcpyAsync_v3020",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14786751,
+              "start_us": 282.519,
+              "end_us": 289.255,
+              "duration_us": 6.736,
+              "overlap_with_gap_us": 0.48
+            }
+          ]
+        },
+        {
+          "start_us": 407.072,
+          "end_us": 407.552,
+          "duration_us": 0.48,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 1716.545,
+          "end_us": 1716.993,
+          "duration_us": 0.448,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaStreamIsCapturing_v10000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14787227,
+              "start_us": 1716.992,
+              "end_us": 1717.611,
+              "duration_us": 0.619,
+              "overlap_with_gap_us": 0.001
+            }
+          ]
+        },
+        {
+          "start_us": 251.328,
+          "end_us": 251.744,
+          "duration_us": 0.416,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 253.248,
+          "end_us": 253.664,
+          "duration_us": 0.416,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 254.912,
+          "end_us": 255.328,
+          "duration_us": 0.416,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 257.888,
+          "end_us": 258.304,
+          "duration_us": 0.416,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 278.112,
+          "end_us": 278.528,
+          "duration_us": 0.416,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 285.184,
+          "end_us": 285.6,
+          "duration_us": 0.416,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaMemcpyAsync_v3020",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14786751,
+              "start_us": 282.519,
+              "end_us": 289.255,
+              "duration_us": 6.736,
+              "overlap_with_gap_us": 0.416
+            }
+          ]
+        },
+        {
+          "start_us": 322.016,
+          "end_us": 322.432,
+          "duration_us": 0.416,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 333.792,
+          "end_us": 334.208,
+          "duration_us": 0.416,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 338.624,
+          "end_us": 339.04,
+          "duration_us": 0.416,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 341.696,
+          "end_us": 342.112,
+          "duration_us": 0.416,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 344.64,
+          "end_us": 345.056,
+          "duration_us": 0.416,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 346.464,
+          "end_us": 346.88,
+          "duration_us": 0.416,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 354.624,
+          "end_us": 355.04,
+          "duration_us": 0.416,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 369.92,
+          "end_us": 370.336,
+          "duration_us": 0.416,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 373.152,
+          "end_us": 373.568,
+          "duration_us": 0.416,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 382.88,
+          "end_us": 383.296,
+          "duration_us": 0.416,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 388.768,
+          "end_us": 389.184,
+          "duration_us": 0.416,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 400.384,
+          "end_us": 400.8,
+          "duration_us": 0.416,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 405.536,
+          "end_us": 405.952,
+          "duration_us": 0.416,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 1668.161,
+          "end_us": 1668.577,
+          "duration_us": 0.416,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 1719.009,
+          "end_us": 1719.425,
+          "duration_us": 0.416,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaEventRecordWithFlags_v11010",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14787228,
+              "start_us": 1717.935,
+              "end_us": 1721.524,
+              "duration_us": 3.589,
+              "overlap_with_gap_us": 0.416
+            }
+          ]
+        },
+        {
+          "start_us": 1721.409,
+          "end_us": 1721.825,
+          "duration_us": 0.416,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaEventRecordWithFlags_v11010",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14787228,
+              "start_us": 1717.935,
+              "end_us": 1721.524,
+              "duration_us": 3.589,
+              "overlap_with_gap_us": 0.115
+            }
+          ]
+        },
+        {
+          "start_us": 1806.785,
+          "end_us": 1807.201,
+          "duration_us": 0.416,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 256.352,
+          "end_us": 256.736,
+          "duration_us": 0.384,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 260.256,
+          "end_us": 260.64,
+          "duration_us": 0.384,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 262.528,
+          "end_us": 262.912,
+          "duration_us": 0.384,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 276.192,
+          "end_us": 276.576,
+          "duration_us": 0.384,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 281.472,
+          "end_us": 281.856,
+          "duration_us": 0.384,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 287.52,
+          "end_us": 287.904,
+          "duration_us": 0.384,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaMemcpyAsync_v3020",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 14786751,
+              "start_us": 282.519,
+              "end_us": 289.255,
+              "duration_us": 6.736,
+              "overlap_with_gap_us": 0.384
+            }
+          ]
+        },
+        {
+          "start_us": 289.376,
+          "end_us": 289.76,
+          "duration_us": 0.384,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 324.384,
+          "end_us": 324.768,
+          "duration_us": 0.384,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 376.48,
+          "end_us": 376.864,
+          "duration_us": 0.384,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 377.984,
+          "end_us": 378.368,
+          "duration_us": 0.384,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 380.768,
+          "end_us": 381.152,
+          "duration_us": 0.384,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 384.48,
+          "end_us": 384.864,
+          "duration_us": 0.384,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 404.096,
+          "end_us": 404.48,
+          "duration_us": 0.384,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 1664.161,
+          "end_us": 1664.545,
+          "duration_us": 0.384,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 1762.913,
+          "end_us": 1763.297,
+          "duration_us": 0.384,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 1809.633,
+          "end_us": 1810.017,
+          "duration_us": 0.384,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 1813.953,
+          "end_us": 1814.337,
+          "duration_us": 0.384,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 358.08,
+          "end_us": 358.432,
+          "duration_us": 0.352,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 318.624,
+          "end_us": 318.912,
+          "duration_us": 0.288,
+          "overlapping_cuda_apis": []
+        }
+      ]
+    },
+    {
+      "scheme": "dense_prefetch",
+      "profile_run_id": "deepseek_mfu_c10_profile_20261006_02",
+      "request_id": 16,
+      "layer": 1,
+      "segment": "candidate",
+      "chunk": null,
+      "sqlite": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_mfu_c10_profile_20261006_02/capture_12.sqlite",
+      "sqlite_sha256": "9e124f28d2289e2fde2f508560d321206d864472cee87de21cf88f88471fe6ae",
+      "all_raw_intervals_conserved": true,
+      "raw_gpu_activity_count": 108,
+      "gpu_streams": [
+        7,
+        69
+      ],
+      "window_ms": 2.317506,
+      "gpu_union_ms": 2.287682,
+      "gpu_gap_ms": 0.029824,
+      "gpu_gap_fraction": 0.012869006595883678,
+      "gpu_gap_count": 30,
+      "largest_gap_us": 1.472,
+      "compute_kernel_union_ms": 1.09709,
+      "separate_gather_union_ms": 2.201858,
+      "compute_separate_gather_overlap_ms": 1.09709,
+      "dense_next_layer_overlap": {
+        "target_layer": 2,
+        "complete_target_gather_union_ms": 1.837602,
+        "compute_target_gather_overlap_ms": 1.09709,
+        "overlap_fraction_of_complete_target": 0.5970226414642561,
+        "complete_target_kernels_verified_from_raw_sql": [
+          {
+            "start_ns": 36446383,
+            "end_ns": 38283985,
+            "stream_id": 69,
+            "grid_x": 80,
+            "block_x": 128,
+            "correlation_id": 20711705,
+            "innermost_nvtx_label": "motivation/dense_prefetch/revisit/candidate/chunk_0/layer_2/host_gather"
+          }
+        ]
+      },
+      "gaps_descending": [
+        {
+          "start_us": 655.264,
+          "end_us": 656.736,
+          "duration_us": 1.472,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaGraphLaunch_v10000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 20711811,
+              "start_us": 599.937,
+              "end_us": 718.708,
+              "duration_us": 118.771,
+              "overlap_with_gap_us": 1.472
+            }
+          ]
+        },
+        {
+          "start_us": 657.728,
+          "end_us": 659.2,
+          "duration_us": 1.472,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaGraphLaunch_v10000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 20711811,
+              "start_us": 599.937,
+              "end_us": 718.708,
+              "duration_us": 118.771,
+              "overlap_with_gap_us": 1.472
+            }
+          ]
+        },
+        {
+          "start_us": 642.144,
+          "end_us": 643.52,
+          "duration_us": 1.376,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaGraphLaunch_v10000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 20711811,
+              "start_us": 599.937,
+              "end_us": 718.708,
+              "duration_us": 118.771,
+              "overlap_with_gap_us": 1.376
+            }
+          ]
+        },
+        {
+          "start_us": 735.936,
+          "end_us": 736.992,
+          "duration_us": 1.056,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 687.392,
+          "end_us": 688.416,
+          "duration_us": 1.024,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaGraphLaunch_v10000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 20711811,
+              "start_us": 599.937,
+              "end_us": 718.708,
+              "duration_us": 118.771,
+              "overlap_with_gap_us": 1.024
+            }
+          ]
+        },
+        {
+          "start_us": 702.304,
+          "end_us": 703.296,
+          "duration_us": 0.992,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaGraphLaunch_v10000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 20711811,
+              "start_us": 599.937,
+              "end_us": 718.708,
+              "duration_us": 118.771,
+              "overlap_with_gap_us": 0.992
+            }
+          ]
+        },
+        {
+          "start_us": 704.288,
+          "end_us": 705.28,
+          "duration_us": 0.992,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaGraphLaunch_v10000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 20711811,
+              "start_us": 599.937,
+              "end_us": 718.708,
+              "duration_us": 118.771,
+              "overlap_with_gap_us": 0.992
+            }
+          ]
+        },
+        {
+          "start_us": 741.44,
+          "end_us": 742.432,
+          "duration_us": 0.992,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 648.896,
+          "end_us": 649.856,
+          "duration_us": 0.96,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaGraphLaunch_v10000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 20711811,
+              "start_us": 599.937,
+              "end_us": 718.708,
+              "duration_us": 118.771,
+              "overlap_with_gap_us": 0.96
+            }
+          ]
+        },
+        {
+          "start_us": 650.624,
+          "end_us": 651.584,
+          "duration_us": 0.96,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaGraphLaunch_v10000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 20711811,
+              "start_us": 599.937,
+              "end_us": 718.708,
+              "duration_us": 118.771,
+              "overlap_with_gap_us": 0.96
+            }
+          ]
+        },
+        {
+          "start_us": 710.816,
+          "end_us": 711.776,
+          "duration_us": 0.96,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaGraphLaunch_v10000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 20711811,
+              "start_us": 599.937,
+              "end_us": 718.708,
+              "duration_us": 118.771,
+              "overlap_with_gap_us": 0.96
+            }
+          ]
+        },
+        {
+          "start_us": 721.152,
+          "end_us": 722.112,
+          "duration_us": 0.96,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 727.616,
+          "end_us": 728.576,
+          "duration_us": 0.96,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 729.536,
+          "end_us": 730.496,
+          "duration_us": 0.96,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 739.712,
+          "end_us": 740.672,
+          "duration_us": 0.96,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 660.096,
+          "end_us": 661.024,
+          "duration_us": 0.928,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaGraphLaunch_v10000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 20711811,
+              "start_us": 599.937,
+              "end_us": 718.708,
+              "duration_us": 118.771,
+              "overlap_with_gap_us": 0.928
+            }
+          ]
+        },
+        {
+          "start_us": 664.384,
+          "end_us": 665.312,
+          "duration_us": 0.928,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaGraphLaunch_v10000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 20711811,
+              "start_us": 599.937,
+              "end_us": 718.708,
+              "duration_us": 118.771,
+              "overlap_with_gap_us": 0.928
+            }
+          ]
+        },
+        {
+          "start_us": 679.04,
+          "end_us": 679.968,
+          "duration_us": 0.928,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaGraphLaunch_v10000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 20711811,
+              "start_us": 599.937,
+              "end_us": 718.708,
+              "duration_us": 118.771,
+              "overlap_with_gap_us": 0.928
+            }
+          ]
+        },
+        {
+          "start_us": 685.504,
+          "end_us": 686.432,
+          "duration_us": 0.928,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaGraphLaunch_v10000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 20711811,
+              "start_us": 599.937,
+              "end_us": 718.708,
+              "duration_us": 118.771,
+              "overlap_with_gap_us": 0.928
+            }
+          ]
+        },
+        {
+          "start_us": 693.952,
+          "end_us": 694.88,
+          "duration_us": 0.928,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaGraphLaunch_v10000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 20711811,
+              "start_us": 599.937,
+              "end_us": 718.708,
+              "duration_us": 118.771,
+              "overlap_with_gap_us": 0.928
+            }
+          ]
+        },
+        {
+          "start_us": 695.872,
+          "end_us": 696.8,
+          "duration_us": 0.928,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaGraphLaunch_v10000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 20711811,
+              "start_us": 599.937,
+              "end_us": 718.708,
+              "duration_us": 118.771,
+              "overlap_with_gap_us": 0.928
+            }
+          ]
+        },
+        {
+          "start_us": 712.736,
+          "end_us": 713.664,
+          "duration_us": 0.928,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaGraphLaunch_v10000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 20711811,
+              "start_us": 599.937,
+              "end_us": 718.708,
+              "duration_us": 118.771,
+              "overlap_with_gap_us": 0.928
+            }
+          ]
+        },
+        {
+          "start_us": 719.232,
+          "end_us": 720.16,
+          "duration_us": 0.928,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 745.6,
+          "end_us": 746.528,
+          "duration_us": 0.928,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 752.928,
+          "end_us": 753.856,
+          "duration_us": 0.928,
+          "overlapping_cuda_apis": []
+        },
+        {
+          "start_us": 644.192,
+          "end_us": 645.088,
+          "duration_us": 0.896,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaGraphLaunch_v10000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 20711811,
+              "start_us": 599.937,
+              "end_us": 718.708,
+              "duration_us": 118.771,
+              "overlap_with_gap_us": 0.896
+            }
+          ]
+        },
+        {
+          "start_us": 653.088,
+          "end_us": 653.984,
+          "duration_us": 0.896,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaGraphLaunch_v10000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 20711811,
+              "start_us": 599.937,
+              "end_us": 718.708,
+              "duration_us": 118.771,
+              "overlap_with_gap_us": 0.896
+            }
+          ]
+        },
+        {
+          "start_us": 666.624,
+          "end_us": 667.52,
+          "duration_us": 0.896,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaGraphLaunch_v10000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 20711811,
+              "start_us": 599.937,
+              "end_us": 718.708,
+              "duration_us": 118.771,
+              "overlap_with_gap_us": 0.896
+            }
+          ]
+        },
+        {
+          "start_us": 677.184,
+          "end_us": 678.08,
+          "duration_us": 0.896,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaGraphLaunch_v10000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 20711811,
+              "start_us": 599.937,
+              "end_us": 718.708,
+              "duration_us": 118.771,
+              "overlap_with_gap_us": 0.896
+            }
+          ]
+        },
+        {
+          "start_us": 668.512,
+          "end_us": 669.376,
+          "duration_us": 0.864,
+          "overlapping_cuda_apis": [
+            {
+              "name": "cudaGraphLaunch_v10000",
+              "source": "CUPTI_ACTIVITY_KIND_RUNTIME",
+              "correlation_id": 20711811,
+              "start_us": 599.937,
+              "end_us": 718.708,
+              "duration_us": 118.771,
+              "overlap_with_gap_us": 0.864
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

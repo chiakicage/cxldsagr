@@ -1,0 +1,202 @@
+{
+  "source_comparisons": [
+    {
+      "manifest": "experiments/nosa_motivation/output/data/refactor_final_nosa_bench_20261005_01/source_manifest.json",
+      "matched_call_path_files": [
+        "cache/host_backing.py",
+        "cache/staging.py",
+        "models/nosa/cache/fixed.py",
+        "models/nosa/cache/offload.py",
+        "models/nosa/cache/resident.py",
+        "models/nosa/execution/fixed.py",
+        "models/nosa/execution/fixed_resources.py",
+        "operators/nosa/attention/device_only/_fa3.py",
+        "operators/nosa/attention/offload/_fused.py",
+        "operators/nosa/attention/offload/csrc/nosa_offload.cu",
+        "operators/nosa/attention/offload/csrc/nosa_offload_fused.cu"
+      ],
+      "different": [
+        "models/nosa/attention.py",
+        "operators/nosa/attention/device_only/api.py",
+        "operators/nosa/attention/offload/api.py"
+      ],
+      "not_in_collected_scope": []
+    },
+    {
+      "manifest": "experiments/nosa_offload_overlap/output/data/refactor_nosa_overlap_bench_20261005_01/metadata.json",
+      "matched_call_path_files": [
+        "cache/host_backing.py",
+        "cache/staging.py",
+        "models/nosa/cache/fixed.py",
+        "models/nosa/cache/offload.py",
+        "models/nosa/cache/resident.py",
+        "models/nosa/execution/fixed.py",
+        "models/nosa/execution/fixed_resources.py",
+        "operators/nosa/attention/device_only/_fa3.py",
+        "operators/nosa/attention/offload/_fused.py",
+        "operators/nosa/attention/offload/csrc/nosa_offload.cu",
+        "operators/nosa/attention/offload/csrc/nosa_offload_fused.cu"
+      ],
+      "different": [
+        "models/nosa/attention.py",
+        "operators/nosa/attention/device_only/api.py",
+        "operators/nosa/attention/offload/api.py"
+      ],
+      "not_in_collected_scope": []
+    },
+    {
+      "manifest": "experiments/nosa_mfu/report/captured/metadata.json",
+      "matched_call_path_files": [
+        "cache/host_backing.py",
+        "cache/staging.py",
+        "models/nosa/cache/fixed.py",
+        "models/nosa/cache/offload.py",
+        "models/nosa/cache/resident.py",
+        "models/nosa/execution/fixed.py",
+        "models/nosa/execution/fixed_resources.py",
+        "operators/nosa/attention/device_only/_fa3.py",
+        "operators/nosa/attention/offload/_fused.py",
+        "operators/nosa/attention/offload/csrc/nosa_offload.cu",
+        "operators/nosa/attention/offload/csrc/nosa_offload_fused.cu"
+      ],
+      "different": [
+        "models/nosa/attention.py",
+        "operators/nosa/attention/device_only/api.py",
+        "operators/nosa/attention/offload/api.py"
+      ],
+      "not_in_collected_scope": []
+    },
+    {
+      "manifest": "experiments/nosa_mfu/report/sparse/native/metadata.json",
+      "matched_call_path_files": [
+        "cache/host_backing.py",
+        "cache/staging.py",
+        "models/nosa/cache/fixed.py",
+        "models/nosa/cache/offload.py",
+        "models/nosa/cache/resident.py",
+        "models/nosa/execution/fixed.py",
+        "models/nosa/execution/fixed_resources.py",
+        "operators/nosa/attention/device_only/_fa3.py",
+        "operators/nosa/attention/offload/_fused.py",
+        "operators/nosa/attention/offload/csrc/nosa_offload.cu",
+        "operators/nosa/attention/offload/csrc/nosa_offload_fused.cu"
+      ],
+      "different": [
+        "models/nosa/attention.py",
+        "operators/nosa/attention/device_only/api.py",
+        "operators/nosa/attention/offload/api.py"
+      ],
+      "not_in_collected_scope": []
+    },
+    {
+      "manifest": "experiments/nosa_mfu/report/dense/metadata.json",
+      "matched_call_path_files": [
+        "cache/host_backing.py",
+        "cache/staging.py",
+        "models/nosa/cache/fixed.py",
+        "models/nosa/cache/offload.py",
+        "models/nosa/cache/resident.py",
+        "models/nosa/execution/fixed.py",
+        "models/nosa/execution/fixed_resources.py",
+        "operators/nosa/attention/device_only/_fa3.py",
+        "operators/nosa/attention/offload/_fused.py",
+        "operators/nosa/attention/offload/csrc/nosa_offload.cu",
+        "operators/nosa/attention/offload/csrc/nosa_offload_fused.cu"
+      ],
+      "different": [
+        "models/nosa/attention.py",
+        "operators/nosa/attention/device_only/api.py",
+        "operators/nosa/attention/offload/api.py"
+      ],
+      "not_in_collected_scope": []
+    }
+  ],
+  "preexisting_relocations": {
+    "basis": "Prior published snapshots predate repository HEAD 0a47b67; these NOSA files have no working-tree change in the current task.",
+    "attention_definitions_unchanged": true,
+    "contract_definitions_unchanged": {
+      "BlockSelection": true,
+      "TokenSelection": false,
+      "AttentionContext": true,
+      "Indexer": true,
+      "MainAttention": true
+    },
+    "dense_adapters_unchanged": {
+      "DenseMainAttention": true,
+      "ResidentLayerView": true
+    },
+    "two_operator_api_differences": "Only BlockSelection import moved from layers.attention to models.attention_contracts; all function/class ASTs are unchanged.",
+    "token_selection_boundary": "TokenSelection lost valid_mask/invalid_id before this task; NOSA uses BlockSelection, and the audited NOSA paths do not import or construct TokenSelection. No equivalence claim is made for that separate contract change."
+  },
+  "schema": "deepseek-mfu-nosa-impact-acceptance-v1",
+  "audited_utc": "2026-10-05T17:18:04.642160+00:00",
+  "scope": "Dependency audit for retained NOSA motivation, offload-overlap, MFU and sparse-pattern evidence after DeepSeek bounded gather, counters and graph changes.",
+  "call_path_findings": [
+    {
+      "path": [
+        "experiments/nosa_motivation/src/measure.py",
+        "models/nosa/execution/fixed_resources.py",
+        "operators/nosa/attention/offload/api.py",
+        "operators/nosa/attention/offload/csrc/nosa_offload.cu"
+      ],
+      "finding": "Dense history fetch uses NOSA prefetch_cached_history and its own prefetch_cached entry, with no common record-gather invocation."
+    },
+    {
+      "path": [
+        "models/nosa/attention.py",
+        "operators/nosa/attention/offload/_fused.py",
+        "operators/nosa/attention/offload/csrc/nosa_offload_fused.cu"
+      ],
+      "finding": "Serial and overlap use NosaFetchWorkspace and the independent NOSA fused kernel; common gather is not a build input."
+    },
+    {
+      "path": [
+        "experiments/nosa_offload_overlap/src/measure.py"
+      ],
+      "finding": "Microbenchmark directly uses NosaFetchWorkspace or resident attention and Tensor copies for host setup, without SparseTokenCache or common gather."
+    },
+    {
+      "path": [
+        "experiments/nosa_mfu/src/measure_modules.py",
+        "experiments/nosa_indexer_pattern_65536_1024/src/capture.py",
+        "experiments/nosa_indexer_pattern_65536_1024/src/sparse_capture.py"
+      ],
+      "finding": "Operator and model measurements use NOSA APIs and resident caches; no changed common-gather execution path."
+    }
+  ],
+  "decision": "Retain existing NOSA evidence; no NOSA GPU rerun is required for these DeepSeek changes. Broad source inventories alone do not establish execution dependencies. The uncapped common-gather default is not assumed to have unchanged binary performance.",
+  "boundary": "This is a source-dependency and AST comparison audit, not a new NOSA performance or numerical run. Unrelated earlier contract changes are separately bounded below.",
+  "current_file_sha256": {
+    "cache/host_backing.py": "33ca59c06810f4fa83f1009554a8d0709838db1223f6c393162f53739fb29135",
+    "cache/staging.py": "95816259b638a9178f600479397d1c09d8ecae7a185b49ce6e85bdacf0a71c77",
+    "experiments/nosa_motivation/src/measure.py": "3d1f71a0ea3ba9be0ecaa2fcf07bc94c95dce6cdbd8aaad00448fdaa134c6135",
+    "experiments/nosa_offload_overlap/src/measure.py": "7ad7dcbac51d4e722887faf1bac5474131b36e79ffeb9e004c2258c1decfefdf",
+    "models/nosa/attention.py": "82fa3ae04c9e7ee307d1c44f493f8f7b3ab1359ef64004841110569250ebdedf",
+    "models/nosa/cache/fixed.py": "a062262c7fbfe80d82682960207f087114a5399ad964cf20813b5fceaca91646",
+    "models/nosa/cache/offload.py": "472e6fea2ea11b0e52a7821871d706e5154de970e68407e20d05ab6c061713a9",
+    "models/nosa/cache/resident.py": "bc8d6898fb1d2eee7a80a689ce846656742fc6fffce2cad73ae33ebba8f62892",
+    "models/nosa/execution/fixed.py": "d764a07f0bc15158efc41177a1a54546ec1080758779558ccf03976947154949",
+    "models/nosa/execution/fixed_resources.py": "8ce76def3724191bd37c277b8c2f7bd56297f5d293c6b9081d33c45e84abefee",
+    "operators/nosa/attention/device_only/_fa3.py": "d56c29942291580bb39281858fe98908a42ee501df460ca700a7a1bcb7949254",
+    "operators/nosa/attention/device_only/api.py": "5364c1b4615755535fcb7dc57295ba283c630eadb5197b89fadac94f63688144",
+    "operators/nosa/attention/offload/_fused.py": "5487ba8ad2b99dc1fb541cb330ffce2ea569edd59e17cb81c5bf39c7c1cd5dc9",
+    "operators/nosa/attention/offload/api.py": "e21b78f07c7263092ad0e3fb88f7ae4c8b3aad33a64d214e843ab25d2ace8e1e",
+    "operators/nosa/attention/offload/csrc/nosa_offload.cu": "eb1049aa74bb9a15eaa82c61c20050d1f7ed7c99b42045643accd4b2fae1f666",
+    "operators/nosa/attention/offload/csrc/nosa_offload_fused.cu": "a68fe19bfc5fd6d626ff310c3526624b2a1a4bc88f85678afd705b844410bb28",
+    "experiments/nosa_mfu/src/measure_modules.py": "c2a422d4eaffef9a53ff126796a4329c0d6f5ad3b5cad12bd4a2ba3db4245a4a",
+    "experiments/nosa_indexer_pattern_65536_1024/src/capture.py": "d8f02d09df77d2a34c188e9834a95fd8ae05c14265d8c266860fb93eae6f2189",
+    "experiments/nosa_indexer_pattern_65536_1024/src/sparse_capture.py": "acd2bebdbae67250ebb26b5815b68c63edcd4cad20282dc61880bf93e3677976"
+  },
+  "dma_followup": {
+    "scope": "Dense cudaMemcpyAsync and optional contiguous SharedSparseTokenPool mode added after the initial bounded-gather audit.",
+    "decision": "Existing NOSA experiment execution still reaches neither SharedSparseTokenPool nor common record-transfer kernels. NOSA native builders still exclude operators/common/csrc/kv_transfer.cu. Existing NOSA results remain applicable to their original paths; no new NOSA GPU run is claimed.",
+    "changed_components": {
+      "cache/sparse_token_pool.py": "0c8c0482df3cfcbac62ad65f34f81c82e797de0cd605bda3144cdc3be8b87e5b",
+      "cache/sparse_token_cache.py": "b45cf4f080596e3e49bd0e92b0986b01e9ef4092c0a4cf3cc7715d4039cd7a04",
+      "operators/common/kv_transfer.py": "787cd38330ea263c5948bcb4510257d3b43fb789e93a6bee207c14a9ab5a480f",
+      "operators/common/csrc/kv_transfer.cu": "71821370997ee6afb92b0aa0cc7da4c813d17e407b621e2b29aeb343747e525b",
+      "models/deepseek_v32/cache/prefetch.py": "854a3d5081ba396a900b233ad1d1c3678d73cf6de68a0aed0a5d85315351ec31"
+    },
+    "nosa_call_path_hashes_match_initial_audit": true
+  }
+}

@@ -65,7 +65,7 @@ def source_snapshot(output, *, include_official=False):
             shutil.copyfile(path, destination)
             manifest[str(relative)] = hashlib.sha256(path.read_bytes()).hexdigest()
     if include_official:
-        from experiments.deepseek_v32_echo_prefill.src.backend_provenance import source_files
+        from experiments.deepseek_v32_mfu.src.backend_provenance import source_files
 
         for path in sorted(source_files()):
             relative = path.relative_to(ROOT)
@@ -162,7 +162,7 @@ def snapshot_report_helpers(output) -> dict:
 
 
 def backend_provenance():
-    from experiments.deepseek_v32_echo_prefill.src.backend_provenance import (
+    from experiments.deepseek_v32_mfu.src.backend_provenance import (
         collect_backend_provenance,
         digest,
     )
