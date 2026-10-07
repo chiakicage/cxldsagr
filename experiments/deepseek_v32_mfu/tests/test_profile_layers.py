@@ -240,6 +240,40 @@ def test_timed_path_keeps_default_output_and_sync_boundary(monkeypatch):
     assert events == ["sync", "forward_with_internal_sync"]
 
 
+def test_benchmark_records_each_samples_counters_after_timer_stops(monkeypatch):
+    current = {"timed": False, "sample": 0}
+
+    def metrics():
+        assert not current["timed"]
+        return {"prefetch_capacity_failures": current["sample"]}
+
+    def timed(model, ids):
+        current["timed"] = True
+        current["sample"] += 1
+        current["timed"] = False
+        return None, float(current["sample"])
+
+    model = SimpleNamespace(
+        blocks=[SimpleNamespace(cache=SimpleNamespace(metrics=metrics)) for _ in range(3)],
+        snapshot_prefix=lambda: "snapshot",
+    )
+    args = SimpleNamespace(prefix=4, prefill_repeats=2, repeats=3)
+    monkeypatch.setattr(profile_layers, "timed", timed)
+    monkeypatch.setattr(profile_layers, "select_cache_method", lambda *_: None)
+    monkeypatch.setattr(profile_layers, "restore_extend_prefix", lambda *_: None)
+    monkeypatch.setattr(profile_layers, "prepare_extend_graph", lambda *_: None)
+    monkeypatch.setattr(profile_layers, "cache_metrics", lambda *_: {})
+    result = {"measurements": {}}
+    profile_layers.run_benchmark(model, [0] * 6, args, result)
+    for measured in result["measurements"].values():
+        for phase, count in (("prefill", 2), ("extend", 3)):
+            samples = measured[f"{phase}_cache_samples"]
+            assert len(samples) == count and all(len(sample) == 3 for sample in samples)
+            assert [sample[0]["prefetch_capacity_failures"] for sample in samples] == measured[
+                f"{phase}_samples_ms"
+            ]
+
+
 def test_annotated_hidden_norm_keeps_inference_mode_after_capture(cpu_annotation, monkeypatch):
     model = FakeModel(chunk_size=2)
     norm_modes = []

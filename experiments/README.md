@@ -3,13 +3,14 @@
 实验按要回答的问题分为四类。各实验明确数值验收状态，独立验收不作为性能结果。
 官方 SGLang 复现按用户要求仅测量性能，保留数值未通过的说明。
 各报告分别记录独立验收、正式计时和 profile 的 run ID、源码身份及测量边界。
-两模型 motivation 给出原已发布结果、同机 P0 与重构后结果的对照，保留阶段开销增加和
-未达到的性能目标。数值检查不替代正式计时和 profile。
+NOSA motivation 保留同机重构对照和未达到的性能目标；DeepSeek C10 已完成三档历史、
+四档候选的 12 点四方案独立验收和正式计时，本轮没有新采集 profile。
+数值检查不替代正式计时和 profile。
 
 | 类别 | 实验 | 目的与现有证据 |
 |---|---|---|
 | Motivation | [NOSA 固定容量](nosa_motivation/README.md) | 完整 32 层、固定 P/NH 四方案；历史保留与稀疏搬运有收益，A128 async 未快于 sync |
-| Motivation | [DeepSeek 固定容量](deepseek_v32_motivation/README.md) | C10 checkpoint 工作负载替身四方案，含末 token LM head；不能据此直接给出跨模型排名 |
+| Motivation | [DeepSeek 固定容量](deepseek_v32_motivation/README.md) | C10 checkpoint 工作负载替身，固定 P/NH 的 12 点四方案矩阵，含末 token LM head；单轮轨迹不证明稳定排序或跨模型排名 |
 | Motivation 容量依据 | [NOSA / DeepSeek cache 管理](cache_management/README.md) | 共同准入和计费契约；分别说明 NOSA 懒分配与 DeepSeek 全局 arena，静态规划和请求观测分开 |
 | Baseline 性能合理性 | [NOSA MFU](nosa_mfu/README.md) | 统一汇总算子、完整模块的效率，以及完整 dense/native/Triton 模型的已有测量；各自保留输入与计时边界 |
 | Baseline 性能合理性 | [官方 SGLang 复现](deepseek_v32_echo_official/README.md) | 原始前三层固定历史负载的 ECHO / HBM-only 独立运行；仅报告性能，容量差异单列 |

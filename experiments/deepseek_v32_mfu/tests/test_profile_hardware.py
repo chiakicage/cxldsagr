@@ -54,7 +54,7 @@ def test_gather_uses_physical_selector_and_readonly_cli_despite_visible_device_m
 
     def run(command, **kwargs):
         commands.append(command)
-        assert kwargs == {"check": True, "capture_output": True, "text": True, "timeout": 20}
+        assert kwargs == {"check": True, "capture_output": True, "text": True, "timeout": 120}
         return SimpleNamespace(stdout=raw, stderr="")
 
     class Response(io.BytesIO):

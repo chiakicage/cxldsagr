@@ -54,6 +54,21 @@ ECHO_STAGES = {
 }
 
 
+def profile_shape(result):
+    """Use recorded dimensions for chunk coverage, labels and receipt metadata."""
+    shape = {key: result[key] for key in ("prefix_tokens", "extend_tokens", "chunk_size")}
+    if result["num_layers"] != 3 or any(
+        type(value) is not int or value < 1 for value in shape.values()
+    ):
+        raise ValueError("timeline requires L0-L2 and positive integer token dimensions")
+    prefix, chunk = shape["prefix_tokens"], shape["chunk_size"]
+    return {
+        **shape,
+        "prefill_chunks": (prefix + chunk - 1) // chunk,
+        "last_chunk_tokens": (prefix - 1) % chunk + 1,
+    }
+
+
 def idle_echo_annotations(panel):
     """Keep all-GPU-idle and selected ECHO GPU activity intervals separate."""
     window = panel["window"]
@@ -227,6 +242,7 @@ def three_layer_panel(panel, phase):
     return {
         "method": panel["method"],
         "phase": phase,
+        **({"shape": panel["shape"]} if "shape" in panel else {}),
         "chunk": panel["chunks"][-1]["chunk"] if phase == "prefill" else None,
         "source_window": panel["window"],
         "window": window,
@@ -311,6 +327,12 @@ def draw(
     io_layout="shared",
     annotations="gap",
 ):
+    shape = prefill[0]["shape"]
+    if any(panel["shape"] != shape for panel in [*prefill, *extend]):
+        raise ValueError("timeline panels have mismatched token dimensions")
+    chunks = shape["prefill_chunks"]
+    last_tokens = shape["last_chunk_tokens"]
+    prefix_tokens, extend_tokens = shape["prefix_tokens"], shape["extend_tokens"]
     plt.rcParams.update({"font.family": "DejaVu Sans", "svg.fonttype": "none"})
     separate = layout == "separate"
     split_io = io_layout == "directions"
@@ -519,7 +541,7 @@ def draw(
             "Fused compute + IO is productive, never gap, and remains in the ratio denominator. Only standalone IO-only time is excluded."
         )
         notes[2] = (
-            "Window ends at L2 last compute. Starts at L0 first compute, or earlier L0 history H2D for dense extend. Prefill uses only chunk 64."
+            f"Window ends at L2 last compute. Starts at L0 first compute, or earlier L0 history H2D for dense extend. Prefill uses only chunk {chunks}."
         )
     if split_io:
         notes[0] = (
@@ -537,22 +559,31 @@ def draw(
             "Window: forward entry to L2 last compute end. Startup ends at embedding start; later pre-layer H2D remains IO."
         )
         notes.append(
-            "Yellow marker locates the short embedding kernel (about 2 microseconds); all activity widths remain to scale."
+            "Yellow marker locates the embedding kernel; all activity widths remain to scale."
         )
     prefill_title = (
-        "Prefill | last chunk 64/64, 1,024 tokens, L0-L2"
+        f"Prefill | H={prefix_tokens:,}, last chunk {chunks}/{chunks}, {last_tokens:,} tokens, L0-L2"
         if window_kind == "three-layers"
-        else "Prefill | 65,536 tokens, all 64 chunks"
+        else f"Prefill | {prefix_tokens:,} tokens, all {chunks} chunks"
     )
     for phase, fig in figures:
         if separate:
-            title = prefill_title if phase == "prefill" else "Extend | 128 tokens, all 3 layers"
+            title = (
+                prefill_title
+                if phase == "prefill"
+                else f"Extend | H={prefix_tokens:,}, A={extend_tokens:,}, all 3 layers"
+            )
             if startup_comparison:
-                title = "Extend | startup + embedding + L0-L2, 128 tokens"
+                title = f"Extend | H={prefix_tokens:,}, A={extend_tokens:,}, startup + embedding + L0-L2"
             fig.text(0.09, 0.960, title, fontsize=15)
         else:
             fig.text(0.075, 0.960, prefill_title, fontsize=15)
-            fig.text(0.555, 0.960, "Extend | 128 tokens, all 3 layers", fontsize=15)
+            fig.text(
+                0.555,
+                0.960,
+                f"Extend | H={prefix_tokens:,}, A={extend_tokens:,}, all 3 layers",
+                fontsize=15,
+            )
         fig.legend(
             handles=handles,
             loc="lower center",
@@ -597,13 +628,7 @@ def extract_profile_panels(profile, gate):
         raise ValueError("timeline requires one accepted matching profile and gap audit")
     if sha(profile / "result.json") != gate["input_result_sha256"]:
         raise ValueError("gap audit does not match the profile result")
-    if (
-        result["num_layers"],
-        result["prefix_tokens"],
-        result["chunk_size"],
-        result["extend_tokens"],
-    ) != (3, 65536, 1024, 128):
-        raise ValueError("this final timeline pair requires L0-L2, H65536, chunk1024 and A128")
+    shape = profile_shape(result)
     calls, _ = read_calls(profile / "operator_calls.json")
     setup = [
         profile / f"capture_{index}.sqlite"
@@ -664,6 +689,7 @@ def extract_profile_panels(profile, gate):
             panel = {
                 "method": method,
                 "phase": phase,
+                "shape": shape,
                 "window": window,
                 "rows": rows,
                 "shared_tail": expected["shared_tail"],
@@ -672,8 +698,10 @@ def extract_profile_panels(profile, gate):
                 panel["chunks"] = [
                     row for row in expected["layer_chunk_windows"] if row["layer"] == 0
                 ]
-                if [row["chunk"] for row in panel["chunks"]] != list(range(64)):
-                    raise ValueError("prefill capture must contain every one of the 64 chunks")
+                if [row["chunk"] for row in panel["chunks"]] != list(
+                    range(shape["prefill_chunks"])
+                ):
+                    raise ValueError("prefill capture must contain every recorded history chunk")
             else:
                 panel["layers"] = expected["layers"]
             panels.append(panel)
@@ -735,6 +763,13 @@ def main():
         ]
         profile_run_id = RUN
         prefill, extend = read(prefill_path), read(extend_path)
+        # The explicitly selected legacy extraction belongs to this fixed run.
+        legacy_shape = profile_shape(
+            {"num_layers": 3, "prefix_tokens": 65536, "extend_tokens": 128, "chunk_size": 1024}
+        )
+        prefill = [{**panel, "shape": legacy_shape} for panel in prefill]
+        extend = [{**panel, "shape": legacy_shape} for panel in extend]
+    shape = prefill[0]["shape"]
     paths = [
         *input_paths,
         Path(__file__),
@@ -800,6 +835,7 @@ def main():
     receipt = {
         "schema": "compact-prefill-extend-v2",
         "profile_run_id": profile_run_id,
+        "shape": shape,
         "layout": args.layout,
         "window_kind": args.window,
         "io_layout": args.io_layout,
@@ -810,9 +846,9 @@ def main():
         "prefill_annotation": (
             None
             if args.window == "extend-startup"
-            else "Only final chunk 64 (1024 tokens), L0 first compute start through L2 last compute end"
+            else f"Only final chunk {shape['prefill_chunks']} ({shape['last_chunk_tokens']} tokens), L0 first compute start through L2 last compute end"
             if args.window == "three-layers"
-            else "Only final chunk 64 (1024 tokens), excluding shared tail; full prefill window retained"
+            else f"Only final chunk {shape['prefill_chunks']} ({shape['last_chunk_tokens']} tokens), excluding shared tail; full prefill window retained"
         ),
         "inputs_and_sources_sha256": before,
         "metrics": metrics,

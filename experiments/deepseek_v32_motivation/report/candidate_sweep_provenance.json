@@ -1,0 +1,51 @@
+{
+  "schema": "deepseek-c10-h64k-candidate-sweep-v1",
+  "run_id": "deepseek_motivation_candidate_plot_20261007_01",
+  "created_utc": "2026-10-07T12:53:29.179979+00:00",
+  "input_summary": {
+    "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/report/summary.json",
+    "sha256": "cc66120a7a89d08b9f2e1e78d5a5814972749c9e317656ae69fc612d00b87ffe"
+  },
+  "source_sha256": {
+    "experiments/deepseek_v32_motivation/src/plot_candidate_sweep.py": "56a9877b4c30aa078c46113a41ed251ee4438a50e6eb89550c2be0dfbc8ca6dd",
+    "experiments/deepseek_v32_motivation/src/plot.py": "28b7ed4095d4363ebd56414212b041a11c466ca3b6359c56a834bc61bb200078",
+    "experiments/deepseek_v32_motivation/src/plot_offload_matrix.py": "423ef209fc59fc5a1aabda3da0de4817d528b7d062cdef5172e5c1d971255d2b"
+  },
+  "source_base": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_candidate_plot_20261007_01/source",
+  "artifacts_base": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_candidate_plot_20261007_01",
+  "history_tokens": 65536,
+  "candidate_tokens": [
+    128,
+    256,
+    512,
+    1024
+  ],
+  "schemes": [
+    "echo",
+    "serial_sparse",
+    "dense_prefetch"
+  ],
+  "benchmark_run_ids": [
+    "deepseek_motivation_matrix_20261007_01_h65536_a1024_bench",
+    "deepseek_motivation_matrix_20261007_01_h65536_a128_bench",
+    "deepseek_motivation_matrix_20261007_01_h65536_a256_bench",
+    "deepseek_motivation_matrix_20261007_01_h65536_a512_bench"
+  ],
+  "plotted_values": 12,
+  "axes_count": 1,
+  "axes": {
+    "x": "candidate tokens A, linear",
+    "y": "mean revisit latency in ms, linear from zero"
+  },
+  "boundary": "Twelve values copied from the accepted matrix; no new GPU measurements. Each mean covers sixteen revisits, with one observation per request. Revisit is defined by user visit count; latency is synchronized request wall time. Different candidate lengths use the same generation rule/seed, not necessarily nested tokens.",
+  "environment": {
+    "python": "3.12.13",
+    "matplotlib": "3.11.1"
+  },
+  "artifacts_sha256": {
+    "candidate_sweep_data.csv": "4ace1adfc4cc985fb0c05d984fbceb2a20e5e60580c46dae7fcde14e1cbe5c6c",
+    "revisit_offload_h64k_vs_a.pdf": "da2d5f63b656bc8b0a79a064469dbbf47cde4159831b66ee35fbd7293c3a6a7e",
+    "revisit_offload_h64k_vs_a.png": "8f7065d28b3fd1eff4992251839028f6021487dcc2ca402ad489d555dd616981",
+    "revisit_offload_h64k_vs_a.svg": "dbd5bece693ad5c3b7409310dbc99adcc43650d05507ee222451a129bf7f0c0c"
+  }
+}

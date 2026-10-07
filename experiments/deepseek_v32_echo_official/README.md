@@ -86,6 +86,12 @@ busy 与 idle 的区间并集覆盖整个窗口。
 的实际传输字节仍未知。没有观测到 CUPTI host memcpy，不能据此声称 H2D 为零。
 这组自然驻留状态与本地 MFU 的 cold offload 条件不同。
 
+2026-10-07 的[recall 诊断](report/recall_diagnosis.md)进一步定位了橙色长条：官方
+kernel 每层扫描全部 16,777,216 个 host 槽位的 HBM 标记。使用相同二进制的独立
+零 miss 实验测得 1.530 ms，与原 trace 的约 1.533 ms 接近；NCU 显示整数与逻辑
+ALU 利用率约 84%，HBM 读吞吐仅为峰值的 0.23%。这段耗时主要来自标记扫描，
+不能作为纯 H2D 时间。诊断未修改官方实现，也不改变原性能报告与数值验收状态。
+
 ### 来源与复现
 
 | 阶段 | HBM-only run ID | ECHO run ID |

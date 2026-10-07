@@ -84,6 +84,8 @@ def test_graph_setup_failure_releases_runner_before_backend_close(
         "sparse_pool_tokens": 8,
         "host_arena_tokens": 16,
         "workspace_query_tokens": 4,
+        "warmup_request_indices": [0, 1, 2],
+        "warmup_requests_per_scheme": 3,
     }
     checkpoint = {
         "path": str(reference),

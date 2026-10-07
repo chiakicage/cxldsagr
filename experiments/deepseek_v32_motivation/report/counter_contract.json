@@ -1,0 +1,420 @@
+{
+  "schema": "deepseek-c10-echo-rejected-reservation-counter-contract-v1",
+  "status": "source_reviewed",
+  "created_utc": "2026-10-06T18:11:25.779679+00:00",
+  "batch_id": "deepseek_motivation_matrix_20261007_01",
+  "field": "cache_diagnostics.layers[layer].prefetch_capacity_failures",
+  "native_storage": "prefetch_stats[2]",
+  "meaning": "Rejected reservation attempts after an eligible miss wins a temporary live-map claim; not failed accepted transfers, lost records, bus bytes, or numerical errors.",
+  "variation_reason": "Volatile prechecks can observe cap exhaustion at different times. A warp that already passed its precheck may reserve after another warp fills cap and count rejections. This attempt count is not specified to be equal across independent executions.",
+  "accepted_comparison_scope": {
+    "scheme": "echo",
+    "candidate_persistence": "gpu_transient",
+    "pool_tokens": 65536,
+    "prefetch_cap": 8192,
+    "requires_actual_prefetched_records_in_both_runs": 8192,
+    "values": "Both must be nonnegative integers, excluding booleans. Every unequal pair must retain request/layer identity and both exact original values.",
+    "all_other_diagnostics": "Exact recursive equality, including successful prefetch, eviction, recall, selected/resident counts, bytes, layout and capacities. Same-named fields in any other location are not exempt."
+  },
+  "does_not_establish": [
+    "Identical logical prefetch sets or priority trajectories across check/bench.",
+    "A per-execution proof of arbitrary cache state transitions.",
+    "Applicability of the real-three-layer cold single-session H+A<=P exception to C10.",
+    "Benchmark output bytes saved or re-compared; numerical evidence remains the matching independent check."
+  ],
+  "source_evidence": {
+    "operators/deepseek_v32/indexer/csrc/echo_cache.cuh": {
+      "sha256": "409be4a062180a8c8e73c1fa783d3980cf3e9926bf53ef34ddbaefe46e2dcd12",
+      "role": "execution_source",
+      "ranges": [
+        {
+          "start_line": 18,
+          "end_line": 28,
+          "finding": "Eligible live-map misses temporarily claim ownership, atomically reserve ranks, and count count-granted rejected reservations."
+        },
+        {
+          "start_line": 35,
+          "end_line": 49,
+          "finding": "Only granted ranks publish slot ownership/allocation_log. A rejected claim performs CAS(-1,MISSING), without these accepted-slot writes."
+        },
+        {
+          "start_line": 52,
+          "end_line": 63,
+          "finding": "Only granted ranks copy records; stats[0] counts actual granted copies."
+        }
+      ]
+    },
+    "operators/deepseek_v32/indexer/csrc/echo_logits.cuh": {
+      "sha256": "562b10fbca2082948fef14a1ac1c40b8918e1c2c81717a965cad040f5293e61f",
+      "role": "execution_source",
+      "ranges": [
+        {
+          "start_line": 405,
+          "end_line": 407,
+          "finding": "Compile-time maximum=8192."
+        },
+        {
+          "start_line": 469,
+          "end_line": 471,
+          "finding": "Invocation cap=min(runtime maximum,compile-time maximum)."
+        },
+        {
+          "start_line": 530,
+          "end_line": 540,
+          "finding": "Query precheck stops further attempts after observing counter>=cap."
+        },
+        {
+          "start_line": 564,
+          "end_line": 581,
+          "finding": "Candidate precheck also observes the volatile counter; concurrent warps can exhaust cap between precheck and reservation."
+        }
+      ]
+    },
+    "operators/deepseek_v32/indexer/csrc/echo_indexer.cu": {
+      "sha256": "c39ee55cb67ef452d6ee920c84c5852002ec8d2efd7c3115dfcb3564e9c8a255",
+      "role": "execution_source",
+      "ranges": [
+        {
+          "start_line": 129,
+          "end_line": 157,
+          "finding": "Finalize consumes allocation_log and clock, not rejected-reservation statistics or the overshooting counter."
+        }
+      ]
+    },
+    "operators/deepseek_v32/indexer/csrc/echo_sparse_recall.cuh": {
+      "sha256": "a7c33da4c60eb3354e93fc77cac39faf19810d4a5b52c03283242fa61e52ff44",
+      "role": "execution_source",
+      "ranges": [
+        {
+          "start_line": 8,
+          "end_line": 15,
+          "finding": "Exact-selection initialization zeros union/miss counters."
+        },
+        {
+          "start_line": 90,
+          "end_line": 99,
+          "finding": "Classification launches initialization before processing the exact union."
+        },
+        {
+          "start_line": 196,
+          "end_line": 203,
+          "finding": "Next prefetch preparation zeros the attempt counter and all three prefetch statistics."
+        }
+      ]
+    },
+    "cache/sparse_token_cache.py": {
+      "sha256": "1b3da2acfe5dc22c403b5794d6aedcebd1daaccaa9e82e54741fb0afd69c3cdf",
+      "role": "execution_source",
+      "ranges": [
+        {
+          "start_line": 94,
+          "end_line": 106,
+          "finding": "Prefetch statistics occupy a distinct three-element diagnostic slab prefix."
+        },
+        {
+          "start_line": 464,
+          "end_line": 468,
+          "finding": "Per-request statistics reset clears the persistent slab."
+        },
+        {
+          "start_line": 625,
+          "end_line": 640,
+          "finding": "Exact classify receives pool.counter as miss-count storage initialized by sparse_union_clear."
+        },
+        {
+          "start_line": 741,
+          "end_line": 741,
+          "finding": "Default limit=8192."
+        },
+        {
+          "start_line": 792,
+          "end_line": 807,
+          "finding": "Transient candidates use min(limit,8192,P); the matrix P is 65536."
+        },
+        {
+          "start_line": 813,
+          "end_line": 825,
+          "finding": "Finalize accumulates the three prefetch statistics."
+        },
+        {
+          "start_line": 889,
+          "end_line": 917,
+          "finding": "Third statistic is exported as prefetch_capacity_failures; H2D bytes use actual prefetched+recalled records."
+        }
+      ]
+    },
+    "models/deepseek_v32/attention.py": {
+      "sha256": "929e7afcc0b3c9abdddce464aca23a0c1a50dc19e656275bdf5031fd4dc4fc7b",
+      "role": "execution_source",
+      "ranges": [
+        {
+          "start_line": 327,
+          "end_line": 331,
+          "finding": "C10 call does not override the default limit."
+        }
+      ]
+    },
+    "models/deepseek_v32/cache/session.py": {
+      "sha256": "50e11d659389aeafc2ed8a608915f4eca2202e953529a4ea7180d2dd0edaaad9",
+      "role": "execution_source",
+      "ranges": [
+        {
+          "start_line": 58,
+          "end_line": 64,
+          "finding": "Session access checks delegate without changing limit."
+        }
+      ]
+    },
+    "operators/deepseek_v32/indexer/echo.py": {
+      "sha256": "de20ebc3b4905b3dddb646167fb770d27a92146e76934be3160ad1b5b149c562",
+      "role": "execution_source",
+      "ranges": [
+        {
+          "start_line": 199,
+          "end_line": 212,
+          "finding": "Existing contract distinguishes copies/evictions/rejected reservations and permits attempt-counter overshoot."
+        }
+      ]
+    },
+    "operators/deepseek_v32/indexer/tests/test_echo_cache_ops.py": {
+      "sha256": "5131fdd5907b5f316b484b4ae93333e32cf257b6b98316571f5f630e74754ba2",
+      "role": "correctness_test",
+      "ranges": [
+        {
+          "start_line": 211,
+          "end_line": 246,
+          "finding": "GPU correctness test checks actual victims, records/maps and duplicate claims."
+        },
+        {
+          "start_line": 249,
+          "end_line": 266,
+          "finding": "Empty/all-hit/zero-cap tests check preservation."
+        },
+        {
+          "start_line": 268,
+          "end_line": 280,
+          "finding": "Twenty competing runs require actual copies/evictions=7 and attempts=7+rejections, without requiring equal rejections across runs."
+        }
+      ]
+    }
+  },
+  "execution_bindings": [
+    {
+      "history_tokens": 4096,
+      "candidate_tokens": 128,
+      "bench_run_id": "deepseek_motivation_matrix_20261007_01_h4096_a128_bench",
+      "check_run_id": "deepseek_motivation_matrix_20261007_01_h4096_a128_check",
+      "bench_metadata_sha256": "9789cfe44e728c5092878c7d235dce12413a4d6d91f5b5d8431f87a0e0274bc9",
+      "bench_source_sha256": "f90f924e35f745fdef0032735c8e3527b34637a07dab5a33e7292ed59b4bbe24",
+      "receipt_sha256": "362e23fb4bb53ceb1cf0835bd58642e36b7a61b45c18a4be8ac408fcb6c8c8f2",
+      "echo_native_artifacts_sha256": "9cf3f30098a35e24783248cfa99dc541be3c04519f1c9e5f7b542f342ccd423f",
+      "echo_indexer_binary": {
+        "/root/.cache/tvm-ffi/cxldsagr_echo_indexer_c8f43b73bc3d148d_1fa11185f6354333/cxldsagr_echo_indexer_c8f43b73bc3d148d.so": {
+          "size": 2504784,
+          "sha256": "09165f76c0ef4a75067939afa1c071bb68b9e8bf28e229d27681cbefdb2e0a11"
+        }
+      }
+    },
+    {
+      "history_tokens": 4096,
+      "candidate_tokens": 256,
+      "bench_run_id": "deepseek_motivation_matrix_20261007_01_h4096_a256_bench",
+      "check_run_id": "deepseek_motivation_matrix_20261007_01_h4096_a256_check",
+      "bench_metadata_sha256": "d2e7b38df510bfbb15340720efeef9405eb063244429f1ab4728699d61648c1e",
+      "bench_source_sha256": "f90f924e35f745fdef0032735c8e3527b34637a07dab5a33e7292ed59b4bbe24",
+      "receipt_sha256": "ba7bc7612b5274e6006b035f33c819a371a4760205da759c075408031222b3e3",
+      "echo_native_artifacts_sha256": "9cf3f30098a35e24783248cfa99dc541be3c04519f1c9e5f7b542f342ccd423f",
+      "echo_indexer_binary": {
+        "/root/.cache/tvm-ffi/cxldsagr_echo_indexer_c8f43b73bc3d148d_1fa11185f6354333/cxldsagr_echo_indexer_c8f43b73bc3d148d.so": {
+          "size": 2504784,
+          "sha256": "09165f76c0ef4a75067939afa1c071bb68b9e8bf28e229d27681cbefdb2e0a11"
+        }
+      }
+    },
+    {
+      "history_tokens": 4096,
+      "candidate_tokens": 512,
+      "bench_run_id": "deepseek_motivation_matrix_20261007_01_h4096_a512_bench",
+      "check_run_id": "deepseek_motivation_matrix_20261007_01_h4096_a512_check",
+      "bench_metadata_sha256": "2dc29bf770175136ccb9a96c9ea6876fa7862a91273df7aee01a0aded22540e4",
+      "bench_source_sha256": "f90f924e35f745fdef0032735c8e3527b34637a07dab5a33e7292ed59b4bbe24",
+      "receipt_sha256": "3c4024eabd36714aae69c917d43396e493a242e5c849a9c87e14d3d56b585f2b",
+      "echo_native_artifacts_sha256": "9cf3f30098a35e24783248cfa99dc541be3c04519f1c9e5f7b542f342ccd423f",
+      "echo_indexer_binary": {
+        "/root/.cache/tvm-ffi/cxldsagr_echo_indexer_c8f43b73bc3d148d_1fa11185f6354333/cxldsagr_echo_indexer_c8f43b73bc3d148d.so": {
+          "size": 2504784,
+          "sha256": "09165f76c0ef4a75067939afa1c071bb68b9e8bf28e229d27681cbefdb2e0a11"
+        }
+      }
+    },
+    {
+      "history_tokens": 4096,
+      "candidate_tokens": 1024,
+      "bench_run_id": "deepseek_motivation_matrix_20261007_01_h4096_a1024_bench",
+      "check_run_id": "deepseek_motivation_matrix_20261007_01_h4096_a1024_check",
+      "bench_metadata_sha256": "d602d6f68c6cb20da00e3fe99867641c7133d2507cd386445067d80c73a5e2eb",
+      "bench_source_sha256": "f90f924e35f745fdef0032735c8e3527b34637a07dab5a33e7292ed59b4bbe24",
+      "receipt_sha256": "10bef1e60d56285debc0c3149cb880ee2ebd0f2e74c63a2df4f1c0921b52af12",
+      "echo_native_artifacts_sha256": "9cf3f30098a35e24783248cfa99dc541be3c04519f1c9e5f7b542f342ccd423f",
+      "echo_indexer_binary": {
+        "/root/.cache/tvm-ffi/cxldsagr_echo_indexer_c8f43b73bc3d148d_1fa11185f6354333/cxldsagr_echo_indexer_c8f43b73bc3d148d.so": {
+          "size": 2504784,
+          "sha256": "09165f76c0ef4a75067939afa1c071bb68b9e8bf28e229d27681cbefdb2e0a11"
+        }
+      }
+    },
+    {
+      "history_tokens": 16384,
+      "candidate_tokens": 128,
+      "bench_run_id": "deepseek_motivation_matrix_20261007_01_h16384_a128_bench",
+      "check_run_id": "deepseek_motivation_matrix_20261007_01_h16384_a128_check",
+      "bench_metadata_sha256": "ef1e33ed2232c308af0c25099a5bcc7622a50b4015b02e5ad7fb29f72ae0ff9f",
+      "bench_source_sha256": "f90f924e35f745fdef0032735c8e3527b34637a07dab5a33e7292ed59b4bbe24",
+      "receipt_sha256": "14940894d5c30adcefac950618047268dec11e6c74dc5125d71358c0834b5479",
+      "echo_native_artifacts_sha256": "9cf3f30098a35e24783248cfa99dc541be3c04519f1c9e5f7b542f342ccd423f",
+      "echo_indexer_binary": {
+        "/root/.cache/tvm-ffi/cxldsagr_echo_indexer_c8f43b73bc3d148d_1fa11185f6354333/cxldsagr_echo_indexer_c8f43b73bc3d148d.so": {
+          "size": 2504784,
+          "sha256": "09165f76c0ef4a75067939afa1c071bb68b9e8bf28e229d27681cbefdb2e0a11"
+        }
+      }
+    },
+    {
+      "history_tokens": 16384,
+      "candidate_tokens": 256,
+      "bench_run_id": "deepseek_motivation_matrix_20261007_01_h16384_a256_bench",
+      "check_run_id": "deepseek_motivation_matrix_20261007_01_h16384_a256_check",
+      "bench_metadata_sha256": "837f3b23466610ca21a3098d4e083877d371b63346b1b67c4557408df4081f3c",
+      "bench_source_sha256": "f90f924e35f745fdef0032735c8e3527b34637a07dab5a33e7292ed59b4bbe24",
+      "receipt_sha256": "bba291473bd1fe05f474eda5e85efaa68b25973c062c12325d6030ff10a2d67d",
+      "echo_native_artifacts_sha256": "9cf3f30098a35e24783248cfa99dc541be3c04519f1c9e5f7b542f342ccd423f",
+      "echo_indexer_binary": {
+        "/root/.cache/tvm-ffi/cxldsagr_echo_indexer_c8f43b73bc3d148d_1fa11185f6354333/cxldsagr_echo_indexer_c8f43b73bc3d148d.so": {
+          "size": 2504784,
+          "sha256": "09165f76c0ef4a75067939afa1c071bb68b9e8bf28e229d27681cbefdb2e0a11"
+        }
+      }
+    },
+    {
+      "history_tokens": 16384,
+      "candidate_tokens": 512,
+      "bench_run_id": "deepseek_motivation_matrix_20261007_01_h16384_a512_bench",
+      "check_run_id": "deepseek_motivation_matrix_20261007_01_h16384_a512_check",
+      "bench_metadata_sha256": "a841766adcbe288d4829893ac37435cf0026b1b03bf2e1dea65d5a82c2fa4737",
+      "bench_source_sha256": "f90f924e35f745fdef0032735c8e3527b34637a07dab5a33e7292ed59b4bbe24",
+      "receipt_sha256": "1806024725cdb2ecfdc5d2a7b4bfac676e040ca1f8c2eb85218831deb3cdbf6d",
+      "echo_native_artifacts_sha256": "9cf3f30098a35e24783248cfa99dc541be3c04519f1c9e5f7b542f342ccd423f",
+      "echo_indexer_binary": {
+        "/root/.cache/tvm-ffi/cxldsagr_echo_indexer_c8f43b73bc3d148d_1fa11185f6354333/cxldsagr_echo_indexer_c8f43b73bc3d148d.so": {
+          "size": 2504784,
+          "sha256": "09165f76c0ef4a75067939afa1c071bb68b9e8bf28e229d27681cbefdb2e0a11"
+        }
+      }
+    },
+    {
+      "history_tokens": 16384,
+      "candidate_tokens": 1024,
+      "bench_run_id": "deepseek_motivation_matrix_20261007_01_h16384_a1024_bench",
+      "check_run_id": "deepseek_motivation_matrix_20261007_01_h16384_a1024_check",
+      "bench_metadata_sha256": "adb70d1c9aef2a8ed168e5dd0a8c7ba7a3e2a4d55822ac0029f8d4f2c4d1b7d6",
+      "bench_source_sha256": "f90f924e35f745fdef0032735c8e3527b34637a07dab5a33e7292ed59b4bbe24",
+      "receipt_sha256": "85adcac0f287264ff39fb3c576853d4ac399367cd28b3b1904d8c110717f32d8",
+      "echo_native_artifacts_sha256": "9cf3f30098a35e24783248cfa99dc541be3c04519f1c9e5f7b542f342ccd423f",
+      "echo_indexer_binary": {
+        "/root/.cache/tvm-ffi/cxldsagr_echo_indexer_c8f43b73bc3d148d_1fa11185f6354333/cxldsagr_echo_indexer_c8f43b73bc3d148d.so": {
+          "size": 2504784,
+          "sha256": "09165f76c0ef4a75067939afa1c071bb68b9e8bf28e229d27681cbefdb2e0a11"
+        }
+      }
+    },
+    {
+      "history_tokens": 65536,
+      "candidate_tokens": 128,
+      "bench_run_id": "deepseek_motivation_matrix_20261007_01_h65536_a128_bench",
+      "check_run_id": "deepseek_motivation_matrix_20261007_01_h65536_a128_check",
+      "bench_metadata_sha256": "8558df0e4bd3afba89111f3e39aa25f264f49155ea655da0fecbcca345d11990",
+      "bench_source_sha256": "f90f924e35f745fdef0032735c8e3527b34637a07dab5a33e7292ed59b4bbe24",
+      "receipt_sha256": "001ed0db4a8099c2fc70c6603a71a43c1a5961bd10d56af8a62f3bc14ea0e8b5",
+      "echo_native_artifacts_sha256": "9cf3f30098a35e24783248cfa99dc541be3c04519f1c9e5f7b542f342ccd423f",
+      "echo_indexer_binary": {
+        "/root/.cache/tvm-ffi/cxldsagr_echo_indexer_c8f43b73bc3d148d_1fa11185f6354333/cxldsagr_echo_indexer_c8f43b73bc3d148d.so": {
+          "size": 2504784,
+          "sha256": "09165f76c0ef4a75067939afa1c071bb68b9e8bf28e229d27681cbefdb2e0a11"
+        }
+      }
+    },
+    {
+      "history_tokens": 65536,
+      "candidate_tokens": 256,
+      "bench_run_id": "deepseek_motivation_matrix_20261007_01_h65536_a256_bench",
+      "check_run_id": "deepseek_motivation_matrix_20261007_01_h65536_a256_check",
+      "bench_metadata_sha256": "17e88f6db746fb08ce58f8e319df6e2d3f0606e73b1050cae361ad1d4a0f0042",
+      "bench_source_sha256": "f90f924e35f745fdef0032735c8e3527b34637a07dab5a33e7292ed59b4bbe24",
+      "receipt_sha256": "a8f3681dec838f9b030386b6982f12a4bdb4a41785e69fcef9af827524392a7f",
+      "echo_native_artifacts_sha256": "9cf3f30098a35e24783248cfa99dc541be3c04519f1c9e5f7b542f342ccd423f",
+      "echo_indexer_binary": {
+        "/root/.cache/tvm-ffi/cxldsagr_echo_indexer_c8f43b73bc3d148d_1fa11185f6354333/cxldsagr_echo_indexer_c8f43b73bc3d148d.so": {
+          "size": 2504784,
+          "sha256": "09165f76c0ef4a75067939afa1c071bb68b9e8bf28e229d27681cbefdb2e0a11"
+        }
+      }
+    },
+    {
+      "history_tokens": 65536,
+      "candidate_tokens": 512,
+      "bench_run_id": "deepseek_motivation_matrix_20261007_01_h65536_a512_bench",
+      "check_run_id": "deepseek_motivation_matrix_20261007_01_h65536_a512_check",
+      "bench_metadata_sha256": "9b63660ac0a5f81f995b469abb82d80c408e8cd116055844d16173a67e2aa5e0",
+      "bench_source_sha256": "f90f924e35f745fdef0032735c8e3527b34637a07dab5a33e7292ed59b4bbe24",
+      "receipt_sha256": "c6323c262046a8e0ca2990930dc06c17fbab53ef46879495d47eb2c2fe79951e",
+      "echo_native_artifacts_sha256": "9cf3f30098a35e24783248cfa99dc541be3c04519f1c9e5f7b542f342ccd423f",
+      "echo_indexer_binary": {
+        "/root/.cache/tvm-ffi/cxldsagr_echo_indexer_c8f43b73bc3d148d_1fa11185f6354333/cxldsagr_echo_indexer_c8f43b73bc3d148d.so": {
+          "size": 2504784,
+          "sha256": "09165f76c0ef4a75067939afa1c071bb68b9e8bf28e229d27681cbefdb2e0a11"
+        }
+      }
+    },
+    {
+      "history_tokens": 65536,
+      "candidate_tokens": 1024,
+      "bench_run_id": "deepseek_motivation_matrix_20261007_01_h65536_a1024_bench",
+      "check_run_id": "deepseek_motivation_matrix_20261007_01_h65536_a1024_check",
+      "bench_metadata_sha256": "7a8d1572723de41a768a8dceac676b3c66374bd3af96014a101fccea521040de",
+      "bench_source_sha256": "f90f924e35f745fdef0032735c8e3527b34637a07dab5a33e7292ed59b4bbe24",
+      "receipt_sha256": "d18a0567fd6b565526a80ea549085ab97f0e95ed8f8e2c0120d235a08b4159d1",
+      "echo_native_artifacts_sha256": "9cf3f30098a35e24783248cfa99dc541be3c04519f1c9e5f7b542f342ccd423f",
+      "echo_indexer_binary": {
+        "/root/.cache/tvm-ffi/cxldsagr_echo_indexer_c8f43b73bc3d148d_1fa11185f6354333/cxldsagr_echo_indexer_c8f43b73bc3d148d.so": {
+          "size": 2504784,
+          "sha256": "09165f76c0ef4a75067939afa1c071bb68b9e8bf28e229d27681cbefdb2e0a11"
+        }
+      }
+    }
+  ],
+  "native_binaries_rehashed": {
+    "/root/.cache/tvm-ffi/cxldsagr_echo_indexer_c8f43b73bc3d148d_1fa11185f6354333/cxldsagr_echo_indexer_c8f43b73bc3d148d.so": {
+      "size": 2504784,
+      "sha256": "09165f76c0ef4a75067939afa1c071bb68b9e8bf28e229d27681cbefdb2e0a11"
+    }
+  },
+  "runtime_evidence_boundary": "This contract classifies a diagnostic counter using bound source/native identities. Independent v2 audits must still verify each run, actual transfers, all other diagnostics, source identity, numerical receipt and observer. It does not mark the matrix accepted.",
+  "additional_correctness_validation": {
+    "status": "passed",
+    "reported_by": "root agent after execution on physical GPU3, CPUs24-31 with the original batch environment",
+    "tests_passed": 7,
+    "elapsed_seconds": 2.62,
+    "selected_test_cases": [
+      "test_cuda_prefetch_actual_victims_and_duplicate_global_claims[0]",
+      "test_cuda_prefetch_actual_victims_and_duplicate_global_claims[17]",
+      "test_cuda_prefetch_actual_victims_and_duplicate_global_claims[64]",
+      "test_cuda_zero_actual_allocations_preserve_pool[empty]",
+      "test_cuda_zero_actual_allocations_preserve_pool[all_hits]",
+      "test_cuda_zero_actual_allocations_preserve_pool[zero_cap]",
+      "test_cuda_cap_exhaustion_race_and_exact_counters"
+    ],
+    "race_repetitions": 20,
+    "initial_attempt": "An initial invocation omitted the batch PATH and failed seven initializations because ninja was unavailable; no GPU checks ran then. The invocation using the complete original PATH passed.",
+    "boundary": "Correctness tests only; no new performance run, no rerun of matrix traces, and no proof of cross-run logical prefetch-set equality."
+  }
+}

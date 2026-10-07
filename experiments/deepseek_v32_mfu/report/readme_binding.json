@@ -1,5 +1,5 @@
 {
-  "schema": "mfu-readme-binding-v4",
+  "schema": "mfu-readme-binding-v6",
   "current_full_extend_graph": {
     "check_run_id": "deepseek_dense_late_wait_cold_check_20261006_01",
     "warm_check_run_id": "deepseek_dense_late_wait_warm_check_20261006_01",
@@ -31,7 +31,51 @@
   },
   "readme": {
     "path": "../README.md",
-    "sha256": "d9d793cad63c49eb02accc2b44f2116c8597bf5700ee6afed90deb6403a3f200"
+    "sha256": "87b6b4ba3834a9050e493604fbdbd077a5d0e42365c30c773537f2f342c0caed"
   },
-  "boundary": "One final main pair plus the explicitly requested startup comparison. Prefill last chunk only. Main windows end at L2 last compute and start at L0 first compute, including earlier L0 history H2D for dense extend. GPU idle and productive fused ECHO intervals retain their original definitions. New matched check/bench/profile runs validate the requested dense late-wait schedule."
+  "boundary": "The original H65536/A128 full-extend and operator-MFU publications remain bound above. The added 12-shape matrix has separate measurement/source bindings and 36 timeline views; profile windows do not replace complete wall times. See each publication for its scope and observation limits.",
+  "shape_matrix": {
+    "run_id": "deepseek_shape_matrix_complete_20261007_01",
+    "shapes": {
+      "prefix_tokens": [
+        4096,
+        16384,
+        65536
+      ],
+      "extend_tokens": [
+        128,
+        256,
+        512,
+        1024
+      ]
+    },
+    "methods": [
+      "hbm",
+      "echo",
+      "serial_sparse",
+      "dense_prefetch"
+    ],
+    "publication_manifest": {
+      "path": "shape_matrix/publication_manifest.json",
+      "sha256": "207e3533d718f2b91d01291504d983059c58b9de579f133ff7b335e9b39ab1ea"
+    },
+    "boundary": "Independent cold check, clean synchronized wall timing, and NSYS profiles for each shape. Real L0-L2, whole A-token full extend graph, P=NH=H+A; prefill timeline shows final chunk only. Four batches retain exact per-shape identities; only startup nvidia-smi query timeout differs across six old and six new shapes, from 20 to 120 seconds. No new operator MFU estimate."
+  },
+  "shape_matrix_statistics": {
+    "run_id": "deepseek_shape_statistics_20261007_01",
+    "source_run_id": "deepseek_shape_matrix_complete_20261007_01",
+    "publication_manifest": {
+      "path": "shape_matrix_statistics/publication_manifest.json",
+      "sha256": "e3748ebbe2f4a98a0e16d73f653c9f750dc0879b163a09c5395bdbf24efeadf9"
+    },
+    "boundary": "Descriptive CPU statistics of the existing 12-shape matrix, retaining all 384 measured samples. Per-shape median comparisons and equal-shape geometric means; separate profile-window and software-payload summaries. No new GPU measurements, operator MFU, or serving throughput results."
+  },
+  "echo_inter_query_prefetcher": {
+    "run_id": "deepseek_echo_prefetch_schematic_20261007_02",
+    "provenance": {
+      "path": "echo_inter_query_prefetcher/provenance.json",
+      "sha256": "e572b6fe949d53450e0be105ac949a94e9a395c06ad8d5fdc26b69fbc886435e"
+    },
+    "boundary": "Eight schematic inter-query work stages; indexer and fetch lanes only, with fetch shifted by one stage. Widths and stage count are illustrative. No new GPU measurement or reported performance change."
+  }
 }

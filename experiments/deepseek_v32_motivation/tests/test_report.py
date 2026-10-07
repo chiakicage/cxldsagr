@@ -6,10 +6,12 @@ import pytest
 import torch
 
 from experiments.deepseek_v32_motivation.src.measure import (
+    LEGACY_WARMUP_POLICY,
     SCHEMA,
     SCHEMES,
     configuration,
     parser,
+    warmup_stages,
     write_json,
 )
 from experiments.deepseek_v32_motivation.src.report import (
@@ -22,14 +24,17 @@ from GR.workload import token_sha256
 
 
 @pytest.fixture
-def saved_run(tmp_path):
+def saved_run(tmp_path, request):
+    parameters = getattr(request, "param", {})
+    users = parameters.get("users", 2)
+    pool_tokens = parameters.get("pool_tokens", 2048)
     config = configuration(
         parser().parse_args(
             [
                 "--run-id",
                 "fixture",
                 "--num-users",
-                "2",
+                str(users),
                 "--history-tokens",
                 "2048",
                 "--candidate-tokens",
@@ -37,25 +42,31 @@ def saved_run(tmp_path):
                 "--chunk-size",
                 "32",
                 "--sparse-pool-tokens",
-                "2048",
+                str(pool_tokens),
                 "--host-arena-tokens",
-                "4096",
+                str(users * 2048),
             ]
         )
     )
+    if parameters.get("legacy", False):
+        config.update(
+            warmup_policy=LEGACY_WARMUP_POLICY,
+            warmup_requests_per_scheme=3,
+            warmup_request_indices=[0, 1, users],
+        )
     (tmp_path / "source").mkdir()
     (tmp_path / "source/example.py").write_text("fixture source\n")
     source = {"example.py": digest(tmp_path / "source/example.py")}
     write_json(tmp_path / "source_manifest.json", source)
     requests = []
-    for index in range(4):
-        ids = [index % 2 + 1] * 2048 + [10 + index, 20 + index]
+    for index in range(users * 2):
+        ids = [index % users + 1] * 2048 + [10 + index, 20 + index]
         requests.append(
             {
                 "request_id": index,
-                "user_id": index % 2,
-                "visit_index": index // 2,
-                "is_revisit": index >= 2,
+                "user_id": index % users,
+                "visit_index": index // users,
+                "is_revisit": index >= users,
                 "input_ids": ids,
                 "input_sha256": token_sha256(ids),
             }
@@ -87,19 +98,25 @@ def saved_run(tmp_path):
     rows = []
     cases = []
     warmup_traces = {}
+    first_users = config["warmup_requests_per_scheme"] - 1
+    warmup_fits = first_users * 2048 <= pool_tokens
     for scheme in SCHEMES:
         warmup_traces[scheme] = []
         for index, stage in zip(
-            (0, 1, 2),
-            ("first_user_first_visit", "second_user_first_visit", "first_user_revisit"),
+            config["warmup_request_indices"],
+            warmup_stages(first_users),
             strict=True,
         ):
-            miss = index == 2 and scheme != "hbm"
+            miss = (
+                index == users
+                and scheme != "hbm"
+                and (scheme == "dense_prefetch" or not warmup_fits or parameters.get("legacy"))
+            )
             warmup_traces[scheme].append(
                 {
                     **{key: value for key, value in requests[index].items() if key != "input_ids"},
                     "stage": stage,
-                    "prefix_cache_hit": miss,
+                    "prefix_cache_hit": index == users and (scheme != "hbm" or warmup_fits),
                     "candidate_persistence": "gpu_transient",
                     "retained_length": 2048,
                     "host_to_device_bytes": 1152 if miss else 0,
@@ -111,41 +128,43 @@ def saved_run(tmp_path):
         cases.append(
             {
                 "scheme": scheme,
-                "requests": 4,
-                "warmup_requests": 3,
-                "warmup_request_ids": [0, 1, 2],
+                "requests": users * 2,
+                "warmup_requests": config["warmup_requests_per_scheme"],
+                "warmup_request_ids": config["warmup_request_indices"],
                 "started_empty": True,
                 "torch_peak_allocated_bytes": 100,
                 "torch_peak_reserved_bytes": 200,
             }
         )
         (tmp_path / "numerical" / scheme).mkdir(parents=True)
-        for request in requests:
-            index = request["request_id"]
+        for workload_request in requests:
+            index = workload_request["request_id"]
             relative = f"numerical/{scheme}/{index:06d}.pt"
             torch.save(
                 {
                     "request_id": index,
-                    "input_sha256": request["input_sha256"],
+                    "input_sha256": workload_request["input_sha256"],
                     "hidden": torch.full((2, 3), index, dtype=torch.bfloat16),
                     "logits": torch.full((1, 5), index, dtype=torch.float32),
                 },
                 tmp_path / relative,
             )
             hbm = scheme == "hbm"
-            metrics = {key: value for key, value in request.items() if key != "input_ids"}
+            resident_users = pool_tokens // 2048 if hbm else users
+            prefix_hit = index >= users and resident_users >= users
+            metrics = {key: value for key, value in workload_request.items() if key != "input_ids"}
             metrics.update(
                 scheme=scheme,
                 run_id="fixture",
-                round_index=index // 2,
-                prefix_cache_hit=index >= 2 and not hbm,
-                prefix_hit_tier="dram" if index >= 2 and not hbm else "miss",
+                round_index=index // users,
+                prefix_cache_hit=prefix_hit,
+                prefix_hit_tier=("hbm" if hbm else "dram") if prefix_hit else "miss",
                 stable_prefix_tokens=2048,
                 candidate_suffix_tokens=2,
                 resource_mode="fixed_pools",
                 hbm_budget_bytes=None,
                 dram_budget_bytes=None,
-                cached_users=1 if hbm else min(index + 1, 2),
+                cached_users=min(index + 1, users, resident_users),
                 evicted_users=[],
                 latency_ms=10,
                 admission_ms=1,
@@ -291,8 +310,30 @@ def test_report_rechecks_all_outputs_and_uses_weighted_hit_ratio(saved_run):
     assert "只覆盖 candidate forward" in report
     assert "被淘汰后的请求仍计为复访" in report
     assert "allocated" in report and "reserved" in report
-    assert "共三次请求" in report and "recalled_records>0" in report
+    assert "共 3 次预热请求" in report and "recalled_records>0" in report
     assert metadata["config"]["byte_subbudgets"] is None
+
+
+@pytest.mark.parametrize(
+    "saved_run,warmup_count,recalled_schemes",
+    [
+        ({"users": 4, "pool_tokens": 8192}, 20, ["dense_prefetch"]),
+        ({"users": 8, "pool_tokens": 8192}, 24, list(SCHEMES[1:])),
+        ({"users": 2, "pool_tokens": 2048, "legacy": True}, 12, list(SCHEMES[1:])),
+    ],
+    indirect=["saved_run"],
+)
+def test_report_audits_actual_capacity_dependent_and_legacy_warmup(
+    saved_run, warmup_count, recalled_schemes
+):
+    metadata, _, audit = audit_run(saved_run)
+    assert audit["warmup_policy"] == metadata["config"]["warmup_policy"]
+    assert audit["checked_warmup_requests"] == warmup_count
+    assert audit["host_recall_warmed_schemes"] == recalled_schemes
+    write_report(saved_run, saved_run / "report")
+    report = (saved_run / "report/results.md").read_text()
+    assert f"共 {warmup_count // len(SCHEMES)} 次预热请求" in report
+    assert f"最后一次预热中，{', '.join(recalled_schemes)} 同时满足" in report
 
 
 def test_report_rejects_incomplete_matrix(saved_run):

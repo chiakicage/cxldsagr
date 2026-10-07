@@ -136,6 +136,26 @@ replay 必须核验 capture 时的精度策略、权重身份、query shape 和 
 每次 replay 前须恢复匹配的 prefix；cold/warm 状态或其他绑定变化时直接报错，
 不能自动切换到图外执行。不得据此声称支持任意增长的历史、C10 或 NOSA 完整图。
 
+ECHO 的融合 prefetch 通过原子操作竞争 `prefetch_cap` 额度。额度饱和时，符合
+阈值、位置和映射条件的候选可能随 GPU 调度不同而被实际预取；这会改变部分逻辑
+token 的 priority，并可能改变 prefetch 与 residual recall 的计数。这种差异涉及
+实际预取集合，不能用前述「相同优先级 slot 的物理编号可变」规则代替验收。
+仅在 cold、单 session、H+A<=P 的真实前三层完整图验收中，可以用逐次执行的合法
+状态转移证明代替跨执行 priority 与搬运计数逐位相等的要求。证明须绑定实际源码、
+native 构建、阈值/hint、`prefetch_cap` 和阶段输入，逐层核验每个实际预取记录的
+资格，以及 prepare、融合 prefetch、finalize、精确 top-k、hint 更新、append 与 recall
+之间的映射、priority、free bitmap、clock、KV 内容与计数变化。成功预取数量须
+受实际额度限制；竞争尝试计数可以超过额度，须按源码分别核验成功、淘汰和拒绝计数。
+还须确认记录唯一性、完整精确选择和实际搬运量；只比较最终计数、驻留集合或模型输出
+不足以证明这些转移合法。数值输出、indexer 分数、精确 top-k 及其并列规则、实际
+消费的 KV 和 cache 事务约束继续按各自契约验收，不据此放宽容差。其他 residency、
+多 session、H+A>P 或缺少逐次转移证据的路径不得套用这项验收规则。
+若保存紧凑证据，须明确区分运行时原始分数、精确 top-k 和最终 KV 比较，与可从
+保存数组重算的映射、priority、clock 和计数转移。只保留资格位图及分数/hint 哈希
+时，独立重读不能宣称重新计算了未保存的分数或 KV 内容。
+正式计时与 profile 必须使用与该证明匹配的新验收记录，分别报告各次执行的实际
+计数和流量，不能将某次执行的 prefetch/recall 拆分套用到另一执行或沿用旧性能数字。
+
 该完整图的 dense 路径允许本层 projection、indexer 和 top-k 与本层历史 H2D 重叠。
 在 append 修改映射及主 attention 消费 KV 前，须等待 H2D 与映射发布完成，随后发起
 下一层预取。跨层预取前须释放当前层 cache lease，之后重新取得当前层 lease 才能
@@ -170,8 +190,9 @@ eviction、snapshot/restore 和 forward 均须在使用资源前失败。`synchr
   extend 恢复相同 prefix，再按声明的 cold/warm 设置处理 HBM residency；cold 只清除
   offload 主 KV 驻留，保留 DRAM 与 resident indexer。两种设置分别验收和测量。
   权重加载、编译和状态恢复不计入执行时间。
-  比较全部 extend hidden；当前 MFU 范围为 H=65,536、A=128，其他 A 须单独声明并
-  验收。单层或单算子正确性检查不能替代声明范围内的前三层完整测量。
+  比较全部 extend hidden 和末 token logits；每个 H/A 组合须单独声明并验收，
+  当前范围见 [MFU 实验](../../experiments/deepseek_v32_mfu/README.md)。单层或单算子
+  正确性检查不能替代声明范围内的前三层完整测量。
   非矩阵操作优先复用 FlashInfer；norm 保留 checkpoint FP32 权重和舍入前 FP32
   residual sum。Indexer RoPE 后直接量化，不执行 Hadamard。量化 kernel 优化遵循
   KDA，和已编译官方 DeepGEMM helper 比较完整 API 成本，逐位验收 FP8 数据与 scale；

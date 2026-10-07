@@ -16,7 +16,6 @@ from experiments.deepseek_v32_motivation.src.measure import (
     RECEIPT_KIND,
     SCHEMA,
     SCHEMES,
-    WARMUP_POLICY,
     check_compute_graph_replays,
     check_request,
     validate_warmup_trace,
@@ -70,8 +69,8 @@ def audit_run(directory, *, receipt_override=None):
     for case in cases:
         require(case["requests"] == expected_count, "incomplete measured trace")
         require(
-            case["warmup_requests"] == 3
-            and case["warmup_request_ids"] == [0, 1, config["num_users"]]
+            case["warmup_requests"] == config["warmup_requests_per_scheme"]
+            and case["warmup_request_ids"] == config["warmup_request_indices"]
             and case["started_empty"],
             "invalid cache initialization",
         )
@@ -118,7 +117,7 @@ def audit_run(directory, *, receipt_override=None):
     traces = metadata.get("warmup_traces", {})
     require(set(traces) == set(SCHEMES), "missing actual warmup paths")
     for scheme in SCHEMES:
-        validate_warmup_trace(scheme, traces[scheme], config, requests)
+        validate_warmup_trace(scheme, traces[scheme], config, requests, allow_legacy=True)
     rows = read_jsonl(directory / "measurements.jsonl")
     require(len(rows) == expected_count * len(SCHEMES), "incomplete measurement matrix")
     by_key = {(row["scheme"], row["request_id"]): row for row in rows}
@@ -194,9 +193,14 @@ def audit_run(directory, *, receipt_override=None):
             "all_candidate_hidden_and_logits_exact": not benchmark,
             **({"independent_correctness_receipt": receipt_audit} if benchmark else {}),
             "source_sha256": source_id,
-            "warmup_policy": WARMUP_POLICY,
-            "checked_warmup_requests": 3 * len(SCHEMES),
-            "host_recall_warmed_schemes": list(SCHEMES[1:]),
+            "warmup_policy": config["warmup_policy"],
+            "checked_warmup_requests": sum(len(trace) for trace in traces.values()),
+            "host_recall_warmed_schemes": [
+                scheme
+                for scheme in SCHEMES[1:]
+                if traces[scheme][-1]["host_to_device_bytes"] > 0
+                and traces[scheme][-1]["recalled_records"] > 0
+            ],
             "numerical_sha256": tensor_hashes,
         },
     )
@@ -326,6 +330,12 @@ def flattened(row):
 
 def markdown(metadata, summary):
     config, hardware = metadata["config"], metadata["hardware"]
+    recalled_schemes = [
+        scheme
+        for scheme in SCHEMES[1:]
+        if metadata["warmup_traces"][scheme][-1]["host_to_device_bytes"] > 0
+        and metadata["warmup_traces"][scheme][-1]["recalled_records"] > 0
+    ]
     lines = [
         f"# DeepSeek V3.2 有限缓存对照（{metadata['run_id']}）",
         "",
@@ -349,9 +359,11 @@ def markdown(metadata, summary):
         ),
         "",
         (
-            "每种方案依次预热首位用户首访、第二位用户首访、首位用户复访，共三次请求。"
-            "三种 offload 方案的最后一次预热均核验 prefix hit、candidate H2D>0 和 "
-            "recalled_records>0，确认通用 host gather 路径已执行。随后释放全部用户和共享缓存，从空 cache "
+            f"每种方案先执行 {config['warmup_requests_per_scheme'] - 1} 位用户的首访，"
+            f"再执行首位用户的复访，共 {config['warmup_requests_per_scheme']} 次预热请求。"
+            f"最后一次预热中，{', '.join(recalled_schemes)} 同时满足 prefix hit、"
+            "candidate H2D>0 和 recalled_records>0，确认实际执行了 host recall。"
+            "随后释放全部用户和共享缓存，从空 cache "
             "执行完整轨迹。端到端 wall latency 包含准入、淘汰、miss 时的历史构建、全部候选 "
             "hidden、末 token LM head 和历史清理。输入生成、模型加载、预热、输出复制、"
             "诊断统计和数值比较不计时；每请求仅测一次，p95 使用线性插值。"

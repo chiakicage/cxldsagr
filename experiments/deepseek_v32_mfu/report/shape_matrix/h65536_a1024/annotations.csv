@@ -1,0 +1,9 @@
+phase,method,GPU idle,ECHO prepare,ECHO finalize,ECHO hint
+prefill,hbm,0.19136,0,0,0
+prefill,echo,0.19805,0.002176,0.0,0.029728
+prefill,serial_sparse,0.174656,0,0,0
+prefill,dense_prefetch,0.170272,0,0,0
+extend,hbm,0.130882,0,0,0
+extend,echo,0.222816,0.070464,0.0176,0.033569
+extend,serial_sparse,0.169345,0,0,0
+extend,dense_prefetch,0.090787,0,0,0

@@ -151,7 +151,7 @@ def gather_hardware(device: int | str = 0) -> dict:
         "--query-gpu=" + ",".join(_FIELDS),
         "--format=csv",
     ]
-    completed = subprocess.run(command, check=True, capture_output=True, text=True, timeout=20)
+    completed = subprocess.run(command, check=True, capture_output=True, text=True, timeout=120)
     parsed = list(csv.reader(io.StringIO(completed.stdout), skipinitialspace=True))
     if len(parsed) != 2 or len(parsed[1]) != len(_FIELDS):
         raise ValueError("GPU selector must identify exactly one device with all requested fields")

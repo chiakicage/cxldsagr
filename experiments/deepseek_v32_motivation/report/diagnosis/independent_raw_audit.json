@@ -1,0 +1,2735 @@
+{
+  "schema": "deepseek-c10-independent-raw-audit-v2",
+  "status": "passed",
+  "auditor_sha256": "623cd2597a75b50f378d627b767781c68f5092b65bdfb929de12f1fb584bd634",
+  "graph": {
+    "status": "passed",
+    "setup_count": 4,
+    "clone_edges": 4520,
+    "processes": [
+      293987944497152
+    ],
+    "captures": [
+      {
+        "scheme": "hbm",
+        "phase": "cold",
+        "request_id": 0,
+        "replays": 1300,
+        "gpu_nodes": 37040,
+        "node_only_copy_activities": 640,
+        "all_nodes_exactly_once": true
+      },
+      {
+        "scheme": "hbm",
+        "phase": "revisit",
+        "request_id": 16,
+        "replays": 1300,
+        "gpu_nodes": 37040,
+        "node_only_copy_activities": 640,
+        "all_nodes_exactly_once": true
+      },
+      {
+        "scheme": "echo",
+        "phase": "cold",
+        "request_id": 0,
+        "replays": 1300,
+        "gpu_nodes": 37040,
+        "node_only_copy_activities": 640,
+        "all_nodes_exactly_once": true
+      },
+      {
+        "scheme": "echo",
+        "phase": "revisit",
+        "request_id": 16,
+        "replays": 20,
+        "gpu_nodes": 560,
+        "node_only_copy_activities": 0,
+        "all_nodes_exactly_once": true
+      },
+      {
+        "scheme": "serial_sparse",
+        "phase": "cold",
+        "request_id": 0,
+        "replays": 1300,
+        "gpu_nodes": 37040,
+        "node_only_copy_activities": 640,
+        "all_nodes_exactly_once": true
+      },
+      {
+        "scheme": "serial_sparse",
+        "phase": "revisit",
+        "request_id": 16,
+        "replays": 20,
+        "gpu_nodes": 560,
+        "node_only_copy_activities": 0,
+        "all_nodes_exactly_once": true
+      },
+      {
+        "scheme": "dense_prefetch",
+        "phase": "cold",
+        "request_id": 0,
+        "replays": 1300,
+        "gpu_nodes": 37040,
+        "node_only_copy_activities": 640,
+        "all_nodes_exactly_once": true
+      },
+      {
+        "scheme": "dense_prefetch",
+        "phase": "revisit",
+        "request_id": 16,
+        "replays": 20,
+        "gpu_nodes": 560,
+        "node_only_copy_activities": 0,
+        "all_nodes_exactly_once": true
+      }
+    ],
+    "input_sha256": {
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_rerun_profile_20261006_01/capture_1.sqlite": "ba91c4d7dd26bfeb884ccd41ee86f4fd8b156ffc49d173574c7d724d1307c733",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_rerun_profile_20261006_01/capture_4.sqlite": "34c4f7a78b303eaada3b73cbc3216f6442b6203dee813c0a252c0479206f13c6",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_rerun_profile_20261006_01/capture_7.sqlite": "87e7be7e820103c72c02bfebf73f2674312771adbd7c4d4ba30db461e815e11c",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_rerun_profile_20261006_01/capture_10.sqlite": "04a1c83716b35b27a33fc471fe7b0946924866205109f9cbd3e9d86adc4989b4",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_rerun_profile_20261006_01/capture_2.sqlite": "526e5e2a9c4bb46b7204edc2fd1ee8bdcd5abd4e29ea2d1ee1e458ce32575f90",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_rerun_profile_20261006_01/capture_3.sqlite": "0af453173542669b0aa1732f0a422b80c107f840e3a87c91e1a54b1c0e773e60",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_rerun_profile_20261006_01/capture_5.sqlite": "02f522ec7aa62ddd20a2f3b9d545ed4f9065afb537254906934a122185a638ca",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_rerun_profile_20261006_01/capture_6.sqlite": "0808d56f126a030159d0d3f82123c791e98968ecce7e57d2b34af9446e0a6733",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_rerun_profile_20261006_01/capture_8.sqlite": "9968e7d673c69a93340cc723a9655b951518f10146e451cb97a87ae2a181d21f",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_rerun_profile_20261006_01/capture_9.sqlite": "346b30477e5d6382504480347c5aeca058a020c5fad5eb354ea63a5ccbb6b9e4",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_rerun_profile_20261006_01/capture_11.sqlite": "f7ece134b44298fbf2376d4cc619697b8bdd155ca80736061086efd36467e24e",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_rerun_profile_20261006_01/capture_12.sqlite": "157d1ecafc1ae0a6cfad7533d1a87b09b35319a155dc6e8350706a88e1b9c463"
+    }
+  },
+  "dense_dma": {
+    "status": "passed",
+    "policy": "contiguous_history_cuda_memcpy_async_next_layer_v1",
+    "captures": [
+      {
+        "phase": "cold",
+        "request_id": 0,
+        "raw_memcpy_count": 0,
+        "raw_memcpy_bytes": 0,
+        "all_declared_spans_match_one_raw_async_copy": true,
+        "all_layer_and_segment_counters_match": true,
+        "copies": []
+      },
+      {
+        "phase": "revisit",
+        "request_id": 16,
+        "raw_memcpy_count": 10,
+        "raw_memcpy_bytes": 754974720,
+        "all_declared_spans_match_one_raw_async_copy": true,
+        "all_layer_and_segment_counters_match": true,
+        "copies": [
+          {
+            "segment": "candidate",
+            "layer": 0,
+            "bytes": 75497472,
+            "start_ns": 32084484,
+            "end_ns": 33458086,
+            "stream": 69,
+            "correlation": 16218350
+          },
+          {
+            "segment": "candidate",
+            "layer": 1,
+            "bytes": 75497472,
+            "start_ns": 33470758,
+            "end_ns": 34845384,
+            "stream": 69,
+            "correlation": 16218460
+          },
+          {
+            "segment": "candidate",
+            "layer": 2,
+            "bytes": 75497472,
+            "start_ns": 34861608,
+            "end_ns": 36233354,
+            "stream": 69,
+            "correlation": 16218832
+          },
+          {
+            "segment": "candidate",
+            "layer": 3,
+            "bytes": 75497472,
+            "start_ns": 36249162,
+            "end_ns": 37620235,
+            "stream": 69,
+            "correlation": 16219196
+          },
+          {
+            "segment": "candidate",
+            "layer": 4,
+            "bytes": 75497472,
+            "start_ns": 37744012,
+            "end_ns": 39117133,
+            "stream": 69,
+            "correlation": 16219560
+          },
+          {
+            "segment": "candidate",
+            "layer": 5,
+            "bytes": 75497472,
+            "start_ns": 39924782,
+            "end_ns": 41296112,
+            "stream": 69,
+            "correlation": 16219932
+          },
+          {
+            "segment": "candidate",
+            "layer": 6,
+            "bytes": 75497472,
+            "start_ns": 41602032,
+            "end_ns": 42973778,
+            "stream": 69,
+            "correlation": 16220312
+          },
+          {
+            "segment": "candidate",
+            "layer": 7,
+            "bytes": 75497472,
+            "start_ns": 43255762,
+            "end_ns": 44626580,
+            "stream": 69,
+            "correlation": 16220692
+          },
+          {
+            "segment": "candidate",
+            "layer": 8,
+            "bytes": 75497472,
+            "start_ns": 44877428,
+            "end_ns": 46254934,
+            "stream": 69,
+            "correlation": 16221064
+          },
+          {
+            "segment": "candidate",
+            "layer": 9,
+            "bytes": 75497472,
+            "start_ns": 46541463,
+            "end_ns": 47912632,
+            "stream": 69,
+            "correlation": 16221444
+          }
+        ]
+      }
+    ],
+    "boundary": "Actual H2D bytes/timestamps/API correlation come from raw CUPTI. Contiguity, address intervals and pinned status come from intercepted runtime arguments."
+  },
+  "candidate": {
+    "status": "passed",
+    "timeline": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_rerun_analysis_20261006_01/single_layer/timeline.json",
+    "timeline_sha256": "64d649bd088e46528b3b367bd9497fd6724b9562d43908031b269c8e1a83e317",
+    "intervals_sha256": "736582ce13062fbe5abb79d2607590356fef45ed0a673385488879c00667de88",
+    "captures": [
+      {
+        "scheme": "hbm",
+        "phase": "revisit",
+        "activity_count": 69,
+        "all_intervals_names_and_memcpy_bytes_exact": true,
+        "window_ms": 1.005697,
+        "busy_union_ms": 0.88064,
+        "gap_ms": 0.125057,
+        "gap_count": 67,
+        "largest_gap_us": 73.376,
+        "gaps_us": [
+          [
+            0.0,
+            1.44
+          ],
+          [
+            6.464,
+            7.392
+          ],
+          [
+            8.992,
+            82.368
+          ],
+          [
+            85.952,
+            86.08
+          ],
+          [
+            87.328,
+            87.456
+          ],
+          [
+            88.768,
+            88.896
+          ],
+          [
+            89.952,
+            90.048
+          ],
+          [
+            91.232,
+            91.36
+          ],
+          [
+            93.472,
+            93.568
+          ],
+          [
+            95.648,
+            95.776
+          ],
+          [
+            107.264,
+            107.488
+          ],
+          [
+            109.856,
+            109.984
+          ],
+          [
+            111.52,
+            111.648
+          ],
+          [
+            112.416,
+            112.544
+          ],
+          [
+            114.4,
+            114.496
+          ],
+          [
+            116.352,
+            116.448
+          ],
+          [
+            117.792,
+            117.952
+          ],
+          [
+            119.904,
+            120.032
+          ],
+          [
+            121.632,
+            121.696
+          ],
+          [
+            138.528,
+            138.912
+          ],
+          [
+            155.424,
+            155.488
+          ],
+          [
+            165.536,
+            165.632
+          ],
+          [
+            168.192,
+            168.48
+          ],
+          [
+            170.112,
+            170.176
+          ],
+          [
+            173.024,
+            173.12
+          ],
+          [
+            175.872,
+            175.936
+          ],
+          [
+            177.472,
+            177.536
+          ],
+          [
+            185.696,
+            185.76
+          ],
+          [
+            188.768,
+            188.864
+          ],
+          [
+            190.976,
+            191.04
+          ],
+          [
+            201.088,
+            201.184
+          ],
+          [
+            204.192,
+            204.32
+          ],
+          [
+            207.584,
+            207.712
+          ],
+          [
+            208.896,
+            209.024
+          ],
+          [
+            211.616,
+            211.712
+          ],
+          [
+            213.568,
+            213.696
+          ],
+          [
+            214.944,
+            215.072
+          ],
+          [
+            218.88,
+            219.008
+          ],
+          [
+            231.552,
+            231.68
+          ],
+          [
+            235.2,
+            235.328
+          ],
+          [
+            236.448,
+            236.576
+          ],
+          [
+            237.76,
+            237.888
+          ],
+          [
+            238.944,
+            239.072
+          ],
+          [
+            241.088,
+            242.432
+          ],
+          [
+            243.424,
+            244.448
+          ],
+          [
+            245.248,
+            272.512
+          ],
+          [
+            572.48,
+            573.696
+          ],
+          [
+            575.328,
+            576.896
+          ],
+          [
+            611.776,
+            613.248
+          ],
+          [
+            625.28,
+            626.24
+          ],
+          [
+            641.12,
+            642.176
+          ],
+          [
+            643.52,
+            644.384
+          ],
+          [
+            645.824,
+            646.848
+          ],
+          [
+            779.201,
+            781.057
+          ],
+          [
+            791.777,
+            795.201
+          ],
+          [
+            797.953,
+            798.017
+          ],
+          [
+            802.017,
+            802.081
+          ],
+          [
+            850.273,
+            850.433
+          ],
+          [
+            853.985,
+            854.081
+          ],
+          [
+            856.161,
+            856.289
+          ],
+          [
+            858.369,
+            858.497
+          ],
+          [
+            896.833,
+            897.089
+          ],
+          [
+            899.648,
+            899.649
+          ],
+          [
+            939.553,
+            939.745
+          ],
+          [
+            944.737,
+            944.801
+          ],
+          [
+            947.457,
+            947.553
+          ],
+          [
+            951.713,
+            951.777
+          ]
+        ],
+        "memcpy": [
+          {
+            "direction": "Device-to-Device",
+            "bytes": 8388608,
+            "stage": "cache_operation"
+          },
+          {
+            "direction": "Device-to-Device",
+            "bytes": 262144,
+            "stage": "cache_operation"
+          },
+          {
+            "direction": "Device-to-Device",
+            "bytes": 16384,
+            "stage": "index_cache_write"
+          },
+          {
+            "direction": "Device-to-Device",
+            "bytes": 512,
+            "stage": "index_cache_write"
+          },
+          {
+            "direction": "Device-to-Device",
+            "bytes": 147456,
+            "stage": "cache_operation"
+          }
+        ],
+        "main_kv_writeback_union_ms": 0.0,
+        "main_kv_writeback_compute_overlap_ms": 0.0,
+        "next_layer_transfers": [],
+        "next_layer_transfer_full_union_ms": 0.0,
+        "compute_next_layer_transfer_overlap_ms": 0.0,
+        "overlap_fraction_of_full_target": null
+      },
+      {
+        "scheme": "echo",
+        "phase": "revisit",
+        "activity_count": 105,
+        "all_intervals_names_and_memcpy_bytes_exact": true,
+        "window_ms": 2.15293,
+        "busy_union_ms": 1.426048,
+        "gap_ms": 0.726882,
+        "gap_count": 102,
+        "largest_gap_us": 212.193,
+        "gaps_us": [
+          [
+            0.0,
+            1.248
+          ],
+          [
+            6.208,
+            7.072
+          ],
+          [
+            8.576,
+            204.128
+          ],
+          [
+            207.488,
+            207.616
+          ],
+          [
+            209.088,
+            209.184
+          ],
+          [
+            210.432,
+            210.56
+          ],
+          [
+            211.552,
+            211.68
+          ],
+          [
+            212.832,
+            212.928
+          ],
+          [
+            214.88,
+            215.008
+          ],
+          [
+            216.896,
+            217.024
+          ],
+          [
+            227.36,
+            227.584
+          ],
+          [
+            229.632,
+            229.728
+          ],
+          [
+            231.168,
+            231.296
+          ],
+          [
+            232.096,
+            232.192
+          ],
+          [
+            233.824,
+            233.92
+          ],
+          [
+            235.68,
+            235.776
+          ],
+          [
+            237.056,
+            237.152
+          ],
+          [
+            239.008,
+            239.072
+          ],
+          [
+            240.544,
+            240.608
+          ],
+          [
+            258.144,
+            258.496
+          ],
+          [
+            273.728,
+            273.792
+          ],
+          [
+            282.88,
+            282.976
+          ],
+          [
+            285.344,
+            285.6
+          ],
+          [
+            287.104,
+            287.168
+          ],
+          [
+            289.856,
+            289.952
+          ],
+          [
+            292.544,
+            292.608
+          ],
+          [
+            294.048,
+            294.112
+          ],
+          [
+            301.792,
+            301.856
+          ],
+          [
+            304.864,
+            304.96
+          ],
+          [
+            306.848,
+            306.944
+          ],
+          [
+            315.84,
+            315.968
+          ],
+          [
+            318.784,
+            318.912
+          ],
+          [
+            321.792,
+            321.92
+          ],
+          [
+            323.04,
+            323.136
+          ],
+          [
+            325.536,
+            325.632
+          ],
+          [
+            327.296,
+            327.424
+          ],
+          [
+            328.608,
+            328.704
+          ],
+          [
+            332.256,
+            332.384
+          ],
+          [
+            343.616,
+            343.712
+          ],
+          [
+            347.008,
+            347.104
+          ],
+          [
+            348.16,
+            348.288
+          ],
+          [
+            349.408,
+            349.504
+          ],
+          [
+            350.496,
+            350.624
+          ],
+          [
+            352.64,
+            353.92
+          ],
+          [
+            354.848,
+            355.776
+          ],
+          [
+            356.544,
+            446.272
+          ],
+          [
+            448.512,
+            456.48
+          ],
+          [
+            457.248,
+            459.68
+          ],
+          [
+            460.8,
+            469.536
+          ],
+          [
+            471.968,
+            476.416
+          ],
+          [
+            477.472,
+            480.832
+          ],
+          [
+            481.888,
+            486.496
+          ],
+          [
+            494.176,
+            495.168
+          ],
+          [
+            496.096,
+            497.12
+          ],
+          [
+            502.528,
+            503.488
+          ],
+          [
+            505.216,
+            717.409
+          ],
+          [
+            1493.697,
+            1495.233
+          ],
+          [
+            1509.025,
+            1509.985
+          ],
+          [
+            1510.753,
+            1511.745
+          ],
+          [
+            1514.113,
+            1515.105
+          ],
+          [
+            1515.905,
+            1516.865
+          ],
+          [
+            1518.273,
+            1519.297
+          ],
+          [
+            1548.193,
+            1549.537
+          ],
+          [
+            1560.609,
+            1562.593
+          ],
+          [
+            1576.641,
+            1577.601
+          ],
+          [
+            1578.817,
+            1579.809
+          ],
+          [
+            1581.569,
+            1583.297
+          ],
+          [
+            1584.033,
+            1585.473
+          ],
+          [
+            1590.401,
+            1592.161
+          ],
+          [
+            1593.665,
+            1594.593
+          ],
+          [
+            1596.225,
+            1597.185
+          ],
+          [
+            1598.273,
+            1599.201
+          ],
+          [
+            1603.265,
+            1604.225
+          ],
+          [
+            1608.705,
+            1610.657
+          ],
+          [
+            1612.929,
+            1614.753
+          ],
+          [
+            1615.553,
+            1617.697
+          ],
+          [
+            1618.817,
+            1620.257
+          ],
+          [
+            1622.721,
+            1623.585
+          ],
+          [
+            1624.577,
+            1625.505
+          ],
+          [
+            1626.465,
+            1627.457
+          ],
+          [
+            1635.073,
+            1635.937
+          ],
+          [
+            1636.865,
+            1637.921
+          ],
+          [
+            1643.553,
+            1644.481
+          ],
+          [
+            1645.217,
+            1646.241
+          ],
+          [
+            1649.249,
+            1650.241
+          ],
+          [
+            1653.761,
+            1654.689
+          ],
+          [
+            1665.793,
+            1667.649
+          ],
+          [
+            1670.753,
+            1671.809
+          ],
+          [
+            1677.921,
+            1771.073
+          ],
+          [
+            1892.577,
+            1893.857
+          ],
+          [
+            1904.257,
+            1955.393
+          ],
+          [
+            1958.113,
+            1958.177
+          ],
+          [
+            1961.665,
+            1961.729
+          ],
+          [
+            2004.993,
+            2005.153
+          ],
+          [
+            2008.481,
+            2008.545
+          ],
+          [
+            2010.561,
+            2010.625
+          ],
+          [
+            2012.577,
+            2012.609
+          ],
+          [
+            2053.728,
+            2053.729
+          ],
+          [
+            2092.321,
+            2092.641
+          ],
+          [
+            2097.569,
+            2097.697
+          ],
+          [
+            2100.161,
+            2100.289
+          ],
+          [
+            2104.097,
+            2104.193
+          ]
+        ],
+        "memcpy": [
+          {
+            "direction": "Device-to-Device",
+            "bytes": 8388608,
+            "stage": "pool_operation"
+          },
+          {
+            "direction": "Device-to-Device",
+            "bytes": 262144,
+            "stage": "pool_operation"
+          },
+          {
+            "direction": "Device-to-Device",
+            "bytes": 16384,
+            "stage": "index_cache_write"
+          },
+          {
+            "direction": "Device-to-Device",
+            "bytes": 512,
+            "stage": "index_cache_write"
+          },
+          {
+            "direction": "Device-to-Device",
+            "bytes": 147456,
+            "stage": "pool_operation"
+          }
+        ],
+        "main_kv_writeback_union_ms": 0.0,
+        "main_kv_writeback_compute_overlap_ms": 0.0,
+        "next_layer_transfers": [
+          {
+            "kind": "kernel",
+            "start_ns": 38200529,
+            "end_ns": 38236785,
+            "bytes": 0,
+            "stream": 7,
+            "api": "cudaLaunchKernel_v7000",
+            "nvtx": "motivation/echo/revisit/candidate/chunk_0/layer_2/pool_operation"
+          }
+        ],
+        "next_layer_transfer_full_union_ms": 0.036256,
+        "compute_next_layer_transfer_overlap_ms": 0.0,
+        "overlap_fraction_of_full_target": 0.0
+      },
+      {
+        "scheme": "serial_sparse",
+        "phase": "revisit",
+        "activity_count": 87,
+        "all_intervals_names_and_memcpy_bytes_exact": true,
+        "window_ms": 1.561666,
+        "busy_union_ms": 0.933152,
+        "gap_ms": 0.628514,
+        "gap_count": 87,
+        "largest_gap_us": 187.201,
+        "gaps_us": [
+          [
+            0.0,
+            1.536
+          ],
+          [
+            6.56,
+            7.648
+          ],
+          [
+            9.568,
+            196.769
+          ],
+          [
+            200.289,
+            200.705
+          ],
+          [
+            202.529,
+            202.945
+          ],
+          [
+            204.129,
+            204.545
+          ],
+          [
+            205.505,
+            205.889
+          ],
+          [
+            206.977,
+            207.361
+          ],
+          [
+            209.313,
+            209.697
+          ],
+          [
+            211.585,
+            212.161
+          ],
+          [
+            222.497,
+            223.041
+          ],
+          [
+            225.089,
+            225.729
+          ],
+          [
+            227.137,
+            227.649
+          ],
+          [
+            228.385,
+            228.769
+          ],
+          [
+            230.369,
+            230.785
+          ],
+          [
+            232.353,
+            232.833
+          ],
+          [
+            234.081,
+            234.497
+          ],
+          [
+            236.417,
+            236.801
+          ],
+          [
+            238.273,
+            238.689
+          ],
+          [
+            254.977,
+            255.649
+          ],
+          [
+            266.081,
+            266.369
+          ],
+          [
+            269.249,
+            269.633
+          ],
+          [
+            271.585,
+            272.001
+          ],
+          [
+            281.025,
+            281.441
+          ],
+          [
+            283.809,
+            284.705
+          ],
+          [
+            286.177,
+            286.561
+          ],
+          [
+            289.249,
+            289.633
+          ],
+          [
+            292.161,
+            292.545
+          ],
+          [
+            293.985,
+            294.369
+          ],
+          [
+            302.017,
+            302.433
+          ],
+          [
+            305.409,
+            305.761
+          ],
+          [
+            307.649,
+            308.097
+          ],
+          [
+            317.025,
+            317.441
+          ],
+          [
+            320.257,
+            320.673
+          ],
+          [
+            323.521,
+            323.905
+          ],
+          [
+            325.057,
+            325.441
+          ],
+          [
+            327.841,
+            328.225
+          ],
+          [
+            329.889,
+            330.273
+          ],
+          [
+            331.457,
+            331.841
+          ],
+          [
+            335.425,
+            335.841
+          ],
+          [
+            347.169,
+            347.553
+          ],
+          [
+            350.849,
+            351.265
+          ],
+          [
+            352.321,
+            352.801
+          ],
+          [
+            353.921,
+            354.337
+          ],
+          [
+            355.297,
+            355.713
+          ],
+          [
+            357.825,
+            359.457
+          ],
+          [
+            360.417,
+            361.601
+          ],
+          [
+            362.369,
+            397.729
+          ],
+          [
+            665.217,
+            666.625
+          ],
+          [
+            667.905,
+            669.025
+          ],
+          [
+            701.985,
+            703.393
+          ],
+          [
+            714.529,
+            715.617
+          ],
+          [
+            729.633,
+            730.657
+          ],
+          [
+            731.873,
+            733.249
+          ],
+          [
+            734.561,
+            794.177
+          ],
+          [
+            795.137,
+            801.057
+          ],
+          [
+            805.185,
+            807.521
+          ],
+          [
+            811.745,
+            924.577
+          ],
+          [
+            926.913,
+            934.241
+          ],
+          [
+            935.009,
+            938.337
+          ],
+          [
+            939.489,
+            946.593
+          ],
+          [
+            948.993,
+            952.737
+          ],
+          [
+            953.729,
+            958.433
+          ],
+          [
+            959.361,
+            964.257
+          ],
+          [
+            971.649,
+            972.769
+          ],
+          [
+            973.665,
+            974.785
+          ],
+          [
+            980.289,
+            981.633
+          ],
+          [
+            982.369,
+            989.185
+          ],
+          [
+            992.193,
+            995.393
+          ],
+          [
+            1000.801,
+            1007.553
+          ],
+          [
+            1080.353,
+            1081.377
+          ],
+          [
+            1084.609,
+            1085.825
+          ],
+          [
+            1091.649,
+            1182.849
+          ],
+          [
+            1304.577,
+            1305.953
+          ],
+          [
+            1317.089,
+            1358.946
+          ],
+          [
+            1361.57,
+            1361.954
+          ],
+          [
+            1365.474,
+            1365.922
+          ],
+          [
+            1409.666,
+            1411.234
+          ],
+          [
+            1414.53,
+            1414.914
+          ],
+          [
+            1416.962,
+            1417.346
+          ],
+          [
+            1419.362,
+            1419.746
+          ],
+          [
+            1458.146,
+            1458.37
+          ],
+          [
+            1460.642,
+            1461.026
+          ],
+          [
+            1499.362,
+            1499.97
+          ],
+          [
+            1504.962,
+            1505.378
+          ],
+          [
+            1507.778,
+            1508.194
+          ],
+          [
+            1512.066,
+            1512.45
+          ]
+        ],
+        "memcpy": [
+          {
+            "direction": "Device-to-Device",
+            "bytes": 8388608,
+            "stage": "pool_operation"
+          },
+          {
+            "direction": "Device-to-Device",
+            "bytes": 262144,
+            "stage": "pool_operation"
+          },
+          {
+            "direction": "Device-to-Device",
+            "bytes": 16384,
+            "stage": "index_cache_write"
+          },
+          {
+            "direction": "Device-to-Device",
+            "bytes": 512,
+            "stage": "index_cache_write"
+          },
+          {
+            "direction": "Device-to-Device",
+            "bytes": 147456,
+            "stage": "pool_operation"
+          }
+        ],
+        "main_kv_writeback_union_ms": 0.0,
+        "main_kv_writeback_compute_overlap_ms": 0.0,
+        "next_layer_transfers": [
+          {
+            "kind": "kernel",
+            "start_ns": 36280871,
+            "end_ns": 36475592,
+            "bytes": 0,
+            "stream": 7,
+            "api": "cudaLaunchKernel_v7000",
+            "nvtx": "motivation/serial_sparse/revisit/candidate/chunk_0/layer_2/pool_operation"
+          }
+        ],
+        "next_layer_transfer_full_union_ms": 0.194721,
+        "compute_next_layer_transfer_overlap_ms": 0.0,
+        "overlap_fraction_of_full_target": 0.0
+      },
+      {
+        "scheme": "dense_prefetch",
+        "phase": "revisit",
+        "activity_count": 75,
+        "all_intervals_names_and_memcpy_bytes_exact": true,
+        "window_ms": 1.557634,
+        "busy_union_ms": 1.553666,
+        "gap_ms": 0.003968,
+        "gap_count": 4,
+        "largest_gap_us": 1.856,
+        "gaps_us": [
+          [
+            506.657,
+            508.513
+          ],
+          [
+            512.417,
+            513.569
+          ],
+          [
+            517.025,
+            517.921
+          ],
+          [
+            522.817,
+            522.881
+          ]
+        ],
+        "memcpy": [
+          {
+            "direction": "Host-to-Device",
+            "bytes": 75497472,
+            "stage": "host_dma"
+          },
+          {
+            "direction": "Device-to-Device",
+            "bytes": 8388608,
+            "stage": "pool_operation"
+          },
+          {
+            "direction": "Host-to-Device",
+            "bytes": 75497472,
+            "stage": "host_dma"
+          },
+          {
+            "direction": "Device-to-Device",
+            "bytes": 262144,
+            "stage": "pool_operation"
+          },
+          {
+            "direction": "Device-to-Device",
+            "bytes": 16384,
+            "stage": "index_cache_write"
+          },
+          {
+            "direction": "Device-to-Device",
+            "bytes": 512,
+            "stage": "index_cache_write"
+          },
+          {
+            "direction": "Device-to-Device",
+            "bytes": 147456,
+            "stage": "pool_operation"
+          }
+        ],
+        "main_kv_writeback_union_ms": 0.0,
+        "main_kv_writeback_compute_overlap_ms": 0.0,
+        "next_layer_transfers": [
+          {
+            "kind": "memcpy",
+            "start_ns": 34861608,
+            "end_ns": 36233354,
+            "bytes": 75497472,
+            "stream": 69,
+            "api": "cudaMemcpyAsync_v3020",
+            "nvtx": "motivation/dense_prefetch/revisit/candidate/chunk_0/layer_2/host_dma"
+          }
+        ],
+        "next_layer_transfer_full_union_ms": 1.371746,
+        "compute_next_layer_transfer_overlap_ms": 0.805312,
+        "overlap_fraction_of_full_target": 0.5870707842413975
+      }
+    ]
+  },
+  "prefill": {
+    "status": "passed",
+    "timeline": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_rerun_analysis_20261006_01/prefill_layer/timeline.json",
+    "timeline_sha256": "a22f7c0a1e605b3b238fa6d096204bc40771fce569411b8f089d7e8c37adb066",
+    "intervals_sha256": "b6211f7af4300206c52cb05dbb2e5d2f7bd7dc495e9056b514b37a10ae2d015a",
+    "captures": [
+      {
+        "scheme": "hbm",
+        "phase": "cold",
+        "activity_count": 73,
+        "all_intervals_names_and_memcpy_bytes_exact": true,
+        "window_ms": 4.133882,
+        "busy_union_ms": 4.090424,
+        "gap_ms": 0.043458,
+        "gap_count": 60,
+        "largest_gap_us": 6.528,
+        "gaps_us": [
+          [
+            0.0,
+            6.528
+          ],
+          [
+            25.408,
+            25.536
+          ],
+          [
+            26.752,
+            26.88
+          ],
+          [
+            28.608,
+            28.736
+          ],
+          [
+            33.504,
+            33.632
+          ],
+          [
+            35.712,
+            35.84
+          ],
+          [
+            57.12,
+            57.312
+          ],
+          [
+            60.384,
+            60.544
+          ],
+          [
+            62.592,
+            62.72
+          ],
+          [
+            63.616,
+            63.744
+          ],
+          [
+            65.76,
+            65.856
+          ],
+          [
+            67.808,
+            67.968
+          ],
+          [
+            69.536,
+            69.664
+          ],
+          [
+            72.0,
+            72.096
+          ],
+          [
+            73.664,
+            73.824
+          ],
+          [
+            139.104,
+            140.48
+          ],
+          [
+            141.248,
+            146.464
+          ],
+          [
+            216.768,
+            216.832
+          ],
+          [
+            235.552,
+            235.616
+          ],
+          [
+            238.4,
+            238.72
+          ],
+          [
+            240.608,
+            240.704
+          ],
+          [
+            257.088,
+            257.184
+          ],
+          [
+            282.112,
+            282.496
+          ],
+          [
+            291.808,
+            291.904
+          ],
+          [
+            302.336,
+            302.432
+          ],
+          [
+            305.6,
+            305.664
+          ],
+          [
+            309.376,
+            309.504
+          ],
+          [
+            310.912,
+            311.008
+          ],
+          [
+            329.024,
+            329.152
+          ],
+          [
+            353.504,
+            353.536
+          ],
+          [
+            388.415,
+            388.416
+          ],
+          [
+            395.488,
+            395.648
+          ],
+          [
+            396.928,
+            397.024
+          ],
+          [
+            398.88,
+            398.976
+          ],
+          [
+            400.096,
+            400.16
+          ],
+          [
+            402.848,
+            405.28
+          ],
+          [
+            406.848,
+            408.8
+          ],
+          [
+            409.792,
+            410.816
+          ],
+          [
+            1616.926,
+            1618.014
+          ],
+          [
+            1622.078,
+            1623.102
+          ],
+          [
+            1894.813,
+            1897.917
+          ],
+          [
+            1959.485,
+            1961.437
+          ],
+          [
+            2036.157,
+            2037.053
+          ],
+          [
+            2039.677,
+            2040.637
+          ],
+          [
+            2042.429,
+            2043.453
+          ],
+          [
+            2044.285,
+            2045.245
+          ],
+          [
+            2047.133,
+            2048.221
+          ],
+          [
+            2049.085,
+            2050.109
+          ],
+          [
+            2050.973,
+            2051.933
+          ],
+          [
+            3069.595,
+            3070.843
+          ],
+          [
+            3072.155,
+            3073.659
+          ],
+          [
+            3125.787,
+            3129.307
+          ],
+          [
+            3141.466,
+            3141.467
+          ],
+          [
+            3355.355,
+            3355.515
+          ],
+          [
+            3369.883,
+            3369.915
+          ],
+          [
+            3374.971,
+            3375.003
+          ],
+          [
+            3377.147,
+            3377.275
+          ],
+          [
+            3613.882,
+            3613.914
+          ],
+          [
+            3616.378,
+            3616.41
+          ],
+          [
+            3851.322,
+            3851.514
+          ]
+        ],
+        "memcpy": [
+          {
+            "direction": "Device-to-Device",
+            "bytes": 131072,
+            "stage": "index_cache_write"
+          },
+          {
+            "direction": "Device-to-Device",
+            "bytes": 4096,
+            "stage": "index_cache_write"
+          },
+          {
+            "direction": "Device-to-Device",
+            "bytes": 1179648,
+            "stage": "cache_append"
+          },
+          {
+            "direction": "Device-to-Device",
+            "bytes": 4096,
+            "stage": "cache_append"
+          },
+          {
+            "direction": "Device-to-Device",
+            "bytes": 8192,
+            "stage": "cache_append"
+          }
+        ],
+        "main_kv_writeback_union_ms": 0.0,
+        "main_kv_writeback_compute_overlap_ms": 0.0,
+        "next_layer_transfers": [],
+        "next_layer_transfer_full_union_ms": 0.0,
+        "compute_next_layer_transfer_overlap_ms": 0.0,
+        "overlap_fraction_of_full_target": null
+      },
+      {
+        "scheme": "echo",
+        "phase": "cold",
+        "activity_count": 78,
+        "all_intervals_names_and_memcpy_bytes_exact": true,
+        "window_ms": 3.788089,
+        "busy_union_ms": 3.744787,
+        "gap_ms": 0.043302,
+        "gap_count": 64,
+        "largest_gap_us": 5.312,
+        "gaps_us": [
+          [
+            0.0,
+            5.312
+          ],
+          [
+            23.68,
+            23.744
+          ],
+          [
+            24.96,
+            24.992
+          ],
+          [
+            26.656,
+            26.72
+          ],
+          [
+            31.712,
+            31.776
+          ],
+          [
+            33.792,
+            33.824
+          ],
+          [
+            54.112,
+            54.336
+          ],
+          [
+            57.344,
+            57.44
+          ],
+          [
+            59.264,
+            59.328
+          ],
+          [
+            60.224,
+            60.288
+          ],
+          [
+            62.144,
+            62.208
+          ],
+          [
+            64.032,
+            64.128
+          ],
+          [
+            65.632,
+            65.696
+          ],
+          [
+            67.904,
+            68.0
+          ],
+          [
+            69.44,
+            69.6
+          ],
+          [
+            131.904,
+            133.536
+          ],
+          [
+            134.368,
+            139.296
+          ],
+          [
+            194.655,
+            194.656
+          ],
+          [
+            203.167,
+            203.168
+          ],
+          [
+            205.088,
+            205.216
+          ],
+          [
+            221.92,
+            222.016
+          ],
+          [
+            224.544,
+            224.896
+          ],
+          [
+            226.656,
+            226.752
+          ],
+          [
+            237.823,
+            237.824
+          ],
+          [
+            241.408,
+            241.536
+          ],
+          [
+            243.008,
+            243.168
+          ],
+          [
+            266.368,
+            266.752
+          ],
+          [
+            273.855,
+            273.856
+          ],
+          [
+            275.776,
+            275.904
+          ],
+          [
+            285.152,
+            285.248
+          ],
+          [
+            288.256,
+            288.288
+          ],
+          [
+            291.808,
+            291.904
+          ],
+          [
+            293.248,
+            293.312
+          ],
+          [
+            303.904,
+            303.968
+          ],
+          [
+            310.656,
+            310.72
+          ],
+          [
+            374.016,
+            374.048
+          ],
+          [
+            375.232,
+            375.328
+          ],
+          [
+            377.024,
+            377.152
+          ],
+          [
+            378.176,
+            378.272
+          ],
+          [
+            380.896,
+            384.192
+          ],
+          [
+            385.536,
+            386.464
+          ],
+          [
+            387.968,
+            388.895
+          ],
+          [
+            389.919,
+            390.879
+          ],
+          [
+            391.487,
+            392.447
+          ],
+          [
+            1449.181,
+            1450.205
+          ],
+          [
+            1454.205,
+            1456.029
+          ],
+          [
+            1705.821,
+            1707.805
+          ],
+          [
+            1765.405,
+            1766.301
+          ],
+          [
+            1835.421,
+            1836.477
+          ],
+          [
+            1839.005,
+            1839.997
+          ],
+          [
+            1841.853,
+            1843.389
+          ],
+          [
+            1844.413,
+            1845.917
+          ],
+          [
+            1850.973,
+            1851.901
+          ],
+          [
+            1853.309,
+            1854.333
+          ],
+          [
+            1858.813,
+            1859.837
+          ],
+          [
+            2789.339,
+            2790.907
+          ],
+          [
+            2791.643,
+            2793.467
+          ],
+          [
+            2845.659,
+            2849.083
+          ],
+          [
+            3059.674,
+            3059.77
+          ],
+          [
+            3080.89,
+            3080.954
+          ],
+          [
+            3301.369,
+            3301.37
+          ],
+          [
+            3522.906,
+            3523.066
+          ],
+          [
+            3565.848,
+            3565.849
+          ],
+          [
+            3570.136,
+            3570.137
+          ]
+        ],
+        "memcpy": [
+          {
+            "direction": "Device-to-Device",
+            "bytes": 1179648,
+            "stage": "compute_graph_owned_writeback_source"
+          },
+          {
+            "direction": "Device-to-Device",
+            "bytes": 131072,
+            "stage": "index_cache_write"
+          },
+          {
+            "direction": "Device-to-Device",
+            "bytes": 4096,
+            "stage": "index_cache_write"
+          },
+          {
+            "direction": "Device-to-Host",
+            "bytes": 1179648,
+            "stage": "pool_write_host"
+          }
+        ],
+        "main_kv_writeback_union_ms": 0.028416,
+        "main_kv_writeback_compute_overlap_ms": 0.007264,
+        "next_layer_transfers": [],
+        "next_layer_transfer_full_union_ms": 0.0,
+        "compute_next_layer_transfer_overlap_ms": 0.0,
+        "overlap_fraction_of_full_target": null
+      },
+      {
+        "scheme": "serial_sparse",
+        "phase": "cold",
+        "activity_count": 73,
+        "all_intervals_names_and_memcpy_bytes_exact": true,
+        "window_ms": 4.033086,
+        "busy_union_ms": 3.97427,
+        "gap_ms": 0.058816,
+        "gap_count": 71,
+        "largest_gap_us": 5.632,
+        "gaps_us": [
+          [
+            0.0,
+            4.96
+          ],
+          [
+            20.288,
+            20.736
+          ],
+          [
+            22.752,
+            23.136
+          ],
+          [
+            25.472,
+            25.888
+          ],
+          [
+            27.136,
+            27.616
+          ],
+          [
+            29.344,
+            29.856
+          ],
+          [
+            34.656,
+            35.072
+          ],
+          [
+            37.152,
+            37.568
+          ],
+          [
+            58.4,
+            59.072
+          ],
+          [
+            62.144,
+            62.592
+          ],
+          [
+            64.512,
+            64.928
+          ],
+          [
+            65.856,
+            66.272
+          ],
+          [
+            68.256,
+            68.672
+          ],
+          [
+            70.56,
+            70.976
+          ],
+          [
+            72.576,
+            72.992
+          ],
+          [
+            75.328,
+            75.68
+          ],
+          [
+            77.216,
+            77.632
+          ],
+          [
+            141.664,
+            143.104
+          ],
+          [
+            143.904,
+            149.536
+          ],
+          [
+            206.559,
+            206.847
+          ],
+          [
+            215.039,
+            215.455
+          ],
+          [
+            217.471,
+            217.887
+          ],
+          [
+            235.519,
+            235.935
+          ],
+          [
+            238.559,
+            239.551
+          ],
+          [
+            241.343,
+            241.727
+          ],
+          [
+            252.607,
+            252.863
+          ],
+          [
+            256.543,
+            256.959
+          ],
+          [
+            258.463,
+            258.911
+          ],
+          [
+            283.871,
+            284.543
+          ],
+          [
+            291.519,
+            291.935
+          ],
+          [
+            294.015,
+            294.463
+          ],
+          [
+            304.735,
+            305.151
+          ],
+          [
+            308.223,
+            308.639
+          ],
+          [
+            312.319,
+            312.767
+          ],
+          [
+            314.175,
+            314.687
+          ],
+          [
+            325.951,
+            326.207
+          ],
+          [
+            331.711,
+            332.191
+          ],
+          [
+            333.567,
+            334.111
+          ],
+          [
+            358.111,
+            358.367
+          ],
+          [
+            393.183,
+            393.599
+          ],
+          [
+            400.415,
+            401.087
+          ],
+          [
+            402.271,
+            402.687
+          ],
+          [
+            404.287,
+            404.959
+          ],
+          [
+            406.015,
+            406.623
+          ],
+          [
+            409.247,
+            411.839
+          ],
+          [
+            413.407,
+            414.431
+          ],
+          [
+            415.935,
+            417.023
+          ],
+          [
+            418.239,
+            419.455
+          ],
+          [
+            1573.951,
+            1575.455
+          ],
+          [
+            1579.455,
+            1580.575
+          ],
+          [
+            1843.167,
+            1844.671
+          ],
+          [
+            1904.639,
+            1905.791
+          ],
+          [
+            1980.031,
+            1981.087
+          ],
+          [
+            1983.743,
+            1984.927
+          ],
+          [
+            1989.471,
+            1990.495
+          ],
+          [
+            1991.519,
+            1992.703
+          ],
+          [
+            2997.598,
+            2999.23
+          ],
+          [
+            2999.966,
+            3002.11
+          ],
+          [
+            3053.086,
+            3056.862
+          ],
+          [
+            3068.83,
+            3069.086
+          ],
+          [
+            3073.118,
+            3073.534
+          ],
+          [
+            3276.99,
+            3277.662
+          ],
+          [
+            3291.998,
+            3292.286
+          ],
+          [
+            3297.214,
+            3297.598
+          ],
+          [
+            3299.71,
+            3300.158
+          ],
+          [
+            3527.55,
+            3527.838
+          ],
+          [
+            3530.27,
+            3530.846
+          ],
+          [
+            3756.318,
+            3756.926
+          ],
+          [
+            3787.198,
+            3787.454
+          ],
+          [
+            3801.726,
+            3801.982
+          ],
+          [
+            3806.366,
+            3806.782
+          ]
+        ],
+        "memcpy": [
+          {
+            "direction": "Device-to-Device",
+            "bytes": 1179648,
+            "stage": "compute_graph_owned_writeback_source"
+          },
+          {
+            "direction": "Device-to-Device",
+            "bytes": 131072,
+            "stage": "index_cache_write"
+          },
+          {
+            "direction": "Device-to-Device",
+            "bytes": 4096,
+            "stage": "index_cache_write"
+          },
+          {
+            "direction": "Device-to-Host",
+            "bytes": 1179648,
+            "stage": "pool_write_host"
+          }
+        ],
+        "main_kv_writeback_union_ms": 0.029216,
+        "main_kv_writeback_compute_overlap_ms": 0.010048,
+        "next_layer_transfers": [],
+        "next_layer_transfer_full_union_ms": 0.0,
+        "compute_next_layer_transfer_overlap_ms": 0.0,
+        "overlap_fraction_of_full_target": null
+      },
+      {
+        "scheme": "dense_prefetch",
+        "phase": "cold",
+        "activity_count": 74,
+        "all_intervals_names_and_memcpy_bytes_exact": true,
+        "window_ms": 4.06537,
+        "busy_union_ms": 4.006298,
+        "gap_ms": 0.059072,
+        "gap_count": 72,
+        "largest_gap_us": 5.344,
+        "gaps_us": [
+          [
+            0.0,
+            1.92
+          ],
+          [
+            4.8,
+            9.28
+          ],
+          [
+            24.032,
+            24.384
+          ],
+          [
+            26.464,
+            26.848
+          ],
+          [
+            29.184,
+            29.76
+          ],
+          [
+            31.008,
+            31.616
+          ],
+          [
+            33.344,
+            33.76
+          ],
+          [
+            38.656,
+            39.072
+          ],
+          [
+            41.184,
+            41.6
+          ],
+          [
+            62.528,
+            63.136
+          ],
+          [
+            66.272,
+            66.848
+          ],
+          [
+            68.704,
+            69.12
+          ],
+          [
+            70.016,
+            70.592
+          ],
+          [
+            72.576,
+            72.992
+          ],
+          [
+            74.88,
+            75.328
+          ],
+          [
+            76.896,
+            77.312
+          ],
+          [
+            79.648,
+            80.0
+          ],
+          [
+            81.536,
+            81.952
+          ],
+          [
+            146.079,
+            147.519
+          ],
+          [
+            148.543,
+            153.887
+          ],
+          [
+            211.455,
+            211.743
+          ],
+          [
+            220.127,
+            220.543
+          ],
+          [
+            222.591,
+            222.975
+          ],
+          [
+            241.151,
+            241.567
+          ],
+          [
+            244.223,
+            244.959
+          ],
+          [
+            246.847,
+            247.423
+          ],
+          [
+            258.271,
+            258.527
+          ],
+          [
+            262.111,
+            262.527
+          ],
+          [
+            264.063,
+            264.511
+          ],
+          [
+            288.927,
+            289.599
+          ],
+          [
+            296.607,
+            297.023
+          ],
+          [
+            299.071,
+            299.551
+          ],
+          [
+            309.695,
+            310.271
+          ],
+          [
+            313.343,
+            313.727
+          ],
+          [
+            317.311,
+            317.727
+          ],
+          [
+            319.167,
+            319.551
+          ],
+          [
+            331.359,
+            331.615
+          ],
+          [
+            336.959,
+            337.375
+          ],
+          [
+            338.751,
+            339.167
+          ],
+          [
+            363.263,
+            363.583
+          ],
+          [
+            398.271,
+            398.687
+          ],
+          [
+            405.567,
+            406.207
+          ],
+          [
+            407.455,
+            408.127
+          ],
+          [
+            409.951,
+            410.367
+          ],
+          [
+            411.455,
+            411.871
+          ],
+          [
+            414.527,
+            416.447
+          ],
+          [
+            417.919,
+            419.135
+          ],
+          [
+            420.767,
+            421.823
+          ],
+          [
+            423.103,
+            424.127
+          ],
+          [
+            1590.878,
+            1592.254
+          ],
+          [
+            1596.349,
+            1597.437
+          ],
+          [
+            1861.693,
+            1863.133
+          ],
+          [
+            1924.189,
+            1925.373
+          ],
+          [
+            1998.493,
+            1999.613
+          ],
+          [
+            2002.269,
+            2003.485
+          ],
+          [
+            2008.189,
+            2009.309
+          ],
+          [
+            2010.333,
+            2010.621
+          ],
+          [
+            3022.332,
+            3023.868
+          ],
+          [
+            3024.604,
+            3026.492
+          ],
+          [
+            3077.467,
+            3082.011
+          ],
+          [
+            3093.691,
+            3094.107
+          ],
+          [
+            3098.107,
+            3098.555
+          ],
+          [
+            3303.195,
+            3304.059
+          ],
+          [
+            3318.619,
+            3318.907
+          ],
+          [
+            3323.931,
+            3324.315
+          ],
+          [
+            3326.459,
+            3326.907
+          ],
+          [
+            3556.219,
+            3556.507
+          ],
+          [
+            3558.843,
+            3559.259
+          ],
+          [
+            3786.651,
+            3787.355
+          ],
+          [
+            3816.282,
+            3816.538
+          ],
+          [
+            3831.386,
+            3831.706
+          ],
+          [
+            3836.25,
+            3836.666
+          ]
+        ],
+        "memcpy": [
+          {
+            "direction": "Device-to-Device",
+            "bytes": 1179648,
+            "stage": "compute_graph_owned_writeback_source"
+          },
+          {
+            "direction": "Device-to-Device",
+            "bytes": 131072,
+            "stage": "index_cache_write"
+          },
+          {
+            "direction": "Device-to-Device",
+            "bytes": 4096,
+            "stage": "index_cache_write"
+          },
+          {
+            "direction": "Device-to-Host",
+            "bytes": 1179648,
+            "stage": "pool_write_host"
+          }
+        ],
+        "main_kv_writeback_union_ms": 0.028352,
+        "main_kv_writeback_compute_overlap_ms": 0.007168,
+        "next_layer_transfers": [],
+        "next_layer_transfer_full_union_ms": 0.0,
+        "compute_next_layer_transfer_overlap_ms": 0.0,
+        "overlap_fraction_of_full_target": null
+      }
+    ]
+  },
+  "boundary": "CPU-only independent raw SQLite verification. All timeline GPU activities are preserved; intervals are clipped only for union durations. Dense transfer addresses remain instrumentation metadata. Fused ECHO internal compute/fetch overlap is not inferred; intrusive profiles are not formal latency."
+}

@@ -1,26 +1,3659 @@
 {
-  "schema": "deepseek-c10-publication-acceptance-v1",
+  "schema": "deepseek-c10-matrix-publication-acceptance-v2",
   "status": "passed",
-  "check_run_id": "deepseek_mfu_c10_check_20261006_01",
-  "bench_run_id": "deepseek_mfu_c10_bench_20261006_01",
-  "profile_run_id": "deepseek_mfu_c10_profile_20261006_02",
-  "bench_requests": 128,
-  "bench_check_output_sets": 128,
-  "offload_vs_hbm_exact_comparisons": 96,
-  "profile_exact_output_sets": 80,
-  "bench_memory_samples_verified": 270,
-  "profile_captures": 12,
-  "request_captures": 8,
-  "single_layer_and_prefill_raw_intervals_conserved": true,
-  "artifact_audit_sha256": {
-    "independent_bench_audit.json": "635395fab97e5a3db34a544f5066a102d4bca0ca810b12a73e91db052197fa9f",
-    "diagnosis/independent_numerical_audit.json": "9510cf5d88402ec547918f3960175b00479035615dcf0ce73abbad6c853b766f",
-    "diagnosis/independent_provenance_audit.json": "4b356f7297dd9f6ce0336d5c563fca1d7067268d6cea5f246182883d6d8acbe8",
-    "diagnosis/independent_transfer_audit.json": "1c2bbd03f53d91821313d06a11f006fac638d772df1b46c14e210a891326c849",
-    "single_layer/raw_check.json": "d5a6e66b656bb76cf7297e13aeeb985b7504ea00ccc416ea0ac7ccae6caa4922",
-    "prefill_layer/raw_check.json": "c1460212ad6c5b7233342b30aec71617a9a0eec951aebc76f65a20ad4f8b1e86",
-    "observer_summary.json": "9cdf9a243b4dfe75e253afe82169d3e30cecb98c4387ce5b63ff2d872fce8903",
-    "diagnosis/observer_summary.json": "c9a4d726b398e5163038868a63ee806c8f3168ac91c87148b587885cc9c5ae12"
+  "batch_id": "deepseek_motivation_matrix_20261007_01",
+  "points": [
+    {
+      "history_tokens": 4096,
+      "candidate_tokens": 128,
+      "bench_run_id": "deepseek_motivation_matrix_20261007_01_h4096_a128_bench",
+      "check_run_id": "deepseek_motivation_matrix_20261007_01_h4096_a128_check",
+      "audit_path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_analysis_20261007_02/h4096_a128/independent_bench_audit.json",
+      "audit_sha256": "22a20031baf7567048a8f6e821b368ff06a26e0580d64a23906d2a145beb24eb",
+      "audit_helper_sha256": "de3f5186310a075061c00050ac16ee58b7f93a34d2fba9bbb1065a92bc678fd6",
+      "audit_helper_path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_analysis_20261007_02/h4096_a128/source/independent_audit_v2.py",
+      "receipt_path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h4096_a128_check/receipt.json",
+      "receipt_sha256": "362e23fb4bb53ceb1cf0835bd58642e36b7a61b45c18a4be8ac408fcb6c8c8f2",
+      "source_sha256": "f90f924e35f745fdef0032735c8e3527b34637a07dab5a33e7292ed59b4bbe24",
+      "counts": {
+        "receipt_artifact_count": 132,
+        "checked_payloads": 128,
+        "compared_offload_payloads": 96,
+        "request_count": 128,
+        "checked_warmup_requests": 68,
+        "memory_sample_count": 270,
+        "check_memory_sample_count": 270,
+        "echo_rejected_reservation_attempt_difference_count": 0
+      },
+      "observer_monitor_coverage": {
+        "first_sample_utc": "2026-10-06T16:32:31.656011+00:00",
+        "last_sample_utc": "2026-10-06T18:02:11.214462+00:00",
+        "first_sample_unix": 1791304351.656011,
+        "last_sample_unix": 1791309731.214462,
+        "run_brackets_check_and_bench": true,
+        "raw_samples_bracket_bench": true,
+        "bench_started_unix": 1791304484.8076956,
+        "bench_completed_unix": 1791304580.3938603,
+        "check_started_unix": 1791304351.5158587,
+        "check_completed_unix": 1791304449.188177,
+        "check_unobserved_start_seconds": 0.1401524543762207,
+        "check_unobserved_end_seconds": 0.0,
+        "boundary": "The whole-batch run brackets check and bench. Raw samples bracket the entire formal benchmark process interval. Any unsampled check initialization or completion interval is reported explicitly; the check is numerical validation, not a performance measurement. Discrete samples do not exclude activity between samples or unrelated CPU work.",
+        "raw_process_ownership_summary_verified": true
+      },
+      "input_sha256": {
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h4096_a128_bench/metadata.json": "9789cfe44e728c5092878c7d235dce12413a4d6d91f5b5d8431f87a0e0274bc9",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h4096_a128_bench/measurements.jsonl": "af14e56c7a37728aff6220390f70f2970a2c20a467e3c600aeed6a2f62af6a3c",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h4096_a128_bench/memory.json": "2b1c1fde1ad85c804a9d0c9db7752b2cf8c9f32c269768eca51af07d1273b531",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h4096_a128_bench/source_manifest.json": "4b68aa9ab128de2d8cee6f860ea4a72fa5b5bd7a85cab3fc851b67601ae9f18d",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h4096_a128_bench/workload/workload.json": "9e40e392f305f359a97473f1c628812d4ee36c7676f214105b0f73504a2ed92d",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h4096_a128_bench/workload/requests.jsonl": "d5e4560a39333d868f66685bb69f66dab8d4e89fb1d42610a7fff3ae3e016b6b",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h4096_a128_check/metadata.json": "8e881f9bcbeebf504113a0fccb75fe62c9f7d0107db29ef8df2e7db7911beeec",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h4096_a128_check/measurements.jsonl": "d5d0b59ecfd50ad4d0475914f1423e31b2bb5f6632eadc0088844eb2e49feb8b",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h4096_a128_check/memory.json": "3a38dfea4e45b65d09168b58a6f6669056558633de890e42904e23424d6b5094",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h4096_a128_check/source_manifest.json": "4b68aa9ab128de2d8cee6f860ea4a72fa5b5bd7a85cab3fc851b67601ae9f18d",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h4096_a128_check/workload/workload.json": "9e40e392f305f359a97473f1c628812d4ee36c7676f214105b0f73504a2ed92d",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h4096_a128_check/workload/requests.jsonl": "d5e4560a39333d868f66685bb69f66dab8d4e89fb1d42610a7fff3ae3e016b6b"
+      },
+      "echo_rejected_reservation_attempt_policy": {
+        "policy_revision": "echo-cap8192-rejected-reservation-attempts-v1",
+        "field": "cache_diagnostics.layers[i].prefetch_capacity_failures",
+        "derived_prefetch_cap": 8192,
+        "cap_derivation": "The hash-bound attention call omits a limit override. SparseTokenLayerCache.prepare_prefetch defaults to 8192 and uses min(limit, 8192, P) for gpu_transient candidates; the fixed P is 65536. The original metadata does not contain a prefetch_cap field.",
+        "source_sha256": {
+          "models/deepseek_v32/attention.py": "929e7afcc0b3c9abdddce464aca23a0c1a50dc19e656275bdf5031fd4dc4fc7b",
+          "models/deepseek_v32/cache/session.py": "50e11d659389aeafc2ed8a608915f4eca2202e953529a4ea7180d2dd0edaaad9",
+          "models/deepseek_v32/execution/adapter.py": "bd20895dca304db0923f1489ed093094f3d199574112035e4745d518d20e4989",
+          "cache/sparse_token_cache.py": "1b3da2acfe5dc22c403b5794d6aedcebd1daaccaa9e82e54741fb0afd69c3cdf",
+          "operators/deepseek_v32/indexer/echo.py": "de20ebc3b4905b3dddb646167fb770d27a92146e76934be3160ad1b5b149c562",
+          "operators/deepseek_v32/indexer/csrc/echo_cache.cuh": "409be4a062180a8c8e73c1fa783d3980cf3e9926bf53ef34ddbaefe46e2dcd12",
+          "operators/deepseek_v32/indexer/csrc/echo_logits.cuh": "562b10fbca2082948fef14a1ac1c40b8918e1c2c81717a965cad040f5293e61f",
+          "operators/deepseek_v32/indexer/csrc/echo_indexer.cu": "c39ee55cb67ef452d6ee920c84c5852002ec8d2efd7c3115dfcb3564e9c8a255",
+          "operators/deepseek_v32/indexer/csrc/echo_sparse_recall.cuh": "a7c33da4c60eb3354e93fc77cac39faf19810d4a5b52c03283242fa61e52ff44"
+        },
+        "backend_cache_policy_revision": "echo-global-pages-fifo-v1",
+        "backend_echo_flags": {
+          "fused_logits_recall_extend": true,
+          "early_evict": false,
+          "offset_policy": "mean_of_last_up_to_four_rows_with_finite_guard",
+          "exact_union_overflow": "local_query_consumption_split_without_selection_clipping"
+        },
+        "boundary": "Only rejected reservation attempts may differ after both executions saturate the same derived cap. Rejected claims restore the temporary map claim without copying a record or writing a slot. This field does not count distinct missing tokens. All actual transfer, eviction, selection, cache, numerical and receipt checks remain exact; no exception for differing actual prefetch sets is used."
+      },
+      "echo_rejected_reservation_attempt_differences": [],
+      "live_source_differences": [
+        {
+          "path": "experiments/deepseek_v32_motivation/src/report_matrix.py",
+          "snapshot_sha256": "d1607c6579dde11ffb384e94969665d775492d932bb2e0024c0f2960e10134d5",
+          "live_sha256": "10780910a8364399f8a1c10bfc8b0ecff45a16b053bbe63f75b78646ff26aa05",
+          "saved_source_sha256": {
+            "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h4096_a128_bench/source/experiments/deepseek_v32_motivation/src/report_matrix.py": "d1607c6579dde11ffb384e94969665d775492d932bb2e0024c0f2960e10134d5",
+            "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h4096_a128_check/source/experiments/deepseek_v32_motivation/src/report_matrix.py": "d1607c6579dde11ffb384e94969665d775492d932bb2e0024c0f2960e10134d5"
+          },
+          "excluded_from_receipt_execution_base_sources": true,
+          "boundary": "Only this hash-bound CPU report file changed after measurement. Saved source snapshots and receipt execution identities remain unchanged.",
+          "excluded_from_tracked_native_and_dependency_files": true
+        }
+      ]
+    },
+    {
+      "history_tokens": 4096,
+      "candidate_tokens": 256,
+      "bench_run_id": "deepseek_motivation_matrix_20261007_01_h4096_a256_bench",
+      "check_run_id": "deepseek_motivation_matrix_20261007_01_h4096_a256_check",
+      "audit_path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_analysis_20261007_02/h4096_a256/independent_bench_audit.json",
+      "audit_sha256": "b9eeea72a9fdae574a0ddafc16df2385c6f8519aff3cc289c6c98b79d678de93",
+      "audit_helper_sha256": "de3f5186310a075061c00050ac16ee58b7f93a34d2fba9bbb1065a92bc678fd6",
+      "audit_helper_path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_analysis_20261007_02/h4096_a256/source/independent_audit_v2.py",
+      "receipt_path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h4096_a256_check/receipt.json",
+      "receipt_sha256": "ba7bc7612b5274e6006b035f33c819a371a4760205da759c075408031222b3e3",
+      "source_sha256": "f90f924e35f745fdef0032735c8e3527b34637a07dab5a33e7292ed59b4bbe24",
+      "counts": {
+        "receipt_artifact_count": 132,
+        "checked_payloads": 128,
+        "compared_offload_payloads": 96,
+        "request_count": 128,
+        "checked_warmup_requests": 68,
+        "memory_sample_count": 270,
+        "check_memory_sample_count": 270,
+        "echo_rejected_reservation_attempt_difference_count": 0
+      },
+      "observer_monitor_coverage": {
+        "first_sample_utc": "2026-10-06T16:32:31.656011+00:00",
+        "last_sample_utc": "2026-10-06T18:02:11.214462+00:00",
+        "first_sample_unix": 1791304351.656011,
+        "last_sample_unix": 1791309731.214462,
+        "run_brackets_check_and_bench": true,
+        "raw_samples_bracket_bench": true,
+        "bench_started_unix": 1791304751.0497139,
+        "bench_completed_unix": 1791304846.0793269,
+        "check_started_unix": 1791304615.2162616,
+        "check_completed_unix": 1791304714.1521735,
+        "check_unobserved_start_seconds": 0.0,
+        "check_unobserved_end_seconds": 0.0,
+        "boundary": "The whole-batch run brackets check and bench. Raw samples bracket the entire formal benchmark process interval. Any unsampled check initialization or completion interval is reported explicitly; the check is numerical validation, not a performance measurement. Discrete samples do not exclude activity between samples or unrelated CPU work.",
+        "raw_process_ownership_summary_verified": true
+      },
+      "input_sha256": {
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h4096_a256_bench/metadata.json": "d2e7b38df510bfbb15340720efeef9405eb063244429f1ab4728699d61648c1e",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h4096_a256_bench/measurements.jsonl": "8b2bf0ed5bb56050d1c60638ffa5dd2fe92f2913905fb56351d0fbcc92621264",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h4096_a256_bench/memory.json": "3b3bf5e6bd349865021e425962a28b3f13dc446bec6916d4cbf0df7c5bd7ec76",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h4096_a256_bench/source_manifest.json": "4b68aa9ab128de2d8cee6f860ea4a72fa5b5bd7a85cab3fc851b67601ae9f18d",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h4096_a256_bench/workload/workload.json": "a74045757d1eddb761add16be04a31c8e78e0e0fab0de1a3ab6b649c820651af",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h4096_a256_bench/workload/requests.jsonl": "dabe487e68a2576ea10e49ac845367849972e9092af1a1fc4c5b1a90f3dfa574",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h4096_a256_check/metadata.json": "170bc228a124c07d2ea6721ee4b250baf28cd4cc121f26a8b1b85da4cf717bda",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h4096_a256_check/measurements.jsonl": "b9cd4ab1da42bcf45cf7703159112eb1f9d9fa8aa35672c4e12b60965a1c29a7",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h4096_a256_check/memory.json": "7a986a8a7f83bd2bf66e3ed87d6b47ac637d57bccadac55f97fa68936186404f",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h4096_a256_check/source_manifest.json": "4b68aa9ab128de2d8cee6f860ea4a72fa5b5bd7a85cab3fc851b67601ae9f18d",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h4096_a256_check/workload/workload.json": "a74045757d1eddb761add16be04a31c8e78e0e0fab0de1a3ab6b649c820651af",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h4096_a256_check/workload/requests.jsonl": "dabe487e68a2576ea10e49ac845367849972e9092af1a1fc4c5b1a90f3dfa574"
+      },
+      "echo_rejected_reservation_attempt_policy": {
+        "policy_revision": "echo-cap8192-rejected-reservation-attempts-v1",
+        "field": "cache_diagnostics.layers[i].prefetch_capacity_failures",
+        "derived_prefetch_cap": 8192,
+        "cap_derivation": "The hash-bound attention call omits a limit override. SparseTokenLayerCache.prepare_prefetch defaults to 8192 and uses min(limit, 8192, P) for gpu_transient candidates; the fixed P is 65536. The original metadata does not contain a prefetch_cap field.",
+        "source_sha256": {
+          "models/deepseek_v32/attention.py": "929e7afcc0b3c9abdddce464aca23a0c1a50dc19e656275bdf5031fd4dc4fc7b",
+          "models/deepseek_v32/cache/session.py": "50e11d659389aeafc2ed8a608915f4eca2202e953529a4ea7180d2dd0edaaad9",
+          "models/deepseek_v32/execution/adapter.py": "bd20895dca304db0923f1489ed093094f3d199574112035e4745d518d20e4989",
+          "cache/sparse_token_cache.py": "1b3da2acfe5dc22c403b5794d6aedcebd1daaccaa9e82e54741fb0afd69c3cdf",
+          "operators/deepseek_v32/indexer/echo.py": "de20ebc3b4905b3dddb646167fb770d27a92146e76934be3160ad1b5b149c562",
+          "operators/deepseek_v32/indexer/csrc/echo_cache.cuh": "409be4a062180a8c8e73c1fa783d3980cf3e9926bf53ef34ddbaefe46e2dcd12",
+          "operators/deepseek_v32/indexer/csrc/echo_logits.cuh": "562b10fbca2082948fef14a1ac1c40b8918e1c2c81717a965cad040f5293e61f",
+          "operators/deepseek_v32/indexer/csrc/echo_indexer.cu": "c39ee55cb67ef452d6ee920c84c5852002ec8d2efd7c3115dfcb3564e9c8a255",
+          "operators/deepseek_v32/indexer/csrc/echo_sparse_recall.cuh": "a7c33da4c60eb3354e93fc77cac39faf19810d4a5b52c03283242fa61e52ff44"
+        },
+        "backend_cache_policy_revision": "echo-global-pages-fifo-v1",
+        "backend_echo_flags": {
+          "fused_logits_recall_extend": true,
+          "early_evict": false,
+          "offset_policy": "mean_of_last_up_to_four_rows_with_finite_guard",
+          "exact_union_overflow": "local_query_consumption_split_without_selection_clipping"
+        },
+        "boundary": "Only rejected reservation attempts may differ after both executions saturate the same derived cap. Rejected claims restore the temporary map claim without copying a record or writing a slot. This field does not count distinct missing tokens. All actual transfer, eviction, selection, cache, numerical and receipt checks remain exact; no exception for differing actual prefetch sets is used."
+      },
+      "echo_rejected_reservation_attempt_differences": [],
+      "live_source_differences": [
+        {
+          "path": "experiments/deepseek_v32_motivation/src/report_matrix.py",
+          "snapshot_sha256": "d1607c6579dde11ffb384e94969665d775492d932bb2e0024c0f2960e10134d5",
+          "live_sha256": "10780910a8364399f8a1c10bfc8b0ecff45a16b053bbe63f75b78646ff26aa05",
+          "saved_source_sha256": {
+            "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h4096_a256_bench/source/experiments/deepseek_v32_motivation/src/report_matrix.py": "d1607c6579dde11ffb384e94969665d775492d932bb2e0024c0f2960e10134d5",
+            "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h4096_a256_check/source/experiments/deepseek_v32_motivation/src/report_matrix.py": "d1607c6579dde11ffb384e94969665d775492d932bb2e0024c0f2960e10134d5"
+          },
+          "excluded_from_receipt_execution_base_sources": true,
+          "boundary": "Only this hash-bound CPU report file changed after measurement. Saved source snapshots and receipt execution identities remain unchanged.",
+          "excluded_from_tracked_native_and_dependency_files": true
+        }
+      ]
+    },
+    {
+      "history_tokens": 4096,
+      "candidate_tokens": 512,
+      "bench_run_id": "deepseek_motivation_matrix_20261007_01_h4096_a512_bench",
+      "check_run_id": "deepseek_motivation_matrix_20261007_01_h4096_a512_check",
+      "audit_path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_analysis_20261007_02/h4096_a512/independent_bench_audit.json",
+      "audit_sha256": "4d0e5de3897933e3a9b089723be29547a3a7dd4e7d01fd674c12de647f419df1",
+      "audit_helper_sha256": "de3f5186310a075061c00050ac16ee58b7f93a34d2fba9bbb1065a92bc678fd6",
+      "audit_helper_path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_analysis_20261007_02/h4096_a512/source/independent_audit_v2.py",
+      "receipt_path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h4096_a512_check/receipt.json",
+      "receipt_sha256": "3c4024eabd36714aae69c917d43396e493a242e5c849a9c87e14d3d56b585f2b",
+      "source_sha256": "f90f924e35f745fdef0032735c8e3527b34637a07dab5a33e7292ed59b4bbe24",
+      "counts": {
+        "receipt_artifact_count": 132,
+        "checked_payloads": 128,
+        "compared_offload_payloads": 96,
+        "request_count": 128,
+        "checked_warmup_requests": 68,
+        "memory_sample_count": 270,
+        "check_memory_sample_count": 270,
+        "echo_rejected_reservation_attempt_difference_count": 0
+      },
+      "observer_monitor_coverage": {
+        "first_sample_utc": "2026-10-06T16:32:31.656011+00:00",
+        "last_sample_utc": "2026-10-06T18:02:11.214462+00:00",
+        "first_sample_unix": 1791304351.656011,
+        "last_sample_unix": 1791309731.214462,
+        "run_brackets_check_and_bench": true,
+        "raw_samples_bracket_bench": true,
+        "bench_started_unix": 1791305023.310759,
+        "bench_completed_unix": 1791305120.1951756,
+        "check_started_unix": 1791304880.907686,
+        "check_completed_unix": 1791304984.3095906,
+        "check_unobserved_start_seconds": 0.0,
+        "check_unobserved_end_seconds": 0.0,
+        "boundary": "The whole-batch run brackets check and bench. Raw samples bracket the entire formal benchmark process interval. Any unsampled check initialization or completion interval is reported explicitly; the check is numerical validation, not a performance measurement. Discrete samples do not exclude activity between samples or unrelated CPU work.",
+        "raw_process_ownership_summary_verified": true
+      },
+      "input_sha256": {
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h4096_a512_bench/metadata.json": "2dc29bf770175136ccb9a96c9ea6876fa7862a91273df7aee01a0aded22540e4",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h4096_a512_bench/measurements.jsonl": "8ff0a3b4b7cbf2611d257d5459401fd73d338e93c0608303aa576fe1fa78e339",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h4096_a512_bench/memory.json": "be427678cf183b3a157feebb58a8f1a4a88b1f6354ba9b89c2ab4e5d519d34aa",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h4096_a512_bench/source_manifest.json": "4b68aa9ab128de2d8cee6f860ea4a72fa5b5bd7a85cab3fc851b67601ae9f18d",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h4096_a512_bench/workload/workload.json": "aaea864975ad8836fdcce02bb88f11befffa5ca96e431a525869ad8bb4be19ca",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h4096_a512_bench/workload/requests.jsonl": "0010595b718437404f9e91afd7a1646a7402bfcfe0c6214241d4bcb74be707e4",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h4096_a512_check/metadata.json": "0c661877c246a99c5e93eb4c39a2a642916d8a17f93947d553c069d7f11d4355",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h4096_a512_check/measurements.jsonl": "5a6da7be5af0d11eed3879bea0e5ae43b4398eebc6986d4ea9eb710901851d2d",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h4096_a512_check/memory.json": "4c747cfeb2368022b5d2fce1da448078f270399449d108b94e65f2d12a69912b",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h4096_a512_check/source_manifest.json": "4b68aa9ab128de2d8cee6f860ea4a72fa5b5bd7a85cab3fc851b67601ae9f18d",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h4096_a512_check/workload/workload.json": "aaea864975ad8836fdcce02bb88f11befffa5ca96e431a525869ad8bb4be19ca",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h4096_a512_check/workload/requests.jsonl": "0010595b718437404f9e91afd7a1646a7402bfcfe0c6214241d4bcb74be707e4"
+      },
+      "echo_rejected_reservation_attempt_policy": {
+        "policy_revision": "echo-cap8192-rejected-reservation-attempts-v1",
+        "field": "cache_diagnostics.layers[i].prefetch_capacity_failures",
+        "derived_prefetch_cap": 8192,
+        "cap_derivation": "The hash-bound attention call omits a limit override. SparseTokenLayerCache.prepare_prefetch defaults to 8192 and uses min(limit, 8192, P) for gpu_transient candidates; the fixed P is 65536. The original metadata does not contain a prefetch_cap field.",
+        "source_sha256": {
+          "models/deepseek_v32/attention.py": "929e7afcc0b3c9abdddce464aca23a0c1a50dc19e656275bdf5031fd4dc4fc7b",
+          "models/deepseek_v32/cache/session.py": "50e11d659389aeafc2ed8a608915f4eca2202e953529a4ea7180d2dd0edaaad9",
+          "models/deepseek_v32/execution/adapter.py": "bd20895dca304db0923f1489ed093094f3d199574112035e4745d518d20e4989",
+          "cache/sparse_token_cache.py": "1b3da2acfe5dc22c403b5794d6aedcebd1daaccaa9e82e54741fb0afd69c3cdf",
+          "operators/deepseek_v32/indexer/echo.py": "de20ebc3b4905b3dddb646167fb770d27a92146e76934be3160ad1b5b149c562",
+          "operators/deepseek_v32/indexer/csrc/echo_cache.cuh": "409be4a062180a8c8e73c1fa783d3980cf3e9926bf53ef34ddbaefe46e2dcd12",
+          "operators/deepseek_v32/indexer/csrc/echo_logits.cuh": "562b10fbca2082948fef14a1ac1c40b8918e1c2c81717a965cad040f5293e61f",
+          "operators/deepseek_v32/indexer/csrc/echo_indexer.cu": "c39ee55cb67ef452d6ee920c84c5852002ec8d2efd7c3115dfcb3564e9c8a255",
+          "operators/deepseek_v32/indexer/csrc/echo_sparse_recall.cuh": "a7c33da4c60eb3354e93fc77cac39faf19810d4a5b52c03283242fa61e52ff44"
+        },
+        "backend_cache_policy_revision": "echo-global-pages-fifo-v1",
+        "backend_echo_flags": {
+          "fused_logits_recall_extend": true,
+          "early_evict": false,
+          "offset_policy": "mean_of_last_up_to_four_rows_with_finite_guard",
+          "exact_union_overflow": "local_query_consumption_split_without_selection_clipping"
+        },
+        "boundary": "Only rejected reservation attempts may differ after both executions saturate the same derived cap. Rejected claims restore the temporary map claim without copying a record or writing a slot. This field does not count distinct missing tokens. All actual transfer, eviction, selection, cache, numerical and receipt checks remain exact; no exception for differing actual prefetch sets is used."
+      },
+      "echo_rejected_reservation_attempt_differences": [],
+      "live_source_differences": [
+        {
+          "path": "experiments/deepseek_v32_motivation/src/report_matrix.py",
+          "snapshot_sha256": "d1607c6579dde11ffb384e94969665d775492d932bb2e0024c0f2960e10134d5",
+          "live_sha256": "10780910a8364399f8a1c10bfc8b0ecff45a16b053bbe63f75b78646ff26aa05",
+          "saved_source_sha256": {
+            "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h4096_a512_bench/source/experiments/deepseek_v32_motivation/src/report_matrix.py": "d1607c6579dde11ffb384e94969665d775492d932bb2e0024c0f2960e10134d5",
+            "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h4096_a512_check/source/experiments/deepseek_v32_motivation/src/report_matrix.py": "d1607c6579dde11ffb384e94969665d775492d932bb2e0024c0f2960e10134d5"
+          },
+          "excluded_from_receipt_execution_base_sources": true,
+          "boundary": "Only this hash-bound CPU report file changed after measurement. Saved source snapshots and receipt execution identities remain unchanged.",
+          "excluded_from_tracked_native_and_dependency_files": true
+        }
+      ]
+    },
+    {
+      "history_tokens": 4096,
+      "candidate_tokens": 1024,
+      "bench_run_id": "deepseek_motivation_matrix_20261007_01_h4096_a1024_bench",
+      "check_run_id": "deepseek_motivation_matrix_20261007_01_h4096_a1024_check",
+      "audit_path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_analysis_20261007_02/h4096_a1024/independent_bench_audit.json",
+      "audit_sha256": "cc9479f8dfd5b681aeb2624fa2763c14dcb7cce93a075bb488ab67b51f261c2d",
+      "audit_helper_sha256": "de3f5186310a075061c00050ac16ee58b7f93a34d2fba9bbb1065a92bc678fd6",
+      "audit_helper_path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_analysis_20261007_02/h4096_a1024/source/independent_audit_v2.py",
+      "receipt_path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h4096_a1024_check/receipt.json",
+      "receipt_sha256": "10bef1e60d56285debc0c3149cb880ee2ebd0f2e74c63a2df4f1c0921b52af12",
+      "source_sha256": "f90f924e35f745fdef0032735c8e3527b34637a07dab5a33e7292ed59b4bbe24",
+      "counts": {
+        "receipt_artifact_count": 132,
+        "checked_payloads": 128,
+        "compared_offload_payloads": 96,
+        "request_count": 128,
+        "checked_warmup_requests": 68,
+        "memory_sample_count": 270,
+        "check_memory_sample_count": 270,
+        "echo_rejected_reservation_attempt_difference_count": 0
+      },
+      "observer_monitor_coverage": {
+        "first_sample_utc": "2026-10-06T16:32:31.656011+00:00",
+        "last_sample_utc": "2026-10-06T18:02:11.214462+00:00",
+        "first_sample_unix": 1791304351.656011,
+        "last_sample_unix": 1791309731.214462,
+        "run_brackets_check_and_bench": true,
+        "raw_samples_bracket_bench": true,
+        "bench_started_unix": 1791305311.7066674,
+        "bench_completed_unix": 1791305410.058434,
+        "check_started_unix": 1791305155.8444676,
+        "check_completed_unix": 1791305268.3448374,
+        "check_unobserved_start_seconds": 0.0,
+        "check_unobserved_end_seconds": 0.0,
+        "boundary": "The whole-batch run brackets check and bench. Raw samples bracket the entire formal benchmark process interval. Any unsampled check initialization or completion interval is reported explicitly; the check is numerical validation, not a performance measurement. Discrete samples do not exclude activity between samples or unrelated CPU work.",
+        "raw_process_ownership_summary_verified": true
+      },
+      "input_sha256": {
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h4096_a1024_bench/metadata.json": "d602d6f68c6cb20da00e3fe99867641c7133d2507cd386445067d80c73a5e2eb",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h4096_a1024_bench/measurements.jsonl": "d4ddae3533540eef080093d63a2f24d753686ffbcd8c9ff109411f2fa26a1c06",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h4096_a1024_bench/memory.json": "658b1063d5f42738c68d299cf4e5de9af755c105f00e4ebf92ba4c246725fd47",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h4096_a1024_bench/source_manifest.json": "4b68aa9ab128de2d8cee6f860ea4a72fa5b5bd7a85cab3fc851b67601ae9f18d",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h4096_a1024_bench/workload/workload.json": "1150fa759d2064af89abea9eb17a0934afd83370835f84a4cb5813a28b09a96f",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h4096_a1024_bench/workload/requests.jsonl": "9dc849a6914c6f0b89b2d737126f26385eaced621895cde769862ff27e676afd",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h4096_a1024_check/metadata.json": "6bb4468dd8370efdd91dcd3eb246eccac6d3ea61ddc3532bd882bcae6d3ce405",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h4096_a1024_check/measurements.jsonl": "da93d3e82dbf22e84530018368744131f69b0e35a90c9a0bb45fd120f24a8730",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h4096_a1024_check/memory.json": "62cd539823fe682e53fe65a775da7ba6cf5bd32a4bc1c4995ac173f9db3e98a3",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h4096_a1024_check/source_manifest.json": "4b68aa9ab128de2d8cee6f860ea4a72fa5b5bd7a85cab3fc851b67601ae9f18d",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h4096_a1024_check/workload/workload.json": "1150fa759d2064af89abea9eb17a0934afd83370835f84a4cb5813a28b09a96f",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h4096_a1024_check/workload/requests.jsonl": "9dc849a6914c6f0b89b2d737126f26385eaced621895cde769862ff27e676afd"
+      },
+      "echo_rejected_reservation_attempt_policy": {
+        "policy_revision": "echo-cap8192-rejected-reservation-attempts-v1",
+        "field": "cache_diagnostics.layers[i].prefetch_capacity_failures",
+        "derived_prefetch_cap": 8192,
+        "cap_derivation": "The hash-bound attention call omits a limit override. SparseTokenLayerCache.prepare_prefetch defaults to 8192 and uses min(limit, 8192, P) for gpu_transient candidates; the fixed P is 65536. The original metadata does not contain a prefetch_cap field.",
+        "source_sha256": {
+          "models/deepseek_v32/attention.py": "929e7afcc0b3c9abdddce464aca23a0c1a50dc19e656275bdf5031fd4dc4fc7b",
+          "models/deepseek_v32/cache/session.py": "50e11d659389aeafc2ed8a608915f4eca2202e953529a4ea7180d2dd0edaaad9",
+          "models/deepseek_v32/execution/adapter.py": "bd20895dca304db0923f1489ed093094f3d199574112035e4745d518d20e4989",
+          "cache/sparse_token_cache.py": "1b3da2acfe5dc22c403b5794d6aedcebd1daaccaa9e82e54741fb0afd69c3cdf",
+          "operators/deepseek_v32/indexer/echo.py": "de20ebc3b4905b3dddb646167fb770d27a92146e76934be3160ad1b5b149c562",
+          "operators/deepseek_v32/indexer/csrc/echo_cache.cuh": "409be4a062180a8c8e73c1fa783d3980cf3e9926bf53ef34ddbaefe46e2dcd12",
+          "operators/deepseek_v32/indexer/csrc/echo_logits.cuh": "562b10fbca2082948fef14a1ac1c40b8918e1c2c81717a965cad040f5293e61f",
+          "operators/deepseek_v32/indexer/csrc/echo_indexer.cu": "c39ee55cb67ef452d6ee920c84c5852002ec8d2efd7c3115dfcb3564e9c8a255",
+          "operators/deepseek_v32/indexer/csrc/echo_sparse_recall.cuh": "a7c33da4c60eb3354e93fc77cac39faf19810d4a5b52c03283242fa61e52ff44"
+        },
+        "backend_cache_policy_revision": "echo-global-pages-fifo-v1",
+        "backend_echo_flags": {
+          "fused_logits_recall_extend": true,
+          "early_evict": false,
+          "offset_policy": "mean_of_last_up_to_four_rows_with_finite_guard",
+          "exact_union_overflow": "local_query_consumption_split_without_selection_clipping"
+        },
+        "boundary": "Only rejected reservation attempts may differ after both executions saturate the same derived cap. Rejected claims restore the temporary map claim without copying a record or writing a slot. This field does not count distinct missing tokens. All actual transfer, eviction, selection, cache, numerical and receipt checks remain exact; no exception for differing actual prefetch sets is used."
+      },
+      "echo_rejected_reservation_attempt_differences": [],
+      "live_source_differences": [
+        {
+          "path": "experiments/deepseek_v32_motivation/src/report_matrix.py",
+          "snapshot_sha256": "d1607c6579dde11ffb384e94969665d775492d932bb2e0024c0f2960e10134d5",
+          "live_sha256": "10780910a8364399f8a1c10bfc8b0ecff45a16b053bbe63f75b78646ff26aa05",
+          "saved_source_sha256": {
+            "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h4096_a1024_bench/source/experiments/deepseek_v32_motivation/src/report_matrix.py": "d1607c6579dde11ffb384e94969665d775492d932bb2e0024c0f2960e10134d5",
+            "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h4096_a1024_check/source/experiments/deepseek_v32_motivation/src/report_matrix.py": "d1607c6579dde11ffb384e94969665d775492d932bb2e0024c0f2960e10134d5"
+          },
+          "excluded_from_receipt_execution_base_sources": true,
+          "boundary": "Only this hash-bound CPU report file changed after measurement. Saved source snapshots and receipt execution identities remain unchanged.",
+          "excluded_from_tracked_native_and_dependency_files": true
+        }
+      ]
+    },
+    {
+      "history_tokens": 16384,
+      "candidate_tokens": 128,
+      "bench_run_id": "deepseek_motivation_matrix_20261007_01_h16384_a128_bench",
+      "check_run_id": "deepseek_motivation_matrix_20261007_01_h16384_a128_check",
+      "audit_path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_analysis_20261007_02/h16384_a128/independent_bench_audit.json",
+      "audit_sha256": "36abe2ed112ec2c0eff2b1f9dfcb42beb01f78e3b5487f53e99616142a198958",
+      "audit_helper_sha256": "de3f5186310a075061c00050ac16ee58b7f93a34d2fba9bbb1065a92bc678fd6",
+      "audit_helper_path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_analysis_20261007_02/h16384_a128/source/independent_audit_v2.py",
+      "receipt_path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h16384_a128_check/receipt.json",
+      "receipt_sha256": "14940894d5c30adcefac950618047268dec11e6c74dc5125d71358c0834b5479",
+      "source_sha256": "f90f924e35f745fdef0032735c8e3527b34637a07dab5a33e7292ed59b4bbe24",
+      "counts": {
+        "receipt_artifact_count": 132,
+        "checked_payloads": 128,
+        "compared_offload_payloads": 96,
+        "request_count": 128,
+        "checked_warmup_requests": 24,
+        "memory_sample_count": 270,
+        "check_memory_sample_count": 270,
+        "echo_rejected_reservation_attempt_difference_count": 0
+      },
+      "observer_monitor_coverage": {
+        "first_sample_utc": "2026-10-06T16:32:31.656011+00:00",
+        "last_sample_utc": "2026-10-06T18:02:11.214462+00:00",
+        "first_sample_unix": 1791304351.656011,
+        "last_sample_unix": 1791309731.214462,
+        "run_brackets_check_and_bench": true,
+        "raw_samples_bracket_bench": true,
+        "bench_started_unix": 1791305621.188988,
+        "bench_completed_unix": 1791305754.5320117,
+        "check_started_unix": 1791305446.2897413,
+        "check_completed_unix": 1791305584.9427607,
+        "check_unobserved_start_seconds": 0.0,
+        "check_unobserved_end_seconds": 0.0,
+        "boundary": "The whole-batch run brackets check and bench. Raw samples bracket the entire formal benchmark process interval. Any unsampled check initialization or completion interval is reported explicitly; the check is numerical validation, not a performance measurement. Discrete samples do not exclude activity between samples or unrelated CPU work.",
+        "raw_process_ownership_summary_verified": true
+      },
+      "input_sha256": {
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h16384_a128_bench/metadata.json": "ef1e33ed2232c308af0c25099a5bcc7622a50b4015b02e5ad7fb29f72ae0ff9f",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h16384_a128_bench/measurements.jsonl": "eb7a93f03ed34ede36ae7a2eae56996ffffd4641b8a5e95e3eae5fc697acba19",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h16384_a128_bench/memory.json": "092b604353f92d807621d0aad7c7a4f46882a6400fd0e80329ee34a45e5539bc",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h16384_a128_bench/source_manifest.json": "4b68aa9ab128de2d8cee6f860ea4a72fa5b5bd7a85cab3fc851b67601ae9f18d",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h16384_a128_bench/workload/workload.json": "72d70e22777dbde11bac78afd507cf1b45252df9d0e625e8fb8141093e9d9f31",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h16384_a128_bench/workload/requests.jsonl": "4f7268b8adf9feeecc48b97d8d1b42eec0cab7fc62bc2252560be47aa7ecdf6b",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h16384_a128_check/metadata.json": "54841ce50200dbd40bebd64cab994163014e393644177c474efac0855df2e666",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h16384_a128_check/measurements.jsonl": "7b4fecd3997c54eb3f233b776a1bbbee008885645f4d455e8db34baaf1f4a0d9",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h16384_a128_check/memory.json": "e321c099b22282dddf44d5b6ea479c84221e90ec58d53699c4f7461b6f4c8eb7",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h16384_a128_check/source_manifest.json": "4b68aa9ab128de2d8cee6f860ea4a72fa5b5bd7a85cab3fc851b67601ae9f18d",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h16384_a128_check/workload/workload.json": "72d70e22777dbde11bac78afd507cf1b45252df9d0e625e8fb8141093e9d9f31",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h16384_a128_check/workload/requests.jsonl": "4f7268b8adf9feeecc48b97d8d1b42eec0cab7fc62bc2252560be47aa7ecdf6b"
+      },
+      "echo_rejected_reservation_attempt_policy": {
+        "policy_revision": "echo-cap8192-rejected-reservation-attempts-v1",
+        "field": "cache_diagnostics.layers[i].prefetch_capacity_failures",
+        "derived_prefetch_cap": 8192,
+        "cap_derivation": "The hash-bound attention call omits a limit override. SparseTokenLayerCache.prepare_prefetch defaults to 8192 and uses min(limit, 8192, P) for gpu_transient candidates; the fixed P is 65536. The original metadata does not contain a prefetch_cap field.",
+        "source_sha256": {
+          "models/deepseek_v32/attention.py": "929e7afcc0b3c9abdddce464aca23a0c1a50dc19e656275bdf5031fd4dc4fc7b",
+          "models/deepseek_v32/cache/session.py": "50e11d659389aeafc2ed8a608915f4eca2202e953529a4ea7180d2dd0edaaad9",
+          "models/deepseek_v32/execution/adapter.py": "bd20895dca304db0923f1489ed093094f3d199574112035e4745d518d20e4989",
+          "cache/sparse_token_cache.py": "1b3da2acfe5dc22c403b5794d6aedcebd1daaccaa9e82e54741fb0afd69c3cdf",
+          "operators/deepseek_v32/indexer/echo.py": "de20ebc3b4905b3dddb646167fb770d27a92146e76934be3160ad1b5b149c562",
+          "operators/deepseek_v32/indexer/csrc/echo_cache.cuh": "409be4a062180a8c8e73c1fa783d3980cf3e9926bf53ef34ddbaefe46e2dcd12",
+          "operators/deepseek_v32/indexer/csrc/echo_logits.cuh": "562b10fbca2082948fef14a1ac1c40b8918e1c2c81717a965cad040f5293e61f",
+          "operators/deepseek_v32/indexer/csrc/echo_indexer.cu": "c39ee55cb67ef452d6ee920c84c5852002ec8d2efd7c3115dfcb3564e9c8a255",
+          "operators/deepseek_v32/indexer/csrc/echo_sparse_recall.cuh": "a7c33da4c60eb3354e93fc77cac39faf19810d4a5b52c03283242fa61e52ff44"
+        },
+        "backend_cache_policy_revision": "echo-global-pages-fifo-v1",
+        "backend_echo_flags": {
+          "fused_logits_recall_extend": true,
+          "early_evict": false,
+          "offset_policy": "mean_of_last_up_to_four_rows_with_finite_guard",
+          "exact_union_overflow": "local_query_consumption_split_without_selection_clipping"
+        },
+        "boundary": "Only rejected reservation attempts may differ after both executions saturate the same derived cap. Rejected claims restore the temporary map claim without copying a record or writing a slot. This field does not count distinct missing tokens. All actual transfer, eviction, selection, cache, numerical and receipt checks remain exact; no exception for differing actual prefetch sets is used."
+      },
+      "echo_rejected_reservation_attempt_differences": [],
+      "live_source_differences": [
+        {
+          "path": "experiments/deepseek_v32_motivation/src/report_matrix.py",
+          "snapshot_sha256": "d1607c6579dde11ffb384e94969665d775492d932bb2e0024c0f2960e10134d5",
+          "live_sha256": "10780910a8364399f8a1c10bfc8b0ecff45a16b053bbe63f75b78646ff26aa05",
+          "saved_source_sha256": {
+            "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h16384_a128_bench/source/experiments/deepseek_v32_motivation/src/report_matrix.py": "d1607c6579dde11ffb384e94969665d775492d932bb2e0024c0f2960e10134d5",
+            "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h16384_a128_check/source/experiments/deepseek_v32_motivation/src/report_matrix.py": "d1607c6579dde11ffb384e94969665d775492d932bb2e0024c0f2960e10134d5"
+          },
+          "excluded_from_receipt_execution_base_sources": true,
+          "boundary": "Only this hash-bound CPU report file changed after measurement. Saved source snapshots and receipt execution identities remain unchanged.",
+          "excluded_from_tracked_native_and_dependency_files": true
+        }
+      ]
+    },
+    {
+      "history_tokens": 16384,
+      "candidate_tokens": 256,
+      "bench_run_id": "deepseek_motivation_matrix_20261007_01_h16384_a256_bench",
+      "check_run_id": "deepseek_motivation_matrix_20261007_01_h16384_a256_check",
+      "audit_path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_analysis_20261007_02/h16384_a256/independent_bench_audit.json",
+      "audit_sha256": "f73d9d366822fad8c121a1e81cd2401ec6df7bc052e43c8fa64bc8d1360d7992",
+      "audit_helper_sha256": "de3f5186310a075061c00050ac16ee58b7f93a34d2fba9bbb1065a92bc678fd6",
+      "audit_helper_path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_analysis_20261007_02/h16384_a256/source/independent_audit_v2.py",
+      "receipt_path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h16384_a256_check/receipt.json",
+      "receipt_sha256": "bba291473bd1fe05f474eda5e85efaa68b25973c062c12325d6030ff10a2d67d",
+      "source_sha256": "f90f924e35f745fdef0032735c8e3527b34637a07dab5a33e7292ed59b4bbe24",
+      "counts": {
+        "receipt_artifact_count": 132,
+        "checked_payloads": 128,
+        "compared_offload_payloads": 96,
+        "request_count": 128,
+        "checked_warmup_requests": 24,
+        "memory_sample_count": 270,
+        "check_memory_sample_count": 270,
+        "echo_rejected_reservation_attempt_difference_count": 30
+      },
+      "observer_monitor_coverage": {
+        "first_sample_utc": "2026-10-06T16:32:31.656011+00:00",
+        "last_sample_utc": "2026-10-06T18:02:11.214462+00:00",
+        "first_sample_unix": 1791304351.656011,
+        "last_sample_unix": 1791309731.214462,
+        "run_brackets_check_and_bench": true,
+        "raw_samples_bracket_bench": true,
+        "bench_started_unix": 1791305968.5119617,
+        "bench_completed_unix": 1791306106.752626,
+        "check_started_unix": 1791305789.6567616,
+        "check_completed_unix": 1791305931.2395732,
+        "check_unobserved_start_seconds": 0.0,
+        "check_unobserved_end_seconds": 0.0,
+        "boundary": "The whole-batch run brackets check and bench. Raw samples bracket the entire formal benchmark process interval. Any unsampled check initialization or completion interval is reported explicitly; the check is numerical validation, not a performance measurement. Discrete samples do not exclude activity between samples or unrelated CPU work.",
+        "raw_process_ownership_summary_verified": true
+      },
+      "input_sha256": {
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h16384_a256_bench/metadata.json": "837f3b23466610ca21a3098d4e083877d371b63346b1b67c4557408df4081f3c",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h16384_a256_bench/measurements.jsonl": "11e46f66c1124b780d304cfa270cbeab2796452804a704cc7a113e95d446bb6b",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h16384_a256_bench/memory.json": "f79dcf72ede5db52e9de0dec9de836051145fc182714d2becd09faba841b1bc3",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h16384_a256_bench/source_manifest.json": "4b68aa9ab128de2d8cee6f860ea4a72fa5b5bd7a85cab3fc851b67601ae9f18d",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h16384_a256_bench/workload/workload.json": "d25e3951ea4cbe415a9cb39c2b003913bab58c649336daf8df402fdd378bfd0d",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h16384_a256_bench/workload/requests.jsonl": "edf0687b6cb76d71b3933b16eab6df8d7cdc9928d5f8df135418146a91e4c279",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h16384_a256_check/metadata.json": "04d98acff56a1b36f817b04d5b017f57d29c6f6be6bb0550927c2003e95de7ce",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h16384_a256_check/measurements.jsonl": "28bb1aa7752e091af52753ae069ac3fbcfa043f9d059f8dfcd5082a95ad003fb",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h16384_a256_check/memory.json": "0c9aab240a547dec145770a782b910b2fb62be72a78abb0ec1006fb1c5becd41",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h16384_a256_check/source_manifest.json": "4b68aa9ab128de2d8cee6f860ea4a72fa5b5bd7a85cab3fc851b67601ae9f18d",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h16384_a256_check/workload/workload.json": "d25e3951ea4cbe415a9cb39c2b003913bab58c649336daf8df402fdd378bfd0d",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h16384_a256_check/workload/requests.jsonl": "edf0687b6cb76d71b3933b16eab6df8d7cdc9928d5f8df135418146a91e4c279"
+      },
+      "echo_rejected_reservation_attempt_policy": {
+        "policy_revision": "echo-cap8192-rejected-reservation-attempts-v1",
+        "field": "cache_diagnostics.layers[i].prefetch_capacity_failures",
+        "derived_prefetch_cap": 8192,
+        "cap_derivation": "The hash-bound attention call omits a limit override. SparseTokenLayerCache.prepare_prefetch defaults to 8192 and uses min(limit, 8192, P) for gpu_transient candidates; the fixed P is 65536. The original metadata does not contain a prefetch_cap field.",
+        "source_sha256": {
+          "models/deepseek_v32/attention.py": "929e7afcc0b3c9abdddce464aca23a0c1a50dc19e656275bdf5031fd4dc4fc7b",
+          "models/deepseek_v32/cache/session.py": "50e11d659389aeafc2ed8a608915f4eca2202e953529a4ea7180d2dd0edaaad9",
+          "models/deepseek_v32/execution/adapter.py": "bd20895dca304db0923f1489ed093094f3d199574112035e4745d518d20e4989",
+          "cache/sparse_token_cache.py": "1b3da2acfe5dc22c403b5794d6aedcebd1daaccaa9e82e54741fb0afd69c3cdf",
+          "operators/deepseek_v32/indexer/echo.py": "de20ebc3b4905b3dddb646167fb770d27a92146e76934be3160ad1b5b149c562",
+          "operators/deepseek_v32/indexer/csrc/echo_cache.cuh": "409be4a062180a8c8e73c1fa783d3980cf3e9926bf53ef34ddbaefe46e2dcd12",
+          "operators/deepseek_v32/indexer/csrc/echo_logits.cuh": "562b10fbca2082948fef14a1ac1c40b8918e1c2c81717a965cad040f5293e61f",
+          "operators/deepseek_v32/indexer/csrc/echo_indexer.cu": "c39ee55cb67ef452d6ee920c84c5852002ec8d2efd7c3115dfcb3564e9c8a255",
+          "operators/deepseek_v32/indexer/csrc/echo_sparse_recall.cuh": "a7c33da4c60eb3354e93fc77cac39faf19810d4a5b52c03283242fa61e52ff44"
+        },
+        "backend_cache_policy_revision": "echo-global-pages-fifo-v1",
+        "backend_echo_flags": {
+          "fused_logits_recall_extend": true,
+          "early_evict": false,
+          "offset_policy": "mean_of_last_up_to_four_rows_with_finite_guard",
+          "exact_union_overflow": "local_query_consumption_split_without_selection_clipping"
+        },
+        "boundary": "Only rejected reservation attempts may differ after both executions saturate the same derived cap. Rejected claims restore the temporary map claim without copying a record or writing a slot. This field does not count distinct missing tokens. All actual transfer, eviction, selection, cache, numerical and receipt checks remain exact; no exception for differing actual prefetch sets is used."
+      },
+      "echo_rejected_reservation_attempt_differences": [
+        {
+          "scheme": "echo",
+          "request_id": 16,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 4,
+          "check": 2,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 16,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 6,
+          "check": 3,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 17,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 0,
+          "check": 1,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 17,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 0,
+          "check": 1,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 18,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 7,
+          "check": 9,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 18,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 12,
+          "check": 10,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 19,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 2,
+          "check": 5,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 19,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 3,
+          "check": 4,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 20,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 9,
+          "check": 10,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 20,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 6,
+          "check": 10,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 20,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 9,
+          "check": 5,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 21,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 6,
+          "check": 12,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 21,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 13,
+          "check": 8,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 22,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 5,
+          "check": 2,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 23,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 12,
+          "check": 6,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 23,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 7,
+          "check": 8,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 23,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 16,
+          "check": 7,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 25,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 3,
+          "check": 5,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 25,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 2,
+          "check": 6,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 25,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 10,
+          "check": 6,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 26,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 0,
+          "check": 1,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 26,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 1,
+          "check": 2,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 26,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 1,
+          "check": 2,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 29,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 7,
+          "check": 11,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 30,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 0,
+          "check": 7,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 30,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 7,
+          "check": 2,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 30,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 6,
+          "check": 2,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 31,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 17,
+          "check": 14,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 31,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 6,
+          "check": 14,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 31,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 7,
+          "check": 14,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        }
+      ],
+      "live_source_differences": [
+        {
+          "path": "experiments/deepseek_v32_motivation/src/report_matrix.py",
+          "snapshot_sha256": "d1607c6579dde11ffb384e94969665d775492d932bb2e0024c0f2960e10134d5",
+          "live_sha256": "10780910a8364399f8a1c10bfc8b0ecff45a16b053bbe63f75b78646ff26aa05",
+          "saved_source_sha256": {
+            "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h16384_a256_bench/source/experiments/deepseek_v32_motivation/src/report_matrix.py": "d1607c6579dde11ffb384e94969665d775492d932bb2e0024c0f2960e10134d5",
+            "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h16384_a256_check/source/experiments/deepseek_v32_motivation/src/report_matrix.py": "d1607c6579dde11ffb384e94969665d775492d932bb2e0024c0f2960e10134d5"
+          },
+          "excluded_from_receipt_execution_base_sources": true,
+          "boundary": "Only this hash-bound CPU report file changed after measurement. Saved source snapshots and receipt execution identities remain unchanged.",
+          "excluded_from_tracked_native_and_dependency_files": true
+        }
+      ]
+    },
+    {
+      "history_tokens": 16384,
+      "candidate_tokens": 512,
+      "bench_run_id": "deepseek_motivation_matrix_20261007_01_h16384_a512_bench",
+      "check_run_id": "deepseek_motivation_matrix_20261007_01_h16384_a512_check",
+      "audit_path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_analysis_20261007_02/h16384_a512/independent_bench_audit.json",
+      "audit_sha256": "7df500b896c2c0bc48cdcb743206ec9c253972b288fb7dcc3e4cfb34f8b39bcc",
+      "audit_helper_sha256": "de3f5186310a075061c00050ac16ee58b7f93a34d2fba9bbb1065a92bc678fd6",
+      "audit_helper_path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_analysis_20261007_02/h16384_a512/source/independent_audit_v2.py",
+      "receipt_path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h16384_a512_check/receipt.json",
+      "receipt_sha256": "1806024725cdb2ecfdc5d2a7b4bfac676e040ca1f8c2eb85218831deb3cdbf6d",
+      "source_sha256": "f90f924e35f745fdef0032735c8e3527b34637a07dab5a33e7292ed59b4bbe24",
+      "counts": {
+        "receipt_artifact_count": 132,
+        "checked_payloads": 128,
+        "compared_offload_payloads": 96,
+        "request_count": 128,
+        "checked_warmup_requests": 24,
+        "memory_sample_count": 270,
+        "check_memory_sample_count": 270,
+        "echo_rejected_reservation_attempt_difference_count": 42
+      },
+      "observer_monitor_coverage": {
+        "first_sample_utc": "2026-10-06T16:32:31.656011+00:00",
+        "last_sample_utc": "2026-10-06T18:02:11.214462+00:00",
+        "first_sample_unix": 1791304351.656011,
+        "last_sample_unix": 1791309731.214462,
+        "run_brackets_check_and_bench": true,
+        "raw_samples_bracket_bench": true,
+        "bench_started_unix": 1791306324.9851742,
+        "bench_completed_unix": 1791306462.1814644,
+        "check_started_unix": 1791306142.0163674,
+        "check_completed_unix": 1791306285.237511,
+        "check_unobserved_start_seconds": 0.0,
+        "check_unobserved_end_seconds": 0.0,
+        "boundary": "The whole-batch run brackets check and bench. Raw samples bracket the entire formal benchmark process interval. Any unsampled check initialization or completion interval is reported explicitly; the check is numerical validation, not a performance measurement. Discrete samples do not exclude activity between samples or unrelated CPU work.",
+        "raw_process_ownership_summary_verified": true
+      },
+      "input_sha256": {
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h16384_a512_bench/metadata.json": "a841766adcbe288d4829893ac37435cf0026b1b03bf2e1dea65d5a82c2fa4737",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h16384_a512_bench/measurements.jsonl": "90a20734e1a562b5d239e552e4bd4e3ea46efe13bee2322091c028d43c6ae0f7",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h16384_a512_bench/memory.json": "69a879a51f0abf891eae5cb7af5a98e9ccf75d33bc06ad5f30e62c4ef8c107c6",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h16384_a512_bench/source_manifest.json": "4b68aa9ab128de2d8cee6f860ea4a72fa5b5bd7a85cab3fc851b67601ae9f18d",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h16384_a512_bench/workload/workload.json": "7071c7edc07896f06cad429e4b7ce1c0b8d22b271648b29c757bf845d02b76f7",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h16384_a512_bench/workload/requests.jsonl": "56c4d129d5e9291a4c12197f82e0d406114aa154aac01a1ba9379e4fec9b54b2",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h16384_a512_check/metadata.json": "7feee5d2c1cee1d917d1b4523f79acfbfc3cc3bb031ba44357381575f12be5e9",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h16384_a512_check/measurements.jsonl": "22546df0ec94c5fb76940b64ca2caa6105b2cebeb295219befe972121605d5c4",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h16384_a512_check/memory.json": "eb2e2bb424854d0e50bdacbe7706d393fdf9b6fcb7955648d660306a44ca583b",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h16384_a512_check/source_manifest.json": "4b68aa9ab128de2d8cee6f860ea4a72fa5b5bd7a85cab3fc851b67601ae9f18d",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h16384_a512_check/workload/workload.json": "7071c7edc07896f06cad429e4b7ce1c0b8d22b271648b29c757bf845d02b76f7",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h16384_a512_check/workload/requests.jsonl": "56c4d129d5e9291a4c12197f82e0d406114aa154aac01a1ba9379e4fec9b54b2"
+      },
+      "echo_rejected_reservation_attempt_policy": {
+        "policy_revision": "echo-cap8192-rejected-reservation-attempts-v1",
+        "field": "cache_diagnostics.layers[i].prefetch_capacity_failures",
+        "derived_prefetch_cap": 8192,
+        "cap_derivation": "The hash-bound attention call omits a limit override. SparseTokenLayerCache.prepare_prefetch defaults to 8192 and uses min(limit, 8192, P) for gpu_transient candidates; the fixed P is 65536. The original metadata does not contain a prefetch_cap field.",
+        "source_sha256": {
+          "models/deepseek_v32/attention.py": "929e7afcc0b3c9abdddce464aca23a0c1a50dc19e656275bdf5031fd4dc4fc7b",
+          "models/deepseek_v32/cache/session.py": "50e11d659389aeafc2ed8a608915f4eca2202e953529a4ea7180d2dd0edaaad9",
+          "models/deepseek_v32/execution/adapter.py": "bd20895dca304db0923f1489ed093094f3d199574112035e4745d518d20e4989",
+          "cache/sparse_token_cache.py": "1b3da2acfe5dc22c403b5794d6aedcebd1daaccaa9e82e54741fb0afd69c3cdf",
+          "operators/deepseek_v32/indexer/echo.py": "de20ebc3b4905b3dddb646167fb770d27a92146e76934be3160ad1b5b149c562",
+          "operators/deepseek_v32/indexer/csrc/echo_cache.cuh": "409be4a062180a8c8e73c1fa783d3980cf3e9926bf53ef34ddbaefe46e2dcd12",
+          "operators/deepseek_v32/indexer/csrc/echo_logits.cuh": "562b10fbca2082948fef14a1ac1c40b8918e1c2c81717a965cad040f5293e61f",
+          "operators/deepseek_v32/indexer/csrc/echo_indexer.cu": "c39ee55cb67ef452d6ee920c84c5852002ec8d2efd7c3115dfcb3564e9c8a255",
+          "operators/deepseek_v32/indexer/csrc/echo_sparse_recall.cuh": "a7c33da4c60eb3354e93fc77cac39faf19810d4a5b52c03283242fa61e52ff44"
+        },
+        "backend_cache_policy_revision": "echo-global-pages-fifo-v1",
+        "backend_echo_flags": {
+          "fused_logits_recall_extend": true,
+          "early_evict": false,
+          "offset_policy": "mean_of_last_up_to_four_rows_with_finite_guard",
+          "exact_union_overflow": "local_query_consumption_split_without_selection_clipping"
+        },
+        "boundary": "Only rejected reservation attempts may differ after both executions saturate the same derived cap. Rejected claims restore the temporary map claim without copying a record or writing a slot. This field does not count distinct missing tokens. All actual transfer, eviction, selection, cache, numerical and receipt checks remain exact; no exception for differing actual prefetch sets is used."
+      },
+      "echo_rejected_reservation_attempt_differences": [
+        {
+          "scheme": "echo",
+          "request_id": 16,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 2,
+          "check": 3,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 16,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 2,
+          "check": 5,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 16,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 0,
+          "check": 1,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 18,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 19,
+          "check": 8,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 18,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 17,
+          "check": 11,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 18,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 7,
+          "check": 10,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 19,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 2,
+          "check": 3,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 19,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 4,
+          "check": 3,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 19,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 5,
+          "check": 1,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 20,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 13,
+          "check": 16,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 20,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 8,
+          "check": 12,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 20,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 7,
+          "check": 15,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 21,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 5,
+          "check": 9,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 21,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 5,
+          "check": 9,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 21,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 7,
+          "check": 5,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 22,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 2,
+          "check": 4,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 22,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 1,
+          "check": 4,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 22,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 4,
+          "check": 2,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 23,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 6,
+          "check": 9,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 23,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 3,
+          "check": 9,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 24,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 5,
+          "check": 12,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 24,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 5,
+          "check": 27,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 25,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 5,
+          "check": 8,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 25,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 9,
+          "check": 6,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 26,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 1,
+          "check": 0,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 26,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 3,
+          "check": 5,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 26,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 2,
+          "check": 5,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 27,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 1,
+          "check": 15,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 27,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 3,
+          "check": 11,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 27,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 5,
+          "check": 25,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 28,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 12,
+          "check": 2,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 28,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 26,
+          "check": 6,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 28,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 10,
+          "check": 34,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 29,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 4,
+          "check": 6,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 29,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 3,
+          "check": 13,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 29,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 5,
+          "check": 3,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 30,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 5,
+          "check": 0,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 30,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 4,
+          "check": 1,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 30,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 0,
+          "check": 2,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 31,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 8,
+          "check": 15,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 31,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 13,
+          "check": 5,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 31,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 8,
+          "check": 18,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        }
+      ],
+      "live_source_differences": [
+        {
+          "path": "experiments/deepseek_v32_motivation/src/report_matrix.py",
+          "snapshot_sha256": "d1607c6579dde11ffb384e94969665d775492d932bb2e0024c0f2960e10134d5",
+          "live_sha256": "10780910a8364399f8a1c10bfc8b0ecff45a16b053bbe63f75b78646ff26aa05",
+          "saved_source_sha256": {
+            "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h16384_a512_bench/source/experiments/deepseek_v32_motivation/src/report_matrix.py": "d1607c6579dde11ffb384e94969665d775492d932bb2e0024c0f2960e10134d5",
+            "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h16384_a512_check/source/experiments/deepseek_v32_motivation/src/report_matrix.py": "d1607c6579dde11ffb384e94969665d775492d932bb2e0024c0f2960e10134d5"
+          },
+          "excluded_from_receipt_execution_base_sources": true,
+          "boundary": "Only this hash-bound CPU report file changed after measurement. Saved source snapshots and receipt execution identities remain unchanged.",
+          "excluded_from_tracked_native_and_dependency_files": true
+        }
+      ]
+    },
+    {
+      "history_tokens": 16384,
+      "candidate_tokens": 1024,
+      "bench_run_id": "deepseek_motivation_matrix_20261007_01_h16384_a1024_bench",
+      "check_run_id": "deepseek_motivation_matrix_20261007_01_h16384_a1024_check",
+      "audit_path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_analysis_20261007_02/h16384_a1024/independent_bench_audit.json",
+      "audit_sha256": "2a21430a7ac144e9fde92c6cef6d4a351e4354e32ab3f3417c0e5338d13f7354",
+      "audit_helper_sha256": "de3f5186310a075061c00050ac16ee58b7f93a34d2fba9bbb1065a92bc678fd6",
+      "audit_helper_path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_analysis_20261007_02/h16384_a1024/source/independent_audit_v2.py",
+      "receipt_path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h16384_a1024_check/receipt.json",
+      "receipt_sha256": "85adcac0f287264ff39fb3c576853d4ac399367cd28b3b1904d8c110717f32d8",
+      "source_sha256": "f90f924e35f745fdef0032735c8e3527b34637a07dab5a33e7292ed59b4bbe24",
+      "counts": {
+        "receipt_artifact_count": 132,
+        "checked_payloads": 128,
+        "compared_offload_payloads": 96,
+        "request_count": 128,
+        "checked_warmup_requests": 24,
+        "memory_sample_count": 270,
+        "check_memory_sample_count": 270,
+        "echo_rejected_reservation_attempt_difference_count": 39
+      },
+      "observer_monitor_coverage": {
+        "first_sample_utc": "2026-10-06T16:32:31.656011+00:00",
+        "last_sample_utc": "2026-10-06T18:02:11.214462+00:00",
+        "first_sample_unix": 1791304351.656011,
+        "last_sample_unix": 1791309731.214462,
+        "run_brackets_check_and_bench": true,
+        "raw_samples_bracket_bench": true,
+        "bench_started_unix": 1791306694.0063956,
+        "bench_completed_unix": 1791306832.4914556,
+        "check_started_unix": 1791306497.8384252,
+        "check_completed_unix": 1791306649.8896124,
+        "check_unobserved_start_seconds": 0.0,
+        "check_unobserved_end_seconds": 0.0,
+        "boundary": "The whole-batch run brackets check and bench. Raw samples bracket the entire formal benchmark process interval. Any unsampled check initialization or completion interval is reported explicitly; the check is numerical validation, not a performance measurement. Discrete samples do not exclude activity between samples or unrelated CPU work.",
+        "raw_process_ownership_summary_verified": true
+      },
+      "input_sha256": {
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h16384_a1024_bench/metadata.json": "adb70d1c9aef2a8ed168e5dd0a8c7ba7a3e2a4d55822ac0029f8d4f2c4d1b7d6",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h16384_a1024_bench/measurements.jsonl": "fae7ce7f5268057516e1e27f6cf5c88a0e827b651afa547f3d87d18b296c4d7a",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h16384_a1024_bench/memory.json": "00a5e0de33bfab5207a4673349e267f5ba1b6735d76cd44c8f7f2e98d24d893d",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h16384_a1024_bench/source_manifest.json": "4b68aa9ab128de2d8cee6f860ea4a72fa5b5bd7a85cab3fc851b67601ae9f18d",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h16384_a1024_bench/workload/workload.json": "4b1197b848aa4972f7eef0f941e128a8dc18319daeb980ed71161375fae33203",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h16384_a1024_bench/workload/requests.jsonl": "abaec909ad2c1da3d7d08fb4158f502a3d75bf36a10943990d49506f5cf43479",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h16384_a1024_check/metadata.json": "3462a3b1b25ea9faba9e1377e72961ad97a7b67a3aba59f2c5aaee30d15200b8",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h16384_a1024_check/measurements.jsonl": "1e5c9b78d0c707b4c721cfd6eb201710685cc1f1aecedf7e9c67e9f892eb0db0",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h16384_a1024_check/memory.json": "66306b9cb5da2c1a2492f5805810447e64c8abb8040ea22f3e5d31ade53713b7",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h16384_a1024_check/source_manifest.json": "4b68aa9ab128de2d8cee6f860ea4a72fa5b5bd7a85cab3fc851b67601ae9f18d",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h16384_a1024_check/workload/workload.json": "4b1197b848aa4972f7eef0f941e128a8dc18319daeb980ed71161375fae33203",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h16384_a1024_check/workload/requests.jsonl": "abaec909ad2c1da3d7d08fb4158f502a3d75bf36a10943990d49506f5cf43479"
+      },
+      "echo_rejected_reservation_attempt_policy": {
+        "policy_revision": "echo-cap8192-rejected-reservation-attempts-v1",
+        "field": "cache_diagnostics.layers[i].prefetch_capacity_failures",
+        "derived_prefetch_cap": 8192,
+        "cap_derivation": "The hash-bound attention call omits a limit override. SparseTokenLayerCache.prepare_prefetch defaults to 8192 and uses min(limit, 8192, P) for gpu_transient candidates; the fixed P is 65536. The original metadata does not contain a prefetch_cap field.",
+        "source_sha256": {
+          "models/deepseek_v32/attention.py": "929e7afcc0b3c9abdddce464aca23a0c1a50dc19e656275bdf5031fd4dc4fc7b",
+          "models/deepseek_v32/cache/session.py": "50e11d659389aeafc2ed8a608915f4eca2202e953529a4ea7180d2dd0edaaad9",
+          "models/deepseek_v32/execution/adapter.py": "bd20895dca304db0923f1489ed093094f3d199574112035e4745d518d20e4989",
+          "cache/sparse_token_cache.py": "1b3da2acfe5dc22c403b5794d6aedcebd1daaccaa9e82e54741fb0afd69c3cdf",
+          "operators/deepseek_v32/indexer/echo.py": "de20ebc3b4905b3dddb646167fb770d27a92146e76934be3160ad1b5b149c562",
+          "operators/deepseek_v32/indexer/csrc/echo_cache.cuh": "409be4a062180a8c8e73c1fa783d3980cf3e9926bf53ef34ddbaefe46e2dcd12",
+          "operators/deepseek_v32/indexer/csrc/echo_logits.cuh": "562b10fbca2082948fef14a1ac1c40b8918e1c2c81717a965cad040f5293e61f",
+          "operators/deepseek_v32/indexer/csrc/echo_indexer.cu": "c39ee55cb67ef452d6ee920c84c5852002ec8d2efd7c3115dfcb3564e9c8a255",
+          "operators/deepseek_v32/indexer/csrc/echo_sparse_recall.cuh": "a7c33da4c60eb3354e93fc77cac39faf19810d4a5b52c03283242fa61e52ff44"
+        },
+        "backend_cache_policy_revision": "echo-global-pages-fifo-v1",
+        "backend_echo_flags": {
+          "fused_logits_recall_extend": true,
+          "early_evict": false,
+          "offset_policy": "mean_of_last_up_to_four_rows_with_finite_guard",
+          "exact_union_overflow": "local_query_consumption_split_without_selection_clipping"
+        },
+        "boundary": "Only rejected reservation attempts may differ after both executions saturate the same derived cap. Rejected claims restore the temporary map claim without copying a record or writing a slot. This field does not count distinct missing tokens. All actual transfer, eviction, selection, cache, numerical and receipt checks remain exact; no exception for differing actual prefetch sets is used."
+      },
+      "echo_rejected_reservation_attempt_differences": [
+        {
+          "scheme": "echo",
+          "request_id": 16,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 1,
+          "check": 3,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 17,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 1,
+          "check": 0,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 18,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 7,
+          "check": 6,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 18,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 11,
+          "check": 4,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 18,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 10,
+          "check": 8,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 19,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 5,
+          "check": 1,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 19,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 1,
+          "check": 3,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 19,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 5,
+          "check": 6,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 20,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 9,
+          "check": 8,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 20,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 10,
+          "check": 15,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 21,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 8,
+          "check": 9,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 21,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 10,
+          "check": 6,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 21,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 5,
+          "check": 6,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 22,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 1,
+          "check": 4,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 22,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 0,
+          "check": 3,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 23,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 7,
+          "check": 5,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 23,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 13,
+          "check": 5,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 23,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 6,
+          "check": 12,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 24,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 22,
+          "check": 13,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 24,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 20,
+          "check": 15,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 24,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 16,
+          "check": 11,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 25,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 11,
+          "check": 4,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 25,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 5,
+          "check": 4,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 26,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 4,
+          "check": 6,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 26,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 5,
+          "check": 3,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 27,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 7,
+          "check": 5,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 27,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 3,
+          "check": 20,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 27,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 24,
+          "check": 7,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 28,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 23,
+          "check": 33,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 28,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 10,
+          "check": 7,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 28,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 10,
+          "check": 18,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 29,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 14,
+          "check": 3,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 29,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 6,
+          "check": 10,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 30,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 4,
+          "check": 2,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 30,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 0,
+          "check": 3,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 30,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 2,
+          "check": 1,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 31,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 15,
+          "check": 11,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 31,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 11,
+          "check": 13,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 31,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 11,
+          "check": 10,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        }
+      ],
+      "live_source_differences": [
+        {
+          "path": "experiments/deepseek_v32_motivation/src/report_matrix.py",
+          "snapshot_sha256": "d1607c6579dde11ffb384e94969665d775492d932bb2e0024c0f2960e10134d5",
+          "live_sha256": "10780910a8364399f8a1c10bfc8b0ecff45a16b053bbe63f75b78646ff26aa05",
+          "saved_source_sha256": {
+            "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h16384_a1024_bench/source/experiments/deepseek_v32_motivation/src/report_matrix.py": "d1607c6579dde11ffb384e94969665d775492d932bb2e0024c0f2960e10134d5",
+            "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h16384_a1024_check/source/experiments/deepseek_v32_motivation/src/report_matrix.py": "d1607c6579dde11ffb384e94969665d775492d932bb2e0024c0f2960e10134d5"
+          },
+          "excluded_from_receipt_execution_base_sources": true,
+          "boundary": "Only this hash-bound CPU report file changed after measurement. Saved source snapshots and receipt execution identities remain unchanged.",
+          "excluded_from_tracked_native_and_dependency_files": true
+        }
+      ]
+    },
+    {
+      "history_tokens": 65536,
+      "candidate_tokens": 128,
+      "bench_run_id": "deepseek_motivation_matrix_20261007_01_h65536_a128_bench",
+      "check_run_id": "deepseek_motivation_matrix_20261007_01_h65536_a128_check",
+      "audit_path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_analysis_20261007_02/h65536_a128/independent_bench_audit.json",
+      "audit_sha256": "893e85875883b3caa1fa079ff9e485e59b75476035ab2673c7e385e79db44fba",
+      "audit_helper_sha256": "de3f5186310a075061c00050ac16ee58b7f93a34d2fba9bbb1065a92bc678fd6",
+      "audit_helper_path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_analysis_20261007_02/h65536_a128/source/independent_audit_v2.py",
+      "receipt_path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h65536_a128_check/receipt.json",
+      "receipt_sha256": "001ed0db4a8099c2fc70c6603a71a43c1a5961bd10d56af8a62f3bc14ea0e8b5",
+      "source_sha256": "f90f924e35f745fdef0032735c8e3527b34637a07dab5a33e7292ed59b4bbe24",
+      "counts": {
+        "receipt_artifact_count": 132,
+        "checked_payloads": 128,
+        "compared_offload_payloads": 96,
+        "request_count": 128,
+        "checked_warmup_requests": 12,
+        "memory_sample_count": 270,
+        "check_memory_sample_count": 270,
+        "echo_rejected_reservation_attempt_difference_count": 0
+      },
+      "observer_monitor_coverage": {
+        "first_sample_utc": "2026-10-06T16:32:31.656011+00:00",
+        "last_sample_utc": "2026-10-06T18:02:11.214462+00:00",
+        "first_sample_unix": 1791304351.656011,
+        "last_sample_unix": 1791309731.214462,
+        "run_brackets_check_and_bench": true,
+        "raw_samples_bracket_bench": true,
+        "bench_started_unix": 1791307224.0198064,
+        "bench_completed_unix": 1791307537.334661,
+        "check_started_unix": 1791306869.147955,
+        "check_completed_unix": 1791307187.167818,
+        "check_unobserved_start_seconds": 0.0,
+        "check_unobserved_end_seconds": 0.0,
+        "boundary": "The whole-batch run brackets check and bench. Raw samples bracket the entire formal benchmark process interval. Any unsampled check initialization or completion interval is reported explicitly; the check is numerical validation, not a performance measurement. Discrete samples do not exclude activity between samples or unrelated CPU work.",
+        "raw_process_ownership_summary_verified": true
+      },
+      "input_sha256": {
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h65536_a128_bench/metadata.json": "8558df0e4bd3afba89111f3e39aa25f264f49155ea655da0fecbcca345d11990",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h65536_a128_bench/measurements.jsonl": "c9d3572c8cc23b0d5659578b79aeb9675f3263f58d0be4810445f499b75ec96f",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h65536_a128_bench/memory.json": "102f68d706319067620249fbb103dc5b797c474f179b1f24ea45a83d2bf4bbe8",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h65536_a128_bench/source_manifest.json": "4b68aa9ab128de2d8cee6f860ea4a72fa5b5bd7a85cab3fc851b67601ae9f18d",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h65536_a128_bench/workload/workload.json": "f13739cdabb79729a64c0e4d8bd4242bf9c64518bee657ab305c598ae6cf01f0",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h65536_a128_bench/workload/requests.jsonl": "167a0af2fba4428c0b3f4bd2886a644675ee46b017c9fc08d25bb0ff50f71355",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h65536_a128_check/metadata.json": "120483c69314a9c05de47fb0a812431ae947e3142dd661b249658e61a1018379",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h65536_a128_check/measurements.jsonl": "aa695d51dc4d5d53b7093ca8d49b55ab4f7e310b5d9c49bd9fdbcd284aafd289",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h65536_a128_check/memory.json": "54f21980563e21b97d79aca5f69db5b346ba0eb2b3fa02dfde865ecee4939420",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h65536_a128_check/source_manifest.json": "4b68aa9ab128de2d8cee6f860ea4a72fa5b5bd7a85cab3fc851b67601ae9f18d",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h65536_a128_check/workload/workload.json": "f13739cdabb79729a64c0e4d8bd4242bf9c64518bee657ab305c598ae6cf01f0",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h65536_a128_check/workload/requests.jsonl": "167a0af2fba4428c0b3f4bd2886a644675ee46b017c9fc08d25bb0ff50f71355"
+      },
+      "echo_rejected_reservation_attempt_policy": {
+        "policy_revision": "echo-cap8192-rejected-reservation-attempts-v1",
+        "field": "cache_diagnostics.layers[i].prefetch_capacity_failures",
+        "derived_prefetch_cap": 8192,
+        "cap_derivation": "The hash-bound attention call omits a limit override. SparseTokenLayerCache.prepare_prefetch defaults to 8192 and uses min(limit, 8192, P) for gpu_transient candidates; the fixed P is 65536. The original metadata does not contain a prefetch_cap field.",
+        "source_sha256": {
+          "models/deepseek_v32/attention.py": "929e7afcc0b3c9abdddce464aca23a0c1a50dc19e656275bdf5031fd4dc4fc7b",
+          "models/deepseek_v32/cache/session.py": "50e11d659389aeafc2ed8a608915f4eca2202e953529a4ea7180d2dd0edaaad9",
+          "models/deepseek_v32/execution/adapter.py": "bd20895dca304db0923f1489ed093094f3d199574112035e4745d518d20e4989",
+          "cache/sparse_token_cache.py": "1b3da2acfe5dc22c403b5794d6aedcebd1daaccaa9e82e54741fb0afd69c3cdf",
+          "operators/deepseek_v32/indexer/echo.py": "de20ebc3b4905b3dddb646167fb770d27a92146e76934be3160ad1b5b149c562",
+          "operators/deepseek_v32/indexer/csrc/echo_cache.cuh": "409be4a062180a8c8e73c1fa783d3980cf3e9926bf53ef34ddbaefe46e2dcd12",
+          "operators/deepseek_v32/indexer/csrc/echo_logits.cuh": "562b10fbca2082948fef14a1ac1c40b8918e1c2c81717a965cad040f5293e61f",
+          "operators/deepseek_v32/indexer/csrc/echo_indexer.cu": "c39ee55cb67ef452d6ee920c84c5852002ec8d2efd7c3115dfcb3564e9c8a255",
+          "operators/deepseek_v32/indexer/csrc/echo_sparse_recall.cuh": "a7c33da4c60eb3354e93fc77cac39faf19810d4a5b52c03283242fa61e52ff44"
+        },
+        "backend_cache_policy_revision": "echo-global-pages-fifo-v1",
+        "backend_echo_flags": {
+          "fused_logits_recall_extend": true,
+          "early_evict": false,
+          "offset_policy": "mean_of_last_up_to_four_rows_with_finite_guard",
+          "exact_union_overflow": "local_query_consumption_split_without_selection_clipping"
+        },
+        "boundary": "Only rejected reservation attempts may differ after both executions saturate the same derived cap. Rejected claims restore the temporary map claim without copying a record or writing a slot. This field does not count distinct missing tokens. All actual transfer, eviction, selection, cache, numerical and receipt checks remain exact; no exception for differing actual prefetch sets is used."
+      },
+      "echo_rejected_reservation_attempt_differences": [],
+      "live_source_differences": [
+        {
+          "path": "experiments/deepseek_v32_motivation/src/report_matrix.py",
+          "snapshot_sha256": "d1607c6579dde11ffb384e94969665d775492d932bb2e0024c0f2960e10134d5",
+          "live_sha256": "10780910a8364399f8a1c10bfc8b0ecff45a16b053bbe63f75b78646ff26aa05",
+          "saved_source_sha256": {
+            "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h65536_a128_bench/source/experiments/deepseek_v32_motivation/src/report_matrix.py": "d1607c6579dde11ffb384e94969665d775492d932bb2e0024c0f2960e10134d5",
+            "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h65536_a128_check/source/experiments/deepseek_v32_motivation/src/report_matrix.py": "d1607c6579dde11ffb384e94969665d775492d932bb2e0024c0f2960e10134d5"
+          },
+          "excluded_from_receipt_execution_base_sources": true,
+          "boundary": "Only this hash-bound CPU report file changed after measurement. Saved source snapshots and receipt execution identities remain unchanged.",
+          "excluded_from_tracked_native_and_dependency_files": true
+        }
+      ]
+    },
+    {
+      "history_tokens": 65536,
+      "candidate_tokens": 256,
+      "bench_run_id": "deepseek_motivation_matrix_20261007_01_h65536_a256_bench",
+      "check_run_id": "deepseek_motivation_matrix_20261007_01_h65536_a256_check",
+      "audit_path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_analysis_20261007_02/h65536_a256/independent_bench_audit.json",
+      "audit_sha256": "afd5db7173e3671bf319ea41ce1278aec1a3180103ab22ac14298b2547656ccf",
+      "audit_helper_sha256": "de3f5186310a075061c00050ac16ee58b7f93a34d2fba9bbb1065a92bc678fd6",
+      "audit_helper_path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_analysis_20261007_02/h65536_a256/source/independent_audit_v2.py",
+      "receipt_path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h65536_a256_check/receipt.json",
+      "receipt_sha256": "a8f3681dec838f9b030386b6982f12a4bdb4a41785e69fcef9af827524392a7f",
+      "source_sha256": "f90f924e35f745fdef0032735c8e3527b34637a07dab5a33e7292ed59b4bbe24",
+      "counts": {
+        "receipt_artifact_count": 132,
+        "checked_payloads": 128,
+        "compared_offload_payloads": 96,
+        "request_count": 128,
+        "checked_warmup_requests": 12,
+        "memory_sample_count": 270,
+        "check_memory_sample_count": 270,
+        "echo_rejected_reservation_attempt_difference_count": 33
+      },
+      "observer_monitor_coverage": {
+        "first_sample_utc": "2026-10-06T16:32:31.656011+00:00",
+        "last_sample_utc": "2026-10-06T18:02:11.214462+00:00",
+        "first_sample_unix": 1791304351.656011,
+        "last_sample_unix": 1791309731.214462,
+        "run_brackets_check_and_bench": true,
+        "raw_samples_bracket_bench": true,
+        "bench_started_unix": 1791307929.1869414,
+        "bench_completed_unix": 1791308243.986036,
+        "check_started_unix": 1791307573.1385727,
+        "check_completed_unix": 1791307891.7292745,
+        "check_unobserved_start_seconds": 0.0,
+        "check_unobserved_end_seconds": 0.0,
+        "boundary": "The whole-batch run brackets check and bench. Raw samples bracket the entire formal benchmark process interval. Any unsampled check initialization or completion interval is reported explicitly; the check is numerical validation, not a performance measurement. Discrete samples do not exclude activity between samples or unrelated CPU work.",
+        "raw_process_ownership_summary_verified": true
+      },
+      "input_sha256": {
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h65536_a256_bench/metadata.json": "17e88f6db746fb08ce58f8e319df6e2d3f0606e73b1050cae361ad1d4a0f0042",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h65536_a256_bench/measurements.jsonl": "9213e572180871fd4fac0dd09f329ed6c161b7c2219314e8fcb55e69be4ffca5",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h65536_a256_bench/memory.json": "a14a00e1fb920639226aa6707a430ae3856e469aaad3ba35d14ae4ccfe7bc6f1",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h65536_a256_bench/source_manifest.json": "4b68aa9ab128de2d8cee6f860ea4a72fa5b5bd7a85cab3fc851b67601ae9f18d",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h65536_a256_bench/workload/workload.json": "530916bab04f3e713383522ba616b66922fc6a5ce51089dd4633bbbc79918fc2",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h65536_a256_bench/workload/requests.jsonl": "4f1ed68cb991b8de444a9c57ce08d1491846b65e06b3aa211ac6c2dad1a83416",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h65536_a256_check/metadata.json": "0a9c9432026f5bdc97c78262b4160359dc8392dbef30777b225ab8125ff74187",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h65536_a256_check/measurements.jsonl": "5692af0fd2a25cde66dd4cfb80881e967c7181051a98e80b74e8b2bbd47e861d",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h65536_a256_check/memory.json": "303e8e64b2d7a40af447bc116f011ff2841b330f081303ebbb5aa2787f58d0ae",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h65536_a256_check/source_manifest.json": "4b68aa9ab128de2d8cee6f860ea4a72fa5b5bd7a85cab3fc851b67601ae9f18d",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h65536_a256_check/workload/workload.json": "530916bab04f3e713383522ba616b66922fc6a5ce51089dd4633bbbc79918fc2",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h65536_a256_check/workload/requests.jsonl": "4f1ed68cb991b8de444a9c57ce08d1491846b65e06b3aa211ac6c2dad1a83416"
+      },
+      "echo_rejected_reservation_attempt_policy": {
+        "policy_revision": "echo-cap8192-rejected-reservation-attempts-v1",
+        "field": "cache_diagnostics.layers[i].prefetch_capacity_failures",
+        "derived_prefetch_cap": 8192,
+        "cap_derivation": "The hash-bound attention call omits a limit override. SparseTokenLayerCache.prepare_prefetch defaults to 8192 and uses min(limit, 8192, P) for gpu_transient candidates; the fixed P is 65536. The original metadata does not contain a prefetch_cap field.",
+        "source_sha256": {
+          "models/deepseek_v32/attention.py": "929e7afcc0b3c9abdddce464aca23a0c1a50dc19e656275bdf5031fd4dc4fc7b",
+          "models/deepseek_v32/cache/session.py": "50e11d659389aeafc2ed8a608915f4eca2202e953529a4ea7180d2dd0edaaad9",
+          "models/deepseek_v32/execution/adapter.py": "bd20895dca304db0923f1489ed093094f3d199574112035e4745d518d20e4989",
+          "cache/sparse_token_cache.py": "1b3da2acfe5dc22c403b5794d6aedcebd1daaccaa9e82e54741fb0afd69c3cdf",
+          "operators/deepseek_v32/indexer/echo.py": "de20ebc3b4905b3dddb646167fb770d27a92146e76934be3160ad1b5b149c562",
+          "operators/deepseek_v32/indexer/csrc/echo_cache.cuh": "409be4a062180a8c8e73c1fa783d3980cf3e9926bf53ef34ddbaefe46e2dcd12",
+          "operators/deepseek_v32/indexer/csrc/echo_logits.cuh": "562b10fbca2082948fef14a1ac1c40b8918e1c2c81717a965cad040f5293e61f",
+          "operators/deepseek_v32/indexer/csrc/echo_indexer.cu": "c39ee55cb67ef452d6ee920c84c5852002ec8d2efd7c3115dfcb3564e9c8a255",
+          "operators/deepseek_v32/indexer/csrc/echo_sparse_recall.cuh": "a7c33da4c60eb3354e93fc77cac39faf19810d4a5b52c03283242fa61e52ff44"
+        },
+        "backend_cache_policy_revision": "echo-global-pages-fifo-v1",
+        "backend_echo_flags": {
+          "fused_logits_recall_extend": true,
+          "early_evict": false,
+          "offset_policy": "mean_of_last_up_to_four_rows_with_finite_guard",
+          "exact_union_overflow": "local_query_consumption_split_without_selection_clipping"
+        },
+        "boundary": "Only rejected reservation attempts may differ after both executions saturate the same derived cap. Rejected claims restore the temporary map claim without copying a record or writing a slot. This field does not count distinct missing tokens. All actual transfer, eviction, selection, cache, numerical and receipt checks remain exact; no exception for differing actual prefetch sets is used."
+      },
+      "echo_rejected_reservation_attempt_differences": [
+        {
+          "scheme": "echo",
+          "request_id": 16,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 8,
+          "check": 10,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 16,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 16,
+          "check": 9,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 16,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 11,
+          "check": 12,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 17,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 9,
+          "check": 3,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 17,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 4,
+          "check": 5,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 17,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 9,
+          "check": 8,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 18,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 5,
+          "check": 4,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 18,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 2,
+          "check": 6,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 18,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 5,
+          "check": 4,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 19,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 0,
+          "check": 1,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 19,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 0,
+          "check": 2,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 19,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 0,
+          "check": 3,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 21,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 9,
+          "check": 7,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 21,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 7,
+          "check": 4,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 23,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 7,
+          "check": 2,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 23,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 2,
+          "check": 5,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 26,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 14,
+          "check": 10,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 26,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 11,
+          "check": 17,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 26,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 13,
+          "check": 12,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 27,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 9,
+          "check": 5,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 27,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 13,
+          "check": 6,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 27,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 10,
+          "check": 6,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 28,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 7,
+          "check": 10,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 28,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 11,
+          "check": 13,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 28,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 20,
+          "check": 7,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 29,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 9,
+          "check": 6,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 29,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 6,
+          "check": 7,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 29,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 8,
+          "check": 5,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 30,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 13,
+          "check": 18,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 30,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 13,
+          "check": 12,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 31,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 7,
+          "check": 6,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 31,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 6,
+          "check": 7,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 31,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 9,
+          "check": 8,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        }
+      ],
+      "live_source_differences": [
+        {
+          "path": "experiments/deepseek_v32_motivation/src/report_matrix.py",
+          "snapshot_sha256": "d1607c6579dde11ffb384e94969665d775492d932bb2e0024c0f2960e10134d5",
+          "live_sha256": "10780910a8364399f8a1c10bfc8b0ecff45a16b053bbe63f75b78646ff26aa05",
+          "saved_source_sha256": {
+            "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h65536_a256_bench/source/experiments/deepseek_v32_motivation/src/report_matrix.py": "d1607c6579dde11ffb384e94969665d775492d932bb2e0024c0f2960e10134d5",
+            "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h65536_a256_check/source/experiments/deepseek_v32_motivation/src/report_matrix.py": "d1607c6579dde11ffb384e94969665d775492d932bb2e0024c0f2960e10134d5"
+          },
+          "excluded_from_receipt_execution_base_sources": true,
+          "boundary": "Only this hash-bound CPU report file changed after measurement. Saved source snapshots and receipt execution identities remain unchanged.",
+          "excluded_from_tracked_native_and_dependency_files": true
+        }
+      ]
+    },
+    {
+      "history_tokens": 65536,
+      "candidate_tokens": 512,
+      "bench_run_id": "deepseek_motivation_matrix_20261007_01_h65536_a512_bench",
+      "check_run_id": "deepseek_motivation_matrix_20261007_01_h65536_a512_check",
+      "audit_path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_analysis_20261007_02/h65536_a512/independent_bench_audit.json",
+      "audit_sha256": "d756a920426ec7a8217735554d410612f67927102653124cff25cff724089dff",
+      "audit_helper_sha256": "de3f5186310a075061c00050ac16ee58b7f93a34d2fba9bbb1065a92bc678fd6",
+      "audit_helper_path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_analysis_20261007_02/h65536_a512/source/independent_audit_v2.py",
+      "receipt_path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h65536_a512_check/receipt.json",
+      "receipt_sha256": "c6323c262046a8e0ca2990930dc06c17fbab53ef46879495d47eb2c2fe79951e",
+      "source_sha256": "f90f924e35f745fdef0032735c8e3527b34637a07dab5a33e7292ed59b4bbe24",
+      "counts": {
+        "receipt_artifact_count": 132,
+        "checked_payloads": 128,
+        "compared_offload_payloads": 96,
+        "request_count": 128,
+        "checked_warmup_requests": 12,
+        "memory_sample_count": 270,
+        "check_memory_sample_count": 270,
+        "echo_rejected_reservation_attempt_difference_count": 48
+      },
+      "observer_monitor_coverage": {
+        "first_sample_utc": "2026-10-06T16:32:31.656011+00:00",
+        "last_sample_utc": "2026-10-06T18:02:11.214462+00:00",
+        "first_sample_unix": 1791304351.656011,
+        "last_sample_unix": 1791309731.214462,
+        "run_brackets_check_and_bench": true,
+        "raw_samples_bracket_bench": true,
+        "bench_started_unix": 1791308642.960284,
+        "bench_completed_unix": 1791308960.0428288,
+        "check_started_unix": 1791308280.047096,
+        "check_completed_unix": 1791308603.858778,
+        "check_unobserved_start_seconds": 0.0,
+        "check_unobserved_end_seconds": 0.0,
+        "boundary": "The whole-batch run brackets check and bench. Raw samples bracket the entire formal benchmark process interval. Any unsampled check initialization or completion interval is reported explicitly; the check is numerical validation, not a performance measurement. Discrete samples do not exclude activity between samples or unrelated CPU work.",
+        "raw_process_ownership_summary_verified": true
+      },
+      "input_sha256": {
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h65536_a512_bench/metadata.json": "9b63660ac0a5f81f995b469abb82d80c408e8cd116055844d16173a67e2aa5e0",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h65536_a512_bench/measurements.jsonl": "601addeb528b594a1b042fd8072aef5cacd754bc5a2cdaf8145b8558ba3862f2",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h65536_a512_bench/memory.json": "2ba2e122fd07f002a41aa4254a1576236ce458c33abde0dee2a4449ee09f1330",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h65536_a512_bench/source_manifest.json": "4b68aa9ab128de2d8cee6f860ea4a72fa5b5bd7a85cab3fc851b67601ae9f18d",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h65536_a512_bench/workload/workload.json": "1b6e809a8eb81aadfced312e03970fcadb17028a56cdfa182789c71628029b53",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h65536_a512_bench/workload/requests.jsonl": "af3546555602650fc9007522011c2494d7954c036b15dd70ff031140685c802c",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h65536_a512_check/metadata.json": "3544f8b32849b876fae786bfe246fd47de3a311d62975cad76f4881c54dd4646",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h65536_a512_check/measurements.jsonl": "812b3646872630cb7253b824eddf86eaa6e8fc5b9147dd351b27572e84f6393b",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h65536_a512_check/memory.json": "046394b7068d210f7eb7ca6e42024cd02c9e2ac23d01423caa44b27b2dd3a7e1",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h65536_a512_check/source_manifest.json": "4b68aa9ab128de2d8cee6f860ea4a72fa5b5bd7a85cab3fc851b67601ae9f18d",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h65536_a512_check/workload/workload.json": "1b6e809a8eb81aadfced312e03970fcadb17028a56cdfa182789c71628029b53",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h65536_a512_check/workload/requests.jsonl": "af3546555602650fc9007522011c2494d7954c036b15dd70ff031140685c802c"
+      },
+      "echo_rejected_reservation_attempt_policy": {
+        "policy_revision": "echo-cap8192-rejected-reservation-attempts-v1",
+        "field": "cache_diagnostics.layers[i].prefetch_capacity_failures",
+        "derived_prefetch_cap": 8192,
+        "cap_derivation": "The hash-bound attention call omits a limit override. SparseTokenLayerCache.prepare_prefetch defaults to 8192 and uses min(limit, 8192, P) for gpu_transient candidates; the fixed P is 65536. The original metadata does not contain a prefetch_cap field.",
+        "source_sha256": {
+          "models/deepseek_v32/attention.py": "929e7afcc0b3c9abdddce464aca23a0c1a50dc19e656275bdf5031fd4dc4fc7b",
+          "models/deepseek_v32/cache/session.py": "50e11d659389aeafc2ed8a608915f4eca2202e953529a4ea7180d2dd0edaaad9",
+          "models/deepseek_v32/execution/adapter.py": "bd20895dca304db0923f1489ed093094f3d199574112035e4745d518d20e4989",
+          "cache/sparse_token_cache.py": "1b3da2acfe5dc22c403b5794d6aedcebd1daaccaa9e82e54741fb0afd69c3cdf",
+          "operators/deepseek_v32/indexer/echo.py": "de20ebc3b4905b3dddb646167fb770d27a92146e76934be3160ad1b5b149c562",
+          "operators/deepseek_v32/indexer/csrc/echo_cache.cuh": "409be4a062180a8c8e73c1fa783d3980cf3e9926bf53ef34ddbaefe46e2dcd12",
+          "operators/deepseek_v32/indexer/csrc/echo_logits.cuh": "562b10fbca2082948fef14a1ac1c40b8918e1c2c81717a965cad040f5293e61f",
+          "operators/deepseek_v32/indexer/csrc/echo_indexer.cu": "c39ee55cb67ef452d6ee920c84c5852002ec8d2efd7c3115dfcb3564e9c8a255",
+          "operators/deepseek_v32/indexer/csrc/echo_sparse_recall.cuh": "a7c33da4c60eb3354e93fc77cac39faf19810d4a5b52c03283242fa61e52ff44"
+        },
+        "backend_cache_policy_revision": "echo-global-pages-fifo-v1",
+        "backend_echo_flags": {
+          "fused_logits_recall_extend": true,
+          "early_evict": false,
+          "offset_policy": "mean_of_last_up_to_four_rows_with_finite_guard",
+          "exact_union_overflow": "local_query_consumption_split_without_selection_clipping"
+        },
+        "boundary": "Only rejected reservation attempts may differ after both executions saturate the same derived cap. Rejected claims restore the temporary map claim without copying a record or writing a slot. This field does not count distinct missing tokens. All actual transfer, eviction, selection, cache, numerical and receipt checks remain exact; no exception for differing actual prefetch sets is used."
+      },
+      "echo_rejected_reservation_attempt_differences": [
+        {
+          "scheme": "echo",
+          "request_id": 16,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 8,
+          "check": 10,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 16,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 11,
+          "check": 12,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 16,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 13,
+          "check": 10,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 17,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 7,
+          "check": 3,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 17,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 8,
+          "check": 5,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 17,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 6,
+          "check": 8,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 18,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 5,
+          "check": 4,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 18,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 7,
+          "check": 3,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 18,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 7,
+          "check": 11,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 19,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 7,
+          "check": 5,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 19,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 3,
+          "check": 7,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 19,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 7,
+          "check": 6,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 20,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 1,
+          "check": 2,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 20,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 3,
+          "check": 0,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 20,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 2,
+          "check": 9,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 21,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 2,
+          "check": 4,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 21,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 9,
+          "check": 7,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 21,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 11,
+          "check": 6,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 22,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 7,
+          "check": 5,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 22,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 7,
+          "check": 9,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 22,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 3,
+          "check": 6,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 23,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 4,
+          "check": 6,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 23,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 8,
+          "check": 3,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 23,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 9,
+          "check": 4,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 24,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 6,
+          "check": 4,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 24,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 9,
+          "check": 4,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 24,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 6,
+          "check": 4,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 25,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 7,
+          "check": 12,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 25,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 11,
+          "check": 6,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 25,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 7,
+          "check": 4,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 26,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 8,
+          "check": 14,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 26,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 11,
+          "check": 16,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 26,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 6,
+          "check": 5,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 27,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 11,
+          "check": 12,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 27,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 7,
+          "check": 8,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 27,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 20,
+          "check": 14,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 28,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 14,
+          "check": 10,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 28,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 7,
+          "check": 2,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 28,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 6,
+          "check": 3,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 29,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 9,
+          "check": 5,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 29,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 8,
+          "check": 9,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 29,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 17,
+          "check": 5,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 30,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 15,
+          "check": 9,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 30,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 12,
+          "check": 15,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 30,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 15,
+          "check": 10,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 31,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 10,
+          "check": 4,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 31,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 8,
+          "check": 11,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 31,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 7,
+          "check": 12,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        }
+      ],
+      "live_source_differences": [
+        {
+          "path": "experiments/deepseek_v32_motivation/src/report_matrix.py",
+          "snapshot_sha256": "d1607c6579dde11ffb384e94969665d775492d932bb2e0024c0f2960e10134d5",
+          "live_sha256": "10780910a8364399f8a1c10bfc8b0ecff45a16b053bbe63f75b78646ff26aa05",
+          "saved_source_sha256": {
+            "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h65536_a512_bench/source/experiments/deepseek_v32_motivation/src/report_matrix.py": "d1607c6579dde11ffb384e94969665d775492d932bb2e0024c0f2960e10134d5",
+            "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h65536_a512_check/source/experiments/deepseek_v32_motivation/src/report_matrix.py": "d1607c6579dde11ffb384e94969665d775492d932bb2e0024c0f2960e10134d5"
+          },
+          "excluded_from_receipt_execution_base_sources": true,
+          "boundary": "Only this hash-bound CPU report file changed after measurement. Saved source snapshots and receipt execution identities remain unchanged.",
+          "excluded_from_tracked_native_and_dependency_files": true
+        }
+      ]
+    },
+    {
+      "history_tokens": 65536,
+      "candidate_tokens": 1024,
+      "bench_run_id": "deepseek_motivation_matrix_20261007_01_h65536_a1024_bench",
+      "check_run_id": "deepseek_motivation_matrix_20261007_01_h65536_a1024_check",
+      "audit_path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_analysis_20261007_02/h65536_a1024/independent_bench_audit.json",
+      "audit_sha256": "1ee49b585b85230a67401c51a968a10b1350932875bd0bb4f4ac47aa3c55d523",
+      "audit_helper_sha256": "de3f5186310a075061c00050ac16ee58b7f93a34d2fba9bbb1065a92bc678fd6",
+      "audit_helper_path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_analysis_20261007_02/h65536_a1024/source/independent_audit_v2.py",
+      "receipt_path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h65536_a1024_check/receipt.json",
+      "receipt_sha256": "d18a0567fd6b565526a80ea549085ab97f0e95ed8f8e2c0120d235a08b4159d1",
+      "source_sha256": "f90f924e35f745fdef0032735c8e3527b34637a07dab5a33e7292ed59b4bbe24",
+      "counts": {
+        "receipt_artifact_count": 132,
+        "checked_payloads": 128,
+        "compared_offload_payloads": 96,
+        "request_count": 128,
+        "checked_warmup_requests": 12,
+        "memory_sample_count": 270,
+        "check_memory_sample_count": 270,
+        "echo_rejected_reservation_attempt_difference_count": 58
+      },
+      "observer_monitor_coverage": {
+        "first_sample_utc": "2026-10-06T16:32:31.656011+00:00",
+        "last_sample_utc": "2026-10-06T18:02:11.214462+00:00",
+        "first_sample_unix": 1791304351.656011,
+        "last_sample_unix": 1791309731.214462,
+        "run_brackets_check_and_bench": true,
+        "raw_samples_bracket_bench": true,
+        "bench_started_unix": 1791309372.532182,
+        "bench_completed_unix": 1791309693.7814376,
+        "check_started_unix": 1791308996.9038591,
+        "check_completed_unix": 1791309327.954511,
+        "check_unobserved_start_seconds": 0.0,
+        "check_unobserved_end_seconds": 0.0,
+        "boundary": "The whole-batch run brackets check and bench. Raw samples bracket the entire formal benchmark process interval. Any unsampled check initialization or completion interval is reported explicitly; the check is numerical validation, not a performance measurement. Discrete samples do not exclude activity between samples or unrelated CPU work.",
+        "raw_process_ownership_summary_verified": true
+      },
+      "input_sha256": {
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h65536_a1024_bench/metadata.json": "7a8d1572723de41a768a8dceac676b3c66374bd3af96014a101fccea521040de",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h65536_a1024_bench/measurements.jsonl": "36522a596d7dd72762444d5ffbe5778b9d19d8cc0166ef1f2458e553ac450fbd",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h65536_a1024_bench/memory.json": "c5e063a6b9d467a60f26da45279b4a8cd4213d05530dc56b475f304de437a89f",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h65536_a1024_bench/source_manifest.json": "4b68aa9ab128de2d8cee6f860ea4a72fa5b5bd7a85cab3fc851b67601ae9f18d",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h65536_a1024_bench/workload/workload.json": "cf9f2767aaabbff5932e21e28337c9ee34fe3c0d875888f2ea66710e3755a233",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h65536_a1024_bench/workload/requests.jsonl": "eb352bf10a67ef9e91a8a3d869734b325cb55ec4cf562dc4176c550c57f5ca5f",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h65536_a1024_check/metadata.json": "cb26e7b7d1578255d506f6d4ffe1e38046c11e5844f26e31e9a8d40855e28979",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h65536_a1024_check/measurements.jsonl": "88c260bcfc4e225517554a490977e4be089c00281e99c514b991fa7acfa538de",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h65536_a1024_check/memory.json": "e8d87e936bdf6f5b094e76967da01f512b6b6b9872bd6311c2718c3c5f693c39",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h65536_a1024_check/source_manifest.json": "4b68aa9ab128de2d8cee6f860ea4a72fa5b5bd7a85cab3fc851b67601ae9f18d",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h65536_a1024_check/workload/workload.json": "cf9f2767aaabbff5932e21e28337c9ee34fe3c0d875888f2ea66710e3755a233",
+        "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h65536_a1024_check/workload/requests.jsonl": "eb352bf10a67ef9e91a8a3d869734b325cb55ec4cf562dc4176c550c57f5ca5f"
+      },
+      "echo_rejected_reservation_attempt_policy": {
+        "policy_revision": "echo-cap8192-rejected-reservation-attempts-v1",
+        "field": "cache_diagnostics.layers[i].prefetch_capacity_failures",
+        "derived_prefetch_cap": 8192,
+        "cap_derivation": "The hash-bound attention call omits a limit override. SparseTokenLayerCache.prepare_prefetch defaults to 8192 and uses min(limit, 8192, P) for gpu_transient candidates; the fixed P is 65536. The original metadata does not contain a prefetch_cap field.",
+        "source_sha256": {
+          "models/deepseek_v32/attention.py": "929e7afcc0b3c9abdddce464aca23a0c1a50dc19e656275bdf5031fd4dc4fc7b",
+          "models/deepseek_v32/cache/session.py": "50e11d659389aeafc2ed8a608915f4eca2202e953529a4ea7180d2dd0edaaad9",
+          "models/deepseek_v32/execution/adapter.py": "bd20895dca304db0923f1489ed093094f3d199574112035e4745d518d20e4989",
+          "cache/sparse_token_cache.py": "1b3da2acfe5dc22c403b5794d6aedcebd1daaccaa9e82e54741fb0afd69c3cdf",
+          "operators/deepseek_v32/indexer/echo.py": "de20ebc3b4905b3dddb646167fb770d27a92146e76934be3160ad1b5b149c562",
+          "operators/deepseek_v32/indexer/csrc/echo_cache.cuh": "409be4a062180a8c8e73c1fa783d3980cf3e9926bf53ef34ddbaefe46e2dcd12",
+          "operators/deepseek_v32/indexer/csrc/echo_logits.cuh": "562b10fbca2082948fef14a1ac1c40b8918e1c2c81717a965cad040f5293e61f",
+          "operators/deepseek_v32/indexer/csrc/echo_indexer.cu": "c39ee55cb67ef452d6ee920c84c5852002ec8d2efd7c3115dfcb3564e9c8a255",
+          "operators/deepseek_v32/indexer/csrc/echo_sparse_recall.cuh": "a7c33da4c60eb3354e93fc77cac39faf19810d4a5b52c03283242fa61e52ff44"
+        },
+        "backend_cache_policy_revision": "echo-global-pages-fifo-v1",
+        "backend_echo_flags": {
+          "fused_logits_recall_extend": true,
+          "early_evict": false,
+          "offset_policy": "mean_of_last_up_to_four_rows_with_finite_guard",
+          "exact_union_overflow": "local_query_consumption_split_without_selection_clipping"
+        },
+        "boundary": "Only rejected reservation attempts may differ after both executions saturate the same derived cap. Rejected claims restore the temporary map claim without copying a record or writing a slot. This field does not count distinct missing tokens. All actual transfer, eviction, selection, cache, numerical and receipt checks remain exact; no exception for differing actual prefetch sets is used."
+      },
+      "echo_rejected_reservation_attempt_differences": [
+        {
+          "scheme": "echo",
+          "request_id": 16,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 8,
+          "check": 12,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 16,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 9,
+          "check": 19,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 16,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 7,
+          "check": 16,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 17,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 3,
+          "check": 6,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 17,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 11,
+          "check": 1,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 17,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 5,
+          "check": 6,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 18,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 2,
+          "check": 9,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 18,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 12,
+          "check": 11,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 19,
+          "layer": 0,
+          "field": "cache_diagnostics.layers[0].prefetch_capacity_failures",
+          "bench": 0,
+          "check": 1,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 19,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 2,
+          "check": 5,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 19,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 4,
+          "check": 7,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 19,
+          "layer": 6,
+          "field": "cache_diagnostics.layers[6].prefetch_capacity_failures",
+          "bench": 2,
+          "check": 4,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 19,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 4,
+          "check": 5,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 19,
+          "layer": 9,
+          "field": "cache_diagnostics.layers[9].prefetch_capacity_failures",
+          "bench": 2,
+          "check": 1,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 20,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 5,
+          "check": 2,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 20,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 1,
+          "check": 3,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 20,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 1,
+          "check": 2,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 21,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 7,
+          "check": 5,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 21,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 7,
+          "check": 6,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 21,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 10,
+          "check": 5,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 22,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 5,
+          "check": 6,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 22,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 5,
+          "check": 6,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 22,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 6,
+          "check": 5,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 23,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 4,
+          "check": 7,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 23,
+          "layer": 3,
+          "field": "cache_diagnostics.layers[3].prefetch_capacity_failures",
+          "bench": 1,
+          "check": 0,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 23,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 3,
+          "check": 5,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 23,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 0,
+          "check": 2,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 24,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 6,
+          "check": 3,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 24,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 8,
+          "check": 6,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 24,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 0,
+          "check": 6,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 25,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 3,
+          "check": 8,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 25,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 11,
+          "check": 8,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 25,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 5,
+          "check": 6,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 26,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 2,
+          "check": 9,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 26,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 11,
+          "check": 6,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 26,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 7,
+          "check": 11,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 27,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 13,
+          "check": 12,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 27,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 17,
+          "check": 10,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 27,
+          "layer": 6,
+          "field": "cache_diagnostics.layers[6].prefetch_capacity_failures",
+          "bench": 0,
+          "check": 1,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 27,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 12,
+          "check": 10,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 28,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 4,
+          "check": 6,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 28,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 6,
+          "check": 11,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 28,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 12,
+          "check": 15,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 29,
+          "layer": 0,
+          "field": "cache_diagnostics.layers[0].prefetch_capacity_failures",
+          "bench": 2,
+          "check": 0,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 29,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 13,
+          "check": 5,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 29,
+          "layer": 3,
+          "field": "cache_diagnostics.layers[3].prefetch_capacity_failures",
+          "bench": 1,
+          "check": 0,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 29,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 10,
+          "check": 6,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 29,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 12,
+          "check": 13,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 30,
+          "layer": 0,
+          "field": "cache_diagnostics.layers[0].prefetch_capacity_failures",
+          "bench": 1,
+          "check": 0,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 30,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 9,
+          "check": 13,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 30,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 10,
+          "check": 7,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 30,
+          "layer": 6,
+          "field": "cache_diagnostics.layers[6].prefetch_capacity_failures",
+          "bench": 1,
+          "check": 0,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 30,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 10,
+          "check": 12,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 30,
+          "layer": 9,
+          "field": "cache_diagnostics.layers[9].prefetch_capacity_failures",
+          "bench": 0,
+          "check": 1,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 31,
+          "layer": 2,
+          "field": "cache_diagnostics.layers[2].prefetch_capacity_failures",
+          "bench": 9,
+          "check": 10,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 31,
+          "layer": 5,
+          "field": "cache_diagnostics.layers[5].prefetch_capacity_failures",
+          "bench": 11,
+          "check": 10,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 31,
+          "layer": 8,
+          "field": "cache_diagnostics.layers[8].prefetch_capacity_failures",
+          "bench": 8,
+          "check": 11,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        },
+        {
+          "scheme": "echo",
+          "request_id": 31,
+          "layer": 9,
+          "field": "cache_diagnostics.layers[9].prefetch_capacity_failures",
+          "bench": 1,
+          "check": 0,
+          "derived_prefetch_cap": 8192,
+          "prefetched_records": 8192
+        }
+      ],
+      "live_source_differences": [
+        {
+          "path": "experiments/deepseek_v32_motivation/src/report_matrix.py",
+          "snapshot_sha256": "d1607c6579dde11ffb384e94969665d775492d932bb2e0024c0f2960e10134d5",
+          "live_sha256": "10780910a8364399f8a1c10bfc8b0ecff45a16b053bbe63f75b78646ff26aa05",
+          "saved_source_sha256": {
+            "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_20261007_01_h65536_a1024_bench/source/experiments/deepseek_v32_motivation/src/report_matrix.py": "d1607c6579dde11ffb384e94969665d775492d932bb2e0024c0f2960e10134d5",
+            "/mnt/ssd-wlcb/chenkaiqi/cxldsagr-tmp/motivation_matrix_20261007_01/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_matrix_20261007_01_h65536_a1024_check/source/experiments/deepseek_v32_motivation/src/report_matrix.py": "d1607c6579dde11ffb384e94969665d775492d932bb2e0024c0f2960e10134d5"
+          },
+          "excluded_from_receipt_execution_base_sources": true,
+          "boundary": "Only this hash-bound CPU report file changed after measurement. Saved source snapshots and receipt execution identities remain unchanged.",
+          "excluded_from_tracked_native_and_dependency_files": true
+        }
+      ]
+    }
+  ],
+  "point_count": 12,
+  "totals": {
+    "receipt_artifact_count": 1584,
+    "checked_payloads": 1536,
+    "compared_offload_payloads": 1152,
+    "request_count": 1536,
+    "checked_warmup_requests": 416,
+    "memory_sample_count": 3240,
+    "check_memory_sample_count": 3240,
+    "echo_rejected_reservation_attempt_difference_count": 250
   },
-  "boundary": "Accepted for this fixed-capacity C10 workload, one formal timing trajectory and intrusive request/layer scheduling diagnostics. Does not establish task quality, full DeepSeek model performance, saturated NH capacity, all-GPU isolation, or removable unprofiled dispatch overhead."
+  "common_source_sha256": "f90f924e35f745fdef0032735c8e3527b34637a07dab5a33e7292ed59b4bbe24",
+  "graph_policy": "deepseek-compute-islands-v4-bound-inputs",
+  "matrix_summary_sha256": "cc66120a7a89d08b9f2e1e78d5a5814972749c9e317656ae69fc612d00b87ffe",
+  "observer_input_sha256": {
+    "run.json": "8070a3699a178674f79094c47059affecbdb4228f7b37301d7a66971ab16b4be",
+    "monitor_audit.json": "6cc517b7d28b02df94df72507224ac9e87ae4514887e6379f6110a4b20950816",
+    "gpu_monitor.jsonl": "3f972024dff9f8f9d4b3bce3bd3665e8d30478de738e15b2ed0be1e24a7f87f9",
+    "driver.py": "d9c70b27698a0a3a90a3202dd56c6d556110c4527386ddf24c7d303f3fa7fc7b"
+  },
+  "audit_batch_input_sha256": {
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_analysis_20261007_02/audit_run.json": "ab4dc591db95b19635a4058e601e20d32e3c17cddc234beaf2bc09a5d4819e33",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_analysis_20261007_02/audit_summary.json": "c3ca7c8d4928910cad86694dfaf14dbda41d0269b02b19fee7fc664eca498eb0"
+  },
+  "counter_contract_sha256": "f672fa944d3777719710e120d157b40735ac3d4fec693e9203b1ed1d3d3eed3c",
+  "bench_and_check_actual_transfer_counters_equal": true,
+  "cache_diagnostics_comparison_policy": "echo-cap8192-rejected-reservation-attempts-v1",
+  "counter_comparison_boundary": "Only saturated ECHO rejected-reservation attempt counts may differ. All other diagnostics remain exact. This does not prove identical logical prefetch sets or priority trajectories.",
+  "selected_point_csvs_checked_against_matrix_and_independent_memory": true,
+  "boundary": "Aggregates 12 independently accepted check/bench pairs and verifies selected CSV statistics. It does not rerun numerical tensors, native provenance or GPU work. Old H64K/A128 profile evidence is a separate retained source, not a profile of these 12 matrix benchmarks. No task-quality, capacity-limit, repeated-run confidence or single-change causal claim is established."
 }

@@ -1,0 +1,39 @@
+{
+  "run_id": "deepseek_shape_statistics_20261007_01",
+  "source_run_id": "deepseek_shape_matrix_complete_20261007_01",
+  "input_and_source_sha256": {
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/report/shape_matrix/publication_manifest.json": "207e3533d718f2b91d01291504d983059c58b9de579f133ff7b335e9b39ab1ea",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/report/shape_matrix/summary.json": "bad1141839c648d2a0081423bdd196c661bd4514a576ab49cc84fc61d58c02e8",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/report/shape_matrix/audit/0_audit.json": "0e6f1a07ae694000d330d73e238803589b41a326c52abeefed48010da319c03c",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/report/shape_matrix/timing.csv": "09294dfac92dcbaf0fc3ccb6eeac4a14ed0576ef08a790c29aeafce20f56f0a7",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/report/shape_matrix/timing_samples.csv": "469921cd01fbe46680e2326004f45e2aabfcd570afc9c7b6a174d4d7a236624a",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/report/shape_matrix/cache_metrics_samples.csv": "666a72f5d264fe62778e2c34c993f3db7ff3cd002134f409aa7952611124c6e8",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/report/shape_matrix/timeline_windows.csv": "496796154d1468a41011f5e750dd41779e7a7c22170a8bb53d22e73fd5db10a7",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/report/shape_matrix/h4096_a128/compact_receipt.json": "8dfbaf792aff2ea504cc8d1ad0874a65edc3cb69d3bc513a6fe85de364af7a88",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/report/shape_matrix/h4096_a256/compact_receipt.json": "633586ecab0886a73ef10f438565d94f7aaeb39849371346b0188abb6ebf4e78",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/report/shape_matrix/h4096_a512/compact_receipt.json": "5a8430d8c6d9ff517ccc167c8c429a45ba9ff83f897c975fee327d804a4ef723",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/report/shape_matrix/h4096_a1024/compact_receipt.json": "d4b5719ce2aed86d3349d070f55244b7700a451f18ead342da9e479c124b3d42",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/report/shape_matrix/h16384_a128/compact_receipt.json": "824ace02a66e9df8f83a8fca59f09f0d0d2625b376e7c5ef2dd981d9c4010daa",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/report/shape_matrix/h16384_a256/compact_receipt.json": "78fbf8c8fb695972e18d29db46601e4cec40b4085ad5abfa3d43cb4f2a4b3b45",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/report/shape_matrix/h16384_a512/compact_receipt.json": "635d3ec9d45887bf2bf77c317d81654144772c484814e98a02f411adfaa2a3e9",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/report/shape_matrix/h16384_a1024/compact_receipt.json": "554b29156e4d0fdc703d6f3fe3b4c820528efaee073d370288b97bc7cc41ec21",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/report/shape_matrix/h65536_a128/compact_receipt.json": "042de5f79995087b559a158cd9f3c65244764104c65420965d4931dc7d8c303f",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/report/shape_matrix/h65536_a256/compact_receipt.json": "7703acd12b4346047a7211c67b6c218beaf484ce7ae5c9607e92c7ebcdae2e58",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/report/shape_matrix/h65536_a512/compact_receipt.json": "5f8d66445949051abebbc5b8880e2e0034c52ae787fae80f4e3227b459fc2f42",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/report/shape_matrix/h65536_a1024/compact_receipt.json": "4b418d3e941a096b96828c4be7a030106b8732103d444bc88365bcdb165f71b2",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/src/summarize_shape_matrix.py": "d966a2bc1ebe4771ae767b3aec36d020def41e82e10ba976760a3ae0ef640106",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/src/plot_shape_statistics.py": "e19bc88e98e1e1e1661c683b18143cfd00a55284ab23c013b1f6fac889d6af28"
+  },
+  "command": [
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/src/summarize_shape_matrix.py",
+    "--source-report",
+    "experiments/deepseek_v32_mfu/report/shape_matrix",
+    "--run-id",
+    "deepseek_shape_statistics_20261007_01",
+    "--output-dir",
+    "experiments/deepseek_v32_mfu/output/data/deepseek_shape_statistics_20261007_01",
+    "--publish-dir",
+    "experiments/deepseek_v32_mfu/report/shape_matrix_statistics"
+  ],
+  "boundary": "CPU descriptive statistics of accepted published matrix data; no new GPU measurements. No sample filtering, significance tests or workload-frequency weighting."
+}

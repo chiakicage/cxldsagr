@@ -5,6 +5,8 @@ import pytest
 
 from experiments.deepseek_v32_motivation.src.measure import (
     INDEXER_DISPATCH_POLICY,
+    LEGACY_WARMUP_POLICY,
+    WARMUP_POLICY,
     check_compute_graph_replays,
     check_request,
     configuration,
@@ -51,12 +53,34 @@ def test_default_workload_does_not_fill_host_arena():
     assert config["byte_subbudgets"] is None
     assert config["warmup_requests_per_scheme"] == 3
     assert config["warmup_request_indices"] == [0, 1, 16]
+    assert config["warmup_policy"] == WARMUP_POLICY
     assert config["indexer_dispatch_policy"] == INDEXER_DISPATCH_POLICY
     assert resource_limits(config) == {
         "max_session_capacity": 65664,
         "max_history_tokens": 65536,
         "max_candidate_tokens": 128,
     }
+
+
+@pytest.mark.parametrize("history,first_users", [(4096, 16), (16384, 5), (65536, 2)])
+@pytest.mark.parametrize("candidate", [128, 256, 512, 1024])
+def test_warmup_plan_covers_available_users_up_to_first_history_eviction(
+    history, first_users, candidate
+):
+    config = configuration(
+        parser().parse_args(
+            [
+                "--run-id",
+                "test",
+                "--history-tokens",
+                str(history),
+                "--candidate-tokens",
+                str(candidate),
+            ]
+        )
+    )
+    assert config["warmup_request_indices"] == [*range(first_users), 16]
+    assert config["warmup_requests_per_scheme"] == first_users + 1
 
 
 @pytest.mark.parametrize(
@@ -152,8 +176,17 @@ def test_compute_replay_audit_covers_every_history_chunk_and_independent_layer(
 
 
 @pytest.mark.parametrize("scheme", ["hbm", "echo", "serial_sparse", "dense_prefetch"])
-def test_warmup_exercises_host_recall_then_releases_cache(scheme):
-    config = configuration(parser().parse_args(["--run-id", "test"]))
+@pytest.mark.parametrize(
+    "history,first_users,exceeds_pool", [(4096, 16, False), (16384, 5, True), (65536, 2, True)]
+)
+def test_warmup_exercises_capacity_dependent_paths_then_releases_cache(
+    scheme, history, first_users, exceeds_pool
+):
+    config = configuration(
+        parser().parse_args(["--run-id", "test", "--history-tokens", str(history)])
+    )
+    recalls_history = scheme == "dense_prefetch" or (scheme != "hbm" and exceeds_pool)
+    revisit_hit = scheme != "hbm" or not exceeds_pool
     events = []
     backend = SimpleNamespace(
         scheme=scheme,
@@ -164,21 +197,21 @@ def test_warmup_exercises_host_recall_then_releases_cache(scheme):
     class Runner:
         def __init__(self, actual_backend, *, resource_limits):
             assert actual_backend is backend
-            assert resource_limits["max_history_tokens"] == 65536
+            assert resource_limits["max_history_tokens"] == history
 
         def __enter__(self):
             return self
 
         def execute(self, request):
             events.append(request["request_id"])
-            miss = request["is_revisit"] and scheme != "hbm"
+            miss = request["is_revisit"] and recalls_history
             return SimpleNamespace(
                 metrics={
                     **request,
-                    "prefix_cache_hit": miss,
+                    "prefix_cache_hit": request["is_revisit"] and revisit_hit,
                     "cache_diagnostics": {
                         "candidate_persistence": "gpu_transient",
-                        "retained_length": 65536,
+                        "retained_length": history,
                         "host_to_device_bytes": 3456 if miss else 0,
                         "device_to_host_bytes": 0,
                         "prefetched_records": 2 if miss else 0,
@@ -203,10 +236,32 @@ def test_warmup_exercises_host_recall_then_releases_cache(scheme):
         ]
     )
     trace = warmup(backend, workload, config, Runner)
-    assert events == [0, 1, 16, "release_sessions", "synchronize", "release_shared"]
-    assert [row["request_id"] for row in trace] == [0, 1, 16]
-    if scheme != "hbm":
-        assert trace[2]["host_to_device_bytes"] > 0 and trace[2]["recalled_records"] > 0
-        trace[2]["recalled_records"] = 0
-        with pytest.raises(ValueError, match="did not exercise host recall"):
-            validate_warmup_trace(scheme, trace, config, workload.requests)
+    indices = [*range(first_users), 16]
+    assert events == [*indices, "release_sessions", "synchronize", "release_shared"]
+    assert [row["request_id"] for row in trace] == indices
+    assert trace[-1]["prefix_cache_hit"] is revisit_hit
+    assert (trace[-1]["host_to_device_bytes"] > 0) is recalls_history
+    assert (trace[-1]["recalled_records"] > 0) is recalls_history
+    if recalls_history:
+        for counter in ("host_to_device_bytes", "recalled_records"):
+            invalid = deepcopy(trace)
+            invalid[-1][counter] = 0
+            with pytest.raises(ValueError, match="did not exercise host recall"):
+                validate_warmup_trace(scheme, invalid, config, workload.requests)
+    for defect in ("first_hit", "revisit_hit", "candidate_d2h", "missing_initial_user"):
+        invalid = deepcopy(trace)
+        if defect == "first_hit":
+            invalid[-2]["prefix_cache_hit"] = True
+        elif defect == "revisit_hit":
+            invalid[-1]["prefix_cache_hit"] = not revisit_hit
+        elif defect == "candidate_d2h":
+            invalid[-1]["device_to_host_bytes"] = 1
+        else:
+            invalid.pop(-2)
+        with pytest.raises(ValueError, match="warmup"):
+            validate_warmup_trace(scheme, invalid, config, workload.requests)
+    if first_users == 2:
+        legacy = {**config, "warmup_policy": LEGACY_WARMUP_POLICY}
+        with pytest.raises(ValueError, match="policy"):
+            validate_warmup_trace(scheme, trace, legacy, workload.requests)
+        validate_warmup_trace(scheme, trace, legacy, workload.requests, allow_legacy=True)

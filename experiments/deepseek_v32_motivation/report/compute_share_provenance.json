@@ -1,0 +1,159 @@
+{
+  "schema": "deepseek-c10-candidate-compute-share-v3",
+  "run_id": "deepseek_motivation_compute_share_20261007_05",
+  "created_utc": "2026-10-07T12:33:08.075187+00:00",
+  "profile_run_id": "deepseek_motivation_rerun_profile_20261006_01",
+  "matching_bench_run_id": "deepseek_motivation_rerun_bench_20261006_01",
+  "matching_check_run_id": "deepseek_motivation_rerun_check_20261006_01",
+  "scheme": "hbm",
+  "phase": "revisit",
+  "segment": "candidate",
+  "request_id": 16,
+  "history_tokens": 65536,
+  "candidate_tokens": 128,
+  "layers": 10,
+  "input_sha256": {
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/report/diagnosis/pipeline.json": "9a39b9ff3d0244cab2683bb75d870351e3919e86603d52f55fd362f95a38f6f3",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_rerun_profile_20261006_01/capture_3.sqlite": "0af453173542669b0aa1732f0a422b80c107f840e3a87c91e1a54b1c0e773e60",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_rerun_profile_20261006_01/metadata.json": "70d6af2b51d385974decdab273b67294ddd89f6248ed04737559260244876531",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_rerun_profile_20261006_01/operator_calls.json": "0e6f68d26ec8de02d9df52aab1eb71f3697d70299157bd6ee8dfe7956741ac06",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_rerun_profile_20261006_01/capture_1.sqlite": "ba91c4d7dd26bfeb884ccd41ee86f4fd8b156ffc49d173574c7d724d1307c733",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_rerun_profile_20261006_01/capture_4.sqlite": "34c4f7a78b303eaada3b73cbc3216f6442b6203dee813c0a252c0479206f13c6",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_rerun_profile_20261006_01/capture_7.sqlite": "87e7be7e820103c72c02bfebf73f2674312771adbd7c4d4ba30db461e815e11c",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_rerun_profile_20261006_01/capture_10.sqlite": "04a1c83716b35b27a33fc471fe7b0946924866205109f9cbd3e9d86adc4989b4",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_rerun_profile_20261006_01/source/models/deepseek_v32/projections.py": "0cf9e54a9053f0a02adfec4a929058e202d6f7dc25c5d0f8c75eebb1b6f88ae9",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_rerun_profile_20261006_01/source/models/deepseek_v32/rotary.py": "ed2ca2d8ef035eaeca48135435a34e0a54df7d29a59bc34fbe67911668a9f1a2",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_rerun_profile_20261006_01/source/models/deepseek_v32/execution/compute_graphs.py": "3a3996dcb08fa87423fd858eec8732669531a4bdfeab31534a49b52a0e08d4e5",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_rerun_profile_20261006_01/source/operators/flashinfer.py": "55c368b9ffa69301b8407de7f9aa69bfce03db3b6bfc4c59646b7d3fe9d36a8d"
+  },
+  "source_sha256": {
+    "experiments/deepseek_v32_motivation/src/plot_compute_share.py": "ce301c78936dda053771cf541b31b268a044a91932dcb969eb99f408e7a16663",
+    "experiments/deepseek_v32_motivation/src/analyze_pipeline.py": "8a33dd597024e859bf93643d9adc7176cdd005a51c1be8cff8ecd6d8c815fa0c",
+    "experiments/deepseek_v32_motivation/src/graph_attribution.py": "475647c4bf4a93d0c1f301cd8bd0e60d87dd8229603f7752e9d746fe80b94578",
+    "experiments/deepseek_v32_mfu/src/analyze_nsys.py": "fd1277d1be4e164ff99027ffe4f7a37dbec272d987ff39c0074b71b908f45089",
+    "experiments/deepseek_v32_motivation/src/graph_instrumentation.py": "0d55238bc3c8ae4b84c9c0495c758066b81e16c24c3d53987ee473419c03f71e",
+    "models/deepseek_v32/projections.py": "0cf9e54a9053f0a02adfec4a929058e202d6f7dc25c5d0f8c75eebb1b6f88ae9",
+    "models/deepseek_v32/rotary.py": "ed2ca2d8ef035eaeca48135435a34e0a54df7d29a59bc34fbe67911668a9f1a2",
+    "models/deepseek_v32/execution/compute_graphs.py": "3a3996dcb08fa87423fd858eec8732669531a4bdfeab31534a49b52a0e08d4e5",
+    "operators/flashinfer.py": "55c368b9ffa69301b8407de7f9aa69bfce03db3b6bfc4c59646b7d3fe9d36a8d"
+  },
+  "source_base": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_compute_share_20261007_05/source",
+  "artifacts_base": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_compute_share_20261007_05",
+  "group_stages": {
+    "Indexer": [
+      "indexer_qk",
+      "exact_topk"
+    ],
+    "Attention": [
+      "mla_qk_pv"
+    ],
+    "Projection": [
+      "index_q_proj",
+      "index_k_proj",
+      "index_weights_proj",
+      "q_a_proj",
+      "q_b_proj",
+      "kv_a_proj",
+      "q_absorb",
+      "v_expand",
+      "o_proj",
+      "embedding",
+      "lm_head"
+    ],
+    "MLP": [
+      "mlp_gate",
+      "mlp_up",
+      "mlp_down"
+    ]
+  },
+  "auxiliary_kernel_rules": {
+    "RoPE": [
+      "BatchQKApplyRotaryPosIdsCosSinCacheHeadParallelismKernel",
+      "cos_kernel_cuda",
+      "sin_kernel_cuda",
+      "arange_cuda_out",
+      "gpu_kernel_impl_nocast<at::native::BinaryFunctor<float, float, float, at::native::binary_internal::MulFunctor<float>>",
+      "CatArrayBatchedCopy_vectorized<at::native::<unnamed>::OpaqueType<(unsigned int)4>"
+    ],
+    "MLP": [
+      "flashinfer::activation::act_and_mul_kernel"
+    ],
+    "Norm": [
+      "LocalPlainRMSNorm",
+      "LocalFusedRMSNorm",
+      "vectorized_layer_norm_kernel"
+    ],
+    "Quantization / scaling": [
+      "quantize_kernel",
+      "AUnaryFunctor<float, float, float, at::native::binary_internal::MulFunctor<float>>",
+      "vectorized_elementwise_kernel<(int)4, at::native::BinaryFunctor<float, float, float, at::native::binary_internal::MulFunctor<float>>"
+    ],
+    "Position / layout / checks": [
+      "CUDAFunctor_add<long>",
+      "CUDAFunctorOnSelf_add<long>",
+      "direct_copy_kernel_cuda",
+      "bfloat16_copy_kernel_cuda",
+      "CatArrayBatchedCopy_vectorized<at::native::<unnamed>::OpaqueType<(unsigned int)2>",
+      "CatArrayBatchedCopy_alignedK_contig",
+      "MinMaxOps<long, long, int>"
+    ]
+  },
+  "groups": [
+    {
+      "group": "Indexer",
+      "kernel_count": 150,
+      "duration_ns": 3845120,
+      "duration_ms": 3.84512,
+      "share_pct": 41.82619317050163
+    },
+    {
+      "group": "Attention",
+      "kernel_count": 20,
+      "duration_ns": 1351331,
+      "duration_ms": 1.351331,
+      "share_pct": 14.69941937918378
+    },
+    {
+      "group": "Projection",
+      "kernel_count": 376,
+      "duration_ns": 2455713,
+      "duration_ms": 2.455713,
+      "share_pct": 26.71259318546939
+    },
+    {
+      "group": "MLP",
+      "kernel_count": 100,
+      "duration_ns": 1540927,
+      "duration_ms": 1.540927,
+      "share_pct": 16.761794264845197
+    }
+  ],
+  "total_kernel_ns": 9193091,
+  "combined_indexer_attention_pct": 56.52561254968541,
+  "scores_topk_mla_only_pct": 54.41272146658833,
+  "excluded_activity_count": 64,
+  "excluded_duration_ns": 130080,
+  "attribution_matches_accepted_pipeline": true,
+  "denominator": "Sum of all candidate GPU kernel durations; every kernel assigned exactly once.",
+  "classification": "Four accounting groups; named API ownership, unique auxiliary signatures and verified index-normalization cast adjacency; unknown kernels rejected.",
+  "group_boundaries": {
+    "Indexer": "Scores/top-k, indexer rotary application, index LayerNorm with its FP32/BF16 casts, index record quantization and head-weight scaling.",
+    "Attention": "Sparse MLA and MLA rotary application.",
+    "Projection": "All previously separated input/output projection APIs, including Q absorption, V expansion and O projection; shared position/trig preparation, input/Q/K norm, KV layout, input checks, embedding, final norm and LM head. This accounting group includes request endpoints, not only linear kernels.",
+    "MLP": "MLP APIs, SiLU, and the finish graph's post-attention normalization."
+  },
+  "layout": "One vertical 100-percent stacked bar; four large in-bar labels plus a bracket and the combined Attention + Indexer share; no title, axes, legend or footnotes.",
+  "boundary": "CPU reanalysis of the retained 2026-10-06 instrumented HBM-only profile; no new GPU run. One revisit candidate over ten C10 blocks, not a repeated-run mean or the new matrix's profile. History reconstruction, all memcpy/memset and CPU gaps excluded. Projection API groups include their quantization/reduction kernels. Auxiliary kernels are folded into four documented accounting groups; the denominator is unchanged. Kernel duration shares are not FLOP shares, SM utilization or end-to-end latency shares.",
+  "environment": {
+    "python": "3.12.13",
+    "matplotlib": "3.11.1"
+  },
+  "artifacts_sha256": {
+    "activities.csv": "b08ab6b275d7ffd052044a63b3c56f1f768fcb8f113f67f046b1320956f9039c",
+    "compute_share_data.csv": "3d28baf513e3a31f06f0082e3aa63beba74dc479e701a6f23a926e7c6c71b6bb",
+    "compute_share_h64k_a128.pdf": "4d0ceab35e267b7b91816d528062bc50653e509337ca979c5b29cb759f545b0c",
+    "compute_share_h64k_a128.png": "6f548a5e162278ab4d6f7cafabb66dfe818e31826b280e8cd7be68fcc6c6a9ba",
+    "compute_share_h64k_a128.svg": "6f09b84303d7ba4d389d1a2548231cf4b302d4a043f63baaaa2a8e41193b1263",
+    "compute_share_stages.csv": "85f7b72238e0bec349e11952826c5dfd0121f974326ceb0f59231723c30feb47"
+  }
+}

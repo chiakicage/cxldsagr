@@ -7,6 +7,7 @@ import hashlib
 import torch
 
 from cache.sparse_token_cache import MISSING
+from evaluation.validation import identity_digest
 
 
 def tensor_identity(tensor):
@@ -79,7 +80,111 @@ def cache_state(model):
     return {"length": model.length, "layers": layers}
 
 
-def compare_cache_state(actual, expected):
+def compare_cache_state(actual, expected, *, actual_prefetch=None, expected_prefetch=None):
+    schedule_fields = set()
+    if actual_prefetch is not None or expected_prefetch is not None:
+        for state, proof in ((actual, actual_prefetch), (expected, expected_prefetch)):
+            if (
+                proof is None
+                or proof.get("schema") != "cold-echo-stage-acceptance-v1"
+                or proof.get("passed") is not True
+                or proof.get("final_cache_state_sha256") != identity_digest(state)
+                or proof.get("proof", {}).get("passed") is not True
+            ):
+                raise AssertionError("prefetch transition proof does not bind this cache state")
+            scope = proof.get("scope", {})
+            if (
+                scope.get("method") != "echo"
+                or scope.get("residency") != "cold"
+                or scope.get("single_session") is not True
+                or scope.get("num_layers") != 3
+                or len(state["layers"]) != 3
+                or any(type(scope.get(key)) is not int for key in ("H", "A", "slots"))
+                or min(scope["H"], scope["A"]) < 1
+                or scope["H"] + scope["A"] > scope["slots"]
+                or scope["H"] + scope["A"] != state["length"]
+                or scope.get("max_prefetch") != min(8192, scope["slots"] - scope["A"])
+            ):
+                raise AssertionError("prefetch transition proof has unsupported execution scope")
+            audit = proof["proof"]
+            layers = audit.get("layers", [])
+            if (
+                audit.get("schema") != "cold-echo-prefetch-transition-v1"
+                or any(audit.get("scope", {}).get(key) != value for key, value in scope.items())
+                or len(layers) != 3
+                or any(
+                    len(proof.get(field, [])) != 3
+                    for field in ("indices", "scores", "initial_hints")
+                )
+            ):
+                raise AssertionError("prefetch acceptance lacks its scoped transition audit")
+            for index, layer in enumerate(layers):
+                if (
+                    layer.get("layer") != index
+                    or any(
+                        layer.get(flag) is not True
+                        for flag in (
+                            "passed",
+                            "stage_maps_free_priorities_clocks_verified",
+                            "physical_owners_preserved_until_final",
+                            "no_eviction",
+                        )
+                    )
+                    or layer.get("final_cache_state_identity")
+                    != identity_digest(state["layers"][index])
+                    or layer.get("indices_identity") != proof["indices"][index]
+                    or layer.get("eligibility", {}).get("score_identity") != proof["scores"][index]
+                    or layer.get("eligibility", {}).get("hint_identity")
+                    != proof["initial_hints"][index]
+                ):
+                    raise AssertionError("prefetch layer audit is incomplete or mismatched")
+        if actual_prefetch["scope"] != expected_prefetch["scope"]:
+            raise AssertionError("prefetch transition proofs cover different scopes")
+        for field, description in (
+            ("indices", "exact top-k indices"),
+            ("scores", "exact indexer scores"),
+            ("initial_hints", "initial prefetch hints"),
+        ):
+            if len(actual_prefetch.get(field, [])) != 3 or actual_prefetch.get(
+                field
+            ) != expected_prefetch.get(field):
+                raise AssertionError(f"full graph changed {description}")
+        # Each accepted stage proof independently recomputes these fields from
+        # the actual capped prefetch/recall execution. Other cache metadata,
+        # numerical identities, final residency and clocks remain strict.
+        schedule_fields = {
+            "prefetched_records",
+            "prefetch_capacity_failures",
+            "recalled_records",
+            "resident_selection_records",
+            "host_to_device_bytes",
+        }
+        actual = {
+            **actual,
+            "layers": [
+                {
+                    key: {k: v for k, v in value.items() if k not in schedule_fields}
+                    if key == "metrics"
+                    else value
+                    for key, value in layer.items()
+                    if key != "logical_priority"
+                }
+                for layer in actual["layers"]
+            ],
+        }
+        expected = {
+            **expected,
+            "layers": [
+                {
+                    key: {k: v for k, v in value.items() if k not in schedule_fields}
+                    if key == "metrics"
+                    else value
+                    for key, value in layer.items()
+                    if key != "logical_priority"
+                }
+                for layer in expected["layers"]
+            ],
+        }
     if actual != expected:
         changed = [
             f"layer_{layer}.{key}"
@@ -90,4 +195,17 @@ def compare_cache_state(actual, expected):
             if left.get(key) != right.get(key)
         ]
         raise AssertionError(f"full graph cache state differs: {changed}")
-    return {"equal": True, "logical_slot_order": True, "layers": len(actual["layers"])}
+    return {
+        "equal": True,
+        "logical_slot_order": True,
+        "layers": len(actual["layers"]),
+        **(
+            {
+                "bounded_prefetch_transitions_validated": True,
+                "schedule_dependent_metrics": sorted(schedule_fields),
+                "exact_topk_equal": True,
+            }
+            if schedule_fields
+            else {}
+        ),
+    }

@@ -1,0 +1,180 @@
+{
+  "schema": "deepseek-c10-revisit-figures-v3",
+  "run_id": "deepseek_motivation_revisit_plot_20261007_01",
+  "created_utc": "2026-10-07T11:27:38.616967+00:00",
+  "input_summary": {
+    "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/report/summary.json",
+    "sha256": "cc66120a7a89d08b9f2e1e78d5a5814972749c9e317656ae69fc612d00b87ffe"
+  },
+  "benchmark_run_ids": [
+    "deepseek_motivation_matrix_20261007_01_h16384_a1024_bench",
+    "deepseek_motivation_matrix_20261007_01_h16384_a128_bench",
+    "deepseek_motivation_matrix_20261007_01_h16384_a256_bench",
+    "deepseek_motivation_matrix_20261007_01_h16384_a512_bench",
+    "deepseek_motivation_matrix_20261007_01_h4096_a1024_bench",
+    "deepseek_motivation_matrix_20261007_01_h4096_a128_bench",
+    "deepseek_motivation_matrix_20261007_01_h4096_a256_bench",
+    "deepseek_motivation_matrix_20261007_01_h4096_a512_bench",
+    "deepseek_motivation_matrix_20261007_01_h65536_a1024_bench",
+    "deepseek_motivation_matrix_20261007_01_h65536_a128_bench",
+    "deepseek_motivation_matrix_20261007_01_h65536_a256_bench",
+    "deepseek_motivation_matrix_20261007_01_h65536_a512_bench"
+  ],
+  "schemes": [
+    "hbm",
+    "echo",
+    "serial_sparse",
+    "dense_prefetch"
+  ],
+  "plotted_values": 84,
+  "figures": [
+    {
+      "name": "revisit_hbm_offload_a128",
+      "candidate_tokens": 128,
+      "schemes": [
+        "hbm",
+        "echo",
+        "serial_sparse",
+        "dense_prefetch"
+      ],
+      "axes_count": 1,
+      "yscale": "log"
+    },
+    {
+      "name": "revisit_offload_a128",
+      "candidate_tokens": 128,
+      "schemes": [
+        "echo",
+        "serial_sparse",
+        "dense_prefetch"
+      ],
+      "axes_count": 1,
+      "yscale": "linear"
+    },
+    {
+      "name": "revisit_hbm_offload_a256",
+      "candidate_tokens": 256,
+      "schemes": [
+        "hbm",
+        "echo",
+        "serial_sparse",
+        "dense_prefetch"
+      ],
+      "axes_count": 1,
+      "yscale": "log"
+    },
+    {
+      "name": "revisit_offload_a256",
+      "candidate_tokens": 256,
+      "schemes": [
+        "echo",
+        "serial_sparse",
+        "dense_prefetch"
+      ],
+      "axes_count": 1,
+      "yscale": "linear"
+    },
+    {
+      "name": "revisit_hbm_offload_a512",
+      "candidate_tokens": 512,
+      "schemes": [
+        "hbm",
+        "echo",
+        "serial_sparse",
+        "dense_prefetch"
+      ],
+      "axes_count": 1,
+      "yscale": "log"
+    },
+    {
+      "name": "revisit_offload_a512",
+      "candidate_tokens": 512,
+      "schemes": [
+        "echo",
+        "serial_sparse",
+        "dense_prefetch"
+      ],
+      "axes_count": 1,
+      "yscale": "linear"
+    },
+    {
+      "name": "revisit_hbm_offload_a1024",
+      "candidate_tokens": 1024,
+      "schemes": [
+        "hbm",
+        "echo",
+        "serial_sparse",
+        "dense_prefetch"
+      ],
+      "axes_count": 1,
+      "yscale": "log"
+    },
+    {
+      "name": "revisit_offload_a1024",
+      "candidate_tokens": 1024,
+      "schemes": [
+        "echo",
+        "serial_sparse",
+        "dense_prefetch"
+      ],
+      "axes_count": 1,
+      "yscale": "linear"
+    }
+  ],
+  "layout": "one axes per file; one HBM/offload comparison and one offload-only view per candidate",
+  "axes": {
+    "x": "log2 history tokens",
+    "y": "log for HBM/offload, zero-based linear for offload-only"
+  },
+  "environment": {
+    "python": "3.12.13",
+    "matplotlib": "3.11.1"
+  },
+  "artifacts_sha256": {
+    "plot_data.csv": "f0fe4eb143101dda6a12e4b736de38daa5d28f9a14caf7e7604556e3d913d245",
+    "revisit_hbm_offload_a1024.png": "5da45acfc88f730706287adcd35e2f63bc8b80090b471d28690490b5e982c271",
+    "revisit_hbm_offload_a1024.svg": "b075cda2cc3b8a40cc89f2c9340dbb095e0b561683d0a473ac99e46332092fa4",
+    "revisit_hbm_offload_a128.png": "49b7433fd06ba159b50fe301c98a5f305fbe9fc69605a7afeb8ac8ac02568ba4",
+    "revisit_hbm_offload_a128.svg": "ba64bbd2ed966d524d3764dc73e20db3b4a7dc5b0ae4d12d7a350630362b931f",
+    "revisit_hbm_offload_a256.png": "9ec1cb9f862b464bf4a39c19ebc1393b0b8ed2781ff0be486aedfe87a62945d0",
+    "revisit_hbm_offload_a256.svg": "22b2ef6e2a14dfececdcd552614d32bd81a461b4cbc071e5ce4f34c737f4856c",
+    "revisit_hbm_offload_a512.png": "f8fd4748346821f069e3989d2cdbca63ca49f48146347ec76b21cb493efb726e",
+    "revisit_hbm_offload_a512.svg": "5b4441f42dcaa3f1d9052a66100ca2e7af70602dc44ef90f00cdebfa4644d80d",
+    "revisit_offload_a1024.png": "cde3661038a269caefbab73653a8487d427aa0dad05c6692df82e53a3289bb6f",
+    "revisit_offload_a1024.svg": "fc237d20001ebcafb29dcf80cbab5c0837783c1ea0e815c3b8279a7e1c2f8d7e",
+    "revisit_offload_a128.png": "8ee693781804742e05245a123fe429bfff364073d8d63a49f9fcec6a065ad62c",
+    "revisit_offload_a128.svg": "03e30f30d0f73783c27d6d1db58bd40ba01a95ae6faacdd1e789e91700393bd2",
+    "revisit_offload_a256.png": "baea36ea8da93189c0ac1be134082de5380d55ab7ea706f5d608f91be1530b81",
+    "revisit_offload_a256.svg": "78dc03db9e321746c48551b0744abd50522cc159703591206b5893b398cba771",
+    "revisit_offload_a512.png": "db194a0e7dda93c99705a7395e605d43d921d80043a3989b32ee191799e4fa97",
+    "revisit_offload_a512.svg": "eb1df1529b25b603eceb817a4791b0430d0c8d0abec1a4c113c6a22b3e68e965",
+    "source/plot.py": "28b7ed4095d4363ebd56414212b041a11c466ca3b6359c56a834bc61bb200078",
+    "source/plot_offload_matrix.py": "423ef209fc59fc5a1aabda3da0de4817d528b7d062cdef5172e5c1d971255d2b"
+  },
+  "boundary": "Presentation-only filtering of the accepted matrix; no GPU execution or new measurements. Original four-method statistics and validation are unchanged. Only revisit mean latency is plotted, directly in milliseconds.",
+  "artifacts_base": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_revisit_plot_20261007_01",
+  "render_record": {
+    "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_revisit_plot_20261007_01/provenance.json",
+    "sha256": "000e3c3133ec670f4beed5d3ceaf4c69329605612519f36d531d8dcda784378d"
+  },
+  "command": [
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin/python",
+    "-m",
+    "experiments.deepseek_v32_motivation.src.plot_offload_matrix",
+    "--summary",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/report/summary.json",
+    "--output-dir",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_revisit_plot_20261007_01"
+  ],
+  "parent_publication": {
+    "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_revisit_plot_20261007_01/parent_publication/publication_manifest.json",
+    "sha256": "dbab1bad9fb5970619645b2bc5f059832642f0d763483749eac08181bfd98f24"
+  },
+  "supersedes_run_id": "deepseek_motivation_history_plot_20261007_01",
+  "parent_snapshot_boundary": "Historical publication index; superseded display files need not remain present.",
+  "review": {
+    "data": "All 84 plotted revisit means independently matched the accepted summary.",
+    "visual": "All eight rendered PNGs inspected; each PNG/SVG has one axes, one candidate, and history on the x-axis.",
+    "unchanged": "Original four-method statistics, summary, acceptance and counter contract."
+  }
+}

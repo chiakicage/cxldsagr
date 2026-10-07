@@ -1,6 +1,39 @@
+import xml.etree.ElementTree as ET
+
 import pytest
 
 from experiments.deepseek_v32_mfu.src import compact_timeline, launch_gap, timeline
+
+
+@pytest.mark.parametrize("prefix", [4096, 16384, 65536])
+@pytest.mark.parametrize("extend", [128, 256, 512, 1024])
+def test_matrix_shapes_use_recorded_prefill_chunk_count(prefix, extend):
+    shape = compact_timeline.profile_shape(
+        {"num_layers": 3, "prefix_tokens": prefix, "extend_tokens": extend, "chunk_size": 1024}
+    )
+    assert shape["prefix_tokens"] == prefix
+    assert shape["extend_tokens"] == extend
+    assert shape["prefill_chunks"] == prefix // 1024
+    assert shape["last_chunk_tokens"] == 1024
+
+
+def test_final_partial_chunk_uses_actual_token_count():
+    shape = compact_timeline.profile_shape(
+        {"num_layers": 3, "prefix_tokens": 4101, "extend_tokens": 256, "chunk_size": 1024}
+    )
+    assert shape["prefill_chunks"] == 5
+    assert shape["last_chunk_tokens"] == 5
+
+
+@pytest.mark.parametrize(
+    "field,value",
+    [("num_layers", 4), ("prefix_tokens", 0), ("extend_tokens", -1), ("chunk_size", 0)],
+)
+def test_timeline_rejects_unsupported_scope_or_invalid_dimensions(field, value):
+    result = {"num_layers": 3, "prefix_tokens": 4096, "extend_tokens": 128, "chunk_size": 1024}
+    result[field] = value
+    with pytest.raises(ValueError, match="L0-L2"):
+        compact_timeline.profile_shape(result)
 
 
 def row(start, end, layer, stage, *, lane="Compute", source_stage=None):
@@ -280,3 +313,95 @@ def test_startup_comparison_retains_embedding_and_pre_layer_io_without_shared_ta
         (140, 145),
     ]
     assert extended["window"]["gap_ms"] == pytest.approx(43 / 1e6)
+
+
+@pytest.mark.parametrize("window_kind", ["three-layers", "extend-startup"])
+def test_matrix_shape_survives_clipping_and_renders_matching_titles(tmp_path, window_kind):
+    shape = compact_timeline.profile_shape(
+        {"num_layers": 3, "prefix_tokens": 4096, "extend_tokens": 1024, "chunk_size": 1024}
+    )
+    prefill, extend = [], []
+    for method in launch_gap.METHODS:
+        prefill_rows = [
+            row(
+                chunk * 1_000_000 + 30_000 + layer * 70_000,
+                chunk * 1_000_000 + 70_000 + layer * 70_000,
+                layer,
+                "q_a_proj",
+            )
+            for chunk in range(4)
+            for layer in range(3)
+        ]
+        prefill.append(
+            {
+                "method": method,
+                "shape": shape,
+                "chunks": [{"chunk": chunk, "start_ns": chunk * 1_000_000} for chunk in range(4)],
+                "rows": prefill_rows,
+                "window": {"start_ns": 0, "end_ns": 3_250_000},
+                "shared_tail": {"start_ns": 3_210_000},
+            }
+        )
+        extend_rows = [
+            {**row(20_000, 30_000, 0, "embedding"), "layer": "shared"},
+            row(100_000, 180_000, 0, "q_a_proj"),
+            row(220_000, 290_000, 1, "q_a_proj"),
+            row(330_000, 400_000, 2, "q_a_proj"),
+            {**row(410_000, 420_000, 0, "lm_head"), "layer": "shared"},
+        ]
+        if method == "dense_prefetch":
+            extend_rows.append(copy_row(40_000, 120_000, "dense_history_prefetch_layer_0"))
+        extend.append(
+            {
+                "method": method,
+                "shape": shape,
+                "rows": extend_rows,
+                "window": {"start_ns": 0, "end_ns": 450_000},
+                "shared_tail": {"start_ns": 400_000},
+            }
+        )
+
+    if window_kind == "three-layers":
+        prefill = [compact_timeline.three_layer_panel(panel, "prefill") for panel in prefill]
+        extend = [compact_timeline.three_layer_panel(panel, "extend") for panel in extend]
+    else:
+        extend = [compact_timeline.extend_startup_panel(panel) for panel in extend]
+    metrics = compact_timeline.draw(
+        prefill,
+        extend,
+        tmp_path,
+        layout="separate",
+        window_kind=window_kind,
+        io_layout="directions",
+        annotations="idle-echo",
+    )
+    assert all(panel["shape"] == shape for panel in [*prefill, *extend])
+    phases = ("prefill", "extend") if window_kind == "three-layers" else ("extend",)
+    assert set(metrics) == {
+        f"{phase}/{method}" for phase in phases for method in launch_gap.METHODS
+    }
+    expected_titles = (
+        {
+            "prefill.svg": "Prefill | H=4,096, last chunk 4/4, 1,024 tokens, L0-L2",
+            "extend.svg": "Extend | H=4,096, A=1,024, all 3 layers",
+        }
+        if window_kind == "three-layers"
+        else {"extend_with_startup.svg": "Extend | H=4,096, A=1,024, startup + embedding + L0-L2"}
+    )
+    for filename, expected in expected_titles.items():
+        texts = {
+            "".join(element.itertext())
+            for element in ET.parse(tmp_path / filename).iter("{http://www.w3.org/2000/svg}text")
+        }
+        assert expected in texts
+        assert (tmp_path / filename.replace(".svg", ".png")).is_file()
+    for method in launch_gap.METHODS:
+        window = metrics[f"extend/{method}"]["window"]
+        assert window["end_ns"] == 400_000
+        if window_kind == "three-layers":
+            assert window["start_ns"] == (40_000 if method == "dense_prefetch" else 100_000)
+            prefill_window = metrics[f"prefill/{method}"]["window"]
+            assert (prefill_window["start_ns"], prefill_window["end_ns"]) == (3_030_000, 3_210_000)
+        else:
+            assert window["start_ns"] == 0
+            assert metrics[f"extend/{method}"]["startup"]["end_ns"] == 20_000

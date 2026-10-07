@@ -85,6 +85,8 @@ def sources():
     for name in (
         "profile_layers.py",
         "extend_graph_validation.py",
+        "prefetch_validation.py",
+        "prefetch_transition_audit.py",
         "full_graph_profile.py",
         "operator_instrumentation.py",
         "operator_flops.py",
@@ -271,23 +273,29 @@ def run_benchmark(model, ids, args, result):
     """Only default model outputs and wall timers; no output copies or comparisons."""
     for mode in METHODS:
         prefix_times = []
+        prefix_cache_samples = []
         for _ in range(args.prefill_repeats):
             select_cache_method(model, mode)
             _, elapsed = timed(model, ids[: args.prefix])
             prefix_times.append(elapsed)
+            prefix_cache_samples.append([block.cache.metrics() for block in model.blocks])
         prefix_metrics = [block.cache.metrics() for block in model.blocks]
         snapshot = model.snapshot_prefix()
         restore_extend_prefix(model, snapshot, args)
         prepare_extend_graph(model, ids[args.prefix :], args)
         extend_times = []
+        extend_cache_samples = []
         for _ in range(args.repeats):
             restore_extend_prefix(model, snapshot, args)
             _, elapsed = timed(model, ids[args.prefix :])
             extend_times.append(elapsed)
+            extend_cache_samples.append([block.cache.metrics() for block in model.blocks])
         result["measurements"][mode] = {
             **cache_metrics(model, snapshot, prefix_metrics),
             "prefill_samples_ms": prefix_times,
             "extend_samples_ms": extend_times,
+            "prefill_cache_samples": prefix_cache_samples,
+            "extend_cache_samples": extend_cache_samples,
             "prefill_median_ms": statistics.median(prefix_times),
             "extend_median_ms": statistics.median(extend_times),
         }
@@ -333,23 +341,54 @@ def run_check(model, ids, args, result):
 
 
 def _check_extend_graph(model, ids, snapshot, args, result, mode):
+    if mode == "echo" and args.extend_residency == "cold":
+        from experiments.deepseek_v32_mfu.src.prefetch_validation import ColdPrefetchObserver
+
+        restore_extend_prefix(model, snapshot, args)
+        with ColdPrefetchObserver(model, args.prefix, args.extend, args.output) as observer:
+            _check_extend_graph_impl(model, ids, snapshot, args, result, mode, observer=observer)
+    else:
+        _check_extend_graph_impl(model, ids, snapshot, args, result, mode)
+
+
+def _check_extend_graph_impl(model, ids, snapshot, args, result, mode, *, observer=None):
     from experiments.deepseek_v32_mfu.src.extend_graph_validation import (
         cache_state,
         compare_cache_state,
     )
 
-    checks = {}
+    checks, prefetch_proofs = {}, {}
+
+    def observed_state(label, *, captured=False):
+        state = cache_state(model)
+        proof = None
+        if observer is not None:
+            proof = observer.audit(label, state, captured=captured)
+            prefetch_proofs[label] = proof
+        return state, proof
+
+    def compare_observed(label, baseline_state, baseline_proof, *, captured=True):
+        state, proof = observed_state(label, captured=captured)
+        return compare_cache_state(
+            state,
+            baseline_state,
+            actual_prefetch=proof,
+            expected_prefetch=baseline_proof,
+        )
+
     restore_extend_prefix(model, snapshot, args)
     expected = {
         key: value.cpu()
         for key, value in model.forward(ids, return_hidden=True, use_extend_graph=False).items()
     }
-    expected_cache = cache_state(model)
+    expected_cache, expected_proof = observed_state("baseline")
     restore_extend_prefix(model, snapshot, args)
     prepare_extend_graph(model, ids, args)
     default = model.forward(ids).cpu()
     checks["default_graph_logits"] = comparison(default, expected["logits"])
-    checks["default_graph_cache"] = compare_cache_state(cache_state(model), expected_cache)
+    checks["default_graph_cache"] = compare_observed(
+        "default_graph", expected_cache, expected_proof
+    )
     restore_extend_prefix(model, snapshot, args)
     graph = prepare_extend_graph(model, ids, args, return_hidden=True)
     for repetition in range(2):
@@ -357,8 +396,8 @@ def _check_extend_graph(model, ids, snapshot, args, result, mode):
         actual = {key: value.cpu() for key, value in model.forward(ids, return_hidden=True).items()}
         for key in ("hidden", "logits"):
             checks[f"replay_{repetition}_{key}"] = comparison(actual[key], expected[key])
-        checks[f"replay_{repetition}_cache"] = compare_cache_state(
-            cache_state(model), expected_cache
+        checks[f"replay_{repetition}_cache"] = compare_observed(
+            f"replay_{repetition}", expected_cache, expected_proof
         )
     changed = list(ids)
     changed[-1] = (int(changed[-1]) + 1) % model.cfg.vocab_size
@@ -367,14 +406,14 @@ def _check_extend_graph(model, ids, snapshot, args, result, mode):
         key: value.cpu()
         for key, value in model.forward(changed, return_hidden=True, use_extend_graph=False).items()
     }
-    changed_cache = cache_state(model)
+    changed_cache, changed_proof = observed_state("changed_baseline")
     restore_extend_prefix(model, snapshot, args)
     changed_actual = {
         key: value.cpu() for key, value in model.forward(changed, return_hidden=True).items()
     }
     for key in ("hidden", "logits"):
         checks[f"changed_input_{key}"] = comparison(changed_actual[key], changed_expected[key])
-    checks["changed_input_cache"] = compare_cache_state(cache_state(model), changed_cache)
+    checks["changed_input_cache"] = compare_observed("changed_graph", changed_cache, changed_proof)
     torch.save(
         {
             "baseline": expected,
@@ -389,6 +428,7 @@ def _check_extend_graph(model, ids, snapshot, args, result, mode):
         "changed_baseline_cache": changed_cache,
         "runtime": graph.describe(),
         "baseline": "same model.forward(use_extend_graph=False), same restored prefix and residency",
+        **({"bounded_prefetch": prefetch_proofs} if observer is not None else {}),
     }
 
 

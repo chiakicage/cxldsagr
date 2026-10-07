@@ -32,7 +32,8 @@ SCHEMA = "deepseek-v32-motivation-v1"
 CHECK_SCHEMA = "deepseek-v32-motivation-check-v1"
 BENCH_SCHEMA = "deepseek-v32-motivation-bench-v1"
 RECEIPT_KIND = "deepseek-v32-motivation-full-trace-v1"
-WARMUP_POLICY = "two_users_then_first_user_host_recall_v1"
+WARMUP_POLICY = "capacity_dependent_users_then_first_user_revisit_v2"
+LEGACY_WARMUP_POLICY = "two_users_then_first_user_host_recall_v1"
 INDEXER_DISPATCH_POLICY = "echo_fused_only_if_history_residency_unproven_v1"
 
 
@@ -124,7 +125,7 @@ def configuration(args):
             "positive capacities, at least two rounds, and a nonnegative seed required"
         )
     if args.num_users < 2:
-        raise ValueError("host-miss warmup requires at least two users")
+        raise ValueError("multi-user warmup requires at least two users")
     padded_history = (args.history_tokens + 63) // 64 * 64
     if args.sparse_pool_tokens % 64 or args.host_arena_tokens % 64:
         raise ValueError("P and NH must be multiples of 64")
@@ -132,14 +133,16 @@ def configuration(args):
         raise ValueError("P must hold one history and the complete query/top-k working set")
     if args.host_arena_tokens < padded_history * args.num_users:
         raise ValueError("NH must retain the requested users; this experiment does not fill NH")
+    first_users = min(args.num_users, args.sparse_pool_tokens // padded_history + 1)
+    warmup_indices = [*range(first_users), args.num_users]
     return {
         **{name: getattr(args, name) for name in names},
         "seed": args.seed,
         "requests_per_scheme": args.num_users * args.rounds,
         "schemes": list(SCHEMES),
         "layers": 10,
-        "warmup_requests_per_scheme": 3,
-        "warmup_request_indices": [0, 1, args.num_users],
+        "warmup_requests_per_scheme": len(warmup_indices),
+        "warmup_request_indices": warmup_indices,
         "warmup_policy": WARMUP_POLICY,
         "indexer_dispatch_policy": INDEXER_DISPATCH_POLICY,
         "sampling": "sequential",
@@ -275,18 +278,36 @@ def snapshot_sources(output):
     return hashlib.sha256(json.dumps(manifest, sort_keys=True).encode()).hexdigest()
 
 
-def validate_warmup_trace(scheme, trace, config, requests):
-    """Require a real host-recall path before a fixed-pool offload measurement."""
-    indices = [0, 1, config["num_users"]]
+def warmup_stages(first_users):
+    return [
+        "first_user_first_visit",
+        "second_user_first_visit",
+        *(f"user_{index}_first_visit" for index in range(2, first_users)),
+        "first_user_revisit",
+    ]
+
+
+def validate_warmup_trace(scheme, trace, config, requests, *, allow_legacy=False):
+    """Audit real warmup visits and the host recall required by the history capacity."""
+    legacy = allow_legacy and config.get("warmup_policy") == LEGACY_WARMUP_POLICY
+    first_users = (
+        2
+        if legacy
+        else min(
+            config["num_users"], config["sparse_pool_tokens"] // config["padded_history_tokens"] + 1
+        )
+    )
+    indices = [*range(first_users), config["num_users"]]
     if (
         config["num_users"] < 2
-        or config.get("warmup_policy") != WARMUP_POLICY
-        or config.get("warmup_requests_per_scheme") != 3
+        or scheme not in SCHEMES
+        or not (legacy or config.get("warmup_policy") == WARMUP_POLICY)
+        or config.get("warmup_requests_per_scheme") != len(indices)
         or config.get("warmup_request_indices") != indices
-        or len(trace) != 3
+        or len(trace) != len(indices)
     ):
-        raise ValueError("warmup must execute two users then the first user's revisit")
-    stages = ("first_user_first_visit", "second_user_first_visit", "first_user_revisit")
+        raise ValueError("warmup trace does not match its declared capacity-dependent policy")
+    stages = warmup_stages(first_users)
     for order, (row, index, stage) in enumerate(zip(trace, indices, stages, strict=True)):
         expected = requests[index]
         for name in ("request_id", "user_id", "input_sha256"):
@@ -294,8 +315,8 @@ def validate_warmup_trace(scheme, trace, config, requests):
                 raise ValueError(f"warmup request identity differs: {name}")
         if (
             row.get("stage") != stage
-            or row.get("visit_index") != (1 if order == 2 else 0)
-            or row.get("is_revisit") != (order == 2)
+            or row.get("visit_index") != (1 if order == first_users else 0)
+            or row.get("is_revisit") != (order == first_users)
             or row.get("retained_length") != config["history_tokens"]
             or row.get("candidate_persistence") != "gpu_transient"
         ):
@@ -310,28 +331,39 @@ def validate_warmup_trace(scheme, trace, config, requests):
                 raise ValueError(f"warmup is missing a valid candidate counter: {name}")
         if row["device_to_host_bytes"] != 0:
             raise ValueError("warmup candidate must remain GPU-only")
-        if order < 2 and row.get("prefix_cache_hit") is not False:
-            raise ValueError("the first two warmup requests must construct independent histories")
-    if trace[0]["user_id"] == trace[1]["user_id"] or trace[0]["user_id"] != trace[2]["user_id"]:
-        raise ValueError("warmup requires two distinct users and a first-user revisit")
+        if order < first_users and row.get("prefix_cache_hit") is not False:
+            raise ValueError("warmup first visits must construct independent histories")
+    if (
+        len({row["user_id"] for row in trace[:-1]}) != first_users
+        or trace[0]["user_id"] != trace[-1]["user_id"]
+    ):
+        raise ValueError("warmup requires distinct initial users and a first-user revisit")
     if scheme == "hbm":
         if any(row["host_to_device_bytes"] or row["recalled_records"] for row in trace):
             raise ValueError("HBM-only warmup must not read host KV")
-        expected_hit = config["sparse_pool_tokens"] // config["padded_history_tokens"] >= 2
-        if trace[2].get("prefix_cache_hit") != expected_hit:
+        expected_hit = (
+            config["sparse_pool_tokens"] // config["padded_history_tokens"] >= first_users
+        )
+        if trace[-1].get("prefix_cache_hit") != expected_hit:
             raise ValueError("HBM warmup revisit does not match the finite history quota")
-    elif (
-        trace[2].get("prefix_cache_hit") is not True
-        or trace[2]["host_to_device_bytes"] <= 0
-        or trace[2]["recalled_records"] <= 0
-    ):
-        raise ValueError("offload warmup did not exercise host recall before measurement")
+    else:
+        if trace[-1].get("prefix_cache_hit") is not True:
+            raise ValueError("offload warmup revisit must retain its history in the host arena")
+        require_recall = (
+            legacy
+            or scheme == "dense_prefetch"
+            or first_users * config["padded_history_tokens"] > config["sparse_pool_tokens"]
+        )
+        if require_recall and (
+            trace[-1]["host_to_device_bytes"] <= 0 or trace[-1]["recalled_records"] <= 0
+        ):
+            raise ValueError("offload warmup did not exercise host recall before measurement")
 
 
 def warmup(backend, workload, config, runner_type):
-    """Exercise a retained-history host miss, then release all warmup cache resources."""
+    """Warm the capacity-dependent user trace, then release all warmup cache resources."""
     trace = []
-    stages = ("first_user_first_visit", "second_user_first_visit", "first_user_revisit")
+    stages = warmup_stages(config["warmup_requests_per_scheme"] - 1)
     with runner_type(backend, resource_limits=resource_limits(config)) as runner:
         for index, stage in zip(config["warmup_request_indices"], stages, strict=True):
             result = runner.execute(workload.requests[index])
@@ -545,7 +577,7 @@ def main(argv=None):
         "measurement_boundary": (
             "Synchronized runner wall latency includes admission/eviction, history construction "
             "on a miss, all candidate hidden, last-token LM head and history cleanup. "
-            "Loading, request generation, three warmup requests including host recall, "
+            "Loading, request generation, capacity-dependent warmup requests, "
             "compute graph preparation, "
             "diagnostics and report generation are outside latency. Bench performs no "
             "full-output CPU copies, numerical comparison or output saving between requests. "
@@ -665,8 +697,8 @@ def main(argv=None):
             metadata.update(stage="warmup", active_scheme=scheme)
             write_json(output / "metadata.json", metadata)
             print(
-                f"warmup {scheme}: user0 first, user1 first, user0 revisit; "
-                "verify host recall before releasing all caches",
+                f"warmup {scheme}: {config['warmup_requests_per_scheme'] - 1} user first visits, "
+                "then user0 revisit; verify capacity-dependent paths before releasing all caches",
                 flush=True,
             )
             metadata["warmup_traces"][scheme] = warmup(backend, workload, config, runner_type)

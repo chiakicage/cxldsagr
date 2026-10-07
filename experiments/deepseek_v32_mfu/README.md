@@ -8,11 +8,105 @@
 
 图内包含 embedding、L0–L2 的计算、cache 操作、真实 H2D/D2H、ECHO hint 备份、
 final norm 和 LM head。输入校验与 staging、事务开始、同步及主机提交留在图外。
-新版本的 cold/warm 正确性、独立 cold 计时、阶段 profile 和逐算子 MFU 均已完成。
+原单点报告的 cold/warm 正确性、独立 cold 计时、阶段 profile 和逐算子 MFU 均已完成。
 
 本实验检查 baseline 实现的性能合理性。使用真实 checkpoint 第 0–2 层依次传播
-hidden/residual，H=65,536、A=128、history chunk=1,024、extend chunk=128、
-P=NH=65,664 tokens，执行普通持久 append。结果不代表完整 61 层或 C10 GR serving。
+hidden/residual，执行普通持久 append。新增矩阵见下文；后文保留的原单点报告
+使用 H=65,536、A=128、history chunk=1,024、extend chunk=128、
+P=NH=65,664 tokens。结果不代表完整 61 层或 C10 GR serving。
+
+## ECHO inter-query prefetcher 原理图
+
+![ECHO inter-query：8 个 stage 的 indexer 与 fetch 交错流水](report/echo_inter_query_prefetcher/echo_inter_query_prefetcher.svg)
+
+图中将 query 工作示意划为 S1–S8 共 8 个 stage。上排执行 indexer 计算，下排
+fetch 同一 stage 选出的历史 KV；fetch 错后一拍，使 `Fetch(Si)` 与
+`Indexer(Si+1)` 重叠。8 个 stage 是示意划分，不对应 native kernel 的缓冲级数；
+条宽和间距不代表实测时长。
+
+下载 [SVG](report/echo_inter_query_prefetcher/echo_inter_query_prefetcher.svg)、
+[PDF](report/echo_inter_query_prefetcher/echo_inter_query_prefetcher.pdf) 或
+[PNG](report/echo_inter_query_prefetcher/echo_inter_query_prefetcher.png)。流水关系依据
+[融合 kernel](../../operators/deepseek_v32/indexer/csrc/echo_logits.cuh)与
+[SM 搬运](../../operators/deepseek_v32/indexer/csrc/echo_cache.cuh)绘制；源码与图像哈希见
+[来源记录](report/echo_inter_query_prefetcher/provenance.json)。制图 run ID 为
+`deepseek_echo_prefetch_schematic_20261007_02`，未新增 GPU 测量。
+
+从仓库根目录重新生成时使用新的输出目录；该入口只调用 Matplotlib：
+
+```bash
+CUDA_VISIBLE_DEVICES= .venv/bin/python -m experiments.deepseek_v32_mfu.src.draw_echo_prefetcher \
+  --output-dir experiments/deepseek_v32_mfu/output/data/echo_prefetch_schematic_new
+```
+
+## H × A 时间与 timeline
+
+新增 `H=[4K,16K,64K] × A=[128,256,512,1024]` 的 12 组配置，K=1,024。
+每组比较 `hbm`、`echo`、`serial_sparse` 和 `dense_prefetch`，使用真实 checkpoint
+的 L0–L2 和一次完整 extend CUDA Graph replay。Cold 设置清除 offload 主 KV 的
+HBM 驻留，保留 DRAM 与 resident indexer。
+History chunk 固定为 1,024，extend 整批执行 A 个 tokens，P=NH=H+A；执行普通
+持久 append，范围包含 embedding、final norm 和末 token LM head。
+
+每个 shape 分别运行正确性验收、独立计时和侵入式 NSYS profile。独立计时每方法
+预热 1 次，完整 prefill 测量 3 次、完整 extend 测量 5 次，报告同步 wall-time
+中位数。输入准备、事务和必要同步/提交计入时间；权重加载、编译、图准备与 prefix
+恢复不计入。来源矩阵 run ID 为 `deepseek_shape_matrix_complete_20261007_01`，各 shape
+的子 run ID、硬件、依赖与源码身份见[汇总](report/shape_matrix/summary.json)。
+
+完整计时和各 shape 的图表入口见[矩阵报告](report/shape_matrix/results.md)，
+未舍入计时见[计时表](report/shape_matrix/timing.csv)，每次计时的实际逐层搬运量见
+[样本计数表](report/shape_matrix/cache_metrics_samples.csv)，profile 窗口见
+[窗口表](report/shape_matrix/timeline_windows.csv)。Prefill timeline 只取最后一个
+1,024-token chunk 的 L0–L2；extend timeline 取完整 A-token batch 的 L0–L2，
+另提供包含启动与 embedding 的版本。主图保留 dense L0 的完整历史 H2D。
+这些 profile 窗口与完整 prefill/extend 的独立 wall-time 分开解释，本组不新增逐算子 MFU。
+
+[矩阵统计报告](report/shape_matrix_statistics/results.md)汇总延迟比、H/A 增长时的
+延迟变化、样本波动、搬运量与 timeline 指标，保留全部 384 个计时样本。统计 run ID
+为 `deepseek_shape_statistics_20261007_01`，数据来自上述矩阵，没有新增 GPU 测量；
+报告末尾提供统计与绘图的复现命令。
+
+所有形状分别验收全部 extend hidden、extend 末 token logits、prefill 末 token
+logits，以及精确 top-k、KV 与 cache 事务。ECHO 的原子
+预取额度饱和时，符合条件的 token 可能因调度不同而被实际预取；因此验收逐次检查
+预取资格和状态转移，计时样本保存各自的 prefetch/recall 计数。原始分数资格与
+最终驻留 KV 的检查在运行时完成；独立复核重读保存的输出和精简状态证据，
+不重新验证未保存的原始分数或 KV payload。见[独立复核](report/shape_matrix/audit/0_audit.json)。
+
+本轮未修改模型或算子实现，也未测量 warm 矩阵。硬件查询两次触及 20 秒期限后，
+将单次 `nvidia-smi` 查询期限改为 120 秒，不增加重试；已完成的六组保留原始来源，
+其余形状使用新期限。逐形状的 check/bench/profile 身份严格一致，跨形状源码差异
+仅限这项发生在模型加载前的查询期限。四个批次及成功形状来源见
+[矩阵清单](report/shape_matrix/matrix_manifest.json)。验收插桩产生的显存观测不代表
+独立计时或 serving 容量。下文保留原 H=65,536、A=128 单点 MFU 报告及其测量边界。
+
+本组运行于 GPU0 的 H200 SXM（名称字段为 NVIDIA M403，SM90），CPU 绑定
+0–7。GPU 观测保留原始归属标记：第二批有一条观测缺少完整祖先链，
+无法当场确认进程归属；同一 PID 在此前七次观测中属于本任务。观测不证明持续隔离。其他 GPU 有并行任务，CPU/DRAM 也未隔离；
+详见[观测记录](report/shape_matrix/audit/observer.json)。
+
+复现沿用下文的环境设置，改用 GPU0、CPU 0–7。每次使用新的矩阵 ID 和发布目录；
+默认脚本覆盖全部 12 组，并生成主图和启动对比图。
+
+```bash
+MATRIX_RUN_ID=deepseek_shape_matrix_new
+
+MFU_RUN_ID="$MATRIX_RUN_ID" CUDA_VISIBLE_DEVICES=0 taskset -c 0-7 \
+  bash experiments/deepseek_v32_mfu/scripts/shape_matrix.sh -- \
+  --physical-device 0 --model /preset-models \
+  --warmups 1 --prefill-repeats 3 --repeats 5
+
+CUDA_VISIBLE_DEVICES= .venv/bin/python -m experiments.deepseek_v32_mfu.src.audit_shape_matrix \
+  --manifest "experiments/deepseek_v32_mfu/output/data/$MATRIX_RUN_ID/manifest.json" \
+  --output "experiments/deepseek_v32_mfu/output/data/$MATRIX_RUN_ID/audit.json"
+
+CUDA_VISIBLE_DEVICES= .venv/bin/python -m experiments.deepseek_v32_mfu.src.report_shape_matrix \
+  --manifest "experiments/deepseek_v32_mfu/output/data/$MATRIX_RUN_ID/manifest.json" \
+  --audit "experiments/deepseek_v32_mfu/output/data/$MATRIX_RUN_ID/audit.json" \
+  --output-dir "experiments/deepseek_v32_mfu/output/data/${MATRIX_RUN_ID}_report" \
+  --publish-dir experiments/deepseek_v32_mfu/report/shape_matrix_new
+```
 
 ## 独立计时
 

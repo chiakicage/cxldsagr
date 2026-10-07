@@ -1,26 +1,2931 @@
 {
-  "schema": "deepseek-c10-observer-summary-v1",
-  "sample_count": 148,
-  "selected_gpu_index": 3,
-  "selected_gpu_foreign_processes": [],
-  "other_gpu_processes": [
-    {
-      "gpu_index": 1,
-      "gpu_uuid": "GPU-a2226185-cb05-a411-80da-f365154128fe",
-      "pid": 3486827,
-      "observations": 24
-    }
-  ],
-  "maximum_sampled_gpu_utilization_percent": {
-    "0": 0,
-    "1": 25,
-    "2": 0,
-    "3": 100,
-    "4": 0,
-    "5": 0,
-    "6": 0,
-    "7": 0
+  "schema": "deepseek-c10-matrix-observer-summary-v1",
+  "batch_id": "deepseek_motivation_matrix_20261007_01",
+  "observer_directory": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/log/deepseek_motivation_matrix_20261007_01/observer",
+  "input_sha256": {
+    "run.json": "8070a3699a178674f79094c47059affecbdb4228f7b37301d7a66971ab16b4be",
+    "monitor_audit.json": "6cc517b7d28b02df94df72507224ac9e87ae4514887e6379f6110a4b20950816",
+    "gpu_monitor.jsonl": "3f972024dff9f8f9d4b3bce3bd3665e8d30478de738e15b2ed0be1e24a7f87f9",
+    "driver.py": "d9c70b27698a0a3a90a3202dd56c6d556110c4527386ddf24c7d303f3fa7fc7b"
   },
-  "maximum_sample_gap_seconds": 30.617866039276123,
-  "boundary": "Discrete nvidia-smi observations, not continuous exclusivity; unrelated CPU activity is not monitored. Other-GPU utilization and activity are recorded without attributing any effect on selected-GPU latency."
+  "run": {
+    "command": [
+      "bash",
+      "experiments/deepseek_v32_motivation/scripts/matrix.sh",
+      "--run-id",
+      "deepseek_motivation_matrix_20261007_01"
+    ],
+    "started_utc": "2026-10-06T16:32:31.380069+00:00",
+    "driver_sha256": "d9c70b27698a0a3a90a3202dd56c6d556110c4527386ddf24c7d303f3fa7fc7b",
+    "pid": 821177,
+    "exit_code": 0,
+    "completed_utc": "2026-10-06T18:02:11.217756+00:00"
+  },
+  "monitor_audit": {
+    "exit_code": 0,
+    "samples": 2093,
+    "observed_owned_pids": [
+      821186,
+      826125,
+      833582,
+      837709,
+      844455,
+      849304,
+      856356,
+      864200,
+      868501,
+      880689,
+      888239,
+      899057,
+      908712,
+      918441,
+      926857,
+      936092,
+      943716,
+      957457,
+      967484,
+      976603,
+      985603,
+      994933,
+      1004071,
+      1013751
+    ],
+    "foreign_processes": [
+      {
+        "time_utc": "2026-10-06T16:32:40.596220+00:00",
+        "pid": 821285,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:32:42.859164+00:00",
+        "pid": 821285,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:32:45.121791+00:00",
+        "pid": 821285,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:32:47.379526+00:00",
+        "pid": 821285,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:32:49.647570+00:00",
+        "pid": 821285,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:32:51.913732+00:00",
+        "pid": 821285,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:32:54.182100+00:00",
+        "pid": 821285,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:32:56.446776+00:00",
+        "pid": 821285,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:32:58.714610+00:00",
+        "pid": 821285,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:33:00.978065+00:00",
+        "pid": 821285,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:33:03.361888+00:00",
+        "pid": 821285,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:33:06.027747+00:00",
+        "pid": 821285,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:33:08.296155+00:00",
+        "pid": 821285,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:33:10.658562+00:00",
+        "pid": 821285,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:33:13.022937+00:00",
+        "pid": 821285,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:33:15.900465+00:00",
+        "pid": 821285,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:33:18.136926+00:00",
+        "pid": 821285,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:33:20.482605+00:00",
+        "pid": 821285,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:33:22.790346+00:00",
+        "pid": 821285,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:33:24.989213+00:00",
+        "pid": 821285,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:33:27.303954+00:00",
+        "pid": 821285,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:33:29.614709+00:00",
+        "pid": 821285,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:33:31.812322+00:00",
+        "pid": 821285,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:33:34.132117+00:00",
+        "pid": 821285,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:33:36.357765+00:00",
+        "pid": 821285,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:33:38.559232+00:00",
+        "pid": 821285,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:33:40.759378+00:00",
+        "pid": 821285,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:33:42.959331+00:00",
+        "pid": 821285,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:33:45.167284+00:00",
+        "pid": 821285,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:33:47.372209+00:00",
+        "pid": 821285,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:33:49.571455+00:00",
+        "pid": 821285,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:33:58.417202+00:00",
+        "pid": 824651,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:34:00.615059+00:00",
+        "pid": 824651,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:34:02.816553+00:00",
+        "pid": 824651,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:34:05.026205+00:00",
+        "pid": 824651,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:34:07.231808+00:00",
+        "pid": 824651,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:34:09.431447+00:00",
+        "pid": 824651,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:34:11.677365+00:00",
+        "pid": 824651,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:34:13.885859+00:00",
+        "pid": 824651,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:34:16.094572+00:00",
+        "pid": 824651,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:34:45.204390+00:00",
+        "pid": 824651,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:34:47.428574+00:00",
+        "pid": 824651,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:34:49.670956+00:00",
+        "pid": 824651,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:35:10.733282+00:00",
+        "pid": 826659,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:35:13.002680+00:00",
+        "pid": 826659,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:35:15.274609+00:00",
+        "pid": 826659,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:35:18.223931+00:00",
+        "pid": 826659,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:35:22.538870+00:00",
+        "pid": 826659,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:35:24.777336+00:00",
+        "pid": 826659,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:35:27.124871+00:00",
+        "pid": 826659,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:35:29.392919+00:00",
+        "pid": 826659,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:35:31.636042+00:00",
+        "pid": 826659,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:35:34.017562+00:00",
+        "pid": 826659,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:35:36.336721+00:00",
+        "pid": 826659,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:35:39.289544+00:00",
+        "pid": 826659,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:35:41.533492+00:00",
+        "pid": 826659,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:35:43.882966+00:00",
+        "pid": 826659,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:35:46.197373+00:00",
+        "pid": 826659,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:35:49.087874+00:00",
+        "pid": 826659,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:35:51.298259+00:00",
+        "pid": 826659,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:35:53.497312+00:00",
+        "pid": 826659,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:35:55.700879+00:00",
+        "pid": 826659,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:35:57.903917+00:00",
+        "pid": 826659,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:36:00.109528+00:00",
+        "pid": 826659,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:36:02.314472+00:00",
+        "pid": 826659,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:36:04.519929+00:00",
+        "pid": 826659,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:36:06.722124+00:00",
+        "pid": 826659,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:36:08.927805+00:00",
+        "pid": 826659,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:36:11.129592+00:00",
+        "pid": 826659,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:36:13.357742+00:00",
+        "pid": 826659,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:36:57.866199+00:00",
+        "pid": 833406,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:37:00.101838+00:00",
+        "pid": 833406,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:37:02.330787+00:00",
+        "pid": 833406,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:37:04.589738+00:00",
+        "pid": 833406,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:37:06.862891+00:00",
+        "pid": 833406,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:37:09.138238+00:00",
+        "pid": 833406,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:37:11.380087+00:00",
+        "pid": 833406,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:37:13.630431+00:00",
+        "pid": 833406,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:37:15.900025+00:00",
+        "pid": 833406,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:37:18.159261+00:00",
+        "pid": 833406,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:37:20.427287+00:00",
+        "pid": 833406,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:37:22.702912+00:00",
+        "pid": 833406,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:37:24.957213+00:00",
+        "pid": 833406,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:37:27.341564+00:00",
+        "pid": 833406,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:37:29.976440+00:00",
+        "pid": 833406,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:37:32.227629+00:00",
+        "pid": 833406,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:37:34.603615+00:00",
+        "pid": 833406,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:37:36.996555+00:00",
+        "pid": 833406,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:37:40.044273+00:00",
+        "pid": 833406,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:37:42.251338+00:00",
+        "pid": 833406,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:37:44.590555+00:00",
+        "pid": 833406,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:37:46.859490+00:00",
+        "pid": 833406,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:37:49.090542+00:00",
+        "pid": 833406,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:37:51.450534+00:00",
+        "pid": 833406,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:37:58.853002+00:00",
+        "pid": 835515,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:38:01.056746+00:00",
+        "pid": 835515,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:38:03.250289+00:00",
+        "pid": 835515,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:38:05.460285+00:00",
+        "pid": 835515,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:38:07.677626+00:00",
+        "pid": 835515,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:38:09.876686+00:00",
+        "pid": 835515,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:38:12.081595+00:00",
+        "pid": 835515,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:38:14.285653+00:00",
+        "pid": 835515,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:38:16.494084+00:00",
+        "pid": 835515,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:38:18.710260+00:00",
+        "pid": 835515,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:38:20.913670+00:00",
+        "pid": 835515,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:38:23.113176+00:00",
+        "pid": 835515,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:38:25.323805+00:00",
+        "pid": 835515,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:39:13.295076+00:00",
+        "pid": 837139,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:39:15.491611+00:00",
+        "pid": 837139,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:39:17.691861+00:00",
+        "pid": 837139,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:39:20.447956+00:00",
+        "pid": 837139,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:39:24.132976+00:00",
+        "pid": 837139,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:39:26.375305+00:00",
+        "pid": 837139,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:39:28.621624+00:00",
+        "pid": 837139,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:39:30.883583+00:00",
+        "pid": 837139,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:39:33.151290+00:00",
+        "pid": 837139,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:39:35.425183+00:00",
+        "pid": 837139,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:39:37.673138+00:00",
+        "pid": 837139,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:39:39.951920+00:00",
+        "pid": 837139,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:39:42.330556+00:00",
+        "pid": 837139,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:39:44.889735+00:00",
+        "pid": 837139,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:39:47.161572+00:00",
+        "pid": 837139,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:39:49.533456+00:00",
+        "pid": 837139,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:39:51.867611+00:00",
+        "pid": 837139,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:39:54.670424+00:00",
+        "pid": 837139,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:39:56.923463+00:00",
+        "pid": 837139,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:39:59.299047+00:00",
+        "pid": 837139,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:40:01.630346+00:00",
+        "pid": 837139,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:40:04.445327+00:00",
+        "pid": 837139,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:40:06.682074+00:00",
+        "pid": 837139,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:40:09.024297+00:00",
+        "pid": 837139,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:40:11.443474+00:00",
+        "pid": 837139,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:40:14.370962+00:00",
+        "pid": 837139,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:40:52.197471+00:00",
+        "pid": 843701,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:41:21.180942+00:00",
+        "pid": 843701,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:41:23.440258+00:00",
+        "pid": 843701,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:41:25.693575+00:00",
+        "pid": 843701,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:41:27.958825+00:00",
+        "pid": 843701,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:41:30.208295+00:00",
+        "pid": 843701,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:41:32.475866+00:00",
+        "pid": 843701,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:41:34.739713+00:00",
+        "pid": 843701,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:41:37.005575+00:00",
+        "pid": 843701,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:41:39.270677+00:00",
+        "pid": 843701,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:41:41.541183+00:00",
+        "pid": 843701,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:41:43.808529+00:00",
+        "pid": 843701,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:41:46.069361+00:00",
+        "pid": 843701,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:41:48.345927+00:00",
+        "pid": 843701,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:41:50.606248+00:00",
+        "pid": 843701,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:41:52.852929+00:00",
+        "pid": 843701,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:41:55.227761+00:00",
+        "pid": 843701,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:41:57.574621+00:00",
+        "pid": 843701,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:42:00.304054+00:00",
+        "pid": 843701,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:42:09.489637+00:00",
+        "pid": 845883,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:42:11.832590+00:00",
+        "pid": 845883,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:42:14.149106+00:00",
+        "pid": 845883,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:42:16.987655+00:00",
+        "pid": 845883,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:42:19.219087+00:00",
+        "pid": 845883,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:42:21.546557+00:00",
+        "pid": 845883,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:42:23.942401+00:00",
+        "pid": 845883,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:42:26.864413+00:00",
+        "pid": 845883,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:42:29.075809+00:00",
+        "pid": 845883,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:42:31.279571+00:00",
+        "pid": 845883,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:42:33.482697+00:00",
+        "pid": 845883,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:42:35.804635+00:00",
+        "pid": 845883,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:42:53.472702+00:00",
+        "pid": 847837,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:42:55.681513+00:00",
+        "pid": 847837,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:42:57.883089+00:00",
+        "pid": 847837,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:43:00.106476+00:00",
+        "pid": 847837,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:43:02.735051+00:00",
+        "pid": 847837,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:43:06.228605+00:00",
+        "pid": 847837,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:43:08.519638+00:00",
+        "pid": 847837,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:43:10.719234+00:00",
+        "pid": 847837,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:43:12.915923+00:00",
+        "pid": 847837,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:43:15.115412+00:00",
+        "pid": 847837,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:43:43.710433+00:00",
+        "pid": 847837,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:43:45.955428+00:00",
+        "pid": 847837,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:43:48.209433+00:00",
+        "pid": 847837,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:43:50.483063+00:00",
+        "pid": 847837,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:43:52.752317+00:00",
+        "pid": 847837,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:43:55.011344+00:00",
+        "pid": 847837,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:43:57.279985+00:00",
+        "pid": 847837,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:43:59.556204+00:00",
+        "pid": 847837,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:44:01.822030+00:00",
+        "pid": 847837,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:44:04.089362+00:00",
+        "pid": 847837,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:44:06.359818+00:00",
+        "pid": 847837,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:44:08.627397+00:00",
+        "pid": 847837,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:44:10.886255+00:00",
+        "pid": 847837,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:44:13.139492+00:00",
+        "pid": 847837,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:44:15.515562+00:00",
+        "pid": 847837,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:44:18.522116+00:00",
+        "pid": 847837,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:44:20.784999+00:00",
+        "pid": 847837,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:44:59.002226+00:00",
+        "pid": 854768,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:45:01.245128+00:00",
+        "pid": 854768,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:45:03.494077+00:00",
+        "pid": 854768,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:45:05.768801+00:00",
+        "pid": 854768,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:45:08.042107+00:00",
+        "pid": 854768,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:45:10.300549+00:00",
+        "pid": 854768,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:45:12.567183+00:00",
+        "pid": 854768,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:45:14.819113+00:00",
+        "pid": 854768,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:45:17.068742+00:00",
+        "pid": 854768,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:45:19.318776+00:00",
+        "pid": 854768,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:45:21.585077+00:00",
+        "pid": 854768,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:45:23.845694+00:00",
+        "pid": 854768,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:45:26.112936+00:00",
+        "pid": 854768,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:45:56.215257+00:00",
+        "pid": 854768,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:45:58.487338+00:00",
+        "pid": 854768,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:46:00.744364+00:00",
+        "pid": 854768,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:46:02.994866+00:00",
+        "pid": 854768,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:46:05.249446+00:00",
+        "pid": 854768,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:46:07.506052+00:00",
+        "pid": 854768,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:46:09.756916+00:00",
+        "pid": 854768,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:46:12.008360+00:00",
+        "pid": 854768,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:46:18.814355+00:00",
+        "pid": 856948,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:46:21.077795+00:00",
+        "pid": 856948,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:46:23.362678+00:00",
+        "pid": 856948,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:46:25.639374+00:00",
+        "pid": 856948,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:46:27.910372+00:00",
+        "pid": 856948,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:46:30.169472+00:00",
+        "pid": 856948,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:46:32.465773+00:00",
+        "pid": 856948,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:46:34.918415+00:00",
+        "pid": 856948,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:46:51.953907+00:00",
+        "pid": 858329,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:46:54.257635+00:00",
+        "pid": 858329,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:46:57.144425+00:00",
+        "pid": 858329,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:46:59.345474+00:00",
+        "pid": 858329,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:47:02.068568+00:00",
+        "pid": 858329,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:47:05.782700+00:00",
+        "pid": 858329,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:47:07.985790+00:00",
+        "pid": 858329,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:47:10.188458+00:00",
+        "pid": 858329,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:47:12.450072+00:00",
+        "pid": 858329,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:47:14.683125+00:00",
+        "pid": 858329,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:47:16.950576+00:00",
+        "pid": 858329,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:47:19.220794+00:00",
+        "pid": 858329,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:47:21.478960+00:00",
+        "pid": 858329,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:47:23.749982+00:00",
+        "pid": 858329,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:47:26.077163+00:00",
+        "pid": 858329,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:47:28.335551+00:00",
+        "pid": 858329,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:47:30.603633+00:00",
+        "pid": 858329,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:47:32.862011+00:00",
+        "pid": 858329,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:47:35.133661+00:00",
+        "pid": 858329,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:47:37.401951+00:00",
+        "pid": 858329,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:47:39.747285+00:00",
+        "pid": 858329,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:47:42.006743+00:00",
+        "pid": 858329,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:50:48.930624+00:00",
+        "pid": 868246,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:50:51.151112+00:00",
+        "pid": 868246,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:50:53.405263+00:00",
+        "pid": 868246,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:50:55.670088+00:00",
+        "pid": 868246,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:50:57.935518+00:00",
+        "pid": 868246,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:51:00.197579+00:00",
+        "pid": 868246,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:51:02.460189+00:00",
+        "pid": 868246,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:51:04.716990+00:00",
+        "pid": 868246,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:51:06.962866+00:00",
+        "pid": 868246,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:51:09.214140+00:00",
+        "pid": 868246,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:51:11.475690+00:00",
+        "pid": 868246,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:51:13.729546+00:00",
+        "pid": 868246,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:51:15.992791+00:00",
+        "pid": 868246,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:51:18.254591+00:00",
+        "pid": 868246,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:51:20.518274+00:00",
+        "pid": 868246,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:51:22.905335+00:00",
+        "pid": 868246,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:51:27.446862+00:00",
+        "pid": 870383,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:51:29.706935+00:00",
+        "pid": 870383,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:51:31.969899+00:00",
+        "pid": 870383,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:51:34.229355+00:00",
+        "pid": 870383,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:51:36.501449+00:00",
+        "pid": 870383,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:51:38.798884+00:00",
+        "pid": 870383,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:51:41.051363+00:00",
+        "pid": 870383,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:51:43.487629+00:00",
+        "pid": 870383,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:52:02.558678+00:00",
+        "pid": 872142,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:52:04.818988+00:00",
+        "pid": 872142,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:52:07.185612+00:00",
+        "pid": 872142,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:52:09.514034+00:00",
+        "pid": 872142,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:52:11.774038+00:00",
+        "pid": 872142,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:52:14.525812+00:00",
+        "pid": 872142,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:52:16.791818+00:00",
+        "pid": 872142,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:52:19.037748+00:00",
+        "pid": 872142,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:52:21.307894+00:00",
+        "pid": 872142,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:52:23.578836+00:00",
+        "pid": 872142,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:52:25.845317+00:00",
+        "pid": 872142,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:52:28.120204+00:00",
+        "pid": 872142,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:52:30.373267+00:00",
+        "pid": 872142,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:52:32.649782+00:00",
+        "pid": 872142,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:52:34.910871+00:00",
+        "pid": 872142,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:52:37.186907+00:00",
+        "pid": 872142,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:52:39.537161+00:00",
+        "pid": 872142,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:52:41.810256+00:00",
+        "pid": 872142,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:52:44.093610+00:00",
+        "pid": 872142,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:52:46.350437+00:00",
+        "pid": 872142,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:52:48.619280+00:00",
+        "pid": 872142,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:52:50.883579+00:00",
+        "pid": 872142,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:56:45.308573+00:00",
+        "pid": 888719,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:56:47.518027+00:00",
+        "pid": 888719,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:56:49.716638+00:00",
+        "pid": 888719,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:56:51.921859+00:00",
+        "pid": 888719,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:56:54.130538+00:00",
+        "pid": 888719,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:56:56.327483+00:00",
+        "pid": 888719,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:56:58.540759+00:00",
+        "pid": 888719,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:57:00.747598+00:00",
+        "pid": 888719,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:57:02.945488+00:00",
+        "pid": 888719,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:57:05.168039+00:00",
+        "pid": 888719,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:57:07.372984+00:00",
+        "pid": 888719,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:57:09.596634+00:00",
+        "pid": 888719,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:57:14.096605+00:00",
+        "pid": 890541,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:57:16.315260+00:00",
+        "pid": 890541,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:57:18.519456+00:00",
+        "pid": 890541,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:57:20.723407+00:00",
+        "pid": 890541,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:57:22.933917+00:00",
+        "pid": 890541,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:57:25.136289+00:00",
+        "pid": 890541,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:57:27.471373+00:00",
+        "pid": 890541,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:57:30.080215+00:00",
+        "pid": 890541,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:57:49.003852+00:00",
+        "pid": 892228,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:57:51.341379+00:00",
+        "pid": 892228,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:57:53.590083+00:00",
+        "pid": 892228,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:57:57.059414+00:00",
+        "pid": 892228,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:58:00.832090+00:00",
+        "pid": 892228,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:58:03.037166+00:00",
+        "pid": 892228,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:58:05.258027+00:00",
+        "pid": 892228,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:58:07.497678+00:00",
+        "pid": 892228,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:58:09.725701+00:00",
+        "pid": 892228,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:58:11.965661+00:00",
+        "pid": 892228,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:58:14.184846+00:00",
+        "pid": 892228,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:58:16.423095+00:00",
+        "pid": 892228,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:58:18.676536+00:00",
+        "pid": 892228,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:58:20.914399+00:00",
+        "pid": 892228,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:58:23.148647+00:00",
+        "pid": 892228,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:58:25.398449+00:00",
+        "pid": 892228,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:58:27.632246+00:00",
+        "pid": 892228,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:58:29.874580+00:00",
+        "pid": 892228,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:58:32.117929+00:00",
+        "pid": 892228,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:58:34.352708+00:00",
+        "pid": 892228,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:58:36.586437+00:00",
+        "pid": 892228,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:59:31.028707+00:00",
+        "pid": 898533,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:59:33.276670+00:00",
+        "pid": 898533,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:59:35.534153+00:00",
+        "pid": 898533,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:59:37.793206+00:00",
+        "pid": 898533,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:59:40.052602+00:00",
+        "pid": 898533,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:59:42.322212+00:00",
+        "pid": 898533,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:59:44.577540+00:00",
+        "pid": 898533,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:59:46.829697+00:00",
+        "pid": 898533,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:59:49.085817+00:00",
+        "pid": 898533,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:59:51.343901+00:00",
+        "pid": 898533,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T16:59:58.159912+00:00",
+        "pid": 900543,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:00:00.435273+00:00",
+        "pid": 900543,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:00:02.697838+00:00",
+        "pid": 900543,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:00:04.963703+00:00",
+        "pid": 900543,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:00:07.233977+00:00",
+        "pid": 900543,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:00:09.504216+00:00",
+        "pid": 900543,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:00:11.775905+00:00",
+        "pid": 900543,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:00:29.462347+00:00",
+        "pid": 902048,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:00:31.768631+00:00",
+        "pid": 902048,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:00:34.045378+00:00",
+        "pid": 902048,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:00:36.271833+00:00",
+        "pid": 902048,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:00:38.735445+00:00",
+        "pid": 902048,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:00:41.107886+00:00",
+        "pid": 902048,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:00:44.906448+00:00",
+        "pid": 902048,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:00:47.167646+00:00",
+        "pid": 902048,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:00:49.556898+00:00",
+        "pid": 902048,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:00:51.923573+00:00",
+        "pid": 902048,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:00:54.771375+00:00",
+        "pid": 902048,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:00:57.031792+00:00",
+        "pid": 902048,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:00:59.298601+00:00",
+        "pid": 902048,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:01:01.579423+00:00",
+        "pid": 902048,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:01:03.848417+00:00",
+        "pid": 902048,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:01:06.112478+00:00",
+        "pid": 902048,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:01:08.403085+00:00",
+        "pid": 902048,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:01:10.681694+00:00",
+        "pid": 902048,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:01:12.953079+00:00",
+        "pid": 902048,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:01:15.222300+00:00",
+        "pid": 902048,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:01:17.484377+00:00",
+        "pid": 902048,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:01:19.752742+00:00",
+        "pid": 902048,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:01:22.031324+00:00",
+        "pid": 902048,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:02:42.123247+00:00",
+        "pid": 909205,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:02:44.353409+00:00",
+        "pid": 909205,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:02:46.597273+00:00",
+        "pid": 909205,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:02:48.829629+00:00",
+        "pid": 909205,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:02:51.078951+00:00",
+        "pid": 909205,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:02:53.320914+00:00",
+        "pid": 909205,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:02:55.565659+00:00",
+        "pid": 909205,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:02:57.818780+00:00",
+        "pid": 909205,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:03:00.056499+00:00",
+        "pid": 909205,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:03:02.313578+00:00",
+        "pid": 909205,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:03:04.578482+00:00",
+        "pid": 909205,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:03:06.844663+00:00",
+        "pid": 909205,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:03:09.114843+00:00",
+        "pid": 909205,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:03:11.413480+00:00",
+        "pid": 909205,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:03:13.667533+00:00",
+        "pid": 909205,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:03:15.979693+00:00",
+        "pid": 909205,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:03:18.217713+00:00",
+        "pid": 909205,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:03:25.362071+00:00",
+        "pid": 911753,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:03:27.695749+00:00",
+        "pid": 911753,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:03:29.969287+00:00",
+        "pid": 911753,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:03:32.203855+00:00",
+        "pid": 911753,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:03:34.589364+00:00",
+        "pid": 911753,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:03:36.935636+00:00",
+        "pid": 911753,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:03:39.900844+00:00",
+        "pid": 911753,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:03:57.092031+00:00",
+        "pid": 912900,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:03:59.350648+00:00",
+        "pid": 912900,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:04:01.628082+00:00",
+        "pid": 912900,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:04:03.911072+00:00",
+        "pid": 912900,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:04:06.704820+00:00",
+        "pid": 912900,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:04:10.226572+00:00",
+        "pid": 912900,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:04:12.483613+00:00",
+        "pid": 912900,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:04:14.755646+00:00",
+        "pid": 912900,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:04:17.038110+00:00",
+        "pid": 912900,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:04:19.301616+00:00",
+        "pid": 912900,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:04:21.574234+00:00",
+        "pid": 912900,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:04:23.853271+00:00",
+        "pid": 912900,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:04:26.122784+00:00",
+        "pid": 912900,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:04:28.400367+00:00",
+        "pid": 912900,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:04:30.681187+00:00",
+        "pid": 912900,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:04:32.952720+00:00",
+        "pid": 912900,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:04:35.230398+00:00",
+        "pid": 912900,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:04:37.516123+00:00",
+        "pid": 912900,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:04:39.797814+00:00",
+        "pid": 912900,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:04:42.067441+00:00",
+        "pid": 912900,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:04:44.332105+00:00",
+        "pid": 912900,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:04:46.658221+00:00",
+        "pid": 912900,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:05:27.622800+00:00",
+        "pid": 918161,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:05:29.872088+00:00",
+        "pid": 918161,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:05:32.132839+00:00",
+        "pid": 918161,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:05:34.375751+00:00",
+        "pid": 918161,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:05:36.623962+00:00",
+        "pid": 918161,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:05:38.899862+00:00",
+        "pid": 918161,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:05:41.164361+00:00",
+        "pid": 918161,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:05:43.437093+00:00",
+        "pid": 918161,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:05:45.714646+00:00",
+        "pid": 918161,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:05:47.972145+00:00",
+        "pid": 918161,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:05:50.242866+00:00",
+        "pid": 918161,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:05:52.517045+00:00",
+        "pid": 918161,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:05:59.357697+00:00",
+        "pid": 919758,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:06:01.626634+00:00",
+        "pid": 919758,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:06:03.901358+00:00",
+        "pid": 919758,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:06:06.169008+00:00",
+        "pid": 919758,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:06:08.430139+00:00",
+        "pid": 919758,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:06:10.700069+00:00",
+        "pid": 919758,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:06:27.546339+00:00",
+        "pid": 920863,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:06:29.928624+00:00",
+        "pid": 920863,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:06:32.194174+00:00",
+        "pid": 920863,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:06:34.439158+00:00",
+        "pid": 920863,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:06:37.386295+00:00",
+        "pid": 920863,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:06:41.877913+00:00",
+        "pid": 920863,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:06:44.109033+00:00",
+        "pid": 920863,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:06:46.471634+00:00",
+        "pid": 920863,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:06:48.818350+00:00",
+        "pid": 920863,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:06:51.847942+00:00",
+        "pid": 920863,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:06:54.057354+00:00",
+        "pid": 920863,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:06:56.255010+00:00",
+        "pid": 920863,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:06:58.488688+00:00",
+        "pid": 920863,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:07:00.692081+00:00",
+        "pid": 920863,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:07:02.896935+00:00",
+        "pid": 920863,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:07:05.104058+00:00",
+        "pid": 920863,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:07:07.301516+00:00",
+        "pid": 920863,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:07:09.520460+00:00",
+        "pid": 920863,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:07:11.719958+00:00",
+        "pid": 920863,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:07:13.931615+00:00",
+        "pid": 920863,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:07:16.173138+00:00",
+        "pid": 920863,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:07:18.377785+00:00",
+        "pid": 920863,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:07:42.658654+00:00",
+        "pid": 926068,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:07:44.873247+00:00",
+        "pid": 926068,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:07:47.073133+00:00",
+        "pid": 926068,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:07:49.273180+00:00",
+        "pid": 926068,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:08:18.169488+00:00",
+        "pid": 926068,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:08:20.422601+00:00",
+        "pid": 926068,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:08:22.683052+00:00",
+        "pid": 926068,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:08:24.965899+00:00",
+        "pid": 926068,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:08:27.226456+00:00",
+        "pid": 926068,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:08:34.058347+00:00",
+        "pid": 927234,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:08:36.318885+00:00",
+        "pid": 927234,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:08:38.589565+00:00",
+        "pid": 927234,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:08:40.837544+00:00",
+        "pid": 927234,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:08:43.091261+00:00",
+        "pid": 927234,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:08:45.345732+00:00",
+        "pid": 927234,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:09:04.026421+00:00",
+        "pid": 928272,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:09:06.322172+00:00",
+        "pid": 928272,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:09:08.589077+00:00",
+        "pid": 928272,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:09:11.530289+00:00",
+        "pid": 928272,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:09:15.182680+00:00",
+        "pid": 928272,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:09:17.408638+00:00",
+        "pid": 928272,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:09:19.813469+00:00",
+        "pid": 928272,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:09:22.091897+00:00",
+        "pid": 928272,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:09:24.328139+00:00",
+        "pid": 928272,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:09:26.707642+00:00",
+        "pid": 928272,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:09:29.014958+00:00",
+        "pid": 928272,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:09:31.216758+00:00",
+        "pid": 928272,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:09:33.542387+00:00",
+        "pid": 928272,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:09:35.821521+00:00",
+        "pid": 928272,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:09:38.075776+00:00",
+        "pid": 928272,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:09:40.438561+00:00",
+        "pid": 928272,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:09:42.794428+00:00",
+        "pid": 928272,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:09:45.699567+00:00",
+        "pid": 928272,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:09:47.896000+00:00",
+        "pid": 928272,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:09:50.101630+00:00",
+        "pid": 928272,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:09:52.307088+00:00",
+        "pid": 928272,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:09:54.536093+00:00",
+        "pid": 928272,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:10:16.694035+00:00",
+        "pid": 933632,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:10:18.959637+00:00",
+        "pid": 933632,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:10:21.162694+00:00",
+        "pid": 933632,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:10:23.423544+00:00",
+        "pid": 933632,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:10:25.671432+00:00",
+        "pid": 933632,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:10:27.873270+00:00",
+        "pid": 933632,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:10:30.080491+00:00",
+        "pid": 933632,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:10:32.284830+00:00",
+        "pid": 933632,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:10:38.901064+00:00",
+        "pid": 934544,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:10:41.103432+00:00",
+        "pid": 934544,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:10:43.331451+00:00",
+        "pid": 934544,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:10:45.556492+00:00",
+        "pid": 934544,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:10:47.765308+00:00",
+        "pid": 934544,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:10:49.971816+00:00",
+        "pid": 934544,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:11:36.536995+00:00",
+        "pid": 935593,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:11:38.806463+00:00",
+        "pid": 935593,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:11:41.083984+00:00",
+        "pid": 935593,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:11:43.730267+00:00",
+        "pid": 935593,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:11:46.127878+00:00",
+        "pid": 935593,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:11:48.333036+00:00",
+        "pid": 935593,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:11:50.535642+00:00",
+        "pid": 935593,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:11:52.733937+00:00",
+        "pid": 935593,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:11:54.934067+00:00",
+        "pid": 935593,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:11:57.137529+00:00",
+        "pid": 935593,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:11:59.339361+00:00",
+        "pid": 935593,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:12:01.538909+00:00",
+        "pid": 935593,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:12:03.739160+00:00",
+        "pid": 935593,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:12:05.940124+00:00",
+        "pid": 935593,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:12:08.143286+00:00",
+        "pid": 935593,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:12:10.356422+00:00",
+        "pid": 935593,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:12:12.562443+00:00",
+        "pid": 935593,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:12:14.771707+00:00",
+        "pid": 935593,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:12:16.974724+00:00",
+        "pid": 935593,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:12:19.182988+00:00",
+        "pid": 935593,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:12:21.394348+00:00",
+        "pid": 935593,
+        "selected_gpu": false
+      },
+      {
+        "time_utc": "2026-10-06T17:12:23.665258+00:00",
+        "pid": 935593,
+        "selected_gpu": false
+      }
+    ],
+    "exit_races": [
+      {
+        "time_utc": "2026-10-06T16:39:11.098848+00:00",
+        "pid": 833582,
+        "prior_observation": {
+          "time_utc": "2026-10-06T16:38:40.882972+00:00",
+          "ancestry": [
+            {
+              "pid": 833582,
+              "ppid": 833578,
+              "start_ticks": 74294368
+            },
+            {
+              "pid": 833578,
+              "ppid": 821177,
+              "start_ticks": 74294367
+            },
+            {
+              "pid": 821177,
+              "ppid": 821172,
+              "start_ticks": 74267995
+            },
+            {
+              "pid": 821172,
+              "ppid": 213869,
+              "start_ticks": 74267984
+            },
+            {
+              "pid": 213869,
+              "ppid": 1,
+              "start_ticks": 31263336
+            }
+          ]
+        },
+        "reason": "Previously confirmed child disappears from /proc between nvidia-smi and ancestry query; original samples retained."
+      }
+    ],
+    "monitor_errors": [],
+    "maximum_sample_gap_seconds": 30.577126026153564,
+    "boundary": "Discrete observations of all GPUs; this does not exclude activity between samples or unrelated CPU work."
+  },
+  "point_coverage": {
+    "h4096_a128": {
+      "first_sample_utc": "2026-10-06T16:32:31.656011+00:00",
+      "last_sample_utc": "2026-10-06T18:02:11.214462+00:00",
+      "first_sample_unix": 1791304351.656011,
+      "last_sample_unix": 1791309731.214462,
+      "run_brackets_check_and_bench": true,
+      "raw_samples_bracket_bench": true,
+      "bench_started_unix": 1791304484.8076956,
+      "bench_completed_unix": 1791304580.3938603,
+      "check_started_unix": 1791304351.5158587,
+      "check_completed_unix": 1791304449.188177,
+      "check_unobserved_start_seconds": 0.1401524543762207,
+      "check_unobserved_end_seconds": 0.0,
+      "boundary": "The whole-batch run brackets check and bench. Raw samples bracket the entire formal benchmark process interval. Any unsampled check initialization or completion interval is reported explicitly; the check is numerical validation, not a performance measurement. Discrete samples do not exclude activity between samples or unrelated CPU work.",
+      "raw_process_ownership_summary_verified": true
+    },
+    "h4096_a256": {
+      "first_sample_utc": "2026-10-06T16:32:31.656011+00:00",
+      "last_sample_utc": "2026-10-06T18:02:11.214462+00:00",
+      "first_sample_unix": 1791304351.656011,
+      "last_sample_unix": 1791309731.214462,
+      "run_brackets_check_and_bench": true,
+      "raw_samples_bracket_bench": true,
+      "bench_started_unix": 1791304751.0497139,
+      "bench_completed_unix": 1791304846.0793269,
+      "check_started_unix": 1791304615.2162616,
+      "check_completed_unix": 1791304714.1521735,
+      "check_unobserved_start_seconds": 0.0,
+      "check_unobserved_end_seconds": 0.0,
+      "boundary": "The whole-batch run brackets check and bench. Raw samples bracket the entire formal benchmark process interval. Any unsampled check initialization or completion interval is reported explicitly; the check is numerical validation, not a performance measurement. Discrete samples do not exclude activity between samples or unrelated CPU work.",
+      "raw_process_ownership_summary_verified": true
+    },
+    "h4096_a512": {
+      "first_sample_utc": "2026-10-06T16:32:31.656011+00:00",
+      "last_sample_utc": "2026-10-06T18:02:11.214462+00:00",
+      "first_sample_unix": 1791304351.656011,
+      "last_sample_unix": 1791309731.214462,
+      "run_brackets_check_and_bench": true,
+      "raw_samples_bracket_bench": true,
+      "bench_started_unix": 1791305023.310759,
+      "bench_completed_unix": 1791305120.1951756,
+      "check_started_unix": 1791304880.907686,
+      "check_completed_unix": 1791304984.3095906,
+      "check_unobserved_start_seconds": 0.0,
+      "check_unobserved_end_seconds": 0.0,
+      "boundary": "The whole-batch run brackets check and bench. Raw samples bracket the entire formal benchmark process interval. Any unsampled check initialization or completion interval is reported explicitly; the check is numerical validation, not a performance measurement. Discrete samples do not exclude activity between samples or unrelated CPU work.",
+      "raw_process_ownership_summary_verified": true
+    },
+    "h4096_a1024": {
+      "first_sample_utc": "2026-10-06T16:32:31.656011+00:00",
+      "last_sample_utc": "2026-10-06T18:02:11.214462+00:00",
+      "first_sample_unix": 1791304351.656011,
+      "last_sample_unix": 1791309731.214462,
+      "run_brackets_check_and_bench": true,
+      "raw_samples_bracket_bench": true,
+      "bench_started_unix": 1791305311.7066674,
+      "bench_completed_unix": 1791305410.058434,
+      "check_started_unix": 1791305155.8444676,
+      "check_completed_unix": 1791305268.3448374,
+      "check_unobserved_start_seconds": 0.0,
+      "check_unobserved_end_seconds": 0.0,
+      "boundary": "The whole-batch run brackets check and bench. Raw samples bracket the entire formal benchmark process interval. Any unsampled check initialization or completion interval is reported explicitly; the check is numerical validation, not a performance measurement. Discrete samples do not exclude activity between samples or unrelated CPU work.",
+      "raw_process_ownership_summary_verified": true
+    },
+    "h16384_a128": {
+      "first_sample_utc": "2026-10-06T16:32:31.656011+00:00",
+      "last_sample_utc": "2026-10-06T18:02:11.214462+00:00",
+      "first_sample_unix": 1791304351.656011,
+      "last_sample_unix": 1791309731.214462,
+      "run_brackets_check_and_bench": true,
+      "raw_samples_bracket_bench": true,
+      "bench_started_unix": 1791305621.188988,
+      "bench_completed_unix": 1791305754.5320117,
+      "check_started_unix": 1791305446.2897413,
+      "check_completed_unix": 1791305584.9427607,
+      "check_unobserved_start_seconds": 0.0,
+      "check_unobserved_end_seconds": 0.0,
+      "boundary": "The whole-batch run brackets check and bench. Raw samples bracket the entire formal benchmark process interval. Any unsampled check initialization or completion interval is reported explicitly; the check is numerical validation, not a performance measurement. Discrete samples do not exclude activity between samples or unrelated CPU work.",
+      "raw_process_ownership_summary_verified": true
+    },
+    "h16384_a256": {
+      "first_sample_utc": "2026-10-06T16:32:31.656011+00:00",
+      "last_sample_utc": "2026-10-06T18:02:11.214462+00:00",
+      "first_sample_unix": 1791304351.656011,
+      "last_sample_unix": 1791309731.214462,
+      "run_brackets_check_and_bench": true,
+      "raw_samples_bracket_bench": true,
+      "bench_started_unix": 1791305968.5119617,
+      "bench_completed_unix": 1791306106.752626,
+      "check_started_unix": 1791305789.6567616,
+      "check_completed_unix": 1791305931.2395732,
+      "check_unobserved_start_seconds": 0.0,
+      "check_unobserved_end_seconds": 0.0,
+      "boundary": "The whole-batch run brackets check and bench. Raw samples bracket the entire formal benchmark process interval. Any unsampled check initialization or completion interval is reported explicitly; the check is numerical validation, not a performance measurement. Discrete samples do not exclude activity between samples or unrelated CPU work.",
+      "raw_process_ownership_summary_verified": true
+    },
+    "h16384_a512": {
+      "first_sample_utc": "2026-10-06T16:32:31.656011+00:00",
+      "last_sample_utc": "2026-10-06T18:02:11.214462+00:00",
+      "first_sample_unix": 1791304351.656011,
+      "last_sample_unix": 1791309731.214462,
+      "run_brackets_check_and_bench": true,
+      "raw_samples_bracket_bench": true,
+      "bench_started_unix": 1791306324.9851742,
+      "bench_completed_unix": 1791306462.1814644,
+      "check_started_unix": 1791306142.0163674,
+      "check_completed_unix": 1791306285.237511,
+      "check_unobserved_start_seconds": 0.0,
+      "check_unobserved_end_seconds": 0.0,
+      "boundary": "The whole-batch run brackets check and bench. Raw samples bracket the entire formal benchmark process interval. Any unsampled check initialization or completion interval is reported explicitly; the check is numerical validation, not a performance measurement. Discrete samples do not exclude activity between samples or unrelated CPU work.",
+      "raw_process_ownership_summary_verified": true
+    },
+    "h16384_a1024": {
+      "first_sample_utc": "2026-10-06T16:32:31.656011+00:00",
+      "last_sample_utc": "2026-10-06T18:02:11.214462+00:00",
+      "first_sample_unix": 1791304351.656011,
+      "last_sample_unix": 1791309731.214462,
+      "run_brackets_check_and_bench": true,
+      "raw_samples_bracket_bench": true,
+      "bench_started_unix": 1791306694.0063956,
+      "bench_completed_unix": 1791306832.4914556,
+      "check_started_unix": 1791306497.8384252,
+      "check_completed_unix": 1791306649.8896124,
+      "check_unobserved_start_seconds": 0.0,
+      "check_unobserved_end_seconds": 0.0,
+      "boundary": "The whole-batch run brackets check and bench. Raw samples bracket the entire formal benchmark process interval. Any unsampled check initialization or completion interval is reported explicitly; the check is numerical validation, not a performance measurement. Discrete samples do not exclude activity between samples or unrelated CPU work.",
+      "raw_process_ownership_summary_verified": true
+    },
+    "h65536_a128": {
+      "first_sample_utc": "2026-10-06T16:32:31.656011+00:00",
+      "last_sample_utc": "2026-10-06T18:02:11.214462+00:00",
+      "first_sample_unix": 1791304351.656011,
+      "last_sample_unix": 1791309731.214462,
+      "run_brackets_check_and_bench": true,
+      "raw_samples_bracket_bench": true,
+      "bench_started_unix": 1791307224.0198064,
+      "bench_completed_unix": 1791307537.334661,
+      "check_started_unix": 1791306869.147955,
+      "check_completed_unix": 1791307187.167818,
+      "check_unobserved_start_seconds": 0.0,
+      "check_unobserved_end_seconds": 0.0,
+      "boundary": "The whole-batch run brackets check and bench. Raw samples bracket the entire formal benchmark process interval. Any unsampled check initialization or completion interval is reported explicitly; the check is numerical validation, not a performance measurement. Discrete samples do not exclude activity between samples or unrelated CPU work.",
+      "raw_process_ownership_summary_verified": true
+    },
+    "h65536_a256": {
+      "first_sample_utc": "2026-10-06T16:32:31.656011+00:00",
+      "last_sample_utc": "2026-10-06T18:02:11.214462+00:00",
+      "first_sample_unix": 1791304351.656011,
+      "last_sample_unix": 1791309731.214462,
+      "run_brackets_check_and_bench": true,
+      "raw_samples_bracket_bench": true,
+      "bench_started_unix": 1791307929.1869414,
+      "bench_completed_unix": 1791308243.986036,
+      "check_started_unix": 1791307573.1385727,
+      "check_completed_unix": 1791307891.7292745,
+      "check_unobserved_start_seconds": 0.0,
+      "check_unobserved_end_seconds": 0.0,
+      "boundary": "The whole-batch run brackets check and bench. Raw samples bracket the entire formal benchmark process interval. Any unsampled check initialization or completion interval is reported explicitly; the check is numerical validation, not a performance measurement. Discrete samples do not exclude activity between samples or unrelated CPU work.",
+      "raw_process_ownership_summary_verified": true
+    },
+    "h65536_a512": {
+      "first_sample_utc": "2026-10-06T16:32:31.656011+00:00",
+      "last_sample_utc": "2026-10-06T18:02:11.214462+00:00",
+      "first_sample_unix": 1791304351.656011,
+      "last_sample_unix": 1791309731.214462,
+      "run_brackets_check_and_bench": true,
+      "raw_samples_bracket_bench": true,
+      "bench_started_unix": 1791308642.960284,
+      "bench_completed_unix": 1791308960.0428288,
+      "check_started_unix": 1791308280.047096,
+      "check_completed_unix": 1791308603.858778,
+      "check_unobserved_start_seconds": 0.0,
+      "check_unobserved_end_seconds": 0.0,
+      "boundary": "The whole-batch run brackets check and bench. Raw samples bracket the entire formal benchmark process interval. Any unsampled check initialization or completion interval is reported explicitly; the check is numerical validation, not a performance measurement. Discrete samples do not exclude activity between samples or unrelated CPU work.",
+      "raw_process_ownership_summary_verified": true
+    },
+    "h65536_a1024": {
+      "first_sample_utc": "2026-10-06T16:32:31.656011+00:00",
+      "last_sample_utc": "2026-10-06T18:02:11.214462+00:00",
+      "first_sample_unix": 1791304351.656011,
+      "last_sample_unix": 1791309731.214462,
+      "run_brackets_check_and_bench": true,
+      "raw_samples_bracket_bench": true,
+      "bench_started_unix": 1791309372.532182,
+      "bench_completed_unix": 1791309693.7814376,
+      "check_started_unix": 1791308996.9038591,
+      "check_completed_unix": 1791309327.954511,
+      "check_unobserved_start_seconds": 0.0,
+      "check_unobserved_end_seconds": 0.0,
+      "boundary": "The whole-batch run brackets check and bench. Raw samples bracket the entire formal benchmark process interval. Any unsampled check initialization or completion interval is reported explicitly; the check is numerical validation, not a performance measurement. Discrete samples do not exclude activity between samples or unrelated CPU work.",
+      "raw_process_ownership_summary_verified": true
+    }
+  },
+  "boundary": "Raw process ownership and formal-benchmark endpoint coverage were independently audited. Unsampled check initialization/completion intervals remain explicit. Discrete observations cannot establish continuous GPU isolation or CPU exclusivity."
 }

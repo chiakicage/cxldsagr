@@ -1,11 +1,20 @@
 # 研究状态的材料依据
 
+> **2026-10-07 DeepSeek H/A 矩阵已发布：**用户指定的 H=[4K,16K,64K] ×
+> A=[128,256,512,1024] 共 12 点已完成独立验收与正式计时，结果和边界见 S-034。
+> T-006 已完成，NOSA、容量填满与后续审阅、simulation 未随之恢复。S-033 的
+> 单点验收及局部 profile 仍有效，但不作为新矩阵的 profile。此前安排按当时范围理解。
+
+> **2026-10-07 C10 重跑：**按用户“只跑 DeepSeek V3.2”的选择，当前路径的独立
+> 数值验收、正式计时与匹配 profile 审查已完成，新增依据见 S-033。S-032 中的 C10
+> 暂缓记录属于此前安排；NOSA motivation、容量后续审阅和 simulation 仍暂缓。
+
 > **2026-10-06 DeepSeek A128 更新：**当前真实三层结果见 S-032，默认已由 A1024 改为
 > A128。旧 `deepseek_v32_echo_prefill` 导航统一指向 `deepseek_v32_mfu`；旧 `layers3`
 > 报告已由 `four_methods` 替换，新链接只提供当前入口，不是旧 run 的证据。S-031 的
 > 历史命令、receipt 与原始产物路径不改写；NOSA 结果仍按其原来源解释。
-> 研究者要求暂缓 motivation 实验，C10 补测与容量后续审阅随之暂停；真实三层结果
-> 不替代该执行路径。旧本地官方 ECHO 适配及其结果已删除；
+> 当时按研究者要求暂缓 motivation 实验，C10 补测与容量后续审阅随之暂停；
+> 后续 C10 重跑见 S-033，真实三层结果不替代该执行路径。旧本地官方 ECHO 适配及其结果已删除；
 > [官方 ECHO 入口](../../../experiments/deepseek_v32_echo_official/README.md)仅保留独立 SGLang
 > 真实前三层的 performance-only 复现。ECHO 与 HBM-only 计时均已完成，数值验收未通过；
 > 两种配置的容量不同，不作为等容量对照。
@@ -28,7 +37,7 @@
 > 原始索引另存于[验收目录](../acceptance/unified_runtime_20261005/shared_cache_integration_evidence.json)，
 > 它有自己的冻结源码与覆盖范围，不能替代缺失产物。
 
-更新：2026-10-06。S-001–S-007 记录初始仓库材料；其旧算子结果未在本轮重新测量。
+更新：2026-10-07。S-001–S-007 记录初始仓库材料；其旧算子结果未在本轮重新测量。
 S-008–S-010 记录本轮实际完成并审计的 GR serving 实验及用户约束；S-011–S-012 记录
 用户修正后的负载候选与数据可用性检查；S-013 记录热度抽样选择，S-014 记录本轮
 MFU/cache 与 baseline 判断修正。最新选择见 S-019：固定用户 loop 替代热度 IID；
@@ -37,7 +46,8 @@ S-021 补入本轮已验收的 ECHO 受控 loop、内存证据及 chunk 选择�
 S-022–S-025 增补 NOSA 固定容量原版实测、最新源码正确性、Q128 负结果及 A1024 补测。
 S-029 记录四类实验整理、旧范围退出与独立验收入口的实现边界；S-031 记录统一框架
 补测、残余开销与物理分配边界，不覆盖历史条目的原始身份；S-032 记录当前 DeepSeek
-A128 四方法 MFU、局部 dense 重叠及依赖实验补测边界。
+A128 四方法 MFU、局部 dense 重叠及依赖实验补测边界；S-033 记录 C10 当前路径的
+独立验收、正式计时和本次限定范围；S-034 记录后续用户指定的 H/A 矩阵、实测取舍与外推边界。
 其余历史条目保留各自当时的范围。本次增量同步既有证据，未重新核验全部论文或 SOTA。
 本文件供 agent 回查；给人的[研究状态](../../status.md)和[下一步任务](../../roadmap.md)在 `docs/`。
 
@@ -1039,6 +1049,8 @@ A128 四方法 MFU、局部 dense 重叠及依赖实验补测边界。
 
 ## S-032：DeepSeek A128 四方法 MFU 与局部重叠
 
+本条保留真实三层补测及当时的任务安排；后续用户只恢复 C10 motivation 重跑，见 S-033。
+
 - **研究者选择与变化：**主条目 2.4、2.5、4.1–4.2。停止广泛优化后，按用户指定
   完成 dense extend 延后同步及补测：对历史 KV 的等待从整层计算前推迟到
   indexer/top-k 后、主 KV append 前。Prefill 和其他方法的 GPU 调度未变。
@@ -1111,3 +1123,208 @@ A128 四方法 MFU、局部 dense 重叠及依赖实验补测边界。
   静态估算，未验收填满 NH。NOSA、独立 SGLang 的结果保留各自范围；T-007 的
   NOSA indexer workspace 仍未实施。H64K-only、4K/16K 暂停、不跑满 NH、固定
   用户同序 loop，以及共同模型和 GR 场景仍待建立等研究者选择保持不变。
+
+## S-033：DeepSeek C10 当前路径重跑
+
+本条记录矩阵前已验收的 H64K/A128 单点；后续矩阵及 timeline 展示调整见 S-034，
+新矩阵使用各点自己的验收，不扩展本条的数值或 profile 覆盖范围。
+
+- **研究者选择：**用户要求重跑 motivation，并明确“只跑 DeepSeek V3.2”。本次
+  恢复 C10 现有 H64K 配置的独立验收、正式计时与匹配 profile，不恢复优化、规模
+  探索、NOSA motivation、容量后续审阅或 simulation。对应 2.2、2.4、2.5、4.1–4.3；
+  T-003、T-007、T-002 保持各自范围，T-006 继续暂缓。
+- **实际执行：**H=65,536、A=128、history chunk=1,024、U=16、R=2、P=65,536、
+  NH=16,777,216、seed=42，固定用户同序 loop。模型为真实前三层独立复制成十层的
+  7,827,793,408 参数 checkpoint 工作负载替身，每个副本使用对应 source 输入，
+  含全部 candidate hidden 和末 token LM head。Candidate 只在 GPU 临时执行，
+  不写回 DRAM。`deepseek-compute-islands-v4-bound-inputs` 只捕获 projection 与
+  finish；cache 事务、选择、召回与 IO 在图外，不是 S-032 的完整 extend 图。
+  Dense 使用连续 pinned host/HBM 地址与 `cudaMemcpyAsync`，本次也覆盖 ECHO
+  scale stage 释放修正后的路径。
+- **独立验收与正式计时：**check 为 `deepseek_motivation_rerun_check_20261006_01`，
+  bench 为 `deepseek_motivation_rerun_bench_20261006_01`；两者均完成四方案各 32
+  请求，另各有 12 次预热。Check 的 128 份 candidate hidden/logits 中，96 组
+  offload/HBM 对照逐字节一致。独立审查重核 132 项 receipt 证据，check/bench 的
+  全部 cache 计数相同、各 270 条内存采样与账本相符，源码、native 与 v4 replay
+  覆盖通过。正式计时不保存或逐元素比较输出，不把 bench 自身的零输出比较计数
+  当成未验收。Check/bench 冻结源码 SHA-256 均为
+  `15b38f1df5eee926c3aba0f2b063acff090903c0e31a64758e74b6b233bad1c7`。
+- **来源位置：**[实验入口](../../../experiments/deepseek_v32_motivation/README.md)现展示
+  S-034 的矩阵；其 `report/summary.json` 不再指向本条单点。本条原始计时保留于
+  `experiments/deepseek_v32_motivation/output/data/deepseek_motivation_rerun_bench_20261006_01/measurements.jsonl`，
+  独立审查保留于
+  `experiments/deepseek_v32_motivation/output/data/deepseek_motivation_rerun_report_20261006_01/independent_bench_audit.json`。
+  [单点局部诊断](../../../experiments/deepseek_v32_motivation/report/diagnosis.md)继续明确
+  标注旧 run；无图的 profile 数据与审查依据、原 source 及必要索引保留。旧 bench 的
+  `report/` 与旧 publication 展示副本已移除，原发布清单
+  `experiments/deepseek_v32_motivation/output/data/deepseek_motivation_rerun_report_20261006_01/publication/publication_manifest.json`
+  仅作为历史索引，不要求其中已撤下的展示文件继续存在。
+  正式 receipt 位于
+  `/tmp/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_rerun_check_20261006_01/receipt.json`，
+  SHA-256 为 `e7a624e4fb4df6bedee3296e596543fff7d798cbe4c7abd82ad79ea9d9d2065b`。
+- **正式结果：**每方法先预热 user 0 首访、user 1 首访和 user 0 复访，释放预热
+  资源后从空 cache 开始。同步请求墙钟包含准入/淘汰、需要时的 history 重建、
+  candidate 和清理；加载、编译、图准备、预热与计数 host 读取不计时。
+
+| 方法 | 首访均值 ms | 复访均值 ms | 复访 p95 ms | 32 请求总耗时 s | 复访历史命中 |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| HBM | 2161.496543 | 2163.788929 | 2170.081379 | 69.204568 | 0/16 |
+| ECHO | 2177.963297 | 21.133124 | 21.474006 | 35.185543 | 16/16 |
+| serial sparse | 2179.617784 | 15.864665 | 16.199310 | 35.127719 | 16/16 |
+| dense prefetch | 2169.704266 | 19.798366 | 19.987529 | 35.032042 | 16/16 |
+
+- **支持与限制：**指定 P=H 配额下，HBM 只保留一个用户的 history，复访全部重建；
+  三个 offload 方案均保留了全部 16 个用户。ECHO 与 serial sparse 的 16 次复访
+  candidate H2D 均为 1.161186218 GiB，dense 为 11.25 GiB，后者是前者的
+  9.688368518 倍；candidate D2H 均为零。这些是 payload 计数，不是物理总线流量。
+  Serial sparse 的复访均值最低；dense 的完整轨迹总耗时最低，首访占一半。
+  ECHO 尚未显示相对 serial sparse 的完整轨迹或复访加速。不能用其中一个阶段
+  的排名代替完整轨迹排名，也不能将避免 history 重建的差值归为 attention 或
+  overlap 收益。这是一轮正式轨迹，每个请求只测一次，p95 不是重复运行置信区间。
+  新旧源码及执行条件不同，本次不作单变量优化归因。
+- **Profile 验收：**`deepseek_motivation_rerun_profile_20261006_01` 的 80 份输出
+  （12 次预热与 68 次轨迹执行）均与独立 check 逐字节一致。1,305 项源码 hash
+  已核验，其中 bench 的全部 1,302 项执行源码相同；987 项 runtime/native 文件
+  通过复核。8 份 capture 中的 6,560 次 graph replay 与 186,880 个节点逐项一致。
+  原始 SQLite、时间线和实际 IO 审查均通过；profile 墙钟不替代正式请求延迟。
+- **局部机制证据：**dense 复访的十次历史 H2D DMA 共 754,974,720 B（720 MiB），
+  cold candidate 没有历史 H2D。选定 L1 compute 与完整 L2 DMA 的交集为
+  0.805312/1.371746 ms，即 58.707078%；分母保留 L2 DMA 超过 L1 compute 的部分。
+  这是 C10 自身的局部观测，不沿用旧 gather 或真实三层完整图的重叠比例。所选
+  prefill L1 中，三个 offload 方案各写回 1,179,648 B，写回与计算交集依次为
+  ECHO 7.264 µs、serial sparse 10.048 µs、dense 7.168 µs。局部交集不证明消除全部
+  等待或获得完整请求收益，ECHO 融合 kernel 的计算与 IO 仍不从 trace 内部分离。
+- **环境观测：**正式 bench 的观察器记录 141 个样本，最大间隔 30.078283 秒；
+  profile 为 297 个样本，最大间隔 29.379686 秒。采样未见所选 GPU3 上的其他进程，
+  其他 GPU 有活动，不称为全机独占；离散采样不能排除间隙中的活动或无关 CPU 工作。
+- **容量与其他边界：**本次独立内存审查中，dense ticket workspace 为 0；allocated、
+  reserved 与请求结束时的设备已用量分别核对，后者不是连续物理峰值。没有跑满 NH，
+  不改写 455 个 64K history 的静态边界，不建立相同总字节预算或真实 GR 质量。
+  `deepseek_dma_c10_bench_20261006_01` 仍作为
+  [容量报告](../../../experiments/cache_management/README.md)已发布内存表的独立来源保留，
+  不把本次重跑包装成容量实验补测。NOSA、真实三层 MFU 与独立 SGLang 的结果仍按
+  各自来源解释；旧 simulation 继续撤回，不把新数字直接代入旧输入。
+- **替换范围：**本轮结果替换旧 mapped-gather C10 报告与其运行产物；上述容量报告
+  独立引用的 DMA 运行继续保留。旧 S-032 记录中的 C10 状态、run ID 和数值只用于
+  说明当时来源，不表示旧 mapped-gather 结果仍是当前证据。
+
+## S-034：DeepSeek motivation H/A 矩阵安排
+
+本条保留最初的用户安排，并补入 2026-10-07 已发布的矩阵结果。
+
+- **用户新增范围：**在已完成的 DeepSeek 单点重跑后，用户要求新增
+  H=[4K,16K,64K] × A=[128,256,512,1024] 的 12 点 motivation 矩阵，并撤下旧
+  timeline 展示。主条目为 4.3，关联 1.3、2.2、2.4、2.5、4.1。实验入口为
+  [DeepSeek motivation](../../../experiments/deepseek_v32_motivation/README.md)。
+- **实际控制条件：**执行沿用 P=65,536、NH=16,777,216；U=16、R=2、history
+  chunk=1,024、seed=42，四方案为 HBM、ECHO、serial sparse 和 dense prefetch。
+  仍使用 C10 checkpoint 工作负载替身与 `deepseek-compute-islands-v4-bound-inputs`，
+  candidate 在 GPU 临时执行。配额最初作为沿用配置的执行假设，不能反写成用户
+  明确指定了新的配额。硬件为 H200/SM90，GPU3、CPU 24–31、NUMA node 0。
+- **完整来源：**batch 为 `deepseek_motivation_matrix_20261007_01`，各点 check/bench
+  分别使用后缀 `_h<H>_a<A>_check` 与 `_h<H>_a<A>_bench`。CPU 汇总与独立审计为
+  `deepseek_motivation_matrix_report_20261007_02` 和
+  `deepseek_motivation_matrix_analysis_20261007_02`；完整产物位于本实验各自的
+  `output/data/<run_id>/`，日志在 `output/log/<run_id>/`。
+  [发布清单](../../../experiments/deepseek_v32_motivation/report/publication_manifest.json)
+  的 status 为 `published`；矩阵初次发布时的 SHA-256 为
+  `e26e9d7883b23a04d96434264e148c22bc72ac5e7d8e53ebc59452713b24e3ef`。
+  初次发布的清单作为本次展示增补的父清单，保存在
+  `experiments/deepseek_v32_motivation/output/data/deepseek_motivation_matrix_report_20261007_02/publication/report/publication_manifest.json`。
+  当前 CPU 图仅展示 revisit，横轴为 History；每个 candidate 各有一张 HBM-only 与
+  三种 offload 的对数纵轴对比图，以及一张三种 offload 的线性纵轴细节图，
+  每张 PNG 仅含一个坐标图。
+  保留原 `batch`、`report_run_id` 与 GPU 身份，不改变测量、summary、验收或研究结论。
+  [矩阵汇总](../../../experiments/deepseek_v32_motivation/report/summary.json)、
+  [验收索引](../../../experiments/deepseek_v32_motivation/report/run_acceptance.json)与
+  [观察记录](../../../experiments/deepseek_v32_motivation/report/observer_summary.json)
+  分别保留统计、逐点依据与监控边界。
+- **独立验收：**12 组 check/bench 各覆盖四方法、每方法 32 请求，共 1,536 个正式
+  请求；保存的 1,536 份 hidden/logits 中，1,152 组 offload/HBM 比较逐字节一致。
+  Check 与 bench 各有 3,240 条内存采样、各 416 次预热；预热用户数依历史配额变化。
+  源码、receipt、workload、LRU、实际搬运计数、v4 graph replay 和内存账本均通过。
+  CPU 审计未初始化 CUDA。冻结执行源码清单 SHA-256 为
+  `f90f924e35f745fdef0032735c8e3527b34637a07dab5a33e7292ed59b4bbe24`。
+- **诊断计数的精确边界：**6 点共有 250 个 ECHO 层级
+  `prefetch_capacity_failures` 值在 check/bench 间不同：H16K 的 A256/512/1024
+  分别为 30/42/39 项，H64K 的 A256/512/1024 分别为 33/48/58 项。这是 cap=8,192
+  已饱和时被拒绝的 reservation 尝试次数，受并发调度影响，不是实际搬运量或不同
+  missing token 数。两次执行的成功预取、召回、淘汰、选择和其余诊断均精确相同，
+  candidate D2H 均为零。9 项冻结源码与 backend/native 身份绑定限定了这一例外，
+  每条原始差异均保留；没有放宽数值容差或执行规则。计数相同也不证明逻辑预取集合
+  或 priority 轨迹相同。详细语义见
+  [计数契约](../../../experiments/deepseek_v32_motivation/report/counter_contract.json)。
+- **CPU 分析修正：**最初把全部诊断叶值都要求相等，分析因此停止；确认上述既有
+  竞争尝试语义后，以新分析 run ID 重新审计，没有重跑 GPU。唯一改变的已捕获源码
+  是 CPU `experiments/deepseek_v32_motivation/src/report_matrix.py`：旧 SHA-256 为
+  `d1607c6579dde11ffb384e94969665d775492d932bb2e0024c0f2960e10134d5`，新 SHA-256 为
+  `10780910a8364399f8a1c10bfc8b0ecff45a16b053bbe63f75b78646ff26aa05`。
+  该文件不在 receipt 的执行 base sources 或追踪的 native/dependency inventory 中；
+  原始快照 hash 保持不变，其他执行源码仍逐项相等。独立审计 v2 的 SHA-256 为
+  `de3f5186310a075061c00050ac16ee58b7f93a34d2fba9bbb1065a92bc678fd6`。
+- **H4K 预测的实测结果：**HBM 确实保留全部 16 用户，四档 A 的复访均为 16/16
+  命中。H16K/H64K 的 HBM 分别最多保留 4/1 用户，顺序 loop 复访均为 0/16；
+  三个 offload 方案在全部 H/A 点均为 16/16。H4K 的 ECHO/serial sparse candidate
+  H2D 为零，因而没有 H64K 单点中的 history 重建差值；HBM 也取得最低复访均值。
+  这些结果验证指定配额下的保留差异，不证明物理容量上限。
+- **复访结果：**下表单位为 ms，每格是本轮 16 次复访请求均值。
+
+| H | A | HBM | ECHO | serial sparse | dense prefetch |
+| ---: | ---: | ---: | ---: | ---: | ---: |
+| 4,096 | 128 | 9.691 | 12.472 | 10.217 | 10.543 |
+| 4,096 | 256 | 12.198 | 13.911 | 12.547 | 12.449 |
+| 4,096 | 512 | 17.879 | 19.762 | 18.152 | 17.978 |
+| 4,096 | 1,024 | 29.655 | 32.160 | 30.073 | 29.860 |
+| 16,384 | 128 | 453.310 | 14.298 | 12.438 | 10.742 |
+| 16,384 | 256 | 456.245 | 16.942 | 15.465 | 13.543 |
+| 16,384 | 512 | 459.982 | 24.209 | 21.925 | 19.790 |
+| 16,384 | 1,024 | 477.307 | 39.558 | 35.209 | 32.815 |
+| 65,536 | 128 | 2163.207 | 21.038 | 15.772 | 19.784 |
+| 65,536 | 256 | 2165.339 | 24.310 | 18.987 | 20.040 |
+| 65,536 | 512 | 2179.869 | 37.170 | 27.968 | 26.989 |
+| 65,536 | 1,024 | 2193.369 | 62.521 | 46.077 | 44.501 |
+
+- **研究判断：**H4K 四点为 HBM 最低，H16K 四点为 dense 最低，H64K 的 A128/256
+  为 serial sparse 最低、A512/1024 为 dense 略低。ECHO 在全部 12 点均慢于 serial
+  sparse，两者复访 candidate H2D 总量逐点相同。H2D 非零的八点中，dense payload
+  是 sparse 的 1.832–9.688 倍，仍在其中六点取得比 serial sparse 更低的复访延迟。
+  H 同时改变历史构建
+  成本、可保留人数和取数规模；A 改变 candidate 的计算与选择范围，不能从 FLOPs、
+  payload 或旧单点局部重叠单独推出请求排序。每个配置只测一条正式轨迹，每方案
+  含两轮用户访问，不提供稳定排名或重复运行置信区间；首访、复访和完整轨迹
+  不得互相替代。
+- **环境与物理边界：**整批观察器成功退出，2,093 个离散样本的最大间隔为
+  30.577126 秒。原始样本覆盖全部正式 bench，首个 check 的初始化起始有
+  0.140152 秒未采样，已显式保留；未观察到所选 GPU 的外来进程，不称全机独占。
+  Allocated、reserved 与请求结束时设备已用量分别报告，后者不是连续物理峰值。
+  没有跑满 NH，不更改 455 个 64K history 的静态估算，也不建立等总字节预算、
+  真实到达过程或 GR 质量结论。
+- **证据与任务边界：**矩阵没有新增 profile。S-033 的单点数值、计时与无图局部
+  profile 依据继续有效；撤下展示不使原测量失效，也不让旧 profile 成为这 12 点的
+  匹配机制证据。真实三层完整图与 C10 纯计算图继续分开。T-006 已完成并移出
+  roadmap；NOSA motivation、NOSA 的 4K/16K、容量填满与后续审阅、simulation 仍
+  暂缓，不恢复广泛优化或其他 U/R、P/NH 探索。T-003、T-007、T-002 保持各自范围。
+
+## S-035：官方 ECHO recall 全池扫描诊断
+
+- **研究位置：**主条目 2.5，关联 4.2。用户要求解释官方 recall 为何长于本地
+  serial sparse 的完整选择集合 fetch；本轮核对已有 trace，并实际运行独立零 miss
+  验证、计时与 NCU，没有修改模型、cache 或第三方实现。
+- **来源：**[诊断报告](../../../experiments/deepseek_v32_echo_official/report/recall_diagnosis.md)
+  与[来源记录](../../../experiments/deepseek_v32_echo_official/report/recall_diagnosis/provenance.json)。
+  分析发布 ID 为 `recall_diagnosis_20261007_03`，独立 check、bench 分别为
+  `recall_zero_miss_check_20261007_01`、`recall_zero_miss_bench_20261007_01`，
+  NCU 为 `recall_zero_miss_ncu_20261007_01`。原 Engine profile 为
+  `first3_engine_warm_echo_profile_20261006_01`，本地对照继续使用
+  `deepseek_dense_late_wait_profile_20261006_01`。
+- **证据：**官方每层按 NH=16,777,216 扫描 HBM 上的布尔标记，启动 65,536 个
+  CTA，每个 CTA 串行检查 256 项。原 trace 的 195 次调用均约 1.533 ms，末层
+  residual recall 计数为零时也保留该开销。相同 16M cubin 的零 miss 中位数为
+  1.530142 ms；64K、1M 扫描分别为 0.022296、0.106495 ms。NCU full 的 ALU
+  利用率为 83.9899%，HBM 读吞吐为峰值的 0.2277%，支持整数与逻辑扫描开销的归因。
+- **研究含义：**官方 recall 橙色条的时长不能解释成纯 H2D 等待，也不能单凭它
+  论证 ECHO 的重叠机制无效。本地 gather 遍历压紧后的 miss，未出现同一固定扫描
+  症状；本次不解释 C10 矩阵中 ECHO 较慢的全部原因。
+- **边界：**零 miss 诊断不测真实 miss 的传输性能，不构成跨框架数值验收；官方
+  `numerical_acceptance=false` 保留。缩小 NH 的扫描点是诊断控制，不是等容量
+  serving 优化。未启动实现优化，原正式结果及其他研究任务不变。

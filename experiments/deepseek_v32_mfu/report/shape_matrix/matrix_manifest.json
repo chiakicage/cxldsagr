@@ -1,0 +1,410 @@
+{
+  "schema_version": 1,
+  "run_id": "deepseek_shape_matrix_complete_20261007_01",
+  "started_at_utc": "2026-10-06T16:28:17.007068+00:00",
+  "completed_at_utc": "2026-10-06T17:13:09.091643+00:00",
+  "configuration": {
+    "prefix_tokens": [
+      4096,
+      16384,
+      65536
+    ],
+    "extend_tokens": [
+      128,
+      256,
+      512,
+      1024
+    ],
+    "history_chunk_tokens": 1024,
+    "extend_chunk_tokens": "A",
+    "pool_tokens": "H+A",
+    "host_tokens": "H+A",
+    "extend_residency": "cold",
+    "extend_graph": true,
+    "startup_timeline": true,
+    "trace_warmups": 1
+  },
+  "runner": {
+    "source": "experiments/deepseek_v32_mfu/scripts/shape_matrix.sh",
+    "sha256": "860f3f42e0bc27721ab29827149ef5aeed6f01e0fe4b2e4f95610ba64665c34c"
+  },
+  "aggregation_source": {
+    "path": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_complete_20261007_01/assemble_matrix.py",
+    "sha256": "1788613e0bc7983475eb7d1a86da70a38f520ba7a2cb87c9aa5b1b2fcae7d6d0"
+  },
+  "execution_batches": [
+    {
+      "run_id": "deepseek_shape_matrix_20261007_01",
+      "completed_shape_count": 5,
+      "completed_shapes": [
+        [
+          65536,
+          1024
+        ],
+        [
+          65536,
+          512
+        ],
+        [
+          65536,
+          256
+        ],
+        [
+          65536,
+          128
+        ],
+        [
+          16384,
+          1024
+        ]
+      ],
+      "command_exit_code": 1,
+      "manifest_path": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_complete_20261007_01/batches/deepseek_shape_matrix_20261007_01/manifest.json",
+      "manifest_sha256": "f983d9aaf5d37c9129a0df06cb498c58ee3e0b8298949d51b2a65a3a2cfeb411",
+      "runner_invocation": [
+        "experiments/deepseek_v32_mfu/scripts/shape_matrix.sh",
+        "--prefix-tokens",
+        "65536,16384,4096",
+        "--extend-tokens",
+        "1024,512,256,128",
+        "--physical-device",
+        "0",
+        "--model",
+        "/preset-models"
+      ],
+      "observer_path": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_complete_20261007_01/batches/deepseek_shape_matrix_20261007_01/observer/summary.json",
+      "observer_sha256": "a4f3c161bd3bda0502a21a2f00bcdb8b533f992f755180ac424fa29b637a7c43",
+      "raw_observations_sha256": "4f2dd2c7969a7bc94ad210b0585db31edac8f49be15877a81d1032baf6fe7440",
+      "preflight_interruption": {
+        "stage": "before_model_loading",
+        "command": "nvidia-smi",
+        "timeout_seconds": 20,
+        "shape": [
+          16384,
+          512
+        ],
+        "diagnostic_directory": "/tmp/deepseek-echo-deepseek_shape_matrix_20261007_01_h16384_a512_check.OIydSM",
+        "cause": "Not established; no model execution or accepted measurement for the interrupted child."
+      }
+    },
+    {
+      "run_id": "deepseek_shape_matrix_20261007_02",
+      "completed_shape_count": 1,
+      "completed_shapes": [
+        [
+          16384,
+          512
+        ]
+      ],
+      "command_exit_code": 1,
+      "manifest_path": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_complete_20261007_01/batches/deepseek_shape_matrix_20261007_02/manifest.json",
+      "manifest_sha256": "d64093c1e47b824f8574703def2a2674dc95f4a997f17a5ba1d3aab78df79c7b",
+      "runner_invocation": [
+        "experiments/deepseek_v32_mfu/scripts/shape_matrix.sh",
+        "--prefix-tokens",
+        "16384",
+        "--extend-tokens",
+        "512,256,128",
+        "--physical-device",
+        "0",
+        "--model",
+        "/preset-models"
+      ],
+      "observer_path": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_complete_20261007_01/batches/deepseek_shape_matrix_20261007_02/observer/summary.json",
+      "observer_sha256": "25549df52a88f2466bf22481a683b05be5ea1ab07acc2b71534afd04d6e0525c",
+      "raw_observations_sha256": "ec7b66f338c44a085b81f7455381722b0a0dbc056c9ea3828e7087a486002f92",
+      "preflight_interruption": {
+        "stage": "before_model_loading",
+        "command": "nvidia-smi",
+        "timeout_seconds": 20,
+        "shape": [
+          16384,
+          256
+        ],
+        "diagnostic_directory": "/tmp/deepseek-echo-deepseek_shape_matrix_20261007_02_h16384_a256_check.nlCICR",
+        "cause": "Not established; no model execution or accepted measurement for the interrupted child."
+      }
+    },
+    {
+      "run_id": "deepseek_shape_matrix_20261007_03",
+      "completed_shape_count": 2,
+      "completed_shapes": [
+        [
+          16384,
+          256
+        ],
+        [
+          16384,
+          128
+        ]
+      ],
+      "command_exit_code": 0,
+      "manifest_path": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_complete_20261007_01/batches/deepseek_shape_matrix_20261007_03/manifest.json",
+      "manifest_sha256": "23d54dd86eb9dabb96bacd4290311cbe911dda4b92fe5794c6b9dde480d8a524",
+      "runner_invocation": [
+        "experiments/deepseek_v32_mfu/scripts/shape_matrix.sh",
+        "--prefix-tokens",
+        "16384",
+        "--extend-tokens",
+        "256,128",
+        "--physical-device",
+        "0",
+        "--model",
+        "/preset-models"
+      ],
+      "observer_path": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_complete_20261007_01/batches/deepseek_shape_matrix_20261007_03/observer/summary.json",
+      "observer_sha256": "ae5af5f1bd85508337a2e7dd683793c71f6e279811b672f7ee36167307f5e143",
+      "raw_observations_sha256": "629ec6dd7a2a4e97cc060cf54c76f2fd981a96fd403334fb18514b4a86b320dd"
+    },
+    {
+      "run_id": "deepseek_shape_matrix_20261007_04",
+      "completed_shape_count": 4,
+      "completed_shapes": [
+        [
+          4096,
+          1024
+        ],
+        [
+          4096,
+          512
+        ],
+        [
+          4096,
+          256
+        ],
+        [
+          4096,
+          128
+        ]
+      ],
+      "command_exit_code": 0,
+      "manifest_path": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_complete_20261007_01/batches/deepseek_shape_matrix_20261007_04/manifest.json",
+      "manifest_sha256": "faf3ac14f4fe6768aa95af1b5cc844fbdec9ea9f3f50dd68e88748f2f0c8a0ad",
+      "runner_invocation": [
+        "experiments/deepseek_v32_mfu/scripts/shape_matrix.sh",
+        "--prefix-tokens",
+        "4096",
+        "--extend-tokens",
+        "1024,512,256,128",
+        "--physical-device",
+        "0",
+        "--model",
+        "/preset-models"
+      ],
+      "observer_path": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_complete_20261007_01/batches/deepseek_shape_matrix_20261007_04/observer/summary.json",
+      "observer_sha256": "3ecf55bb608a5069fe7f26791b3d97a33520085c73053c9baabb92bd17c0e347",
+      "raw_observations_sha256": "13659bcd8e6564c44071cb24826865fed3bb5113a3a0266e13aaded0009f33f3"
+    }
+  ],
+  "hardware_query_deadline_impact": {
+    "path": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_complete_20261007_01/hardware_deadline_impact.json",
+    "sha256": "b1730fbe1c7d7011de9248474c9394778c9ca6026b9d62d87ad39ce31b48f9d3"
+  },
+  "observer": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_complete_20261007_01/observer_summary.json",
+  "shapes": [
+    {
+      "prefix_tokens": 4096,
+      "extend_tokens": 128,
+      "pool_tokens": 4224,
+      "host_tokens": 4224,
+      "check_run_id": "deepseek_shape_matrix_20261007_04_h4096_a128_check",
+      "bench_run_id": "deepseek_shape_matrix_20261007_04_h4096_a128_bench",
+      "profile_run_id": "deepseek_shape_matrix_20261007_04_h4096_a128_profile",
+      "timeline_run_id": "deepseek_shape_matrix_20261007_04_h4096_a128_timeline",
+      "startup_run_id": "deepseek_shape_matrix_20261007_04_h4096_a128_startup",
+      "check_run": "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_shape_matrix_20261007_04_h4096_a128_check",
+      "bench_run": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_04_h4096_a128_bench",
+      "profile_run": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_04_h4096_a128_profile",
+      "timeline_run": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_04_h4096_a128_timeline",
+      "startup_run": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_04_h4096_a128_startup",
+      "validation_receipt_sha256": "1ecb8ca58e2aaafddd01c02d13b0b5640dad479afeb3d7d22c0d5c8182ac89cc"
+    },
+    {
+      "prefix_tokens": 4096,
+      "extend_tokens": 256,
+      "pool_tokens": 4352,
+      "host_tokens": 4352,
+      "check_run_id": "deepseek_shape_matrix_20261007_04_h4096_a256_check",
+      "bench_run_id": "deepseek_shape_matrix_20261007_04_h4096_a256_bench",
+      "profile_run_id": "deepseek_shape_matrix_20261007_04_h4096_a256_profile",
+      "timeline_run_id": "deepseek_shape_matrix_20261007_04_h4096_a256_timeline",
+      "startup_run_id": "deepseek_shape_matrix_20261007_04_h4096_a256_startup",
+      "check_run": "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_shape_matrix_20261007_04_h4096_a256_check",
+      "bench_run": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_04_h4096_a256_bench",
+      "profile_run": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_04_h4096_a256_profile",
+      "timeline_run": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_04_h4096_a256_timeline",
+      "startup_run": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_04_h4096_a256_startup",
+      "validation_receipt_sha256": "a3ea2a212e6f23475de3ececd1a1ae75d7f14aba82c9d5661b6b9d294111f4f7"
+    },
+    {
+      "prefix_tokens": 4096,
+      "extend_tokens": 512,
+      "pool_tokens": 4608,
+      "host_tokens": 4608,
+      "check_run_id": "deepseek_shape_matrix_20261007_04_h4096_a512_check",
+      "bench_run_id": "deepseek_shape_matrix_20261007_04_h4096_a512_bench",
+      "profile_run_id": "deepseek_shape_matrix_20261007_04_h4096_a512_profile",
+      "timeline_run_id": "deepseek_shape_matrix_20261007_04_h4096_a512_timeline",
+      "startup_run_id": "deepseek_shape_matrix_20261007_04_h4096_a512_startup",
+      "check_run": "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_shape_matrix_20261007_04_h4096_a512_check",
+      "bench_run": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_04_h4096_a512_bench",
+      "profile_run": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_04_h4096_a512_profile",
+      "timeline_run": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_04_h4096_a512_timeline",
+      "startup_run": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_04_h4096_a512_startup",
+      "validation_receipt_sha256": "2bd5dbf136bb90f46d8a7935e9ea12c7d52c42bcfd7b16442fe8bc3afc9e592e"
+    },
+    {
+      "prefix_tokens": 4096,
+      "extend_tokens": 1024,
+      "pool_tokens": 5120,
+      "host_tokens": 5120,
+      "check_run_id": "deepseek_shape_matrix_20261007_04_h4096_a1024_check",
+      "bench_run_id": "deepseek_shape_matrix_20261007_04_h4096_a1024_bench",
+      "profile_run_id": "deepseek_shape_matrix_20261007_04_h4096_a1024_profile",
+      "timeline_run_id": "deepseek_shape_matrix_20261007_04_h4096_a1024_timeline",
+      "startup_run_id": "deepseek_shape_matrix_20261007_04_h4096_a1024_startup",
+      "check_run": "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_shape_matrix_20261007_04_h4096_a1024_check",
+      "bench_run": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_04_h4096_a1024_bench",
+      "profile_run": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_04_h4096_a1024_profile",
+      "timeline_run": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_04_h4096_a1024_timeline",
+      "startup_run": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_04_h4096_a1024_startup",
+      "validation_receipt_sha256": "994db7ede63e243cc3601a83978457885a4de7996f0afe8827db8339c74e79b8"
+    },
+    {
+      "prefix_tokens": 16384,
+      "extend_tokens": 128,
+      "pool_tokens": 16512,
+      "host_tokens": 16512,
+      "check_run_id": "deepseek_shape_matrix_20261007_03_h16384_a128_check",
+      "bench_run_id": "deepseek_shape_matrix_20261007_03_h16384_a128_bench",
+      "profile_run_id": "deepseek_shape_matrix_20261007_03_h16384_a128_profile",
+      "timeline_run_id": "deepseek_shape_matrix_20261007_03_h16384_a128_timeline",
+      "startup_run_id": "deepseek_shape_matrix_20261007_03_h16384_a128_startup",
+      "check_run": "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_shape_matrix_20261007_03_h16384_a128_check",
+      "bench_run": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_03_h16384_a128_bench",
+      "profile_run": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_03_h16384_a128_profile",
+      "timeline_run": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_03_h16384_a128_timeline",
+      "startup_run": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_03_h16384_a128_startup",
+      "validation_receipt_sha256": "1c50dc84b4fa0b64c8465cba291ecdbacef6e0986c4b83ed60282403055310de"
+    },
+    {
+      "prefix_tokens": 16384,
+      "extend_tokens": 256,
+      "pool_tokens": 16640,
+      "host_tokens": 16640,
+      "check_run_id": "deepseek_shape_matrix_20261007_03_h16384_a256_check",
+      "bench_run_id": "deepseek_shape_matrix_20261007_03_h16384_a256_bench",
+      "profile_run_id": "deepseek_shape_matrix_20261007_03_h16384_a256_profile",
+      "timeline_run_id": "deepseek_shape_matrix_20261007_03_h16384_a256_timeline",
+      "startup_run_id": "deepseek_shape_matrix_20261007_03_h16384_a256_startup",
+      "check_run": "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_shape_matrix_20261007_03_h16384_a256_check",
+      "bench_run": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_03_h16384_a256_bench",
+      "profile_run": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_03_h16384_a256_profile",
+      "timeline_run": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_03_h16384_a256_timeline",
+      "startup_run": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_03_h16384_a256_startup",
+      "validation_receipt_sha256": "031c0e39481d7d480ecb65be6115533b0cceb9dab2a81598568d554972421702"
+    },
+    {
+      "prefix_tokens": 16384,
+      "extend_tokens": 512,
+      "pool_tokens": 16896,
+      "host_tokens": 16896,
+      "check_run_id": "deepseek_shape_matrix_20261007_02_h16384_a512_check",
+      "bench_run_id": "deepseek_shape_matrix_20261007_02_h16384_a512_bench",
+      "profile_run_id": "deepseek_shape_matrix_20261007_02_h16384_a512_profile",
+      "timeline_run_id": "deepseek_shape_matrix_20261007_02_h16384_a512_timeline",
+      "startup_run_id": "deepseek_shape_matrix_20261007_02_h16384_a512_startup",
+      "check_run": "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_shape_matrix_20261007_02_h16384_a512_check",
+      "bench_run": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_02_h16384_a512_bench",
+      "profile_run": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_02_h16384_a512_profile",
+      "timeline_run": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_02_h16384_a512_timeline",
+      "startup_run": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_02_h16384_a512_startup",
+      "validation_receipt_sha256": "e746eb5d1c874f701ef10d0f5b4bdccc91b1a5409cc71ed9afef69f920dab5aa"
+    },
+    {
+      "prefix_tokens": 16384,
+      "extend_tokens": 1024,
+      "pool_tokens": 17408,
+      "host_tokens": 17408,
+      "check_run_id": "deepseek_shape_matrix_20261007_01_h16384_a1024_check",
+      "bench_run_id": "deepseek_shape_matrix_20261007_01_h16384_a1024_bench",
+      "profile_run_id": "deepseek_shape_matrix_20261007_01_h16384_a1024_profile",
+      "timeline_run_id": "deepseek_shape_matrix_20261007_01_h16384_a1024_timeline",
+      "startup_run_id": "deepseek_shape_matrix_20261007_01_h16384_a1024_startup",
+      "check_run": "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_shape_matrix_20261007_01_h16384_a1024_check",
+      "bench_run": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_01_h16384_a1024_bench",
+      "profile_run": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_01_h16384_a1024_profile",
+      "timeline_run": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_01_h16384_a1024_timeline",
+      "startup_run": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_01_h16384_a1024_startup",
+      "validation_receipt_sha256": "6117ed5f2bfaa6cf85b07346e66879f57e8081457ec99123c562f7c582f86f45"
+    },
+    {
+      "prefix_tokens": 65536,
+      "extend_tokens": 128,
+      "pool_tokens": 65664,
+      "host_tokens": 65664,
+      "check_run_id": "deepseek_shape_matrix_20261007_01_h65536_a128_check",
+      "bench_run_id": "deepseek_shape_matrix_20261007_01_h65536_a128_bench",
+      "profile_run_id": "deepseek_shape_matrix_20261007_01_h65536_a128_profile",
+      "timeline_run_id": "deepseek_shape_matrix_20261007_01_h65536_a128_timeline",
+      "startup_run_id": "deepseek_shape_matrix_20261007_01_h65536_a128_startup",
+      "check_run": "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_shape_matrix_20261007_01_h65536_a128_check",
+      "bench_run": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_01_h65536_a128_bench",
+      "profile_run": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_01_h65536_a128_profile",
+      "timeline_run": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_01_h65536_a128_timeline",
+      "startup_run": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_01_h65536_a128_startup",
+      "validation_receipt_sha256": "ccb181617205be1f691eb9ec691d43f9441d7c48eda550b36c938c75e32dc98b"
+    },
+    {
+      "prefix_tokens": 65536,
+      "extend_tokens": 256,
+      "pool_tokens": 65792,
+      "host_tokens": 65792,
+      "check_run_id": "deepseek_shape_matrix_20261007_01_h65536_a256_check",
+      "bench_run_id": "deepseek_shape_matrix_20261007_01_h65536_a256_bench",
+      "profile_run_id": "deepseek_shape_matrix_20261007_01_h65536_a256_profile",
+      "timeline_run_id": "deepseek_shape_matrix_20261007_01_h65536_a256_timeline",
+      "startup_run_id": "deepseek_shape_matrix_20261007_01_h65536_a256_startup",
+      "check_run": "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_shape_matrix_20261007_01_h65536_a256_check",
+      "bench_run": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_01_h65536_a256_bench",
+      "profile_run": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_01_h65536_a256_profile",
+      "timeline_run": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_01_h65536_a256_timeline",
+      "startup_run": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_01_h65536_a256_startup",
+      "validation_receipt_sha256": "df28a5027563894973cdbf6bb6f2a7527042c8bc9aee03c78eb5dbdc873e94cb"
+    },
+    {
+      "prefix_tokens": 65536,
+      "extend_tokens": 512,
+      "pool_tokens": 66048,
+      "host_tokens": 66048,
+      "check_run_id": "deepseek_shape_matrix_20261007_01_h65536_a512_check",
+      "bench_run_id": "deepseek_shape_matrix_20261007_01_h65536_a512_bench",
+      "profile_run_id": "deepseek_shape_matrix_20261007_01_h65536_a512_profile",
+      "timeline_run_id": "deepseek_shape_matrix_20261007_01_h65536_a512_timeline",
+      "startup_run_id": "deepseek_shape_matrix_20261007_01_h65536_a512_startup",
+      "check_run": "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_shape_matrix_20261007_01_h65536_a512_check",
+      "bench_run": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_01_h65536_a512_bench",
+      "profile_run": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_01_h65536_a512_profile",
+      "timeline_run": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_01_h65536_a512_timeline",
+      "startup_run": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_01_h65536_a512_startup",
+      "validation_receipt_sha256": "4b98a65579a71fd30415b938f16c81eca251230c607de2e275ec2f6bfe02e769"
+    },
+    {
+      "prefix_tokens": 65536,
+      "extend_tokens": 1024,
+      "pool_tokens": 66560,
+      "host_tokens": 66560,
+      "check_run_id": "deepseek_shape_matrix_20261007_01_h65536_a1024_check",
+      "bench_run_id": "deepseek_shape_matrix_20261007_01_h65536_a1024_bench",
+      "profile_run_id": "deepseek_shape_matrix_20261007_01_h65536_a1024_profile",
+      "timeline_run_id": "deepseek_shape_matrix_20261007_01_h65536_a1024_timeline",
+      "startup_run_id": "deepseek_shape_matrix_20261007_01_h65536_a1024_startup",
+      "check_run": "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_shape_matrix_20261007_01_h65536_a1024_check",
+      "bench_run": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_01_h65536_a1024_bench",
+      "profile_run": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_01_h65536_a1024_profile",
+      "timeline_run": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_01_h65536_a1024_timeline",
+      "startup_run": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_01_h65536_a1024_startup",
+      "validation_receipt_sha256": "50ca9e6b5244f59e02b60b5d6b1bab264440811ee8960ea3a930319c0ab19d24"
+    }
+  ]
+}

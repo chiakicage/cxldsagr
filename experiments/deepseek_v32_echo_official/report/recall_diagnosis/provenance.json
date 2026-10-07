@@ -1,0 +1,108 @@
+{
+  "schema": "official-echo-recall-diagnosis-provenance-v1",
+  "run_id": "recall_diagnosis_20261007_03",
+  "files": {
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/3rdparty/ECHO/sglang/python/sglang/srt/mem_cache/recall_ops.py": {
+      "sha256": "acccb812e162141a7c483a304aa82e14d4dd6b808c9e3d82d8bbd6dc693fbfee",
+      "bytes": 24073
+    },
+    "experiments/deepseek_v32_echo_official/src/recall_zero_miss.py": {
+      "sha256": "f61374ce977f203f3ce85eb12ce07504b659cc751bec120fc28a64f020efb4a8",
+      "bytes": 5963
+    },
+    "experiments/deepseek_v32_echo_official/output/data/recall_zero_miss_check_20261007_01/check.json": {
+      "sha256": "b045faefed0413665bb687bf5daf35fade76b731ab3b75c14a66e07a88c0b70a",
+      "bytes": 1193
+    },
+    "experiments/deepseek_v32_echo_official/output/data/recall_zero_miss_bench_20261007_01/bench.json": {
+      "sha256": "de2658b88a2e08f8b795e71f3f1a6b08d1aa5c3e616b025ecb82e6260ed77008",
+      "bytes": 3218
+    },
+    "experiments/deepseek_v32_echo_official/output/profile/first3_engine_warm_echo_profile_20261006_01/engine_pair.sqlite": {
+      "sha256": "fcc48e1df702425f16acc3ecabbbc7597b8c05e06f0c9eaff010b78760c5870f",
+      "bytes": 5931008
+    },
+    "experiments/deepseek_v32_echo_official/output/data/first3_engine_warm_echo_profile_20261006_01/profile/jit_artifacts.json": {
+      "sha256": "73970c3b896a0d3500faa46df8a5be2d207bc70cab78e1b1d048c52e1c3bf93b",
+      "bytes": 163478
+    },
+    "experiments/deepseek_v32_echo_official/report/sglang_engine/selected_activities.csv": {
+      "sha256": "d6343c1d2a939878e61aafe2ab83f62b66f13bd6d7ad4797148e96df0abafe56",
+      "bytes": 521043
+    },
+    "experiments/deepseek_v32_mfu/report/full_extend_graph/audit/timeline_actual_io.csv": {
+      "sha256": "1a419a744de4f02a8350c21a3ff9e610df313ed81b6c5e0a55574ed471a1a6d8",
+      "bytes": 19835
+    },
+    "experiments/deepseek_v32_echo_official/output/profile/recall_zero_miss_ncu_20261007_01/full.ncu-rep": {
+      "sha256": "ca210aa1263043483685c50b120ff6ff02b4f3481643988dce7d17cf51e8d727",
+      "bytes": 30304583
+    },
+    "experiments/deepseek_v32_echo_official/output/profile/recall_zero_miss_ncu_20261007_01/source.ncu-rep": {
+      "sha256": "3eaa895a8836a867ef32bd7fd5a7dc70a9e6ddedb5226ecec636ef22d03b5f48",
+      "bytes": 108888
+    },
+    "experiments/deepseek_v32_echo_official/output/data/recall_diagnosis_20261007_03/bench.json": {
+      "sha256": "de2658b88a2e08f8b795e71f3f1a6b08d1aa5c3e616b025ecb82e6260ed77008",
+      "bytes": 3218
+    },
+    "experiments/deepseek_v32_echo_official/output/data/recall_diagnosis_20261007_03/check.json": {
+      "sha256": "b045faefed0413665bb687bf5daf35fade76b731ab3b75c14a66e07a88c0b70a",
+      "bytes": 1193
+    },
+    "experiments/deepseek_v32_echo_official/output/data/recall_diagnosis_20261007_03/full_metrics_all.json": {
+      "sha256": "7af5ff09f58a7ff92220f2468f3960bde9679761eb6a87aee3ba7584adbc4ae4",
+      "bytes": 322298
+    },
+    "experiments/deepseek_v32_echo_official/output/data/recall_diagnosis_20261007_03/full_rules.json": {
+      "sha256": "9ec64958bae5315e0755b32ab48600aa8b467e21e6175252953fc52cad6701d9",
+      "bytes": 5777
+    },
+    "experiments/deepseek_v32_echo_official/output/data/recall_diagnosis_20261007_03/pm_sampling.json": {
+      "sha256": "c46d48f3b6e443d630777e05e1b46a069fab682f6ba9efed987a253558ef66a0",
+      "bytes": 300132
+    },
+    "experiments/deepseek_v32_echo_official/output/data/recall_diagnosis_20261007_03/source_metrics_all.json": {
+      "sha256": "7df76ce12e021da0a0dc26cdb3349b93daef6012e4dcb501430419a18dc69f06",
+      "bytes": 40005
+    },
+    "experiments/deepseek_v32_echo_official/output/data/recall_diagnosis_20261007_03/source_rules.json": {
+      "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+      "bytes": 3
+    },
+    "experiments/deepseek_v32_echo_official/output/data/recall_diagnosis_20261007_03/source_stalls_by_line.json": {
+      "sha256": "f21c1b3bb1060b9d69077904c6123dc35ecf906778f2f4ea660d1ac51fcd007a",
+      "bytes": 6281
+    },
+    "experiments/deepseek_v32_echo_official/output/data/recall_diagnosis_20261007_03/summary.json": {
+      "sha256": "4d3a00fc39e1d4cdec450a7f081580bec7980a2bc6226f8a0a000ba2a1093585",
+      "bytes": 11081
+    },
+    "experiments/deepseek_v32_echo_official/output/data/recall_diagnosis_20261007_03/ncu_metrics.csv": {
+      "sha256": "2ac993a036b818f6d9e8dab919244150595b865f40a7bf55c21a486a66255c22",
+      "bytes": 735
+    },
+    "experiments/deepseek_v32_echo_official/output/data/recall_diagnosis_20261007_03/zero_miss.csv": {
+      "sha256": "ae0c406d4cf0d87af88a70656a40ab74143b21b83b1b57df8cd9673575988aa9",
+      "bytes": 192
+    }
+  },
+  "ncu_version": "2026.1.1",
+  "ncu_full_flags": "--set full --section PmSampling --section PmSampling_WarpStates -k regex:_recall_update_extend_kernel -c 1",
+  "ncu_source_flags": "--set source --section SourceCounters -k regex:_recall_update_extend_kernel -c 1",
+  "cpu_affinity": "72-79",
+  "numa_node": 1,
+  "gpu": 7,
+  "actual_host_pool_capacity": 16777216,
+  "zero_miss_small_pool_points": "Synthetic scan bounds only; not equal-capacity serving optimizations.",
+  "jit_cubins": {
+    "experiments/deepseek_v32_echo_official/output/runtime/cache/triton/3FKZY6SB4SOZPGBWAY3M67RFTCQXHBRXXN66T6GVVJE24VWKDD4Q/_recall_update_extend_kernel.cubin": "54389c69a31618c937e6a1f666a2486403c4b5d561ca683d8ec6b07089f7ea44",
+    "experiments/deepseek_v32_echo_official/output/runtime/cache/triton/M7UIIAZ2ZF2YKOTDCC6JYHYAJ3WQSZJI5AJAXCP2ND2VYGPLE6BA/_recall_update_extend_kernel.cubin": "54389c69a31618c937e6a1f666a2486403c4b5d561ca683d8ec6b07089f7ea44",
+    "experiments/deepseek_v32_echo_official/output/runtime/cache/triton/MDPK6CBKLSX3C35PNEO3R7PKZMTW64N2O7C6G5GAQVPUS5VSG35Q/_recall_update_extend_kernel.cubin": "1fa1a44e392776724074ce47ceff9e747fd41879d038bc7c614e2c38dad8eabe",
+    "experiments/deepseek_v32_echo_official/output/runtime/cache/triton/NI65DER2VK4Y7FYQWESW4JHZFWSFZJFDYF4RKR7M6OMMEL3SUMWQ/_recall_update_extend_kernel.cubin": "a55f988e2faed677843b5d1232d9cac09c2a0d0f97ef6d71072cbd205ef0ae0c",
+    "experiments/deepseek_v32_echo_official/output/runtime/cache/triton/RXO426XRNCXLMCKZMK34CMAIWKXJOWTXX7QBWWXDUGMKA7YBU45Q/_recall_update_extend_kernel.cubin": "54389c69a31618c937e6a1f666a2486403c4b5d561ca683d8ec6b07089f7ea44"
+  },
+  "official_and_zero_miss_16M_cubin_sha256": "54389c69a31618c937e6a1f666a2486403c4b5d561ca683d8ec6b07089f7ea44",
+  "compiled_scope_audit": "Only 64K and 1M variants were newly compiled. Their PTX differs from the existing 16M PTX only in the host index bound immediate. The 16M cubin is unchanged.",
+  "analysis_note": "Source-only NCU set does not collect all full-set metrics; each CSV row names the report that actually collected it."
+}

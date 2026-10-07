@@ -22,8 +22,8 @@ kernel。每个 offload query batch 必须先补齐其精确选择，模型在�
 
 融合 indexer 在依赖 scale 的 logits 写出后归还共享 KV stage，防止 TMA 提前覆盖
 仍在读取的 scale。原 Q1024/N66560 的间歇分数差异已通过该释放顺序修正；固定输入
-连续 64 轮完整分数逐位验收通过，生产回归也覆盖了同一复用过程。性能仍待正式补测，
-当前报告不能作为这项修正后的性能数据。
+连续 64 轮完整分数逐位验收通过，生产回归也覆盖了同一复用过程。修正后的 C10
+模型级正式计时见下文；这些数值检查不替代 kernel 的独立性能测量。
 
 主 KV record 是 512 个 BF16 latent 加 64 个 BF16 RoPE key，1152 B/token；indexer
 FP8 K 与 FP32 scale 常驻 GPU。MLA 的 selection 在所有 attention heads 间共享；
@@ -41,11 +41,12 @@ dense / grouped 路径调用官方公共 API。适配层的 padding、
 route packing、scale layout 转换和 inverse mapping 均计入算子时间。
 CPU FP32 oracle 独立实现，不依赖 DeepGEMM。
 量化路径已通过生产接口、实际 checkpoint MLP 和四方案 H64K 数值验收。
-当前 C10 本地完整请求验收为 `refactor_final_deepseek_check_20261005_01`，
-96 组 offload/HBM 输出逐位一致。三次本地正式计时及旧/P0/当前版本对照已完成，
-仍观察到部分 candidate、复访和公共请求阶段的延迟增加；profile 与最终发布状态见
-[motivation](../../experiments/deepseek_v32_motivation/README.md)。这些是模型级路径
-证据，不能替代某个 kernel 的独立性能测量或证明完整 61 层性能。
+当前 C10 批次 `deepseek_motivation_matrix_20261007_01` 已完成三档 H、四档 A 的
+12 点独立验收，1,152 组 offload/HBM 输出逐字节一致。修正后的 ECHO、dense DMA
+与 v4 局部计算图已完成每点四方案各 32 请求的正式计时；结果及测量边界见
+[motivation](../../experiments/deepseek_v32_motivation/README.md)。本轮没有新采集
+profile，保留的 profile 只匹配旧 H65536/A128 单点。这些是模型级路径证据，
+不能替代某个 kernel 的独立性能测量或证明完整 61 层性能。
 
 单元测试随 indexer、linear 和三种 attention 实现存放；通用搬运测试在
 `operators/common/tests/`。从仓库根目录运行全局 CPU 或 Hopper GPU 回归：

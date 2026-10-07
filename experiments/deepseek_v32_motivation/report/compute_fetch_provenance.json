@@ -1,0 +1,49 @@
+{
+  "schema": "deepseek-c10-compute-fetch-schematic-v1",
+  "run_id": "deepseek_motivation_compute_fetch_20261007_03",
+  "created_utc": "2026-10-07T11:44:21.086379+00:00",
+  "kind": "qualitative implementation schematic",
+  "schemes": [
+    "echo",
+    "serial_sparse",
+    "dense_prefetch"
+  ],
+  "source_sha256": {
+    "models/deepseek_v32/attention.py": "929e7afcc0b3c9abdddce464aca23a0c1a50dc19e656275bdf5031fd4dc4fc7b",
+    "models/deepseek_v32/execution/pipeline.py": "00b74fabd619c5b052629b348fb11fa933761389ebf9aa1daf59166406cdaf9c",
+    "models/deepseek_v32/execution/adapter.py": "bd20895dca304db0923f1489ed093094f3d199574112035e4745d518d20e4989",
+    "models/deepseek_v32/cache/prefetch.py": "0f2e77294c7024df9c4d0709b9fc99ccee38b2d44da82712565a68c924794f95",
+    "cache/sparse_token_cache.py": "1b3da2acfe5dc22c403b5794d6aedcebd1daaccaa9e82e54741fb0afd69c3cdf",
+    "operators/deepseek_v32/indexer/csrc/echo_logits.cuh": "562b10fbca2082948fef14a1ac1c40b8918e1c2c81717a965cad040f5293e61f",
+    "operators/deepseek_v32/indexer/csrc/echo_cache.cuh": "409be4a062180a8c8e73c1fa783d3980cf3e9926bf53ef34ddbaefe46e2dcd12",
+    "experiments/deepseek_v32_motivation/src/draw_compute_fetch.py": "c301bde85756deb4ef66074c25a1a8e569f0115bbc868ebe5e3ca49178a1e2b2"
+  },
+  "artifacts_sha256": {
+    "compute_fetch_schematic.pdf": "b4d0fce3a8105ae264968499fdeb57a5fb50ec1ce06e49cf88c3ffefe9d207bb",
+    "compute_fetch_schematic.png": "e5d57ec32565fa9020ca66eb50b23708928f146fa38a98786fad189cd7e52176",
+    "compute_fetch_schematic.svg": "3574290ab83d619b57409628526e5469803daf7935e17aecf8321da513303532"
+  },
+  "boundary": "C10 fixed-P/NH candidate path with history misses and H<=P; no timing data, new measurements or performance claims. ECHO and serial fetch use SM host reads; only dense has an independent DMA stream. Dense waits before each whole layer, not the separate real-three-layer late-wait graph schedule.",
+  "source_base": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_compute_fetch_20261007_03/source",
+  "artifacts_base": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_compute_fetch_20261007_03",
+  "render_record": {
+    "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_compute_fetch_20261007_03/provenance.json",
+    "sha256": "5f36b1d6731bb52e235367f5f0b27d6815cb020c832185bb6730980800e586d8"
+  },
+  "parent_publication": {
+    "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_compute_fetch_20261007_03/parent_publication/publication_manifest.json",
+    "sha256": "9f19d0258a06a53160ad1f072917701168b567b83d773febcb0e172fd8fe4229"
+  },
+  "command": [
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/bin/python",
+    "-m",
+    "experiments.deepseek_v32_motivation.src.draw_compute_fetch",
+    "--output-dir",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_compute_fetch_20261007_03"
+  ],
+  "review": {
+    "semantics": "C10 wait/launch order, exact selection and residual recall checked against implementation sources.",
+    "visual": "PNG, SVG structure and one-page PDF checked; no measured time axis or proportional timing claim.",
+    "boundary": "Source and visual review only; not a new GPU experiment or profile."
+  }
+}

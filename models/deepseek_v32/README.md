@@ -2,8 +2,9 @@
 
 真实前三层支持四种 cache 实现和显式准备的完整 extend CUDA Graph；独立验收、
 正式计时与 profile 的当前状态见[四方案 MFU 实验](../../experiments/deepseek_v32_mfu/README.md)。
-十 block C10 GR 工作负载仍为 A=128，DMA 版本已完成独立 check 和正式 bench；
-profile 按用户要求暂缓。下文保留的 motivation profile 仍对应 mapped-host 实现。
+十 block C10 GR 工作负载已完成固定 P/NH 的 12 点四方案独立 check 和正式 bench，见
+[motivation 实验](../../experiments/deepseek_v32_motivation/README.md)。本轮没有新采集
+profile；保留的 profile 只对应旧 H65536/A128 单点。
 固定历史的临时候选语义与前三层 MFU 的持久追加分开验收。
 
 独立 SM90 checkpoint 推理实现，支持 ECHO prefill/extend。完整结构包含 61 层、
@@ -137,8 +138,8 @@ extend 图的独立数值验收、正式计时和 profile 分别记录在
 以该页的实现版本、输入、计时边界和来源为准。完整图的准备及 prefix 恢复不计入
 执行时间；完整请求时延、三层窗口、逐算子 MFU 和局部 IO 重叠分别解释。
 
-C10 已完成 DMA check、正式 bench 和请求内存观测，
-其 profile 按用户要求暂缓；前三层结果不能替代 C10 验收。
+C10 已完成 12 点四方案的独立 check、正式 bench 和请求内存观测，本轮未采集
+profile；前三层结果与 C10 验收分别报告。
 十 block GR 工作负载的固定 P/NH 容量检查见
 [统一 cache management 实验](../../experiments/cache_management/README.md)。
 原有 DeepSeek / SM120 实验的有效历史结果保存在
@@ -150,10 +151,10 @@ C10 已完成 DMA check、正式 bench 和请求内存观测，
 ## 单卡 GR Serving 工作负载
 
 共享 ECHO cache 与模型级 chunk 调度已接入。固定 P/NH 的静态规划、实际分配和
-完整请求验收分别报告。十 block 本地四方案已完成 H65,536/A128、16 用户两轮的
-DMA check 和正式 bench；profile 按用户要求暂缓。以下保留的 motivation 报告
-及 profile 仍对应原 mapped-host gather 实现。这些运行没有
-填满 NH，也不能代表任意用户数或 H/A 配置。容量范围与可核验结果见
+完整请求验收分别报告。用于 cache management 的十 block 本地四方案观测仍为
+H65,536/A128、16 用户两轮的 DMA check、正式 bench 和请求内存数据，来源 run ID 为
+`deepseek_dma_c10_bench_20261006_01`。这些运行没有填满 NH，也不能代表任意用户数
+或 H/A 配置。容量范围与可核验结果见
 [统一 cache management 实验](../../experiments/cache_management/README.md)。
 旧 4 GiB / W / chunk 对照已撤回，不再据此指定默认 chunk 或给出性能排名。
 
@@ -182,23 +183,19 @@ pool/arena 容量执行，并记录物理显存和 DRAM 占用；cache 统计仍
 传入；GR 入口与当前实验使用十个物理 block。执行时把 session 的 attention runner 和
 chunk 大小作为参数传给 block，模型不再临时挂载用户 attention/cache。
 数值验收、正式计时和诊断 profile 使用独立入口；
-报告中的 run ID、源码和测量边界共同标识结果。保留报告的独立验收、正式计时和
-profile 分别为 `deepseek_mfu_c10_check_20261006_01`、
-`deepseek_mfu_c10_bench_20261006_01` 和 `deepseek_mfu_c10_profile_20261006_02`。
-旧正式计时包含四方案各 32 个请求。新的 DMA 独立 check
-`deepseek_dma_c10_check_20261006_01` 和正式轨迹
-`deepseek_dma_c10_bench_20261006_01` 已完成，其请求内存数据已纳入统一 cache
-management 报告；C10 DMA profile 按用户要求暂缓。
-本地结果入口见
-[motivation](../../experiments/deepseek_v32_motivation/README.md)和
-[统一 cache management](../../experiments/cache_management/README.md)。
+报告中的 run ID、源码和测量边界共同标识结果。当前批次为
+`deepseek_motivation_matrix_20261007_01`，固定 P=65,536、NH=16,777,216，覆盖
+H∈{4096,16384,65536}、A∈{128,256,512,1024} 的 12 个点。每点四方案各执行
+32 个请求，使用 v4 局部计算图；逐点配对的独立 check、正式 bench 及验收依据见
+[motivation 实验](../../experiments/deepseek_v32_motivation/README.md)。原
+`deepseek_dma_c10_bench_20261006_01` 仍作为统一 cache management 报告的独立
+内存来源保留，不用其旧计时代表本轮结果。
+容量与内存说明见[统一 cache management](../../experiments/cache_management/README.md)。
 
-保留的旧 C10 复访 profile 中，dense 的 L2 完整 mapped-host gather 为 1.837602 ms，其中
-1.097090 ms 与 L1 的 compute kernel 相交，占 59.70%。单层总览按 L1 窗口裁切，
-详细图保留 L2 gather 的完整尾部；D2D 与 L1 自身的 gather tail 不计入这项重叠。
-正式计时的 dense 复访请求均值为 25.462 ms，ECHO 为 23.520 ms，serial sparse
-为 17.188 ms。局部重叠尚未使 dense 快于两个 sparse 方案；单次 trace 与单条
-正式轨迹不证明性能差异稳定，也不能作为真实 GR 任务质量的证据。
+本轮矩阵没有新采集 profile。保留的 `deepseek_motivation_rerun_profile_20261006_01`
+只匹配旧 H65536/A128 单点 `deepseek_motivation_rerun_bench_20261006_01`；
+局部 DMA/计算重叠的适用范围见 motivation 报告。该 profile 不代表新矩阵，
+每点的一轮请求轨迹也不证明稳定性能排序或真实 GR 任务质量。
 
 GR 的 `echo/serial_sparse` 在 session 计划中将保留容量设为 H，
 host pages 与私有 history indexer 都按 H 保留；`extend_candidate` 使用 backend
@@ -238,9 +235,9 @@ host records、映射和 indexer 状态。一次完整 prefill/extend 借用双�
 runner 从构造到 close 绑定唯一准入 owner；其关闭只释放 session，最外层再关闭
 backend。以上 C10 容量、临时候选和输入重放边界与真实前三层 MFU 分别报告。
 
-C10 DMA 本地验收 `deepseek_dma_c10_check_20261006_01` 保存 128 份完整候选输出，
-96 组 offload/HBM 对照逐位一致。模型测试与这些数值 check 不替代固定 P/NH
-容量实验、正式计时或未运行的配置。
+C10 矩阵的 12 份独立 check 共保存 1,536 份完整候选 hidden/logits，
+1,152 组 offload/HBM 对照逐字节一致；逐点记录见 motivation 报告的验收索引。
+模型测试与这些数值 check 不替代固定 P/NH 容量填满实验、正式计时或未运行的配置。
 
 `sparse_pool_tokens` 配置 backend 每层共享容量，`host_arena_tokens` 配置全局 host
 容量；原 per-session `slots` 参数已移除。固定 P/NH 模式按实际 prefill chunk 与

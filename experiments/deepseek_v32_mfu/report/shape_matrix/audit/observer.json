@@ -1,0 +1,102 @@
+{
+  "schema": "deepseek-mfu-batch-observations-v1",
+  "selected_gpu_index": "0",
+  "selected_gpu_uuid": "GPU-1bdee8b4-22ac-536c-208b-bfb4ed38b878",
+  "completed_shape_count": 12,
+  "samples": 864,
+  "foreign_selected_gpu_process_observations": [
+    {
+      "batch": "deepseek_shape_matrix_20261007_02",
+      "time_utc": "2026-10-06T16:51:43.455247+00:00",
+      "gpu_uuid": "GPU-1bdee8b4-22ac-536c-208b-bfb4ed38b878",
+      "pid": "870383",
+      "used_gpu_memory": "8818",
+      "ancestry": [
+        870383
+      ],
+      "owned": false
+    }
+  ],
+  "other_gpu_uuids_with_process_observations": [
+    "GPU-80ff95c3-176e-fd8a-728f-9c5577c4a779"
+  ],
+  "maximum_sample_gap_seconds_within_batches": 30.31935904896818,
+  "batches": [
+    {
+      "run_id": "deepseek_shape_matrix_20261007_01",
+      "exit_code": 1,
+      "selected_gpu_index": "0",
+      "selected_gpu_uuid": "GPU-1bdee8b4-22ac-536c-208b-bfb4ed38b878",
+      "samples": 450,
+      "foreign_selected_gpu_process_observations": [],
+      "other_gpu_uuids_with_process_observations": [
+        "GPU-80ff95c3-176e-fd8a-728f-9c5577c4a779"
+      ],
+      "maximum_sample_gap_seconds": 30.085139355971478,
+      "boundary": "Discrete GPU/process observations; other GPUs may run concurrently. CPU and memory bandwidth are not isolated, and activity between samples is unobserved.",
+      "source_path": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_complete_20261007_01/batches/deepseek_shape_matrix_20261007_01/observer/summary.json",
+      "source_sha256": "a4f3c161bd3bda0502a21a2f00bcdb8b533f992f755180ac424fa29b637a7c43",
+      "raw_observations_sha256": "4f2dd2c7969a7bc94ad210b0585db31edac8f49be15877a81d1032baf6fe7440"
+    },
+    {
+      "run_id": "deepseek_shape_matrix_20261007_02",
+      "exit_code": 1,
+      "selected_gpu_index": "0",
+      "selected_gpu_uuid": "GPU-1bdee8b4-22ac-536c-208b-bfb4ed38b878",
+      "samples": 65,
+      "foreign_selected_gpu_process_observations": [
+        {
+          "time_utc": "2026-10-06T16:51:43.455247+00:00",
+          "gpu_uuid": "GPU-1bdee8b4-22ac-536c-208b-bfb4ed38b878",
+          "pid": "870383",
+          "used_gpu_memory": "8818",
+          "ancestry": [
+            870383
+          ],
+          "owned": false
+        }
+      ],
+      "other_gpu_uuids_with_process_observations": [
+        "GPU-80ff95c3-176e-fd8a-728f-9c5577c4a779"
+      ],
+      "maximum_sample_gap_seconds": 30.31935904896818,
+      "boundary": "Discrete GPU/process observations; other GPUs may run concurrently. CPU and memory bandwidth are not isolated, and activity between samples is unobserved.",
+      "source_path": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_complete_20261007_01/batches/deepseek_shape_matrix_20261007_02/observer/summary.json",
+      "source_sha256": "25549df52a88f2466bf22481a683b05be5ea1ab07acc2b71534afd04d6e0525c",
+      "raw_observations_sha256": "ec7b66f338c44a085b81f7455381722b0a0dbc056c9ea3828e7087a486002f92"
+    },
+    {
+      "run_id": "deepseek_shape_matrix_20261007_03",
+      "exit_code": 0,
+      "selected_gpu_index": "0",
+      "selected_gpu_uuid": "GPU-1bdee8b4-22ac-536c-208b-bfb4ed38b878",
+      "samples": 121,
+      "foreign_selected_gpu_process_observations": [],
+      "other_gpu_uuids_with_process_observations": [
+        "GPU-80ff95c3-176e-fd8a-728f-9c5577c4a779"
+      ],
+      "maximum_sample_gap_seconds": 29.723761294968426,
+      "boundary": "Discrete GPU/process observations; other GPUs may run concurrently. CPU and memory bandwidth are not isolated, and activity between samples is unobserved.",
+      "source_path": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_complete_20261007_01/batches/deepseek_shape_matrix_20261007_03/observer/summary.json",
+      "source_sha256": "ae5af5f1bd85508337a2e7dd683793c71f6e279811b672f7ee36167307f5e143",
+      "raw_observations_sha256": "629ec6dd7a2a4e97cc060cf54c76f2fd981a96fd403334fb18514b4a86b320dd"
+    },
+    {
+      "run_id": "deepseek_shape_matrix_20261007_04",
+      "exit_code": 0,
+      "selected_gpu_index": "0",
+      "selected_gpu_uuid": "GPU-1bdee8b4-22ac-536c-208b-bfb4ed38b878",
+      "samples": 228,
+      "foreign_selected_gpu_process_observations": [],
+      "other_gpu_uuids_with_process_observations": [
+        "GPU-80ff95c3-176e-fd8a-728f-9c5577c4a779"
+      ],
+      "maximum_sample_gap_seconds": 29.845485475030728,
+      "boundary": "Discrete GPU/process observations; other GPUs may run concurrently. CPU and memory bandwidth are not isolated, and activity between samples is unobserved.",
+      "source_path": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_complete_20261007_01/batches/deepseek_shape_matrix_20261007_04/observer/summary.json",
+      "source_sha256": "3ecf55bb608a5069fe7f26791b3d97a33520085c73053c9baabb92bd17c0e347",
+      "raw_observations_sha256": "13659bcd8e6564c44071cb24826865fed3bb5113a3a0266e13aaded0009f33f3"
+    }
+  ],
+  "boundary": "Discrete observations within four separate batches, with unobserved time between batches and samples. The first two commands ended during hardware preflight after five and one successful shapes; only successful checked children enter the matrix. One second-batch process observation lacks a live ancestry and retains its raw owned=false flag; the same PID was owned in preceding observations. This is consistent with a process-exit race but not proof of continuous process ownership. Other GPUs ran concurrently; CPU and DRAM bandwidth were not isolated. No machine-fault or driver-stall root cause is inferred."
+}

@@ -1,0 +1,368 @@
+{
+  "source_run_id": "deepseek_shape_matrix_complete_20261007_01",
+  "batch_shape_counts": [
+    5,
+    1,
+    2,
+    4
+  ],
+  "shape_count": 12,
+  "methods": [
+    "hbm",
+    "echo",
+    "serial_sparse",
+    "dense_prefetch"
+  ],
+  "sample_counts": {
+    "prefill": 144,
+    "extend": 240
+  },
+  "aggregates": [
+    {
+      "phase": "prefill",
+      "method": "hbm",
+      "geomean_relative_hbm": 1.0,
+      "min_relative_hbm": 1.0,
+      "max_relative_hbm": 1.0,
+      "median_case_cv_percent": 1.4817778901670353,
+      "max_case_cv_percent": 33.84334815671214,
+      "first_sample_maximum_cases": 4
+    },
+    {
+      "phase": "prefill",
+      "method": "echo",
+      "geomean_relative_hbm": 1.0142431163607901,
+      "min_relative_hbm": 0.9851162581271237,
+      "max_relative_hbm": 1.0550281990038792,
+      "median_case_cv_percent": 1.4034262621635392,
+      "max_case_cv_percent": 5.704716264708107,
+      "first_sample_maximum_cases": 3
+    },
+    {
+      "phase": "prefill",
+      "method": "serial_sparse",
+      "geomean_relative_hbm": 1.011757868295732,
+      "min_relative_hbm": 0.9881902993323307,
+      "max_relative_hbm": 1.04156834354491,
+      "median_case_cv_percent": 1.04992086401939,
+      "max_case_cv_percent": 61.85696417178012,
+      "first_sample_maximum_cases": 4
+    },
+    {
+      "phase": "prefill",
+      "method": "dense_prefetch",
+      "geomean_relative_hbm": 1.006302977513301,
+      "min_relative_hbm": 0.9887601076633544,
+      "max_relative_hbm": 1.033158469205964,
+      "median_case_cv_percent": 1.1633446639235547,
+      "max_case_cv_percent": 1.6770275919061748,
+      "first_sample_maximum_cases": 4
+    },
+    {
+      "phase": "extend",
+      "method": "hbm",
+      "geomean_relative_hbm": 1.0,
+      "min_relative_hbm": 1.0,
+      "max_relative_hbm": 1.0,
+      "median_case_cv_percent": 1.810647135275499,
+      "max_case_cv_percent": 4.17769311323368,
+      "first_sample_maximum_cases": 12
+    },
+    {
+      "phase": "extend",
+      "method": "echo",
+      "geomean_relative_hbm": 1.3800444956656635,
+      "min_relative_hbm": 1.1451169677332889,
+      "max_relative_hbm": 1.6976641479719436,
+      "median_case_cv_percent": 0.8016699408481378,
+      "max_case_cv_percent": 1.3094382306529384,
+      "first_sample_maximum_cases": 12
+    },
+    {
+      "phase": "extend",
+      "method": "serial_sparse",
+      "geomean_relative_hbm": 1.1937403584006245,
+      "min_relative_hbm": 1.0873000921083162,
+      "max_relative_hbm": 1.3314367017518505,
+      "median_case_cv_percent": 0.8947876567689718,
+      "max_case_cv_percent": 1.8187099415594523,
+      "first_sample_maximum_cases": 11
+    },
+    {
+      "phase": "extend",
+      "method": "dense_prefetch",
+      "geomean_relative_hbm": 1.1404086242788196,
+      "min_relative_hbm": 1.0151346658216134,
+      "max_relative_hbm": 1.7101810338692063,
+      "median_case_cv_percent": 0.9759800477626869,
+      "max_case_cv_percent": 1.5342737900211383,
+      "first_sample_maximum_cases": 12
+    }
+  ],
+  "extend_winner_counts": {
+    "hbm": 12
+  },
+  "offload_winner_counts": {
+    "dense_prefetch": 10,
+    "serial_sparse": 2
+  },
+  "echo_serial_h2d_equal_all_extend_samples": true,
+  "all_eviction_and_capacity_splits_zero": true,
+  "extend_first_sample_is_maximum_cases": 47,
+  "equal_shape_weighting": true,
+  "inferential_statistics": false,
+  "hardware": {
+    "schema_version": 1,
+    "checked_at_utc": "2026-10-06T17:10:36.836705+00:00",
+    "physical_device_selector": "0",
+    "cuda_visible_devices": "0",
+    "selector_semantics": "physical nvidia-smi index or UUID; CUDA_VISIBLE_DEVICES does not remap it",
+    "command": [
+      "nvidia-smi",
+      "--id=0",
+      "--query-gpu=index,name,uuid,pci.device_id,pci.bus_id,compute_cap,memory.total,clocks.max.sm,clocks.current.sm,power.limit,utilization.gpu,driver_version",
+      "--format=csv"
+    ],
+    "stdout": "index, name, uuid, pci.device_id, pci.bus_id, compute_cap, memory.total [MiB], clocks.max.sm [MHz], clocks.current.sm [MHz], power.limit [W], utilization.gpu [%], driver_version\n0, NVIDIA M403, GPU-1bdee8b4-22ac-536c-208b-bfb4ed38b878, 0x233510DE, 00000000:18:00.0, 9.0, 143771 MiB, 1980 MHz, 1980 MHz, 700.00 W, 0 %, 570.124.06\n",
+    "stderr": "",
+    "query_headers": [
+      "index",
+      "name",
+      "uuid",
+      "pci.device_id",
+      "pci.bus_id",
+      "compute_cap",
+      "memory.total [MiB]",
+      "clocks.max.sm [MHz]",
+      "clocks.current.sm [MHz]",
+      "power.limit [W]",
+      "utilization.gpu [%]",
+      "driver_version"
+    ],
+    "gpu": {
+      "index": "0",
+      "name": "NVIDIA M403",
+      "uuid": "GPU-1bdee8b4-22ac-536c-208b-bfb4ed38b878",
+      "pci.device_id": "0x233510DE",
+      "pci.bus_id": "00000000:18:00.0",
+      "compute_cap": "9.0",
+      "memory.total": "143771 MiB",
+      "clocks.max.sm": "1980 MHz",
+      "clocks.current.sm": "1980 MHz",
+      "power.limit": "700.00 W",
+      "utilization.gpu": "0 %",
+      "driver_version": "570.124.06"
+    },
+    "is_sm90": true,
+    "pci_identity": {
+      "vendor_id": "10de",
+      "device_id": "2335",
+      "database_path": "/usr/share/misc/pci.ids",
+      "matched_line": "\t2335  GH100 [H200 SXM 141GB]",
+      "database_sha256": "eaa7099ae3cfc8a58cf5f8dcd1aafd323e2ad9263908051aa2d1fbd722a0800b",
+      "database_version": "#\tVersion: 2024.03.31"
+    },
+    "hardware_source_sha256": "8f85448482c3c37d6f6dd70bb1d9bfd3152122ed601ad84338ed43de234ef2a0",
+    "h200_sxm_reference": {
+      "url": "https://www.nvidia.com/en-us/data-center/h200/",
+      "verified": true,
+      "http_status": 200,
+      "resolved_url": "https://www.nvidia.com/en-us/data-center/h200/",
+      "retrieved_at_utc": "2026-10-06T17:10:37.422726+00:00",
+      "response_sha256": "7f778459471dc83defedd36d12a73dbd9f55ac82acbfcf89be0cf80186a081b3",
+      "response_bytes": 281108,
+      "product_column": "H200 SXM¹",
+      "specification_table": [
+        [
+          "",
+          "H200 SXM¹",
+          "H200 NVL¹"
+        ],
+        [
+          "FP64",
+          "34 TFLOPS",
+          "30 TFLOPS"
+        ],
+        [
+          "FP64 Tensor Core",
+          "67 TFLOPS",
+          "60 TFLOPS"
+        ],
+        [
+          "FP32",
+          "67 TFLOPS",
+          "60 TFLOPS"
+        ],
+        [
+          "TF32 Tensor Core²",
+          "989 TFLOPS",
+          "835 TFLOPS"
+        ],
+        [
+          "BFLOAT16 Tensor Core²",
+          "1,979 TFLOPS",
+          "1,671 TFLOPS"
+        ],
+        [
+          "FP16 Tensor Core²",
+          "1,979 TFLOPS",
+          "1,671 TFLOPS"
+        ],
+        [
+          "FP8 Tensor Core²",
+          "3,958 TFLOPS",
+          "3,341 TFLOPS"
+        ],
+        [
+          "INT8 Tensor Core²",
+          "3,958 TFLOPS",
+          "3,341 TFLOPS"
+        ],
+        [
+          "GPU Memory",
+          "141GB",
+          "141GB"
+        ],
+        [
+          "GPU Memory Bandwidth",
+          "4.8TB/s",
+          "4.8TB/s"
+        ],
+        [
+          "Decoders",
+          "7 NVDEC 7 JPEG",
+          "7 NVDEC 7 JPEG"
+        ],
+        [
+          "Confidential Computing",
+          "Supported",
+          "Supported"
+        ],
+        [
+          "Max Thermal Design Power (TDP)",
+          "Up to 700W (configurable)",
+          "Up to 600W (configurable)"
+        ],
+        [
+          "Multi-Instance GPUs",
+          "Up to 7 MIGs @18GB each",
+          "Up to 7 MIGs @16.5GB each"
+        ],
+        [
+          "Form Factor",
+          "SXM",
+          "PCIe Dual-slot air-cooled"
+        ],
+        [
+          "Interconnect",
+          "NVIDIA NVLink™: 900GB/s PCIe Gen5: 128GB/s",
+          "2- or 4-way NVIDIA NVLink bridge: 900GB/s per GPU PCIe Gen5: 128GB/s"
+        ],
+        [
+          "Server Options",
+          "NVIDIA HGX™ H200 partner and NVIDIA-Certified Systems™ with 4 or 8 GPUs",
+          "NVIDIA MGX™ H200 NVL partner and NVIDIA-Certified Systems with up to 8 GPUs"
+        ],
+        [
+          "NVIDIA AI Enterprise",
+          "Add-on",
+          "Included"
+        ],
+        [
+          "1 Preliminary specifications. May be subject to change. 2 With sparsity."
+        ]
+      ],
+      "selected_rows": {
+        "BFLOAT16 Tensor Core": {
+          "label": "BFLOAT16 Tensor Core²",
+          "published_tflops": 1979.0
+        },
+        "FP8 Tensor Core": {
+          "label": "FP8 Tensor Core²",
+          "published_tflops": 3958.0
+        },
+        "FP32": {
+          "label": "FP32",
+          "published_tflops": 67.0
+        }
+      },
+      "sparsity_footnote": "2 With sparsity.",
+      "dense_peaks_tflops": {
+        "BF16": 989.5,
+        "FP8": 1979.0,
+        "FP32": 67.0
+      },
+      "conversion": "BF16 and FP8 published sparsity peaks divided by two; FP32 unchanged"
+    },
+    "h200_sxm_reference_matches_pci": true,
+    "torch_properties": "_CudaDeviceProperties(name='NVIDIA H200', major=9, minor=0, total_memory=143167MB, multi_processor_count=132, uuid=1bdee8b4-22ac-536c-208b-bfb4ed38b878, pci_bus_id=24, pci_device_id=0, pci_domain_id=0, L2_cache_size=60MB)",
+    "torch_device_uuid": "1bdee8b4-22ac-536c-208b-bfb4ed38b878"
+  },
+  "source_compatibility": {
+    "rule": "Exact source manifests, except one complete nvidia-smi subprocess timeout line of 20 or 120 seconds; no other byte changes",
+    "comparison_source_identity_sha256": "bc2e18e72d6aeb9190d815bc22d4002b5a1439c1af697b100c5b6ae3276232a2",
+    "original_source_identity_sha256": [
+      "bc2e18e72d6aeb9190d815bc22d4002b5a1439c1af697b100c5b6ae3276232a2",
+      "d79431b7890ffb64d45351d79da7aa4af471e7659348be4e16b25b143395df70"
+    ],
+    "hardware_probe_source": "experiments/deepseek_v32_mfu/src/profile_hardware.py",
+    "matrix_hardware_probe_deadline_differs": true,
+    "archived_or_current_hardware_probe_deadline_differs": true,
+    "hardware_probe_variants": [
+      {
+        "sha256": "5e527c1b4c7ee892afa93f2dc8fb4379eb3be332082212c0b46a86454a6c458b",
+        "nvidia_smi_timeout_seconds": 20,
+        "canonical_timeout20_sha256": "5e527c1b4c7ee892afa93f2dc8fb4379eb3be332082212c0b46a86454a6c458b",
+        "paths": [
+          "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_shape_matrix_20261007_02_h16384_a512_check/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_02_h16384_a512_bench/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_02_h16384_a512_profile/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_shape_matrix_20261007_01_h16384_a1024_check/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_01_h16384_a1024_bench/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_01_h16384_a1024_profile/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_shape_matrix_20261007_01_h65536_a128_check/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_01_h65536_a128_bench/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_01_h65536_a128_profile/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_shape_matrix_20261007_01_h65536_a256_check/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_01_h65536_a256_bench/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_01_h65536_a256_profile/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_shape_matrix_20261007_01_h65536_a512_check/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_01_h65536_a512_bench/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_01_h65536_a512_profile/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_shape_matrix_20261007_01_h65536_a1024_check/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_01_h65536_a1024_bench/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_01_h65536_a1024_profile/source/experiments/deepseek_v32_mfu/src/profile_hardware.py"
+        ]
+      },
+      {
+        "sha256": "8f85448482c3c37d6f6dd70bb1d9bfd3152122ed601ad84338ed43de234ef2a0",
+        "nvidia_smi_timeout_seconds": 120,
+        "canonical_timeout20_sha256": "5e527c1b4c7ee892afa93f2dc8fb4379eb3be332082212c0b46a86454a6c458b",
+        "paths": [
+          "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_shape_matrix_20261007_04_h4096_a128_check/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_04_h4096_a128_bench/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_04_h4096_a128_profile/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_shape_matrix_20261007_04_h4096_a256_check/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_04_h4096_a256_bench/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_04_h4096_a256_profile/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_shape_matrix_20261007_04_h4096_a512_check/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_04_h4096_a512_bench/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_04_h4096_a512_profile/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_shape_matrix_20261007_04_h4096_a1024_check/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_04_h4096_a1024_bench/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_04_h4096_a1024_profile/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_shape_matrix_20261007_03_h16384_a128_check/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_03_h16384_a128_bench/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_03_h16384_a128_profile/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_shape_matrix_20261007_03_h16384_a256_check/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_03_h16384_a256_bench/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_03_h16384_a256_profile/source/experiments/deepseek_v32_mfu/src/profile_hardware.py"
+        ]
+      }
+    ]
+  },
+  "observer_boundary": "Discrete observations within four separate batches, with unobserved time between batches and samples. The first two commands ended during hardware preflight after five and one successful shapes; only successful checked children enter the matrix. One second-batch process observation lacks a live ancestry and retains its raw owned=false flag; the same PID was owned in preceding observations. This is consistent with a process-exit race but not proof of continuous process ownership. Other GPUs ran concurrently; CPU and DRAM bandwidth were not isolated. No machine-fault or driver-stall root cause is inferred.",
+  "dataset_specific_narrative_premises_checked": true,
+  "statistics_run_id": "deepseek_shape_statistics_20261007_01"
+}

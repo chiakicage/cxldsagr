@@ -1,0 +1,853 @@
+{
+  "schema": "deepseek-v32-shape-matrix-report-v1",
+  "run_id": "deepseek_shape_matrix_complete_20261007_01",
+  "complete_requested_matrix": true,
+  "methods": [
+    "hbm",
+    "echo",
+    "serial_sparse",
+    "dense_prefetch"
+  ],
+  "configuration": {
+    "prefix_tokens": [
+      4096,
+      16384,
+      65536
+    ],
+    "extend_tokens": [
+      128,
+      256,
+      512,
+      1024
+    ],
+    "history_chunk_tokens": 1024,
+    "extend_chunk_tokens": "A",
+    "pool_tokens": "H+A",
+    "host_tokens": "H+A",
+    "extend_residency": "cold",
+    "extend_graph": true,
+    "startup_timeline": true,
+    "trace_warmups": 1
+  },
+  "execution_batches": [
+    {
+      "run_id": "deepseek_shape_matrix_20261007_01",
+      "completed_shape_count": 5,
+      "completed_shapes": [
+        [
+          65536,
+          1024
+        ],
+        [
+          65536,
+          512
+        ],
+        [
+          65536,
+          256
+        ],
+        [
+          65536,
+          128
+        ],
+        [
+          16384,
+          1024
+        ]
+      ],
+      "command_exit_code": 1,
+      "manifest_path": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_complete_20261007_01/batches/deepseek_shape_matrix_20261007_01/manifest.json",
+      "manifest_sha256": "f983d9aaf5d37c9129a0df06cb498c58ee3e0b8298949d51b2a65a3a2cfeb411",
+      "runner_invocation": [
+        "experiments/deepseek_v32_mfu/scripts/shape_matrix.sh",
+        "--prefix-tokens",
+        "65536,16384,4096",
+        "--extend-tokens",
+        "1024,512,256,128",
+        "--physical-device",
+        "0",
+        "--model",
+        "/preset-models"
+      ],
+      "observer_path": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_complete_20261007_01/batches/deepseek_shape_matrix_20261007_01/observer/summary.json",
+      "observer_sha256": "a4f3c161bd3bda0502a21a2f00bcdb8b533f992f755180ac424fa29b637a7c43",
+      "raw_observations_sha256": "4f2dd2c7969a7bc94ad210b0585db31edac8f49be15877a81d1032baf6fe7440",
+      "preflight_interruption": {
+        "stage": "before_model_loading",
+        "command": "nvidia-smi",
+        "timeout_seconds": 20,
+        "shape": [
+          16384,
+          512
+        ],
+        "diagnostic_directory": "/tmp/deepseek-echo-deepseek_shape_matrix_20261007_01_h16384_a512_check.OIydSM",
+        "cause": "Not established; no model execution or accepted measurement for the interrupted child."
+      }
+    },
+    {
+      "run_id": "deepseek_shape_matrix_20261007_02",
+      "completed_shape_count": 1,
+      "completed_shapes": [
+        [
+          16384,
+          512
+        ]
+      ],
+      "command_exit_code": 1,
+      "manifest_path": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_complete_20261007_01/batches/deepseek_shape_matrix_20261007_02/manifest.json",
+      "manifest_sha256": "d64093c1e47b824f8574703def2a2674dc95f4a997f17a5ba1d3aab78df79c7b",
+      "runner_invocation": [
+        "experiments/deepseek_v32_mfu/scripts/shape_matrix.sh",
+        "--prefix-tokens",
+        "16384",
+        "--extend-tokens",
+        "512,256,128",
+        "--physical-device",
+        "0",
+        "--model",
+        "/preset-models"
+      ],
+      "observer_path": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_complete_20261007_01/batches/deepseek_shape_matrix_20261007_02/observer/summary.json",
+      "observer_sha256": "25549df52a88f2466bf22481a683b05be5ea1ab07acc2b71534afd04d6e0525c",
+      "raw_observations_sha256": "ec7b66f338c44a085b81f7455381722b0a0dbc056c9ea3828e7087a486002f92",
+      "preflight_interruption": {
+        "stage": "before_model_loading",
+        "command": "nvidia-smi",
+        "timeout_seconds": 20,
+        "shape": [
+          16384,
+          256
+        ],
+        "diagnostic_directory": "/tmp/deepseek-echo-deepseek_shape_matrix_20261007_02_h16384_a256_check.nlCICR",
+        "cause": "Not established; no model execution or accepted measurement for the interrupted child."
+      }
+    },
+    {
+      "run_id": "deepseek_shape_matrix_20261007_03",
+      "completed_shape_count": 2,
+      "completed_shapes": [
+        [
+          16384,
+          256
+        ],
+        [
+          16384,
+          128
+        ]
+      ],
+      "command_exit_code": 0,
+      "manifest_path": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_complete_20261007_01/batches/deepseek_shape_matrix_20261007_03/manifest.json",
+      "manifest_sha256": "23d54dd86eb9dabb96bacd4290311cbe911dda4b92fe5794c6b9dde480d8a524",
+      "runner_invocation": [
+        "experiments/deepseek_v32_mfu/scripts/shape_matrix.sh",
+        "--prefix-tokens",
+        "16384",
+        "--extend-tokens",
+        "256,128",
+        "--physical-device",
+        "0",
+        "--model",
+        "/preset-models"
+      ],
+      "observer_path": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_complete_20261007_01/batches/deepseek_shape_matrix_20261007_03/observer/summary.json",
+      "observer_sha256": "ae5af5f1bd85508337a2e7dd683793c71f6e279811b672f7ee36167307f5e143",
+      "raw_observations_sha256": "629ec6dd7a2a4e97cc060cf54c76f2fd981a96fd403334fb18514b4a86b320dd"
+    },
+    {
+      "run_id": "deepseek_shape_matrix_20261007_04",
+      "completed_shape_count": 4,
+      "completed_shapes": [
+        [
+          4096,
+          1024
+        ],
+        [
+          4096,
+          512
+        ],
+        [
+          4096,
+          256
+        ],
+        [
+          4096,
+          128
+        ]
+      ],
+      "command_exit_code": 0,
+      "manifest_path": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_complete_20261007_01/batches/deepseek_shape_matrix_20261007_04/manifest.json",
+      "manifest_sha256": "faf3ac14f4fe6768aa95af1b5cc844fbdec9ea9f3f50dd68e88748f2f0c8a0ad",
+      "runner_invocation": [
+        "experiments/deepseek_v32_mfu/scripts/shape_matrix.sh",
+        "--prefix-tokens",
+        "4096",
+        "--extend-tokens",
+        "1024,512,256,128",
+        "--physical-device",
+        "0",
+        "--model",
+        "/preset-models"
+      ],
+      "observer_path": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_complete_20261007_01/batches/deepseek_shape_matrix_20261007_04/observer/summary.json",
+      "observer_sha256": "3ecf55bb608a5069fe7f26791b3d97a33520085c73053c9baabb92bd17c0e347",
+      "raw_observations_sha256": "13659bcd8e6564c44071cb24826865fed3bb5113a3a0266e13aaded0009f33f3"
+    }
+  ],
+  "source_compatibility": {
+    "rule": "Exact source manifests, except one complete nvidia-smi subprocess timeout line of 20 or 120 seconds; no other byte changes",
+    "comparison_source_identity_sha256": "bc2e18e72d6aeb9190d815bc22d4002b5a1439c1af697b100c5b6ae3276232a2",
+    "original_source_identity_sha256": [
+      "bc2e18e72d6aeb9190d815bc22d4002b5a1439c1af697b100c5b6ae3276232a2",
+      "d79431b7890ffb64d45351d79da7aa4af471e7659348be4e16b25b143395df70"
+    ],
+    "hardware_probe_source": "experiments/deepseek_v32_mfu/src/profile_hardware.py",
+    "matrix_hardware_probe_deadline_differs": true,
+    "archived_or_current_hardware_probe_deadline_differs": true,
+    "hardware_probe_variants": [
+      {
+        "sha256": "5e527c1b4c7ee892afa93f2dc8fb4379eb3be332082212c0b46a86454a6c458b",
+        "nvidia_smi_timeout_seconds": 20,
+        "canonical_timeout20_sha256": "5e527c1b4c7ee892afa93f2dc8fb4379eb3be332082212c0b46a86454a6c458b",
+        "paths": [
+          "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_shape_matrix_20261007_02_h16384_a512_check/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_02_h16384_a512_bench/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_02_h16384_a512_profile/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_shape_matrix_20261007_01_h16384_a1024_check/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_01_h16384_a1024_bench/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_01_h16384_a1024_profile/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_shape_matrix_20261007_01_h65536_a128_check/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_01_h65536_a128_bench/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_01_h65536_a128_profile/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_shape_matrix_20261007_01_h65536_a256_check/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_01_h65536_a256_bench/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_01_h65536_a256_profile/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_shape_matrix_20261007_01_h65536_a512_check/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_01_h65536_a512_bench/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_01_h65536_a512_profile/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_shape_matrix_20261007_01_h65536_a1024_check/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_01_h65536_a1024_bench/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_01_h65536_a1024_profile/source/experiments/deepseek_v32_mfu/src/profile_hardware.py"
+        ]
+      },
+      {
+        "sha256": "8f85448482c3c37d6f6dd70bb1d9bfd3152122ed601ad84338ed43de234ef2a0",
+        "nvidia_smi_timeout_seconds": 120,
+        "canonical_timeout20_sha256": "5e527c1b4c7ee892afa93f2dc8fb4379eb3be332082212c0b46a86454a6c458b",
+        "paths": [
+          "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_shape_matrix_20261007_04_h4096_a128_check/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_04_h4096_a128_bench/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_04_h4096_a128_profile/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_shape_matrix_20261007_04_h4096_a256_check/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_04_h4096_a256_bench/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_04_h4096_a256_profile/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_shape_matrix_20261007_04_h4096_a512_check/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_04_h4096_a512_bench/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_04_h4096_a512_profile/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_shape_matrix_20261007_04_h4096_a1024_check/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_04_h4096_a1024_bench/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_04_h4096_a1024_profile/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_shape_matrix_20261007_03_h16384_a128_check/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_03_h16384_a128_bench/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_03_h16384_a128_profile/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_shape_matrix_20261007_03_h16384_a256_check/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_03_h16384_a256_bench/source/experiments/deepseek_v32_mfu/src/profile_hardware.py",
+          "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_03_h16384_a256_profile/source/experiments/deepseek_v32_mfu/src/profile_hardware.py"
+        ]
+      }
+    ]
+  },
+  "shapes": [
+    {
+      "prefix_tokens": 4096,
+      "extend_tokens": 128,
+      "pool_tokens": 4224,
+      "run_ids": {
+        "check": "deepseek_shape_matrix_20261007_04_h4096_a128_check",
+        "bench": "deepseek_shape_matrix_20261007_04_h4096_a128_bench",
+        "profile": "deepseek_shape_matrix_20261007_04_h4096_a128_profile"
+      },
+      "execution_identity_sha256": "c1f905aa92bc2cc7b9b9321f5369947e726a93cfd322d425bc9001ead03389c1",
+      "source_identity_sha256": "d79431b7890ffb64d45351d79da7aa4af471e7659348be4e16b25b143395df70",
+      "source_directories": {
+        "check": "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_shape_matrix_20261007_04_h4096_a128_check",
+        "bench": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_04_h4096_a128_bench",
+        "profile": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_04_h4096_a128_profile"
+      },
+      "timeline_directory": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_04_h4096_a128_timeline",
+      "startup_directory": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_04_h4096_a128_startup",
+      "warmups": 1,
+      "prefill_repeats": 3,
+      "extend_repeats": 5
+    },
+    {
+      "prefix_tokens": 4096,
+      "extend_tokens": 256,
+      "pool_tokens": 4352,
+      "run_ids": {
+        "check": "deepseek_shape_matrix_20261007_04_h4096_a256_check",
+        "bench": "deepseek_shape_matrix_20261007_04_h4096_a256_bench",
+        "profile": "deepseek_shape_matrix_20261007_04_h4096_a256_profile"
+      },
+      "execution_identity_sha256": "0a5a3edb3931df53eb44d94f14a0acbd8aac7ea93df0b83c2fbc5366d96c3cce",
+      "source_identity_sha256": "d79431b7890ffb64d45351d79da7aa4af471e7659348be4e16b25b143395df70",
+      "source_directories": {
+        "check": "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_shape_matrix_20261007_04_h4096_a256_check",
+        "bench": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_04_h4096_a256_bench",
+        "profile": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_04_h4096_a256_profile"
+      },
+      "timeline_directory": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_04_h4096_a256_timeline",
+      "startup_directory": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_04_h4096_a256_startup",
+      "warmups": 1,
+      "prefill_repeats": 3,
+      "extend_repeats": 5
+    },
+    {
+      "prefix_tokens": 4096,
+      "extend_tokens": 512,
+      "pool_tokens": 4608,
+      "run_ids": {
+        "check": "deepseek_shape_matrix_20261007_04_h4096_a512_check",
+        "bench": "deepseek_shape_matrix_20261007_04_h4096_a512_bench",
+        "profile": "deepseek_shape_matrix_20261007_04_h4096_a512_profile"
+      },
+      "execution_identity_sha256": "a6ad8c88bccc37d1cbe3ea30e6eed7d1913e3c5bb8a14cfd04426d289be15e91",
+      "source_identity_sha256": "d79431b7890ffb64d45351d79da7aa4af471e7659348be4e16b25b143395df70",
+      "source_directories": {
+        "check": "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_shape_matrix_20261007_04_h4096_a512_check",
+        "bench": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_04_h4096_a512_bench",
+        "profile": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_04_h4096_a512_profile"
+      },
+      "timeline_directory": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_04_h4096_a512_timeline",
+      "startup_directory": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_04_h4096_a512_startup",
+      "warmups": 1,
+      "prefill_repeats": 3,
+      "extend_repeats": 5
+    },
+    {
+      "prefix_tokens": 4096,
+      "extend_tokens": 1024,
+      "pool_tokens": 5120,
+      "run_ids": {
+        "check": "deepseek_shape_matrix_20261007_04_h4096_a1024_check",
+        "bench": "deepseek_shape_matrix_20261007_04_h4096_a1024_bench",
+        "profile": "deepseek_shape_matrix_20261007_04_h4096_a1024_profile"
+      },
+      "execution_identity_sha256": "91ac40a29db3113257a4708212a95b117b9b9d53d58a66ad30869825d1b00d23",
+      "source_identity_sha256": "d79431b7890ffb64d45351d79da7aa4af471e7659348be4e16b25b143395df70",
+      "source_directories": {
+        "check": "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_shape_matrix_20261007_04_h4096_a1024_check",
+        "bench": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_04_h4096_a1024_bench",
+        "profile": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_04_h4096_a1024_profile"
+      },
+      "timeline_directory": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_04_h4096_a1024_timeline",
+      "startup_directory": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_04_h4096_a1024_startup",
+      "warmups": 1,
+      "prefill_repeats": 3,
+      "extend_repeats": 5
+    },
+    {
+      "prefix_tokens": 16384,
+      "extend_tokens": 128,
+      "pool_tokens": 16512,
+      "run_ids": {
+        "check": "deepseek_shape_matrix_20261007_03_h16384_a128_check",
+        "bench": "deepseek_shape_matrix_20261007_03_h16384_a128_bench",
+        "profile": "deepseek_shape_matrix_20261007_03_h16384_a128_profile"
+      },
+      "execution_identity_sha256": "c90bb3595977e9950d079b1684d6a8929ee1d2f4f35831ade3d2f9f8ec5c3006",
+      "source_identity_sha256": "d79431b7890ffb64d45351d79da7aa4af471e7659348be4e16b25b143395df70",
+      "source_directories": {
+        "check": "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_shape_matrix_20261007_03_h16384_a128_check",
+        "bench": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_03_h16384_a128_bench",
+        "profile": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_03_h16384_a128_profile"
+      },
+      "timeline_directory": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_03_h16384_a128_timeline",
+      "startup_directory": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_03_h16384_a128_startup",
+      "warmups": 1,
+      "prefill_repeats": 3,
+      "extend_repeats": 5
+    },
+    {
+      "prefix_tokens": 16384,
+      "extend_tokens": 256,
+      "pool_tokens": 16640,
+      "run_ids": {
+        "check": "deepseek_shape_matrix_20261007_03_h16384_a256_check",
+        "bench": "deepseek_shape_matrix_20261007_03_h16384_a256_bench",
+        "profile": "deepseek_shape_matrix_20261007_03_h16384_a256_profile"
+      },
+      "execution_identity_sha256": "450b0f8626071f0fc027d123eaac844d99eb4cb06a78b44ef43dc84bb8107b33",
+      "source_identity_sha256": "d79431b7890ffb64d45351d79da7aa4af471e7659348be4e16b25b143395df70",
+      "source_directories": {
+        "check": "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_shape_matrix_20261007_03_h16384_a256_check",
+        "bench": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_03_h16384_a256_bench",
+        "profile": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_03_h16384_a256_profile"
+      },
+      "timeline_directory": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_03_h16384_a256_timeline",
+      "startup_directory": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_03_h16384_a256_startup",
+      "warmups": 1,
+      "prefill_repeats": 3,
+      "extend_repeats": 5
+    },
+    {
+      "prefix_tokens": 16384,
+      "extend_tokens": 512,
+      "pool_tokens": 16896,
+      "run_ids": {
+        "check": "deepseek_shape_matrix_20261007_02_h16384_a512_check",
+        "bench": "deepseek_shape_matrix_20261007_02_h16384_a512_bench",
+        "profile": "deepseek_shape_matrix_20261007_02_h16384_a512_profile"
+      },
+      "execution_identity_sha256": "bb022bcdb3db2134b7cc1025c5f7c9a09755bb00264d2fb028d096a08d91ad84",
+      "source_identity_sha256": "bc2e18e72d6aeb9190d815bc22d4002b5a1439c1af697b100c5b6ae3276232a2",
+      "source_directories": {
+        "check": "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_shape_matrix_20261007_02_h16384_a512_check",
+        "bench": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_02_h16384_a512_bench",
+        "profile": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_02_h16384_a512_profile"
+      },
+      "timeline_directory": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_02_h16384_a512_timeline",
+      "startup_directory": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_02_h16384_a512_startup",
+      "warmups": 1,
+      "prefill_repeats": 3,
+      "extend_repeats": 5
+    },
+    {
+      "prefix_tokens": 16384,
+      "extend_tokens": 1024,
+      "pool_tokens": 17408,
+      "run_ids": {
+        "check": "deepseek_shape_matrix_20261007_01_h16384_a1024_check",
+        "bench": "deepseek_shape_matrix_20261007_01_h16384_a1024_bench",
+        "profile": "deepseek_shape_matrix_20261007_01_h16384_a1024_profile"
+      },
+      "execution_identity_sha256": "9c6bc33ea57aa078f4ac0debb95c5c0c9e10e41be4be8f37f05648eb52214a02",
+      "source_identity_sha256": "bc2e18e72d6aeb9190d815bc22d4002b5a1439c1af697b100c5b6ae3276232a2",
+      "source_directories": {
+        "check": "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_shape_matrix_20261007_01_h16384_a1024_check",
+        "bench": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_01_h16384_a1024_bench",
+        "profile": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_01_h16384_a1024_profile"
+      },
+      "timeline_directory": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_01_h16384_a1024_timeline",
+      "startup_directory": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_01_h16384_a1024_startup",
+      "warmups": 1,
+      "prefill_repeats": 3,
+      "extend_repeats": 5
+    },
+    {
+      "prefix_tokens": 65536,
+      "extend_tokens": 128,
+      "pool_tokens": 65664,
+      "run_ids": {
+        "check": "deepseek_shape_matrix_20261007_01_h65536_a128_check",
+        "bench": "deepseek_shape_matrix_20261007_01_h65536_a128_bench",
+        "profile": "deepseek_shape_matrix_20261007_01_h65536_a128_profile"
+      },
+      "execution_identity_sha256": "09492c70d71ca75c70202b235d4b54a9f99bfe7cb7a9ffe71e3a509461cba486",
+      "source_identity_sha256": "bc2e18e72d6aeb9190d815bc22d4002b5a1439c1af697b100c5b6ae3276232a2",
+      "source_directories": {
+        "check": "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_shape_matrix_20261007_01_h65536_a128_check",
+        "bench": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_01_h65536_a128_bench",
+        "profile": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_01_h65536_a128_profile"
+      },
+      "timeline_directory": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_01_h65536_a128_timeline",
+      "startup_directory": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_01_h65536_a128_startup",
+      "warmups": 1,
+      "prefill_repeats": 3,
+      "extend_repeats": 5
+    },
+    {
+      "prefix_tokens": 65536,
+      "extend_tokens": 256,
+      "pool_tokens": 65792,
+      "run_ids": {
+        "check": "deepseek_shape_matrix_20261007_01_h65536_a256_check",
+        "bench": "deepseek_shape_matrix_20261007_01_h65536_a256_bench",
+        "profile": "deepseek_shape_matrix_20261007_01_h65536_a256_profile"
+      },
+      "execution_identity_sha256": "4e2b603bd3d5de7c5ecd60f97c362210a5b03fdf9410a1c486df40d1762206ce",
+      "source_identity_sha256": "bc2e18e72d6aeb9190d815bc22d4002b5a1439c1af697b100c5b6ae3276232a2",
+      "source_directories": {
+        "check": "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_shape_matrix_20261007_01_h65536_a256_check",
+        "bench": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_01_h65536_a256_bench",
+        "profile": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_01_h65536_a256_profile"
+      },
+      "timeline_directory": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_01_h65536_a256_timeline",
+      "startup_directory": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_01_h65536_a256_startup",
+      "warmups": 1,
+      "prefill_repeats": 3,
+      "extend_repeats": 5
+    },
+    {
+      "prefix_tokens": 65536,
+      "extend_tokens": 512,
+      "pool_tokens": 66048,
+      "run_ids": {
+        "check": "deepseek_shape_matrix_20261007_01_h65536_a512_check",
+        "bench": "deepseek_shape_matrix_20261007_01_h65536_a512_bench",
+        "profile": "deepseek_shape_matrix_20261007_01_h65536_a512_profile"
+      },
+      "execution_identity_sha256": "5a0b9ab78391ffde72f603f370c7c865b2b0924e5b32e06bdef3347b21be4fd3",
+      "source_identity_sha256": "bc2e18e72d6aeb9190d815bc22d4002b5a1439c1af697b100c5b6ae3276232a2",
+      "source_directories": {
+        "check": "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_shape_matrix_20261007_01_h65536_a512_check",
+        "bench": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_01_h65536_a512_bench",
+        "profile": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_01_h65536_a512_profile"
+      },
+      "timeline_directory": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_01_h65536_a512_timeline",
+      "startup_directory": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_01_h65536_a512_startup",
+      "warmups": 1,
+      "prefill_repeats": 3,
+      "extend_repeats": 5
+    },
+    {
+      "prefix_tokens": 65536,
+      "extend_tokens": 1024,
+      "pool_tokens": 66560,
+      "run_ids": {
+        "check": "deepseek_shape_matrix_20261007_01_h65536_a1024_check",
+        "bench": "deepseek_shape_matrix_20261007_01_h65536_a1024_bench",
+        "profile": "deepseek_shape_matrix_20261007_01_h65536_a1024_profile"
+      },
+      "execution_identity_sha256": "3f4a530a1b361ee4222c04121951a56dd8726f2d70895eea8b0ceb3bbcc1db32",
+      "source_identity_sha256": "bc2e18e72d6aeb9190d815bc22d4002b5a1439c1af697b100c5b6ae3276232a2",
+      "source_directories": {
+        "check": "/tmp/cxldsagr-checks/deepseek_v32_mfu/data/deepseek_shape_matrix_20261007_01_h65536_a1024_check",
+        "bench": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_01_h65536_a1024_bench",
+        "profile": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_01_h65536_a1024_profile"
+      },
+      "timeline_directory": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_01_h65536_a1024_timeline",
+      "startup_directory": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_20261007_01_h65536_a1024_startup",
+      "warmups": 1,
+      "prefill_repeats": 3,
+      "extend_repeats": 5
+    }
+  ],
+  "hardware": {
+    "schema_version": 1,
+    "checked_at_utc": "2026-10-06T17:10:36.836705+00:00",
+    "physical_device_selector": "0",
+    "cuda_visible_devices": "0",
+    "selector_semantics": "physical nvidia-smi index or UUID; CUDA_VISIBLE_DEVICES does not remap it",
+    "command": [
+      "nvidia-smi",
+      "--id=0",
+      "--query-gpu=index,name,uuid,pci.device_id,pci.bus_id,compute_cap,memory.total,clocks.max.sm,clocks.current.sm,power.limit,utilization.gpu,driver_version",
+      "--format=csv"
+    ],
+    "stdout": "index, name, uuid, pci.device_id, pci.bus_id, compute_cap, memory.total [MiB], clocks.max.sm [MHz], clocks.current.sm [MHz], power.limit [W], utilization.gpu [%], driver_version\n0, NVIDIA M403, GPU-1bdee8b4-22ac-536c-208b-bfb4ed38b878, 0x233510DE, 00000000:18:00.0, 9.0, 143771 MiB, 1980 MHz, 1980 MHz, 700.00 W, 0 %, 570.124.06\n",
+    "stderr": "",
+    "query_headers": [
+      "index",
+      "name",
+      "uuid",
+      "pci.device_id",
+      "pci.bus_id",
+      "compute_cap",
+      "memory.total [MiB]",
+      "clocks.max.sm [MHz]",
+      "clocks.current.sm [MHz]",
+      "power.limit [W]",
+      "utilization.gpu [%]",
+      "driver_version"
+    ],
+    "gpu": {
+      "index": "0",
+      "name": "NVIDIA M403",
+      "uuid": "GPU-1bdee8b4-22ac-536c-208b-bfb4ed38b878",
+      "pci.device_id": "0x233510DE",
+      "pci.bus_id": "00000000:18:00.0",
+      "compute_cap": "9.0",
+      "memory.total": "143771 MiB",
+      "clocks.max.sm": "1980 MHz",
+      "clocks.current.sm": "1980 MHz",
+      "power.limit": "700.00 W",
+      "utilization.gpu": "0 %",
+      "driver_version": "570.124.06"
+    },
+    "is_sm90": true,
+    "pci_identity": {
+      "vendor_id": "10de",
+      "device_id": "2335",
+      "database_path": "/usr/share/misc/pci.ids",
+      "matched_line": "\t2335  GH100 [H200 SXM 141GB]",
+      "database_sha256": "eaa7099ae3cfc8a58cf5f8dcd1aafd323e2ad9263908051aa2d1fbd722a0800b",
+      "database_version": "#\tVersion: 2024.03.31"
+    },
+    "hardware_source_sha256": "8f85448482c3c37d6f6dd70bb1d9bfd3152122ed601ad84338ed43de234ef2a0",
+    "h200_sxm_reference": {
+      "url": "https://www.nvidia.com/en-us/data-center/h200/",
+      "verified": true,
+      "http_status": 200,
+      "resolved_url": "https://www.nvidia.com/en-us/data-center/h200/",
+      "retrieved_at_utc": "2026-10-06T17:10:37.422726+00:00",
+      "response_sha256": "7f778459471dc83defedd36d12a73dbd9f55ac82acbfcf89be0cf80186a081b3",
+      "response_bytes": 281108,
+      "product_column": "H200 SXM¹",
+      "specification_table": [
+        [
+          "",
+          "H200 SXM¹",
+          "H200 NVL¹"
+        ],
+        [
+          "FP64",
+          "34 TFLOPS",
+          "30 TFLOPS"
+        ],
+        [
+          "FP64 Tensor Core",
+          "67 TFLOPS",
+          "60 TFLOPS"
+        ],
+        [
+          "FP32",
+          "67 TFLOPS",
+          "60 TFLOPS"
+        ],
+        [
+          "TF32 Tensor Core²",
+          "989 TFLOPS",
+          "835 TFLOPS"
+        ],
+        [
+          "BFLOAT16 Tensor Core²",
+          "1,979 TFLOPS",
+          "1,671 TFLOPS"
+        ],
+        [
+          "FP16 Tensor Core²",
+          "1,979 TFLOPS",
+          "1,671 TFLOPS"
+        ],
+        [
+          "FP8 Tensor Core²",
+          "3,958 TFLOPS",
+          "3,341 TFLOPS"
+        ],
+        [
+          "INT8 Tensor Core²",
+          "3,958 TFLOPS",
+          "3,341 TFLOPS"
+        ],
+        [
+          "GPU Memory",
+          "141GB",
+          "141GB"
+        ],
+        [
+          "GPU Memory Bandwidth",
+          "4.8TB/s",
+          "4.8TB/s"
+        ],
+        [
+          "Decoders",
+          "7 NVDEC 7 JPEG",
+          "7 NVDEC 7 JPEG"
+        ],
+        [
+          "Confidential Computing",
+          "Supported",
+          "Supported"
+        ],
+        [
+          "Max Thermal Design Power (TDP)",
+          "Up to 700W (configurable)",
+          "Up to 600W (configurable)"
+        ],
+        [
+          "Multi-Instance GPUs",
+          "Up to 7 MIGs @18GB each",
+          "Up to 7 MIGs @16.5GB each"
+        ],
+        [
+          "Form Factor",
+          "SXM",
+          "PCIe Dual-slot air-cooled"
+        ],
+        [
+          "Interconnect",
+          "NVIDIA NVLink™: 900GB/s PCIe Gen5: 128GB/s",
+          "2- or 4-way NVIDIA NVLink bridge: 900GB/s per GPU PCIe Gen5: 128GB/s"
+        ],
+        [
+          "Server Options",
+          "NVIDIA HGX™ H200 partner and NVIDIA-Certified Systems™ with 4 or 8 GPUs",
+          "NVIDIA MGX™ H200 NVL partner and NVIDIA-Certified Systems with up to 8 GPUs"
+        ],
+        [
+          "NVIDIA AI Enterprise",
+          "Add-on",
+          "Included"
+        ],
+        [
+          "1 Preliminary specifications. May be subject to change. 2 With sparsity."
+        ]
+      ],
+      "selected_rows": {
+        "BFLOAT16 Tensor Core": {
+          "label": "BFLOAT16 Tensor Core²",
+          "published_tflops": 1979.0
+        },
+        "FP8 Tensor Core": {
+          "label": "FP8 Tensor Core²",
+          "published_tflops": 3958.0
+        },
+        "FP32": {
+          "label": "FP32",
+          "published_tflops": 67.0
+        }
+      },
+      "sparsity_footnote": "2 With sparsity.",
+      "dense_peaks_tflops": {
+        "BF16": 989.5,
+        "FP8": 1979.0,
+        "FP32": 67.0
+      },
+      "conversion": "BF16 and FP8 published sparsity peaks divided by two; FP32 unchanged"
+    },
+    "h200_sxm_reference_matches_pci": true,
+    "torch_properties": "_CudaDeviceProperties(name='NVIDIA H200', major=9, minor=0, total_memory=143167MB, multi_processor_count=132, uuid=1bdee8b4-22ac-536c-208b-bfb4ed38b878, pci_bus_id=24, pci_device_id=0, pci_domain_id=0, L2_cache_size=60MB)",
+    "torch_device_uuid": "1bdee8b4-22ac-536c-208b-bfb4ed38b878"
+  },
+  "compute_precision": {
+    "projection": "checkpoint_block_fp8_weight_and_fp8_activation_gemm",
+    "projection_activation_quantization": true,
+    "main_kv": "bf16_latent_and_rope_no_fp8_roundtrip",
+    "indexer": "bf16_rope_then_fp8_e4m3_no_hadamard",
+    "indexer_head_weights": "fp32_linear_from_checkpoint_weight"
+  },
+  "dependencies": {
+    "torch": "2.12.1+cu130",
+    "triton": "3.7.1",
+    "safetensors": "0.8.0",
+    "apache-tvm-ffi": "0.1.13.post3"
+  },
+  "execution_environment": {
+    "cpu_affinity": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "torch_num_threads": 8,
+    "variables": {
+      "CUDA_VISIBLE_DEVICES": "0",
+      "CXLDSAGR_SM90_BACKEND": "native",
+      "DG_JIT_WITH_LINEINFO": "1",
+      "MKL_NUM_THREADS": "8",
+      "OMP_NUM_THREADS": "8",
+      "OPENBLAS_NUM_THREADS": "8",
+      "PYTORCH_ALLOC_CONF": "backend:native,pinned_use_cuda_host_register:True,pinned_num_register_threads:8",
+      "TRITON_PTXAS_BLACKWELL_PATH": "/usr/local/cuda/bin/ptxas"
+    }
+  },
+  "observer": {
+    "schema": "deepseek-mfu-batch-observations-v1",
+    "selected_gpu_index": "0",
+    "selected_gpu_uuid": "GPU-1bdee8b4-22ac-536c-208b-bfb4ed38b878",
+    "completed_shape_count": 12,
+    "samples": 864,
+    "foreign_selected_gpu_process_observations": [
+      {
+        "batch": "deepseek_shape_matrix_20261007_02",
+        "time_utc": "2026-10-06T16:51:43.455247+00:00",
+        "gpu_uuid": "GPU-1bdee8b4-22ac-536c-208b-bfb4ed38b878",
+        "pid": "870383",
+        "used_gpu_memory": "8818",
+        "ancestry": [
+          870383
+        ],
+        "owned": false
+      }
+    ],
+    "other_gpu_uuids_with_process_observations": [
+      "GPU-80ff95c3-176e-fd8a-728f-9c5577c4a779"
+    ],
+    "maximum_sample_gap_seconds_within_batches": 30.31935904896818,
+    "batches": [
+      {
+        "run_id": "deepseek_shape_matrix_20261007_01",
+        "exit_code": 1,
+        "selected_gpu_index": "0",
+        "selected_gpu_uuid": "GPU-1bdee8b4-22ac-536c-208b-bfb4ed38b878",
+        "samples": 450,
+        "foreign_selected_gpu_process_observations": [],
+        "other_gpu_uuids_with_process_observations": [
+          "GPU-80ff95c3-176e-fd8a-728f-9c5577c4a779"
+        ],
+        "maximum_sample_gap_seconds": 30.085139355971478,
+        "boundary": "Discrete GPU/process observations; other GPUs may run concurrently. CPU and memory bandwidth are not isolated, and activity between samples is unobserved.",
+        "source_path": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_complete_20261007_01/batches/deepseek_shape_matrix_20261007_01/observer/summary.json",
+        "source_sha256": "a4f3c161bd3bda0502a21a2f00bcdb8b533f992f755180ac424fa29b637a7c43",
+        "raw_observations_sha256": "4f2dd2c7969a7bc94ad210b0585db31edac8f49be15877a81d1032baf6fe7440"
+      },
+      {
+        "run_id": "deepseek_shape_matrix_20261007_02",
+        "exit_code": 1,
+        "selected_gpu_index": "0",
+        "selected_gpu_uuid": "GPU-1bdee8b4-22ac-536c-208b-bfb4ed38b878",
+        "samples": 65,
+        "foreign_selected_gpu_process_observations": [
+          {
+            "time_utc": "2026-10-06T16:51:43.455247+00:00",
+            "gpu_uuid": "GPU-1bdee8b4-22ac-536c-208b-bfb4ed38b878",
+            "pid": "870383",
+            "used_gpu_memory": "8818",
+            "ancestry": [
+              870383
+            ],
+            "owned": false
+          }
+        ],
+        "other_gpu_uuids_with_process_observations": [
+          "GPU-80ff95c3-176e-fd8a-728f-9c5577c4a779"
+        ],
+        "maximum_sample_gap_seconds": 30.31935904896818,
+        "boundary": "Discrete GPU/process observations; other GPUs may run concurrently. CPU and memory bandwidth are not isolated, and activity between samples is unobserved.",
+        "source_path": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_complete_20261007_01/batches/deepseek_shape_matrix_20261007_02/observer/summary.json",
+        "source_sha256": "25549df52a88f2466bf22481a683b05be5ea1ab07acc2b71534afd04d6e0525c",
+        "raw_observations_sha256": "ec7b66f338c44a085b81f7455381722b0a0dbc056c9ea3828e7087a486002f92"
+      },
+      {
+        "run_id": "deepseek_shape_matrix_20261007_03",
+        "exit_code": 0,
+        "selected_gpu_index": "0",
+        "selected_gpu_uuid": "GPU-1bdee8b4-22ac-536c-208b-bfb4ed38b878",
+        "samples": 121,
+        "foreign_selected_gpu_process_observations": [],
+        "other_gpu_uuids_with_process_observations": [
+          "GPU-80ff95c3-176e-fd8a-728f-9c5577c4a779"
+        ],
+        "maximum_sample_gap_seconds": 29.723761294968426,
+        "boundary": "Discrete GPU/process observations; other GPUs may run concurrently. CPU and memory bandwidth are not isolated, and activity between samples is unobserved.",
+        "source_path": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_complete_20261007_01/batches/deepseek_shape_matrix_20261007_03/observer/summary.json",
+        "source_sha256": "ae5af5f1bd85508337a2e7dd683793c71f6e279811b672f7ee36167307f5e143",
+        "raw_observations_sha256": "629ec6dd7a2a4e97cc060cf54c76f2fd981a96fd403334fb18514b4a86b320dd"
+      },
+      {
+        "run_id": "deepseek_shape_matrix_20261007_04",
+        "exit_code": 0,
+        "selected_gpu_index": "0",
+        "selected_gpu_uuid": "GPU-1bdee8b4-22ac-536c-208b-bfb4ed38b878",
+        "samples": 228,
+        "foreign_selected_gpu_process_observations": [],
+        "other_gpu_uuids_with_process_observations": [
+          "GPU-80ff95c3-176e-fd8a-728f-9c5577c4a779"
+        ],
+        "maximum_sample_gap_seconds": 29.845485475030728,
+        "boundary": "Discrete GPU/process observations; other GPUs may run concurrently. CPU and memory bandwidth are not isolated, and activity between samples is unobserved.",
+        "source_path": "experiments/deepseek_v32_mfu/output/data/deepseek_shape_matrix_complete_20261007_01/batches/deepseek_shape_matrix_20261007_04/observer/summary.json",
+        "source_sha256": "3ecf55bb608a5069fe7f26791b3d97a33520085c73053c9baabb92bd17c0e347",
+        "raw_observations_sha256": "13659bcd8e6564c44071cb24826865fed3bb5113a3a0266e13aaded0009f33f3"
+      }
+    ],
+    "boundary": "Discrete observations within four separate batches, with unobserved time between batches and samples. The first two commands ended during hardware preflight after five and one successful shapes; only successful checked children enter the matrix. One second-batch process observation lacks a live ancestry and retains its raw owned=false flag; the same PID was owned in preceding observations. This is consistent with a process-exit race but not proof of continuous process ownership. Other GPUs ran concurrently; CPU and DRAM bandwidth were not isolated. No machine-fault or driver-stall root cause is inferred."
+  },
+  "wall_time_boundary": "synchronized wall; independent check, clean bench, and NVTX profile processes",
+  "profile_boundary": "Independent intrusive NSYS profile; final prefill chunk and complete extend L0-L2 windows; optional forward-entry startup view."
+}

@@ -1,0 +1,20 @@
+{
+  "schema": "deepseek-echo-inter-query-schematic-v2",
+  "schematic_stages": 8,
+  "run_id": "deepseek_echo_prefetch_schematic_20261007_02",
+  "created_utc": "2026-10-07T12:29:43.009136+00:00",
+  "kind": "qualitative implementation schematic; no GPU measurement",
+  "source_sha256": {
+    "operators/deepseek_v32/indexer/echo.py": "de20ebc3b4905b3dddb646167fb770d27a92146e76934be3160ad1b5b149c562",
+    "operators/deepseek_v32/indexer/csrc/echo_indexer.cu": "c39ee55cb67ef452d6ee920c84c5852002ec8d2efd7c3115dfcb3564e9c8a255",
+    "operators/deepseek_v32/indexer/csrc/echo_logits.cuh": "562b10fbca2082948fef14a1ac1c40b8918e1c2c81717a965cad040f5293e61f",
+    "operators/deepseek_v32/indexer/csrc/echo_cache.cuh": "409be4a062180a8c8e73c1fa783d3980cf3e9926bf53ef34ddbaefe46e2dcd12",
+    "experiments/deepseek_v32_mfu/src/draw_echo_prefetcher.py": "91abf70394625e6373882a31f5e2318396a775247df26201115dad011b8d0db7"
+  },
+  "artifacts_sha256": {
+    "echo_inter_query_prefetcher.pdf": "40f62945e71eac842238f9fa86c36fb333e42cae9601933e9d3699fe503734fe",
+    "echo_inter_query_prefetcher.png": "a36fa226f4f29c25e9468f5b5c1f87724d4027c515a6008ed7d5fe55cbf57368",
+    "echo_inter_query_prefetcher.svg": "02cc3e61840a89ddd38037093f7f32ed2ca6a2ba7a15f64ce51778229a757f6e"
+  },
+  "boundary": "Qualitative ECHO inter-query pipeline only. S1 through S8 label eight schematic query work stages on both lanes; fetch follows indexer by one stage, so Fetch(Si) overlaps Indexer(Si+1). The ninth horizontal position is the final fetch, not a ninth stage. Stage count, equal widths and spacing are illustrative, not native buffer counts or measured timings. Prefetch selection and subsequent completion are outside this diagram."
+}

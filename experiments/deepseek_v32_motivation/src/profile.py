@@ -522,7 +522,7 @@ def load_reference(path):
         config.get("warmup_policy") != measure.WARMUP_POLICY
         or config.get("byte_subbudgets") is not None
     ):
-        raise ValueError("reference must use host-recall warmup and fixed pools")
+        raise ValueError("reference must use the current capacity-aware warmup and fixed pools")
     manifest = json.loads((path / "workload/workload.json").read_text())
     requests = tuple(
         json.loads(line) for line in (path / "workload/requests.jsonl").read_text().splitlines()
@@ -669,7 +669,11 @@ def main(argv=None):
         "graph_setup_captures": [],
         "cases": [],
         "started_unix": time.time(),
-        "execution_boundary": "Three warmups, release all resources, then requests 0..num_users; capture only 0 and num_users. All first-round users execute before revisit.",
+        "execution_boundary": (
+            "Replay the reference configuration's capacity-aware warmup, release all resources, "
+            "then requests 0..num_users; capture only 0 and num_users. "
+            "All first-round users execute before revisit."
+        ),
         "instrumentation_boundary": "NVTX plus inclusive CPU perf_counter timestamps and tensor metadata; no added CUDA events or GPU reductions for annotations. Production synchronization remains unchanged. Instrumented latency is diagnostic, not formal performance.",
         "counter_boundary": "One added ordinary session_metrics call after completed history prefill, labeled diagnostics/history_counters. Existing runner candidate metrics intercepted once. Heavy collect_cache_diagnostics is disabled.",
         "chunk_boundary": "Each chunk opens immediately before embedding, closes before the next embedding; the last includes forward final concatenation, synchronization and commit. Layer scopes cover the actual independent replay block.",
@@ -794,7 +798,10 @@ def main(argv=None):
             backend.configure_scheme(scheme)
             metadata.update(stage="warmup", active_scheme=scheme)
             measure.write_json(output / "metadata.json", metadata)
-            print(f"warmup {scheme}: user0, user1, user0 host recall", flush=True)
+            print(
+                f"warmup {scheme}: request indices {config['warmup_request_indices']}",
+                flush=True,
+            )
             metadata["warmup_traces"][scheme] = measure.warmup(
                 backend, workload, config, WarmupRunner
             )
@@ -925,7 +932,9 @@ def main(argv=None):
                 metadata["cases"].append(case)
             backend.close()
             measure.write_json(output / "metadata.json", metadata)
-        expected_outputs = len(schemes) * (3 + config["num_users"] + 1)
+        expected_outputs = len(schemes) * (
+            config["warmup_requests_per_scheme"] + config["num_users"] + 1
+        )
         if len(evidence) != expected_outputs or len(metadata["captures"]) != 2 * len(schemes):
             raise AssertionError("incomplete profile execution")
         verify_source_snapshot(output)

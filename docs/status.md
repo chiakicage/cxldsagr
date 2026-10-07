@@ -1,13 +1,34 @@
 # cxldsagr 研究状态
 
+> **2026-10-07 DeepSeek motivation 矩阵已发布：**用户指定的
+> H=[4K,16K,64K] × A=[128,256,512,1024] 共 12 点已完成独立验收与正式计时。
+> 实际沿用 P=65,536、NH=16,777,216、U=16、R=2、history chunk=1,024、seed=42；
+> 模型为 C10，使用 v4 纯计算图。H4K 的 HBM 历史复访全部命中，四档 A 的复访均值
+> 均为 HBM 最低；H16K 均为 dense 最低；H64K 的 A128/256 为 serial sparse 最低，
+> A512/1024 则为 dense 略低。ECHO 在全部 12 点均慢于 serial sparse。
+> 历史保留收益和 candidate 成本随 H/A 改变，不能把原 H64K/A128 排名推广到所有配置。
+> 每个配置只测一条正式轨迹，每方案含两轮用户访问，不证明稳定排名或真实 GR 场景质量。
+> T-006 已完成，依据见 S-034。NOSA motivation、容量填满与后续审阅、simulation
+> 仍暂缓，广泛优化未恢复。
+> 旧单点数值与计时依据保留；撤下 timeline 展示不使其局部 profile 证据失效，
+> 也不把旧 profile 改称新矩阵的机制验收。
+
+> **2026-10-07 矩阵前的 DeepSeek 单点重跑：**按用户“只跑 DeepSeek V3.2”的选择，
+> C10 当前 DMA 与 ECHO 修正路径已完成独立数值验收、四方案正式计时和匹配 profile 审查。
+> HBM、ECHO、serial sparse、dense prefetch 的复访请求均值分别为
+> 2163.789、21.133、15.865、19.798 ms；历史命中分别为 0/16、16/16、16/16、16/16。
+> Serial sparse 的复访最快，dense 的完整 32 请求总耗时最低；这是一轮轨迹，
+> 不提供重复运行置信区间。C10 只捕获部分计算，不能套用真实三层完整图的执行边界。
+> 依据见 S-033；该次重跑只覆盖一个配置，后续 H/A 矩阵及其独立来源见上方说明。
+
 > **2026-10-06 DeepSeek 完整 extend 图：**[真实三层 A128 MFU](../experiments/deepseek_v32_mfu/README.md)
 > 已完成用户指定的 dense 等待位置调整，并补齐四方法独立计时和逐算子 MFU。
 > HBM、ECHO、serial sparse、dense prefetch 的 extend 分别为
 > 3.326、5.716、4.265、5.706 ms。Dense 的原生预取重叠已验证，完整延迟与 ECHO
 > 接近，仍高于 serial sparse；局部重叠不能单独决定完整延迟。
 > 广泛优化仍已停止，本轮只完成这项指定调整及补测，不追加 gap 优化任务。
-> [C10 motivation](../experiments/deepseek_v32_motivation/README.md)、容量后续审阅及
-> 其他 motivation 实验继续暂缓。C10 原测量保留其实现范围；直接依赖已撤回旧 MFU
+> [C10 motivation](../experiments/deepseek_v32_motivation/README.md)已按上方用户选择完成单点及矩阵重跑，
+> 容量后续审阅及其他 motivation 实验继续暂缓。直接依赖已撤回旧 MFU
 > 输入的单层 simulation 已撤回，没有用新图数字替换旧模拟。
 > 三层普通追加与 C10 分别验收；本次结果不证明完整 serving 收益。
 > 旧本地官方 ECHO 适配及其结果已删除；[独立 SGLang 复现](../experiments/deepseek_v32_echo_official/README.md)
@@ -46,7 +67,7 @@
 > checkpoint 检查仅验证数值与存储语义。旧 candidate 写回 DRAM 的容量结果已替换，
 > 不作为新实现的显存测量或性能排名。NOSA 与独立前三层计算实验不在此次撤回范围内。
 
-更新：2026-10-06。保留研究者选择的固定用户顺序 loop。两模型的统一框架重构结果
+更新：2026-10-07。保留研究者选择的固定用户顺序 loop。两模型的统一框架重构结果
 与同机 P0 分别比较，原已发布数字保留历史来源。NOSA 三轮完整 trace 的中位总耗时
 比 P0 增加 406.132 ms（0.19664%）；准入、清理和部分 candidate／复访阶段仍有耗时
 增加，不能声称重构没有性能代价。A128 的 96 个适用内部样本均未达到两种 90% 门槛；
@@ -65,7 +86,8 @@ KV 容量约束、offload 开销及相对 ECHO 的设计价值。已有单卡、
 算子 kernel 利用率与完整阶段的端到端利用率分开报告。计算优化与本次 cache/serving 结果分别解读。
 旧短轨迹没有建立有效的用户规模与缓存容量压力对照；16K 的少量复访重建差异只能描述
 原轨迹。固定 U 个用户、按同一顺序遍历 R 轮的选择不变，用户覆盖与复用距离据此解释。
-当前两模型控制点均为 U=16、R=2、H=65536、A=128、P=65536、NH=16777216；
+两模型原控制点均为 U=16、R=2、H=65536、A=128、P=65536、NH=16777216；
+DeepSeek 后续在相同 U/R 与 P/NH 下补齐了 12 点 H/A 矩阵，NOSA 的范围不随之扩大。
 比较的是指定 token 配额，不是相同总 HBM/DRAM 字节预算。已撤回的 4 GiB / W / chunk
 数据不再支持当前容量或 chunk 选择；其他规模与真实场景代表性仍未验证。
 
@@ -83,7 +105,7 @@ KV 容量约束、offload 开销及相对 ECHO 的设计价值。已有单卡、
 |---|---|---|
 | **1.1 研究什么任务与场景？** | sparse attention GR serving 是候选场景；当前讨论固定 history 的构建与变化 candidate 的 extend，不含自回归 decode，跨请求保留有效历史 | **候选。** 执行生命周期已明确，仍需明确具体推荐任务、服务方式和适用范围 |
 | **1.2 使用什么模型？** | 现有执行对象为完整 NOSA-8B，以及 DeepSeek V3.2 前三层权重和对应输入独立复制构成的约 8B dense 工作负载替身；后续开发优先 NOSA | **执行对象已确定，任务模型仍待选择。** DeepSeek 替身未经训练，不等于完整 61 层验证；NOSA 只输出 hidden，DeepSeek 另执行末 token LM head，不能直接比较跨模型延迟或任务质量 |
-| **1.3 使用什么数据？** | 用户选择固定 U 个 user 的合成 loop 数据，不需要热度；沿用每用户固定 history、每次访问变化 candidate 的请求内容 | **已有受控数据点。** DeepSeek 使用 16 用户、64K history 与 128 candidate；真实推荐标签、其他规模及场景代表性仍未验证 |
+| **1.3 使用什么数据？** | 用户选择固定 U 个 user 的合成 loop 数据，不需要热度；沿用每用户固定 history、每次访问变化 candidate 的请求内容 | **已有受控矩阵。** DeepSeek 已测 16 用户、H=[4K,16K,64K] × A=[128,256,512,1024] 的 12 点矩阵。真实推荐标签及场景代表性仍未验证 |
 | **1.4 怎样形成 serving 负载？** | 同一用户顺序完整重复 R 轮：总请求 UR，首访 U，复访 U(R−1)；相邻两次访问之间有 U−1 个不同用户 | **已有两模型控制点及同机重复。** U=16/R=2、H=65536/A=128、P=65536/NH=16777216；两模型各有三轮 P0 与三轮重构后测量。重复次数不增加用户规模覆盖；Beauty 短轨迹不替代完整用户覆盖，同参数也不等于跨模型同计算 |
 | **1.5 主要优化目标是什么？** | 相同 HBM/DRAM 硬预算下比较完整 loop 的逐请求延迟，分开首轮、后续复访命中和复访重建；淘汰后重建仍计入复访 | **指标方向已明确。** 固定 P/NH 实验比较 token 额度，不等于相同总 HBM 字节预算；首访比例 1/R 影响全请求均值，仍需分轮报告。真实服务的吞吐/到达目标待确定 |
 
@@ -97,10 +119,10 @@ KV 容量约束、offload 开销及相对 ECHO 的设计价值。已有单卡、
 | 条目 / 要回答的问题 | 当前理解 | 状态与具体缺口 |
 |---|---|---|
 | **2.1 主要 baseline 是否覆盖？** | motivation 目标集合为 HBM-only、ECHO、full prefetch、sync sparse loading、async sparse loading；full prefetch 搬运完整历史，attention 仍稀疏 | **两模型各有四类对照。** 统一资源与执行契约已接入，正式计时、独立数值依据和 profile 分别记录。ECHO 尚未接入同一 NOSA 对照，不能拼接跨模型排名；SOTA 覆盖仍待补 |
-| **2.2 全 HBM 的问题是什么？** | 固定复用距离下，history 配额影响复访是否重建；实际物理容量还受模型布局、workspace、allocator 和其他分配约束 | **指定配额的控制点支持。** P=H 时，两个模型的 HBM-only 均只保留一个 history、复访 0/16 命中，三个 offload 方案均为 16/16。这不证明 HBM 物理上只能容纳一个用户，也不恢复已撤回的 C1024/C2048 容量结论 |
+| **2.2 全 HBM 的问题是什么？** | 固定复用距离下，history 配额影响复访是否重建；实际物理容量还受模型布局、workspace、allocator 和其他分配约束 | **指定配额下的历史保留差异已测。** DeepSeek 固定 P=65,536 时，H4K 的 HBM 保留全部 16 用户、复访 16/16 命中；H16K/H64K 分别只能保留 4/1 个用户，顺序 loop 的复访均为 0/16。三个 offload 方案始终 16/16。H4K 没有避免历史重建的收益，不能沿用 H64K 的解释；这些配额结果不证明物理容量上限，也不恢复已撤回的 C1024/C2048 结论 |
 | **2.3 CPU DRAM offload 的问题是什么？** | NOSA 固定容量 loop 中，保留历史避免了重新构建，但引入了首访分配、写回及复访取数成本 | **重构后已测量。** 各轮先求 16 次复访均值，再取三轮中位数，HBM/dense/sync/async 分别为 2342.511/71.980/29.568/31.952 ms；三个 offload 的首访均慢于 HBM。容量保留收益与取数代价须分开，不能把完整差值归为串行等待 |
-| **2.4 Dense prefetch 的问题是什么？** | 整层历史预取仍使用 sparse attention。NOSA 固定容量轨迹中，dense 的复访 candidate H2D payload 多于两种 sparse；DeepSeek 三层完整图使用连续内存与 `cudaMemcpyAsync`，延后同步后已验证预取与计算重叠 | **三层完整图已验收，C10 补测暂缓。** Dense 完整 extend 为 5.706 ms，与 ECHO 的 5.716 ms 接近，仍高于 serial sparse 的 4.265 ms；局部重叠不能单独推出完整延迟收益。NOSA 的流量是软件 payload，不是物理总线流量；流量、预取机会、非矩阵工作和调度仍须按各自路径解释 |
-| **2.5 与 ECHO 如何比较？** | ECHO prefill fetch 适用于后续 chunk 或已有 offloaded prefix 的 extend；无 decode 不排除适用。已复现层内共享 token cache，GR session 保留与容量/异步安全适配单独说明 | **当前本地对照未显示 ECHO 整体加速。** 三层 cold A128 完整图中，ECHO extend 为 5.716 ms，高于 serial sparse 的 4.265 ms；C10 的 DMA 补测继续暂缓。融合 kernel 的计算与 IO 不从 trace 内部分离。独立 SGLang 计时不替代共同模型上的 NOSA/ECHO 比较 |
+| **2.4 Dense prefetch 的问题是什么？** | 整层历史预取仍使用 sparse attention；搬运量较多不必然意味着请求更慢。DeepSeek 三层完整图与 C10 单点均有连续内存 DMA 和计算的局部重叠证据 | **C10 取舍随 H/A 改变。** H16K 四档 A 的 dense 复访均值最低；H64K 的 A128/256 为 serial sparse 最低，A512/1024 为 dense 略低。ECHO/sparse 的 H2D 非零时，dense payload 为它们的 1.832–9.688 倍。不能仅据字节数或旧单点局部重叠解释排序；流量是软件 payload，矩阵未新增 profile |
+| **2.5 与 ECHO 如何比较？** | ECHO prefill fetch 适用于后续 chunk 或已有 offloaded prefix 的 extend；无 decode 不排除适用。已复现层内共享 token cache，GR session 保留与容量/异步安全适配单独说明 | **本轮矩阵未显示 ECHO 的复访优势。** ECHO 在 12 个 H/A 点的复访均值均高于 serial sparse，两者 candidate H2D 总量逐点相同。三层 cold A128 完整图也单独观察到 ECHO 较慢；一轮矩阵不证明稳定排序，融合 kernel 的计算与 IO 不从 trace 内部分离，独立 SGLang 计时不替代共同模型上的 NOSA/ECHO 比较 |
 
 ECHO cache baseline 的官方逐层共享 pool、实际领取才驱逐、
 `indexer/prefetch → top-k → 主 KV append → exact recall` 的顺序及时间戳 priority
@@ -111,6 +133,13 @@ ECHO cache baseline 的官方逐层共享 pool、实际领取才驱逐、
 仅保留独立 SGLang 真实前三层复现。按用户要求接受数值不一致，ECHO 与 HBM-only
 均已完成 performance-only 计时；两种配置容量不同，不作为等容量对照，
 不据此宣称数值验收通过。
+
+2026-10-07 的[官方 recall 诊断](../experiments/deepseek_v32_echo_official/report/recall_diagnosis.md)
+确认了独立 SGLang 的一项实现开销：召回每层扫描全部 host pool 的标记，零 miss 时
+仍耗时约 1.53 ms。相同二进制的隔离实验与 NCU 将主要成本定位到扫描中的整数与
+逻辑运算。因此图中长 recall 条不能作为纯取数等待或 ECHO 重叠能力不足的证据。
+本地实现使用不同的召回路径，这一原因不能直接解释 C10 矩阵中的 ECHO 排名。
+本轮只完成诊断，未修改实现或恢复广泛优化；详细依据见 S-035。
 
 非 GR 计算对照使用真实 checkpoint 第 0–2 层，hidden/residual 依次传播，包含
 embedding、三个 dense MLP、final norm 与末 token LM head。当前
@@ -144,14 +173,24 @@ chunk 的 L0–L2，extend 主图也取 L0–L2。Dense 的起点包括 L0 首�
 [四方法汇总](../experiments/deepseek_v32_mfu/report/full_extend_graph/mfu/summary.json)与
 [S-032](agents/research-supervisor/sources.md#s-032deepseek-a128-四方法-mfu-与局部重叠)。
 
-C10 保留的 mapped-gather 报告中，HBM/ECHO/serial sparse/dense 的复访
-请求均值为 2178.992/23.520/17.188/25.462 ms；ECHO 与 serial sparse 的
-16 次复访 candidate H2D 均为 1.161186 GiB，dense 为 11.25 GiB。该版本未显示
-ECHO 的整体加速收益。旧 ECHO 还受融合 indexer scale stage 提前释放问题影响，
-原保存输出的比较不替代修正后验收。连续内存 DMA 版本尚未完成 C10 补测，现按
-用户要求暂缓，既有报告和产物保留其原始范围，不用于修正后实现的结论。
-独立 SGLang 计时不构成 C10 补测的依赖。真实三层与 C10 的 A 相同，
-也不意味着两者具有相同计算、事务或缓存范围。
+C10 的 12 点矩阵说明，历史保留收益和 candidate 成本需要随 H/A 分别解释。
+H4K 时 HBM 的 16 次复访全部命中，ECHO 与 serial sparse 也不需要 candidate
+历史 H2D；四档 A 均由 HBM 取得最低复访均值。H16K/H64K 时，HBM 复访全部重建，
+三个 offload 方案均保留历史；其中 H16K 的四档 A 均由 dense 最低，H64K 则在
+A128/256 由 serial sparse 最低、A512/1024 由 dense 略低。不能把避免 history
+重建的差值归为 attention 或预取加速，也不能由搬运量单独推出请求延迟。
+
+矩阵的独立数值、内存与计量审查已完成。每个配置只测一条正式轨迹，每方案含
+两轮用户访问、共 32 请求，首访占一半；首访、复访和完整轨迹分别报告，不证明
+重复运行的稳定排名或单项改动的因果收益。C10 使用 v4 纯计算图，cache 事务、
+选择、召回与 IO 留在图外，
+与真实三层的完整 extend 图分开。完整结果与验收边界见
+[S-034](agents/research-supervisor/sources.md#s-034deepseek-motivation-ha-矩阵安排)。
+
+矩阵没有新增 profile。此前 H64K/A128 单点的数值、计时与局部 DMA 重叠证据
+仍按 [S-033](agents/research-supervisor/sources.md#s-033deepseek-c10-当前路径重跑)
+保留，撤下旧 timeline 展示不把该 profile 扩展到其他 H/A 点。容量报告引用的
+既有 DMA 内存来源独立保留；独立 SGLang 计时也不构成本次矩阵的验收依据。
 
 ## 3. Challenge 与 Design
 
@@ -188,9 +227,9 @@ DeepSeek 则持有共享全局 host arena，并按 pinned allocator 档位预留
 
 | 条目 / 要回答的问题 | 当前理解 | 状态与具体缺口 |
 |---|---|---|
-| **4.1 整体系统收益是什么？** | 两模型分别比较完整 loop、首访和复访；offload 的复访优势首先来自保留历史、避免 HBM 重建。真实三层 MFU 单独检查 baseline 执行效率 | **容量、执行效率与方法收益分开。** NOSA 的 async 复访均值比 sync 慢 8.06%，重构后完整 trace 中位数比 P0 增加 406.132 ms；原两模型重构对照的 cleanup 仍有增加。DeepSeek 三层完整图中，serial sparse 快于 ECHO 和 dense；C10 DMA 补测仍暂缓，局部排序不替代 serving 收益、共同模型对照或场景质量 |
-| **4.2 哪些设计带来收益？** | 独立矩阵/attention API、resident A1024、冷稀疏并集回放与 DeepSeek 三层 timeline 分别提供局部证据；主机编排诊断不隔离可移除成本 | **收益依赖输入与范围。** NOSA A1024 融合 API 延迟下降 23.02%–29.47%，9 个样本双比率过 90%，但 A128 serving 的 96 个适用样本仍未过。DeepSeek 四方法每次 extend 仅一次完整图 launch，逐算子计时有独占节点依据；dense 延后同步后的原生预取重叠已验证，但新旧延迟不是单变量对照。广泛优化仍已停止，本轮指定调整已完成，不追加归因或优化任务 |
-| **4.3 结论适用于哪些条件？** | 固定容量控制点覆盖 SM90/Hopper、16 用户两轮、64K+128；NOSA 使用完整 32 层 checkpoint，DeepSeek 使用独立复制 block 的替身且另执行末 token LM head | **范围有限。** 两模型各有三轮同机 P0 与重构后正式 trace；NOSA pair04 是另一次复核，不混入三轮统计。匹配诊断只选请求 0/16。重复测量不扩展到其他 U/R、物理字节预算、真实到达过程或 GR 质量；resident A1024 与 pattern 仍有各自范围 |
+| **4.1 整体系统收益是什么？** | 两模型分别比较完整 loop、首访和复访；DeepSeek H16K/H64K 的 offload 复访优势首先来自保留历史，H4K 全命中时没有这项重建差值。真实三层 MFU 单独检查 baseline 执行效率 | **容量、执行效率与方法收益分开。** NOSA 的 async 复访均值比 sync 慢 8.06%，重构后完整 trace 中位数比 P0 增加 406.132 ms；原两模型重构对照的 cleanup 仍有增加。C10 矩阵的最低复访均值随 H/A 在 HBM、dense 和 serial sparse 间变化；一轮结果不证明稳定排名，也不建立共同模型对照或场景质量 |
+| **4.2 哪些设计带来收益？** | 独立矩阵/attention API、resident A1024、冷稀疏并集回放与 DeepSeek 局部 profile 分别提供局部证据；主机编排诊断不隔离可移除成本 | **收益依赖输入与范围。** NOSA A1024 融合 API 延迟下降 23.02%–29.47%，9 个样本双比率过 90%，但 A128 serving 的 96 个适用样本仍未过。真实三层与 C10 单点均有 dense DMA/计算重叠证据；新 C10 矩阵中 dense 在 6 点复访最低，但没有新增 profile 来解释这些点。不能沿用旧单点作跨配置机制归因；广泛优化仍已停止，不追加归因任务 |
+| **4.3 结论适用于哪些条件？** | DeepSeek 已测 SM90/Hopper、16 用户两轮、固定 P/NH 的 H=[4K,16K,64K] × A=[128,256,512,1024]；NOSA 原固定容量范围仍为 64K+128。两模型计算与输出范围不同 | **12 点矩阵已发布，外推范围仍有限。** 每个配置只测一条正式轨迹，每方案含两轮用户访问，不混入原重构对照的三轮统计。DeepSeek 是独立复制 block 的 C10 替身且执行末 token LM head，NOSA 使用完整 32 层 checkpoint；其他 U/R、物理字节预算、真实到达过程与 GR 质量未验证。NOSA pair04、请求 0/16 诊断、resident A1024 与 pattern 仍有各自范围 |
 
 完整 resident A1024 对照中，native sparse 的 full/extend 墙钟中位数为
 2374.539/36.208 ms，有效 MFU 为 50.38%/52.56%；dense 为 3506.118/81.807 ms，
@@ -311,10 +350,10 @@ motivation 检验。合并报告不改变 4.2–4.3 的证据强度，也不产�
 
 | 卡在哪里 | 影响哪里 | 下一步建议 |
 |---|---|---|
-| **ECHO 的整体加速尚未成立，C10 DMA 对照尚未完成验收。** 三层 DMA 已完成测量，但不能替代 C10；预测/预取、搬运方式与等待仍有归因缺口，独立 SGLang 计时另行报告 | 2.5、3.1、4.1、4.2 | 按用户要求暂缓 motivation 实验及归因，不列为当前补测任务 |
+| **ECHO 相对 serial sparse 的加速尚未成立。** C10 的 12 点矩阵均观察到 ECHO 复访较慢；预测/预取、搬运方式与等待的因果归因仍有缺口 | 2.5、3.1、4.1、4.2 | **T-003：共同模型适配与可比范围。** 矩阵任务已完成，不把一轮排序视为稳定规律，不恢复广泛优化或新增归因实验 |
 | **缺少可以直接采用的 sparse attention GR 场景。** 已有生成器和模型代码，但模型、数据与服务需求如何对应仍不清楚 | 1.1–1.5；影响 2.2 的容量动机和 4.1 的整体评测 | **T-002：场景构造方案比较**，先列出具体可行路线和各自能回答的问题 |
 | **五类 baseline 尚未在共同模型上形成完整可比集合。** 共享资源与执行契约已接入，但 ECHO 与 async 仍分属不同模型入口，模型和输出范围也不同 | 2.1、2.5、3.1、3.3 | **T-003：共同模型适配与可比范围**，明确剩余适配与可回答的问题 |
-| **两模型固定容量结果仍只覆盖一个共同参数点。** NOSA 与 DeepSeek 的计算和物理分配不同，其他 U/R、P/NH 及字节预算范围尚未验证 | 1.4、2.2、4.1、4.3 | **T-006 暂缓。** 恢复 motivation 工作后再选择有区分力的范围，保留 H64K、不跑满 NH 与完整轮次约束 |
+| **固定 token 配额不等于相同物理预算。** DeepSeek 已补齐 12 点 H/A 矩阵，但两模型的计算和分配不同，其他 U/R、P/NH、字节预算范围仍未验证 | 1.4、2.2、4.1、4.3 | **当前不追加容量测量。** 保留历史命中与 candidate 成本的区别；容量填满和后续审阅仍暂缓，不跑满 NH，不扩展 NOSA 范围 |
 | **NOSA 当前固定容量 loop 未显示 async 收益。** H64K prequeue 显示提交敏感，但 candidate 效率差距、剩余长尾和供数/流水线等待仍需归因；外部原型尚未形成四方案完整 serving 收益 | 2.1、2.3、2.4、3.1、3.2、4.1、4.2 | **T-007：H64K 效率与归因**，用完整 candidate 对照检验 indexer workspace 复用，并保持四方案正确性和测量验收 |
 
 DeepSeek 当前有效结论以上方用户修正与[固定容量 motivation](../experiments/deepseek_v32_motivation/README.md)

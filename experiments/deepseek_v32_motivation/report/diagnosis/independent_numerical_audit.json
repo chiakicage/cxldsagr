@@ -1,11 +1,9 @@
 {
+  "schema": "deepseek-c10-profile-numerical-v2",
   "accepted": true,
-  "scope": "Independent CPU byte comparison of all saved profile candidate hidden/logit payloads",
-  "project_validation_code_imported": false,
-  "cuda_initialized": false,
-  "profile_run": "deepseek_mfu_c10_profile_20261006_02",
-  "formal_run": "deepseek_mfu_c10_bench_20261006_01",
-  "independent_hbm_check": "deepseek_mfu_c10_check_20261006_01",
+  "profile_run": "deepseek_motivation_rerun_profile_20261006_01",
+  "formal_run": "deepseek_motivation_rerun_bench_20261006_01",
+  "independent_hbm_check": "deepseek_motivation_rerun_check_20261006_01",
   "payloads": 80,
   "phase_counts": {
     "cold": 4,
@@ -14,13 +12,14 @@
     "warmup": 12
   },
   "all_hidden_and_logits_byte_exact": true,
+  "cuda_initialized": false,
   "checks": [
     {
       "scheme": "dense_prefetch",
       "phase": "cold",
       "request_id": 0,
       "profile_file_sha256": "95198864b698343eec8dd2a976b04528250b2f1b00eb29164f5a3bc3012dc5ec",
-      "formal_file_sha256": "95198864b698343eec8dd2a976b04528250b2f1b00eb29164f5a3bc3012dc5ec",
+      "reference_file_sha256": "95198864b698343eec8dd2a976b04528250b2f1b00eb29164f5a3bc3012dc5ec",
       "tensors": {
         "hidden": {
           "shape": [
@@ -47,7 +46,7 @@
       "phase": "prepare",
       "request_id": 1,
       "profile_file_sha256": "0881906758bbef7f776c858d9e2a8686d33170290630f7acd799feb7d0fb0cca",
-      "formal_file_sha256": "0881906758bbef7f776c858d9e2a8686d33170290630f7acd799feb7d0fb0cca",
+      "reference_file_sha256": "0881906758bbef7f776c858d9e2a8686d33170290630f7acd799feb7d0fb0cca",
       "tensors": {
         "hidden": {
           "shape": [
@@ -74,7 +73,7 @@
       "phase": "prepare",
       "request_id": 2,
       "profile_file_sha256": "9307bb9de779ee73088ce15a0e788199037d120637a98703692fa6fe11338ee1",
-      "formal_file_sha256": "9307bb9de779ee73088ce15a0e788199037d120637a98703692fa6fe11338ee1",
+      "reference_file_sha256": "9307bb9de779ee73088ce15a0e788199037d120637a98703692fa6fe11338ee1",
       "tensors": {
         "hidden": {
           "shape": [
@@ -101,7 +100,7 @@
       "phase": "prepare",
       "request_id": 3,
       "profile_file_sha256": "415602a36ad6c2745a1a59175848a71a6a86d115c41f0976fb653b19236638f4",
-      "formal_file_sha256": "415602a36ad6c2745a1a59175848a71a6a86d115c41f0976fb653b19236638f4",
+      "reference_file_sha256": "415602a36ad6c2745a1a59175848a71a6a86d115c41f0976fb653b19236638f4",
       "tensors": {
         "hidden": {
           "shape": [
@@ -128,7 +127,7 @@
       "phase": "prepare",
       "request_id": 4,
       "profile_file_sha256": "b06a78b11ac0b2bc86cd75b5acc947b6e7a3d3a8ced3f6fbd913a4fa6bc1ac97",
-      "formal_file_sha256": "b06a78b11ac0b2bc86cd75b5acc947b6e7a3d3a8ced3f6fbd913a4fa6bc1ac97",
+      "reference_file_sha256": "b06a78b11ac0b2bc86cd75b5acc947b6e7a3d3a8ced3f6fbd913a4fa6bc1ac97",
       "tensors": {
         "hidden": {
           "shape": [
@@ -155,7 +154,7 @@
       "phase": "prepare",
       "request_id": 5,
       "profile_file_sha256": "85eb2ede4c59325eea690b2f76f617db8dc93f3b5ba22d7cbd3f61fdcc4bbd8e",
-      "formal_file_sha256": "85eb2ede4c59325eea690b2f76f617db8dc93f3b5ba22d7cbd3f61fdcc4bbd8e",
+      "reference_file_sha256": "85eb2ede4c59325eea690b2f76f617db8dc93f3b5ba22d7cbd3f61fdcc4bbd8e",
       "tensors": {
         "hidden": {
           "shape": [
@@ -182,7 +181,7 @@
       "phase": "prepare",
       "request_id": 6,
       "profile_file_sha256": "890a805638600e945be7ca5b26bb1d3c3ef921e8141ce667b180d606a507f599",
-      "formal_file_sha256": "890a805638600e945be7ca5b26bb1d3c3ef921e8141ce667b180d606a507f599",
+      "reference_file_sha256": "890a805638600e945be7ca5b26bb1d3c3ef921e8141ce667b180d606a507f599",
       "tensors": {
         "hidden": {
           "shape": [
@@ -209,7 +208,7 @@
       "phase": "prepare",
       "request_id": 7,
       "profile_file_sha256": "32e0680c678048351599813820b164d3984a6fd2610b454c16ce1722f112638a",
-      "formal_file_sha256": "32e0680c678048351599813820b164d3984a6fd2610b454c16ce1722f112638a",
+      "reference_file_sha256": "32e0680c678048351599813820b164d3984a6fd2610b454c16ce1722f112638a",
       "tensors": {
         "hidden": {
           "shape": [
@@ -236,7 +235,7 @@
       "phase": "prepare",
       "request_id": 8,
       "profile_file_sha256": "1b1829effc99b8a9216f1ebd1bb7e24c9369b9bcac8e3eb4e05ed68063c561f2",
-      "formal_file_sha256": "1b1829effc99b8a9216f1ebd1bb7e24c9369b9bcac8e3eb4e05ed68063c561f2",
+      "reference_file_sha256": "1b1829effc99b8a9216f1ebd1bb7e24c9369b9bcac8e3eb4e05ed68063c561f2",
       "tensors": {
         "hidden": {
           "shape": [
@@ -263,7 +262,7 @@
       "phase": "prepare",
       "request_id": 9,
       "profile_file_sha256": "499e281152c5056d66d428500db4fcb71b9219ac7219f48fdee6ecd902dce328",
-      "formal_file_sha256": "499e281152c5056d66d428500db4fcb71b9219ac7219f48fdee6ecd902dce328",
+      "reference_file_sha256": "499e281152c5056d66d428500db4fcb71b9219ac7219f48fdee6ecd902dce328",
       "tensors": {
         "hidden": {
           "shape": [
@@ -290,7 +289,7 @@
       "phase": "prepare",
       "request_id": 10,
       "profile_file_sha256": "ddab41099827c431ce84fbcbfad2e6ff1f7837eb189eefd9d4aec9a1320e7e78",
-      "formal_file_sha256": "ddab41099827c431ce84fbcbfad2e6ff1f7837eb189eefd9d4aec9a1320e7e78",
+      "reference_file_sha256": "ddab41099827c431ce84fbcbfad2e6ff1f7837eb189eefd9d4aec9a1320e7e78",
       "tensors": {
         "hidden": {
           "shape": [
@@ -317,7 +316,7 @@
       "phase": "prepare",
       "request_id": 11,
       "profile_file_sha256": "abfec2c6526b1b4b8db4f001523ad693b7e92010a1124fc2e78efb9afd596180",
-      "formal_file_sha256": "abfec2c6526b1b4b8db4f001523ad693b7e92010a1124fc2e78efb9afd596180",
+      "reference_file_sha256": "abfec2c6526b1b4b8db4f001523ad693b7e92010a1124fc2e78efb9afd596180",
       "tensors": {
         "hidden": {
           "shape": [
@@ -344,7 +343,7 @@
       "phase": "prepare",
       "request_id": 12,
       "profile_file_sha256": "c0b7796eaab47619c178a8d5fe72d4ad9629996d80f297c4720673aa499809f9",
-      "formal_file_sha256": "c0b7796eaab47619c178a8d5fe72d4ad9629996d80f297c4720673aa499809f9",
+      "reference_file_sha256": "c0b7796eaab47619c178a8d5fe72d4ad9629996d80f297c4720673aa499809f9",
       "tensors": {
         "hidden": {
           "shape": [
@@ -371,7 +370,7 @@
       "phase": "prepare",
       "request_id": 13,
       "profile_file_sha256": "0895f6be2a7ea409becf9d852d9fb92e2064992a2b7beb3899b19a92c1fcd81e",
-      "formal_file_sha256": "0895f6be2a7ea409becf9d852d9fb92e2064992a2b7beb3899b19a92c1fcd81e",
+      "reference_file_sha256": "0895f6be2a7ea409becf9d852d9fb92e2064992a2b7beb3899b19a92c1fcd81e",
       "tensors": {
         "hidden": {
           "shape": [
@@ -398,7 +397,7 @@
       "phase": "prepare",
       "request_id": 14,
       "profile_file_sha256": "8f3cd4a4f39cb6f18c1d6f0a5f2a8cc94538f0671f4addf41272856e74f81b5e",
-      "formal_file_sha256": "8f3cd4a4f39cb6f18c1d6f0a5f2a8cc94538f0671f4addf41272856e74f81b5e",
+      "reference_file_sha256": "8f3cd4a4f39cb6f18c1d6f0a5f2a8cc94538f0671f4addf41272856e74f81b5e",
       "tensors": {
         "hidden": {
           "shape": [
@@ -425,7 +424,7 @@
       "phase": "prepare",
       "request_id": 15,
       "profile_file_sha256": "bde5fb22e2013a488647126a1a4417150a90a85ad495d7bb7e356c5f16eb6abc",
-      "formal_file_sha256": "bde5fb22e2013a488647126a1a4417150a90a85ad495d7bb7e356c5f16eb6abc",
+      "reference_file_sha256": "bde5fb22e2013a488647126a1a4417150a90a85ad495d7bb7e356c5f16eb6abc",
       "tensors": {
         "hidden": {
           "shape": [
@@ -452,7 +451,7 @@
       "phase": "revisit",
       "request_id": 16,
       "profile_file_sha256": "ef2044c020e55e1c95daf471ee84d67a3fe7ca67d01168500764f2efbf418e6a",
-      "formal_file_sha256": "ef2044c020e55e1c95daf471ee84d67a3fe7ca67d01168500764f2efbf418e6a",
+      "reference_file_sha256": "ef2044c020e55e1c95daf471ee84d67a3fe7ca67d01168500764f2efbf418e6a",
       "tensors": {
         "hidden": {
           "shape": [
@@ -479,7 +478,7 @@
       "phase": "warmup",
       "request_id": 0,
       "profile_file_sha256": "95198864b698343eec8dd2a976b04528250b2f1b00eb29164f5a3bc3012dc5ec",
-      "formal_file_sha256": "95198864b698343eec8dd2a976b04528250b2f1b00eb29164f5a3bc3012dc5ec",
+      "reference_file_sha256": "95198864b698343eec8dd2a976b04528250b2f1b00eb29164f5a3bc3012dc5ec",
       "tensors": {
         "hidden": {
           "shape": [
@@ -506,7 +505,7 @@
       "phase": "warmup",
       "request_id": 1,
       "profile_file_sha256": "0881906758bbef7f776c858d9e2a8686d33170290630f7acd799feb7d0fb0cca",
-      "formal_file_sha256": "0881906758bbef7f776c858d9e2a8686d33170290630f7acd799feb7d0fb0cca",
+      "reference_file_sha256": "0881906758bbef7f776c858d9e2a8686d33170290630f7acd799feb7d0fb0cca",
       "tensors": {
         "hidden": {
           "shape": [
@@ -533,7 +532,7 @@
       "phase": "warmup",
       "request_id": 16,
       "profile_file_sha256": "ef2044c020e55e1c95daf471ee84d67a3fe7ca67d01168500764f2efbf418e6a",
-      "formal_file_sha256": "ef2044c020e55e1c95daf471ee84d67a3fe7ca67d01168500764f2efbf418e6a",
+      "reference_file_sha256": "ef2044c020e55e1c95daf471ee84d67a3fe7ca67d01168500764f2efbf418e6a",
       "tensors": {
         "hidden": {
           "shape": [
@@ -560,7 +559,7 @@
       "phase": "cold",
       "request_id": 0,
       "profile_file_sha256": "95198864b698343eec8dd2a976b04528250b2f1b00eb29164f5a3bc3012dc5ec",
-      "formal_file_sha256": "95198864b698343eec8dd2a976b04528250b2f1b00eb29164f5a3bc3012dc5ec",
+      "reference_file_sha256": "95198864b698343eec8dd2a976b04528250b2f1b00eb29164f5a3bc3012dc5ec",
       "tensors": {
         "hidden": {
           "shape": [
@@ -587,7 +586,7 @@
       "phase": "prepare",
       "request_id": 1,
       "profile_file_sha256": "0881906758bbef7f776c858d9e2a8686d33170290630f7acd799feb7d0fb0cca",
-      "formal_file_sha256": "0881906758bbef7f776c858d9e2a8686d33170290630f7acd799feb7d0fb0cca",
+      "reference_file_sha256": "0881906758bbef7f776c858d9e2a8686d33170290630f7acd799feb7d0fb0cca",
       "tensors": {
         "hidden": {
           "shape": [
@@ -614,7 +613,7 @@
       "phase": "prepare",
       "request_id": 2,
       "profile_file_sha256": "9307bb9de779ee73088ce15a0e788199037d120637a98703692fa6fe11338ee1",
-      "formal_file_sha256": "9307bb9de779ee73088ce15a0e788199037d120637a98703692fa6fe11338ee1",
+      "reference_file_sha256": "9307bb9de779ee73088ce15a0e788199037d120637a98703692fa6fe11338ee1",
       "tensors": {
         "hidden": {
           "shape": [
@@ -641,7 +640,7 @@
       "phase": "prepare",
       "request_id": 3,
       "profile_file_sha256": "415602a36ad6c2745a1a59175848a71a6a86d115c41f0976fb653b19236638f4",
-      "formal_file_sha256": "415602a36ad6c2745a1a59175848a71a6a86d115c41f0976fb653b19236638f4",
+      "reference_file_sha256": "415602a36ad6c2745a1a59175848a71a6a86d115c41f0976fb653b19236638f4",
       "tensors": {
         "hidden": {
           "shape": [
@@ -668,7 +667,7 @@
       "phase": "prepare",
       "request_id": 4,
       "profile_file_sha256": "b06a78b11ac0b2bc86cd75b5acc947b6e7a3d3a8ced3f6fbd913a4fa6bc1ac97",
-      "formal_file_sha256": "b06a78b11ac0b2bc86cd75b5acc947b6e7a3d3a8ced3f6fbd913a4fa6bc1ac97",
+      "reference_file_sha256": "b06a78b11ac0b2bc86cd75b5acc947b6e7a3d3a8ced3f6fbd913a4fa6bc1ac97",
       "tensors": {
         "hidden": {
           "shape": [
@@ -695,7 +694,7 @@
       "phase": "prepare",
       "request_id": 5,
       "profile_file_sha256": "85eb2ede4c59325eea690b2f76f617db8dc93f3b5ba22d7cbd3f61fdcc4bbd8e",
-      "formal_file_sha256": "85eb2ede4c59325eea690b2f76f617db8dc93f3b5ba22d7cbd3f61fdcc4bbd8e",
+      "reference_file_sha256": "85eb2ede4c59325eea690b2f76f617db8dc93f3b5ba22d7cbd3f61fdcc4bbd8e",
       "tensors": {
         "hidden": {
           "shape": [
@@ -722,7 +721,7 @@
       "phase": "prepare",
       "request_id": 6,
       "profile_file_sha256": "890a805638600e945be7ca5b26bb1d3c3ef921e8141ce667b180d606a507f599",
-      "formal_file_sha256": "890a805638600e945be7ca5b26bb1d3c3ef921e8141ce667b180d606a507f599",
+      "reference_file_sha256": "890a805638600e945be7ca5b26bb1d3c3ef921e8141ce667b180d606a507f599",
       "tensors": {
         "hidden": {
           "shape": [
@@ -749,7 +748,7 @@
       "phase": "prepare",
       "request_id": 7,
       "profile_file_sha256": "32e0680c678048351599813820b164d3984a6fd2610b454c16ce1722f112638a",
-      "formal_file_sha256": "32e0680c678048351599813820b164d3984a6fd2610b454c16ce1722f112638a",
+      "reference_file_sha256": "32e0680c678048351599813820b164d3984a6fd2610b454c16ce1722f112638a",
       "tensors": {
         "hidden": {
           "shape": [
@@ -776,7 +775,7 @@
       "phase": "prepare",
       "request_id": 8,
       "profile_file_sha256": "1b1829effc99b8a9216f1ebd1bb7e24c9369b9bcac8e3eb4e05ed68063c561f2",
-      "formal_file_sha256": "1b1829effc99b8a9216f1ebd1bb7e24c9369b9bcac8e3eb4e05ed68063c561f2",
+      "reference_file_sha256": "1b1829effc99b8a9216f1ebd1bb7e24c9369b9bcac8e3eb4e05ed68063c561f2",
       "tensors": {
         "hidden": {
           "shape": [
@@ -803,7 +802,7 @@
       "phase": "prepare",
       "request_id": 9,
       "profile_file_sha256": "499e281152c5056d66d428500db4fcb71b9219ac7219f48fdee6ecd902dce328",
-      "formal_file_sha256": "499e281152c5056d66d428500db4fcb71b9219ac7219f48fdee6ecd902dce328",
+      "reference_file_sha256": "499e281152c5056d66d428500db4fcb71b9219ac7219f48fdee6ecd902dce328",
       "tensors": {
         "hidden": {
           "shape": [
@@ -830,7 +829,7 @@
       "phase": "prepare",
       "request_id": 10,
       "profile_file_sha256": "ddab41099827c431ce84fbcbfad2e6ff1f7837eb189eefd9d4aec9a1320e7e78",
-      "formal_file_sha256": "ddab41099827c431ce84fbcbfad2e6ff1f7837eb189eefd9d4aec9a1320e7e78",
+      "reference_file_sha256": "ddab41099827c431ce84fbcbfad2e6ff1f7837eb189eefd9d4aec9a1320e7e78",
       "tensors": {
         "hidden": {
           "shape": [
@@ -857,7 +856,7 @@
       "phase": "prepare",
       "request_id": 11,
       "profile_file_sha256": "abfec2c6526b1b4b8db4f001523ad693b7e92010a1124fc2e78efb9afd596180",
-      "formal_file_sha256": "abfec2c6526b1b4b8db4f001523ad693b7e92010a1124fc2e78efb9afd596180",
+      "reference_file_sha256": "abfec2c6526b1b4b8db4f001523ad693b7e92010a1124fc2e78efb9afd596180",
       "tensors": {
         "hidden": {
           "shape": [
@@ -884,7 +883,7 @@
       "phase": "prepare",
       "request_id": 12,
       "profile_file_sha256": "c0b7796eaab47619c178a8d5fe72d4ad9629996d80f297c4720673aa499809f9",
-      "formal_file_sha256": "c0b7796eaab47619c178a8d5fe72d4ad9629996d80f297c4720673aa499809f9",
+      "reference_file_sha256": "c0b7796eaab47619c178a8d5fe72d4ad9629996d80f297c4720673aa499809f9",
       "tensors": {
         "hidden": {
           "shape": [
@@ -911,7 +910,7 @@
       "phase": "prepare",
       "request_id": 13,
       "profile_file_sha256": "0895f6be2a7ea409becf9d852d9fb92e2064992a2b7beb3899b19a92c1fcd81e",
-      "formal_file_sha256": "0895f6be2a7ea409becf9d852d9fb92e2064992a2b7beb3899b19a92c1fcd81e",
+      "reference_file_sha256": "0895f6be2a7ea409becf9d852d9fb92e2064992a2b7beb3899b19a92c1fcd81e",
       "tensors": {
         "hidden": {
           "shape": [
@@ -938,7 +937,7 @@
       "phase": "prepare",
       "request_id": 14,
       "profile_file_sha256": "8f3cd4a4f39cb6f18c1d6f0a5f2a8cc94538f0671f4addf41272856e74f81b5e",
-      "formal_file_sha256": "8f3cd4a4f39cb6f18c1d6f0a5f2a8cc94538f0671f4addf41272856e74f81b5e",
+      "reference_file_sha256": "8f3cd4a4f39cb6f18c1d6f0a5f2a8cc94538f0671f4addf41272856e74f81b5e",
       "tensors": {
         "hidden": {
           "shape": [
@@ -965,7 +964,7 @@
       "phase": "prepare",
       "request_id": 15,
       "profile_file_sha256": "bde5fb22e2013a488647126a1a4417150a90a85ad495d7bb7e356c5f16eb6abc",
-      "formal_file_sha256": "bde5fb22e2013a488647126a1a4417150a90a85ad495d7bb7e356c5f16eb6abc",
+      "reference_file_sha256": "bde5fb22e2013a488647126a1a4417150a90a85ad495d7bb7e356c5f16eb6abc",
       "tensors": {
         "hidden": {
           "shape": [
@@ -992,7 +991,7 @@
       "phase": "revisit",
       "request_id": 16,
       "profile_file_sha256": "ef2044c020e55e1c95daf471ee84d67a3fe7ca67d01168500764f2efbf418e6a",
-      "formal_file_sha256": "ef2044c020e55e1c95daf471ee84d67a3fe7ca67d01168500764f2efbf418e6a",
+      "reference_file_sha256": "ef2044c020e55e1c95daf471ee84d67a3fe7ca67d01168500764f2efbf418e6a",
       "tensors": {
         "hidden": {
           "shape": [
@@ -1019,7 +1018,7 @@
       "phase": "warmup",
       "request_id": 0,
       "profile_file_sha256": "95198864b698343eec8dd2a976b04528250b2f1b00eb29164f5a3bc3012dc5ec",
-      "formal_file_sha256": "95198864b698343eec8dd2a976b04528250b2f1b00eb29164f5a3bc3012dc5ec",
+      "reference_file_sha256": "95198864b698343eec8dd2a976b04528250b2f1b00eb29164f5a3bc3012dc5ec",
       "tensors": {
         "hidden": {
           "shape": [
@@ -1046,7 +1045,7 @@
       "phase": "warmup",
       "request_id": 1,
       "profile_file_sha256": "0881906758bbef7f776c858d9e2a8686d33170290630f7acd799feb7d0fb0cca",
-      "formal_file_sha256": "0881906758bbef7f776c858d9e2a8686d33170290630f7acd799feb7d0fb0cca",
+      "reference_file_sha256": "0881906758bbef7f776c858d9e2a8686d33170290630f7acd799feb7d0fb0cca",
       "tensors": {
         "hidden": {
           "shape": [
@@ -1073,7 +1072,7 @@
       "phase": "warmup",
       "request_id": 16,
       "profile_file_sha256": "ef2044c020e55e1c95daf471ee84d67a3fe7ca67d01168500764f2efbf418e6a",
-      "formal_file_sha256": "ef2044c020e55e1c95daf471ee84d67a3fe7ca67d01168500764f2efbf418e6a",
+      "reference_file_sha256": "ef2044c020e55e1c95daf471ee84d67a3fe7ca67d01168500764f2efbf418e6a",
       "tensors": {
         "hidden": {
           "shape": [
@@ -1100,7 +1099,7 @@
       "phase": "cold",
       "request_id": 0,
       "profile_file_sha256": "95198864b698343eec8dd2a976b04528250b2f1b00eb29164f5a3bc3012dc5ec",
-      "formal_file_sha256": "95198864b698343eec8dd2a976b04528250b2f1b00eb29164f5a3bc3012dc5ec",
+      "reference_file_sha256": "95198864b698343eec8dd2a976b04528250b2f1b00eb29164f5a3bc3012dc5ec",
       "tensors": {
         "hidden": {
           "shape": [
@@ -1127,7 +1126,7 @@
       "phase": "prepare",
       "request_id": 1,
       "profile_file_sha256": "0881906758bbef7f776c858d9e2a8686d33170290630f7acd799feb7d0fb0cca",
-      "formal_file_sha256": "0881906758bbef7f776c858d9e2a8686d33170290630f7acd799feb7d0fb0cca",
+      "reference_file_sha256": "0881906758bbef7f776c858d9e2a8686d33170290630f7acd799feb7d0fb0cca",
       "tensors": {
         "hidden": {
           "shape": [
@@ -1154,7 +1153,7 @@
       "phase": "prepare",
       "request_id": 2,
       "profile_file_sha256": "9307bb9de779ee73088ce15a0e788199037d120637a98703692fa6fe11338ee1",
-      "formal_file_sha256": "9307bb9de779ee73088ce15a0e788199037d120637a98703692fa6fe11338ee1",
+      "reference_file_sha256": "9307bb9de779ee73088ce15a0e788199037d120637a98703692fa6fe11338ee1",
       "tensors": {
         "hidden": {
           "shape": [
@@ -1181,7 +1180,7 @@
       "phase": "prepare",
       "request_id": 3,
       "profile_file_sha256": "415602a36ad6c2745a1a59175848a71a6a86d115c41f0976fb653b19236638f4",
-      "formal_file_sha256": "415602a36ad6c2745a1a59175848a71a6a86d115c41f0976fb653b19236638f4",
+      "reference_file_sha256": "415602a36ad6c2745a1a59175848a71a6a86d115c41f0976fb653b19236638f4",
       "tensors": {
         "hidden": {
           "shape": [
@@ -1208,7 +1207,7 @@
       "phase": "prepare",
       "request_id": 4,
       "profile_file_sha256": "b06a78b11ac0b2bc86cd75b5acc947b6e7a3d3a8ced3f6fbd913a4fa6bc1ac97",
-      "formal_file_sha256": "b06a78b11ac0b2bc86cd75b5acc947b6e7a3d3a8ced3f6fbd913a4fa6bc1ac97",
+      "reference_file_sha256": "b06a78b11ac0b2bc86cd75b5acc947b6e7a3d3a8ced3f6fbd913a4fa6bc1ac97",
       "tensors": {
         "hidden": {
           "shape": [
@@ -1235,7 +1234,7 @@
       "phase": "prepare",
       "request_id": 5,
       "profile_file_sha256": "85eb2ede4c59325eea690b2f76f617db8dc93f3b5ba22d7cbd3f61fdcc4bbd8e",
-      "formal_file_sha256": "85eb2ede4c59325eea690b2f76f617db8dc93f3b5ba22d7cbd3f61fdcc4bbd8e",
+      "reference_file_sha256": "85eb2ede4c59325eea690b2f76f617db8dc93f3b5ba22d7cbd3f61fdcc4bbd8e",
       "tensors": {
         "hidden": {
           "shape": [
@@ -1262,7 +1261,7 @@
       "phase": "prepare",
       "request_id": 6,
       "profile_file_sha256": "890a805638600e945be7ca5b26bb1d3c3ef921e8141ce667b180d606a507f599",
-      "formal_file_sha256": "890a805638600e945be7ca5b26bb1d3c3ef921e8141ce667b180d606a507f599",
+      "reference_file_sha256": "890a805638600e945be7ca5b26bb1d3c3ef921e8141ce667b180d606a507f599",
       "tensors": {
         "hidden": {
           "shape": [
@@ -1289,7 +1288,7 @@
       "phase": "prepare",
       "request_id": 7,
       "profile_file_sha256": "32e0680c678048351599813820b164d3984a6fd2610b454c16ce1722f112638a",
-      "formal_file_sha256": "32e0680c678048351599813820b164d3984a6fd2610b454c16ce1722f112638a",
+      "reference_file_sha256": "32e0680c678048351599813820b164d3984a6fd2610b454c16ce1722f112638a",
       "tensors": {
         "hidden": {
           "shape": [
@@ -1316,7 +1315,7 @@
       "phase": "prepare",
       "request_id": 8,
       "profile_file_sha256": "1b1829effc99b8a9216f1ebd1bb7e24c9369b9bcac8e3eb4e05ed68063c561f2",
-      "formal_file_sha256": "1b1829effc99b8a9216f1ebd1bb7e24c9369b9bcac8e3eb4e05ed68063c561f2",
+      "reference_file_sha256": "1b1829effc99b8a9216f1ebd1bb7e24c9369b9bcac8e3eb4e05ed68063c561f2",
       "tensors": {
         "hidden": {
           "shape": [
@@ -1343,7 +1342,7 @@
       "phase": "prepare",
       "request_id": 9,
       "profile_file_sha256": "499e281152c5056d66d428500db4fcb71b9219ac7219f48fdee6ecd902dce328",
-      "formal_file_sha256": "499e281152c5056d66d428500db4fcb71b9219ac7219f48fdee6ecd902dce328",
+      "reference_file_sha256": "499e281152c5056d66d428500db4fcb71b9219ac7219f48fdee6ecd902dce328",
       "tensors": {
         "hidden": {
           "shape": [
@@ -1370,7 +1369,7 @@
       "phase": "prepare",
       "request_id": 10,
       "profile_file_sha256": "ddab41099827c431ce84fbcbfad2e6ff1f7837eb189eefd9d4aec9a1320e7e78",
-      "formal_file_sha256": "ddab41099827c431ce84fbcbfad2e6ff1f7837eb189eefd9d4aec9a1320e7e78",
+      "reference_file_sha256": "ddab41099827c431ce84fbcbfad2e6ff1f7837eb189eefd9d4aec9a1320e7e78",
       "tensors": {
         "hidden": {
           "shape": [
@@ -1397,7 +1396,7 @@
       "phase": "prepare",
       "request_id": 11,
       "profile_file_sha256": "abfec2c6526b1b4b8db4f001523ad693b7e92010a1124fc2e78efb9afd596180",
-      "formal_file_sha256": "abfec2c6526b1b4b8db4f001523ad693b7e92010a1124fc2e78efb9afd596180",
+      "reference_file_sha256": "abfec2c6526b1b4b8db4f001523ad693b7e92010a1124fc2e78efb9afd596180",
       "tensors": {
         "hidden": {
           "shape": [
@@ -1424,7 +1423,7 @@
       "phase": "prepare",
       "request_id": 12,
       "profile_file_sha256": "c0b7796eaab47619c178a8d5fe72d4ad9629996d80f297c4720673aa499809f9",
-      "formal_file_sha256": "c0b7796eaab47619c178a8d5fe72d4ad9629996d80f297c4720673aa499809f9",
+      "reference_file_sha256": "c0b7796eaab47619c178a8d5fe72d4ad9629996d80f297c4720673aa499809f9",
       "tensors": {
         "hidden": {
           "shape": [
@@ -1451,7 +1450,7 @@
       "phase": "prepare",
       "request_id": 13,
       "profile_file_sha256": "0895f6be2a7ea409becf9d852d9fb92e2064992a2b7beb3899b19a92c1fcd81e",
-      "formal_file_sha256": "0895f6be2a7ea409becf9d852d9fb92e2064992a2b7beb3899b19a92c1fcd81e",
+      "reference_file_sha256": "0895f6be2a7ea409becf9d852d9fb92e2064992a2b7beb3899b19a92c1fcd81e",
       "tensors": {
         "hidden": {
           "shape": [
@@ -1478,7 +1477,7 @@
       "phase": "prepare",
       "request_id": 14,
       "profile_file_sha256": "8f3cd4a4f39cb6f18c1d6f0a5f2a8cc94538f0671f4addf41272856e74f81b5e",
-      "formal_file_sha256": "8f3cd4a4f39cb6f18c1d6f0a5f2a8cc94538f0671f4addf41272856e74f81b5e",
+      "reference_file_sha256": "8f3cd4a4f39cb6f18c1d6f0a5f2a8cc94538f0671f4addf41272856e74f81b5e",
       "tensors": {
         "hidden": {
           "shape": [
@@ -1505,7 +1504,7 @@
       "phase": "prepare",
       "request_id": 15,
       "profile_file_sha256": "bde5fb22e2013a488647126a1a4417150a90a85ad495d7bb7e356c5f16eb6abc",
-      "formal_file_sha256": "bde5fb22e2013a488647126a1a4417150a90a85ad495d7bb7e356c5f16eb6abc",
+      "reference_file_sha256": "bde5fb22e2013a488647126a1a4417150a90a85ad495d7bb7e356c5f16eb6abc",
       "tensors": {
         "hidden": {
           "shape": [
@@ -1532,7 +1531,7 @@
       "phase": "revisit",
       "request_id": 16,
       "profile_file_sha256": "ef2044c020e55e1c95daf471ee84d67a3fe7ca67d01168500764f2efbf418e6a",
-      "formal_file_sha256": "ef2044c020e55e1c95daf471ee84d67a3fe7ca67d01168500764f2efbf418e6a",
+      "reference_file_sha256": "ef2044c020e55e1c95daf471ee84d67a3fe7ca67d01168500764f2efbf418e6a",
       "tensors": {
         "hidden": {
           "shape": [
@@ -1559,7 +1558,7 @@
       "phase": "warmup",
       "request_id": 0,
       "profile_file_sha256": "95198864b698343eec8dd2a976b04528250b2f1b00eb29164f5a3bc3012dc5ec",
-      "formal_file_sha256": "95198864b698343eec8dd2a976b04528250b2f1b00eb29164f5a3bc3012dc5ec",
+      "reference_file_sha256": "95198864b698343eec8dd2a976b04528250b2f1b00eb29164f5a3bc3012dc5ec",
       "tensors": {
         "hidden": {
           "shape": [
@@ -1586,7 +1585,7 @@
       "phase": "warmup",
       "request_id": 1,
       "profile_file_sha256": "0881906758bbef7f776c858d9e2a8686d33170290630f7acd799feb7d0fb0cca",
-      "formal_file_sha256": "0881906758bbef7f776c858d9e2a8686d33170290630f7acd799feb7d0fb0cca",
+      "reference_file_sha256": "0881906758bbef7f776c858d9e2a8686d33170290630f7acd799feb7d0fb0cca",
       "tensors": {
         "hidden": {
           "shape": [
@@ -1613,7 +1612,7 @@
       "phase": "warmup",
       "request_id": 16,
       "profile_file_sha256": "ef2044c020e55e1c95daf471ee84d67a3fe7ca67d01168500764f2efbf418e6a",
-      "formal_file_sha256": "ef2044c020e55e1c95daf471ee84d67a3fe7ca67d01168500764f2efbf418e6a",
+      "reference_file_sha256": "ef2044c020e55e1c95daf471ee84d67a3fe7ca67d01168500764f2efbf418e6a",
       "tensors": {
         "hidden": {
           "shape": [
@@ -1640,7 +1639,7 @@
       "phase": "cold",
       "request_id": 0,
       "profile_file_sha256": "95198864b698343eec8dd2a976b04528250b2f1b00eb29164f5a3bc3012dc5ec",
-      "formal_file_sha256": "95198864b698343eec8dd2a976b04528250b2f1b00eb29164f5a3bc3012dc5ec",
+      "reference_file_sha256": "95198864b698343eec8dd2a976b04528250b2f1b00eb29164f5a3bc3012dc5ec",
       "tensors": {
         "hidden": {
           "shape": [
@@ -1667,7 +1666,7 @@
       "phase": "prepare",
       "request_id": 1,
       "profile_file_sha256": "0881906758bbef7f776c858d9e2a8686d33170290630f7acd799feb7d0fb0cca",
-      "formal_file_sha256": "0881906758bbef7f776c858d9e2a8686d33170290630f7acd799feb7d0fb0cca",
+      "reference_file_sha256": "0881906758bbef7f776c858d9e2a8686d33170290630f7acd799feb7d0fb0cca",
       "tensors": {
         "hidden": {
           "shape": [
@@ -1694,7 +1693,7 @@
       "phase": "prepare",
       "request_id": 2,
       "profile_file_sha256": "9307bb9de779ee73088ce15a0e788199037d120637a98703692fa6fe11338ee1",
-      "formal_file_sha256": "9307bb9de779ee73088ce15a0e788199037d120637a98703692fa6fe11338ee1",
+      "reference_file_sha256": "9307bb9de779ee73088ce15a0e788199037d120637a98703692fa6fe11338ee1",
       "tensors": {
         "hidden": {
           "shape": [
@@ -1721,7 +1720,7 @@
       "phase": "prepare",
       "request_id": 3,
       "profile_file_sha256": "415602a36ad6c2745a1a59175848a71a6a86d115c41f0976fb653b19236638f4",
-      "formal_file_sha256": "415602a36ad6c2745a1a59175848a71a6a86d115c41f0976fb653b19236638f4",
+      "reference_file_sha256": "415602a36ad6c2745a1a59175848a71a6a86d115c41f0976fb653b19236638f4",
       "tensors": {
         "hidden": {
           "shape": [
@@ -1748,7 +1747,7 @@
       "phase": "prepare",
       "request_id": 4,
       "profile_file_sha256": "b06a78b11ac0b2bc86cd75b5acc947b6e7a3d3a8ced3f6fbd913a4fa6bc1ac97",
-      "formal_file_sha256": "b06a78b11ac0b2bc86cd75b5acc947b6e7a3d3a8ced3f6fbd913a4fa6bc1ac97",
+      "reference_file_sha256": "b06a78b11ac0b2bc86cd75b5acc947b6e7a3d3a8ced3f6fbd913a4fa6bc1ac97",
       "tensors": {
         "hidden": {
           "shape": [
@@ -1775,7 +1774,7 @@
       "phase": "prepare",
       "request_id": 5,
       "profile_file_sha256": "85eb2ede4c59325eea690b2f76f617db8dc93f3b5ba22d7cbd3f61fdcc4bbd8e",
-      "formal_file_sha256": "85eb2ede4c59325eea690b2f76f617db8dc93f3b5ba22d7cbd3f61fdcc4bbd8e",
+      "reference_file_sha256": "85eb2ede4c59325eea690b2f76f617db8dc93f3b5ba22d7cbd3f61fdcc4bbd8e",
       "tensors": {
         "hidden": {
           "shape": [
@@ -1802,7 +1801,7 @@
       "phase": "prepare",
       "request_id": 6,
       "profile_file_sha256": "890a805638600e945be7ca5b26bb1d3c3ef921e8141ce667b180d606a507f599",
-      "formal_file_sha256": "890a805638600e945be7ca5b26bb1d3c3ef921e8141ce667b180d606a507f599",
+      "reference_file_sha256": "890a805638600e945be7ca5b26bb1d3c3ef921e8141ce667b180d606a507f599",
       "tensors": {
         "hidden": {
           "shape": [
@@ -1829,7 +1828,7 @@
       "phase": "prepare",
       "request_id": 7,
       "profile_file_sha256": "32e0680c678048351599813820b164d3984a6fd2610b454c16ce1722f112638a",
-      "formal_file_sha256": "32e0680c678048351599813820b164d3984a6fd2610b454c16ce1722f112638a",
+      "reference_file_sha256": "32e0680c678048351599813820b164d3984a6fd2610b454c16ce1722f112638a",
       "tensors": {
         "hidden": {
           "shape": [
@@ -1856,7 +1855,7 @@
       "phase": "prepare",
       "request_id": 8,
       "profile_file_sha256": "1b1829effc99b8a9216f1ebd1bb7e24c9369b9bcac8e3eb4e05ed68063c561f2",
-      "formal_file_sha256": "1b1829effc99b8a9216f1ebd1bb7e24c9369b9bcac8e3eb4e05ed68063c561f2",
+      "reference_file_sha256": "1b1829effc99b8a9216f1ebd1bb7e24c9369b9bcac8e3eb4e05ed68063c561f2",
       "tensors": {
         "hidden": {
           "shape": [
@@ -1883,7 +1882,7 @@
       "phase": "prepare",
       "request_id": 9,
       "profile_file_sha256": "499e281152c5056d66d428500db4fcb71b9219ac7219f48fdee6ecd902dce328",
-      "formal_file_sha256": "499e281152c5056d66d428500db4fcb71b9219ac7219f48fdee6ecd902dce328",
+      "reference_file_sha256": "499e281152c5056d66d428500db4fcb71b9219ac7219f48fdee6ecd902dce328",
       "tensors": {
         "hidden": {
           "shape": [
@@ -1910,7 +1909,7 @@
       "phase": "prepare",
       "request_id": 10,
       "profile_file_sha256": "ddab41099827c431ce84fbcbfad2e6ff1f7837eb189eefd9d4aec9a1320e7e78",
-      "formal_file_sha256": "ddab41099827c431ce84fbcbfad2e6ff1f7837eb189eefd9d4aec9a1320e7e78",
+      "reference_file_sha256": "ddab41099827c431ce84fbcbfad2e6ff1f7837eb189eefd9d4aec9a1320e7e78",
       "tensors": {
         "hidden": {
           "shape": [
@@ -1937,7 +1936,7 @@
       "phase": "prepare",
       "request_id": 11,
       "profile_file_sha256": "abfec2c6526b1b4b8db4f001523ad693b7e92010a1124fc2e78efb9afd596180",
-      "formal_file_sha256": "abfec2c6526b1b4b8db4f001523ad693b7e92010a1124fc2e78efb9afd596180",
+      "reference_file_sha256": "abfec2c6526b1b4b8db4f001523ad693b7e92010a1124fc2e78efb9afd596180",
       "tensors": {
         "hidden": {
           "shape": [
@@ -1964,7 +1963,7 @@
       "phase": "prepare",
       "request_id": 12,
       "profile_file_sha256": "c0b7796eaab47619c178a8d5fe72d4ad9629996d80f297c4720673aa499809f9",
-      "formal_file_sha256": "c0b7796eaab47619c178a8d5fe72d4ad9629996d80f297c4720673aa499809f9",
+      "reference_file_sha256": "c0b7796eaab47619c178a8d5fe72d4ad9629996d80f297c4720673aa499809f9",
       "tensors": {
         "hidden": {
           "shape": [
@@ -1991,7 +1990,7 @@
       "phase": "prepare",
       "request_id": 13,
       "profile_file_sha256": "0895f6be2a7ea409becf9d852d9fb92e2064992a2b7beb3899b19a92c1fcd81e",
-      "formal_file_sha256": "0895f6be2a7ea409becf9d852d9fb92e2064992a2b7beb3899b19a92c1fcd81e",
+      "reference_file_sha256": "0895f6be2a7ea409becf9d852d9fb92e2064992a2b7beb3899b19a92c1fcd81e",
       "tensors": {
         "hidden": {
           "shape": [
@@ -2018,7 +2017,7 @@
       "phase": "prepare",
       "request_id": 14,
       "profile_file_sha256": "8f3cd4a4f39cb6f18c1d6f0a5f2a8cc94538f0671f4addf41272856e74f81b5e",
-      "formal_file_sha256": "8f3cd4a4f39cb6f18c1d6f0a5f2a8cc94538f0671f4addf41272856e74f81b5e",
+      "reference_file_sha256": "8f3cd4a4f39cb6f18c1d6f0a5f2a8cc94538f0671f4addf41272856e74f81b5e",
       "tensors": {
         "hidden": {
           "shape": [
@@ -2045,7 +2044,7 @@
       "phase": "prepare",
       "request_id": 15,
       "profile_file_sha256": "bde5fb22e2013a488647126a1a4417150a90a85ad495d7bb7e356c5f16eb6abc",
-      "formal_file_sha256": "bde5fb22e2013a488647126a1a4417150a90a85ad495d7bb7e356c5f16eb6abc",
+      "reference_file_sha256": "bde5fb22e2013a488647126a1a4417150a90a85ad495d7bb7e356c5f16eb6abc",
       "tensors": {
         "hidden": {
           "shape": [
@@ -2072,7 +2071,7 @@
       "phase": "revisit",
       "request_id": 16,
       "profile_file_sha256": "ef2044c020e55e1c95daf471ee84d67a3fe7ca67d01168500764f2efbf418e6a",
-      "formal_file_sha256": "ef2044c020e55e1c95daf471ee84d67a3fe7ca67d01168500764f2efbf418e6a",
+      "reference_file_sha256": "ef2044c020e55e1c95daf471ee84d67a3fe7ca67d01168500764f2efbf418e6a",
       "tensors": {
         "hidden": {
           "shape": [
@@ -2099,7 +2098,7 @@
       "phase": "warmup",
       "request_id": 0,
       "profile_file_sha256": "95198864b698343eec8dd2a976b04528250b2f1b00eb29164f5a3bc3012dc5ec",
-      "formal_file_sha256": "95198864b698343eec8dd2a976b04528250b2f1b00eb29164f5a3bc3012dc5ec",
+      "reference_file_sha256": "95198864b698343eec8dd2a976b04528250b2f1b00eb29164f5a3bc3012dc5ec",
       "tensors": {
         "hidden": {
           "shape": [
@@ -2126,7 +2125,7 @@
       "phase": "warmup",
       "request_id": 1,
       "profile_file_sha256": "0881906758bbef7f776c858d9e2a8686d33170290630f7acd799feb7d0fb0cca",
-      "formal_file_sha256": "0881906758bbef7f776c858d9e2a8686d33170290630f7acd799feb7d0fb0cca",
+      "reference_file_sha256": "0881906758bbef7f776c858d9e2a8686d33170290630f7acd799feb7d0fb0cca",
       "tensors": {
         "hidden": {
           "shape": [
@@ -2153,7 +2152,7 @@
       "phase": "warmup",
       "request_id": 16,
       "profile_file_sha256": "ef2044c020e55e1c95daf471ee84d67a3fe7ca67d01168500764f2efbf418e6a",
-      "formal_file_sha256": "ef2044c020e55e1c95daf471ee84d67a3fe7ca67d01168500764f2efbf418e6a",
+      "reference_file_sha256": "ef2044c020e55e1c95daf471ee84d67a3fe7ca67d01168500764f2efbf418e6a",
       "tensors": {
         "hidden": {
           "shape": [
@@ -2177,15 +2176,13 @@
     }
   ],
   "input_sha256": {
-    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_mfu_c10_profile_20261006_02/metadata.json": "5ba26f51147acf6016748b939ea780c61341c9eca31318509714865ba79221d4",
-    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_mfu_c10_profile_20261006_02/result.json": "1305e0630f6fdddf4766a07aca7dc0d9cf59b10854413facd9da19ca11e5c2e3",
-    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_mfu_c10_profile_20261006_02/correctness.jsonl": "608c548ac31f00bdf0255534898a70c80f2f9c9dd543fa769c8fbd34e21f08f7",
-    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_mfu_c10_bench_20261006_01/metadata.json": "b1a907a0490284ae1c66842506485c1720cebd1a216d3eedc06a581ee69ed58a",
-    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_mfu_c10_bench_20261006_01/measurements.jsonl": "cab4cb4cd54db17c2dceb62caa9b9ecde27629abf994d2ddce375abcc2cb2ab2",
-    "/tmp/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_mfu_c10_check_20261006_01/metadata.json": "416d29021d13ec2ec61d8cc260abc1466ab622b2f4ad037bfab58343d7d53521",
-    "/tmp/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_mfu_c10_check_20261006_01/measurements.jsonl": "6bad6af8b14ecfab6ff3f2fc242dc583edd3682957682eb2638a8ad5f53fddd8"
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_rerun_profile_20261006_01/metadata.json": "70d6af2b51d385974decdab273b67294ddd89f6248ed04737559260244876531",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_rerun_profile_20261006_01/result.json": "1409090b946447725bfd7903ff10376eb8e809712c8706d3b22162fe3f32c142",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_rerun_profile_20261006_01/correctness.jsonl": "e907ab9e98441163f37a1cc54fde681c5c384fe4a43fa150d9aade00359030f8",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_motivation/output/data/deepseek_motivation_rerun_bench_20261006_01/metadata.json": "39377f38fb44f506a419beab067c403cbd8e14f67bcee9bbd4aba50a0731bfa8",
+    "/tmp/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_rerun_check_20261006_01/receipt.json": "e7a624e4fb4df6bedee3296e596543fff7d798cbe4c7abd82ad79ea9d9d2065b",
+    "/tmp/cxldsagr-checks/deepseek_v32_motivation/data/deepseek_motivation_rerun_check_20261006_01/measurements.jsonl": "e24989b57f8075da2728041ece709909364d380fc98216c671306da782306d92"
   },
-  "script_sha256": "e2084509972d150ab52a17eed884ea8bb0bab238ab80fee31acb1628f2a7e76e",
-  "torch": "2.12.1+cu130",
-  "boundary": "Includes twelve saved warmup outputs and sixty-eight trajectory outputs; no new GPU execution or serving latency measurement."
+  "script_sha256": "bdd540220aead36896d9e17c3c9074110c6d2a79a24675ee9e27442d6d6bf977",
+  "boundary": "CPU byte comparison of 12 warmup and 68 trajectory outputs. Intrusive captures do not replace formal serving latency; raw activity and clone-lineage audits are separate."
 }
