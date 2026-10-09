@@ -1,0 +1,496 @@
+{
+  "component": {
+    "arm_samples": 3000,
+    "boundary": "Complete echo.logits plus original staging cleanup; includes current packing, bounds, block table, official schedule, stage reset, unchanged fused scores, causal clean and promotion. Excludes caller FIFO preparation/reset, top-k and exact recall.",
+    "cold_sum_paired_savings_us": 4.9439966678619385,
+    "groups": [
+      {
+        "AB_delta_us": -1.1200010776519775,
+        "BA_delta_us": -0.9439997375011444,
+        "baseline_us": 37.167999893426895,
+        "candidate_us": 35.93600168824196,
+        "candidate_wins": 80,
+        "case": "kernel_inputs_layer_0",
+        "paired_delta_us": -0.9759999811649323,
+        "pairs": 100,
+        "policy": "zero",
+        "warmups": 20
+      },
+      {
+        "AB_delta_us": -1.6480013728141785,
+        "BA_delta_us": -1.3440009206533432,
+        "baseline_us": 36.928001791238785,
+        "candidate_us": 35.50399839878082,
+        "candidate_wins": 93,
+        "case": "kernel_inputs_layer_0",
+        "paired_delta_us": -1.4720000326633453,
+        "pairs": 100,
+        "policy": "small",
+        "warmups": 20
+      },
+      {
+        "AB_delta_us": -1.4559999108314514,
+        "BA_delta_us": -1.4559999108314514,
+        "baseline_us": 40.39999842643738,
+        "candidate_us": 38.784001022577286,
+        "candidate_wins": 90,
+        "case": "kernel_inputs_layer_0",
+        "paired_delta_us": -1.4559999108314514,
+        "pairs": 100,
+        "policy": "partial",
+        "warmups": 20
+      },
+      {
+        "AB_delta_us": -1.775999553501606,
+        "BA_delta_us": -1.456000842154026,
+        "baseline_us": 32.416000962257385,
+        "candidate_us": 30.848000198602676,
+        "candidate_wins": 97,
+        "case": "kernel_inputs_layer_0",
+        "paired_delta_us": -1.6480004414916039,
+        "pairs": 100,
+        "policy": "warm",
+        "warmups": 20
+      },
+      {
+        "AB_delta_us": -2.432001754641533,
+        "BA_delta_us": -2.3360000923275948,
+        "baseline_us": 31.856000423431396,
+        "candidate_us": 29.519999399781227,
+        "candidate_wins": 98,
+        "case": "kernel_inputs_layer_0",
+        "paired_delta_us": -2.4320008233189583,
+        "pairs": 100,
+        "policy": "empty",
+        "warmups": 20
+      },
+      {
+        "AB_delta_us": -1.9839983433485031,
+        "BA_delta_us": -1.2639984488487244,
+        "baseline_us": 62.33599968254566,
+        "candidate_us": 60.975998640060425,
+        "candidate_wins": 64,
+        "case": "kernel_inputs_layer_1",
+        "paired_delta_us": -1.7439983785152435,
+        "pairs": 100,
+        "policy": "zero",
+        "warmups": 20
+      },
+      {
+        "AB_delta_us": -2.032000571489334,
+        "BA_delta_us": -1.695999875664711,
+        "baseline_us": 39.93599861860275,
+        "candidate_us": 38.176000118255615,
+        "candidate_wins": 96,
+        "case": "kernel_inputs_layer_1",
+        "paired_delta_us": -1.855999231338501,
+        "pairs": 100,
+        "policy": "small",
+        "warmups": 20
+      },
+      {
+        "AB_delta_us": -1.8079988658428192,
+        "BA_delta_us": -1.5519987791776657,
+        "baseline_us": 52.352000027894974,
+        "candidate_us": 50.71999877691269,
+        "candidate_wins": 90,
+        "case": "kernel_inputs_layer_1",
+        "paired_delta_us": -1.6799978911876678,
+        "pairs": 100,
+        "policy": "partial",
+        "warmups": 20
+      },
+      {
+        "AB_delta_us": -1.8560001626610756,
+        "BA_delta_us": -1.9200006499886513,
+        "baseline_us": 32.78400003910065,
+        "candidate_us": 30.751999467611313,
+        "candidate_wins": 99,
+        "case": "kernel_inputs_layer_1",
+        "paired_delta_us": -1.888001337647438,
+        "pairs": 100,
+        "policy": "warm",
+        "warmups": 20
+      },
+      {
+        "AB_delta_us": -2.2560004144906998,
+        "BA_delta_us": -2.303999848663807,
+        "baseline_us": 31.679999083280563,
+        "candidate_us": 29.40800040960312,
+        "candidate_wins": 98,
+        "case": "kernel_inputs_layer_1",
+        "paired_delta_us": -2.303999848663807,
+        "pairs": 100,
+        "policy": "empty",
+        "warmups": 20
+      },
+      {
+        "AB_delta_us": -2.319999039173126,
+        "BA_delta_us": -2.1600015461444855,
+        "baseline_us": 75.74400305747986,
+        "candidate_us": 73.53600114583969,
+        "candidate_wins": 88,
+        "case": "kernel_inputs_layer_2",
+        "paired_delta_us": -2.2239983081817627,
+        "pairs": 100,
+        "policy": "zero",
+        "warmups": 20
+      },
+      {
+        "AB_delta_us": -2.319999039173126,
+        "BA_delta_us": -2.543998882174492,
+        "baseline_us": 51.263999193906784,
+        "candidate_us": 48.79999905824661,
+        "candidate_wins": 100,
+        "case": "kernel_inputs_layer_2",
+        "paired_delta_us": -2.4319998919963837,
+        "pairs": 100,
+        "policy": "small",
+        "warmups": 20
+      },
+      {
+        "AB_delta_us": -2.0000003278255463,
+        "BA_delta_us": -2.064000815153122,
+        "baseline_us": 56.8000003695488,
+        "candidate_us": 54.896000772714615,
+        "candidate_wins": 93,
+        "case": "kernel_inputs_layer_2",
+        "paired_delta_us": -2.048000693321228,
+        "pairs": 100,
+        "policy": "partial",
+        "warmups": 20
+      },
+      {
+        "AB_delta_us": -1.9999993965029716,
+        "BA_delta_us": -1.9680019468069077,
+        "baseline_us": 32.88000077009201,
+        "candidate_us": 30.94400092959404,
+        "candidate_wins": 97,
+        "case": "kernel_inputs_layer_2",
+        "paired_delta_us": -1.984001137316227,
+        "pairs": 100,
+        "policy": "warm",
+        "warmups": 20
+      },
+      {
+        "AB_delta_us": -2.8960006311535835,
+        "BA_delta_us": -2.767999656498432,
+        "baseline_us": 32.19199925661087,
+        "candidate_us": 29.440000653266907,
+        "candidate_wins": 99,
+        "case": "kernel_inputs_layer_2",
+        "paired_delta_us": -2.79999990016222,
+        "pairs": 100,
+        "policy": "empty",
+        "warmups": 20
+      }
+    ]
+  },
+  "measurement_integrity_accepted": true,
+  "model": {
+    "boundary": "All 500 balanced pairs and 1000 arm samples retained. Both order medians and all five block medians improve, including both order medians within every block. Means and tails are mixed; one process with two fixed allocations does not identify independent-run confidence, isolated production effects or a pure packing mechanism.",
+    "descriptive_block_sensitivity": {
+      "AB": {
+        "blocks": 5,
+        "interpretation": "Descriptive sensitivity to the five observed time blocks, not an independent-run confidence interval. One process with two fixed model instances is measured; cross-block dependence, drift and shared machine effects are not identified by this resampling.",
+        "median_paired_delta_percentile_band_ms": [
+          -0.03484249999999989,
+          -0.02450400000000008
+        ],
+        "method": "Exact enumeration of 5^5 ordered resamples of the five prespecified consecutive blocks; 2.5/97.5 percentiles use linear interpolation.",
+        "resamples": 3125
+      },
+      "BA": {
+        "blocks": 5,
+        "interpretation": "Descriptive sensitivity to the five observed time blocks, not an independent-run confidence interval. One process with two fixed model instances is measured; cross-block dependence, drift and shared machine effects are not identified by this resampling.",
+        "median_paired_delta_percentile_band_ms": [
+          -0.04678899999999997,
+          -0.03458400000000017
+        ],
+        "method": "Exact enumeration of 5^5 ordered resamples of the five prespecified consecutive blocks; 2.5/97.5 percentiles use linear interpolation.",
+        "resamples": 3125
+      },
+      "overall": {
+        "blocks": 5,
+        "interpretation": "Descriptive sensitivity to the five observed time blocks, not an independent-run confidence interval. One process with two fixed model instances is measured; cross-block dependence, drift and shared machine effects are not identified by this resampling.",
+        "median_paired_delta_percentile_band_ms": [
+          -0.036456000000000044,
+          -0.03211200000000014
+        ],
+        "method": "Exact enumeration of 5^5 ordered resamples of the five prespecified consecutive blocks; 2.5/97.5 percentiles use linear interpolation.",
+        "resamples": 3125
+      }
+    },
+    "large_paired_delta_counts": {
+      "absolute_over_0_5_ms": 81,
+      "boundary": "Post-measurement descriptive tail counts only; no samples removed or reweighted.",
+      "negative_below_minus_0_5_ms": 46,
+      "positive_above_0_5_ms": 35
+    },
+    "latency_distribution": {
+      "baseline": {
+        "max_ms": 4.126016,
+        "mean_ms": 2.729470146,
+        "median_ms": 2.6468309999999997,
+        "min_ms": 2.576898,
+        "p95_ms": 3.49744755,
+        "p99_ms": 3.58927315,
+        "samples": 500
+      },
+      "candidate": {
+        "max_ms": 4.030287,
+        "mean_ms": 2.672826324,
+        "median_ms": 2.6119944999999998,
+        "min_ms": 2.534529,
+        "p95_ms": 3.310581499999999,
+        "p99_ms": 3.65829368,
+        "samples": 500
+      }
+    },
+    "memory": {
+      "arms": {
+        "baseline": {
+          "allocated": 6637012480,
+          "chosen_private_limit_bytes": 2147483648,
+          "device_used": 9037676544,
+          "private_reserved_bytes": 62914560,
+          "reservation_bytes": 2147484160,
+          "reserved": 7610564608,
+          "static_allocated_bytes": 512
+        },
+        "candidate": {
+          "allocated": 13239421440,
+          "chosen_private_limit_bytes": 2147483648,
+          "device_used": 16560160768,
+          "private_reserved_bytes": 62914560,
+          "reservation_bytes": 2147484160,
+          "reserved": 15130951680,
+          "static_allocated_bytes": 512
+        }
+      },
+      "boundary": "Saved graph.describe counters and reservation arithmetic are verified. Raw allocator segments are not retained, so private segment membership is not independently reconstructed. Process snapshots include sequentially prepared models and are not isolated model footprints or continuous peaks.",
+      "candidate_minus_baseline_private_reserved_bytes": 0
+    },
+    "statistics": [
+      {
+        "block": "all",
+        "candidate_faster_pairs": 413,
+        "max_h2d_delta_bytes": 73728,
+        "mean_delta_us": -56.643822,
+        "mean_h2d_delta_bytes": 5603.328,
+        "median_delta_us": -34.650499999999916,
+        "median_h2d_delta_bytes": 2304.0,
+        "min_h2d_delta_bytes": -79488,
+        "order": "all",
+        "pairs": 500
+      },
+      {
+        "block": "all",
+        "candidate_faster_pairs": 197,
+        "max_h2d_delta_bytes": 73728,
+        "mean_delta_us": 3.1391280000000026,
+        "mean_h2d_delta_bytes": 5515.776,
+        "median_delta_us": -29.899500000000188,
+        "median_h2d_delta_bytes": 1152.0,
+        "min_h2d_delta_bytes": -79488,
+        "order": "AB",
+        "pairs": 250
+      },
+      {
+        "block": "all",
+        "candidate_faster_pairs": 216,
+        "max_h2d_delta_bytes": 72576,
+        "mean_delta_us": -116.426772,
+        "mean_h2d_delta_bytes": 5690.88,
+        "median_delta_us": -38.48349999999989,
+        "median_h2d_delta_bytes": 3456.0,
+        "min_h2d_delta_bytes": -76032,
+        "order": "BA",
+        "pairs": 250
+      },
+      {
+        "block": 0,
+        "candidate_faster_pairs": 76,
+        "max_h2d_delta_bytes": 73728,
+        "mean_delta_us": 15.134690000000004,
+        "mean_h2d_delta_bytes": 5610.24,
+        "median_delta_us": -31.554500000000154,
+        "median_h2d_delta_bytes": 2304.0,
+        "min_h2d_delta_bytes": -76032,
+        "order": "all",
+        "pairs": 100
+      },
+      {
+        "block": 0,
+        "candidate_faster_pairs": 35,
+        "max_h2d_delta_bytes": 73728,
+        "mean_delta_us": 28.62394000000001,
+        "mean_h2d_delta_bytes": 7534.08,
+        "median_delta_us": -26.66499999999994,
+        "median_h2d_delta_bytes": 4608.0,
+        "min_h2d_delta_bytes": -50688,
+        "order": "AB",
+        "pairs": 50
+      },
+      {
+        "block": 0,
+        "candidate_faster_pairs": 41,
+        "max_h2d_delta_bytes": 71424,
+        "mean_delta_us": 1.645439999999998,
+        "mean_h2d_delta_bytes": 3686.4,
+        "median_delta_us": -39.066000000000045,
+        "median_h2d_delta_bytes": 1152.0,
+        "min_h2d_delta_bytes": -76032,
+        "order": "BA",
+        "pairs": 50
+      },
+      {
+        "block": 1,
+        "candidate_faster_pairs": 81,
+        "max_h2d_delta_bytes": 73728,
+        "mean_delta_us": -67.48678000000004,
+        "mean_h2d_delta_bytes": 4170.24,
+        "median_delta_us": -38.435000000000215,
+        "median_h2d_delta_bytes": 2880.0,
+        "min_h2d_delta_bytes": -79488,
+        "order": "all",
+        "pairs": 100
+      },
+      {
+        "block": 1,
+        "candidate_faster_pairs": 37,
+        "max_h2d_delta_bytes": 73728,
+        "mean_delta_us": 40.52555999999996,
+        "mean_h2d_delta_bytes": -161.28,
+        "median_delta_us": -28.900499999999994,
+        "median_h2d_delta_bytes": 0.0,
+        "min_h2d_delta_bytes": -79488,
+        "order": "AB",
+        "pairs": 50
+      },
+      {
+        "block": 1,
+        "candidate_faster_pairs": 44,
+        "max_h2d_delta_bytes": 69120,
+        "mean_delta_us": -175.49912000000003,
+        "mean_h2d_delta_bytes": 8501.76,
+        "median_delta_us": -46.76550000000002,
+        "median_h2d_delta_bytes": 3456.0,
+        "min_h2d_delta_bytes": -57600,
+        "order": "BA",
+        "pairs": 50
+      },
+      {
+        "block": 2,
+        "candidate_faster_pairs": 87,
+        "max_h2d_delta_bytes": 71424,
+        "mean_delta_us": -156.59796999999998,
+        "mean_h2d_delta_bytes": 5529.6,
+        "median_delta_us": -35.29000000000005,
+        "median_h2d_delta_bytes": 2304.0,
+        "min_h2d_delta_bytes": -76032,
+        "order": "all",
+        "pairs": 100
+      },
+      {
+        "block": 2,
+        "candidate_faster_pairs": 40,
+        "max_h2d_delta_bytes": 71424,
+        "mean_delta_us": -23.914900000000003,
+        "mean_h2d_delta_bytes": 8386.56,
+        "median_delta_us": -23.41199999999999,
+        "median_h2d_delta_bytes": 1728.0,
+        "min_h2d_delta_bytes": -55296,
+        "order": "AB",
+        "pairs": 50
+      },
+      {
+        "block": 2,
+        "candidate_faster_pairs": 47,
+        "max_h2d_delta_bytes": 69120,
+        "mean_delta_us": -289.28103999999996,
+        "mean_h2d_delta_bytes": 2672.64,
+        "median_delta_us": -47.187499999999936,
+        "median_h2d_delta_bytes": 2304.0,
+        "min_h2d_delta_bytes": -76032,
+        "order": "BA",
+        "pairs": 50
+      },
+      {
+        "block": 3,
+        "candidate_faster_pairs": 87,
+        "max_h2d_delta_bytes": 73728,
+        "mean_delta_us": -92.23369,
+        "mean_h2d_delta_bytes": 4262.4,
+        "median_delta_us": -35.60549999999996,
+        "median_h2d_delta_bytes": 0.0,
+        "min_h2d_delta_bytes": -74880,
+        "order": "all",
+        "pairs": 100
+      },
+      {
+        "block": 3,
+        "candidate_faster_pairs": 45,
+        "max_h2d_delta_bytes": 73728,
+        "mean_delta_us": -66.18784,
+        "mean_h2d_delta_bytes": 2764.8,
+        "median_delta_us": -36.35600000000005,
+        "median_h2d_delta_bytes": 0.0,
+        "min_h2d_delta_bytes": -74880,
+        "order": "AB",
+        "pairs": 50
+      },
+      {
+        "block": 3,
+        "candidate_faster_pairs": 42,
+        "max_h2d_delta_bytes": 72576,
+        "mean_delta_us": -118.27954,
+        "mean_h2d_delta_bytes": 5760,
+        "median_delta_us": -35.32299999999999,
+        "median_h2d_delta_bytes": 1728.0,
+        "min_h2d_delta_bytes": -72576,
+        "order": "BA",
+        "pairs": 50
+      },
+      {
+        "block": 4,
+        "candidate_faster_pairs": 82,
+        "max_h2d_delta_bytes": 72576,
+        "mean_delta_us": 17.964640000000028,
+        "mean_h2d_delta_bytes": 8444.16,
+        "median_delta_us": -33.28499999999979,
+        "median_h2d_delta_bytes": 3456.0,
+        "min_h2d_delta_bytes": -72576,
+        "order": "all",
+        "pairs": 100
+      },
+      {
+        "block": 4,
+        "candidate_faster_pairs": 40,
+        "max_h2d_delta_bytes": 72576,
+        "mean_delta_us": 36.64888000000004,
+        "mean_h2d_delta_bytes": 9054.72,
+        "median_delta_us": -34.84249999999989,
+        "median_h2d_delta_bytes": 3456.0,
+        "min_h2d_delta_bytes": -63360,
+        "order": "AB",
+        "pairs": 50
+      },
+      {
+        "block": 4,
+        "candidate_faster_pairs": 42,
+        "max_h2d_delta_bytes": 70272,
+        "mean_delta_us": -0.71959999999998,
+        "mean_h2d_delta_bytes": 7833.6,
+        "median_delta_us": -31.41299999999991,
+        "median_h2d_delta_bytes": 2304.0,
+        "min_h2d_delta_bytes": -72576,
+        "order": "BA",
+        "pairs": 50
+      }
+    ]
+  },
+  "production_promotion_accepted": false,
+  "run_id": "q1_fused_prepare_report_20261009_02",
+  "schema": "private-q1-fused-prepare-report-v1"
+}

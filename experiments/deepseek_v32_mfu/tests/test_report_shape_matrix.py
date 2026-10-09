@@ -57,8 +57,8 @@ def make_shape(tmp_path, history=4096, extend=128, *, startup=True, hardware_tim
             "extend_tokens": extend,
             "chunk_size": 1024,
             "extend_chunk_size": extend,
-            "sparse_pool_tokens": history + extend,
-            "host_arena_tokens": history + extend,
+            "sparse_pool_tokens": (history + extend + 63) // 64 * 64,
+            "host_arena_tokens": (history + extend + 63) // 64 * 64,
             "source_sha256": {"kernel.py": digest(paths["bench"] / "source/kernel.py")},
             "request_sha256": digest(paths["bench"] / "request.json"),
             "hardware": {"gpu": {"uuid": "fixture-gpu"}},
@@ -405,6 +405,19 @@ def test_rejects_incomplete_duplicate_and_misdeclared_matrix(tmp_path):
     write(path, value)
     with pytest.raises(ValueError, match="Cartesian product"):
         report.load_manifest(path, allow_subset=True)
+
+
+def test_single_decode_point_accepts_aligned_capacity_and_rejects_short_arena(tmp_path):
+    entry = make_shape(tmp_path, history=65536, extend=1)
+    path = manifest(tmp_path, [entry])
+    report.load_manifest(path, allow_subset=True)
+    report.validate_shape(entry)
+    bench_path = Path(entry["bench_run"]) / "result.json"
+    bench = report.read(bench_path)
+    bench["host_arena_tokens"] = 65537
+    write(bench_path, bench)
+    with pytest.raises(ValueError, match="declared cold full-graph shape"):
+        report.validate_shape(entry)
 
 
 def test_rejects_tampered_timeline_and_wrong_shape(tmp_path):

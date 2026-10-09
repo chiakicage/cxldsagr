@@ -12,6 +12,12 @@ import torch
 
 from evaluation.validation import identity_digest
 from experiments.deepseek_v32_mfu.src.extend_graph_validation import tensor_identity
+from experiments.deepseek_v32_mfu.src.prefetch_transition_audit import (
+    BOUNDED_FREE_PREPARATION,
+    COARSE_POLICY,
+    OFFICIAL_POLICY,
+    preparation_capacity,
+)
 
 
 class ColdPrefetchObserver:
@@ -74,6 +80,8 @@ class ColdPrefetchObserver:
                     "topk": block.attention.cfg.index_topk,
                     "max_prefetch": min(8192, cache.slots - append),
                     "global_ids": global_ids,
+                    "host_arena_tokens": cache.host_to_device.numel(),
+                    "session_host_tokens": cache.session.host_tokens,
                 }
             )
             self.eager.append(self._allocate(block))
@@ -107,6 +115,16 @@ class ColdPrefetchObserver:
                 device=cache.device,
                 dtype=torch.int32,
             ),
+            "official_staging": {
+                "host_ids": torch.empty(64, device=cache.device, dtype=torch.int32),
+                "records": torch.empty(
+                    (64, cache.record_bytes // 2), device=cache.device, dtype=torch.bfloat16
+                ),
+                "prepared_slots": torch.empty(64, device=cache.device, dtype=torch.int32),
+                "allocation_log": torch.empty_like(cache.device_to_host),
+            },
+            "policy_metadata": {},
+            "preparation_metadata": {},
             "complete": False,
         }
 
@@ -129,22 +147,139 @@ class ColdPrefetchObserver:
             target["stages"][stage][name].copy_(source)
 
     def _prepare(self, original, index, start, count, offset, **kwargs):
+        from operators.deepseek_v32.indexer import echo
+
         if self.active is not None or (start, count) != (self.history, self.append):
             raise ValueError("observed execution must contain one complete batch per layer")
         target = (self.captured if torch.cuda.is_current_stream_capturing() else self.eager)[index]
         target["complete"] = False
+        target["policy_metadata"] = {}
+        target["preparation_metadata"] = {}
         self.active = (index, target)
         self._snapshot(index, target, "initial")
         target["initial_hint"].copy_(offset)
         prefetch = original(start, count, offset, **kwargs)
-        if prefetch is None or prefetch["max_prefetch"] != self.metadata[index]["max_prefetch"]:
+        if prefetch is None:
             raise ValueError("cold observer did not execute the declared bounded prefetch")
+        token = prefetch.get("_prepared")
+        if type(token) is echo._BoundedPreparedPrefetch:
+            cache = self.model.blocks[index].cache
+            pool = cache._pool
+            expected_owner = (cache.session.owner, cache.layer_id)
+            actual = tuple(
+                prefetch[name]
+                for name in ("free_slots", "allocation_log", "counter", "prefetch_stats")
+            )
+            if (
+                token.used is not False
+                or type(token.rows) is not int
+                or token.rows != count
+                or type(token.prepared_limit) is not int
+                or token.prepared_limit != 64
+                or type(prefetch.get("prepared_limit")) is not int
+                or prefetch["prepared_limit"] != token.prepared_limit
+                or len(token.tensors) != len(actual)
+                or any(left is not right for left, right in zip(token.tensors, actual, strict=True))
+                or prefetch.get("history_length") != cache.host_written_end
+                or prefetch.get("transient_suffix") is not False
+                or cache.slots != self.metadata[index]["slots"]
+                or token.scratch is not pool.miss_scratch
+                or any(
+                    left is not right
+                    for left, right in zip(
+                        actual,
+                        (pool.free_slots, pool.allocation_log, pool.counter, pool.prefetch_stats),
+                        strict=True,
+                    )
+                )
+            ):
+                raise ValueError("bounded observer token does not bind the returned lease")
+            preparation = {
+                "kind": BOUNDED_FREE_PREPARATION,
+                "query_start": start,
+                "query_count": count,
+                "visible_columns": cache.indexer_visible_end,
+                "initialized_history": cache.host_written_end,
+                "prepared_limit": token.prepared_limit,
+                "requested_max_prefetch": min(kwargs.get("limit", 8192), 8192, cache.slots - 1),
+                "single_session": len(pool._sessions) == 1,
+                "exclusive_operation": pool._active == expected_owner and pool._depth > 0,
+                "pending_owner_matches": pool._pending_prefetch == expected_owner,
+                "persistent_append": cache.transient_start is None,
+            }
+            metadata = {
+                **self.metadata[index],
+                "preparation": preparation,
+                "prefetch_policy": OFFICIAL_POLICY,
+                "max_prefetch": prefetch.get("max_prefetch"),
+                "prepared_max_prefetch": token.prepared_limit,
+                "hint_index": 1,
+            }
+            preparation_capacity(metadata)
+            target["preparation_metadata"] = {
+                "preparation": preparation,
+                "prepared_max_prefetch": token.prepared_limit,
+            }
+            target["prepared_token"] = token
+        elif (
+            (token is not None and type(token) is not echo._PreparedPrefetch)
+            or "prepared_limit" in prefetch
+            or prefetch["max_prefetch"] != self.metadata[index]["max_prefetch"]
+        ):
+            raise ValueError("cold observer did not execute the declared full prefetch")
+        target["prefetch_lease"] = prefetch
         return prefetch
+
+    def _prefetch_policy(self, index, target, lease):
+        policy = lease.get("prefetch_policy", COARSE_POLICY)
+        preparation = target["preparation_metadata"]
+        if preparation and (
+            policy != OFFICIAL_POLICY
+            or lease is not target["prefetch_lease"]
+            or lease.get("_prepared") is not target["prepared_token"]
+            or target["prepared_token"].used is not True
+            or type(lease.get("prepared_limit")) is not int
+            or lease.get("prepared_limit") != 64
+            or type(lease.get("max_prefetch")) is not int
+            or lease.get("max_prefetch") != 64
+        ):
+            raise ValueError("bounded observer requires consumption by the official Q1 policy")
+        if policy == COARSE_POLICY:
+            target["policy_metadata"] = {}
+            return
+        if policy != OFFICIAL_POLICY:
+            raise ValueError("observed prefetch used an unknown policy")
+        if (
+            self.append != 1
+            or lease.get("official_prefetch_cap") != 64
+            or lease["max_prefetch"] < 64
+            or "_official_prefetch" not in lease
+        ):
+            raise ValueError("official Q1 observation lacks cap or staging ownership")
+        state = lease["_official_prefetch"]
+        sources = {
+            "host_ids": state.host_ids.reshape(64),
+            "records": state.records.reshape(64, -1),
+            "prepared_slots": lease["free_slots"][:64],
+            "allocation_log": lease["allocation_log"],
+        }
+        for name, source in sources.items():
+            target["official_staging"][name].copy_(source)
+        target["policy_metadata"] = {
+            "prefetch_policy": OFFICIAL_POLICY,
+            "max_prefetch": 64,
+            "prepared_max_prefetch": self.metadata[index]["max_prefetch"],
+            "hint_index": 1,
+            **preparation,
+        }
 
     def _stage(self, original, index, stage, *args, **kwargs):
         if self.active is None or self.active[0] != index:
             raise ValueError("prefetch stage lacks its matching layer invocation")
         target = self.active[1]
+        if stage == "after_prefetch":
+            lease = args[0] if args and isinstance(args[0], dict) else target["prefetch_lease"]
+            self._prefetch_policy(index, target, lease)
         if stage == "after_recall":
             indices = args[0]
             if indices.shape != target["indices"].shape or indices.dtype != torch.int32:
@@ -154,6 +289,10 @@ class ColdPrefetchObserver:
         self._snapshot(index, target, stage)
         if stage == "after_recall":
             target["complete"] = True
+            # Captured memcpy nodes retain their source storages in the graph;
+            # the observer need not keep the Python lease after recording them.
+            target.pop("prefetch_lease", None)
+            target.pop("prepared_token", None)
             self.active = None
         return result
 
@@ -240,24 +379,47 @@ class ColdPrefetchObserver:
         for index, target in enumerate(self.captured if captured else self.eager):
             if not target["complete"]:
                 raise ValueError("incomplete observer buffers cannot validate an execution")
-            metadata = self.metadata[index]
+            metadata = {**self.metadata[index], **target["policy_metadata"]}
             stages = {}
             for name, stage in target["stages"].items():
                 copied = {key: value.detach().cpu().clone() for key, value in stage.items()}
                 mapping = copied.pop("host_to_device")
                 copied["logical_to_slot"] = mapping[metadata["global_ids"]].clone()
-                if mapping.numel() != self.history + self.append:
-                    raise ValueError("cold evidence must cover the entire sole-session host arena")
+                if mapping.numel() != metadata["host_arena_tokens"]:
+                    raise ValueError("host arena capacity changed during stage observation")
+                # The auditor separately proves global_ids cover exactly the
+                # valid prefix. Retain every remaining map entry, including
+                # page padding, so compact reread can reject phantom residency.
+                copied["padding_to_slot"] = mapping[self.history + self.append :].clone()
                 stages[name] = copied
+            extra = {}
+            if metadata.get("prefetch_policy") == OFFICIAL_POLICY:
+                official = {
+                    name: value.detach().cpu().clone()
+                    for name, value in target["official_staging"].items()
+                }
+                count = min(int(stages["after_prefetch"]["prefetch_counter"][0]), 64)
+                host_ids = official["host_ids"][:count].long()
+                host = self.model.blocks[index].cache.host
+                if not bool(((host_ids >= 0) & (host_ids < len(host))).all()):
+                    raise ValueError("official staged IDs exceed host storage")
+                official["records"] = official["records"][:count].clone()
+                official["expected_records"] = host[host_ids].clone()
+                extra["official_staging"] = official
+            hint_index = metadata.get("hint_index", 0)
             layers.append(
                 {
                     **metadata,
-                    "initial_hint": target["initial_hint"][:1].detach().cpu().clone(),
+                    "initial_hint": target["initial_hint"][hint_index : hint_index + 1]
+                    .detach()
+                    .cpu()
+                    .clone(),
                     "scores": target["scores"].detach().cpu().clone(),
                     "indices": target["indices"].detach().cpu().clone(),
                     "stages": stages,
                     "metrics": self.model.blocks[index].cache.metrics(),
                     "final_cache_state": final_cache_state["layers"][index],
+                    **extra,
                 }
             )
         evidence = {
@@ -287,7 +449,22 @@ class ColdPrefetchObserver:
                 "H": self.history,
                 "A": self.append,
                 "slots": self.model.slots,
-                "max_prefetch": min(8192, self.model.slots - self.append),
+                "max_prefetch": proof["scope"]["max_prefetch"],
+                **{
+                    name: proof["scope"][name]
+                    for name in (
+                        "prefetch_policy",
+                        "prepared_max_prefetch",
+                        "hint_index",
+                        "preparation",
+                    )
+                    if name in proof["scope"]
+                },
+                **(
+                    {name: proof["scope"][name] for name in ("record_bytes", "topk")}
+                    if "preparation" in proof["scope"]
+                    else {}
+                ),
             },
             "proof": proof,
             "evidence_file": path.name,
@@ -299,7 +476,9 @@ class ColdPrefetchObserver:
             "boundary": (
                 "Actual independent-check eager or diagnostic-graph execution; graph copy nodes "
                 "write preallocated buffers. No observer in clean timings or profile. "
-                "Saved eligibility binds runtime score hashes; full scores are not retained."
+                "Saved eligibility binds runtime score hashes; full scores are not retained. "
+                "Official stage KV is compared with host records at runtime; compact evidence "
+                "retains identities, not those stage or host KV bytes."
             ),
         }
         (self.output / f"echo_{label}_prefetch_receipt.json").write_text(

@@ -60,6 +60,16 @@ def test_all_local_libraries_are_verified_and_returned(records):
     ]
 
 
+def test_isolated_hbm_still_checks_every_observed_native_file(records):
+    entries = records["check"]["execution_runtime_artifacts"]["local_native_jit"][-1:]
+    replace_entries(records, entries)
+    assert len(report.audit_local_native_artifacts(records, require_offload=False)) == 1
+    entries[0]["library"]["sha256"] = "0" * 64
+    replace_entries(records, entries)
+    with pytest.raises(ValueError, match="recorded loaded native artifact changed"):
+        report.audit_local_native_artifacts(records, require_offload=False)
+
+
 @pytest.mark.parametrize("run", RUNS)
 @pytest.mark.parametrize("field", SNAPSHOTS)
 def test_older_runs_cannot_gain_original_mapping_evidence(records, run, field):

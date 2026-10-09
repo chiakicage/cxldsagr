@@ -136,6 +136,7 @@ def test_host_scope_partition_counts_nested_scopes_and_cuda_apis_once():
         ("exact_topk", "publish", "GPU control"),
         ("exact_topk", "void at::native::reduce_kernel<float>", "GPU control"),
         ("prefetch_hint", "prediction_kernel", "GPU control"),
+        ("prefetch_hint", "q1_hint_exact::mean_kernel", "GPU control"),
         ("offload_exact_recall", "sparse_union_clear", "GPU control"),
         ("offload_exact_recall", "gather_records_bounded", "IO"),
         ("offload_exact_recall", "resident_selection_kernel", "GPU control"),
@@ -638,3 +639,163 @@ def test_unresolved_prefill_cannot_pass_the_primary_gap_gate(tmp_path, monkeypat
     echo = next(row for row in result["prefill_methods"] if row["method"] == "echo")
     assert echo["absolute_gap_over_hbm"] == 1.0
     assert not echo["absolute_gap_at_most_120_percent_hbm"]
+
+
+@pytest.mark.parametrize("prefetched,expected", [(0, "Compute"), (64, "Compute + IO")])
+def test_official_q1_fusion_uses_actual_graph_layer_counters(prefetched, expected):
+    fused = transport(10, 60, family="fused")
+    fused.update(
+        name="void deep_gemm::sm90_fp8_paged_mqa_logits_fused_v2<1,64,128>(...)",
+        scope={"layer": "shared", "stage": "extend_graph_body"},
+        graph_layer="layer_0",
+        graph_stage="indexer_fused",
+    )
+    promotion = {
+        **fused,
+        "start": 60,
+        "end": 70,
+        "name": "official_prefetch::promote_kernel(const int *, ...)",
+        "graph_call": 7,
+    }
+    clean = {
+        **fused,
+        "start": 70,
+        "end": 80,
+        "name": "void deep_gemm::smxx_clean_logits<1,8192,8>(...)",
+    }
+    rows = [fused, promotion, clean]
+    before = deepcopy(rows)
+    audit = launch_gap.annotate_actual_io(
+        rows, [transport_counts(prefetched=prefetched)], "echo", "extend_annotated"
+    )
+    assert len(audit) == 1
+    assert fused["actual_io"]["matching_kernel_count"] == 1
+    assert fused["actual_io"]["records"] == prefetched
+    assert fused["actual_io"]["bytes"] == prefetched * 8
+    assert fused["actual_io"]["status"] == ("unique_positive" if prefetched else "phase_zero")
+    assert fused["actual_io"]["counter_path"].endswith(
+        "extend_cache_per_layer[0].prefetched_records"
+    )
+    assert [activity_lane(row) for row in rows] == [expected, "GPU control", "Compute"]
+    assert "actual_io" not in promotion and "actual_io" not in clean
+    assert [{k: v for k, v in row.items() if k != "actual_io"} for row in rows] == before
+    summary = summarize_window(rows, 0, 90)
+    assert summary["gap_ms"] == pytest.approx(30 / 1e6)
+    assert summary["gpu_idle_ms"] == pytest.approx(20 / 1e6)
+    assert summary["control_only_ms"] == pytest.approx(10 / 1e6)
+
+
+def test_official_q1_missing_counters_remain_unresolved_potential_io():
+    fused = transport(10, 60, family="fused")
+    fused["name"] = "deep_gemm::sm90_fp8_paged_mqa_logits_fused_v2<1,64,128>(...)"
+    launch_gap.annotate_actual_io([fused], None, "echo", "extend_annotated")
+    assert activity_lane(fused) == "Compute + IO"
+    assert fused["actual_io"]["status"] == "unresolved"
+    assert fused["actual_io"]["records"] is None
+    assert fused["actual_io"]["bytes"] is None
+
+
+@pytest.mark.parametrize(
+    "name",
+    [
+        "pack_page64",
+        "void deep_gemm::smxx_paged_mqa_logits_metadata<32,256,132>(...)",
+        "official_prefetch::prepare_kernel(const int *, ...)",
+        "void official_prefetch::prepare_keys_kernel<true>(const unsigned int *, ...)",
+        "void official_prefetch::prepare_keys_kernel<false>(const unsigned int *, ...)",
+        "official_prefetch::promote_kernel(const int *, ...)",
+        "official_prefetch::validate_promotion_kernel(const int *, ...)",
+        "official_prefetch::copy_publish_kernel(const int *, ...)",
+        "official_prefetch::clear_kernel(const int *, ...)",
+    ],
+)
+@pytest.mark.parametrize("stage", ["indexer_qk", "indexer_fused"])
+def test_official_q1_storage_helpers_remain_control_under_operator_ownership(name, stage):
+    row = activity(0, 1, stage=stage, name=name)
+    row["graph_call"] = 3
+    assert activity_lane(row) == "GPU control"
+
+
+@pytest.mark.parametrize("method", launch_gap.METHODS)
+def test_isolated_gap_audits_only_own_method_and_defers_hbm_comparison(
+    tmp_path, monkeypatch, method
+):
+    labels = [
+        "graph_setup",
+        f"{method}/prefill_annotated",
+        f"{method}/extend_graph_setup",
+        f"{method}/extend_annotated",
+    ]
+    (tmp_path / "result.json").write_text(
+        json.dumps(
+            {
+                "schema_version": 4,
+                "run_id": "isolated_gap",
+                "methods": [method],
+                "selected_method": method,
+                "method_isolation": "fresh-process-one-method-v1",
+                "nsys_capture_order": labels,
+            }
+        )
+    )
+    monkeypatch.setattr(launch_gap, "read_calls", lambda _: ([], {}))
+    parents = {"process": "only this child"}
+    lineage = []
+    monkeypatch.setattr(launch_gap, "read_lineage", lambda paths: lineage.extend(paths) or parents)
+    observed = []
+
+    def analyze(path, _calls, actual_parents, **_kwargs):
+        observed.append(path.name)
+        assert actual_parents is parents
+        return {
+            "method": method,
+            "full_extend": {"conservative_gate_pass": True},
+            "all_layer_gates_pass": True,
+        }
+
+    monkeypatch.setattr(launch_gap, "analyze_capture", analyze)
+    monkeypatch.setattr(
+        launch_gap,
+        "analyze_prefill_capture",
+        lambda *_, **_kwargs: {"method": method, "full_prefill": {"gap_ms": 1}},
+    )
+    audit = launch_gap.analyze_run(tmp_path)
+    assert observed == ["capture_4.sqlite"]
+    assert [path.name for path in lineage] == ["capture_1.sqlite", "capture_3.sqlite"]
+    assert audit["schema_version"] == 3
+    assert audit["selected_methods"] == [method]
+    assert audit["cohort_comparison_required"]
+    assert audit["extend_gate_pass"]
+    assert audit["all_methods_pass"] is None
+    assert audit["prefill_absolute_gap_gate_pass"] is None
+    assert "absolute_gap_over_hbm" not in audit["prefill_methods"][0]
+    assert "uncomputed" in audit["prefill_comparison_note"]
+
+
+@pytest.mark.parametrize(
+    "foreign_label", ["dense_prefetch/prefill_annotated", "dense_prefetch/extend_graph_setup"]
+)
+def test_isolated_gap_rejects_foreign_method_capture(tmp_path, monkeypatch, foreign_label):
+    (tmp_path / "result.json").write_text(
+        json.dumps(
+            {
+                "schema_version": 4,
+                "run_id": "foreign_capture",
+                "methods": ["hbm"],
+                "selected_method": "hbm",
+                "method_isolation": "fresh-process-one-method-v1",
+                "nsys_capture_order": [foreign_label],
+            }
+        )
+    )
+    monkeypatch.setattr(launch_gap, "read_calls", lambda _: ([], {}))
+    with pytest.raises(ValueError, match="unexpected capture"):
+        launch_gap.analyze_run(tmp_path)
+
+
+def test_prefill_cohort_comparison_rejects_single_method_and_duplicate_coverage():
+    rows = [{"method": "hbm", "full_prefill": {}}]
+    with pytest.raises(ValueError, match="exactly all four methods"):
+        launch_gap.compare_prefill_gaps(rows)
+    with pytest.raises(ValueError, match="exactly all four methods"):
+        launch_gap.compare_prefill_gaps(rows * 4)

@@ -21,3 +21,15 @@
   结构、容量、输出有限性检查不等于跨实现数值验收。性能边界和来源以 README 与报告为准。
 - 有效 HTTP 报告保留原签名。Engine 请求、GPU 三层窗口和本地 MFU 阶段计时分别说明；
   不通过相减不同负载的结果估计 HTTP 开销。
+- 正常 decode 使用一次 `generate`，在 `sampling_params` 中设置 `max_new_tokens=2`：
+  prefill 采样第一个 token，
+  decode 消费该 token 并采样第二个。必须核验 `DECODE` 模式、query=1、sequence=65,537
+  和实际输入 token；不能将 H+A 的单 token extend 当作官方 decode。保留正常 radix、
+  自然驻留及默认 CUDA Graph，不手工清空 history。
+- Decode timeline 的逐层归属使用 capture 时只读枚举的原生 graph node ID，并与
+  NSYS replay、graph lineage 和唯一 graph launch 核对。不能根据 kernel 名字或
+  重复次序推测层号。计时与独立输出检查不安装这些 profile hooks。
+- NSYS 采集须覆盖 graph capture 和 clone；正式 decode 窗口由独立 NVTX 标记选取。
+  当前 Engine 关闭时会强制结束 scheduler，须先用 CUDA Profiler API 停采并让 NSYS
+  完成收集。进程退出成功不能替代 trace 完整性检查；保留 collector 警告，并明确
+  区分已核验的正式 forward、完整 decode graph 节点和未逐项核验的 setup/warmup。

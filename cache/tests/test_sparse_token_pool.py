@@ -181,6 +181,63 @@ def test_prefetch_claims_only_real_misses_never_suffix_and_records_exact_count()
     check_maps(pool)
 
 
+def test_rollback_clears_temporary_prefetch_tags_before_pool_publication(monkeypatch):
+    pool = make_pool()
+    cache = pool.allocate_session(64).layer(0)
+    append(cache, torch.arange(56, dtype=torch.float32).reshape(8, 7))
+    cache.begin_step(1)
+    cache.declare_indexer_visible(9)
+    state = cache.prepare_prefetch(8, 1, torch.zeros(16))
+    assert cache.host_to_device[0] == MISSING
+    cache.host_to_device[0] = cache.slots + 1
+    events = []
+
+    def clear():
+        events.append("clear")
+        cache.host_to_device[0] = MISSING
+
+    original = pool.finalize_prefetch
+
+    def finalize(layer_id):
+        events.append("finalize")
+        assert cache.host_to_device[0] == MISSING
+        original(layer_id)
+
+    state["_pending_prefetch_cleanup"] = clear
+    monkeypatch.setattr(pool, "finalize_prefetch", finalize)
+    cache.rollback()
+    assert events == ["clear", "finalize"]
+    assert cache._prefetch is pool._pending_prefetch is None
+    check_maps(pool)
+    pool.close()
+
+
+def test_prefetch_cleanup_failure_retains_lease_and_storage(monkeypatch):
+    pool = make_pool()
+    cache = pool.allocate_session(64).layer(0)
+    append(cache, torch.arange(56, dtype=torch.float32).reshape(8, 7))
+    cache.begin_step(1)
+    cache.declare_indexer_visible(9)
+    state = cache.prepare_prefetch(8, 1, torch.zeros(16))
+    failure = RuntimeError("injected cleanup failure")
+    owner = object()
+    state["staging_owner"] = owner
+
+    def clear():
+        raise failure
+
+    def forbidden(*args):
+        raise AssertionError("publication ran before cleanup completed")
+
+    state["_pending_prefetch_cleanup"] = clear
+    monkeypatch.setattr(pool, "finalize_prefetch", forbidden)
+    with pytest.raises(RuntimeError, match="injected cleanup failure") as result:
+        cache.finalize_prefetch()
+    assert result.value is failure
+    assert cache._prefetch is state and state["staging_owner"] is owner
+    assert pool._pending_prefetch == (cache.session.owner, cache.layer_id)
+
+
 def test_new_kv_direct_write_zero_compulsory_recall_and_q_boundaries():
     pool = make_pool()
     cache = pool.allocate_session(64).layer(0)

@@ -1,0 +1,489 @@
+{
+  "atomic_dominance_established": false,
+  "boundary": "Cited aggregate metrics require has_value=true. Per-PC and PM numbers with individual false flags remain raw diagnostics, not valid source-count percentages or timelines.",
+  "captures": {
+    "layer_2_warm_full": {
+      "analysis_source_hashes": {
+        "instances.json": "a57bb769463e9dd5f3c81fbd1b2e9fdef425e4fa55bf99345c5889ee9bcd0187",
+        "metrics.json": "345e2214454e14fb3da5088d904c7e281ac21cafe2f38224d79eb9f86e97d10e",
+        "pc_evidence.json": "b794154992d5440d2ea22708eccec57fbf33ccd88d233b8319ff343d6f9a045e",
+        "summary.json": "57aae54d5a105adc6c609836e55d67137cd2ec13ad8fcd04a539a219f84a63bf"
+      },
+      "instance_validity": {
+        "inst_executed": {
+          "aggregate_has_value": true,
+          "aggregate_value": 1476970,
+          "instances": 3234,
+          "nonzero_has_value_false": 930,
+          "nonzero_has_value_true": 2,
+          "nonzero_instances": 932
+        },
+        "pmsampling:smsp__warps_issue_stalled_long_scoreboard.avg": {
+          "aggregate_has_value": true,
+          "aggregate_value": 23259.83712121212,
+          "instances": 111,
+          "nonzero_has_value_false": 7,
+          "nonzero_has_value_true": 0,
+          "nonzero_instances": 7
+        },
+        "smsp__pcsamp_warps_issue_stalled_long_scoreboard": {
+          "aggregate_has_value": true,
+          "aggregate_value": 346,
+          "instances": 169,
+          "nonzero_has_value_false": 12,
+          "nonzero_has_value_true": 0,
+          "nonzero_instances": 12
+        },
+        "thread_inst_executed_true": {
+          "aggregate_has_value": true,
+          "aggregate_value": 43482888,
+          "instances": 3234,
+          "nonzero_has_value_false": 916,
+          "nonzero_has_value_true": 2,
+          "nonzero_instances": 918
+        }
+      },
+      "observation": {
+        "attempted_records": 0,
+        "eligible_history_misses": 0,
+        "history": 65536,
+        "initial_resident_history": 65536,
+        "layer": 2,
+        "logical_host_copy_bytes": 0,
+        "n": 65537,
+        "observer_sha256": "250140f31ee8a3f3cd7b7fac3c3a8621d9c36486afa4b907d88761bc93fd505b",
+        "observer_source": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/src/q1_official_core_profile.py",
+        "policy": "warm",
+        "readback_boundary": "After original synchronization and cudaProfilerStop",
+        "replay_boundary": "Application-visible completion only; internal NCU replay passes can have different legal reservation attempts and selected IDs",
+        "staged_host_ids": [],
+        "staged_records": 0,
+        "staged_records_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "threshold_fp32_bits": 0
+      },
+      "official_elf_sha256": "f67b4dffe705a90803ebdfb61ed15fb449aebe030dd49409d5ab8c15a53f9998",
+      "raw_atomic_pc_diagnostics": [],
+      "raw_source_sample_groups": {
+        "barrier.h:424": {
+          "instance_has_value_false": 2,
+          "nonzero_instances": 2,
+          "reported_samples": 169
+        },
+        "sm90_fp8_paged_mqa_logits.cuh:80": {
+          "instance_has_value_false": 2,
+          "nonzero_instances": 2,
+          "reported_samples": 54
+        },
+        "sm90_fp8_paged_mqa_logits.cuh:844": {
+          "instance_has_value_false": 1,
+          "nonzero_instances": 1,
+          "reported_samples": 17
+        },
+        "sm90_fp8_paged_mqa_logits.cuh:907": {
+          "instance_has_value_false": 4,
+          "nonzero_instances": 4,
+          "reported_samples": 99
+        },
+        "sm90_fp8_paged_mqa_logits.cuh:92": {
+          "instance_has_value_false": 2,
+          "nonzero_instances": 2,
+          "reported_samples": 6
+        },
+        "sm_20_intrinsics.hpp:151": {
+          "instance_has_value_false": 1,
+          "nonzero_instances": 1,
+          "reported_samples": 1
+        }
+      },
+      "receipt_sha256": "d7d9a19db115369a9d9bd025f71e5090896f21aa7adb1eb7d695f29b1a25549e",
+      "report": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/output/profile/q1_official_core_ncu_20261008_01/layer_2_warm_full.ncu-rep",
+      "report_sha256": "d661ffabd0b73fed1c2f3d1f91511d7e296682a1751c5eb0c23c2f692dee926d",
+      "valid_aggregate_metrics": {
+        "dram__bytes_read.sum": {
+          "description": "# of bytes read from DRAM\n(This counter metric represents the sum across all sub-unit instances)",
+          "has_value": true,
+          "instances": 0,
+          "unit": "byte",
+          "value": 9251072.0
+        },
+        "gpu__time_duration.sum": {
+          "description": "equals to gpu__time_duration_measured_user if collectable, otherwise equals to gpu__time_duration_measured_wallclock\n(This counter metric represents the sum across all sub-unit instances)",
+          "has_value": true,
+          "instances": 0,
+          "unit": "ns",
+          "value": 10880.0
+        },
+        "l1tex__t_requests_pipe_lsu_mem_global_op_atom.sum": {
+          "description": "# of requests sent to T-Stage for global atomics\n(This counter metric represents the sum across all sub-unit instances)",
+          "has_value": true,
+          "instances": 0,
+          "unit": "",
+          "value": 0.0
+        },
+        "lts__t_requests_srcunit_tex_op_atom_dot_alu.sum": {
+          "description": "# of LTS requests from unit L1TEX for atomic ALU (non-CAS)\n(This counter metric represents the sum across all sub-unit instances)",
+          "has_value": true,
+          "instances": 0,
+          "unit": "request",
+          "value": 0.0
+        },
+        "lts__t_sectors_srcunit_tex_aperture_sysmem_op_read_lookup_miss.sum": {
+          "description": "# of LTS sectors from unit L1TEX accessing system memory (sysmem) for reads that missed\n(This counter metric represents the sum across all sub-unit instances)",
+          "has_value": true,
+          "instances": 0,
+          "unit": "sector",
+          "value": 0.0
+        },
+        "sass__inst_executed_register_spilling_mem_local": {
+          "description": "",
+          "has_value": true,
+          "instances": 0,
+          "unit": "inst",
+          "value": 9884
+        },
+        "sm__cycles_active.avg": {
+          "description": "# of cycles with at least one warp in flight\n(This counter metric represents the avg across all sub-unit instances)",
+          "has_value": true,
+          "instances": 0,
+          "unit": "cycle",
+          "value": 11508.522727272728
+        },
+        "sm__cycles_active.max": {
+          "description": "# of cycles with at least one warp in flight\n(This counter metric represents the max across all sub-unit instances)",
+          "has_value": true,
+          "instances": 0,
+          "unit": "cycle",
+          "value": 12448.0
+        },
+        "sm__cycles_active.min": {
+          "description": "# of cycles with at least one warp in flight\n(This counter metric represents the min across all sub-unit instances)",
+          "has_value": true,
+          "instances": 0,
+          "unit": "cycle",
+          "value": 7314.0
+        },
+        "smsp__inst_executed_op_generic_atom_dot_alu.sum": {
+          "description": "# of warp instructions executed: ATOM.ALU, ATOMG.ALU (non-CAS)\n(This counter metric represents the sum across all sub-unit instances)",
+          "has_value": true,
+          "instances": 0,
+          "unit": "inst",
+          "value": 0.0
+        },
+        "smsp__pcsamp_warps_issue_stalled_long_scoreboard": {
+          "description": "",
+          "has_value": true,
+          "instances": 169,
+          "unit": "warp",
+          "value": 346
+        }
+      }
+    },
+    "layer_2_zero_full": {
+      "analysis_source_hashes": {
+        "instances.json": "f4ff0714eb3fc14b66e497403b1e861bba0a631940b8c07646d851030de2bbb7",
+        "metrics.json": "79d31a9783320fde8d9152c724c16b0872918e82e90f165c727295b54cae4e43",
+        "pc_evidence.json": "0eea2452ad90b7fb368d4d6f98d56d11f07b981bfca6c99c9b90b627805a7ace",
+        "summary.json": "88712f17262f20b7a04f35a86d4fccb8b5e1cce7e17fd345a103f0e3e3b6463a"
+      },
+      "instance_validity": {
+        "inst_executed": {
+          "aggregate_has_value": true,
+          "aggregate_value": 1482494,
+          "instances": 3234,
+          "nonzero_has_value_false": 2054,
+          "nonzero_has_value_true": 2,
+          "nonzero_instances": 2056
+        },
+        "pmsampling:smsp__warps_issue_stalled_long_scoreboard.avg": {
+          "aggregate_has_value": true,
+          "aggregate_value": 22627.128787878773,
+          "instances": 147,
+          "nonzero_has_value_false": 37,
+          "nonzero_has_value_true": 0,
+          "nonzero_instances": 37
+        },
+        "smsp__pcsamp_warps_issue_stalled_long_scoreboard": {
+          "aggregate_has_value": true,
+          "aggregate_value": 351,
+          "instances": 209,
+          "nonzero_has_value_false": 45,
+          "nonzero_has_value_true": 0,
+          "nonzero_instances": 45
+        },
+        "thread_inst_executed_true": {
+          "aggregate_has_value": true,
+          "aggregate_value": 43332547,
+          "instances": 3234,
+          "nonzero_has_value_false": 2005,
+          "nonzero_has_value_true": 2,
+          "nonzero_instances": 2007
+        }
+      },
+      "observation": {
+        "attempted_records": 33464,
+        "eligible_history_misses": 65430,
+        "history": 65536,
+        "initial_resident_history": 0,
+        "layer": 2,
+        "logical_host_copy_bytes": 73728,
+        "n": 65537,
+        "observer_sha256": "250140f31ee8a3f3cd7b7fac3c3a8621d9c36486afa4b907d88761bc93fd505b",
+        "observer_source": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/src/q1_official_core_profile.py",
+        "policy": "zero",
+        "readback_boundary": "After original synchronization and cudaProfilerStop",
+        "replay_boundary": "Application-visible completion only; internal NCU replay passes can have different legal reservation attempts and selected IDs",
+        "staged_host_ids": [
+          28736,
+          28737,
+          28738,
+          28739,
+          28740,
+          28741,
+          28742,
+          28743,
+          28744,
+          28745,
+          28746,
+          28747,
+          28748,
+          28749,
+          28750,
+          28751,
+          28752,
+          28753,
+          28754,
+          28755,
+          28756,
+          28757,
+          28758,
+          28759,
+          28760,
+          28761,
+          28762,
+          28763,
+          28764,
+          28765,
+          28766,
+          28767,
+          28672,
+          28673,
+          28674,
+          28675,
+          28676,
+          28677,
+          28678,
+          28679,
+          28680,
+          28681,
+          28682,
+          28683,
+          28684,
+          28685,
+          28686,
+          28687,
+          28688,
+          28689,
+          28690,
+          28691,
+          28692,
+          28693,
+          28694,
+          28695,
+          28696,
+          28697,
+          28698,
+          28699,
+          28700,
+          28701,
+          28702,
+          28703
+        ],
+        "staged_records": 64,
+        "staged_records_sha256": "f19501811f386acb5967b77a35e6f8124e157bd97b7a2de6859378d30af8d89e",
+        "threshold_fp32_bits": 0
+      },
+      "official_elf_sha256": "f67b4dffe705a90803ebdfb61ed15fb449aebe030dd49409d5ab8c15a53f9998",
+      "raw_atomic_pc_diagnostics": [
+        {
+          "absolute_pc": 128386596688608,
+          "raw_inst_executed": {
+            "correlation": 128386596688608,
+            "has_value": false,
+            "value": 524
+          },
+          "sass": "      ATOMG.E.ADD.STRONG.GPU PT, R4, desc[UR12][R4.64], R15",
+          "source": {
+            "file": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/3rdparty/ECHO/DeepGEMM/deep_gemm/include/deep_gemm/impls/sm90_fp8_paged_mqa_logits.cuh",
+            "line": 797
+          }
+        },
+        {
+          "absolute_pc": 128386596705792,
+          "raw_inst_executed": {
+            "correlation": 128386596705792,
+            "has_value": false,
+            "value": 524
+          },
+          "sass": "      ATOMG.E.ADD.STRONG.GPU PT, R4, desc[UR12][R4.64], R15",
+          "source": {
+            "file": "/usr/local/cuda/targets/x86_64-linux/include/device_atomic_functions.hpp",
+            "line": 112
+          }
+        }
+      ],
+      "raw_source_sample_groups": {
+        "barrier.h:424": {
+          "instance_has_value_false": 3,
+          "nonzero_instances": 3,
+          "reported_samples": 182
+        },
+        "sm90_fp8_paged_mqa_logits.cuh:798": {
+          "instance_has_value_false": 2,
+          "nonzero_instances": 2,
+          "reported_samples": 36
+        },
+        "sm90_fp8_paged_mqa_logits.cuh:80": {
+          "instance_has_value_false": 2,
+          "nonzero_instances": 2,
+          "reported_samples": 37
+        },
+        "sm90_fp8_paged_mqa_logits.cuh:844": {
+          "instance_has_value_false": 1,
+          "nonzero_instances": 1,
+          "reported_samples": 19
+        },
+        "sm90_fp8_paged_mqa_logits.cuh:907": {
+          "instance_has_value_false": 3,
+          "nonzero_instances": 3,
+          "reported_samples": 38
+        },
+        "sm90_fp8_paged_mqa_logits.cuh:92": {
+          "instance_has_value_false": 2,
+          "nonzero_instances": 2,
+          "reported_samples": 7
+        },
+        "utils.cuh:359": {
+          "instance_has_value_false": 32,
+          "nonzero_instances": 32,
+          "reported_samples": 32
+        }
+      },
+      "receipt_sha256": "d7d9a19db115369a9d9bd025f71e5090896f21aa7adb1eb7d695f29b1a25549e",
+      "report": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/output/profile/q1_official_core_ncu_20261008_01/layer_2_zero_full.ncu-rep",
+      "report_sha256": "3ef344bfa1e06efef1c0151e9a4553921666f3e99a512d51d7ab0d21a3b938cf",
+      "valid_aggregate_metrics": {
+        "dram__bytes_read.sum": {
+          "description": "# of bytes read from DRAM\n(This counter metric represents the sum across all sub-unit instances)",
+          "has_value": true,
+          "instances": 0,
+          "unit": "byte",
+          "value": 8996352.0
+        },
+        "gpu__time_duration.sum": {
+          "description": "equals to gpu__time_duration_measured_user if collectable, otherwise equals to gpu__time_duration_measured_wallclock\n(This counter metric represents the sum across all sub-unit instances)",
+          "has_value": true,
+          "instances": 0,
+          "unit": "ns",
+          "value": 55008.0
+        },
+        "l1tex__t_requests_pipe_lsu_mem_global_op_atom.sum": {
+          "description": "# of requests sent to T-Stage for global atomics\n(This counter metric represents the sum across all sub-unit instances)",
+          "has_value": true,
+          "instances": 0,
+          "unit": "",
+          "value": 1048.0
+        },
+        "lts__t_requests_srcunit_tex_op_atom_dot_alu.sum": {
+          "description": "# of LTS requests from unit L1TEX for atomic ALU (non-CAS)\n(This counter metric represents the sum across all sub-unit instances)",
+          "has_value": true,
+          "instances": 0,
+          "unit": "request",
+          "value": 1048.0
+        },
+        "lts__t_sectors_srcunit_tex_aperture_sysmem_op_read_lookup_miss.sum": {
+          "description": "# of LTS sectors from unit L1TEX accessing system memory (sysmem) for reads that missed\n(This counter metric represents the sum across all sub-unit instances)",
+          "has_value": true,
+          "instances": 0,
+          "unit": "sector",
+          "value": 2304.0
+        },
+        "sass__inst_executed_register_spilling_mem_local": {
+          "description": "",
+          "has_value": true,
+          "instances": 0,
+          "unit": "inst",
+          "value": 9884
+        },
+        "sm__cycles_active.avg": {
+          "description": "# of cycles with at least one warp in flight\n(This counter metric represents the avg across all sub-unit instances)",
+          "has_value": true,
+          "instances": 0,
+          "unit": "cycle",
+          "value": 11937.689393939394
+        },
+        "sm__cycles_active.max": {
+          "description": "# of cycles with at least one warp in flight\n(This counter metric represents the max across all sub-unit instances)",
+          "has_value": true,
+          "instances": 0,
+          "unit": "cycle",
+          "value": 78125.0
+        },
+        "sm__cycles_active.min": {
+          "description": "# of cycles with at least one warp in flight\n(This counter metric represents the min across all sub-unit instances)",
+          "has_value": true,
+          "instances": 0,
+          "unit": "cycle",
+          "value": 7141.0
+        },
+        "smsp__inst_executed_op_generic_atom_dot_alu.sum": {
+          "description": "# of warp instructions executed: ATOM.ALU, ATOMG.ALU (non-CAS)\n(This counter metric represents the sum across all sub-unit instances)",
+          "has_value": true,
+          "instances": 0,
+          "unit": "inst",
+          "value": 1048.0
+        },
+        "smsp__pcsamp_warps_issue_stalled_long_scoreboard": {
+          "description": "",
+          "has_value": true,
+          "instances": 209,
+          "unit": "warp",
+          "value": 351
+        }
+      }
+    }
+  },
+  "clean_timing": false,
+  "execution": {
+    "capability": [
+      9,
+      0
+    ],
+    "cpu_affinity": [
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15
+    ],
+    "cuda": "13.0",
+    "device": "NVIDIA H200",
+    "gpu_uuid": "GPU-a2226185-cb05-a411-80da-f365154128fe",
+    "inputs": {
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/output/data/q1_inputs_20261008_01/kernel_inputs_layer_0.pt": "fc2a2f093b434f658d9ad7ad0bcf1515e8c5426020021c788235740b3cbb073c",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/output/data/q1_inputs_20261008_01/kernel_inputs_layer_1.pt": "aedccc7501f2e8263d99ed1f91c580f03500da4f40d2df421b9f854f2438965b",
+      "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/output/data/q1_inputs_20261008_01/kernel_inputs_layer_2.pt": "b821285a250f8f22f50f39a5af2479d26b436424151c4d5be45e6198cb8a500f"
+    },
+    "physical_device": 1,
+    "precision": {
+      "tf32": false
+    },
+    "torch": "2.12.1+cu130",
+    "triton": "3.7.1"
+  },
+  "per_full_capture_replay_passes": 45,
+  "run_id": "q1_official_core_ncu_20261008_01",
+  "validated_pm_timeline": false
+}

@@ -140,7 +140,139 @@ def runtime_records(value):
             yield from runtime_records(child)
 
 
-def runtime_audit(result, evidence):
+def q1_hint_audit(result, evidence):
+    """Reread the bounded exact-mean build without importing a CUDA provider."""
+    name = "cxldsagr_q1_hint_exact_mean_sm90"
+    runtime = result["execution_runtime_artifacts"]
+    observed = runtime.get("q1_hint_native")
+    mapped = [item for item in runtime["local_native_jit"] if item["name"] == f"{name}.so"]
+    backend = result["backend_provenance"]
+    if "q1_exact_prefetch_hint" not in backend:
+        require(observed is None and not mapped, "Q1 hint runtime has no declared build identity")
+        return None
+    declared = backend["q1_exact_prefetch_hint"]
+    require(
+        isinstance(declared, dict)
+        and declared.get("policy") == "q1-exact-torch-tree-65537-512x4-v1",
+        "Unknown Q1 hint source policy",
+    )
+    files = {}
+
+    def verify_files(records):
+        require(isinstance(records, dict) and bool(records), "Empty Q1 hint file closure")
+        for path, expected in records.items():
+            require(
+                isinstance(path, str)
+                and Path(path).is_absolute()
+                and isinstance(expected, str)
+                and re.fullmatch("[0-9a-f]{64}", expected) is not None,
+                "Invalid Q1 hint file identity",
+            )
+            require(evidence.digest(path) == expected, f"Q1 hint dependency changed: {path}")
+            require(files.get(path, expected) == expected, "Conflicting Q1 hint file identities")
+            files[path] = expected
+
+    sources = declared.get("source_sha256")
+    verify_files(sources)
+    project = {
+        str((ROOT / relative).resolve())
+        for relative in (
+            "operators/deepseek_v32/indexer/q1_hint_exact.py",
+            "operators/deepseek_v32/indexer/csrc/q1_hint_exact.cu",
+            "operators/deepseek_v32/indexer/_native_cache.py",
+        )
+    }
+    require(project <= sources.keys(), "Q1 hint project source closure is incomplete")
+    required = (
+        result.get("prefix_tokens") == 65536
+        and result.get("extend_tokens") == 1
+        and "echo" in result.get("methods", ())
+    )
+    if observed is None:
+        require(not required and not mapped, "Expected an observed Q1 hint production artifact")
+        return {"loaded": False, "source_files": len(sources)}
+    require(isinstance(observed, dict), "Invalid Q1 hint native record")
+    build = observed["build_identity"]
+    require(build["source_identity"] == declared, "Q1 hint native/source identity differs")
+    require(
+        build["cuda_flags"] == declared["flags"]
+        and build["include_paths"] == []
+        and build["link_flags"] == [],
+        "Q1 hint native build flags differ",
+    )
+    translation = str((ROOT / "operators/deepseek_v32/indexer/csrc/q1_hint_exact.cu").resolve())
+    loader = str((ROOT / "operators/deepseek_v32/indexer/_native_cache.py").resolve())
+    require(
+        build["sources_sha256"] == {translation: sources[translation]}
+        and build["loader_sha256"] == sources[loader],
+        "Q1 hint translation unit or loader differs",
+    )
+    toolchain = build["toolchain"]
+    for compiler in ("cc", "cxx", "nvcc"):
+        item = toolchain[compiler]
+        verify_files({item["executable"]: item["sha256"]})
+    verify_files(toolchain["cuda_compiler_sha256"])
+    headers = Path(toolchain["nvcc"]["executable"]).parent.parent / "include"
+    require(headers.is_dir(), "Q1 hint CUDA include directory missing")
+    require(
+        set(sources) == project | {str(p.resolve()) for p in headers.rglob("*") if p.is_file()},
+        "Q1 hint CUDA source closure inventory differs",
+    )
+    ffi_root = Path(toolchain["tvm_ffi_root"])
+    require(ffi_root.is_absolute() and ffi_root.is_dir(), "Invalid Q1 hint TVM-FFI root")
+    ffi_files = toolchain["tvm_ffi_sha256"]
+    require(
+        set(ffi_files)
+        == {
+            str(p.relative_to(ffi_root))
+            for p in ffi_root.rglob("*")
+            if p.is_file() and p.suffix in {".py", ".so", ".h", ".hpp"}
+        },
+        "Q1 hint TVM-FFI closure inventory differs",
+    )
+    verify_files({str(ffi_root / path): expected for path, expected in ffi_files.items()})
+    fingerprint = hashlib.sha256(json.dumps(build, sort_keys=True).encode()).hexdigest()
+    key = f"{name}_{fingerprint}"
+    artifact = Path(observed["artifact_path"])
+    require(
+        observed.get("schema") == 1
+        and observed.get("cache_key") == key
+        and observed.get("artifact_name") == f"{name}.so"
+        and artifact.is_absolute()
+        and artifact.name == f"{name}.so"
+        and artifact.parent.name == key,
+        "Q1 hint immutable artifact identity differs",
+    )
+    require(
+        evidence.read(artifact.parent / "record.json")
+        == {key: value for key, value in observed.items() if key != "artifact_path"},
+        "Q1 hint immutable cache record differs",
+    )
+    verify_files({str(artifact): observed["artifact_sha256"]})
+    require(
+        len(mapped) == 1
+        and mapped[0]["library"]
+        == {
+            "path": str(artifact),
+            "sha256": observed["artifact_sha256"],
+            "bytes": artifact.stat().st_size,
+        },
+        "Q1 hint artifact does not match the mapped production DSO",
+    )
+    return {
+        "loaded": True,
+        "source_files": len(sources),
+        "source_and_toolchain_files": len(files),
+        "tvm_ffi_files": len(ffi_files),
+        "cache_key": key,
+        "artifact_sha256": observed["artifact_sha256"],
+        "mapped_artifact_matches": True,
+        "boundary": "Declared project/CUDA, compiler and TVM-FFI closure plus the exact mapped "
+        "DSO. System C/C++ headers outside that declaration are not build-time evidence.",
+    }
+
+
+def runtime_audit(result, evidence, *, require_offload=True):
     files = {}
     for group in ("backend_provenance", "execution_runtime_artifacts"):
         for item in runtime_records(result[group]):
@@ -152,6 +284,12 @@ def runtime_audit(result, evidence):
                 if "bytes" in item:
                     require(path.stat().st_size == item["bytes"], "Runtime artifact size changed")
                 files[str(path)] = item["sha256"]
+    if not require_offload:
+        require(
+            result.get("schema_version") == 4 and result.get("methods") == ["hbm"],
+            "Only isolated HBM can omit the loaded recall bridge",
+        )
+        return {"runtime_and_dependency_files": len(files), "bridge_fingerprint": None}
     bridge = result["backend_provenance"]["recall_dispatch"]
     fingerprint = hashlib.sha256(
         json.dumps(bridge["identity"], sort_keys=True).encode()
@@ -164,7 +302,12 @@ def runtime_audit(result, evidence):
     require(
         any(fingerprint[:16] in item["name"] for item in native), "Loaded native bridge differs"
     )
-    return {"runtime_and_dependency_files": len(files), "bridge_fingerprint": fingerprint}
+    hint = q1_hint_audit(result, evidence)
+    return {
+        "runtime_and_dependency_files": len(files),
+        "bridge_fingerprint": fingerprint,
+        **({"q1_exact_prefetch_hint": hint} if hint is not None else {}),
+    }
 
 
 def tensor_record(tensor, name, extend):
@@ -221,9 +364,10 @@ def saved_tensors(check, profile, extend, evidence):
 
     loaded, inventory, comparisons = {}, [], []
     for method in METHODS:
-        control = load(check / f"{method}_control.pt")
-        prefix = load(check / f"{method}_prefix_logits.pt")
-        graph = load(check / f"{method}_extend_graph_check.pt")
+        check_directory = check[method] if isinstance(check, dict) else check
+        control = load(check_directory / f"{method}_control.pt")
+        prefix = load(check_directory / f"{method}_prefix_logits.pt")
+        graph = load(check_directory / f"{method}_extend_graph_check.pt")
         require(set(control) == {"hidden", "logits"}, "Saved control schema differs")
         require(
             set(graph) == {"baseline", "changed_baseline", "changed_graph"},
@@ -271,7 +415,8 @@ def saved_tensors(check, profile, extend, evidence):
                 )
     profile_comparisons = []
     for method in METHODS:
-        actual = load(profile / f"{method}_profile_output.pt")
+        profile_directory = profile[method] if isinstance(profile, dict) else profile
+        actual = load(profile_directory / f"{method}_profile_output.pt")
         require(set(actual) == {"hidden", "logits"}, "Saved profile output schema differs")
         for key in ("hidden", "logits"):
             inventory.append(tensor_record(actual[key], f"{method}/profile/{key}", extend))
@@ -312,6 +457,8 @@ def prefetch_audit(directory, result, receipt, evidence):
     proofs = checks.get("bounded_prefetch", {})
     require(set(proofs) == set(PREFETCH_LABELS), "Incomplete bounded-prefetch execution coverage")
     history, append, slots = result["prefix_tokens"], result["extend_tokens"], result["slots"]
+    baseline_scope = proofs["baseline"].get("scope", {})
+    prepared_cap = transitions.preparation_capacity(baseline_scope)
     expected_scope = {
         "method": "echo",
         "residency": "cold",
@@ -320,8 +467,25 @@ def prefetch_audit(directory, result, receipt, evidence):
         "H": history,
         "A": append,
         "slots": slots,
-        "max_prefetch": min(8192, slots - append),
+        "max_prefetch": prepared_cap,
     }
+    policy = baseline_scope.get("prefetch_policy", transitions.COARSE_POLICY)
+    require(
+        policy in (transitions.COARSE_POLICY, transitions.OFFICIAL_POLICY),
+        "Unknown prefetch policy in matrix acceptance",
+    )
+    if policy == transitions.OFFICIAL_POLICY:
+        require(append == 1 and slots - append >= 64, "Unsupported official Q1 headroom")
+        expected_scope.update(
+            prefetch_policy=transitions.OFFICIAL_POLICY,
+            max_prefetch=64,
+            prepared_max_prefetch=prepared_cap,
+            hint_index=1,
+        )
+    if "preparation" in baseline_scope:
+        expected_scope.update(
+            preparation=dict(baseline_scope["preparation"]), record_bytes=1152, topk=2048
+        )
     require(
         result["extend_residency"] == "cold" and history + append <= slots,
         "Unsupported bounded-prefetch audit scope",
@@ -416,6 +580,9 @@ def prefetch_audit(directory, result, receipt, evidence):
         "resident_selection_records",
         "host_to_device_bytes",
     }
+    schedule_state_fields = {"logical_priority", "metrics"}
+    if policy == transitions.OFFICIAL_POLICY:
+        schedule_state_fields.update(("resident", "free_count"))
     for baseline, other in (
         ("baseline", "default_graph"),
         ("baseline", "replay_0"),
@@ -429,14 +596,10 @@ def prefetch_audit(directory, result, receipt, evidence):
             )
         for left, right in zip(states[baseline]["layers"], states[other]["layers"], strict=True):
             left_fixed = {
-                key: value
-                for key, value in left.items()
-                if key not in {"logical_priority", "metrics"}
+                key: value for key, value in left.items() if key not in schedule_state_fields
             }
             right_fixed = {
-                key: value
-                for key, value in right.items()
-                if key not in {"logical_priority", "metrics"}
+                key: value for key, value in right.items() if key not in schedule_state_fields
             }
             require(left_fixed == right_fixed, f"Graph changed deterministic cache state: {other}")
             left_metrics = {
@@ -743,9 +906,23 @@ def window_arithmetic(panel):
     return {"start_ns": start, "end_ns": end, **expected}
 
 
+def read_setup_lineage(path, evidence):
+    """Read capture/clone lineage; setup need not contain measured NVTX scopes."""
+    evidence.digest(path)
+    lineage = {}
+    with sqlite3.connect(f"file:{Path(path).resolve()}?mode=ro", uri=True) as connection:
+        for node, parent in connection.execute(
+            "SELECT graphNodeId,originalGraphNodeId FROM CUDA_GRAPH_NODE_EVENTS"
+        ):
+            if parent is not None:
+                require(node not in lineage or lineage[node] == parent, "Ambiguous graph lineage")
+                lineage[node] = parent
+    return lineage
+
+
 def graph_inventory(profile, result, method, native, evidence):
     setup_index = result["nsys_capture_order"].index(f"{method}/extend_graph_setup") + 1
-    setup = read_native(profile / f"capture_{setup_index}.sqlite", evidence)
+    lineage = read_setup_lineage(profile / f"capture_{setup_index}.sqlite", evidence)
     templates = evidence.read(profile / "full_graph_templates.json")
     require(
         templates == result["full_extend_graph_templates"], "Full graph template identity differs"
@@ -780,7 +957,7 @@ def graph_inventory(profile, result, method, native, evidence):
             not row["graph_id"] or row["graph_id"] == template["executable_graph_id"],
             "Unexpected executable graph",
         )
-        node = original_node(row["graph_node_id"], setup["lineage"])
+        node = original_node(row["graph_node_id"], lineage)
         require(str(node) in template["node_owners"], "Native graph contains an unknown node")
         require(
             template["node_types"][str(node)]

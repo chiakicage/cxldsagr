@@ -235,6 +235,108 @@ def test_all_schemes_reserve_observed_cpu_execution_scratch(scheme):
         assert plan.shared.dram == 40
 
 
+@pytest.mark.parametrize(
+    ("context", "expected"),
+    [
+        (32767, 1_703_936),  # Below the paged dispatch threshold.
+        (32768, 6_237_480),
+        (32769, 6_258_224),  # Both the page and score row gain padding.
+        (65536, 12_268_840),
+        (65537, 12_289_584),
+    ],
+)
+def test_q1_reservation_covers_paged_storage_and_padding(context, expected, monkeypatch):
+    def forbidden(*args, **kwargs):
+        raise AssertionError("execution planning allocated a tensor or initialized CUDA")
+
+    monkeypatch.setattr(torch, "empty", forbidden)
+    monkeypatch.setattr(torch.cuda, "_lazy_init", forbidden)
+    reservation = execution_reservation(1, context, topk=2048, width=576)
+    assert reservation.indexer_bytes == expected
+    assert reservation.copy_source_bytes == 2304
+    assert reservation.dram == 40
+
+
+@pytest.mark.parametrize("queries", [2, 4, 8])
+def test_larger_query_limits_also_cover_a_paged_q1_tail(queries):
+    reservation = execution_reservation(queries, 65537, topk=2048, width=576)
+    assert reservation.indexer_bytes == 12_289_584
+    # Tail packing does not reduce the source leases required by a full chunk.
+    assert reservation.copy_source_bytes == queries * 2304
+
+
+@pytest.mark.parametrize(
+    ("queries", "context", "expected"),
+    [(16, 65537, 21_008_384), (1024, 65664, 1_212_157_952)],
+)
+def test_paged_tail_does_not_add_to_a_larger_existing_peak(queries, context, expected):
+    assert execution_reservation(queries, context, topk=2048, width=576).indexer_bytes == expected
+
+
+@pytest.mark.parametrize(
+    ("context", "peak"),
+    [(2047, 229_312), (2048, 4_816_896), (4096, 4_816_896), (32768, 6_237_480)],
+)
+def test_decode_workspace_only_adds_the_uncovered_active_peak(context, peak):
+    reservation = execution_reservation(1, context, topk=2048, width=576)
+    assert reservation.indexer_bytes + reservation.attention_extra_bytes == peak
+    assert reservation.hbm == peak + 2304
+    if context in (2048, 4096):
+        assert reservation.attention_workspace_metadata == {
+            "workspace_attention_extra_bytes": peak - reservation.indexer_bytes
+        }
+    else:
+        assert reservation.attention_workspace_metadata == {}
+
+
+@pytest.mark.parametrize("scheme", ["hbm", "echo", "serial_sparse", "dense_prefetch"])
+def test_short_context_serving_plan_accounts_for_q1_decode(scheme):
+    backend = planned_backend(host_tokens=4096)
+    backend.scheme = scheme
+    backend.max_seq_len = backend.slots = 4096
+    backend.workspace_query_tokens = backend.chunk_size = 2
+    backend.cfg.index_topk = 2048
+    plan = backend.plan_resources(CacheFootprint(1 << 30, 1 << 30), {"max_session_capacity": 4096})
+    assert plan.metadata["workspace_attention_extra_bytes"] == 4_292_608
+    assert plan.metadata["workspace_indexer_bytes"] == 524_288
+    items = [
+        item for item in plan.allocations if item.name == "attention_execution_extra_upper_bound"
+    ]
+    assert len(items) == 1
+
+
+@pytest.mark.parametrize("scheme", ["hbm", "echo", "serial_sparse", "dense_prefetch"])
+def test_serving_plans_reserve_paged_q1_tail_once_per_backend(scheme):
+    backend = planned_backend(host_tokens=65600)
+    backend.scheme = scheme
+    backend.max_seq_len = backend.slots = 65537
+    backend.workspace_query_tokens = backend.chunk_size = 2
+    backend.cfg.index_topk = 2048
+    limits = {"max_session_capacity": 65537}
+    plan = backend.plan_resources(CacheFootprint(1 << 35, 1 << 35), limits)
+    assert plan.metadata["workspace_indexer_bytes"] == 12_289_584
+    assert plan.metadata["workspace_copy_source_bytes"] == 4608
+
+
+def test_standalone_resident_rejects_budget_without_paged_q1_tail_storage():
+    from models.deepseek_v32.model import DeepSeekEchoModel
+
+    model = object.__new__(DeepSeekEchoModel)
+    model.cfg = planned_backend().cfg
+    model.cfg.index_topk = 2048
+    model.capacity = 65537
+    model.devices = [torch.device("cuda:0")]
+    model.placement = model.devices * 3
+    model.hbm_cache_budget_bytes = 1 << 30
+    model.dram_cache_budget_bytes = 40
+    model.execution_reservation = execution_reservation(2, 65537, topk=2048, width=576)
+    plan = model._plan_cache_resources(False)["devices"]["cuda:0"]
+    assert plan["indexer_workspace_bytes"] == 12_289_584
+    model.hbm_cache_budget_bytes = plan["hbm"] - (12_289_584 - 4_464_640)
+    with pytest.raises(CacheBudgetExceeded, match="execution reservation"):
+        model._plan_cache_resources(False)
+
+
 def test_standalone_resident_cpu_scratch_has_a_real_dram_budget():
     from models.deepseek_v32.model import DeepSeekEchoModel
 

@@ -11,6 +11,41 @@ DEPENDENCIES = {"cutlass": "cutlass", "deep_jit": "DeepJIT"}
 FLASH_MLA_REVISION = "ba89a3466e9470ad08ab39738d4e7bb66989e1e7"
 FLASH_MLA_CUTLASS_PIN = "147f5673d0c1c3dcf66f78d677fd647e4a020219"
 SHARED_CUTLASS_REVISION = "f3fde58372d33e9a5650ba7b80fc48b3b49d40c8"
+ECHO_REVISION = "bc1b75c1000010d0ac6f032ebaac283255c050b1"
+ECHO_URL = "https://github.com/sjtu-zhao-lab/ECHO.git"
+
+
+def prepare_echo(*, initialize=False):
+    """Prepare pinned source-only ECHO headers, preserving existing reproductions."""
+    checkout = THIRD_PARTY / "ECHO"
+    if not checkout.exists() and initialize:
+        subprocess.run(
+            [
+                "git",
+                "-c",
+                "submodule.recurse=false",
+                "clone",
+                "--no-recurse-submodules",
+                ECHO_URL,
+                str(checkout),
+            ],
+            check=True,
+        )
+        subprocess.run(
+            ["git", "-C", str(checkout), "checkout", "--detach", ECHO_REVISION], check=True
+        )
+    if not (checkout / ".git").exists():
+        raise RuntimeError("Official ECHO source is not initialized; run with --init")
+    if git(checkout, "rev-parse", "HEAD") != ECHO_REVISION:
+        raise RuntimeError(
+            f"ECHO must use pinned revision {ECHO_REVISION}; existing checkout is unchanged"
+        )
+    if git(checkout, "status", "--porcelain", "--untracked-files=no"):
+        raise RuntimeError("Tracked ECHO source changed; preserve or restore it before preparing")
+    required = checkout / "DeepGEMM/deep_gemm/include/deep_gemm/impls/sm90_fp8_paged_mqa_logits.cuh"
+    if not required.is_file():
+        raise RuntimeError("Official ECHO paged decode header is missing")
+    print(f"3rdparty/ECHO source-only dependency: {ECHO_REVISION}")
 
 
 def git(directory, *args):
@@ -119,6 +154,7 @@ def main():
             check=True,
         )
     try:
+        prepare_echo(initialize=args.init)
         prepare()
     except RuntimeError as exc:
         parser.exit(1, f"error: {exc}\n")

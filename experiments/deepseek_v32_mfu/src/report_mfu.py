@@ -73,7 +73,7 @@ def _verify_native_file(item):
             raise ValueError(f"recorded loaded native artifact changed: {path}")
 
 
-def audit_local_native_artifacts(results):
+def audit_local_native_artifacts(results, *, require_offload=True):
     """Require complete, unchanged mapped-DSO evidence from all three runs."""
     if set(results) != {"check", "bench", "profile"}:
         raise ValueError("local native verification requires check, bench and profile runs")
@@ -120,7 +120,9 @@ def audit_local_native_artifacts(results):
                     raise ValueError(f"{run} repeats a local native library path")
                 paths.add(path)
                 counts[category] += 1
-            if any(counts[category] != 1 for category in ("echo_indexer", "record_transfer")):
+            if require_offload and any(
+                counts[category] != 1 for category in ("echo_indexer", "record_transfer")
+            ):
                 raise ValueError(
                     f"{run} requires exactly one echo_indexer and one record_transfer library "
                     f"in {field}['local_native_jit'] for formal native-bound publication"
@@ -504,14 +506,14 @@ def audit_dense_transport(result, summary, phase_counters):
     }
 
 
-def audit_work(result, calls, peaks):
+def audit_work(result, calls, peaks, *, methods=METHODS):
     """Require full query coverage and equal useful work for every method."""
     expected_stages = set(STAGES) - {"indexer_qk", "indexer_fused", "lm_head"}
     totals, rows, intervals = {}, [], []
     for phase in ("prefill", "extend"):
         start = 0 if phase == "prefill" else result["prefix_tokens"]
         tokens = result["prefix_tokens"] if phase == "prefill" else result["extend_tokens"]
-        for method in METHODS:
+        for method in methods:
             selected = [
                 call
                 for call in calls
@@ -574,8 +576,8 @@ def audit_work(result, calls, peaks):
                     "details": utilization,
                 }
             )
-        if any(totals[method, phase] != totals["hbm", phase] for method in METHODS[1:]):
-            raise ValueError("four methods have different useful matrix work")
+        if any(totals[method, phase] != totals[methods[0], phase] for method in methods[1:]):
+            raise ValueError("selected methods have different useful matrix work")
     return rows, intervals
 
 

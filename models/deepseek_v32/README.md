@@ -1,11 +1,39 @@
 # DeepSeek V3.2
 
+Q1 hint 均值融合已通过生产入口验收和正式三层补测。它仅作用于 SM90 推理的
+FP32 `[1,65537]`、内层 stride 为 1 且按 16 B 对齐的输入，保留原 FP32 归约次序。
+官方 ECHO、精确选择和 decode EMA 均未改变。私有 100 组配对计时为
+2.6486815→2.6053275 ms，87 组更快。该收益来自独立配对实验；当前正式结果与
+测量边界见 MFU 实验，不用不同批次的中位数估计加速。
+
 真实前三层支持四种 cache 实现和显式准备的完整 extend CUDA Graph；独立验收、
 正式计时与 profile 的当前状态见[四方案 MFU 实验](../../experiments/deepseek_v32_mfu/README.md)。
 十 block C10 GR 工作负载已完成固定 P/NH 的 12 点四方案独立 check 和正式 bench，见
-[motivation 实验](../../experiments/deepseek_v32_motivation/README.md)。本轮没有新采集
+[motivation 实验](../../experiments/deepseek_v32_motivation/README.md)。该 C10 实验本轮没有新采集
 profile；保留的 profile 只对应旧 H65536/A128 单点。
 固定历史的临时候选语义与前三层 MFU 的持久追加分开验收。
+
+H64K+A1 的真实前三层四方案已在 `deepseek_h64k_a1_fused_prepare_20261009_01` 完成
+独立正确性验收、正式计时及 graph node profile。该版本包含官方 ECHO paged decode、
+合并 KV 打包、Q1 scale 布局、projection 分支调度、多 CTA 暂存发布，以及供精确 top-k
+使用的对齐 score 视图、CUB 后处理、官方 Q1 专用的 64 空槽准备、精确 hint 均值融合及 page64／页表／暂存区准备融合。check 和 profile
+保存的 44 个输出 tensor 经独立 CPU 复读，所有比较逐位一致；六次 cold ECHO
+预取状态证明及每个正式样本的流量也通过核验。
+每种方法的 check、bench、阶段 profile 和逐算子 profile 均在独立进程中完成，
+只预热所选方法。逐算子 profile 另存的 8 个 hidden/logits 与相应验收逐位一致。
+HBM 的三层 GPU 窗口为 1.014466 ms，与官方参考接近；输入和环境差异仍保留。
+准备融合每次重建当前 K/scales、页表和暂存状态，不新增持久 storage；
+三层准备从 9 个节点减到 3 个，完整 ECHO graph 从 263 个节点减到 257 个。
+151 项 GPU 检查和四方法独立进程补测通过。私有 500 对计时的中位数下降约
+1.32%，部分均值与 p99 变差，不外推尾延迟或完整 serving 收益。
+结果与各项测量边界见上述 MFU 入口及
+[官方对照与 Q1 算子实验](../../experiments/deepseek_v32_echo_official/README.md)。
+
+64 空槽准备的独立双模型对照为 `q1_free_prepare_model_bench_20261008_01`。
+H=65,536、A=1、P=NH=65,600 的真实三层 cold 路径采用 100 组平衡 AB/BA 配对，
+完整 `model.forward(return_hidden=True)` 加同步的 wall 中位数从 2.7214065 ms
+降至 2.641556 ms，减少 2.934%，91 组更快。每次计时前恢复相同 prefix、映射和 hint，
+恢复操作在计时外；该结果不代表完整 61 层，也不建立与官方 SGLang 的数值等价。
 
 独立 SM90 checkpoint 推理实现，支持 ECHO prefill/extend。完整结构包含 61 层、
 embedding、3 个 dense MLP、58 个 MoE、final norm 和 LM head。硬件算子按功能位于
@@ -88,6 +116,11 @@ return_hidden=False, capture_scope=None)` 显式启用，策略为
 跨层预取时释放当前层 cache lease，随后重新取得它完成 append、recall 和 MLA。
 Prefill 与普通 forward 保留原来的层前等待。新调度的验收与测量状态见 MFU 实验。
 
+Q1 完整图采用 `query-and-kv-index-key-branches-v1` 投影调度：query 分支与
+KV/indexer-key 分支分别提交到两个 stream，再在消费前汇合。该调度已纳入上述
+前三层验收；独立 A/B 记录的是调度收益。早期组件 NSYS 未观察到实际计算重叠，
+完整图中的交叠范围见 MFU 实验的阶段 profile。
+
 两类图分别记录规划上限、static allocated、private reserved 和设备已用量。
 完整图引用 cache storage，重建或释放 cache 前先销毁图；其异步写回源保留至图完成。
 模型关闭或异步失败进入 poisoned 状态后拒绝新执行和资源变更，保留
@@ -129,6 +162,41 @@ dense 要求 `P >= session capacity`。独立 correctness 通过 `return_hidden=
 - Indexer RoPE 后直接进行 FP8 量化，不执行 Hadamard；精确 top-k 选择当前量化 logits
   中的最大值。该变更可能改变量化值与选择，不能视为与旧 Hadamard 输出逐位等价。
   RoPE、norm、SiLU 与 top-k 复用 FlashInfer；量化按 KDA 流程独立验证和测量。
+
+Resident indexer 对 Q1 且有效 causal context `query_start + 1 >= 32768` 使用官方
+paged MQA。原 FP8 K 与 FP32 scales 每次由一个 kernel 按 64-token 页打包；N=65,537 时 packed
+storage 为 8,659,200 B（约 8.66 MB），页表和调度 metadata 另计。执行预留覆盖最大
+query 配置及其 Q1 尾块，打包空间不作为逐层持久 cache 重复计费。
+
+Q1 offload 在有效 causal context 至少为 32,768、history 完整且预取空间至少有
+64 个合法槽位时，调用固定版本的 ECHO 官方 paged fused decode。最多 64 条预测
+记录先进入暂存区；适配器完成所有映射、slot 与 journal 核验后，再由最多 64 个 CTA
+逐 record 搬入并发布到本地 pool。未进入精确 top-k 的预测记录也计入实际 H2D，
+随后完整召回剩余选择。阈值使用独立的 `offset[1]`，初始为 0，每次 Q1 后按官方
+0.5 EMA 更新。官方 score storage 的物理行宽按 256 个 FP32 元素对齐，默认返回
+逻辑长度 N 的视图；模型的精确 top-k 直接使用包含已初始化 `-inf` 尾部的对齐视图，
+无需复制分数或增加 kernel。选择数量仍按逻辑 N 限定，hint 归约也只读取逻辑列，
+保留原分数、阈值和精确选择语义。暂存和逐 token host 表在 N=65,537 时共占
+336,132 B，已纳入执行预留；多 CTA 发布不另增 scratch。运行结果与验收边界见上述 MFU 入口。
+
+上述官方 Q1 路径在单 session、独占 pool 操作、普通持久 append、已初始化
+`H=query_start` 且 `P-H>=64` 时，只按槽位升序选择前 64 个空槽。已驻留数
+`L<=H` 保证空槽足够，不能据此推断 history 已驻留。GPU 仍核验全池 priority、
+选中槽的 free bitmap 和反向映射，并重置完整 journal、计数与统计。专用的
+bounded token 只供声明了 64 槽消费上限的官方 Q1 路径使用；其他条件保留完整准备，
+通用 prefill 拒绝消费该 token。新批次按实际准备的 64 槽验收。
+
+Q1/k2048 且 score storage 至少 32K 列的精确选择保留 FlashInfer SMALL 核心，
+由官方 CUB 合并排序与 nonfinite ID mask。输出值、并列 ID 和 signed zero 的
+顺序保持原契约；其余形状继续调用原 sorted 路径。Promotion 用一个 256-thread
+CTA 并行校验映射与重复记录，后续逐 record 复制不变。
+
+模型仅在原始 query batch 为 Q1 且 selection 宽度为 2,048 时调用显式
+`sparse_mla_decode`：16 个分片共用原 KV，官方 sparse prefill 生成 BF16 partial
+输出，再按自然对数 LSE 用 FP32 合并。该路径保留完整 selection，按原容差验收新增舍入。
+容量不足时拆分 prefill query 所得到的 Q1 仍调用原 `sparse_mla`，保留切片逐位契约。
+Decode 活跃空间仅补入超过原 indexer 预留的部分；完整图的私有池仍独立计费，
+allocated、reserved 和设备已用量分别核验。
 
 ## 相关实验
 

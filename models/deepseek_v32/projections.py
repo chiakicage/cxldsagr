@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
 from typing import ClassVar
@@ -94,6 +95,57 @@ class CheckpointAttention:
         self.index_wq, self.index_wk = linear("indexer.wq_b"), linear("indexer.wk")
         self.index_head_weight = tensor(attn + "indexer.weights_proj.weight")
         self.frequencies = rotary_frequencies(cfg, device=self.device)
+        self._q1_projection_stream = (
+            torch.cuda.Stream(device=self.device)
+            if linear_backend == "fp8"
+            and self.device.type == "cuda"
+            and torch.cuda.get_device_capability(self.device) == (9, 0)
+            and (cfg.n_heads, cfg.qk_rope_head_dim) == (128, 64)
+            else None
+        )
+
+    def _project_kv(self, x):
+        cfg = self.cfg
+        kv = self.wkv_a(x)
+        latent, k_pe = kv.split((cfg.kv_lora_rank, cfg.qk_rope_head_dim), -1)
+        latent = rms_norm(latent, self.kv_norm_weight, cfg.norm_eps)
+        return kv, latent, k_pe
+
+    def _project_index_k(self, x):
+        return F.layer_norm(
+            self.index_wk(x).float(),
+            (self.cfg.index_head_dim,),
+            self.index_norm_weight,
+            self.index_norm_bias,
+            self.cfg.norm_eps,
+        ).bfloat16()
+
+    @contextmanager
+    def _projection_branches(self, x):
+        side = self._q1_projection_stream
+        if side is None or len(x) != 1 or not torch.cuda.is_current_stream_capturing():
+            yield None
+            return
+        current = torch.cuda.current_stream(x.device)
+        side.wait_stream(current)
+        x.record_stream(side)
+        try:
+            with torch.cuda.stream(side):
+                kv, latent, k_pe = self._project_kv(x)
+                index_k = self._project_index_k(x)
+            yield kv, latent, k_pe, index_k
+        except BaseException as primary:
+            try:
+                current.wait_stream(side)
+            except BaseException as cleanup:  # noqa: BLE001 -- retain both exception objects
+                raise BaseExceptionGroup(
+                    "Projection execution and stream join failed", [primary, cleanup]
+                ) from None
+            raise
+        current.wait_stream(side)
+        # The caller consumes side allocations after this captured join.
+        for tensor in (kv, latent, index_k):
+            tensor.record_stream(current)
 
     @torch.inference_mode()
     def embedding(self, token_ids: torch.Tensor) -> torch.Tensor:
@@ -143,27 +195,30 @@ class CheckpointAttention:
         cfg = self.cfg
         count = hidden.shape[0]
         x = hidden if normalized else rms_norm(hidden, self.input_norm_weight, cfg.norm_eps)
-        qr = rms_norm(self.wq_a(x), self.q_norm_weight, cfg.norm_eps)
-        angles = positions[:, None] * self.frequencies[None, :]
-        rotary_cache = prepare_rotary_cache(angles) if hidden.is_cuda else None
-        q = self.wq_b(qr).reshape(count, cfg.n_heads, -1)
-        q_nope, q_pe = q.split((cfg.qk_nope_head_dim, cfg.qk_rope_head_dim), -1)
-        if hidden.is_cuda:
-            # cuBLAS accepts this strided output directly. Writing into the
-            # final token-major layout avoids repacking a head-major Q tensor.
-            projected_q = torch.empty(
-                (count, cfg.n_heads, cfg.qk_head_dim), device=hidden.device, dtype=hidden.dtype
-            )
-            torch.bmm(
-                q_nope.transpose(0, 1),
-                self.wk_b,
-                out=projected_q[..., : cfg.kv_lora_rank].transpose(0, 1),
-            )
+        with self._projection_branches(x) as branches:
+            qr = rms_norm(self.wq_a(x), self.q_norm_weight, cfg.norm_eps)
+            angles = positions[:, None] * self.frequencies[None, :]
+            rotary_cache = prepare_rotary_cache(angles) if hidden.is_cuda else None
+            q = self.wq_b(qr).reshape(count, cfg.n_heads, -1)
+            q_nope, q_pe = q.split((cfg.qk_nope_head_dim, cfg.qk_rope_head_dim), -1)
+            if hidden.is_cuda:
+                # Write directly to token-major Q with the original strided cuBLAS output.
+                projected_q = torch.empty(
+                    (count, cfg.n_heads, cfg.qk_head_dim), device=hidden.device, dtype=hidden.dtype
+                )
+                torch.bmm(
+                    q_nope.transpose(0, 1),
+                    self.wk_b,
+                    out=projected_q[..., : cfg.kv_lora_rank].transpose(0, 1),
+                )
+            else:
+                q_latent = torch.bmm(q_nope.transpose(0, 1), self.wk_b).transpose(0, 1)
+            if branches is not None:
+                index_q = self.index_wq(qr).reshape(count, cfg.index_n_heads, cfg.index_head_dim)
+        if branches is None:
+            _kv, latent, k_pe = self._project_kv(x)
         else:
-            q_latent = torch.bmm(q_nope.transpose(0, 1), self.wk_b).transpose(0, 1)
-        kv = self.wkv_a(x)
-        latent, k_pe = kv.split((cfg.kv_lora_rank, cfg.qk_rope_head_dim), -1)
-        latent = rms_norm(latent, self.kv_norm_weight, cfg.norm_eps)
+            _kv, latent, k_pe, index_k = branches
         direct_rotary_output = hidden.is_cuda and q_pe.shape[1:] == (128, 64)
         if direct_rotary_output:
             from operators.flashinfer import rotary_pair_into
@@ -177,14 +232,9 @@ class CheckpointAttention:
             )
         else:
             q_pe, k_pe = apply_rope_pair(q_pe, k_pe, angles, interleaved=True, cache=rotary_cache)
-        index_q = self.index_wq(qr).reshape(count, cfg.index_n_heads, cfg.index_head_dim)
-        index_k = F.layer_norm(
-            self.index_wk(x).float(),
-            (cfg.index_head_dim,),
-            self.index_norm_weight,
-            self.index_norm_bias,
-            cfg.norm_eps,
-        ).bfloat16()
+        if branches is None:
+            index_q = self.index_wq(qr).reshape(count, cfg.index_n_heads, cfg.index_head_dim)
+            index_k = self._project_index_k(x)
         index_q, index_k = apply_rope_pair(
             index_q, index_k, angles, interleaved=False, cache=rotary_cache
         )

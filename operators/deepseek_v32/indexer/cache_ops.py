@@ -447,6 +447,69 @@ def _selection_workspace_bytes(slots, device):
     return int(_call("echo_sparse_selection_workspace", device, slots, device.index))
 
 
+def supports_free_q1_prepare(*, rows, columns, query_start, history_length, limit):
+    """Share the actual official Q1 predicate with cache preparation dispatch."""
+    from operators.deepseek_v32.indexer.echo import _uses_official_q1
+
+    return _uses_official_q1(
+        {"history_length": history_length, "max_prefetch": limit},
+        rows,
+        columns,
+        query_start,
+    )
+
+
+def prepare_prefetch_free(
+    priority,
+    free_bitmap,
+    device_to_host,
+    free_slots,
+    allocation_log,
+    counter,
+    prefetch_stats,
+    keys,
+    *,
+    timestamp,
+):
+    """Prepare exactly 64 existing free slots; the caller proves their capacity."""
+    from operators.deepseek_v32.indexer.echo import _BoundedPreparedPrefetch
+
+    device, slots = priority.device, priority.numel() - 1
+    if (
+        device.type != "cuda"
+        or torch.cuda.get_device_capability(device) != (9, 0)
+        or not 64 <= slots < 2**31 - 1
+        or type(timestamp) is not int
+        or not 0 <= timestamp < 2**31 - 2
+    ):
+        raise ValueError("bounded prefetch preparation requires SM90 pool geometry")
+    for tensor, shape, dtype, name in (
+        (priority, (slots + 1,), torch.int64, "priority"),
+        (free_bitmap, (slots + 1,), torch.bool, "free bitmap"),
+        (device_to_host, (slots + 1,), torch.int64, "reverse map"),
+        (free_slots, (slots,), torch.int32, "free slots"),
+        (allocation_log, (slots + 1,), torch.int64, "journal"),
+        (counter, (1,), torch.uint32, "counter"),
+        (prefetch_stats, (3,), torch.int64, "statistics"),
+        (keys, (slots,), torch.int64, "mask scratch"),
+    ):
+        _check_tensor(tensor, shape, dtype, device, name)
+    tensors = (
+        priority,
+        free_bitmap,
+        device_to_host,
+        free_slots,
+        allocation_log,
+        counter,
+        prefetch_stats,
+        keys,
+    )
+    if len({tensor.untyped_storage().data_ptr() for tensor in tensors}) != len(tensors):
+        raise ValueError("bounded preparation inputs and scratch cannot alias")
+    _call("echo_prepare_prefetch_free", device, *tensors, timestamp)
+    return _BoundedPreparedPrefetch(1, free_slots, allocation_log, counter, prefetch_stats, keys)
+
+
 def prepare_prefetch(
     priority,
     free_slots,

@@ -34,6 +34,8 @@ def test_capture_preserves_graph_ids_for_explicit_clone_attribution(tmp_path):
     [
         ("deep_gemm::sm90_fp8_mqa_logits<64,128>", "indexer"),
         ("echo_native::sm90_fp8_mqa_logits_fuse_prefetch<64,128>", "indexer_fused_prefetch"),
+        ("deep_gemm::sm90_fp8_paged_mqa_logits_fused_v2<1,64,128>", "indexer_fused_prefetch"),
+        ("deep_gemm::sm90_fp8_paged_mqa_logits<1,64,128>", "indexer"),
         ("sm90::prefill::sparse_fwd::sparse_attn_fwd_kernel<576>", "sparse_mla"),
         ("deep_gemm::sm90_fp8_gemm_1d2d_impl<...>", "deepgemm_fp8_gemm"),
     ],

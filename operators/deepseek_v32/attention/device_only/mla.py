@@ -14,7 +14,7 @@ from pathlib import Path
 import torch
 from torch.nn import functional as F
 
-from operators.deepseek_v32.attention._config import padded_selection_count
+from operators.deepseek_v32.attention._config import DECODE_SPLITS, padded_selection_count
 from operators.deepseek_v32.attention._validation import _validate
 
 
@@ -38,6 +38,10 @@ def build_info():
         "package": Path(package.__file__).resolve(),
         "interface": Path(interface.__file__).resolve(),
         "native": Path(native.__file__).resolve(),
+        "adapter": Path(__file__).resolve(),
+        "decode_combine": Path(__file__).with_name("decode.py").resolve(),
+        "layout": Path(__file__).parents[1] / "_config.py",
+        "validation": Path(__file__).parents[1] / "_validation.py",
     }
     identities = {}
     for name, path in files.items():
@@ -51,16 +55,7 @@ def build_info():
     }
 
 
-def sparse_mla(q, kv, indices, scale, value_dim=512):
-    """Return BF16 [Q,H,512] sparse attention on SM90 using FlashMLA.
-
-    Supported queries have 64 or 128 heads and dimension 576. KV records have
-    dimension 576, with the first 512 elements used as values. Negative and
-    out-of-range IDs are padding; duplicates participate independently and
-    all-padding rows return zero. Strided inputs and int64 IDs are converted
-    inside this call. These copies and selected-axis padding are operator work.
-    The independent CPU oracle is attention.reference.torch.
-    """
+def _validate_inputs(q, kv, indices, scale, value_dim):
     _validate(q, kv, indices, scale, value_dim)
     if q.device.type != "cuda" or torch.cuda.get_device_capability(q.device) != (9, 0):
         raise NotImplementedError("FlashMLA sparse prefill requires an SM90/Hopper CUDA device")
@@ -70,26 +65,45 @@ def sparse_mla(q, kv, indices, scale, value_dim=512):
         raise ValueError("DeepSeek FlashMLA requires H=64 or 128, QK dimension 576 and V=512")
     if kv.shape[0] > torch.iinfo(torch.int32).max:
         raise ValueError("FlashMLA sparse prefill requires the KV row count to fit int32")
+
+
+def _prepare_inputs(q, kv, indices, *, splits=1):
+    q, kv = q.contiguous(), kv.contiguous()
+    # A contiguous view can retain a two-byte storage offset. Native TMA
+    # and vector KV loads also need a 16-byte aligned base address.
+    if q.data_ptr() % 16:
+        q = q.clone()
+    if kv.data_ptr() % 16:
+        kv = kv.clone()
+    if indices.dtype == torch.int64:
+        # Narrow only after masking: large invalid int64 IDs can wrap into
+        # valid int32 token IDs and must never fetch those records.
+        valid = (indices >= 0) & (indices < kv.shape[0])
+        indices = indices.masked_fill(~valid, -1).to(torch.int32)
+    indices = indices.contiguous()
+    padded = splits * padded_selection_count((indices.shape[1] + splits - 1) // splits)
+    if padded != indices.shape[1]:
+        indices = F.pad(indices, (0, padded - indices.shape[1]), value=-1)
+    return q, kv, indices
+
+
+def sparse_mla(q, kv, indices, scale, value_dim=512):
+    """Return BF16 [Q,H,512] sparse attention on SM90 using FlashMLA.
+
+    Supported queries have 64 or 128 heads and dimension 576. KV records have
+    dimension 576, with the first 512 elements used as values. Negative and
+    out-of-range IDs are padding; duplicates participate independently and
+    all-padding rows return zero. Strided inputs and int64 IDs are converted
+    inside this call. These copies and selected-axis padding are operator work.
+    The independent CPU oracle is attention.reference.torch. This entry keeps
+    the prefill reduction even for one-query slices of a larger batch.
+    """
+    _validate_inputs(q, kv, indices, scale, value_dim)
     if not q.shape[0] or not kv.shape[0] or not indices.shape[1]:
         return torch.zeros((*q.shape[:2], value_dim), dtype=q.dtype, device=q.device)
 
     with torch.cuda.device(q.device):
-        q, kv = q.contiguous(), kv.contiguous()
-        # A contiguous view can retain a two-byte storage offset. Native TMA
-        # and vector KV loads also need a 16-byte aligned base address.
-        if q.data_ptr() % 16:
-            q = q.clone()
-        if kv.data_ptr() % 16:
-            kv = kv.clone()
-        if indices.dtype == torch.int64:
-            # Narrow only after masking: large invalid int64 IDs can wrap into
-            # valid int32 token IDs and must never fetch those records.
-            valid = (indices >= 0) & (indices < kv.shape[0])
-            indices = indices.masked_fill(~valid, -1).to(torch.int32)
-        indices = indices.contiguous()
-        padded = padded_selection_count(indices.shape[1])
-        if padded != indices.shape[1]:
-            indices = F.pad(indices, (0, padded - indices.shape[1]), value=-1)
+        q, kv, indices = _prepare_inputs(q, kv, indices)
         output, _, _ = _flash_mla().flash_mla_sparse_fwd(
             q,
             kv.unsqueeze(1),
@@ -99,3 +113,30 @@ def sparse_mla(q, kv, indices, scale, value_dim=512):
             topk_length=None,
         )
     return output
+
+
+def sparse_mla_decode(q, kv, indices, scale, value_dim=512):
+    """Explicit Q1 sparse decode with 16 independent KV partitions.
+
+    Input and padding semantics match ``sparse_mla``. The query is repeated,
+    each partition uses the official prefill kernel, and FP32 natural-log LSE
+    merges the BF16 partial outputs. This changes rounding and is not the
+    prefill entry's bitwise-equivalent query-slicing path. All temporary work
+    executes on the caller stream; no schedule or storage survives the call.
+    """
+    _validate_inputs(q, kv, indices, scale, value_dim)
+    if q.shape[0] != 1:
+        raise ValueError("FlashMLA sparse decode requires exactly one query")
+    if not kv.shape[0] or not indices.shape[1]:
+        return torch.zeros((*q.shape[:2], value_dim), dtype=q.dtype, device=q.device)
+    from operators.deepseek_v32.attention.device_only.decode import split_kv
+
+    with torch.cuda.device(q.device):
+        q, kv, indices = _prepare_inputs(q, kv, indices, splits=DECODE_SPLITS)
+        # Native prefill scales its invalid-score sentinel too. Keep that
+        # scale positive without changing finite BF16 query/score semantics.
+        if scale < 0:
+            q, scale = -q, -scale
+        elif scale == 0:
+            q, scale = torch.zeros_like(q), 1.0
+        return split_kv(q, kv, indices, float(scale), _flash_mla())

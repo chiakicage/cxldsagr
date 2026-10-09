@@ -739,7 +739,7 @@ class SparseTokenCache:
         return physical
 
     def prepare_prefetch(self, new_start, new_count, offset, *, limit=8192):
-        """Sort all usable slots without eviction, before current main-KV write."""
+        """Prepare bounded free or full FIFO slots before the current main-KV write."""
         self._check()
         if not self._shared:
             return None
@@ -769,7 +769,43 @@ class SparseTokenCache:
             self._pool.wait_host(self.session, self.layer_id)
             native = self._pool.native_metadata
             prepared = None
-            if type(self).__dict__.get("native_metadata_compatible") is True and hasattr(
+            bounded_free = False
+            if new_count == 1:
+                # Non-Q1 paths retain their original preparation and token.
+                free_prepare = getattr(native, "prepare_prefetch_free", None)
+                free_supported = getattr(native, "supports_free_q1_prepare", None)
+                bounded_free = (
+                    type(self).__dict__.get("native_metadata_compatible") is True
+                    and callable(free_prepare)
+                    and callable(free_supported)
+                    and len(self._pool._sessions) == 1
+                    and self._pool._active == (self.session.owner, self.layer_id)
+                    and self._pool._depth > 0
+                    and self.transient_start is None
+                    and self.slots - self.host_written_end >= 64
+                    and free_supported(
+                        rows=new_count,
+                        columns=self.indexer_visible_end,
+                        query_start=new_start,
+                        history_length=self.host_written_end,
+                        limit=min(limit, 8192, self.slots - 1),
+                    )
+                )
+            if bounded_free:
+                # With one session, L<=H live records leave at least P-H>=64
+                # free slots. This proves capacity without certifying residency.
+                prepared = free_prepare(
+                    self.age,
+                    self._pool.layers[self.layer_id].free,
+                    self.device_to_host,
+                    self._pool.free_slots,
+                    self._pool.allocation_log,
+                    self._pool.counter,
+                    self._pool.prefetch_stats,
+                    self._pool.miss_scratch,
+                    timestamp=self._pool.layers[self.layer_id].clock,
+                )
+            elif type(self).__dict__.get("native_metadata_compatible") is True and hasattr(
                 native, "prepare_prefetch"
             ):
                 prepared = native.prepare_prefetch(
@@ -806,6 +842,9 @@ class SparseTokenCache:
                     limit, 8192, self.slots - (new_count if self.transient_start is None else 0)
                 ),
             }
+            if bounded_free:
+                self._prefetch["max_prefetch"] = 64
+                self._prefetch["prepared_limit"] = 64
             if prepared is not None:
                 self._prefetch["_prepared"] = prepared
             return self._prefetch
@@ -819,6 +858,11 @@ class SparseTokenCache:
         if self._prefetch.get("_prepared") is not None:
             self._prefetch["_prepared"].invalidate()
         with self.operation():
+            cleanup = self._prefetch.get("_pending_prefetch_cleanup")
+            if cleanup is not None:
+                # The lease retains temporary maps/storage until cleanup and
+                # publication succeed, including rollback after a failed launch.
+                cleanup()
             self._pool.finalize_prefetch(self.layer_id)
             self._prefetch_totals.add_(self._pool.prefetch_stats)
             self._prefetch = None

@@ -127,9 +127,9 @@ def _assign_scopes(apis, scopes):
 def kernel_category(name):
     """Stable implementation families; full kernel names are also retained."""
     name = name.lower()
-    if "sm90_fp8_mqa_logits_fuse_prefetch" in name:
+    if "sm90_fp8_mqa_logits_fuse_prefetch" in name or "sm90_fp8_paged_mqa_logits_fused_v2" in name:
         return "indexer_fused_prefetch"
-    if "sm90_fp8_mqa_logits" in name:
+    if "sm90_fp8_mqa_logits" in name or "sm90_fp8_paged_mqa_logits<" in name:
         return "indexer"
     if "sparse_attn_fwd_kernel" in name or "sparse_mla" in name:
         return "sparse_mla"

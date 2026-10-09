@@ -1,0 +1,40 @@
+{
+  "schema": "deepseek-q1-static-impact-publication-v1",
+  "run_id": "cache_deepseek_q1_impact_20261008_02",
+  "output_directory": "experiments/cache_management/output/data/cache_deepseek_q1_impact_20261008_02",
+  "selected_report_files": {
+    "deepseek_q1_static_impact.json": "59cd33c500f8141d2226d589e83a90aed4f521bda68514c9df84fb054f202674"
+  },
+  "artifacts_sha256": {
+    "deepseek_q1_static_impact.json": "59cd33c500f8141d2226d589e83a90aed4f521bda68514c9df84fb054f202674",
+    "deepseek_q1_static_impact.py": "f6da9cf843f52358ff22b12854270a94930f43eca6adaf69dbefdaa6c8d94ee2",
+    "inputs/cache_deepseek_nh_20261006_01/checkpoint_config.json": "c7fa8b191e9936d8e6a57d864baab82b792fae16a116416cdd3a75ba76bc5af1",
+    "inputs/cache_deepseek_nh_20261006_01/plan.json": "9e639d982242e87b48a1acf7fe43dab3c585f6f0899e2aba5d6ac11de7265d53",
+    "inputs/cache_deepseek_p_base_20261006_01/checkpoint_config.json": "c7fa8b191e9936d8e6a57d864baab82b792fae16a116416cdd3a75ba76bc5af1",
+    "inputs/cache_deepseek_p_base_20261006_01/plan.json": "11830341f20d68a6343e28be55721015cd41b99d5fc8d4e61627ae2aff5d3214",
+    "inputs/cache_deepseek_p_base_headroom_20261006_01/checkpoint_config.json": "c7fa8b191e9936d8e6a57d864baab82b792fae16a116416cdd3a75ba76bc5af1",
+    "inputs/cache_deepseek_p_base_headroom_20261006_01/plan.json": "b051d788eaee47abf00295405eb6745a0e4046e31cf02522440336dec4651c03",
+    "inputs/cache_deepseek_p_nhmax_20261006_01/checkpoint_config.json": "c7fa8b191e9936d8e6a57d864baab82b792fae16a116416cdd3a75ba76bc5af1",
+    "inputs/cache_deepseek_p_nhmax_20261006_01/plan.json": "af7c849031c956b2fa3a6e813e3139c519e83376218588e16f1fe4474bf74449",
+    "inputs/cache_deepseek_p_nhmax_headroom_20261006_01/checkpoint_config.json": "c7fa8b191e9936d8e6a57d864baab82b792fae16a116416cdd3a75ba76bc5af1",
+    "inputs/cache_deepseek_p_nhmax_headroom_20261006_01/plan.json": "6be4b67bc9cb2386ee3d31e54ce14d392ce694d6ef6e072892e2e2eba2833b62",
+    "source/cache/capacity.py": "ba39f57a49124b23c60552240d87fbb9804b5320275b09596eadf2f0ff8c3a96",
+    "source/cache/host_allocation.py": "6c6c65e166fc6a2289547482a9bc51c1da136190b9105423edd23f9732567150",
+    "source/cache/sparse_token_pool.py": "56c9386c22d7f8b1833d9d9d420b69b0210dd472a1b24e0ff61e4753b9991ac2",
+    "source/experiments/cache_management/src/capacity_plan.py": "666b6d0bf5278b0296f514f4ee385f683bc641229a1de32bd004cd2d19ca91b5",
+    "source/models/deepseek_v32/cache/session.py": "50e11d659389aeafc2ed8a608915f4eca2202e953529a4ea7180d2dd0edaaad9",
+    "source/models/deepseek_v32/config.py": "d8f0d2aa209e2cf7a7653ef4980b60a3dca4d430eb23f2579abf00a290ff529d",
+    "source/models/deepseek_v32/execution/adapter.py": "bd20895dca304db0923f1489ed093094f3d199574112035e4745d518d20e4989",
+    "source/models/deepseek_v32/execution/cache_resources.py": "0a253733ef6a8ece47b06209a5ac601a374c148a702decbc4c95df9b4d3ab9b1",
+    "source/models/deepseek_v32/execution/capacity.py": "70f84a237777db522f3a0455d1dfdd7f3e3814e812924fae56ca4264ba0ccc16",
+    "source/models/deepseek_v32/execution/planning.py": "fc9c493633c31759b48893d054c12d5a2993b904c59ebd8a868c90a2e9c8bc37",
+    "source/operators/deepseek_v32/attention/_config.py": "876496c086d4979d235fce5575c330e38e59961140ba20c4d2475ba74f6dfa25",
+    "source/operators/deepseek_v32/indexer/csrc/official_prefetch.cu": "fcc2bf553ede3838ecaebd35383cc1c60102858958ade63352680b798c4cbe32",
+    "source/operators/deepseek_v32/indexer/echo.py": "77544fa9ca531cbd874b82c040375c511f5edf16ccb9c3ea8a34d1ae6439e859",
+    "source/operators/deepseek_v32/indexer/official_decode.py": "f61226ffc2166d767bf90f3791897cff74f3a889fe84e74f91341edc50b6b607",
+    "source/operators/deepseek_v32/indexer/official_prefetch.py": "d64902cadbda81f6eab0abc8aaf8943d5ed0dc082e40fe5f66d29bd190995ff7",
+    "source/operators/deepseek_v32/indexer/page64.py": "86b0f4c8e953149fc1197dddb1733df2a4bb62e202304467a7424834eb8e39ce",
+    "source/pyproject.toml": "cac6e9271538d74e99b1bdc83c2a12648bb3c76a310af21c98aff3ec2d3761d1",
+    "source/uv.lock": "53339af1728da3661b614d554e928408186b4fac6106a92999bd8fd69b3d2d8f"
+  }
+}

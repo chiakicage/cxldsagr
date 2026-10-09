@@ -39,10 +39,12 @@ def update_prefetch_hint(scores, offset):
     """Write only offset[0], preserving the checked FP32 reduction order.
 
     The hint is the mean of finite scores in the last min(4,Q) query rows.
-    A contiguous masked tensor retains the exact shape and torch.sum call of
-    the checked expression. Integer partial counts are exact; publication uses
-    round-to-nearest FP32 division. Inputs and offset[1:] remain unchanged.
-    Scratch is temporary on the calling stream, with no retained allocation.
+    The aligned SM90 Q1/N65537 path fuses masking, count and mean using the
+    accepted Torch FP32 reduction tree. The generic CUDA path retains a
+    contiguous masked tensor with the checked torch.sum shape and order.
+    Integer counts are exact; publication uses round-to-nearest FP32 division.
+    Inputs and offset[1:] remain unchanged. Generic scratch is temporary on
+    the calling stream, with no retained allocation.
     """
     if (
         scores.ndim != 2
@@ -62,6 +64,11 @@ def update_prefetch_hint(scores, offset):
         or torch.cuda.get_device_capability(scores.device) != (9, 0)
     ):
         _reference_update(scores, offset)
+        return
+    if scores.shape == (1, 65537) and scores.data_ptr() % 16 == 0:
+        from operators.deepseek_v32.indexer.q1_hint_exact import update
+
+        update(scores, offset)
         return
     tail = scores[-4:]
     count = (tail.numel() + 1023) // 1024

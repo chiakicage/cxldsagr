@@ -177,6 +177,27 @@ def test_subset_without_startup_and_profile_warmups(matrix_repo):
     assert all(row["startup_run"] is None for row in manifest["shapes"])
 
 
+def test_single_decode_point_keeps_cold_history_and_page_aligned_capacity(matrix_repo):
+    completed = invoke(matrix_repo, "--prefix-tokens", "65536", "--extend-tokens", "1")
+    assert completed.returncode == 0, completed.stderr
+    calls = load_calls(matrix_repo)
+    assert len(calls) == 5
+    for call in calls[:3]:
+        args = call["args"]
+        for key, value in (
+            ("--prefix", "65536"),
+            ("--extend", "1"),
+            ("--extend-chunk-size", "1"),
+            ("--sparse-pool-tokens", "65600"),
+            ("--host-arena-tokens", "65600"),
+            ("--extend-residency", "cold"),
+        ):
+            assert args[args.index(key) + 1] == value
+    path = matrix_repo[0] / "experiments/deepseek_v32_mfu/output/data/fixture_matrix/manifest.json"
+    (row,) = json.loads(path.read_text())["shapes"]
+    assert row["pool_tokens"] == row["host_tokens"] == 65600
+
+
 @pytest.mark.parametrize(
     "operation,count", [("check", 1), ("bench", 2), ("profile", 3), ("three-layers", 4)]
 )
@@ -197,6 +218,7 @@ def test_child_failure_stops_without_retry_or_completed_manifest(matrix_repo, op
     [
         ["--prefix-tokens", "4096,4096"],
         ["--extend-tokens", "64"],
+        ["--extend-tokens", "1"],
         ["--prefix-tokens", "4096,"],
         ["--trace-warmups", "-1"],
         ["--", "--extend-residency", "warm"],

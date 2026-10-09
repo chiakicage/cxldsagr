@@ -1,5 +1,8 @@
 """Layout adaptation required by the official FlashMLA SM90 sparse prefill API."""
 
+DECODE_SPLITS = 16
+DECODE_SELECTION_COUNT = 2048
+
 
 def padded_selection_count(selected):
     """Pad selection capacity for FlashMLA's pair of 64-token tiles.

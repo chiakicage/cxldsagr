@@ -23,7 +23,11 @@
 - 第三方依赖的初始化、链接和构建遵循 `3rdparty/README.md` 及现有配置；修改版本、
   分支或布局时同步更新子模块和相关引用。不要将可选本地参考 checkout 的存在
   视为已经接入项目的后端。
-- 官方 ECHO 仅用于独立 SGLang 复现及 policy 差分参考，不接入项目的模型、cache 或
-  serving 框架。复现代码、独立环境、权重和原始产物留在被 Git 忽略的
-  `3rdparty/ECHO/reproduction/cxldsagr/`；`experiments/deepseek_v32_echo_official/`
-  只保存报告及选定数据，不恢复旧适配代码、测试或记录。
+- 官方 ECHO 固定 `bc1b75c1000010d0ac6f032ebaac283255c050b1`，Q1 fused decode
+  优先通过项目 TVM FFI 编译原始 headers；不能修改或复制上游 kernel，也不能将独立
+  SGLang 环境的 Torch native 二进制加载到项目环境。`prepare_3rdparty.py --init`
+  准备该受版本管理脚本约束的源码 checkout；它不作为 Python 包安装，不初始化嵌套依赖。
+  现有 checkout 的提交或已跟踪源码不符时直接失败，不覆盖或自动切换版本。
+- `3rdparty/ECHO/reproduction/cxldsagr/` 中的独立环境、权重和原复现产物保持只读。
+  新的官方实验入口、日志、验收和性能结果按实验规则维护；独立 Engine 的环境及
+  自然驻留语义不等于本地模型的 cold 测量条件。源级桥接、pool 适配和完整模型须分别验收。

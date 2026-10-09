@@ -5,6 +5,8 @@ cd -- "$script_dir/../../.."
 export PATH="$PWD/.venv/bin:$PATH"
 export PYTHONDONTWRITEBYTECODE=1
 export DG_JIT_WITH_LINEINFO=1
+runner_source="$script_dir/gap_profile.sh"
+runner_invocation=("$0" "$@")
 if [[ "${1:-}" == --help || "${1:-}" == -h ]]; then
   echo "Minimal node profile: --trace-warmups N (default 1) warms each capture before restoring and measuring."
   python -m experiments.deepseek_v32_mfu.src.gap_profile --help
@@ -16,13 +18,15 @@ if [[ ! "$run_id" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]]; then
   exit 2
 fi
 for argument in "$@"; do
-  case "${argument%%=*}" in
-    --run-id|--output|--nsys) echo "Script owns --run-id, --output, --nsys" >&2; exit 2 ;;
-  esac
+  option="${argument%%=*}"
+  if [[ "$option" == --* && ( --run-id == "$option"* || --output == "$option"* || --nsys == "$option"* ) ]]; then
+    echo "The script owns --run-id, --output and --nsys" >&2
+    exit 2
+  fi
 done
 base="experiments/deepseek_v32_mfu/output"
 for category in data log profile; do
-  if [[ -e "$base/$category/$run_id" ]]; then echo "Existing run: $run_id" >&2; exit 2; fi
+  if [[ -e "$base/$category/$run_id" || -L "$base/$category/$run_id" ]]; then echo "Existing run: $run_id" >&2; exit 2; fi
 done
 staging="$(mktemp -d "${TMPDIR:-/tmp}/deepseek-minimal-node-${run_id}.XXXXXX")"
 mkdir -p "$staging/log" "$staging/profile"
@@ -39,21 +43,15 @@ finish() {
 trap finish EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
+source "$script_dir/runner_common.sh"
 nsys --version >"$staging/log/nsys_version.txt" 2>"$staging/log/nsys_version.stderr.log"
-nsys profile --trace=cuda,nvtx --sample=none --cpuctxsw=none --cuda-graph-trace=node \
+command=(nsys profile --trace=cuda,nvtx --sample=none --cpuctxsw=none --cuda-graph-trace=node \
   --capture-range=cudaProfilerApi --capture-range-end=repeat \
   --output "$staging/profile/minimal" \
   python -m experiments.deepseek_v32_mfu.src.gap_profile \
-  --run-id "$run_id" --output "$staging/data" --nsys "$@" \
-  >"$staging/log/stdout.log" 2>"$staging/log/stderr.log"
-python - "$staging/data/result.json" <<'PY'
-import json, sys
-result = json.load(open(sys.argv[1]))
-assert result['accepted'] and result['num_layers'] == 3
-assert result['profile_detail'] == 'minimal_node_model_scopes'
-assert len(result['correctness']) == 25 and result['validation_receipt']
-assert not result['measurement_identity']['operator_wrappers_during_forward']
-PY
+  --run-id "$run_id" --output "$staging/data" --nsys "$@")
+"${command[@]}" >"$staging/log/stdout.log" 2>"$staging/log/stderr.log"
+validate_and_record_runner profile minimal_node_model_scopes
 mapfile -t captures < <(python - "$staging/data/result.json" <<'PY'
 import json, sys
 for index, label in enumerate(json.load(open(sys.argv[1]))['nsys_capture_order'], 1):

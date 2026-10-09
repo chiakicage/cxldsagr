@@ -240,6 +240,7 @@ void mark_misses(TensorView ids, TensorView h2d, TensorView output) {
 #include "echo_sparse_recall.cuh"
 #include "echo_sparse_free.cuh"
 #include "echo_sparse_append_free.cuh"
+#include "echo_sparse_prepare_free.cuh"
 #include "echo_dense_prefetch.cuh"
 TVM_FFI_DLL_EXPORT_TYPED_FUNC(echo_logits, echo_native::forward);
 
@@ -256,6 +257,7 @@ TVM_FFI_DLL_EXPORT_TYPED_FUNC(echo_sparse_selection_classify, echo_native::spars
 TVM_FFI_DLL_EXPORT_TYPED_FUNC(echo_sparse_selection_compact, echo_native::sparse_selection_compact);
 TVM_FFI_DLL_EXPORT_TYPED_FUNC(echo_sparse_selection_workspace, echo_native::sparse_selection_workspace);
 TVM_FFI_DLL_EXPORT_TYPED_FUNC(echo_prepare_prefetch, echo_native::prepare_prefetch);
+TVM_FFI_DLL_EXPORT_TYPED_FUNC(echo_prepare_prefetch_free, echo_native::free_prepare::prepare);
 TVM_FFI_DLL_EXPORT_TYPED_FUNC(echo_sparse_append, echo_native::sparse_append);
 TVM_FFI_DLL_EXPORT_TYPED_FUNC(echo_sparse_append_free, echo_native::free_append::append);
 TVM_FFI_DLL_EXPORT_TYPED_FUNC(echo_sparse_selection_allocate, echo_native::sparse_selection_allocate);

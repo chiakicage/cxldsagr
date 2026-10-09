@@ -327,7 +327,7 @@ def analyze_capture(path, calls, parents, *, threshold_percent=10.0, metrics=Non
         raise ValueError("expected one method and phase per capture")
     method, phase = identities.pop()
     if phase != "extend_annotated" or method not in METHODS:
-        raise ValueError("gap audit expects a four-method extend capture")
+        raise ValueError("gap audit expects a recognized-method extend capture")
     if len({row["device_id"] for row in activities}) != 1:
         raise ValueError("gap audit requires exactly one GPU")
     _assign_scopes(apis, scopes)
@@ -580,13 +580,24 @@ def analyze_prefill_capture(path, calls, parents, *, metrics=None):
 def analyze_run(directory, *, threshold_percent=10.0):
     directory = Path(directory).resolve(strict=True)
     result = json.loads((directory / "result.json").read_text())
+    isolated = result.get("schema_version") == 4
+    if isolated:
+        from experiments.deepseek_v32_mfu.src.run_contract import result_methods
+
+        methods = result_methods(result)
+    else:
+        if result.get("schema_version", 3) != 3:
+            raise ValueError("gap audit requires schema 3 or isolated schema 4")
+        methods = METHODS
     calls, _ = read_calls(directory / "operator_calls.json")
     setup, captures, prefill_paths = [], [], []
     for index, label in enumerate(result["nsys_capture_order"], 1):
         path = directory / f"capture_{index}.sqlite"
-        if label == "graph_setup" or label.endswith("/extend_graph_setup"):
+        if label == "graph_setup" or label in {
+            f"{method}/extend_graph_setup" for method in methods
+        }:
             setup.append(path)
-        elif label in {f"{method}/extend_annotated" for method in METHODS}:
+        elif label in {f"{method}/extend_annotated" for method in methods}:
             captures.append(
                 (
                     path,
@@ -595,7 +606,7 @@ def analyze_run(directory, *, threshold_percent=10.0):
                     .get("extend_cache_per_layer"),
                 )
             )
-        elif label in {f"{method}/prefill_annotated" for method in METHODS}:
+        elif label in {f"{method}/prefill_annotated" for method in methods}:
             prefill_paths.append(
                 (
                     path,
@@ -604,19 +615,63 @@ def analyze_run(directory, *, threshold_percent=10.0):
                     .get("prefix_cache_per_layer"),
                 )
             )
+        else:
+            raise ValueError(f"unexpected capture in gap audit: {label}")
+    if len(set(result["nsys_capture_order"])) != len(result["nsys_capture_order"]):
+        raise ValueError("duplicate profile capture labels")
     parents = read_lineage(setup) if setup else None
     rows = [
         analyze_capture(path, calls, parents, threshold_percent=threshold_percent, metrics=metrics)
         for path, metrics in captures
     ]
-    if len(rows) != len(METHODS) or {row["method"] for row in rows} != set(METHODS):
-        raise ValueError("one extend capture is required for every method")
+    if len(rows) != len(methods) or {row["method"] for row in rows} != set(methods):
+        raise ValueError("one extend capture is required for every selected method")
     prefills = [
         analyze_prefill_capture(path, calls, parents, metrics=metrics)
         for path, metrics in prefill_paths
     ]
+    if len(prefills) != len(methods) or {row["method"] for row in prefills} != set(methods):
+        raise ValueError("one prefill capture is required for every selected method")
+    prefill_pass = None if isolated else compare_prefill_gaps(prefills)
+    all_layers_pass = all(row["all_layer_gates_pass"] for row in rows)
+    extend_pass = (
+        all(row["full_extend"]["conservative_gate_pass"] for row in rows) and all_layers_pass
+    )
+    return {
+        "schema_version": 3 if isolated else 2,
+        "run_id": result["run_id"],
+        "selected_methods": list(methods),
+        "cohort_comparison_required": isolated,
+        "sqlite_path_base": "profile run directory containing result.json",
+        "input_result_sha256": hashlib.sha256((directory / "result.json").read_bytes()).hexdigest(),
+        "analyzer_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+        "classifier_sha256": hashlib.sha256(
+            Path(__file__).with_name("timeline.py").read_bytes()
+        ).hexdigest(),
+        "gap_definition": "window minus union of model Compute, host IO, and indivisible Compute + IO; GPU cache/control and idle are included",
+        "no_io_definition": "remove only standalone IO outside pure and fused computation; fused compute+IO is productive and fully retained in the denominator, yielding one definite ratio",
+        "gate_definition": "each complete extend and every layer must have a definite no-IO gap ratio strictly below threshold; complete extend includes startup and synchronization/commit; L0 includes forward startup; each complete offload prefill's absolute gap is at most 1.2 times HBM-only",
+        "prefill_comparison_note": (
+            "uncomputed pending a validated four-method cohort join; this child reports its own raw prefill quantities"
+            if isolated
+            else "absolute gap ratio and normalized non-IO gap ratio are distinct; both reported, primary prefill gate uses absolute gap at matched workload"
+        ),
+        "actual_io_definition": "same measured phase-layer record counters prove all matching calls empty when the total is zero; positive exclusive totals bind only a unique node; unresolved gather classification cannot certify an overlapping gate; fused calls remain productive in their entirety",
+        "measurement_boundary": "single intrusive node-traced profile per selected method; includes profiler overhead; not independent benchmark wall time or SM utilization",
+        "timed_output": result.get("timed_output"),
+        "all_methods_pass": None if isolated else extend_pass and prefill_pass,
+        "extend_gate_pass": extend_pass,
+        "all_layers_gate_pass": all_layers_pass,
+        "prefill_absolute_gap_gate_pass": prefill_pass,
+        "methods": rows,
+        "prefill_methods": prefills,
+    }
+
+
+def compare_prefill_gaps(prefills):
+    """Apply the HBM-relative gate only after all four methods have been joined."""
     if len(prefills) != len(METHODS) or {row["method"] for row in prefills} != set(METHODS):
-        raise ValueError("one prefill capture is required for every method")
+        raise ValueError("prefill comparison requires exactly all four methods")
     reference = next(row["full_prefill"] for row in prefills if row["method"] == "hbm")
     reference_gap = reference["gap_ms"]
     reference_ratio = reference["gap_no_io_percent_upper_bound"]
@@ -636,34 +691,7 @@ def analyze_run(directory, *, threshold_percent=10.0):
         row["normalized_gap_at_most_120_percent_hbm"] = (
             certifiable and ratio is not None and ratio <= 1.2 * reference_ratio
         )
-    all_layers_pass = all(row["all_layer_gates_pass"] for row in rows)
-    extend_pass = (
-        all(row["full_extend"]["conservative_gate_pass"] for row in rows) and all_layers_pass
-    )
-    prefill_pass = all(row["absolute_gap_at_most_120_percent_hbm"] for row in prefills)
-    return {
-        "schema_version": 2,
-        "run_id": result["run_id"],
-        "sqlite_path_base": "profile run directory containing result.json",
-        "input_result_sha256": hashlib.sha256((directory / "result.json").read_bytes()).hexdigest(),
-        "analyzer_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
-        "classifier_sha256": hashlib.sha256(
-            Path(__file__).with_name("timeline.py").read_bytes()
-        ).hexdigest(),
-        "gap_definition": "window minus union of model Compute, host IO, and indivisible Compute + IO; GPU cache/control and idle are included",
-        "no_io_definition": "remove only standalone IO outside pure and fused computation; fused compute+IO is productive and fully retained in the denominator, yielding one definite ratio",
-        "gate_definition": "each complete extend and every layer must have a definite no-IO gap ratio strictly below threshold; complete extend includes startup and synchronization/commit; L0 includes forward startup; each complete offload prefill's absolute gap is at most 1.2 times HBM-only",
-        "prefill_comparison_note": "absolute gap ratio and normalized non-IO gap ratio are distinct; both reported, primary prefill gate uses absolute gap at matched workload",
-        "actual_io_definition": "same measured phase-layer record counters prove all matching calls empty when the total is zero; positive exclusive totals bind only a unique node; unresolved gather classification cannot certify an overlapping gate; fused calls remain productive in their entirety",
-        "measurement_boundary": "single intrusive node-traced profile per method; includes profiler overhead; not independent benchmark wall time or SM utilization",
-        "timed_output": result.get("timed_output"),
-        "all_methods_pass": extend_pass and prefill_pass,
-        "extend_gate_pass": extend_pass,
-        "all_layers_gate_pass": all_layers_pass,
-        "prefill_absolute_gap_gate_pass": prefill_pass,
-        "methods": rows,
-        "prefill_methods": prefills,
-    }
+    return all(row["absolute_gap_at_most_120_percent_hbm"] for row in prefills)
 
 
 def main():

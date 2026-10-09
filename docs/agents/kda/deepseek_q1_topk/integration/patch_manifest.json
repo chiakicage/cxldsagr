@@ -1,0 +1,26 @@
+{
+  "operators/deepseek_v32/indexer/selection.py": {
+    "base_sha256": "0e68ecb4e16e40e9dda1541693ce3e00e41ccd4a05ea2e708d04dd2545a4dcd8",
+    "patch_sha256": "473e34e5961cea1511ce16995a93b56ed807d3e6b55b0f28c8b252916a0112d9"
+  },
+  "operators/deepseek_v32/indexer/q1_topk_cub.py": {
+    "base_sha256": null,
+    "patch_sha256": "c2d59cf3dedbe3ab47ea54241622cc21249448699816c099ad13818813b2f3a0"
+  },
+  "operators/deepseek_v32/indexer/csrc/q1_topk_sort.cu": {
+    "base_sha256": null,
+    "patch_sha256": "e032304fdb34a01e77792796012f882dd906caf4f1868afc94bd9cbc530aab6c"
+  },
+  "operators/deepseek_v32/indexer/tests/test_q1_topk.py": {
+    "base_sha256": null,
+    "patch_sha256": "d18946216dde2ada8d34db85466e0150b78d539579f2372e7f92a30e10ab48a0"
+  },
+  "experiments/deepseek_v32_mfu/src/backend_provenance.py": {
+    "base_sha256": "457db80b581712073d214a1e7b092c379ddc07fcc8d17bbbd2e9bfdfcd16202b",
+    "patch_sha256": "81f686a83e411a546ecbbcce3aaca9e2d4b4d6aeadc6b3fe481545ff6ad5f7cf"
+  },
+  "experiments/deepseek_v32_mfu/tests/test_backend_provenance.py": {
+    "base_sha256": "974de02ddf677f4bdce69db6f1c9ca96bc942b048424275685387c28d6e5110e",
+    "patch_sha256": "525eb419982c584258f07cc3ed2a49867e14a8a4c2d3aaad895ff60965dc799b"
+  }
+}

@@ -1,0 +1,331 @@
+{
+  "schema": "q1-attention-provenance-v2",
+  "run_id": "q1_attention_report_20261008_04",
+  "argv": [
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/src/report_q1_optimization.py",
+    "--output-dir",
+    "experiments/deepseek_v32_echo_official/output/data/q1_attention_report_20261008_04"
+  ],
+  "files": {
+    "experiments/deepseek_v32_echo_official/output/acceptance/q1_attention_check_20261008_01/result.json": {
+      "sha256": "849999cf061bfe40a7876e1ce3143f6d608d019af6b31aad096f7edf3903df90",
+      "bytes": 15966
+    },
+    "experiments/deepseek_v32_echo_official/output/data/q1_attention_bench_20261008_01/result.json": {
+      "sha256": "c43fdfd07c8be754361a7a6a6190ed2de66c76d641d7d9bc954647c408295479",
+      "bytes": 22951
+    },
+    "experiments/deepseek_v32_echo_official/output/acceptance/q1_attention_check_20261008_01/source/experiments/deepseek_v32_echo_official/src/q1_attention.py": {
+      "sha256": "fcb05b760f47214fcd2004c3a5a584dcd8a7bfc68a6f1089bcf9b43e97b63741",
+      "bytes": 14715
+    },
+    "experiments/deepseek_v32_echo_official/output/acceptance/q1_attention_check_20261008_01/source/experiments/deepseek_v32_echo_official/src/q1_attention_dense.py": {
+      "sha256": "8ed404a3d9cb448e579979c1c5dc91bbba4e1fa5d98890f7fb46d898aed8782e",
+      "bytes": 12565
+    },
+    "experiments/deepseek_v32_echo_official/output/acceptance/q1_attention_check_20261008_01/source/experiments/deepseek_v32_echo_official/src/q1_indexer.py": {
+      "sha256": "648677c19b7b87af14b3ddc3330f8681003bbef74629a4206854443581474ad0",
+      "bytes": 17466
+    },
+    "experiments/deepseek_v32_echo_official/output/acceptance/q1_attention_check_20261008_01/source/operators/deepseek_v32/attention/device_only/mla.py": {
+      "sha256": "1d353ab719a339275b8bcd3935cd72419684a680fe5eca9982a3dbbe08c385ec",
+      "bytes": 6290
+    },
+    "experiments/deepseek_v32_echo_official/output/acceptance/q1_attention_check_20261008_01/source/operators/deepseek_v32/attention/device_only/decode.py": {
+      "sha256": "686b695f410bb4b4a30c25ca8337d1417b7f48ce1c41783f9de27f452f65d74b",
+      "bytes": 4028
+    },
+    "experiments/deepseek_v32_echo_official/output/acceptance/q1_attention_check_20261008_01/source/operators/deepseek_v32/attention/reference/torch.py": {
+      "sha256": "819cc165096790ac68585bcc90c8147b46ee99e6c7a2a3bf616fe01cd9f9b919",
+      "bytes": 1202
+    },
+    "experiments/deepseek_v32_echo_official/output/acceptance/q1_attention_check_20261008_01/source/operators/deepseek_v32/attention/_config.py": {
+      "sha256": "876496c086d4979d235fce5575c330e38e59961140ba20c4d2475ba74f6dfa25",
+      "bytes": 507
+    },
+    "experiments/deepseek_v32_echo_official/output/acceptance/q1_attention_check_20261008_01/source/operators/deepseek_v32/attention/_validation.py": {
+      "sha256": "9fcd9c2c39d9981374de81f2ad8ef1d40a48bbb929ba8e995d0a572dd11c535a",
+      "bytes": 1202
+    },
+    "experiments/deepseek_v32_echo_official/output/data/q1_attention_bench_20261008_01/source/experiments/deepseek_v32_echo_official/src/q1_attention.py": {
+      "sha256": "fcb05b760f47214fcd2004c3a5a584dcd8a7bfc68a6f1089bcf9b43e97b63741",
+      "bytes": 14715
+    },
+    "experiments/deepseek_v32_echo_official/output/data/q1_attention_bench_20261008_01/source/experiments/deepseek_v32_echo_official/src/q1_attention_dense.py": {
+      "sha256": "8ed404a3d9cb448e579979c1c5dc91bbba4e1fa5d98890f7fb46d898aed8782e",
+      "bytes": 12565
+    },
+    "experiments/deepseek_v32_echo_official/output/data/q1_attention_bench_20261008_01/source/experiments/deepseek_v32_echo_official/src/q1_indexer.py": {
+      "sha256": "648677c19b7b87af14b3ddc3330f8681003bbef74629a4206854443581474ad0",
+      "bytes": 17466
+    },
+    "experiments/deepseek_v32_echo_official/output/data/q1_attention_bench_20261008_01/source/operators/deepseek_v32/attention/device_only/mla.py": {
+      "sha256": "1d353ab719a339275b8bcd3935cd72419684a680fe5eca9982a3dbbe08c385ec",
+      "bytes": 6290
+    },
+    "experiments/deepseek_v32_echo_official/output/data/q1_attention_bench_20261008_01/source/operators/deepseek_v32/attention/device_only/decode.py": {
+      "sha256": "686b695f410bb4b4a30c25ca8337d1417b7f48ce1c41783f9de27f452f65d74b",
+      "bytes": 4028
+    },
+    "experiments/deepseek_v32_echo_official/output/data/q1_attention_bench_20261008_01/source/operators/deepseek_v32/attention/reference/torch.py": {
+      "sha256": "819cc165096790ac68585bcc90c8147b46ee99e6c7a2a3bf616fe01cd9f9b919",
+      "bytes": 1202
+    },
+    "experiments/deepseek_v32_echo_official/output/data/q1_attention_bench_20261008_01/source/operators/deepseek_v32/attention/_config.py": {
+      "sha256": "876496c086d4979d235fce5575c330e38e59961140ba20c4d2475ba74f6dfa25",
+      "bytes": 507
+    },
+    "experiments/deepseek_v32_echo_official/output/data/q1_attention_bench_20261008_01/source/operators/deepseek_v32/attention/_validation.py": {
+      "sha256": "9fcd9c2c39d9981374de81f2ad8ef1d40a48bbb929ba8e995d0a572dd11c535a",
+      "bytes": 1202
+    },
+    "experiments/deepseek_v32_echo_official/output/data/q1_inputs_20261008_01/kernel_inputs_layer_0.pt": {
+      "sha256": "fc2a2f093b434f658d9ad7ad0bcf1515e8c5426020021c788235740b3cbb073c",
+      "bytes": 84317255
+    },
+    "experiments/deepseek_v32_echo_official/output/data/q1_inputs_20261008_01/kernel_inputs_layer_1.pt": {
+      "sha256": "aedccc7501f2e8263d99ed1f91c580f03500da4f40d2df421b9f854f2438965b",
+      "bytes": 84317255
+    },
+    "experiments/deepseek_v32_echo_official/output/data/q1_inputs_20261008_01/kernel_inputs_layer_2.pt": {
+      "sha256": "b821285a250f8f22f50f39a5af2479d26b436424151c4d5be45e6198cb8a500f",
+      "bytes": 84317255
+    },
+    "experiments/deepseek_v32_echo_official/output/data/q1_attention_ncu_20261008_01/analysis/summary.json": {
+      "sha256": "861f3f058b2e3ed1d2a81839bc1ade1b82f64d23a5421e4860af9219ee0c3762",
+      "bytes": 5957
+    },
+    "experiments/deepseek_v32_echo_official/output/profile/q1_attention_ncu_20261008_01/prefill_full.ncu-rep": {
+      "sha256": "83ec36a19acd2ce403be02d3738a59c8daed3251c778f433c42bd578ca2a26a8",
+      "bytes": 2208094
+    },
+    "experiments/deepseek_v32_echo_official/output/data/q1_attention_ncu_20261008_01/prefill_full/result.json": {
+      "sha256": "24a9f274c856f4fa991307417df6754d59748423f69fa7219e035d0e22a71bf6",
+      "bytes": 8794
+    },
+    "experiments/deepseek_v32_echo_official/output/data/q1_attention_ncu_20261008_01/analysis/prefill_full.metrics.json": {
+      "sha256": "1598a3d7a86245b32fd21a0ebcc90fd8e79e500871b8050a825e07c147540447",
+      "bytes": 296375
+    },
+    "experiments/deepseek_v32_echo_official/output/profile/q1_attention_ncu_20261008_01/prefill_source.ncu-rep": {
+      "sha256": "50f9a22941c6a8de9ff7a84550277ba9b3a9dd76ab1f3ec45471024bb1fb99f6",
+      "bytes": 937904
+    },
+    "experiments/deepseek_v32_echo_official/output/data/q1_attention_ncu_20261008_01/prefill_source/result.json": {
+      "sha256": "71e021dc18dc5817c818899c3a4ed7bd7a1c30ffc0b07cbca5bb7ac2db35e335",
+      "bytes": 8798
+    },
+    "experiments/deepseek_v32_echo_official/output/data/q1_attention_ncu_20261008_01/analysis/prefill_source.metrics.json": {
+      "sha256": "cdee3a1843d498cada7fe2bcf3d3379939045fe284d0ea192d4e3e85908c56ca",
+      "bytes": 35248
+    },
+    "experiments/deepseek_v32_echo_official/output/profile/q1_attention_ncu_20261008_01/decode_full.ncu-rep": {
+      "sha256": "b602fe27eaef5825ffcddc8bbb184cb572963e3d3c970f3d18c1e9b87edf99fe",
+      "bytes": 2221941
+    },
+    "experiments/deepseek_v32_echo_official/output/data/q1_attention_ncu_20261008_01/decode_full/result.json": {
+      "sha256": "661e48a619faa15ce2b751d95ebb2a41c5b6ad10550abcb09c810bec96c33dca",
+      "bytes": 8790
+    },
+    "experiments/deepseek_v32_echo_official/output/data/q1_attention_ncu_20261008_01/analysis/decode_full.metrics.json": {
+      "sha256": "48bac3bd1a5975f8542b38237f6261a3b102065613de16c07d6545c8f288413b",
+      "bytes": 296232
+    },
+    "experiments/deepseek_v32_echo_official/output/profile/q1_attention_ncu_20261008_01/decode_source.ncu-rep": {
+      "sha256": "3a511c5cbc3cc79474c46e6ee77f4fb957723962a0cd6b9c74717ee03c686542",
+      "bytes": 957591
+    },
+    "experiments/deepseek_v32_echo_official/output/data/q1_attention_ncu_20261008_01/decode_source/result.json": {
+      "sha256": "8e0be5c848f6497f5b9309c19c1bed86d318ff6778df6b96f09295b93598e5d4",
+      "bytes": 8794
+    },
+    "experiments/deepseek_v32_echo_official/output/data/q1_attention_ncu_20261008_01/analysis/decode_source.metrics.json": {
+      "sha256": "44aeeaad4c2de04b9f1e0b043b006c4d7ce9a1150c1bdf26340bb03a812a0ef3",
+      "bytes": 35242
+    },
+    "experiments/deepseek_v32_echo_official/src/report_q1_optimization.py": {
+      "sha256": "8ba099a28a550851c2674fb960ee075865d065a7b128147d7e118f0aeeb39256",
+      "bytes": 16076
+    }
+  },
+  "original_identities": {
+    "attention": {
+      "check_run_id": "q1_attention_check_20261008_01",
+      "bench_run_id": "q1_attention_bench_20261008_01",
+      "original_identity": {
+        "inputs_sha256": {
+          "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/output/data/q1_inputs_20261008_01/kernel_inputs_layer_0.pt": "fc2a2f093b434f658d9ad7ad0bcf1515e8c5426020021c788235740b3cbb073c",
+          "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/output/data/q1_inputs_20261008_01/kernel_inputs_layer_1.pt": "aedccc7501f2e8263d99ed1f91c580f03500da4f40d2df421b9f854f2438965b",
+          "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/output/data/q1_inputs_20261008_01/kernel_inputs_layer_2.pt": "b821285a250f8f22f50f39a5af2479d26b436424151c4d5be45e6198cb8a500f"
+        },
+        "source_sha256": {
+          "experiments/deepseek_v32_echo_official/src/q1_attention.py": "fcb05b760f47214fcd2004c3a5a584dcd8a7bfc68a6f1089bcf9b43e97b63741",
+          "experiments/deepseek_v32_echo_official/src/q1_attention_dense.py": "8ed404a3d9cb448e579979c1c5dc91bbba4e1fa5d98890f7fb46d898aed8782e",
+          "experiments/deepseek_v32_echo_official/src/q1_indexer.py": "648677c19b7b87af14b3ddc3330f8681003bbef74629a4206854443581474ad0",
+          "operators/deepseek_v32/attention/device_only/mla.py": "1d353ab719a339275b8bcd3935cd72419684a680fe5eca9982a3dbbe08c385ec",
+          "operators/deepseek_v32/attention/device_only/decode.py": "686b695f410bb4b4a30c25ca8337d1417b7f48ce1c41783f9de27f452f65d74b",
+          "operators/deepseek_v32/attention/reference/torch.py": "819cc165096790ac68585bcc90c8147b46ee99e6c7a2a3bf616fe01cd9f9b919",
+          "operators/deepseek_v32/attention/_config.py": "876496c086d4979d235fce5575c330e38e59961140ba20c4d2475ba74f6dfa25",
+          "operators/deepseek_v32/attention/_validation.py": "9fcd9c2c39d9981374de81f2ad8ef1d40a48bbb929ba8e995d0a572dd11c535a"
+        },
+        "attention_backend": {
+          "backend": "flash_mla.flash_mla_sparse_fwd",
+          "package_version": "1.0.0",
+          "files": {
+            "package": {
+              "path": "/root/.venv/lib/python3.12/site-packages/flash_mla/__init__.py",
+              "sha256": "4345e7b57facecac586e85d2c64a7fbbaa38f92c258b739223708db6a1715b5f"
+            },
+            "interface": {
+              "path": "/root/.venv/lib/python3.12/site-packages/flash_mla/flash_mla_interface.py",
+              "sha256": "1f461f1581253eae93107a6179e18b27ab23950e4819326828058a391bde87bf"
+            },
+            "native": {
+              "path": "/root/.venv/lib/python3.12/site-packages/flash_mla/cuda.cpython-312-x86_64-linux-gnu.so",
+              "sha256": "1c9969551e8ef7ca96ca1182ab4f9347aa5402586a1ba5a5c82f86cf4b2fb9a6"
+            },
+            "adapter": {
+              "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/operators/deepseek_v32/attention/device_only/mla.py",
+              "sha256": "1d353ab719a339275b8bcd3935cd72419684a680fe5eca9982a3dbbe08c385ec"
+            },
+            "decode_combine": {
+              "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/operators/deepseek_v32/attention/device_only/decode.py",
+              "sha256": "686b695f410bb4b4a30c25ca8337d1417b7f48ce1c41783f9de27f452f65d74b"
+            },
+            "layout": {
+              "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/operators/deepseek_v32/attention/_config.py",
+              "sha256": "876496c086d4979d235fce5575c330e38e59961140ba20c4d2475ba74f6dfa25"
+            },
+            "validation": {
+              "path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/operators/deepseek_v32/attention/_validation.py",
+              "sha256": "9fcd9c2c39d9981374de81f2ad8ef1d40a48bbb929ba8e995d0a572dd11c535a"
+            }
+          }
+        },
+        "compiled_attention": {
+          "policy": "sparse-q1-split16-natural-lse-v1",
+          "triton_version": "3.7.1",
+          "specializations": [
+            {
+              "hash": "b6395fc4b7b91c986cdd7fb3f326df14830332430599995175128fe6aa0096ad",
+              "name": "combine",
+              "metadata": {
+                "TRITON_DISABLE_LINE_INFO": "false",
+                "allowed_dot_input_precisions": [
+                  "tf32",
+                  "tf32x3",
+                  "ieee",
+                  "bf16x3",
+                  "bf16x6"
+                ],
+                "arch": "sm90",
+                "backend_name": "cuda",
+                "debug": false,
+                "default_dot_input_precision": "tf32",
+                "deprecated_fp8_dot_operand_dtypes": [
+                  "fp8e4b15"
+                ],
+                "enable_fp_fusion": true,
+                "enable_reflect_ftz": true,
+                "extern_libs": [
+                  [
+                    "libdevice",
+                    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/.venv/lib/python3.12/site-packages/triton/backends/nvidia/lib/libdevice.10.bc"
+                  ]
+                ],
+                "global_scratch_align": 1,
+                "global_scratch_size": 0,
+                "hash": "b6395fc4b7b91c986cdd7fb3f326df14830332430599995175128fe6aa0096ad",
+                "instrumentation_mode": "",
+                "ir_override": null,
+                "launch_cooperative_grid": false,
+                "launch_pdl": false,
+                "max_num_imprecise_acc_default": 1073741824,
+                "maxnreg": null,
+                "name": "combine",
+                "num_ctas": 1,
+                "num_stages": 3,
+                "num_warps": 4,
+                "profile_scratch_align": 1,
+                "profile_scratch_size": 0,
+                "ptx_options": null,
+                "ptx_version": null,
+                "sanitize_overflow": true,
+                "shared": 4096,
+                "supported_fp8_dtypes": [
+                  "fp8e4b15",
+                  "fp8e4nv",
+                  "fp8e5"
+                ],
+                "target": {
+                  "backend": "cuda",
+                  "arch": 90,
+                  "warp_size": 32
+                },
+                "tensordesc_meta": [],
+                "tmem_size": 0,
+                "triton_version": "3.7.1",
+                "warp_size": 32
+              },
+              "artifact_sha256": {
+                "cubin": "3e5f56775c90b432bb9040ed83b97a4cb9f8a8b72e1a73e06aafa6630415c24f",
+                "llir": "79a9c06f90c84310edff87e671c82536b235e2bf4311febb7b6cd3b995148ebb",
+                "ptx": "c8e183b7cd823201410c1fa2dc1b17c5c1da07715074b809ba94fd2fe1ccf24a",
+                "ttgir": "26dd57912998ab7ca3585ae05a957de4c65ad94a0be5215cd5bb91e44a867e49",
+                "ttir": "f1debf22aad60bdf688fb57a5b29b6390afef6c92872769e2fef9c782e4a2d72"
+              },
+              "module_handle_set": true,
+              "function_handle_set": true
+            }
+          ]
+        },
+        "torch": "2.12.1+cu130",
+        "triton": "3.7.1",
+        "cuda": "13.0",
+        "device": "NVIDIA H200",
+        "capability": [
+          9,
+          0
+        ],
+        "gpu_uuid": "GPU-72f87cfe-1a24-f69c-8b5d-71f1d8414a34",
+        "physical_device": 2,
+        "cpu_affinity": [
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23
+        ],
+        "environment": {
+          "CUDA_VISIBLE_DEVICES": "2",
+          "OMP_NUM_THREADS": "8",
+          "MKL_NUM_THREADS": "8",
+          "TRITON_CACHE_DIR": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/output/runtime/q1-attention/triton",
+          "TRITON_DISABLE_LINE_INFO": "0",
+          "CUDA_CACHE_PATH": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/output/runtime/q1-attention/cuda"
+        },
+        "numerical_policy": {
+          "atol": 0.004,
+          "rtol": 0.02
+        },
+        "input_provenance": "Extra eager diagnostic forward after restored model prefix, outside the original profiler capture. The old numerical receipt did not bind these saved input bytes. This experiment independently binds their hashes.",
+        "boundary": "Complete production sparse_mla or sparse_mla_decode call, including selection/layout adaptation, native sparse attention, and decode merge. No oracle, comparison, file I/O or source hashing inside timed/profile ranges."
+      }
+    }
+  },
+  "artifacts_sha256": {
+    "api_latency.pdf": "ee9962c3f98852c313eb9e2ec9967212cb2cb2555910599f8652894e6dbf91cd",
+    "api_latency.png": "290844db2bc81c44eb3438c8fc1e33645701bee43a5fe95f48da4229218e5a90",
+    "api_latency.svg": "b2c934d3985e5c4f19a9d6aff07fd482b8e80ea39acde0b6b9d1b5d3ba8b3fc5",
+    "api_timing.csv": "71ebd64c40d6f4f06884d6176479ecbba2bdd43fb2b2d4d1144e08537b467cde",
+    "attention_rounding.csv": "71524ac53a5b824e228671a5dc4b19ec666cbd30968e553915336d2b474bffc4",
+    "ncu_metrics.csv": "2af4d370ab7f8bcd93dafc97c91591ca43ed945adfda26913b37ed2752402db5",
+    "report.md": "c02e65b30b9503c286c2884a7d264020a7044e3505455fdfd2a1da88cc9ce727",
+    "summary.json": "4e367b0872bebe108f6edfc9cc30087f29bca667303b776681aa5daf7c41ac2a",
+    "workspace.csv": "b70f54f62a37239f3cf5838f1df4e7927cfb14451d1238781e969f54c924c9c2"
+  },
+  "all_bound_files_stable_after_generation": true
+}

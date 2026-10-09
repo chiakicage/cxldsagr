@@ -7,6 +7,14 @@
 | `DeepJIT/` | 与 DeepGEMM 的 gitlink 一致 | DeepGEMM 的 JIT runtime headers |
 | `FlashMLA/` | `ba89a3466e9470ad08ab39738d4e7bb66989e1e7` | 官方 Hopper / DeepSeek V3.2 sparse MLA prefill |
 
+此外，准备脚本管理固定提交的 `ECHO/` 源码 checkout，供本地 Q1 fused decode
+桥接直接包含官方 headers。它由 `.gitignore` 排除，提交由脚本显式校验，不作为
+第五个 Git 子模块或 Python 包安装。官方桥接、cache 适配、Q1 的 64 空槽准备与
+hint 均值融合及 page64／页表／暂存区准备融合已通过独立验收，并完成真实前三层四方案的正式补测，当前批次为
+`deepseek_h64k_a1_fused_prepare_20261009_01`，各方法分别在独立进程中准备和测量。
+官方 ECHO 内核、依赖版本和独立 SGLang 测量保持原样；结果见
+[四方案 MFU](../experiments/deepseek_v32_mfu/README.md)。
+
 从仓库根目录初始化并连接构建所需的头文件路径：
 
 ```bash
@@ -40,14 +48,19 @@ DeepGEMM 2.8.1 使用 DeepJIT 和 C++20，不再依赖 fmt。若本地保留了
 `EzKernelKit/` 是由 Git 忽略的本地参考 checkout，不是子模块或自动构建依赖。
 
 被 Git 忽略的本地 `ECHO/` checkout 固定为
-`bc1b75c1000010d0ac6f032ebaac283255c050b1`，供 DeepSeek GPU policy 差分测试和
-独立 SGLang 复现使用。官方 ECHO 不接入项目模型、cache 或 serving 框架。
+`bc1b75c1000010d0ac6f032ebaac283255c050b1`，供 DeepSeek GPU policy 差分测试、
+独立 SGLang 复现和本地 Q1 decode 源码桥接使用。
 复现代码、独立环境、权重和原始产物保存在 `ECHO/reproduction/cxldsagr/`，
 不进入父项目 Git；选定报告见[官方 SGLang 复现](../experiments/deepseek_v32_echo_official/README.md)。
-普通模型入口不加载这套依赖。显式运行 policy 差分测试时需要这个本地 checkout；
-缺少依赖导致的失败不能计为通过。
+本地 Q1 offload 路径通过项目环境的 TVM FFI 编译官方 paged fused kernel，复用
+顶层 CUTLASS；不导入 SGLang 或其独立环境的 native 库。缺少源码依赖时直接失败。
+官方融合 kernel 保持原样，本地适配负责槽位准备、暂存记录发布与 cache 生命周期。
+Q1 attention 使用固定版本 FlashMLA 的官方 sparse prefill，按 16 个分片计算后用
+FP32 LSE 合并；其独立性能与完整路径验收见上述 MFU 入口及
+[官方对照实验](../experiments/deepseek_v32_echo_official/README.md)。
 
-ECHO 不加入四个顶层子模块，也不初始化其嵌套依赖。目录尚不存在时，从仓库根目录执行：
+ECHO 不加入四个顶层子模块，也不初始化其嵌套依赖。推荐使用
+`python scripts/prepare_3rdparty.py --init` 准备并核验；其检出操作等价于：
 
 ```bash
 git -c submodule.recurse=false clone --no-recurse-submodules \

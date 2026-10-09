@@ -1,0 +1,1017 @@
+diff --git a/experiments/deepseek_v32_mfu/src/backend_provenance.py b/experiments/deepseek_v32_mfu/src/backend_provenance.py
+--- a/experiments/deepseek_v32_mfu/src/backend_provenance.py
++++ b/experiments/deepseek_v32_mfu/src/backend_provenance.py
+@@ -377,6 +377,8 @@
+     q1_topk_native = None if topk is None else topk.runtime_info()
+     hint = sys.modules.get("operators.deepseek_v32.indexer.q1_hint_exact")
+     q1_hint_native = None if hint is None else hint.runtime_info()
++    prefetch = sys.modules.get("operators.deepseek_v32.indexer.official_prefetch")
++    q1_prefetch_preparation = None if prefetch is None else prefetch.runtime_info()
+     indexer_triton = {}
+     for component in ("page64", "decode_hint"):
+         module = sys.modules.get(f"operators.deepseek_v32.indexer.{component}")
+@@ -408,6 +410,7 @@
+         "attention_decode_triton": attention_decode,
+         "q1_topk_cub_native": q1_topk_native,
+         "q1_hint_native": q1_hint_native,
++        "q1_prefetch_preparation": q1_prefetch_preparation,
+         "indexer_adaptation_triton": indexer_triton,
+         "boundary": "Registered modules plus process mappings identify loaded native libraries; "
+         "live vendor and local norm CuTe cache entries identify compiled specializations. "
+diff --git a/experiments/deepseek_v32_mfu/src/run_contract.py b/experiments/deepseek_v32_mfu/src/run_contract.py
+--- a/experiments/deepseek_v32_mfu/src/run_contract.py
++++ b/experiments/deepseek_v32_mfu/src/run_contract.py
+@@ -14,6 +14,7 @@
+ RECEIPT_KIND = "deepseek-v32-checkpoint-layers-0-2-four-method-v3"
+ ISOLATED_RECEIPT_KIND = "deepseek-v32-checkpoint-layers-0-2-single-method-v4"
+ METHOD_ISOLATION = "fresh-process-one-method-v1"
++Q1_PREFETCH_PREPARATION = "official-q1-current-page64-and-staging-v1"
+ GRAPH_CHECK_FIELDS = {
+     "default_graph_logits",
+     "default_graph_cache",
+@@ -181,6 +182,39 @@
+     return {key: value for key, value in identity.items() if key not in excluded}
+ 
+ 
++def _validate_fused_preparation(runtime, declared):
++    """Bind actual current-key participation to its declared immutable mapped ELF."""
++    observed = runtime.get("q1_prefetch_preparation")
++    if not isinstance(observed, dict) or (
++        observed.get("preparation") != Q1_PREFETCH_PREPARATION
++        or observed.get("entry_point") != "logits_from_keys"
++    ):
++        raise ValueError("Selected ECHO Q1 method is missing observed fused preparation")
++    native = observed.get("native") or {}
++    if (native.get("build_identity") or {}).get("source_identity") != declared:
++        raise ValueError("Fused preparation native source identity differs from declaration")
++    name, digest, path = (
++        native.get("artifact_name"),
++        native.get("artifact_sha256"),
++        native.get("artifact_path"),
++    )
++    if (
++        not isinstance(name, str)
++        or not name.startswith("cxldsagr_official_prefetch_")
++        or not name.endswith(".so")
++        or not digest
++        or not path
++        or sum(
++            row.get("name") == name
++            and row.get("library", {}).get("sha256") == digest
++            and row.get("library", {}).get("path") == path
++            for row in runtime.get("local_native_jit", ())
++        )
++        != 1
++    ):
++        raise ValueError("Fused preparation is missing its actual immutable mapped adapter")
++
++
+ def validate_runtime_participation(result, runtime=None):
+     """Require dispatched adapters from observed records without loading unused providers."""
+     if result.get("schema_version") != 4:
+@@ -203,11 +237,42 @@
+         for category in ("echo_indexer", "record_transfer"):
+             if sum(row.get("category") == category for row in local) != 1:
+                 raise ValueError(f"Selected offload method is missing required {category} adapter")
+-    q1_ends = []
+-    if (
++    declared_prefetch = result.get("backend_provenance", {}).get(
++        "official_echo_prefetch_adapter", {}
++    )
++    preparation = declared_prefetch.get("preparation")
++    if preparation not in (None, Q1_PREFETCH_PREPARATION):
++        raise ValueError("Unsupported official Q1 preparation identity")
++    observed_preparation = runtime.get("q1_prefetch_preparation")
++    if observed_preparation is not None:
++        if preparation is None or method != "echo":
++            raise ValueError("Observed fused preparation does not match the selected source path")
++        _validate_fused_preparation(runtime, declared_prefetch)
++    extend_has_q1 = (
+         result["extend_chunk_size"] == 1
+         or result["extend_tokens"] % result["extend_chunk_size"] == 1
+-    ):
++    )
++    current_q1_extend = (
++        preparation == Q1_PREFETCH_PREPARATION
++        and method == "echo"
++        and extend_has_q1
++        and result["prefix_tokens"] + result["extend_tokens"] >= 32768
++    )
++    if (
++        current_q1_extend
++        and result["extend_tokens"] == 1
++        and result.get("extend_residency") == "cold"
++        and result["slots"] - 1 >= 64
++    ):
++        # A cold A1 uses official Q1 through bounded-free or full preparation.
++        # Warming an unused resident packer cannot replace its evidence.
++        _validate_fused_preparation(runtime, declared_prefetch)
++    # Warm or chunked requests can also execute official Q1. This marker proves
++    # process participation, not every call; profile nodes retain that boundary.
++    # Only the observed entry grants an exemption, never a residency label.
++    fused_extend = current_q1_extend and observed_preparation is not None
++    q1_ends = []
++    if extend_has_q1:
+         q1_ends.append(result["prefix_tokens"] + result["extend_tokens"])
+     if result["chunk_size"] == 1 or result["prefix_tokens"] % result["chunk_size"] == 1:
+         q1_ends.append(result["prefix_tokens"])
+@@ -223,7 +288,12 @@
+             for row in local
+         ):
+             raise ValueError("Selected Q1 method is missing its mapped CUB top-k adapter")
+-        if not runtime.get("indexer_adaptation_triton", {}).get("page64"):
++        prefill_q1 = (
++            result["chunk_size"] == 1 or result["prefix_tokens"] % result["chunk_size"] == 1
++        ) and result["prefix_tokens"] >= 32768
++        if (not fused_extend or prefill_q1) and not runtime.get(
++            "indexer_adaptation_triton", {}
++        ).get("page64"):
+             raise ValueError("Selected Q1 method is missing its page64 specialization")
+     if (
+         method == "echo"
+diff --git a/experiments/deepseek_v32_mfu/tests/test_backend_provenance.py b/experiments/deepseek_v32_mfu/tests/test_backend_provenance.py
+--- a/experiments/deepseek_v32_mfu/tests/test_backend_provenance.py
++++ b/experiments/deepseek_v32_mfu/tests/test_backend_provenance.py
+@@ -23,6 +23,7 @@
+         "operators.deepseek_v32.linear.quantization",
+         "operators.deepseek_v32.indexer.q1_topk_cub",
+         "operators.deepseek_v32.indexer.q1_hint_exact",
++        "operators.deepseek_v32.indexer.official_prefetch",
+     ):
+         monkeypatch.delitem(sys.modules, name, raising=False)
+     monkeypatch.setattr(provenance, "_mapped_libraries", set)
+@@ -133,6 +134,7 @@
+     assert result["linear_quantization_triton"] is None
+     assert result["q1_topk_cub_native"] is None
+     assert result["q1_hint_native"] is None
++    assert result["q1_prefetch_preparation"] is None
+ 
+ 
+ def test_runtime_observes_already_imported_linear_quantizer(empty_runtime, monkeypatch):
+@@ -488,3 +490,15 @@
+     with pytest.raises(RuntimeError, match="loaded artifact changed") as captured:
+         provenance.collect_flashinfer_runtime_artifacts()
+     assert captured.value is original
++
++
++def test_runtime_collects_observed_prefetch_entry_without_loading_provider(
++    empty_runtime, monkeypatch
++):
++    record = {"preparation": "fixture", "entry_point": "logits_from_keys", "native": {}}
++    module = ModuleType("operators.deepseek_v32.indexer.official_prefetch")
++    module.runtime_info = lambda: record
++    module._module = lambda: pytest.fail("Collector must not load an unused provider")
++    monkeypatch.setitem(sys.modules, module.__name__, module)
++    result = provenance.collect_flashinfer_runtime_artifacts()
++    assert result["q1_prefetch_preparation"] is record
+diff --git a/experiments/deepseek_v32_mfu/tests/test_launch_gap.py b/experiments/deepseek_v32_mfu/tests/test_launch_gap.py
+--- a/experiments/deepseek_v32_mfu/tests/test_launch_gap.py
++++ b/experiments/deepseek_v32_mfu/tests/test_launch_gap.py
+@@ -701,6 +701,8 @@
+         "pack_page64",
+         "void deep_gemm::smxx_paged_mqa_logits_metadata<32,256,132>(...)",
+         "official_prefetch::prepare_kernel(const int *, ...)",
++        "void official_prefetch::prepare_keys_kernel<true>(const unsigned int *, ...)",
++        "void official_prefetch::prepare_keys_kernel<false>(const unsigned int *, ...)",
+         "official_prefetch::promote_kernel(const int *, ...)",
+         "official_prefetch::validate_promotion_kernel(const int *, ...)",
+         "official_prefetch::copy_publish_kernel(const int *, ...)",
+diff --git a/experiments/deepseek_v32_mfu/tests/test_method_isolation.py b/experiments/deepseek_v32_mfu/tests/test_method_isolation.py
+--- a/experiments/deepseek_v32_mfu/tests/test_method_isolation.py
++++ b/experiments/deepseek_v32_mfu/tests/test_method_isolation.py
+@@ -179,3 +179,173 @@
+         argv += ["--hbm-check-receipt", str(tmp_path / "receipt.json")]
+     with pytest.raises(SystemExit):
+         profile_layers.parse_run_args("profile" if mode == "profile" else None, argv)
++
++
++def _large_q1_result(*, method="echo", fused=True, page64=False):
++    adapter = {
++        "policy": "official-q1-predictive-staging-promotion-v1",
++        "source_sha256": {"adapter": "sha"},
++    }
++    if fused:
++        adapter["preparation"] = run_contract.Q1_PREFETCH_PREPARATION
++    local = [
++        {
++            "name": "cxldsagr_echo_indexer_fixture.so",
++            "category": "echo_indexer",
++            "library": {"sha256": "echo"},
++        },
++        {
++            "name": "cxldsagr_kv_transfer.so",
++            "category": "record_transfer",
++            "library": {"sha256": "transfer"},
++        },
++        {
++            "name": "cxldsagr_official_echo_decode_fixture.so",
++            "category": "other_local_native",
++            "library": {"sha256": "decode"},
++        },
++        {
++            "name": "cxldsagr_official_prefetch_fixture.so",
++            "category": "other_local_native",
++            "library": {"sha256": "prepare", "path": "/native/prepare.so"},
++        },
++        {"name": "topk.so", "category": "other_local_native", "library": {"sha256": "topk"}},
++        {"name": "hint.so", "category": "other_local_native", "library": {"sha256": "hint"}},
++    ]
++    native = {
++        "artifact_name": "cxldsagr_official_prefetch_fixture.so",
++        "artifact_path": "/native/prepare.so",
++        "artifact_sha256": "prepare",
++        "build_identity": {"source_identity": copy.deepcopy(adapter)},
++    }
++    return {
++        "schema_version": 4,
++        "selected_method": method,
++        "methods": [method],
++        "method_isolation": run_contract.METHOD_ISOLATION,
++        "backend_provenance": {"official_echo_prefetch_adapter": adapter},
++        "prefix_tokens": 65536,
++        "extend_tokens": 1,
++        "chunk_size": 1024,
++        "extend_chunk_size": 1,
++        "slots": 65600,
++        "extend_residency": "cold",
++        "execution_runtime_artifacts": {
++            "native_jit": [
++                {"name": name, "loaded_in_this_process": True, "library": {"sha256": name}}
++                for name in ("rope", "silu_and_mul", "topk")
++            ],
++            "cute_jit": [{}],
++            "linear_quantization_triton": {"specializations": [{}]},
++            "local_native_jit": local,
++            "attention_decode_triton": {"specializations": [{}]},
++            "q1_topk_cub_native": {"artifact_name": "topk.so", "artifact_sha256": "topk"},
++            "q1_hint_native": {"artifact_name": "hint.so", "artifact_sha256": "hint"},
++            "indexer_adaptation_triton": {"page64": [{}] if page64 else [], "decode_hint": [{}]},
++            "q1_prefetch_preparation": {
++                "preparation": run_contract.Q1_PREFETCH_PREPARATION,
++                "entry_point": "logits_from_keys",
++                "native": native,
++            }
++            if fused and method == "echo"
++            else None,
++        },
++    }
++
++
++@pytest.mark.parametrize("headroom", [1, 64])
++def test_isolated_fused_q1_requires_observed_entry_and_actual_native_without_unused_packer(
++    headroom,
++):
++    result = _large_q1_result()
++    result["slots"] = result["prefix_tokens"] + headroom
++    run_contract.validate_runtime_participation(result)
++    result["execution_runtime_artifacts"]["q1_prefetch_preparation"] = None
++    result["execution_runtime_artifacts"]["indexer_adaptation_triton"]["page64"] = [{}]
++    with pytest.raises(ValueError, match="observed fused preparation"):
++        run_contract.validate_runtime_participation(result)
++
++
++@pytest.mark.parametrize(
++    "corruption", ["entry", "preparation", "source", "sha", "path", "name", "unmapped", "duplicate"]
++)
++def test_isolated_fused_q1_rejects_unbound_native_participation(corruption):
++    result = _large_q1_result()
++    runtime = result["execution_runtime_artifacts"]
++    observed = runtime["q1_prefetch_preparation"]
++    if corruption == "entry":
++        observed["entry_point"] = "logits"
++    elif corruption == "preparation":
++        observed["preparation"] = "unknown"
++    elif corruption == "source":
++        observed["native"]["build_identity"]["source_identity"]["source_sha256"] = {}
++    elif corruption in {"sha", "path", "name"}:
++        observed["native"][
++            {"sha": "artifact_sha256", "path": "artifact_path", "name": "artifact_name"}[corruption]
++        ] = "wrong"
++    elif corruption == "unmapped":
++        runtime["local_native_jit"].pop(3)
++    else:
++        runtime["local_native_jit"].append(copy.deepcopy(runtime["local_native_jit"][3]))
++    with pytest.raises(ValueError, match="fused preparation|Fused preparation"):
++        run_contract.validate_runtime_participation(result)
++
++
++@pytest.mark.parametrize("method", run_contract.METHODS)
++def test_legacy_large_q1_reports_keep_original_page64_requirement(method):
++    result = _large_q1_result(method=method, fused=False, page64=True)
++    run_contract.validate_runtime_participation(result)
++    result["execution_runtime_artifacts"]["indexer_adaptation_triton"]["page64"] = []
++    with pytest.raises(ValueError, match="page64 specialization"):
++        run_contract.validate_runtime_participation(result)
++
++
++@pytest.mark.parametrize("method", ("hbm", "serial_sparse", "dense_prefetch"))
++def test_current_resident_q1_still_requires_page64(method):
++    result = _large_q1_result(method=method, fused=True)
++    with pytest.raises(ValueError, match="page64 specialization"):
++        run_contract.validate_runtime_participation(result)
++    result["execution_runtime_artifacts"]["indexer_adaptation_triton"]["page64"] = [{}]
++    run_contract.validate_runtime_participation(result)
++
++
++def test_fused_extend_does_not_replace_resident_prefill_tail_evidence():
++    result = _large_q1_result()
++    result["prefix_tokens"] = 65537
++    result["slots"] = 65601
++    with pytest.raises(ValueError, match="page64 specialization"):
++        run_contract.validate_runtime_participation(result)
++    result["execution_runtime_artifacts"]["indexer_adaptation_triton"]["page64"] = [{}]
++    run_contract.validate_runtime_participation(result)
++
++
++@pytest.mark.parametrize("headroom", [1, 64])
++def test_warm_uncertified_residency_binds_only_observed_fused_entry(headroom):
++    result = _large_q1_result()
++    result["extend_residency"] = "warm"
++    result["slots"] = result["prefix_tokens"] + headroom
++    run_contract.validate_runtime_participation(result)
++    result["execution_runtime_artifacts"]["q1_prefetch_preparation"] = None
++    with pytest.raises(ValueError, match="page64 specialization"):
++        run_contract.validate_runtime_participation(result)
++    result["execution_runtime_artifacts"]["indexer_adaptation_triton"]["page64"] = [{}]
++    run_contract.validate_runtime_participation(result)
++
++
++def test_legacy_declaration_cannot_claim_new_fused_entry():
++    result = _large_q1_result()
++    del result["backend_provenance"]["official_echo_prefetch_adapter"]["preparation"]
++    with pytest.raises(ValueError, match="selected source path"):
++        run_contract.validate_runtime_participation(result)
++
++
++@pytest.mark.parametrize("extend,chunk", [(2, 1), (1025, 1024)])
++def test_chunked_extend_q1_binds_only_observed_fused_entry(extend, chunk):
++    result = _large_q1_result()
++    result.update(extend_tokens=extend, extend_chunk_size=chunk, slots=65536 + extend)
++    run_contract.validate_runtime_participation(result)
++    result["execution_runtime_artifacts"]["q1_prefetch_preparation"] = None
++    with pytest.raises(ValueError, match="page64 specialization"):
++        run_contract.validate_runtime_participation(result)
++    result["execution_runtime_artifacts"]["indexer_adaptation_triton"]["page64"] = [{}]
++    run_contract.validate_runtime_participation(result)
+diff --git a/operators/deepseek_v32/indexer/csrc/official_prefetch.cu b/operators/deepseek_v32/indexer/csrc/official_prefetch.cu
+--- a/operators/deepseek_v32/indexer/csrc/official_prefetch.cu
++++ b/operators/deepseek_v32/indexer/csrc/official_prefetch.cu
+@@ -153,8 +153,80 @@
+       static_cast<uint32_t*>(counter.data_ptr()), pool_rows, h2d.size(0));
+   checked(cudaGetLastError());
+ }
++template <bool kVectorKeys>
++__global__ void prepare_keys_kernel(const uint32_t* keys, const uint32_t* scales,
++                               const int* pages, const int* context,
++                               uint32_t* packed, int* blocks, int* token_ids,
++                               int* stage_ids, uint32_t* counter,
++                               int columns, int history, int host_capacity) {
++  // Keep the production assertion, including its execution before reads.
++  assert(context[0] == history + 1);
++  const int page = blockIdx.x;
++  const int lane = threadIdx.x;
++  if constexpr (kVectorKeys) {
++    for (int vector = lane; vector < 512; vector += blockDim.x) {
++      const int token = page * 64 + vector / 8;
++      uint4 value = make_uint4(0, 0, 0, 0);
++      if (token < columns) {
++        value = reinterpret_cast<const uint4*>(keys + int64_t(page) * 2048)[vector];
++      }
++      reinterpret_cast<uint4*>(packed + int64_t(page) * 2112)[vector] = value;
++    }
++  } else {
++    for (int word = lane; word < 2048; word += blockDim.x) {
++      const int token = page * 64 + word / 32;
++      packed[int64_t(page) * 2112 + word] =
++          token < columns ? keys[int64_t(page) * 2048 + word] : 0;
++    }
++  }
++  if (lane < 64) {
++    const int token = page * 64 + lane;
++    packed[int64_t(page) * 2112 + 2048 + lane] =
++        token < columns ? scales[token] : 0;
++    if (token < columns) {
++      int host = 0;
++      if (token < history) {
++        const int host_page = pages[page];
++        assert(host_page >= 0 && host_page < host_capacity / 64);
++        host = host_page * 64 + lane;
++      }
++      token_ids[token] = host;
++    }
++    if (page == 0) stage_ids[lane] = -1;
++  }
++  if (lane == 0) {
++    blocks[page] = page;
++    if (page == 0) *counter = 0;
++  }
++}
++
++void prepare_keys(TensorView keys, TensorView scales, TensorView pages,
++             TensorView context, TensorView packed, TensorView blocks,
++             TensorView token_ids, TensorView stage_ids, TensorView counter,
++             int64_t history, int64_t host_capacity) {
++  const int gpu = keys.device().device_id;
++  checked(cudaSetDevice(gpu));
++  auto stream = static_cast<cudaStream_t>(TVMFFIEnvGetStream(kDLCUDA, gpu));
++  const int64_t columns = keys.size(0);
++  TVM_FFI_ICHECK(columns > 0 && columns < INT32_MAX);
++  const auto key_pointer = reinterpret_cast<uintptr_t>(keys.data_ptr());
++  TVM_FFI_ICHECK(key_pointer % sizeof(uint32_t) == 0);
++  const int grid = (columns + 63) / 64;
++  auto kernel = key_pointer % sizeof(uint4) == 0 ? prepare_keys_kernel<true> : prepare_keys_kernel<false>;
++  kernel<<<grid, 128, 0, stream>>>(
++      static_cast<const uint32_t*>(keys.data_ptr()),
++      static_cast<const uint32_t*>(scales.data_ptr()),
++      static_cast<const int*>(pages.data_ptr()),
++      static_cast<const int*>(context.data_ptr()),
++      static_cast<uint32_t*>(packed.data_ptr()), static_cast<int*>(blocks.data_ptr()),
++      static_cast<int*>(token_ids.data_ptr()), static_cast<int*>(stage_ids.data_ptr()),
++      static_cast<uint32_t*>(counter.data_ptr()), columns, history, host_capacity);
++  checked(cudaGetLastError());
++}
+ }  // namespace official_prefetch
+ 
+ TVM_FFI_DLL_EXPORT_TYPED_FUNC(official_prefetch_prepare, official_prefetch::prepare);
+ TVM_FFI_DLL_EXPORT_TYPED_FUNC(official_prefetch_promote, official_prefetch::promote);
+ TVM_FFI_DLL_EXPORT_TYPED_FUNC(official_prefetch_clear, official_prefetch::clear);
++
++TVM_FFI_DLL_EXPORT_TYPED_FUNC(official_prefetch_prepare_keys, official_prefetch::prepare_keys);
+diff --git a/operators/deepseek_v32/indexer/echo.py b/operators/deepseek_v32/indexer/echo.py
+--- a/operators/deepseek_v32/indexer/echo.py
++++ b/operators/deepseek_v32/indexer/echo.py
+@@ -411,22 +411,11 @@
+ 
+     _validate_prefetch(prefetch, rows, columns, device)
+     if use_official_q1:
+-        from operators.deepseek_v32.indexer import official_decode, official_prefetch
++        from operators.deepseek_v32.indexer import official_prefetch
+ 
+         with torch.cuda.device(device):
+-            packed = _pack_q1_keys(k, kscale)
+-            block_table = torch.arange(len(packed), dtype=torch.int32, device=device).unsqueeze(0)
+-            context_lens = ends.reshape(1)
+-            schedule = official_decode.metadata(context_lens)
+-            result = official_prefetch.logits(
+-                q.unsqueeze(0),
+-                packed,
+-                weights,
+-                context_lens,
+-                block_table,
+-                schedule,
+-                columns,
+-                prefetch,
++            result = official_prefetch.logits_from_keys(
++                q.unsqueeze(0), k, weights, kscale, ends.reshape(1), prefetch
+             )
+             # The official clean kernel initializes the complete physical tail.
+             # This view lets FlashInfer vectorize without copying or rescoring.
+diff --git a/operators/deepseek_v32/indexer/official_prefetch.py b/operators/deepseek_v32/indexer/official_prefetch.py
+--- a/operators/deepseek_v32/indexer/official_prefetch.py
++++ b/operators/deepseek_v32/indexer/official_prefetch.py
+@@ -20,6 +20,9 @@
+ 
+ PREFETCH_CAP = 64
+ POLICY = "official-q1-predictive-staging-promotion-v1"
++PREPARATION = "official-q1-current-page64-and-staging-v1"
++_MODULE_NAME = None
++_FUSED_ENTRY_OBSERVED = False
+ CLEANUP_KEY = "_pending_prefetch_cleanup"
+ STATE_KEY = "_official_prefetch"
+ _SOURCE = Path(__file__).with_name("csrc") / "official_prefetch.cu"
+@@ -31,6 +34,7 @@
+     root = Path(__file__).resolve().parents[3]
+     return {
+         "policy": POLICY,
++        "preparation": PREPARATION,
+         "cuda_flags": _FLAGS,
+         "source_sha256": {
+             str(path.relative_to(root)): hashlib.sha256(path.read_bytes()).hexdigest()
+@@ -41,26 +45,44 @@
+ 
+ @cache
+ def _module():
++    global _MODULE_NAME
++
+     from operators.deepseek_v32.indexer import _native_cache
+ 
+     info = build_info()
+     digest = hashlib.sha256(repr(info).encode()).hexdigest()[:16]
++    name = f"cxldsagr_official_prefetch_{digest}"
+     previous_arch = os.environ.get("TVM_FFI_CUDA_ARCH_LIST")
+     os.environ["TVM_FFI_CUDA_ARCH_LIST"] = "9.0a"
+     try:
+-        return _native_cache.load(
+-            name=f"cxldsagr_official_prefetch_{digest}",
++        module = _native_cache.load(
++            name=name,
+             sources=[str(_SOURCE)],
+             extra_include_paths=[],
+             extra_cuda_cflags=_FLAGS,
+             extra_ldflags=[],
+             source_identity=info,
+         )
++        _MODULE_NAME = name
++        return module
+     finally:
+         if previous_arch is None:
+             os.environ.pop("TVM_FFI_CUDA_ARCH_LIST", None)
+         else:
+             os.environ["TVM_FFI_CUDA_ARCH_LIST"] = previous_arch
++
++
++def runtime_info():
++    """Report a normal current-key entry and its actual immutable native build."""
++    if not _FUSED_ENTRY_OBSERVED:
++        return None
++    from operators.deepseek_v32.indexer import _native_cache
++
++    return {
++        "preparation": PREPARATION,
++        "entry_point": "logits_from_keys",
++        "native": _native_cache.native_info(_MODULE_NAME),
++    }
+ 
+ 
+ def _call(module, name, device, *args):
+@@ -93,9 +115,8 @@
+         )
+ 
+ 
+-def _prepare(prefetch, context_lens, max_context_len):
++def _new_staging(prefetch, context_lens, max_context_len):
+     from operators.deepseek_v32.indexer.echo import (
+-        _BoundedPreparedPrefetch,
+         _check_tensor,
+         _validate_prefetch,
+     )
+@@ -126,6 +147,12 @@
+         prefetch["counter"],
+         len(prefetch["device"]),
+     )
++    return state
++
++
++def _register_staging(state, prefetch):
++    from operators.deepseek_v32.indexer.echo import _BoundedPreparedPrefetch
++
+     prepared = prefetch.get("_prepared")
+     if type(prepared) is _BoundedPreparedPrefetch:
+         prepared.consume(prefetch, 1, consumer_limit=PREFETCH_CAP)
+@@ -140,19 +167,57 @@
+     prefetch[CLEANUP_KEY] = state.clear
+     prefetch["prefetch_policy"] = POLICY
+     prefetch["official_prefetch_cap"] = PREFETCH_CAP
++
++
++def _prepare(prefetch, context_lens, max_context_len):
++    state = _new_staging(prefetch, context_lens, max_context_len)
++    _register_staging(state, prefetch)
+     _call(
+-        module,
++        state.module,
+         "official_prefetch_prepare",
+-        device,
++        prefetch["device"].device,
+         prefetch["page_table"],
+         state.page_table,
+         state.host_ids,
+         state.counter,
+         context_lens,
+-        history,
++        prefetch["history_length"],
+         len(prefetch["host"]),
+     )
+     return state
++
++
++def _prepare_keys(k, scales, prefetch, context_lens):
++    from operators.deepseek_v32.indexer.echo import _check_tensor
++
++    columns, device = len(k), prefetch["device"].device
++    _check_tensor(k, (columns, 128), torch.float8_e4m3fn, device, "k")
++    _check_tensor(scales, (columns,), torch.float32, device, "scales")
++    if k.storage_offset() % 4:
++        raise ValueError("page64 keys require a 4-byte-aligned storage offset")
++    state = _new_staging(prefetch, context_lens, columns)
++    packed = torch.empty(((columns + 63) // 64, 8448), dtype=torch.uint8, device=device)
++    blocks = torch.empty((1, len(packed)), dtype=torch.int32, device=device)
++    # Finish every allocation before registering cleanup over reset-dependent
++    # stage buffers. No launch can publish a tag before ownership is registered.
++    _register_staging(state, prefetch)
++    _call(
++        state.module,
++        "official_prefetch_prepare_keys",
++        device,
++        k,
++        scales,
++        prefetch["page_table"],
++        context_lens,
++        packed,
++        blocks,
++        state.page_table,
++        state.host_ids,
++        state.counter,
++        prefetch["history_length"],
++        len(prefetch["host"]),
++    )
++    return packed, blocks, state
+ 
+ 
+ def _promote(state, prefetch):
+@@ -196,6 +261,30 @@
+     stage copy counts as H2D, including records outside the exact top-k.
+     """
+     state = _prepare(prefetch, context_lens, max_context_len)
++    return _logits_prepared(
++        q,
++        packed,
++        weights,
++        context_lens,
++        block_table,
++        schedule_meta,
++        max_context_len,
++        prefetch,
++        state,
++    )
++
++
++def _logits_prepared(
++    q,
++    packed,
++    weights,
++    context_lens,
++    block_table,
++    schedule_meta,
++    max_context_len,
++    prefetch,
++    state,
++):
+     scores = official_decode.logits(
+         q,
+         packed,
+@@ -215,3 +304,23 @@
+     )
+     _promote(state, prefetch)
+     return scores
++
++
++def logits_from_keys(q, k, weights, scales, context_lens, prefetch):
++    """Run official Q1 with fresh fused key/table/stage preparation.
++
++    The current keys and scales are packed on every call and graph replay. The
++    original strict predictor, promotion and owner-driven cleanup are retained.
++    Storage sizes match the explicit packed-input path; no history is retained.
++    """
++    global _FUSED_ENTRY_OBSERVED
++
++    packed, blocks, state = _prepare_keys(k, scales, prefetch, context_lens)
++    schedule = official_decode.metadata(context_lens)
++    scores = _logits_prepared(
++        q, packed, weights, context_lens, blocks, schedule, len(k), prefetch, state
++    )
++    # Stable participation evidence, collected outside measurement. Graph
++    # capture records this entry; later trace audits verify the actual nodes.
++    _FUSED_ENTRY_OBSERVED = True
++    return scores
+diff --git a/operators/deepseek_v32/indexer/tests/test_q1_fused_prepare.py b/operators/deepseek_v32/indexer/tests/test_q1_fused_prepare.py
+new file mode 100644
+--- /dev/null
++++ b/operators/deepseek_v32/indexer/tests/test_q1_fused_prepare.py
+@@ -0,0 +1,336 @@
++"""Current-key preparation, exact official dispatch and observed native identity."""
++
++import os
++import subprocess
++import sys
++from contextlib import nullcontext
++
++import pytest
++import torch
++
++from operators.deepseek_v32.indexer import _native_cache, echo, official_decode, official_prefetch
++from operators.deepseek_v32.indexer.page64 import pack_q1_keys
++from operators.deepseek_v32.indexer.selection import exact_topk
++from operators.deepseek_v32.indexer.tests.test_official_prefetch import _context, _lease
++
++
++def test_loaded_control_does_not_claim_current_key_participation(monkeypatch):
++    monkeypatch.setattr(official_prefetch, "_FUSED_ENTRY_OBSERVED", False)
++    monkeypatch.setattr(official_prefetch, "_MODULE_NAME", "loaded_control")
++    monkeypatch.setattr(
++        _native_cache,
++        "native_info",
++        lambda _: pytest.fail("Unused current-key entry queried native"),
++    )
++    assert official_prefetch.runtime_info() is None
++
++
++def test_runtime_identity_binds_observed_entry_without_loading_native(monkeypatch):
++    record = {"artifact_name": "bound.so", "artifact_sha256": "digest"}
++    names = []
++    monkeypatch.setattr(official_prefetch, "_FUSED_ENTRY_OBSERVED", True)
++    monkeypatch.setattr(official_prefetch, "_MODULE_NAME", "bound")
++    monkeypatch.setattr(
++        official_prefetch, "_module", lambda: pytest.fail("Must not load a provider")
++    )
++    monkeypatch.setattr(_native_cache, "native_info", lambda name: names.append(name) or record)
++    assert official_prefetch.runtime_info() == {
++        "preparation": official_prefetch.PREPARATION,
++        "entry_point": "logits_from_keys",
++        "native": record,
++    }
++    assert names == ["bound"]
++
++
++@pytest.mark.parametrize("fail", [True, False])
++def test_entry_marks_participation_only_after_normal_return(monkeypatch, fail):
++    marker, error = object(), RuntimeError("injected official failure")
++    keys = torch.empty(2, 128)
++    monkeypatch.setattr(official_prefetch, "_FUSED_ENTRY_OBSERVED", False)
++    monkeypatch.setattr(official_prefetch, "_prepare_keys", lambda *args: (None, None, None))
++    monkeypatch.setattr(official_decode, "metadata", lambda _: None)
++
++    def run(*args):
++        assert not official_prefetch._FUSED_ENTRY_OBSERVED
++        if fail:
++            raise error
++        return marker
++
++    monkeypatch.setattr(official_prefetch, "_logits_prepared", run)
++    if fail:
++        with pytest.raises(RuntimeError) as raised:
++            official_prefetch.logits_from_keys(None, keys, None, None, None, {})
++        assert raised.value is error
++    else:
++        assert official_prefetch.logits_from_keys(None, keys, None, None, None, {}) is marker
++    assert official_prefetch._FUSED_ENTRY_OBSERVED is not fail
++
++
++def test_allocation_failure_precedes_cleanup_registration(monkeypatch):
++    keys = torch.empty(65, 128, dtype=torch.float8_e4m3fn)
++    scales = torch.ones(65)
++    lease = {"device": torch.empty(97, 576, dtype=torch.bfloat16)}
++    error = RuntimeError("injected packing allocation failure")
++    monkeypatch.setattr(official_prefetch, "_new_staging", lambda *args: object())
++
++    def fail(*args, **kwargs):
++        raise error
++
++    monkeypatch.setattr(torch, "empty", fail)
++    with pytest.raises(RuntimeError) as raised:
++        official_prefetch._prepare_keys(keys, scales, lease, None)
++    assert raised.value is error
++    assert official_prefetch.CLEANUP_KEY not in lease
++    assert official_prefetch.STATE_KEY not in lease
++
++
++def test_unaligned_key_storage_is_rejected_before_staging(monkeypatch):
++    keys = torch.zeros(65 * 128 + 1, dtype=torch.uint8)[1:].view(65, 128).view(torch.float8_e4m3fn)
++    scales = torch.ones(65)
++    lease = {"device": torch.empty(97, 576, dtype=torch.bfloat16)}
++    monkeypatch.setattr(
++        official_prefetch, "_new_staging", lambda *args: pytest.fail("Invalid K reached staging")
++    )
++    with pytest.raises(ValueError, match="4-byte-aligned"):
++        official_prefetch._prepare_keys(keys, scales, lease, None)
++
++
++def _release(lease):
++    lease[official_prefetch.CLEANUP_KEY]()
++    torch.cuda.synchronize()
++    lease.pop(official_prefetch.CLEANUP_KEY)
++    lease.pop(official_prefetch.STATE_KEY)
++    lease.pop("_prepared", None)
++
++
++def _packing_reference(keys, scales):
++    keys = keys.cpu().view(torch.uint8)
++    scales = scales.cpu().view(torch.uint8)
++    packed = torch.zeros(((len(keys) + 63) // 64, 8448), dtype=torch.uint8)
++    for page in range(len(packed)):
++        start, count = page * 64, min(64, len(keys) - page * 64)
++        packed[page, : count * 128] = keys[start : start + count].flatten()
++        packed[page, 8192 : 8192 + count * 4] = scales[start * 4 : (start + count) * 4]
++    return packed
++
++
++def _assert_prepared(keys, scales, lease, result):
++    packed, blocks, state = result
++    torch.cuda.synchronize()
++    assert torch.equal(packed.cpu(), _packing_reference(keys, scales))
++    assert blocks.cpu().tolist() == [list(range(len(packed)))]
++    history = lease["history_length"]
++    logical = torch.arange(history)
++    expected = torch.zeros(len(keys), dtype=torch.int32)
++    expected[:history] = lease["page_table"].cpu()[logical // 64] * 64 + logical % 64
++    assert torch.equal(state.page_table.cpu()[0], expected)
++    assert state.host_ids.eq(-1).all()
++    assert state.counter.item() == 0
++    assert lease["allocation_log"].eq(2**31 - 1).all()
++    assert lease["prefetch_stats"].eq(0).all()
++
++
++@pytest.mark.parametrize("columns", [1, 63, 64, 65, 129, 32768, 65537])
++@pytest.mark.parametrize("key_offset", [0, 4])
++def test_cuda_fused_bytes_and_same_address_graph_refresh(columns, key_offset):
++    capacity = max(384, (columns + 63) // 64 * 64)
++    lease = _lease(history=columns - 1, host_capacity=capacity)
++    lease["page_table"] = torch.arange(capacity // 64, device="cuda", dtype=torch.int32).flip(0)
++    keys = (
++        torch.arange(columns * 128 + key_offset, device="cuda", dtype=torch.int64)
++        .to(torch.uint8)[key_offset:]
++        .view(columns, 128)
++        .view(torch.float8_e4m3fn)
++    )
++    bits = torch.tensor(
++        [0, -2147483648, 1, -2147483647, 0x7FC01234, 0x7F800000, -8388608],
++        dtype=torch.int32,
++        device="cuda",
++    )
++    scales = bits.repeat((columns + 6) // 7)[:columns].view(torch.float32)
++    context = _context(lease)
++    unchanged = {
++        name: lease[name].clone()
++        for name in ("device", "host_to_device", "device_to_host", "priority", "offset")
++    }
++    result = official_prefetch._prepare_keys(keys, scales, lease, context)
++    _assert_prepared(keys, scales, lease, result)
++    for name, value in unchanged.items():
++        assert torch.equal(lease[name], value)
++    _release(lease)
++    graph = torch.cuda.CUDAGraph()
++    with torch.cuda.graph(graph):
++        result = official_prefetch._prepare_keys(keys, scales, lease, context)
++    for iteration in range(3):
++        keys.view(torch.uint8).fill_(1 + 97 * iteration)
++        scales.view(torch.int32).fill_(0x7FA00123 + iteration)
++        lease["page_table"].copy_(lease["page_table"].roll(1))
++        graph.replay()
++        _assert_prepared(keys, scales, lease, result)
++    del graph
++    _release(lease)
++
++
++@pytest.mark.parametrize("transient", [False, True])
++@pytest.mark.parametrize("nondefault_stream", [False, True])
++@torch.inference_mode()
++def test_cuda_public_fused_scores_selection_and_actual_promotion(transient, nondefault_stream):
++    columns = 32769
++    lease = _lease(history=columns - 1, host_capacity=32832)
++    lease.update(
++        page_table=torch.arange(513, dtype=torch.int32, device="cuda").flip(0),
++        transient_suffix=transient,
++        max_prefetch=64,
++    )
++    device = lease["device"].device
++    torch.manual_seed(8319)
++    q = torch.randn(1, 64, 128, device=device).to(torch.float8_e4m3fn)
++    keys = torch.randn(columns, 128, device=device).to(torch.float8_e4m3fn)
++    scales = torch.rand(columns, device=device) + 0.5
++    weights = torch.rand(1, 64, device=device) / 64
++    context = _context(lease)
++    packed = pack_q1_keys(keys, scales)
++    blocks = torch.arange(len(packed), dtype=torch.int32, device=device)[None]
++    lease["offset"][1] = torch.inf
++    expected = official_prefetch.logits(
++        q[None], packed, weights, context, blocks, official_decode.metadata(context), columns, lease
++    ).clone()
++    _release(lease)
++    lease["offset"][1] = 0
++    before_offsets = lease["offset"].clone()
++    stream = torch.cuda.Stream() if nondefault_stream else None
++    if stream is not None:
++        stream.wait_stream(torch.cuda.current_stream())
++    with torch.cuda.stream(stream) if stream is not None else nullcontext():
++        actual = echo.logits(q, keys, weights, scales, columns - 1, lease, _pad_to_stride=True)
++    if stream is not None:
++        torch.cuda.current_stream().wait_stream(stream)
++    torch.cuda.synchronize()
++    assert actual.shape == (1, 33024)
++    assert actual[:, columns:].isneginf().all()
++    assert torch.equal(actual[:, :columns].view(torch.int32), expected.view(torch.int32))
++    for left, right in zip(exact_topk(actual, 2048), exact_topk(expected, 2048), strict=True):
++        if left.dtype == torch.float32:
++            left, right = left.view(torch.int32), right.view(torch.int32)
++        assert torch.equal(left, right)
++    state = lease[official_prefetch.STATE_KEY]
++    count = min(64, state.counter.item())
++    assert count == 64
++    ids = state.host_ids[0, :count].long()
++    assert ids.unique().numel() == count
++    logical_to_host = state.page_table[0, : columns - 1].long()
++    logical = torch.where(torch.isin(logical_to_host, ids))[0]
++    assert len(logical) == count and actual[0, logical].gt(0).all()
++    slots = lease["host_to_device"][ids].long()
++    assert (
++        slots.unique().numel() == count
++        and slots.gt(0).all()
++        and slots.lt(len(lease["device"])).all()
++    )
++    assert torch.equal(lease["device_to_host"][slots], ids)
++    assert torch.equal(lease["allocation_log"][slots], ids)
++    assert torch.equal(lease["device"][slots].cpu(), lease["host"][ids.cpu()])
++    assert torch.equal(state.records[0, :count].cpu(), lease["host"][ids.cpu()])
++    assert lease["prefetch_stats"].tolist() == [count, 0, state.counter.item() - count]
++    assert torch.equal(lease["offset"].view(torch.int32), before_offsets.view(torch.int32))
++    assert official_prefetch.runtime_info()["entry_point"] == "logits_from_keys"
++    _release(lease)
++
++
++@pytest.mark.parametrize("kind", ["bounded", "full"])
++def test_cuda_fused_prepared_token_and_duplicate_owner(kind):
++    from operators.deepseek_v32.indexer import cache_ops
++
++    lease = _lease(history=128)
++    keys = torch.zeros(129, 128, dtype=torch.float8_e4m3fn, device="cuda")
++    scales = torch.ones(129, device="cuda")
++    scratch = torch.empty(96, dtype=torch.int64, device="cuda")
++    if kind == "bounded":
++        token = cache_ops.prepare_prefetch_free(
++            lease["priority"],
++            lease["free_bitmap"],
++            lease["device_to_host"],
++            lease["free_slots"],
++            lease["allocation_log"],
++            lease["counter"],
++            lease["prefetch_stats"],
++            scratch,
++            timestamp=8,
++        )
++    else:
++        token = cache_ops.prepare_prefetch(
++            lease["priority"],
++            lease["free_slots"],
++            lease["allocation_log"],
++            lease["counter"],
++            lease["prefetch_stats"],
++            scratch,
++            timestamp=8,
++            host_capacity=len(lease["host"]),
++            query_count=1,
++        )
++    lease.update(_prepared=token, max_prefetch=64)
++    official_prefetch._prepare_keys(keys, scales, lease, _context(lease))
++    assert token.used
++    with pytest.raises(ValueError, match="staging already belongs"):
++        official_prefetch._prepare_keys(keys, scales, lease, _context(lease))
++    _release(lease)
++
++
++def test_cuda_fused_entry_preserves_original_failure_and_cleanup(monkeypatch):
++    from operators.deepseek_v32.indexer.tests.test_official_prefetch import _stage
++
++    lease = _lease(history=128)
++    keys = torch.zeros(129, 128, dtype=torch.float8_e4m3fn, device="cuda")
++    scales = torch.ones(129, device="cuda")
++    error = RuntimeError("injected failure after official stage publication")
++    monkeypatch.setattr(official_prefetch, "_FUSED_ENTRY_OBSERVED", False)
++
++    def fail(*args):
++        assert callable(lease[official_prefetch.CLEANUP_KEY])
++        _stage(lease, lease[official_prefetch.STATE_KEY], 64)
++        raise error
++
++    monkeypatch.setattr(official_decode, "logits", fail)
++    with pytest.raises(RuntimeError) as raised:
++        official_prefetch.logits_from_keys(None, keys, None, scales, _context(lease), lease)
++    assert raised.value is error
++    assert not official_prefetch._FUSED_ENTRY_OBSERVED
++    assert lease["host_to_device"][0].item() == len(lease["device"])
++    _release(lease)
++    assert lease["host_to_device"].eq(2**31 - 1).all()
++
++
++@pytest.mark.parametrize("invalid", ["context", "negative_page", "high_page"])
++def test_cuda_fused_preserves_device_assertions_in_isolated_process(invalid):
++    from operators.deepseek_v32.indexer.tests.test_official_prefetch import _require_sm90
++
++    _require_sm90()
++    program = """
++import sys
++import torch
++from operators.deepseek_v32.indexer import official_prefetch
++from operators.deepseek_v32.indexer.tests.test_official_prefetch import _lease, _context
++lease = _lease(history=128)
++context = _context(lease)
++invalid = sys.argv[1]
++if invalid == 'context':
++    context.add_(1)
++elif invalid == 'negative_page':
++    lease['page_table'][0] = -1
++else:
++    lease['page_table'][0] = len(lease['host']) // 64
++k = torch.zeros(129, 128, dtype=torch.float8_e4m3fn, device='cuda')
++scale = torch.ones(129, device='cuda')
++official_prefetch._prepare_keys(k, scale, lease, context)
++torch.cuda.synchronize()
++"""
++    result = subprocess.run(
++        [sys.executable, "-B", "-c", program, invalid],
++        capture_output=True,
++        text=True,
++        env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"},
++        check=False,
++    )
++    assert result.returncode != 0
++    assert "device-side assert" in result.stderr or "device-side assertion" in result.stderr

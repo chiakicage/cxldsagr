@@ -6,8 +6,10 @@ import torch
 
 from cache.sparse_token_cache import MISSING, SparseTokenCache, WorkingSetTooLarge
 from models.attention_contracts import TokenSelection
-from operators.deepseek_v32.attention.device_only.mla import sparse_mla
+from operators.deepseek_v32.attention._config import DECODE_SELECTION_COUNT
+from operators.deepseek_v32.attention.device_only.mla import sparse_mla, sparse_mla_decode
 from operators.deepseek_v32.attention.offload.mla import sparse_mla_from_pool
+from operators.deepseek_v32.indexer.decode_hint import update_decode_hint
 from operators.deepseek_v32.indexer.prefetch_hint import update_prefetch_hint
 from operators.deepseek_v32.indexer.selection import exact_topk
 
@@ -196,11 +198,12 @@ class EchoAttentionRunner:
         )
         self.cache_diagnostics = counts
 
-    def _consume(self, q, selection: TokenSelection, scope):
+    def _consume(self, q, selection: TokenSelection, scope, *, decode=False):
         indices = selection.token_ids
         if not self.cache.offload:
             with scope("sparse_mla"):
-                return sparse_mla(q, self.cache.records, indices, self.cfg.attention_scale)
+                attention = sparse_mla_decode if decode else sparse_mla
+                return attention(q, self.cache.records, indices, self.cfg.attention_scale)
         diagnostics = getattr(self, "_diagnostic_state", None)
         group = None
         if diagnostics is not None:
@@ -227,6 +230,8 @@ class EchoAttentionRunner:
             with scope("cache_diagnostic_group"):
                 self._diagnose_group_after_recall(group)
         with scope("sparse_mla"):
+            if decode:
+                return sparse_mla_decode(q, self.cache.records, physical, self.cfg.attention_scale)
             return sparse_mla_from_pool(q, self.cache.records, physical, self.cfg.attention_scale)
 
     def forward(
@@ -332,7 +337,7 @@ class EchoAttentionRunner:
                 )
             with scope("indexer_prefetch" if prefetch is not None else "indexer"):
                 indexer_options = {"_bounds": indexer_bounds} if indexer_bounds is not None else {}
-                if p.index_q.is_cuda and prefetch is None and end >= self.cfg.index_topk:
+                if p.index_q.is_cuda and end >= self.cfg.index_topk:
                     # The official score allocation already has an aligned
                     # stride. Expose it to top-k without repacking Q x N;
                     # end >= k keeps the logical selection capacity unchanged.
@@ -349,6 +354,9 @@ class EchoAttentionRunner:
             if prefetch is not None:
                 with scope("offload_finalize"):
                     self.cache.finalize_prefetch(prefetch)
+                # Release the callback-owned official staging before top-k/MLA.
+                # Captured storage remains accounted in the graph private pool.
+                prefetch = None
             with scope("exact_topk"):
                 if scores.is_cuda:
                     # Both indexer backends return causal logits, including
@@ -369,6 +377,9 @@ class EchoAttentionRunner:
                     # Keep the original reduction shape/order even when
                     # selection consumed an aligned score view.
                     update_prefetch_hint(scores[:, :end], self.offset)
+            if self.fused_prefetch and self.cache.offload and len(hidden) == 1 and end >= 32768:
+                with scope("prefetch_hint"):
+                    update_decode_hint(values, self.offset)
             del scores, values
             if before_kv_consume is not None:
                 # Indexer/top-k use resident index records, not main KV. Release
@@ -389,7 +400,15 @@ class EchoAttentionRunner:
                 self.capture_hook(
                     p, self.index_keys[:end], self.index_scales[:end], indices, self.cache, position
                 )
-            attn = self._consume(p.q, TokenSelection(indices), scope)
+            # Decode belongs to an original one-query batch. A prefill batch
+            # split by pool capacity keeps the prefill reduction on every leaf,
+            # including a final one-query leaf.
+            consume_options = (
+                {"decode": True}
+                if p.q.is_cuda and len(p.q) == 1 and indices.shape[1] == DECODE_SELECTION_COUNT
+                else {}
+            )
+            attn = self._consume(p.q, TokenSelection(indices), scope, **consume_options)
             with scope("attention_output"):
                 result = (
                     self.attention.output(attn)

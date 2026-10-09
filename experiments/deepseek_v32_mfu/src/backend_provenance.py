@@ -24,12 +24,14 @@ PINS = {
     "DeepJIT": "2efdab421e1cfb17fe8bc20e11ca72aa6d0e6c43",
     "FlashMLA": "ba89a3466e9470ad08ab39738d4e7bb66989e1e7",
     "cutlass": "f3fde58372d33e9a5650ba7b80fc48b3b49d40c8",
+    "ECHO": "bc1b75c1000010d0ac6f032ebaac283255c050b1",
 }
 SOURCE_ROOTS = {
     "DeepGEMM": ("csrc", "deep_gemm", "setup.py", "scripts", ".gitmodules"),
     "DeepJIT": ("include",),
     "FlashMLA": ("csrc", "flash_mla", "setup.py", ".gitmodules"),
     "cutlass": ("include", "tools/util/include"),
+    "ECHO": ("DeepGEMM/csrc", "DeepGEMM/deep_gemm", ".gitmodules"),
 }
 
 
@@ -58,6 +60,10 @@ def source_files():
         ROOT / "uv.lock",
         ROOT / "scripts/prepare_3rdparty.py",
         ROOT / "evaluation/local_native.py",
+        ROOT / "operators/deepseek_v32/indexer/q1_topk_cub.py",
+        ROOT / "operators/deepseek_v32/indexer/csrc/q1_topk_sort.cu",
+        ROOT / "operators/deepseek_v32/indexer/q1_hint_exact.py",
+        ROOT / "operators/deepseek_v32/indexer/csrc/q1_hint_exact.cu",
     }
     files.update((ROOT / "operators/deepseek_v32/norm").glob("*.py"))
     files.update((ROOT / "operators/deepseek_v32/linear").glob("*.py"))
@@ -222,6 +228,43 @@ def _recall_dispatch_identity():
     return identity
 
 
+def _q1_topk_identity():
+    """Verify declared CUB source bytes and any observed native build."""
+    from operators.deepseek_v32.indexer.q1_topk_cub import build_info, runtime_info
+
+    identity = build_info()
+    sources = identity.get("source_sha256")
+    if not sources:
+        raise RuntimeError("Q1 top-k has no declared source identity")
+    for path, expected in sources.items():
+        if digest(path) != expected:
+            raise RuntimeError(f"Q1 top-k source changed during execution: {path}")
+    runtime = runtime_info()
+    if runtime is not None and runtime["build_identity"]["source_identity"] != identity:
+        raise RuntimeError("Loaded Q1 top-k differs from current build identity")
+    return identity
+
+
+def _q1_hint_identity():
+    """Bind declared exact-mean sources and any loaded production artifact."""
+    from operators.deepseek_v32.indexer.q1_hint_exact import NAME, build_info, runtime_info
+
+    identity = build_info()
+    sources = identity.get("source_sha256")
+    if not sources:
+        raise RuntimeError("Q1 hint has no declared source identity")
+    for path, expected in sources.items():
+        if digest(path) != expected:
+            raise RuntimeError(f"Q1 hint source changed during execution: {path}")
+    runtime = runtime_info()
+    if runtime is not None and (
+        runtime["build_identity"]["source_identity"] != identity
+        or runtime["artifact_name"] != f"{NAME}.so"
+    ):
+        raise RuntimeError("Loaded Q1 hint differs from current production build identity")
+    return identity
+
+
 def _mapped_libraries():
     """Read loaded file mappings without searching any cache directory."""
     maps = Path("/proc/self/maps")
@@ -328,15 +371,50 @@ def collect_flashinfer_runtime_artifacts(*, require_local_native=False):
             cute.extend(_cute_cached_artifacts(module))
     quantizer = sys.modules.get("operators.deepseek_v32.linear.quantization")
     linear_quantization = None if quantizer is None else quantizer.runtime_info()
+    decode = sys.modules.get("operators.deepseek_v32.attention.device_only.decode")
+    attention_decode = None if decode is None else decode.runtime_info()
+    topk = sys.modules.get("operators.deepseek_v32.indexer.q1_topk_cub")
+    q1_topk_native = None if topk is None else topk.runtime_info()
+    hint = sys.modules.get("operators.deepseek_v32.indexer.q1_hint_exact")
+    q1_hint_native = None if hint is None else hint.runtime_info()
+    prefetch = sys.modules.get("operators.deepseek_v32.indexer.official_prefetch")
+    q1_prefetch_preparation = None if prefetch is None else prefetch.runtime_info()
+    indexer_triton = {}
+    for component in ("page64", "decode_hint"):
+        module = sys.modules.get(f"operators.deepseek_v32.indexer.{component}")
+        entries = []
+        if module is not None and module._kernel.cache_info().currsize:
+            for cache in module._kernel().device_caches.values():
+                for compiled in cache[0].values():
+                    entries.append(
+                        {
+                            "hash": compiled.hash,
+                            "metadata": json.loads(
+                                json.dumps(compiled.metadata._asdict(), default=str)
+                            ),
+                            "asm_sha256": {
+                                name: hashlib.sha256(
+                                    value if isinstance(value, bytes) else value.encode()
+                                ).hexdigest()
+                                for name, value in compiled.asm.items()
+                            },
+                        }
+                    )
+        indexer_triton[component] = sorted(entries, key=lambda item: item["hash"])
     return {
         "schema_version": 2,
         "native_jit": native,
         "local_native_jit": collect_local_native_artifacts(required=require_local_native),
         "cute_jit": cute,
         "linear_quantization_triton": linear_quantization,
+        "attention_decode_triton": attention_decode,
+        "q1_topk_cub_native": q1_topk_native,
+        "q1_hint_native": q1_hint_native,
+        "q1_prefetch_preparation": q1_prefetch_preparation,
+        "indexer_adaptation_triton": indexer_triton,
         "boundary": "Registered modules plus process mappings identify loaded native libraries; "
         "live vendor and local norm CuTe cache entries identify compiled specializations. "
-        "The linear quantizer reports its observed Triton specializations separately. "
+        "The linear quantizer and Q1 attention report their observed Triton specializations separately. "
         "Local cxldsagr libraries are identified from actual file mappings with inode/device "
         "and concurrent-file-change checks; ECHO and record transfer are required for full "
         "four-method runs. "
@@ -348,6 +426,11 @@ def collect_flashinfer_runtime_artifacts(*, require_local_native=False):
 
 def collect_backend_provenance():
     """Reject mismatched pins or installed versions and identify loaded binaries."""
+    # This used dependency initializes Triton's compiler environment on import.
+    # Complete that normal setup before binding any before/after identities.
+    importlib.import_module("flashinfer.triton")
+    from operators.deepseek_v32.indexer import official_decode, official_prefetch
+
     revisions = {}
     for name, expected in PINS.items():
         directory = ROOT / "3rdparty" / name
@@ -379,6 +462,10 @@ def collect_backend_provenance():
         "linear_activation_quantization": _linear_quantization_identity(),
         "recall_dispatch": _recall_dispatch_identity(),
         "typed_norm": _typed_norm_identity(),
+        "official_echo_decode": official_decode.build_info(),
+        "official_echo_prefetch_adapter": official_prefetch.build_info(),
+        "q1_exact_topk": _q1_topk_identity(),
+        "q1_exact_prefetch_hint": _q1_hint_identity(),
         "flash_mla_upstream_cutlass_pin": "147f5673d0c1c3dcf66f78d677fd647e4a020219",
         "flash_mla_shared_cutlass_pin": revisions["cutlass"],
         "boundary": "Loaded official libraries and tracked build sources; hashes are identity, "

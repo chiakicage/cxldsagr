@@ -5,6 +5,8 @@ cd -- "$script_dir/../../.."
 export PATH="$PWD/.venv/bin:$PATH"
 export PYTHONDONTWRITEBYTECODE=1
 export DG_JIT_WITH_LINEINFO=1
+runner_source="$script_dir/run.sh"
+runner_invocation=("$0" "$@")
 if [[ "${1:-}" == --help || "${1:-}" == -h ]]; then
   python -m experiments.deepseek_v32_mfu.src.measure --help
   exit 0
@@ -63,21 +65,11 @@ finish() {
 trap finish EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
+source "$script_dir/runner_common.sh"
 command=(python -m experiments.deepseek_v32_mfu.src.measure
   --mode "$mode" --run-id "$run_id" --output "$staging/data" "$@")
 "${command[@]}" >"$staging/log/stdout.log" 2>"$staging/log/stderr.log"
-python - "$staging/data/result.json" <<'PY'
-import json, sys
-result = json.load(open(sys.argv[1]))
-assert result['accepted'] and result['num_layers'] == 3
-assert result['schema_version'] == 3 and result['mode'] in ('check', 'bench')
-if result['mode'] == 'check':
-    assert len(result['correctness']) == 13
-    from pathlib import Path
-    assert Path(sys.argv[1]).with_name('receipt.json').is_file()
-else:
-    assert not result['correctness'] and result['validation_receipt']
-PY
+validate_and_record_runner "$mode"
 for category in data log profile; do
   mkdir -p "$base/$category"
   mkdir "$base/$category/$run_id"

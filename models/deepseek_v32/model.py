@@ -283,6 +283,7 @@ class DeepSeekEchoModel:
                 "metadata_workspace_bytes": metadata_workspace,
                 "dense_ticket_workspace_bytes": ticket_workspace,
                 "indexer_workspace_bytes": self.execution_reservation.indexer_bytes,
+                **self.execution_reservation.attention_workspace_metadata,
                 "copy_source_bytes": self.execution_reservation.copy_source_bytes,
                 "compute_graph_reservation_bytes": getattr(self, "_graph_reservation_bytes", 0),
                 "extend_graph_reservation_bytes": getattr(

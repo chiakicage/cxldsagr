@@ -383,7 +383,29 @@ def driver(tmp_path, monkeypatch, cpu_annotation):
     monkeypatch.setattr(
         backend_provenance,
         "collect_flashinfer_runtime_artifacts",
-        lambda **kwargs: {"fixture": True, "local_native_jit": []},
+        lambda **kwargs: {
+            "fixture": True,
+            "local_native_jit": [
+                {
+                    "name": "fixture_echo.so",
+                    "category": "echo_indexer",
+                    "library": {"sha256": "echo"},
+                },
+                {
+                    "name": "fixture_transfer.so",
+                    "category": "record_transfer",
+                    "library": {"sha256": "transfer"},
+                },
+            ]
+            if kwargs["require_local_native"]
+            else [],
+            "native_jit": [
+                {"name": name, "loaded_in_this_process": True, "library": {"sha256": name}}
+                for name in ("rope", "silu_and_mul", "topk")
+            ],
+            "cute_jit": [{"fixture": True}],
+            "linear_quantization_triton": {"specializations": [{"fixture": True}]},
+        },
     )
     monkeypatch.setattr(profile_layers.importlib.metadata, "version", lambda _: "test")
     arguments = [
@@ -408,9 +430,10 @@ def driver(tmp_path, monkeypatch, cpu_annotation):
         "2",
     ]
 
-    def execute(mode, *extra):
-        output = tmp_path / mode
-        argv = [*arguments, "--run-id", mode, "--output", str(output), *extra]
+    def execute(mode, *extra, run_name=None):
+        run_name = mode if run_name is None else run_name
+        output = tmp_path / run_name
+        argv = [*arguments, "--run-id", run_name, "--output", str(output), *extra]
         if mode == "profile":
             profile_layers.main(argv)
         else:

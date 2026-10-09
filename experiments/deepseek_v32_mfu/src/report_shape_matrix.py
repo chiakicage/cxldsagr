@@ -22,6 +22,7 @@ from experiments.deepseek_v32_mfu.src.run_contract import (
 HISTORY_TOKENS = (4096, 16384, 65536)
 EXTEND_TOKENS = (128, 256, 512, 1024)
 SHAPES = {(history, extend) for history in HISTORY_TOKENS for extend in EXTEND_TOKENS}
+SUPPORTED_SHAPES = SHAPES | {(65536, 1)}
 ROOT = Path(__file__).resolve().parents[3]
 TIMELINE_FILES = ("prefill.svg", "prefill.png", "extend.svg", "extend.png")
 STARTUP_FILES = ("extend_with_startup.svg", "extend_with_startup.png")
@@ -67,8 +68,11 @@ def load_manifest(path, *, allow_subset=False):
         raise ValueError("Shape matrix must be nonempty and have no duplicate shapes")
     if any(type(value) is not int for shape in shapes for value in shape):
         raise ValueError("Token counts must be integers")
-    if not set(shapes) <= SHAPES or (not allow_subset and set(shapes) != SHAPES):
-        raise ValueError("Expected the complete [4096,16384,65536] x [128,256,512,1024] matrix")
+    if not set(shapes) <= SUPPORTED_SHAPES or (not allow_subset and set(shapes) != SHAPES):
+        raise ValueError(
+            "Expected the complete [4096,16384,65536] x [128,256,512,1024] matrix; "
+            "use --allow-subset for a subset or the additional H65536/A1 point"
+        )
     configuration = manifest["configuration"]
     requested = {
         (history, extend)
@@ -157,6 +161,7 @@ def validate_cache_samples(bench):
 
 def validate_shape(entry):
     history, extend = entry["prefix_tokens"], entry["extend_tokens"]
+    capacity = (history + extend + 63) // 64 * 64
     directories = {
         name: Path(entry[f"{name}_run"]).resolve(strict=True)
         for name in ("check", "bench", "profile")
@@ -175,8 +180,8 @@ def validate_shape(entry):
             or (run["prefix_tokens"], run["extend_tokens"]) != (history, extend)
             or run["extend_chunk_size"] != extend
             or run["chunk_size"] != 1024
-            or run["sparse_pool_tokens"] != history + extend
-            or run["host_arena_tokens"] != history + extend
+            or run["sparse_pool_tokens"] != capacity
+            or run["host_arena_tokens"] != capacity
         ):
             raise ValueError(f"Run does not cover the declared cold full-graph shape: {name}")
         if entry.get(f"{name}_run_id", run["run_id"]) != run["run_id"]:
@@ -343,7 +348,7 @@ def markdown(manifest, shapes, timings, *, source_compatibility=None):
         "",
         f"Matrix run: `{manifest['run_id']}`. Each shape has independent cold correctness, clean timing and NSYS profile runs.",
         "",
-        "The real checkpoint's L0–L2 propagate hidden/residual in order, with embedding, three dense MLPs, final norm and last-token LM head. History uses 1,024-token chunks; extend uses one complete A-token batch and one full CUDA Graph replay. P=NH=H+A; ordinary persistent append. This scope does not represent the full 61-layer model or C10 GR serving.",
+        "The real checkpoint's L0–L2 propagate hidden/residual in order, with embedding, three dense MLPs, final norm and last-token LM head. History uses 1,024-token chunks; extend uses one complete A-token batch and one full CUDA Graph replay. P=NH=ceil((H+A)/64)*64; ordinary persistent append. H65536/A1 performs one token step over 65,536 history tokens, with 65,600 pool/host slots. This scope does not represent the full 61-layer model or C10 GR serving.",
         "",
         "Times below are medians of synchronized wall-time samples. Input preparation, transactions and required synchronization/commit are included; weight loading, compilation, graph preparation and prefix restoration are excluded. Cold clears offload main-KV HBM residency while retaining DRAM and resident indexer data. Sample counts and all unrounded values are in [timing.csv](timing.csv) and [timing_samples.csv](timing_samples.csv).",
         "",
@@ -581,7 +586,7 @@ def publish(manifest_path, output, *, publish_dir=None, audit_paths=(), allow_su
             {
                 "prefix_tokens": entry["prefix_tokens"],
                 "extend_tokens": entry["extend_tokens"],
-                "pool_tokens": entry["prefix_tokens"] + entry["extend_tokens"],
+                "pool_tokens": (entry["prefix_tokens"] + entry["extend_tokens"] + 63) // 64 * 64,
                 "run_ids": {name: run["run_id"] for name, run in shape["runs"].items()},
                 "execution_identity_sha256": identity_digest(
                     shape["runs"]["bench"]["execution_identity"]

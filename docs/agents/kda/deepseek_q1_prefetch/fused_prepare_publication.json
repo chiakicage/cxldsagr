@@ -1,0 +1,333 @@
+{
+  "cohort": "deepseek_h64k_a1_fused_prepare_20261009_01",
+  "prepared_at_utc": "2026-10-08T17:31:26.161950+00:00",
+  "source_sha256": {
+    "experiments/deepseek_v32_mfu/src/backend_provenance.py": "8d3639b3cbbb2d86c563e71b2d7c87c0b0f5d48f7eac858b1fbcc04cbc831c81",
+    "experiments/deepseek_v32_mfu/src/run_contract.py": "8949468a482e5c1128032e5e01170768c82e2a3835f419cf62b7cd5999c608ee",
+    "experiments/deepseek_v32_mfu/tests/test_backend_provenance.py": "31dde9a114b13099c09af4d40d5086c95fd90a01325f021b59081fd543a5459c",
+    "experiments/deepseek_v32_mfu/tests/test_launch_gap.py": "dbdda7424d0fb18e21e81d9892bd31582c6ec68917eeef6af42a7a4345050905",
+    "experiments/deepseek_v32_mfu/tests/test_method_isolation.py": "afcf8aeb8a1eda2ff59b4977502aa9bd62ab8247db424af68c232a6562e7d40e",
+    "operators/deepseek_v32/indexer/csrc/official_prefetch.cu": "020daf60e2acdeb3195b34485f036fe1074f2b5501754ba95bc72c94e4e3e1e3",
+    "operators/deepseek_v32/indexer/echo.py": "d451c53d4dae4b13ef7f3b8486bf8e0a06bf5f416162504da7d0851f88ea4203",
+    "operators/deepseek_v32/indexer/official_prefetch.py": "c4efd30949e1dbef774e98383c8dc7ac33371bfa0afa1d2c4bacdfaef7871929",
+    "operators/deepseek_v32/indexer/tests/test_q1_fused_prepare.py": "d47bb7d348ce3555982a2696a15e4bdb695374f61ce0241956850a58c60eb44f"
+  },
+  "documents": {
+    "experiments/deepseek_v32_mfu/README.md": {
+      "before": "c72ace0b41da1e0a46b940cbd2a6f58c14742b6a8f010a761f93c8f63232194b",
+      "after": "fd3bb51b83424cc8e125990916aa8d10fd1bdc5075605d36a957d234c55a8dc9"
+    },
+    "experiments/deepseek_v32_echo_official/README.md": {
+      "before": "b3a0181a3d6c2b482b78577cf9af20328a9f7ceae7416d036bbf7e93e2d049af",
+      "after": "b2ce9ab4ce77524dbc3a489960ec9f2b83534b01f7b702987e2cc8ca85daa381"
+    },
+    "models/deepseek_v32/README.md": {
+      "before": "107f3550abc748cc25eebfb2411dd6a6ed7799ae3e18769a5233534c7eb9ed08",
+      "after": "56abb96d4a029916f44c8dcb30f09f389ab710af0bf084d414e7fc501597d00c"
+    },
+    "operators/deepseek_v32/README.md": {
+      "before": "300058ba68460790387dd88bc549e498499974903714209cd62d51a8f1e33d02",
+      "after": "2ccdfe86d3895a22540f0f36fef36035e2e4c9b4ed31fd270fd4a919b3d4f8b6"
+    },
+    "3rdparty/README.md": {
+      "before": "5c5202126eca76d6e7ba96581f71c9c8eb0ad7544c534eda36edd9a66919e07e",
+      "after": "74630a2a5b966d7b93c25a10d9da3b03aad59c82fdcd8c919cae3a5235c6aecf"
+    },
+    "models/deepseek_v32/AGENTS.md": {
+      "before": "c3ff873e21e24233815271ce5f47572ac20880e5a0683322c3dea7138bb8420a",
+      "after": "9ba27a7002ee8ccff4ba5bf43c8213f9d95fc844c65993a38887f35b11d8e28c"
+    },
+    "docs/status.md": {
+      "before": "6a59e50cc4ee976d41a33c0a392c79602f94fb22e62085110978ab4c83bc5ed4",
+      "after": "5fa3e1de12f880dbe6abef7f855536520f87d78cf0ad8a62e641a2a6f49e58d6"
+    },
+    "docs/roadmap.md": {
+      "before": "2688778a2b3360444ee39951acc85dc37850c90660a3b398112cbb0f67d1a48c",
+      "after": "040c934bd4a0b89493d496604eee13e58e1cf1b88cf0acbf76a50335cdabf8df"
+    },
+    "docs/agents/research-supervisor/sources.md": {
+      "before": "25594b7cb772e567d1a9fd79fbe5f6c4f7cf6f2ff7f849d6c322b268e11e2f8d",
+      "after": "9e780bce74495f383f93ce7b9b382e96d494101d6b3d2cea7c30e54378e98b39"
+    },
+    "docs/agents/research-supervisor/updates.md": {
+      "before": "04349ce38dcfd7ece657b6fc751eb7644f7464f606ecfd171079c1c885c1d37a",
+      "after": "cae2fede2603d5414a7d018dc9a126308440c9b0b55c13b25916320d9ac36d5d"
+    },
+    "docs/agents/kda/deepseek_q1_prefetch/checkpoint.md": {
+      "before": "2a7c7b6beea56178688893c50090a5459987d62caeb3ccf7f55206acee947c00",
+      "after": "8acf2789b1acb7ae1bdcfa2964fd657b04d9fa943b2f5c0cb549240ae6cfdbba"
+    },
+    "docs/agents/kda/deepseek_q1_prefetch/fused_prepare_integration_plan.md": {
+      "before": "05c2597ff198c338b7cef61a7a3fa4c2dd3d17eb1e3b93f316f8ce017df22c42",
+      "after": "dcd7b4f708f70db2774811b2effb02f8341714d3b18af1fde29f62eef61bc843"
+    },
+    "docs/agents/kda/deepseek_q1_prefetch/fused_prepare_model_plan.md": {
+      "before": "c0d3f16cdab864c807201040b66c06e5be8ed70b84b04f09757e27ca5afdb7c1",
+      "after": "0cbc26ba7135026d4e7287e59d70693144559ffa605aaeecf8a00f6e3a87567c"
+    },
+    "docs/agents/kda/deepseek_q1_prefetch/integration_scope.md": {
+      "before": "54474f0eb5d023ba747503752d3e5a6dcd3534acdf531d9d85d83640b9097226",
+      "after": "9fa4414bdbc459b9aab57314ba6333dc3e5b99a75ac01b14a0c318561d5a7a3f"
+    },
+    "docs/agents/kda/deepseek_q1_prefetch/fused_prepare_checkpoint.md": {
+      "before": "e3e1a5077d7e218752153589a296a44e6a56b4b28b0b7e4bfb88e6e2f23d1386",
+      "after": "67332fdccc6f01c4d2ea0ad887908039173559f5ef5e584ed102cb4d27e94fe0"
+    }
+  },
+  "reports": [
+    {
+      "source": "experiments/deepseek_v32_mfu/output/data/deepseek_h64k_a1_fused_prepare_report_20261009_01",
+      "selected": "experiments/deepseek_v32_mfu/report/h64k_a1",
+      "staged": "/tmp/cxldsagr-checks/q1-fused-prepare-production/report_stage_0",
+      "temporary": "experiments/deepseek_v32_mfu/report/h64k_a1.publication_20261009",
+      "previous": "experiments/deepseek_v32_mfu/report/h64k_a1.superseded_20261009",
+      "new_files_sha256": {
+        "extend.png": "a320d462c93ac126bc0a67f6eb850d36cdd014484b6d8161e6e01bc298911906",
+        "extend.svg": "98ac33824ae4ed6adb2a9ada86dbfb048df33a4acc61f38a8bcf1079ae2f96b0",
+        "final_mfu.csv": "8284ce56434144219677d76254b3331c62633c77f22857d590169447c7db8251",
+        "final_mfu.png": "52d68cf86232c8549b0240f9ebf1bfedd8e555a51b992ef3d6c93b376461485b",
+        "final_mfu.svg": "7a64866fb48907e685b953b4ceeedcbfcda02bc112fd4e063aa8ffa2a80f941f",
+        "input_hashes.json": "cbca675d7588dc8862437bf820217bc39ccdc0a5ba563b47488bc30d8722b6d5",
+        "operator_analysis.json": "7b574fb64d9db5c07e003406d4bb097e2e1a19e5b118fdd9625c6193db32042e",
+        "operator_mfu.csv": "0a954ab17770cf0523c4e4879efa63c9e02e20a8cfdffaeea1bea005484aebdf",
+        "operator_mfu.png": "c85046d2bec0a3350029193840e9d7663cc61b24215b3aca039f609f3cd779d4",
+        "operator_mfu.svg": "2f6872d592e24c962fb287937cee5a4ee4d55a706f4a87c081105830ea257825",
+        "operator_mfu_by_layer.csv": "cd707f4bfa5d721ed1c96c984bbe27fbb198af5a1d45d32f589305b3a4403b32",
+        "prefill.png": "17dcb650bc45f9672c9765e079d5c3e10a28385ee3653ed2b8faffd4f4213903",
+        "prefill.svg": "72afe022f57589c379fa829cb2d2e14f843d7e28863d70f99808c3e7fd542bc4",
+        "publication_manifest.json": "dfb9a04e7f8a698f67b6cee3ef2c3129d944913dc70fbd17ef8baa528b418965",
+        "query_coverage.csv": "e9b7161bc97b88e4f31775fc633674ef1ab3393dda4da106eb65b313b501ff8d",
+        "results.md": "facdf49b2fb98fd1499785c1013d6bd41f713f251d052eecd51e56bb66c52dca",
+        "summary.json": "e47bbed74bc6a7d43ca606ba8bb9d11eef7b9baa6f568feee0c130abb5d25927",
+        "timing_samples.csv": "955a50aee6e5db9122a83c43b19dc22c758369a6b663988e335a9e1e790ac226",
+        "window_rows.json": "f764f5c4f13985cf647e3b2b72b69b5acb68138ca797abe47445b40fc86fff81",
+        "windows.csv": "597e95573ca7ac3f4fd437a3135f56bbd6c60519e0630fd1f96afa056e85762b",
+        "with_startup/extend_with_startup.png": "bb76ec2186b8457d7140496d1a6b1eb8057a1a615a6b1057df929802d2c0075c",
+        "with_startup/extend_with_startup.svg": "0ca5af50ebd65e92dbfa398776bf4f827ad051c8622d3c4e3a7ae3c359995ac1",
+        "with_startup/window_rows.json": "69012375f00f8e211903d1d342c8af0a349a455338708f2841c764961f67485c"
+      },
+      "old_files_sha256": {
+        "extend.png": "6ce050e734d62bad73690d92cde2679984e2935687b3e87fa7cf7e919e64f2ca",
+        "extend.svg": "5a4f3ff0efba7374c502757d769cff61fc5de37d463b9de0568ab40aa92701f9",
+        "final_mfu.csv": "2a3748986e0e45dbdbf326a99594c8314f6ec8368b097c4f93521201fdc16703",
+        "final_mfu.png": "18a4db6cd9f69b6b8b5a0bd9321749adaed26edfe277f9cbb237121689f6f628",
+        "final_mfu.svg": "d4d26e011f970bcb1b9a44b6d4a561fe0fadeb2b50c5d403d05d3544d74928f6",
+        "input_hashes.json": "06324f6170bac0690e8aed1db6dd31545f1a428c631139690bd90e522949bb49",
+        "operator_analysis.json": "ca1262a4d03ac7eb4db3278791ca883737ce9207cbc046989b0bcbd6c223b0ac",
+        "operator_mfu.csv": "c6198123b9652269cc2377c92fec4b3f5ea75d2dfca5cab6bb34176f67b17bb5",
+        "operator_mfu.png": "689ff51e68ce25a1cef81c909aa5dc998fcd0a34eeb2b3adf388541ee6ca8770",
+        "operator_mfu.svg": "00e0165fe4545c1a410b10ae2cd55b43662b9fdfd498ee21b84a7b794ac1bcf3",
+        "operator_mfu_by_layer.csv": "139acb998271b2f95b1ffe18f5309b755e21f9c024aac3f92be56a07329906bb",
+        "prefill.png": "7a05ee42661ae3e5fce356366e76b583d1849238187afb2adc976e7ac796de8d",
+        "prefill.svg": "d824f901fc80886cad549e1207de5e2bf7a07b0b68fd80852372a7cf072f6439",
+        "publication_manifest.json": "646ef54781990587cfddf26da929e8e16dc635db35b6f89369bfb51cf45c1605",
+        "query_coverage.csv": "e9b7161bc97b88e4f31775fc633674ef1ab3393dda4da106eb65b313b501ff8d",
+        "results.md": "3052ef2ff3d28749c86b4f0982a75d241fc6c2e3f75664074bc4e9eebd8590d2",
+        "summary.json": "4ce60fc1a2f40b61de5c25208b921a8e7a5449889950fb210dd98ec2b880a0be",
+        "timing_samples.csv": "dea8949a830cdf2d0cad2ae04e01c2e3c449de5c3b0b46b88187c30bc7c4874d",
+        "window_rows.json": "06a214db16bb594b10377c1be29ff48dc01294d5fedd82f9c0e43677915081fe",
+        "windows.csv": "4aa8488a5089a91eee89ad4a1b166494c28e68deeab04297c2db585a61cbf411",
+        "with_startup/extend_with_startup.png": "958dfe0a85ba841ccd8fbe387c04ae944318a4e032dbc04a60221f9a7d25646d",
+        "with_startup/extend_with_startup.svg": "0fb4e7d7ce61c7485c162d2d48fbde64b8872fe3d967e1613b01b547777726ca",
+        "with_startup/window_rows.json": "0fd05e69d52b6134f02543b08710ca15687cdfe283d4bfb7fb0404ac24a1d2b8"
+      }
+    },
+    {
+      "source": "experiments/deepseek_v32_echo_official/output/data/combined_decode_fused_prepare_20261009_01",
+      "selected": "experiments/deepseek_v32_echo_official/report/combined_decode",
+      "staged": "/tmp/cxldsagr-checks/q1-fused-prepare-production/report_stage_1",
+      "temporary": "experiments/deepseek_v32_echo_official/report/combined_decode.publication_20261009",
+      "previous": "experiments/deepseek_v32_echo_official/report/combined_decode.superseded_20261009",
+      "new_files_sha256": {
+        "panels.json": "ca18764329963fa1d93110864e985b164ba11f9a2c070d1f920e16c7346a9d47",
+        "provenance.json": "95fd07847eae357eb6bf89d720be9afbdfddaa35468d9f192ba931911cf5a839",
+        "source_snapshot/compact_timeline.py": "1efeb4a671e102f4f813f63e20a72ef3d188395e4a7f75828ba81fe229155a32",
+        "source_snapshot/compare_decode_timeline.py": "ecfd8d8cc671737bb5213a0e0d12edcd8eeff1ed7f57a5cde0df28c700a5cdf9",
+        "source_snapshot/compare_timeline.py": "0cd37c99d0f5df4bc25a08e7371b2152493a8a999731f5d9007b691ec6f00c41",
+        "source_snapshot/engine_timeline.py": "fb2b5b70504cc0a1e6c5441f85893ca151cebbc02c3890445f946f0f8dd8cfb1",
+        "source_snapshot/timeline.py": "6a8fa2598045accc26b6746913c283fad52ad4633f6fc01e0d961f397e691b25",
+        "timeline_decode.png": "302f79a48166fbbcd6b2a5d9beeef6064e106b41a72a1f84a0c678e6ca076e2e",
+        "timeline_decode.svg": "4ba46dbb5abb28d2aed6f84114e1a4f27c639f0195eded533bc4771f2d070e2f",
+        "windows.csv": "250e6a264962450e7401a332899a0a36424b88bb07faa41bada2328a196c56c6"
+      },
+      "old_files_sha256": {
+        "panels.json": "77abaf02829adb32299e87d559fceea47435c4304b253cc25834d8bc5de2c273",
+        "provenance.json": "b58e7b129dbac2c91f5c37fd8fc49c240a00ad22502d8c4880d3459ec4e6cb0c",
+        "source_snapshot/compact_timeline.py": "1efeb4a671e102f4f813f63e20a72ef3d188395e4a7f75828ba81fe229155a32",
+        "source_snapshot/compare_decode_timeline.py": "ecfd8d8cc671737bb5213a0e0d12edcd8eeff1ed7f57a5cde0df28c700a5cdf9",
+        "source_snapshot/compare_timeline.py": "0cd37c99d0f5df4bc25a08e7371b2152493a8a999731f5d9007b691ec6f00c41",
+        "source_snapshot/engine_timeline.py": "fb2b5b70504cc0a1e6c5441f85893ca151cebbc02c3890445f946f0f8dd8cfb1",
+        "source_snapshot/timeline.py": "6a8fa2598045accc26b6746913c283fad52ad4633f6fc01e0d961f397e691b25",
+        "timeline_decode.png": "ca7ac74a7cc399eb732b97fd7b6806fbffbe36066ccd96821bc722c3c0013758",
+        "timeline_decode.svg": "5c7173188f4067e119f761af9eb28924983940f0e496f4bd7158acab177cd361",
+        "windows.csv": "f40648b40d0d5ebff4efee8cf47ad57db63e6027ee7d802f49605e37a3f521a5"
+      }
+    },
+    {
+      "source": "experiments/deepseek_v32_echo_official/output/data/decode_gap_fused_prepare_20261009_01",
+      "selected": "experiments/deepseek_v32_echo_official/report/decode_gap",
+      "staged": "/tmp/cxldsagr-checks/q1-fused-prepare-production/report_stage_2",
+      "temporary": "experiments/deepseek_v32_echo_official/report/decode_gap.publication_20261009",
+      "previous": "experiments/deepseek_v32_echo_official/report/decode_gap.superseded_20261009",
+      "new_files_sha256": {
+        "gap_decomposition.csv": "8489746f3d0a5612f2090521a6e89761fc35c54cc9c79911dd92de18230d5191",
+        "kernel_details.csv": "a942dda82744690fdb558d5a9720b254e49c951660e1b2e290fc3bf05d8ceffe",
+        "provenance.json": "f495cee96d18f61e63c5990877d4a0edc7939cae8539b41bf54c6ffcc12fb238",
+        "report.json": "691b31ac68de3c4e648f2f0bc706026e474a7037d1567b77585204ccc8fc5f79",
+        "source_snapshot/compact_timeline.py": "1efeb4a671e102f4f813f63e20a72ef3d188395e4a7f75828ba81fe229155a32",
+        "source_snapshot/compare_timeline.py": "0cd37c99d0f5df4bc25a08e7371b2152493a8a999731f5d9007b691ec6f00c41",
+        "source_snapshot/diagnose_decode_gap.py": "36e3b018c98120dd0d5a10cfad7d1754fb57dc793ae5f6fe71db5c0b9aea3bc1",
+        "source_snapshot/engine_timeline.py": "fb2b5b70504cc0a1e6c5441f85893ca151cebbc02c3890445f946f0f8dd8cfb1",
+        "source_snapshot/timeline.py": "6a8fa2598045accc26b6746913c283fad52ad4633f6fc01e0d961f397e691b25"
+      },
+      "old_files_sha256": {
+        "gap_decomposition.csv": "500b0fd838c57e2073b4966f1b84aef80803906edc1731ef3cfbe5376319bf0f",
+        "kernel_details.csv": "22a3521efad8607c77134f82dfd97d3c8e2d5d8e99d7a2b91b4560f7b8210873",
+        "provenance.json": "340f69f8b0362ff8e76bd80d7dc3d04308e012f79d27334551a3a728e53b225f",
+        "report.json": "c5735ea7360a5c38a414fab5550110285a2142f512310ddd6cc325070cd69881",
+        "source_snapshot/compact_timeline.py": "1efeb4a671e102f4f813f63e20a72ef3d188395e4a7f75828ba81fe229155a32",
+        "source_snapshot/compare_timeline.py": "0cd37c99d0f5df4bc25a08e7371b2152493a8a999731f5d9007b691ec6f00c41",
+        "source_snapshot/diagnose_decode_gap.py": "36e3b018c98120dd0d5a10cfad7d1754fb57dc793ae5f6fe71db5c0b9aea3bc1",
+        "source_snapshot/engine_timeline.py": "fb2b5b70504cc0a1e6c5441f85893ca151cebbc02c3890445f946f0f8dd8cfb1",
+        "source_snapshot/timeline.py": "6a8fa2598045accc26b6746913c283fad52ad4633f6fc01e0d961f397e691b25"
+      }
+    }
+  ],
+  "cleanup": [
+    "experiments/deepseek_v32_mfu/output/data/deepseek_h64k_a1_isolated_20261008_01_hbm_bench",
+    "experiments/deepseek_v32_mfu/output/data/deepseek_h64k_a1_isolated_20261008_01_hbm_profile",
+    "experiments/deepseek_v32_mfu/output/data/deepseek_h64k_a1_isolated_20261008_01_hbm_operators",
+    "experiments/deepseek_v32_mfu/output/data/deepseek_h64k_a1_isolated_20261008_01_echo_bench",
+    "experiments/deepseek_v32_mfu/output/data/deepseek_h64k_a1_isolated_20261008_01_echo_profile",
+    "experiments/deepseek_v32_mfu/output/data/deepseek_h64k_a1_isolated_20261008_01_echo_operators",
+    "experiments/deepseek_v32_mfu/output/data/deepseek_h64k_a1_isolated_20261008_01_serial_sparse_bench",
+    "experiments/deepseek_v32_mfu/output/data/deepseek_h64k_a1_isolated_20261008_01_serial_sparse_profile",
+    "experiments/deepseek_v32_mfu/output/data/deepseek_h64k_a1_isolated_20261008_01_serial_sparse_operators",
+    "experiments/deepseek_v32_mfu/output/data/deepseek_h64k_a1_isolated_20261008_01_dense_prefetch_bench",
+    "experiments/deepseek_v32_mfu/output/data/deepseek_h64k_a1_isolated_20261008_01_dense_prefetch_profile",
+    "experiments/deepseek_v32_mfu/output/data/deepseek_h64k_a1_isolated_20261008_01_dense_prefetch_operators",
+    "experiments/deepseek_v32_mfu/output/log/deepseek_h64k_a1_isolated_20261008_01_hbm_bench",
+    "experiments/deepseek_v32_mfu/output/log/deepseek_h64k_a1_isolated_20261008_01_hbm_profile",
+    "experiments/deepseek_v32_mfu/output/log/deepseek_h64k_a1_isolated_20261008_01_hbm_operators",
+    "experiments/deepseek_v32_mfu/output/log/deepseek_h64k_a1_isolated_20261008_01_echo_bench",
+    "experiments/deepseek_v32_mfu/output/log/deepseek_h64k_a1_isolated_20261008_01_echo_profile",
+    "experiments/deepseek_v32_mfu/output/log/deepseek_h64k_a1_isolated_20261008_01_echo_operators",
+    "experiments/deepseek_v32_mfu/output/log/deepseek_h64k_a1_isolated_20261008_01_serial_sparse_bench",
+    "experiments/deepseek_v32_mfu/output/log/deepseek_h64k_a1_isolated_20261008_01_serial_sparse_profile",
+    "experiments/deepseek_v32_mfu/output/log/deepseek_h64k_a1_isolated_20261008_01_serial_sparse_operators",
+    "experiments/deepseek_v32_mfu/output/log/deepseek_h64k_a1_isolated_20261008_01_dense_prefetch_bench",
+    "experiments/deepseek_v32_mfu/output/log/deepseek_h64k_a1_isolated_20261008_01_dense_prefetch_profile",
+    "experiments/deepseek_v32_mfu/output/log/deepseek_h64k_a1_isolated_20261008_01_dense_prefetch_operators",
+    "experiments/deepseek_v32_mfu/output/log/deepseek_h64k_a1_isolated_20261008_01",
+    "experiments/deepseek_v32_mfu/output/profile/deepseek_h64k_a1_isolated_20261008_01_hbm_bench",
+    "experiments/deepseek_v32_mfu/output/profile/deepseek_h64k_a1_isolated_20261008_01_hbm_profile",
+    "experiments/deepseek_v32_mfu/output/profile/deepseek_h64k_a1_isolated_20261008_01_hbm_operators",
+    "experiments/deepseek_v32_mfu/output/profile/deepseek_h64k_a1_isolated_20261008_01_echo_bench",
+    "experiments/deepseek_v32_mfu/output/profile/deepseek_h64k_a1_isolated_20261008_01_echo_profile",
+    "experiments/deepseek_v32_mfu/output/profile/deepseek_h64k_a1_isolated_20261008_01_echo_operators",
+    "experiments/deepseek_v32_mfu/output/profile/deepseek_h64k_a1_isolated_20261008_01_serial_sparse_bench",
+    "experiments/deepseek_v32_mfu/output/profile/deepseek_h64k_a1_isolated_20261008_01_serial_sparse_profile",
+    "experiments/deepseek_v32_mfu/output/profile/deepseek_h64k_a1_isolated_20261008_01_serial_sparse_operators",
+    "experiments/deepseek_v32_mfu/output/profile/deepseek_h64k_a1_isolated_20261008_01_dense_prefetch_bench",
+    "experiments/deepseek_v32_mfu/output/profile/deepseek_h64k_a1_isolated_20261008_01_dense_prefetch_profile",
+    "experiments/deepseek_v32_mfu/output/profile/deepseek_h64k_a1_isolated_20261008_01_dense_prefetch_operators",
+    "experiments/deepseek_v32_mfu/output/profile/deepseek_h64k_a1_isolated_20261008_01",
+    "experiments/deepseek_v32_mfu/output/data/deepseek_h64k_a1_isolated_20261008_01/manifest.json",
+    "experiments/deepseek_v32_mfu/output/data/deepseek_h64k_a1_isolated_20261008_01/measurement_scheduling.json",
+    "experiments/deepseek_v32_mfu/output/data/deepseek_h64k_a1_isolated_20261008_01/publication_review",
+    "experiments/deepseek_v32_mfu/output/data/deepseek_h64k_a1_isolated_report_20261008_01",
+    "experiments/deepseek_v32_echo_official/output/data/combined_decode_isolated_20261008_01",
+    "experiments/deepseek_v32_echo_official/output/data/decode_gap_isolated_20261008_01"
+  ],
+  "retained_request": {
+    "path": "experiments/deepseek_v32_mfu/output/data/deepseek_h64k_a1_isolated_20261008_01/request.json",
+    "sha256": "d776856368e64c931805f2181c41417609d55082866cc71e7468dfb6d57b380f"
+  },
+  "publication_gate": {
+    "publication_approved": true,
+    "reviewer": "/root/production_review",
+    "approved_at_utc": "2026-10-08T17:34:14.063601+00:00",
+    "review_document": "docs/agents/kda/deepseek_q1_prefetch/fused_prepare_production_review.md",
+    "reviewer_status": "Approved; no concrete blocker. Source/native, actual fused entry markers, generic CUBIN/sections, both graph inventories, isolated process/sample/traffic and reported graph memory gates passed.",
+    "documentation_review": "/root/candidate_report passed all 15 staged documents and current/historical evidence boundaries.",
+    "limits": [
+      "No complete graph-edge equivalence claim.",
+      "No independent reconstruction of raw allocator segments by reviewer.",
+      "No cross-implementation numerical acceptance or paired speedup from cross-cohort subtraction."
+    ],
+    "evidence_sha256": {
+      "/tmp/cxldsagr-checks/q1-fused-prepare-production/independent_review_20261009_01/native_graph.json": "6ab703e42906ea8f46234fe64340e2b075a274515b166a839385dfe7f57bb0e2",
+      "/tmp/cxldsagr-checks/q1-fused-prepare-production/independent_review_20261009_01/audit.py": "c81c59054e24b7d9914806d17ce6cfd74fb15bb377ba17941d011ab62c81dfb7",
+      "/tmp/cxldsagr-checks/q1-fused-prepare-production/scope_audit.json": "c843b58df96f0c0bcb49f6d418eb5ea39d000994a5dd916ca10433d2727d2052",
+      "/tmp/cxldsagr-checks/q1-fused-prepare-production/focused_acceptance.json": "2e7a147c185ddb684b35edf2c65042b63eb0de0f1afb9973c9a0a888c0c841b8",
+      "/tmp/cxldsagr-checks/q1-fused-prepare-production/integration_stage_20261009_01/applied_sources.json": "5569645051e3c133fd0544643daffe80dd9c94afb691e12d8dd06157cb3fdbaf",
+      "/tmp/cxldsagr-checks/q1-fused-prepare-production/publication_docs/manifest.json": "003e856d4813046f2bdc9cc0f32792590942efd1c169298a02efa5a0427576c8"
+    }
+  },
+  "state": "complete",
+  "completed_at_utc": "2026-10-08T17:34:41.748247+00:00",
+  "removed": [
+    "experiments/deepseek_v32_mfu/output/data/deepseek_h64k_a1_isolated_20261008_01_hbm_bench",
+    "experiments/deepseek_v32_mfu/output/data/deepseek_h64k_a1_isolated_20261008_01_hbm_profile",
+    "experiments/deepseek_v32_mfu/output/data/deepseek_h64k_a1_isolated_20261008_01_hbm_operators",
+    "experiments/deepseek_v32_mfu/output/data/deepseek_h64k_a1_isolated_20261008_01_echo_bench",
+    "experiments/deepseek_v32_mfu/output/data/deepseek_h64k_a1_isolated_20261008_01_echo_profile",
+    "experiments/deepseek_v32_mfu/output/data/deepseek_h64k_a1_isolated_20261008_01_echo_operators",
+    "experiments/deepseek_v32_mfu/output/data/deepseek_h64k_a1_isolated_20261008_01_serial_sparse_bench",
+    "experiments/deepseek_v32_mfu/output/data/deepseek_h64k_a1_isolated_20261008_01_serial_sparse_profile",
+    "experiments/deepseek_v32_mfu/output/data/deepseek_h64k_a1_isolated_20261008_01_serial_sparse_operators",
+    "experiments/deepseek_v32_mfu/output/data/deepseek_h64k_a1_isolated_20261008_01_dense_prefetch_bench",
+    "experiments/deepseek_v32_mfu/output/data/deepseek_h64k_a1_isolated_20261008_01_dense_prefetch_profile",
+    "experiments/deepseek_v32_mfu/output/data/deepseek_h64k_a1_isolated_20261008_01_dense_prefetch_operators",
+    "experiments/deepseek_v32_mfu/output/log/deepseek_h64k_a1_isolated_20261008_01_hbm_bench",
+    "experiments/deepseek_v32_mfu/output/log/deepseek_h64k_a1_isolated_20261008_01_hbm_profile",
+    "experiments/deepseek_v32_mfu/output/log/deepseek_h64k_a1_isolated_20261008_01_hbm_operators",
+    "experiments/deepseek_v32_mfu/output/log/deepseek_h64k_a1_isolated_20261008_01_echo_bench",
+    "experiments/deepseek_v32_mfu/output/log/deepseek_h64k_a1_isolated_20261008_01_echo_profile",
+    "experiments/deepseek_v32_mfu/output/log/deepseek_h64k_a1_isolated_20261008_01_echo_operators",
+    "experiments/deepseek_v32_mfu/output/log/deepseek_h64k_a1_isolated_20261008_01_serial_sparse_bench",
+    "experiments/deepseek_v32_mfu/output/log/deepseek_h64k_a1_isolated_20261008_01_serial_sparse_profile",
+    "experiments/deepseek_v32_mfu/output/log/deepseek_h64k_a1_isolated_20261008_01_serial_sparse_operators",
+    "experiments/deepseek_v32_mfu/output/log/deepseek_h64k_a1_isolated_20261008_01_dense_prefetch_bench",
+    "experiments/deepseek_v32_mfu/output/log/deepseek_h64k_a1_isolated_20261008_01_dense_prefetch_profile",
+    "experiments/deepseek_v32_mfu/output/log/deepseek_h64k_a1_isolated_20261008_01_dense_prefetch_operators",
+    "experiments/deepseek_v32_mfu/output/log/deepseek_h64k_a1_isolated_20261008_01",
+    "experiments/deepseek_v32_mfu/output/profile/deepseek_h64k_a1_isolated_20261008_01_hbm_bench",
+    "experiments/deepseek_v32_mfu/output/profile/deepseek_h64k_a1_isolated_20261008_01_hbm_profile",
+    "experiments/deepseek_v32_mfu/output/profile/deepseek_h64k_a1_isolated_20261008_01_hbm_operators",
+    "experiments/deepseek_v32_mfu/output/profile/deepseek_h64k_a1_isolated_20261008_01_echo_bench",
+    "experiments/deepseek_v32_mfu/output/profile/deepseek_h64k_a1_isolated_20261008_01_echo_profile",
+    "experiments/deepseek_v32_mfu/output/profile/deepseek_h64k_a1_isolated_20261008_01_echo_operators",
+    "experiments/deepseek_v32_mfu/output/profile/deepseek_h64k_a1_isolated_20261008_01_serial_sparse_bench",
+    "experiments/deepseek_v32_mfu/output/profile/deepseek_h64k_a1_isolated_20261008_01_serial_sparse_profile",
+    "experiments/deepseek_v32_mfu/output/profile/deepseek_h64k_a1_isolated_20261008_01_serial_sparse_operators",
+    "experiments/deepseek_v32_mfu/output/profile/deepseek_h64k_a1_isolated_20261008_01_dense_prefetch_bench",
+    "experiments/deepseek_v32_mfu/output/profile/deepseek_h64k_a1_isolated_20261008_01_dense_prefetch_profile",
+    "experiments/deepseek_v32_mfu/output/profile/deepseek_h64k_a1_isolated_20261008_01_dense_prefetch_operators",
+    "experiments/deepseek_v32_mfu/output/profile/deepseek_h64k_a1_isolated_20261008_01",
+    "experiments/deepseek_v32_mfu/output/data/deepseek_h64k_a1_isolated_20261008_01/manifest.json",
+    "experiments/deepseek_v32_mfu/output/data/deepseek_h64k_a1_isolated_20261008_01/measurement_scheduling.json",
+    "experiments/deepseek_v32_mfu/output/data/deepseek_h64k_a1_isolated_20261008_01/publication_review",
+    "experiments/deepseek_v32_mfu/output/data/deepseek_h64k_a1_isolated_report_20261008_01",
+    "experiments/deepseek_v32_echo_official/output/data/combined_decode_isolated_20261008_01",
+    "experiments/deepseek_v32_echo_official/output/data/decode_gap_isolated_20261008_01",
+    "experiments/deepseek_v32_mfu/report/h64k_a1.superseded_20261009",
+    "experiments/deepseek_v32_echo_official/report/combined_decode.superseded_20261009",
+    "experiments/deepseek_v32_echo_official/report/decode_gap.superseded_20261009"
+  ],
+  "final_verification": {
+    "completed_at_utc": "2026-10-08T17:35:33.825867+00:00",
+    "production_files_unchanged": 9,
+    "applied_document_hashes_matched": 15,
+    "selected_and_durable_report_files_matched": 42,
+    "superseded_paths_absent": 47,
+    "signed_request_retained": true,
+    "publication_evidence_hashes_matched": true,
+    "git_diff_check": "passed",
+    "nvidia_smi_compute_processes": [],
+    "new_relative_document_links_checked": 3,
+    "production_review_sha256": "31e620527f333405a08a1b3b0e41be377013de45f9a2407df304f58fcc2faa4e",
+    "publication_helper_sha256": "da2ec0eebef171128f3ff351a81606610dc6ab6c6eee7ea59f7196f02d08776f",
+    "boundary": "No GPU or numerical reruns after documentation/publication; the completed production acceptance and formal cohort remain the measurement evidence."
+  }
+}

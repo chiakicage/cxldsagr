@@ -196,3 +196,115 @@ def test_transition_proof_cannot_be_a_generic_priority_exemption(change):
         proof["initial_hints"][0] = "changed"
     with pytest.raises(AssertionError):
         compare_cache_state(state, state, actual_prefetch=proof, expected_prefetch=proof_for(state))
+
+
+def official_proof_and_state(*, different_winners=False, bounded=False):
+    from experiments.deepseek_v32_mfu.src import prefetch_transition_audit as transitions
+    from experiments.deepseek_v32_mfu.tests.test_prefetch_transition_audit import execution_fixture
+
+    evidence = execution_fixture(
+        official=True,
+        saturated=True,
+        padded=True,
+        different_winners=different_winners,
+        bounded=bounded,
+    )
+    audit = transitions.validate_execution(evidence)
+    state = {
+        "length": evidence["layers"][0]["H"] + 1,
+        "layers": [layer["final_cache_state"] for layer in evidence["layers"]],
+    }
+    receipt = {
+        "schema": "cold-echo-stage-acceptance-v1",
+        "passed": True,
+        "scope": {
+            key: value
+            for key, value in audit["scope"].items()
+            if bounded or key not in ("record_bytes", "topk")
+        },
+        "proof": audit,
+        "final_cache_state_sha256": identity_digest(state),
+        "indices": [transitions.tensor_identity(layer["indices"]) for layer in evidence["layers"]],
+        "scores": [transitions.tensor_identity(layer["scores"]) for layer in evidence["layers"]],
+        "initial_hints": [
+            transitions.tensor_identity(layer["initial_hint"]) for layer in evidence["layers"]
+        ],
+    }
+    return state, receipt
+
+
+@pytest.mark.parametrize("bounded", [False, True])
+def test_official_bound_false_positives_can_change_residency_and_free_count(bounded):
+    expected, expected_proof = official_proof_and_state(bounded=bounded)
+    actual, actual_proof = official_proof_and_state(different_winners=True, bounded=bounded)
+    assert actual["layers"][0]["resident"] != expected["layers"][0]["resident"]
+    assert actual["layers"][0]["free_count"] != expected["layers"][0]["free_count"]
+    compared = compare_cache_state(
+        actual, expected, actual_prefetch=actual_proof, expected_prefetch=expected_proof
+    )
+    assert compared["schedule_dependent_state_fields"] == [
+        "free_count",
+        "logical_priority",
+        "resident",
+    ]
+    actual_proof["proof"]["layers"][0]["official_staging"]["temporary_tags_cleared"] = False
+    with pytest.raises(AssertionError, match="official prefetch stage proof"):
+        compare_cache_state(
+            actual, expected, actual_prefetch=actual_proof, expected_prefetch=expected_proof
+        )
+
+
+@pytest.mark.parametrize("field", ["records", "index_keys", "hint", "clock"])
+@pytest.mark.parametrize("bounded", [False, True])
+def test_official_proof_keeps_numerical_and_clock_comparisons_strict(field, bounded):
+    expected, expected_proof = official_proof_and_state(bounded=bounded)
+    actual, actual_proof = official_proof_and_state(different_winners=True, bounded=bounded)
+    actual["layers"][0][field]["sha256"] = "c" * 64
+    actual_proof["final_cache_state_sha256"] = identity_digest(actual)
+    actual_proof["proof"]["layers"][0]["final_cache_state_identity"] = identity_digest(
+        actual["layers"][0]
+    )
+    with pytest.raises(AssertionError, match=field):
+        compare_cache_state(
+            actual, expected, actual_prefetch=actual_proof, expected_prefetch=expected_proof
+        )
+
+
+@pytest.mark.parametrize(
+    "change", ["missing", "cap", "descriptor", "layer_descriptor", "mixed_full", "different_scope"]
+)
+def test_bounded_graph_comparison_requires_matching_complete_preparation_scopes(change):
+    state, expected = official_proof_and_state(bounded=True)
+    actual = deepcopy(expected)
+    if change == "missing":
+        del actual["scope"]["preparation"]
+    elif change == "cap":
+        actual["scope"]["prepared_max_prefetch"] = 8192
+    elif change == "descriptor":
+        actual["scope"]["preparation"]["exclusive_operation"] = False
+    elif change == "layer_descriptor":
+        actual["proof"]["layers"][0]["preparation"]["persistent_append"] = False
+    elif change == "mixed_full":
+        for scope in (actual["scope"], actual["proof"]["scope"], *actual["proof"]["layers"]):
+            del scope["preparation"]
+            scope["prepared_max_prefetch"] = 8192
+    else:
+        for scope in (actual["scope"], actual["proof"]["scope"], *actual["proof"]["layers"]):
+            scope["preparation"]["requested_max_prefetch"] = 64
+    with pytest.raises(AssertionError):
+        compare_cache_state(state, state, actual_prefetch=actual, expected_prefetch=expected)
+
+
+@pytest.mark.parametrize("field", ["indices", "scores", "initial_hints"])
+def test_bounded_proofs_do_not_relax_exact_selection_scores_or_hints(field):
+    state, expected = official_proof_and_state(bounded=True)
+    actual = deepcopy(expected)
+    actual[field][0] = "changed"
+    layer = actual["proof"]["layers"][0]
+    if field == "indices":
+        layer["indices_identity"] = "changed"
+    else:
+        key = "score_identity" if field == "scores" else "hint_identity"
+        layer["eligibility"][key] = "changed"
+    with pytest.raises(AssertionError, match="full graph changed"):
+        compare_cache_state(state, state, actual_prefetch=actual, expected_prefetch=expected)

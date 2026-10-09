@@ -1,9 +1,8 @@
 # NOSA 与 DeepSeek cache 管理
 
-DeepSeek dense prefetch 已改用连续布局与 `cudaMemcpyAsync`，完成新的独立验收和
-C10 正式请求计时，GPU ID/count ticket 预留为 0。统一报告使用新的请求内存观测，
-并保留经源码影响审计及完整复算确认不变的五项 DeepSeek 静态计划；NOSA 计划与
-测量不受影响。静态 P/NH 上限没有变化，本轮仍未运行容量填满轨迹。
+DeepSeek Q1 indexer、attention 与官方预取 staging 的执行预留已纳入静态规划。重算后，
+五项完整容量计划及下一不可行配置均与原结果一致。原有 dense DMA 请求内存观测和
+NOSA 结果保留各自来源；本次只补充静态审计，未重新测量请求内存或运行容量填满轨迹。
 
 本实验为 motivation 提供容量依据，说明两模型如何准入用户、保留 history、执行
 candidate，以及怎样核对 HBM / CPU DRAM 占用。公共框架统一容量计划和生命周期；
@@ -98,10 +97,12 @@ H=65,536、A=128、C=1024，session 保留容量为 H，执行范围为 N=H+A=65
 `10×128×1,152=1,474,560 B`；单层合并 indexer 为 `(65,536+128)×132=8,667,648 B`，
 两项合计 10,142,208 B，均跨用户复用。合并 indexer 只有一份，不乘层数。
 
-当前[容量 planner](../../models/deepseek_v32/execution/capacity.py) 的基础账本为：
+在本节 N=65,664、top-k=2,048、record 宽度为 576 的条件下，当前
+[容量 planner](../../models/deepseek_v32/execution/capacity.py) 的基础账本为：
 
 ```text
-E(Q) = 1,184,000Q + 2,101,248 B
+E(Q) = max(1,181,696Q + 2,101,248, 12,298,544, 4,816,896)
+       + 2,304Q B
 E(1024) = 1,214,517,248 B
 bitmap = 4 × ceil((P+129)/32)
 HBM_base = E(1024) + 11,854P + 104NH + 11,874
@@ -110,15 +111,31 @@ U = floor(NH / 65,536)
 DRAM = 10×next_power_of_two(1,152NH) + NH/16 + 4,096U + 40 B
 ```
 
-E 包含 indexer/selection 执行空间与两份在途 append source，后者覆盖 history
-prefill 写回，candidate D2H 仍为零。HBM_base 另含 `64(P+1)+64NH` 的 metadata
-执行预留；它不含模型、普通 activation 或 allocator allowance。当前账本包括
+E 的 max 三项分别覆盖最大 query 的 indexer/selection、可达 Q1 尾块的 paged
+indexer（含官方预取 staging）和 Q1 attention 活跃空间；互斥阶段取较大峰值。
+官方暂存包括逐 token host ID 表、64 条 BF16 record 和 64 个 stage host ID，
+共 `4N + 64×(1,152+4)` B；在 N=65,664 时为 336,640 B，使 Q1 indexer
+预留从 11,961,904 B 增至 12,298,544 B。`2,304Q` 计入两份在途
+append source，覆盖 history prefill 写回，candidate D2H 仍为零。
+Q≥9 时，该式与原来的 `1,184,000Q + 2,101,248 B` 相同；较小 Q 须保留上述 max。
+HBM_base 另含 `64(P+1)+64NH` 的 metadata 执行预留；它不含模型、普通 activation
+或 allocator allowance。当前账本包括
 append-order、native counter 与 bitmap。每层新增的 int64 recall counter 使十层
 session 的逻辑计数 slab 从 560 B 增至 640 B，每 session 增加 80 B；两者落在
 同一 allocator 档位，逻辑预留的增加与 allowance 的减少抵消，五项静态边界和
-舍入后总额均未改变。DMA 改动不涉及这些计划执行的公式；原始源码快照保留，
-当前源码的完整计划及下一不可行边界复算均与原计划一致，依据见
-[源码影响审计](report/unified/deepseek_static_impact.json)和[发布审计](report/unified/audit.json)。
+舍入后总额均未改变。此前 DMA 改动的源码与公式核验保留在
+[DMA 源码影响审计](report/unified/deepseek_static_impact.json)和
+[原发布审计](report/unified/audit.json)，其中的源码身份仍对应当时版本。
+
+新审计 `cache_deepseek_q1_impact_20261008_02` 复算了包括官方预取 staging 在内的 Q1 预留。
+五项计划均使用 Q=1024，indexer 预留为 1,212,157,952 B，已覆盖 Q1 indexer 和 attention 的活跃峰值，
+attention 增量为 0；两份 append source 为 2,359,296 B，因此 E(1024) 不变。
+[Q1 静态影响记录](report/unified/deepseek_q1_static_impact.json)绑定当前源码、原计划及
+checkpoint 配置哈希，逐项比较五个完整计划，包括所选配置、有效 P 配置及下一不可行
+配置；共 1,222 个标量全部相等。[Q1 发布清单](report/unified/deepseek_q1_static_publication.json)记录
+报告与复现文件的哈希。脚本、当前源码和原计划副本位于
+`output/data/cache_deepseek_q1_impact_20261008_02/`。此次复算不更新后文的请求内存
+观测，也不验收 Graph 私有池或物理容量。
 
 上述静态边界针对 ECHO／serial sparse。完整请求中的 dense DMA ticket 借用已有
 连续 host/HBM storage，不再分配私有 GPU ID/count，预留为 0。这比前一实现减少

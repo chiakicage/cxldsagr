@@ -342,3 +342,62 @@ def test_cuda_echo_rejects_query_over_pool_and_prefetch_over_headroom_before_com
     state["max_prefetch"] = 1
     with pytest.raises(ValueError, match="P-Q"):
         logits(q, k, weights, scales, 56, prefetch=state)
+
+
+@pytest.mark.parametrize("limit", [-1, 65, 8192, True, 1.0, None])
+def test_bounded_prepared_lease_rejects_unprepared_consumer_limit(limit):
+    values = [torch.empty(128) for _ in range(4)]
+    scratch = torch.zeros(128, dtype=torch.int64)
+    token = echo._BoundedPreparedPrefetch(1, *values, scratch)
+    lease = dict(zip(("free_slots", "allocation_log", "counter", "prefetch_stats"), values))
+    with pytest.raises(ValueError, match="prepared slot limit"):
+        token.consume(lease, 1, consumer_limit=limit)
+    with pytest.raises(TypeError):
+        token.consume(lease, 1)
+    assert type(token) is not echo._PreparedPrefetch
+    token.consume(lease, 1, consumer_limit=64)
+    with pytest.raises(ValueError, match="consumed"):
+        token.consume(lease, 1, consumer_limit=64)
+
+
+@pytest.mark.parametrize("field", range(5))
+@pytest.mark.parametrize("change", ["resize", "set", "shape"])
+def test_bounded_prepared_lease_rejects_inplace_storage_or_geometry_change(field, change):
+    values = [torch.empty(128) for _ in range(4)]
+    scratch = torch.zeros(128, dtype=torch.int64)
+    token = echo._BoundedPreparedPrefetch(1, *values, scratch)
+    lease = dict(zip(("free_slots", "allocation_log", "counter", "prefetch_stats"), values))
+    tensor = (*values, scratch)[field]
+    if change == "resize":
+        tensor.resize_(129)
+    elif change == "set":
+        tensor.set_(tensor.clone())
+    else:
+        tensor.unsqueeze_(0)
+    with pytest.raises(ValueError, match="resized"):
+        token.consume(lease, 1, consumer_limit=64)
+
+
+@pytest.mark.parametrize(
+    "changed",
+    [
+        {"rows": 2},
+        {"columns": 65538},
+        {"query_start": 65535},
+        {"history_length": 65535},
+        {"limit": 63},
+        {"limit": 64.0},
+    ],
+)
+def test_free_prepare_provider_uses_exact_official_q1_predicate(changed):
+    from operators.deepseek_v32.indexer.cache_ops import supports_free_q1_prepare
+
+    args = {"rows": 1, "columns": 65537, "query_start": 65536, "history_length": 65536, "limit": 64}
+    assert supports_free_q1_prepare(**args)
+    assert not supports_free_q1_prepare(**(args | changed))
+    assert not supports_free_q1_prepare(
+        rows=1, columns=32767, query_start=32766, history_length=32766, limit=64
+    )
+    assert supports_free_q1_prepare(
+        rows=1, columns=32768, query_start=32767, history_length=32767, limit=64
+    )

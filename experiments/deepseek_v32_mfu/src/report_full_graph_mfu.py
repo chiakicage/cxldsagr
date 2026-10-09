@@ -63,12 +63,12 @@ def audit_hardware(hardware):
         raise ValueError("recorded verified H200 SXM reference differs from the MFU dense peaks")
 
 
-def capture_paths(directory, result):
+def capture_paths(directory, result, *, methods=METHODS):
     """Require all setup captures and exactly one measured capture per phase/method."""
     order = result["nsys_capture_order"]
     expected = (["graph_setup"] if result["compute_graphs"] else []) + [
         label
-        for method in METHODS
+        for method in methods
         for label in (
             f"{method}/prefill_annotated",
             f"{method}/extend_graph_setup",
@@ -94,12 +94,14 @@ def _match_template(replay, template):
         raise ValueError("graph replay differs from its captured template")
 
 
-def audit_graph_ledgers(result, calls, full_templates, compute_templates=None):
+def audit_graph_ledgers(result, calls, full_templates, compute_templates=None, *, methods=METHODS):
     """Bind actual capture-time matrix metadata and every replay to its template."""
     if full_templates != result["full_extend_graph_templates"]:
         raise ValueError("full graph template file differs from profile metadata")
-    if len(full_templates) != 4 or {row["method"] for row in full_templates} != set(METHODS):
-        raise ValueError("full graph templates must cover all four methods exactly")
+    if len(full_templates) != len(methods) or {row["method"] for row in full_templates} != set(
+        methods
+    ):
+        raise ValueError("full graph templates must cover the selected methods exactly")
     full_rows = []
     for template in full_templates:
         method = template["method"]
@@ -184,7 +186,7 @@ def audit_graph_ledgers(result, calls, full_templates, compute_templates=None):
         ]
         expected = Counter(
             (method, layer, part, size)
-            for method in METHODS
+            for method in methods
             for size in sizes
             for layer in range(3)
             for part in ("projection", "finish")
@@ -212,11 +214,14 @@ def audit_graph_ledgers(result, calls, full_templates, compute_templates=None):
     return {"full_extend": full_rows, "prefill_compute_graphs": prefill_audit}
 
 
-def audit_analysis(result, analysis, graph_ledger):
-    expected = {(method, phase) for method in METHODS for phase in PHASES}
+def audit_analysis(result, analysis, graph_ledger, *, methods=METHODS):
+    expected = {(method, phase) for method in methods for phase in PHASES}
     captures = analysis["captures"]
-    if len(captures) != 8 or {(row["mode"], row["phase"]) for row in captures} != expected:
-        raise ValueError("profile lacks one of the eight method/phase captures")
+    if (
+        len(captures) != len(expected)
+        or {(row["mode"], row["phase"]) for row in captures} != expected
+    ):
+        raise ValueError("profile lacks a selected method/phase capture")
     if analysis["calls_outside_selected_captures"]:
         raise ValueError("operator ledger contains uncaptured calls")
     if analysis["dense_peaks_tflops"] != PEAKS:

@@ -182,7 +182,11 @@ def run_profile(model, ids, args, result, receipt, *, trace_warmups):
         raise ValueError("minimal node profiling requires --nsys and cuda graph node tracing")
     manifest = measurement_sources()
     result["measurement_identity"] = {
-        "kind": "deepseek-four-method-minimal-node-scopes-v2-in-capture-warmup",
+        "kind": (
+            "deepseek-single-method-minimal-node-scopes-v4-in-capture-warmup"
+            if getattr(args, "method", None) is not None
+            else "deepseek-four-method-minimal-node-scopes-v2-in-capture-warmup"
+        ),
         "source_sha256": manifest,
         "trace_warmups_per_capture": trace_warmups,
         "measured_captures_per_phase_method": 1,
@@ -200,7 +204,8 @@ def run_profile(model, ids, args, result, receipt, *, trace_warmups):
     result["nsys_capture_order"] = ["graph_setup"] if args.compute_graphs else []
     result["correctness"].update(receipt["checks"]["comparisons"])
     calls = []
-    for method in METHODS:
+    methods = (args.method,) if getattr(args, "method", None) is not None else METHODS
+    for method in methods:
         control = torch.load(
             receipt["artifact_paths"][method + "_control.pt"], map_location="cpu", weights_only=True
         )
@@ -250,7 +255,7 @@ def run_profile(model, ids, args, result, receipt, *, trace_warmups):
         }
         common.write_json(
             args.output / "operator_calls.json",
-            {"schema_version": 3, "run_id": args.run_id, "calls": calls},
+            {"schema_version": result["schema_version"], "run_id": args.run_id, "calls": calls},
         )
         del snapshot
     if measurement_sources() != manifest:

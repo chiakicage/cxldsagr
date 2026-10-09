@@ -114,6 +114,7 @@ def _plan_serving_resources(config, budgets, limits):
                 "workspace_query_tokens": queries,
                 "max_candidate_tokens": candidate,
                 "workspace_indexer_bytes": execution.indexer_bytes,
+                **execution.attention_workspace_metadata,
                 "workspace_copy_source_bytes": execution.copy_source_bytes,
                 "dense_staging_bytes": staging_bytes,
                 "dense_staging_allocation_bytes": staging_allocation,
@@ -221,6 +222,7 @@ def _plan_serving_resources(config, budgets, limits):
             "workspace_query_tokens": queries,
             "max_candidate_tokens": candidate,
             "workspace_indexer_bytes": execution.indexer_bytes,
+            **execution.attention_workspace_metadata,
             "workspace_copy_source_bytes": execution.copy_source_bytes,
             **execution.cpu_workspace_metadata,
             "workspace_metadata_bytes": SharedSparseTokenPool.estimate_execution_workspace_bytes(
@@ -275,6 +277,15 @@ def resource_allocations(config, plan):
             tier="hbm",
         ),
     ]
+    if metadata.get("workspace_attention_extra_bytes", 0):
+        allocations.append(
+            _reservation(
+                "attention_execution_extra_upper_bound",
+                metadata["workspace_attention_extra_bytes"],
+                device,
+                tier="hbm",
+            )
+        )
     for key in ("indexer", "scalar", "metrics"):
         allocations.append(
             _reservation(

@@ -220,6 +220,7 @@ class InstrumentOperators:
         original_bmm, original_functional = torch.bmm, F.linear
         original_project = projections.CheckpointAttention.project
         original_logits, original_mla = echo.logits, echo_attention.sparse_mla
+        original_decode_mla = echo_attention.sparse_mla_decode
 
         def linear(instance, x, *args, **kwargs):
             label = self.linears.get(id(instance))
@@ -308,6 +309,14 @@ class InstrumentOperators:
             with self.scopes("mla_qk_pv", **mla_call_details(q, indices, origin, value_dim)):
                 return original_mla(q, kv, indices, scale, value_dim)
 
+        def decode_mla(q, kv, indices, scale, value_dim=512):
+            try:
+                origin = self.queries[_storage_key(q)]
+            except KeyError:
+                raise ValueError("Decode MLA Q has no recorded projection origin") from None
+            with self.scopes("mla_qk_pv", **mla_call_details(q, indices, origin, value_dim)):
+                return original_decode_mla(q, kv, indices, scale, value_dim)
+
         def wrap(function, label):
             def wrapped(*args, **kwargs):
                 with self.scopes(label, **_work_details(non_matmul_work(label))):
@@ -322,6 +331,7 @@ class InstrumentOperators:
             (F, "linear", functional),
             (echo, "logits", logits),
             (echo_attention, "sparse_mla", mla),
+            (echo_attention, "sparse_mla_decode", decode_mla),
             (offload_mla, "sparse_mla", mla),
         ]
         for module, names in (

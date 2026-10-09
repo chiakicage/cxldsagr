@@ -21,6 +21,9 @@ def empty_runtime(monkeypatch):
         "flashinfer.norm.kernels.fused_add_rmsnorm",
         "operators.deepseek_v32.norm._compile",
         "operators.deepseek_v32.linear.quantization",
+        "operators.deepseek_v32.indexer.q1_topk_cub",
+        "operators.deepseek_v32.indexer.q1_hint_exact",
+        "operators.deepseek_v32.indexer.official_prefetch",
     ):
         monkeypatch.delitem(sys.modules, name, raising=False)
     monkeypatch.setattr(provenance, "_mapped_libraries", set)
@@ -81,6 +84,10 @@ def test_local_flashinfer_adapters_are_in_source_identity():
         "operators/deepseek_v32/linear/quantization.py",
         "operators/deepseek_v32/linear/_quantization_kernel.py",
         "operators/deepseek_v32/linear/_quantization_identity.py",
+        "operators/deepseek_v32/indexer/q1_topk_cub.py",
+        "operators/deepseek_v32/indexer/csrc/q1_topk_sort.cu",
+        "operators/deepseek_v32/indexer/q1_hint_exact.py",
+        "operators/deepseek_v32/indexer/csrc/q1_hint_exact.cu",
     ):
         path = provenance.ROOT / relative
         assert path in sources and path.is_file()
@@ -125,6 +132,9 @@ def test_empty_process_does_not_claim_cached_binaries(empty_runtime, tmp_path, m
     assert result["native_jit"] == []
     assert result["cute_jit"] == []
     assert result["linear_quantization_triton"] is None
+    assert result["q1_topk_cub_native"] is None
+    assert result["q1_hint_native"] is None
+    assert result["q1_prefetch_preparation"] is None
 
 
 def test_runtime_observes_already_imported_linear_quantizer(empty_runtime, monkeypatch):
@@ -271,6 +281,66 @@ def test_source_listing_does_not_import_flashinfer(monkeypatch):
     assert Path(provenance.__file__).resolve() in provenance.source_files()
 
 
+@pytest.mark.parametrize("configured", (None, "/configured/ptxas"))
+def test_backend_identity_initializes_compiler_environment_before_observation(
+    monkeypatch, configured
+):
+    variable = "TRITON_PTXAS_BLACKWELL_PATH"
+    if configured is None:
+        monkeypatch.delenv(variable, raising=False)
+    else:
+        monkeypatch.setenv(variable, configured)
+    expected = configured or "/system/ptxas"
+    imports = []
+
+    def initialize(name):
+        assert name == "flashinfer.triton"
+        if not imports and not provenance.os.environ.get(variable):
+            monkeypatch.setenv(variable, expected)
+        imports.append(name)
+
+    def git(directory, *arguments):
+        assert imports
+        assert variable in provenance.os.environ
+        return provenance.PINS[directory.name] if arguments == ("rev-parse", "HEAD") else ""
+
+    monkeypatch.setattr(provenance.importlib, "import_module", initialize)
+    monkeypatch.setattr(provenance, "_git", git)
+    monkeypatch.setattr(
+        provenance,
+        "_installed",
+        lambda name, _: {
+            "distribution_version": {
+                "deep-gemm": "2.8.1+057ca59",
+                "flash-mla": "1.0.0+ba89a34",
+            }[name]
+        },
+    )
+    for name in (
+        "_installed_flashinfer",
+        "_recall_dispatch_identity",
+        "_typed_norm_identity",
+        "_q1_topk_identity",
+        "_q1_hint_identity",
+    ):
+        monkeypatch.setattr(provenance, name, dict)
+    monkeypatch.setattr(
+        provenance,
+        "_linear_quantization_identity",
+        lambda: {"compiler_environment": {variable: provenance.os.environ[variable]}},
+    )
+
+    before = provenance.collect_backend_provenance()
+    assert before["linear_activation_quantization"]["compiler_environment"] == {variable: expected}
+    assert provenance.collect_backend_provenance() == before
+    monkeypatch.setenv(variable, "/changed/ptxas")
+    after = provenance.collect_backend_provenance()
+    assert after["linear_activation_quantization"]["compiler_environment"] == {
+        variable: "/changed/ptxas"
+    }
+    assert after != before
+
+
 def test_linear_identity_rechecks_sources_and_compiled_build(tmp_path, monkeypatch):
     source = tmp_path / "quantization.py"
     source.write_bytes(b"validated quantizer")
@@ -323,3 +393,112 @@ def test_recall_dispatch_identity_matches_prepared_build(monkeypatch):
     module.build_info = lambda: {"identity": {"source_and_dependency_sha256": {}}}
     with pytest.raises(RuntimeError, match="no declared source/dependency identity"):
         provenance._recall_dispatch_identity()
+
+
+def test_q1_topk_runtime_does_not_create_a_native_module(empty_runtime, monkeypatch):
+    observed = {"artifact_sha256": "already-loaded", "build_identity": {}}
+    module = ModuleType("operators.deepseek_v32.indexer.q1_topk_cub")
+    module.runtime_info = lambda: observed
+    module._module = lambda: pytest.fail("Runtime inspection must not invoke a module factory")
+    monkeypatch.setitem(sys.modules, module.__name__, module)
+    assert provenance.collect_flashinfer_runtime_artifacts()["q1_topk_cub_native"] is observed
+
+
+def test_q1_topk_identity_rejects_source_and_native_build_changes(tmp_path, monkeypatch):
+    source = tmp_path / "sort.cu"
+    source.write_bytes(b"accepted CUB adapter")
+    identity = {"source_sha256": {str(source): sha256(source.read_bytes())}}
+    module = ModuleType("operators.deepseek_v32.indexer.q1_topk_cub")
+    module.build_info = lambda: identity
+    module.runtime_info = lambda: None
+    monkeypatch.setitem(sys.modules, module.__name__, module)
+    assert provenance._q1_topk_identity() is identity
+    module.runtime_info = lambda: {"build_identity": {"source_identity": identity}}
+    assert provenance._q1_topk_identity() is identity
+    module.runtime_info = lambda: {"build_identity": {"source_identity": {"stale": True}}}
+    with pytest.raises(RuntimeError, match="differs from current build identity"):
+        provenance._q1_topk_identity()
+    module.runtime_info = lambda: None
+    source.write_bytes(b"unaccepted source change")
+    with pytest.raises(RuntimeError, match="source changed during execution"):
+        provenance._q1_topk_identity()
+    module.build_info = lambda: {"source_sha256": {}}
+    with pytest.raises(RuntimeError, match="no declared source identity"):
+        provenance._q1_topk_identity()
+
+
+def test_q1_hint_runtime_observes_loaded_state_without_import_or_build(empty_runtime, monkeypatch):
+    def forbidden(*_args, **_kwargs):
+        pytest.fail("Runtime observation must not import or compile a hint provider")
+
+    monkeypatch.setattr(provenance.importlib, "import_module", forbidden)
+    assert provenance.collect_flashinfer_runtime_artifacts()["q1_hint_native"] is None
+    module = ModuleType("operators.deepseek_v32.indexer.q1_hint_exact")
+    module.module = forbidden
+    module.build_info = forbidden
+    module.runtime_info = lambda: None
+    monkeypatch.setitem(sys.modules, module.__name__, module)
+    assert provenance.collect_flashinfer_runtime_artifacts()["q1_hint_native"] is None
+    observed = {"artifact_sha256": "already-loaded", "build_identity": {}}
+    module.runtime_info = lambda: observed
+    assert provenance.collect_flashinfer_runtime_artifacts()["q1_hint_native"] is observed
+
+
+def test_q1_hint_identity_is_stable_and_rejects_stale_source_or_wrong_dso(tmp_path, monkeypatch):
+    source = tmp_path / "q1_hint_exact.cu"
+    source.write_bytes(b"accepted exact mean tree")
+    identity = {"source_sha256": {str(source): sha256(source.read_bytes())}}
+    module = ModuleType("operators.deepseek_v32.indexer.q1_hint_exact")
+    module.NAME = "cxldsagr_q1_hint_exact_mean_sm90"
+    module.module = lambda: pytest.fail("Identity inspection must not build a provider")
+    module.build_info = lambda: identity
+    module.runtime_info = lambda: None
+    monkeypatch.setitem(sys.modules, module.__name__, module)
+    assert provenance._q1_hint_identity() is identity
+    runtime = {
+        "artifact_name": module.NAME + ".so",
+        "build_identity": {"source_identity": identity},
+    }
+    module.runtime_info = lambda: runtime
+    assert provenance._q1_hint_identity() is identity
+    runtime["artifact_name"] = "cxldsagr_q1_hint_exact_mean.so"
+    with pytest.raises(RuntimeError, match="differs from current production build identity"):
+        provenance._q1_hint_identity()
+    runtime["artifact_name"] = module.NAME + ".so"
+    runtime["build_identity"] = {"source_identity": {"stale": True}}
+    with pytest.raises(RuntimeError, match="differs from current production build identity"):
+        provenance._q1_hint_identity()
+    module.runtime_info = lambda: None
+    source.write_bytes(b"unaccepted source change")
+    with pytest.raises(RuntimeError, match="source changed during execution"):
+        provenance._q1_hint_identity()
+    module.build_info = lambda: {"source_sha256": {}}
+    with pytest.raises(RuntimeError, match="no declared source identity"):
+        provenance._q1_hint_identity()
+
+
+def test_q1_hint_runtime_failure_propagates_without_factory_call(empty_runtime, monkeypatch):
+    original = RuntimeError("loaded artifact changed")
+    module = ModuleType("operators.deepseek_v32.indexer.q1_hint_exact")
+    module.module = lambda: pytest.fail("Artifact errors must not trigger rebuilds")
+
+    def changed():
+        raise original
+
+    module.runtime_info = changed
+    monkeypatch.setitem(sys.modules, module.__name__, module)
+    with pytest.raises(RuntimeError, match="loaded artifact changed") as captured:
+        provenance.collect_flashinfer_runtime_artifacts()
+    assert captured.value is original
+
+
+def test_runtime_collects_observed_prefetch_entry_without_loading_provider(
+    empty_runtime, monkeypatch
+):
+    record = {"preparation": "fixture", "entry_point": "logits_from_keys", "native": {}}
+    module = ModuleType("operators.deepseek_v32.indexer.official_prefetch")
+    module.runtime_info = lambda: record
+    module._module = lambda: pytest.fail("Collector must not load an unused provider")
+    monkeypatch.setitem(sys.modules, module.__name__, module)
+    result = provenance.collect_flashinfer_runtime_artifacts()
+    assert result["q1_prefetch_preparation"] is record

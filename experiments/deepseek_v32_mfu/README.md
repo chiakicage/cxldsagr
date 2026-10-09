@@ -1,5 +1,35 @@
 # DeepSeek V3.2 MFU
 
+H64K+A1 已接入固定版本 ECHO 的官方 paged 融合 indexer/prefetch 内核，并完成
+打包、scale 布局、projection 调度、staging promotion 并行校验、CUB top-k 后处理及 page64／页表／暂存区准备融合。
+当前结果来自 `deepseek_h64k_a1_fused_prepare_20261009_01`。每种方法分别在新进程中完成
+正确性检查、正式计时、阶段 profile 和逐算子 profile，并只预热本方法。HBM 的
+L0–L2 GPU 窗口为 1.014466 ms，与官方 SGLang 参考的 1.014975 ms 接近；
+两侧输入和执行环境仍不同，不据此报告等价工作量的加速。
+
+本轮准备融合保留每次调用的当前 K/scales 与页表内容，将三层的准备节点从 9 个
+减到 3 个，完整 ECHO graph 从 263 个节点减到 257 个。生产路径的 151 项 GPU
+检查通过；正式四方法各自完成独立验收、计时和两类 profile。私有 500 对 AB/BA
+对照的完整 step 中位数从 2.646831 降到 2.6119945 ms，约下降 1.32%；部分均值
+和 p99 变差，不能声称尾延迟改善。配对收益及其单进程、固定两份分配的边界见
+[准备融合报告](../deepseek_v32_echo_official/report/q1_fused_prepare/report.md)。
+
+Q1 hint 只融合有限值均值的掩码、计数与发布，保留原 FP32 归约树；官方 ECHO、
+精确 top-k、decode EMA 和 FlashMLA 均未改变。生产入口另行通过全部 offset 位、
+变化输入的 graph replay、非默认 stream，以及 Q1 后直接执行 A2 的实际消费验收。
+
+私有双模型的 100 组平衡 AB/BA 配对中，完整同步 step 的 wall 中位数从
+2.6486815 降至 2.6053275 ms，87 组更快，成对差值中位数为 −45.828 µs。
+来源为 `q1_hint_model_bench_20261008_01`，每次计时外恢复相同 cold prefix 和 hint；
+计时包含 `forward(return_hidden=True)` 与同步。该收益只由配对实验支持，
+不以不同批次的正式四方案中位数估计加速。
+
+官方 Q1 的缓存准备现只选取前 64 个合法空槽，保留官方融合内核与精确 recall。
+独立双模型对照 `q1_free_prepare_model_bench_20261008_01` 使用 100 组平衡 AB/BA
+计时，ECHO 完整三层单步 wall 中位数从 2.7214065 降至 2.641556 ms，降低 2.934%，
+91 组更快。每次计时外恢复相同 cold prefix，计时包含 `model.forward` 与同步。
+下文四方案结果来自改动后的独立补测；上述配对收益只适用于本次三层路径。
+
 四种实现的 extend 均使用一次完整 CUDA Graph replay。当前策略为
 `deepseek-full-extend-graph-v2-dense-late-wait`：dense 的本层 projection、indexer
 和 top-k 与本层历史 H2D 同时推进，在 append 和主 attention 前等待数据及映射就绪，
@@ -37,6 +67,166 @@ fetch 同一 stage 选出的历史 KV；fetch 错后一拍，使 `Fetch(Si)` 与
 ```bash
 CUDA_VISIBLE_DEVICES= .venv/bin/python -m experiments.deepseek_v32_mfu.src.draw_echo_prefetcher \
   --output-dir experiments/deepseek_v32_mfu/output/data/echo_prefetch_schematic_new
+```
+
+## H64K + A1：单 token step
+
+Q1 的当前 K/scales、页表与暂存区准备融合已通过生产验收及四方案补测；
+hint 均值融合、64 空槽准备、预取写回的并行校验和 CUB top-k 后处理继续保留。
+ECHO 官方融合内核保持原样。
+
+H=65,536、A=1 配置使用真实 L0–L2、普通持久 append 和完整 extend
+CUDA Graph。它在已有 64K history 上执行一个 token 的计算；输入使用本实验固定
+token 序列，不包含自回归采样或 SGLang 调度。输入复用 seed=42 的 A128 请求的
+history，取其第一个追加 token（ID 111090）；单 token 不视为完整 GR 候选文本。
+Offload 的 P=NH=65,600 tokens，按 64-token host page 对齐，其中最后 63 个
+host 槽不对应有效 token；HBM-only 的主 KV 存储覆盖实际 H+A=65,537 个 token。
+Indexer 的精确 top-k 为 2,048。
+
+当前 `hbm`、`serial_sparse` 和 `dense_prefetch` 的 Q1 indexer 在有效 causal
+context 至少为 32,768 时使用官方 paged MQA，每次调用重建 K/scales 打包和调度
+metadata。四种方法的原始 Q1、selection 宽度为 2,048 的主 attention 均使用
+`sparse_mla_decode`：16 个分片调用官方 sparse prefill，再按自然对数 LSE 以
+FP32 合并 BF16 partial 输出。Decode 与 prefill 的舍入不同，按原容差验收；
+普通 prefill 和容量拆分产生的 Q1 保留原切片契约。ECHO 在完整 history 已初始化、
+context 至少为 32,768 且至少有 64 个合法槽时，调用固定版本 ECHO 的官方 paged
+融合内核，保留严格 `score > offset[1]` 阈值与最多 64 条预取。适配器负责合法槽
+准备、staging 校验与发布；精确 top-k 后继续 recall 缺失记录。其余形状保留原分派。
+官方源码直接作为依赖编译，不加载独立 Torch 2.8 复现环境的二进制。
+
+SM90 推理的 FP32 `[1,65537]` scores 在内层 stride 为 1、按 16 B 对齐时，
+hint 均值由一个 kernel 完成，每层从三个 kernel 减为一个；只更新 `offset[0]`，
+独立 EMA 更新仍保留。当前 ECHO 的完整 graph 有 257 个 GPU 节点，
+其中 L0–L2 各 83 个，共 249 个。窗口还包含一个与层末边界重叠的 shared
+final norm 节点，共 250 个 activity；它仍属于同一张图。
+窗口 activity、层归属节点与完整 graph 节点数不能混用。
+准备融合逐次重建 packed K/scales、identity block table、逻辑 host-token 表并重置
+staging，不保留额外历史。阶段 profile 的三层准备耗时合计 18.656 µs，逐算子
+profile 为 19.040 µs；两者都是侵入式测量。与原图相比，其余 254 个节点的归属
+和完整执行配置多重集一致，不据此声称完整依赖边或全部 wall 差值已经得到解释。
+
+64 空槽准备仅用于普通持久 append、独占 pool 操作、唯一 session、完整 history
+已初始化且 `H=query_start`、`P−H≥64` 的官方 Q1 路径。`L≤H` 保证至少 64 个空槽，
+不保证 history 驻留。准备先校验 priority age，再按 slot 升序选择 64 个空槽，
+核验 bitmap 和反向 owner，并重置完整 journal、计数和统计；其他路径仍使用完整准备。
+独立配对 profile 中，三层准备由 30 个 GPU activity 降为 9 个，耗时和由
+68.928 降至 17.920 µs。Profile 有侵入性，
+不能把完整图的时长差全部归因于这段准备。
+
+精确 top-k 在 Q1/k2048 且 score storage 至少 32K 列时保留 FlashInfer SMALL 选择，
+用官方 CUB 合并排序与 nonfinite ID mask，保留原并列规则和值的全部位。
+Promotion 的校验 CTA 改为 256 线程，后续按 record 复制与官方 ECHO 融合内核不变。
+本轮准备融合及相关分派、事务和 native 路径的 151 项 GPU 检查通过；正式四方案按新源码重新验收。
+
+独立 HBM 完整模型的 100 组成对 CUDA event 计时中，CUB 后处理将 L0–L2 中位数
+从 1.046336 ms 降至 1.038720 ms，86 组更快；完整 graph 从 1.484304 ms 降至
+1.476480 ms。该对照的同步 wall 计时有明显顺序波动。
+不能把组件改善表述为已解决端到端差距。该对照的 run ID 为
+`q1_selection_model_bench_20261008_01`，两组各有四个相同的图内 event 节点，
+在每次计时外恢复同一 prefix，范围包含 embedding、L0–L2、final norm 和 LM head。
+
+独立算子证据见[官方路径报告](../deepseek_v32_echo_official/report/q1_official_path/report.md)
+与[attention 报告](../deepseek_v32_echo_official/report/q1_optimization/report.md)。
+
+Q1 FP8 projection 在 graph capture 中分别调度 query 与 KV/index-key 分支，在
+RoPE 前汇合；scale 直接写入 GEMM 所需布局。独立配对计时支持调度收益；早期组件
+profile 没有测到跨流重叠，后续完整图已观察到 Q-A 与 KV-A 同时执行。四方法的 graph
+private reserved 均为 62,914,560 B，static 为 512 B；这是已计入诊断预算的实际
+graph storage，不等于整张设备的显存占用。
+
+三个 offload 方法在每次 extend 前恢复同一 prefix，再清除全部 history 主 KV 的
+HBM 驻留，保留 DRAM 中的 history 和 HBM 中的 indexer。图准备、预热和正式 replay
+都从匹配的冷状态开始；HBM-only 对照保留主 KV 的 HBM 驻留。
+
+独立正确性、正式计时、阶段 profile 和逐算子 profile 均已完成。运行于 GPU0 的
+H200 SXM（SM90，设备名称字段为 NVIDIA M403），CPU 绑定 0–7；FP8 权重、BF16
+主 KV，Torch 2.12.1+cu130、Triton 3.7.1。四种方法各有四个独立进程，共 16 个。
+Offload 正确性检查从 CPU 读取已认证的 HBM 输出，不额外执行 HBM forward。
+每方法预热 1 次，完整 prefill 测量 3 次、单 token step 测量 5 次。下表为同步
+wall-time 中位数，包含输入准备、事务与同步/提交；加载、编译、图准备和 prefix
+恢复在计时外。
+
+| 方法 | 完整 Prefill ms | Prefill MFU | 单 token step ms | 单步 MFU | L0–L2 profile 窗口 ms |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| `hbm` | 633.801 | 45.68% | 1.803 | 0.395% | 1.014 |
+| `echo` | 639.019 | 45.31% | 2.562 | 0.278% | 1.419 |
+| `serial_sparse` | 648.025 | 44.68% | 2.401 | 0.297% | 1.264 |
+| `dense_prefetch` | 648.195 | 44.67% | 5.540 | 0.129% | 4.415 |
+
+HBM 的 L0–L2 窗口为 1.014466 ms，idle 为 16.737 µs；官方 SGLang 参考分别为
+1.014975 ms、14.274 µs。此前所有方法在同一进程中依次预热，会影响随后 HBM 的
+节点间隙。新流程排除了其他方法的同进程准备，模型计算没有改变；这项测量边界修正
+不能解释为 kernel 加速，也没有证明具体硬件机制。官方与本地的输入、驻留、容量、
+框架和物理 GPU 仍不同，详见[官方对照](../deepseek_v32_echo_official/README.md)。
+ECHO 在本轮 cold 条件下仍慢于 serial sparse，优化工作继续。
+
+此前 FREE 实现的 A1/B1/B2/A2 控制中，仅做 HBM 准备的两个进程记录到
+17.312–18.146 µs 的窗口 idle；执行四方案预热后的两个进程为
+67.361–68.064 µs，节点间隙中位数分别为 96 和 416 ns。单方法控制又发现，
+dense 完整预热后的六个 HBM 窗口均为 416 ns，而 serial sparse 和 ECHO 预热后
+均为 96 ns。每项只有一个独立计时进程和一个 profile 进程，支持本次流程修正，
+不建立通用硬件因果结论。有效控制保留各自冻结实现，来源为
+`q1_replay_prelude_abba_20261008_01` 和 `q1_replay_single_methods_20261008_01`，
+原始数据位于 `output/data/<run_id>/`。
+
+![H64K + A1：cold 单 token step 的 L0–L2 timeline](report/h64k_a1/extend.svg)
+
+[完整报告](report/h64k_a1/results.md)同时给出最后一个 prefill chunk 和
+[含启动的单步图](report/h64k_a1/with_startup/extend_with_startup.svg)。单步主图覆盖
+L0–L2；dense 保留首层全部历史 H2D。图来自独立 NSYS profile，不代替完整阶段计时。
+ECHO 融合 kernel 的计算与搬运不从内部拆分。15 个 ECHO 正式单步层样本均预取
+64 条，再 recall 1,983–2,041 条，总 H2D 为 2,358,144–2,424,960 B。
+预测允许包含未入选精确 top-k 的记录，流量按每次实际执行统计；最终选择完整保留。
+Serial 每层 H2D 为 2,358,144 B（2,047 条），dense 为 75,497,472 B（65,536 条）；
+三个 offload 方法每层 D2H 均为 1,152 B。逐样本计数保存在
+[汇总](report/h64k_a1/summary.json)的 `methods.<method>.timing[].cache_samples` 中。
+
+MFU 以独立完整阶段 wall time 为分母；有效矩阵 FLOPs 按各精度的 dense 峰值
+换算，定义和峰值与下文一致。单步包含 43 个矩阵 API，理想计算时间合计
+7.132043 µs。低 MFU 不表示 Tensor Core 活跃率或 GPU idle 比例。
+[整段 MFU](report/h64k_a1/final_mfu.csv)、[逐算子表](report/h64k_a1/operator_mfu.csv)
+和[逐算子图](report/h64k_a1/operator_mfu.svg)使用各方法独立的 operator profile；
+query coverage、节点归属和耗时守恒见汇总中的 `operator_graph_audits`。
+
+逐算子计时将 Q repeat、FlashMLA 核心和 combine 全部归入 decode API。三层合计
+9 个 kernel，HBM、ECHO、serial sparse、dense prefetch 的 kernel 耗时和分别为
+44.000、43.072、42.848、44.704 µs。主 timeline 将 Q repeat 归入 GPU control，
+Attention 色块不覆盖完整 decode API，不能用该色块代替逐算子计时。
+
+13 项标准输出比较和 44 项完整图检查通过。阶段与逐算子 profile 各自重新核对
+36 个 check tensor、8 个 profile tensor；每组 31 项 check 比较与 8 项 profile
+比较均逐位一致。ECHO 的六份状态证明均核验实际准备 64 槽、严格预测资格、完整
+精确选择、映射、priority、clock 与实际流量。精简证据不重新计算未保存的原始
+分数或 KV payload；这些内容在 GPU 验收时检查。
+
+所有方法的 extend profile 均核验一次完整 graph launch，并重读原始进程、设备、
+GPU 节点及 dense IO 依赖。HBM 图准备 trace 没有 NVTX 表，只读取其原生 capture/
+clone lineage；正式 forward 仍须具备可定位的 NVTX 和完整 GPU 活动。进程记录
+证明每个子进程只准备所选方法，不证明整机在测量全程没有其他工作。
+
+Cohort run ID 为 `deepseek_h64k_a1_fused_prepare_20261009_01`，子 ID 为
+`<cohort>_<method>_<check|bench|profile|operators>`。Check 保存在
+`/tmp/cxldsagr-checks/deepseek_v32_mfu/data/<child-id>/`，性能数据保存在
+`output/data/<child-id>/`；报告原件为
+`output/data/deepseek_h64k_a1_fused_prepare_report_20261009_01/`。
+[汇总](report/h64k_a1/summary.json)、[输入哈希](report/h64k_a1/input_hashes.json)与
+[发布清单](report/h64k_a1/publication_manifest.json)分别保留实际子运行的源码、
+native、receipt、计时和 trace 身份，没有合成一个不存在的共同 profile。
+下文 A128–A1024 的已有结果保留原 run ID 和测量边界。
+
+从仓库根目录复现，使用新的 run ID。脚本固定 GPU0/CPU0–7 和上述配置；
+`--request` 使用保存的 H64K+A1 输入，`--help` 列出完整约束：
+
+```bash
+MFU_COHORT_ID=deepseek_h64k_a1_isolated_new
+MFU_RUN_ID="$MFU_COHORT_ID" \
+  bash experiments/deepseek_v32_mfu/scripts/method_isolation.sh \
+  --model /preset-models \
+  --request experiments/deepseek_v32_mfu/output/data/deepseek_h64k_a1_fused_prepare_20261009_01/request.json
+
+CUDA_VISIBLE_DEVICES= .venv/bin/python -m experiments.deepseek_v32_mfu.src.method_isolation_report \
+  --manifest "experiments/deepseek_v32_mfu/output/data/$MFU_COHORT_ID/manifest.json" \
+  --output-dir "experiments/deepseek_v32_mfu/output/data/${MFU_COHORT_ID}_report"
 ```
 
 ## H × A 时间与 timeline

@@ -75,6 +75,31 @@ class Scopes:
 
 
 def make_request(model, prefix, extend, seed):
+    if extend == 1:
+        # One supplied token is a model step, not a complete GR candidate text.
+        # Reuse the A128 history and its first suffix token for a fixed input.
+        source = make_request(model, prefix, 128, seed)
+        ids = source["input_ids"][: prefix + 1]
+        return {
+            "model": source["model"],
+            "input_ids": ids,
+            "attention_mask": [1] * len(ids),
+            "stable_prefix_tokens": prefix,
+            "candidate_suffix_tokens": 1,
+            "total_input_tokens": len(ids),
+            "history_sha256": source["history_sha256"],
+            "history_token_span": source["history_token_span"],
+            "candidate_token_span": [prefix, prefix + 1],
+            "content_is_synthetic": True,
+            "workload_kind": "single_supplied_token_step",
+            "token_source": {
+                "kind": "first_suffix_token_of_same_seed_A128_request",
+                "source_candidate_suffix_tokens": source["candidate_suffix_tokens"],
+                "token_id": ids[-1],
+                "seed": seed,
+                "sampling_included": False,
+            },
+        }
     tokenizer = Tokenizer.from_file(str(model / "tokenizer.json"))
     overhead = len(
         tokenizer.encode(request_format.prefix(INSTRUCTION), add_special_tokens=False).ids

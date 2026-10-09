@@ -10,8 +10,15 @@ from dataclasses import dataclass
 
 import torch
 
-CACHE_POLICY_REVISION = "echo-global-pages-fifo-v1"
+from operators.deepseek_v32.attention._config import DECODE_SELECTION_COUNT, DECODE_SPLITS
+from operators.deepseek_v32.indexer.echo import PAGED_Q1_MIN_CONTEXT_TOKENS
+
+CACHE_POLICY_REVISION = "echo-global-pages-fifo-official-q1-v2"
 PAGE_SIZE = 64
+# H100/H200 SM90 devices expose at most 132 SMs. DeepGEMM's paged schedule
+# stores two int32 values per SM plus one terminal entry.
+_SM90_MAX_SMS = 132
+_PAGED_INDEXER_RECORD_BYTES = 128 + 4  # FP8 key and FP32 scale, per token.
 
 
 def dense_staging_allocation_bytes(logical_bytes, device):
@@ -87,10 +94,20 @@ class ExecutionReservation:
     cpu_indexer_bytes: int = 8
     cpu_scalar_bytes: int = 8
     cpu_metrics_bytes: int = 24
+    attention_extra_bytes: int = 0
 
     @property
     def hbm(self):
-        return self.indexer_bytes + self.copy_source_bytes
+        return self.indexer_bytes + self.attention_extra_bytes + self.copy_source_bytes
+
+    @property
+    def attention_workspace_metadata(self):
+        # Preserve unchanged plans when the existing indexer peak covers decode.
+        return (
+            {"workspace_attention_extra_bytes": self.attention_extra_bytes}
+            if self.attention_extra_bytes
+            else {}
+        )
 
     @property
     def dram(self):
@@ -116,6 +133,11 @@ def execution_reservation(query_tokens, context_tokens, *, topk, width, max_infl
     values/IDs, global-ID remaps, union/sort storage, and bounded append source
     leases all count. The implementation may use less, but must never allocate
     beyond this shape contract or grow a buffer outside this reservation.
+
+    Any maximum query size can execute a one-query tail. Reserve the larger
+    active indexer peak, including that tail's paged KV packing and schedule.
+    Complete CUDA Graphs separately reserve and audit their private pools;
+    their retained intermediates are not multiplied by layer count here.
     """
     if any(
         type(x) is not int or x < 1
@@ -127,5 +149,32 @@ def execution_reservation(query_tokens, context_tokens, *, topk, width, max_infl
     # 16 bytes covers all concurrent logits/mask/finite-hint intermediates;
     # 64 per selected element includes PyTorch sort/unique and remap temporaries.
     indexer = 16 * query_tokens * columns + 64 * query_tokens * selected + 32 * columns
+    if context_tokens >= PAGED_Q1_MIN_CONTEXT_TOKENS:
+        page_tokens = padded_tokens(context_tokens)
+        q1_columns = (context_tokens + 255) // 256 * 256
+        packed = page_tokens * _PAGED_INDEXER_RECORD_BYTES
+        block_table = page_tokens // PAGE_SIZE * 4
+        schedule = (_SM90_MAX_SMS + 1) * 2 * 4
+        # Official decode expands the session page table and stages at most 64
+        # predicted records. Finalization releases these before main attention.
+        official_staging = 4 * context_tokens + 64 * (width * 2 + 4)
+        q1_indexer = (
+            48 * q1_columns + 64 * selected + packed + block_table + schedule + official_staging
+        )
+        indexer = max(indexer, q1_indexer)
+    attention_extra = 0
+    if selected >= DECODE_SELECTION_COUNT:
+        # Model KV records already have contiguous, aligned storage. H128 is
+        # the largest supported model query. Count repeated Q, BF16 partials,
+        # max-logit/LSE outputs, final output, optional Q preparation and all
+        # live selection/remap/conversion storage (32 B per selected slot).
+        # Scores and top-k values are released before attention consumes KV.
+        attention = (
+            128 * (DECODE_SPLITS * (width * 2 + 512 * 2 + 8) + width * 2 + 512 * 2)
+            + 32 * DECODE_SELECTION_COUNT
+        )
+        attention_extra = max(0, attention - indexer)
     copies = max_inflight_writes * query_tokens * width * 2
-    return ExecutionReservation(query_tokens, context_tokens, indexer, copies)
+    return ExecutionReservation(
+        query_tokens, context_tokens, indexer, copies, attention_extra_bytes=attention_extra
+    )

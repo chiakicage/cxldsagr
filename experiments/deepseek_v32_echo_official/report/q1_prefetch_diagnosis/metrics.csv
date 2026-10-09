@@ -1,0 +1,13 @@
+metric,cold,resident,ncu_metric
+NCU core duration (us),55.008,10.88,gpu__time_duration.sum
+Mean SM active cycles,11937.689393939394,11508.522727272728,sm__cycles_active.avg
+Maximum SM active cycles,78125.0,12448.0,sm__cycles_active.max
+Atomic ALU instructions,1048.0,0.0,smsp__inst_executed_op_generic_atom_dot_alu.sum
+L1 global atomic requests,1048.0,0.0,l1tex__t_requests_pipe_lsu_mem_global_op_atom.sum
+TEX sysmem read miss sectors,2304.0,0.0,lts__t_sectors_srcunit_tex_aperture_sysmem_op_read_lookup_miss.sum
+DRAM read bytes,8996352.0,9251072.0,dram__bytes_read.sum
+Register spill local memory requests,9884,9884,sass__inst_executed_register_spilling_mem_local
+initial_resident_history,0,65536,application-visible readback
+attempted_records,33464,0,application-visible readback
+staged_records,64,0,application-visible readback
+logical_host_copy_bytes,73728,0,application-visible readback

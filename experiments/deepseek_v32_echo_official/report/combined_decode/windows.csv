@@ -1,0 +1,7 @@
+source,method,condition,profile_run_id,start_ns,end_ns,window_ms,gpu_idle_ms
+Official SGLang,hbm,normal decode; natural residency,h64k_decode_hbm_profile_20261008_05,8111312362,8112327337,1.014975,0.014274
+Official SGLang,echo,normal decode; natural residency,h64k_decode_echo_profile_20261008_02,10246111328,10247666718,1.55539,0.127648
+Ours (local MFU),hbm,fixed token; HBM resident,deepseek_h64k_a1_fused_prepare_20261009_01_hbm_profile,32557218,33571684,1.014466,0.016737
+Ours (local MFU),echo,fixed token; cold history KV,deepseek_h64k_a1_fused_prepare_20261009_01_echo_profile,230581555,232000566,1.419011,0.040388
+Ours (local MFU),serial_sparse,fixed token; cold history KV,deepseek_h64k_a1_fused_prepare_20261009_01_serial_sparse_profile,82895661,84159408,1.263747,0.04189
+Ours (local MFU),dense_prefetch,fixed token; cold history KV,deepseek_h64k_a1_fused_prepare_20261009_01_dense_prefetch_profile,86748232,91163441,4.415209,0.053409

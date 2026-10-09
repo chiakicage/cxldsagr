@@ -235,6 +235,32 @@ def test_full_graph_replay_requires_original_api_metadata_and_exact_nodes():
         report.audit_graph_ledgers(result, calls, changed)
 
 
+@pytest.mark.parametrize("method", report.METHODS)
+def test_isolated_method_helpers_preserve_graph_and_work_checks(tmp_path, method):
+    result, calls, templates = graph_fixture()
+    complete = report.audit_graph_ledgers(result, calls, templates)
+    analysis = analysis_fixture(complete)
+    result["full_extend_graph_templates"] = [row for row in templates if row["method"] == method]
+    result["nsys_capture_order"] = [
+        label for label in result["nsys_capture_order"] if label.startswith(method + "/")
+    ]
+    selected = [row for row in calls if row["mode"] == method]
+    graph = report.audit_graph_ledgers(
+        result, selected, result["full_extend_graph_templates"], methods=(method,)
+    )
+    analysis["captures"] = [row for row in analysis["captures"] if row["mode"] == method]
+    report.audit_analysis(result, analysis, graph, methods=(method,))
+    rows, coverage = report.audit_work(result, selected, report.PEAKS, methods=(method,))
+    assert len(rows) == 2 and len(coverage) == 12
+    setup, measured = report.capture_paths(tmp_path, result, methods=(method,))
+    assert len(setup) == 1 and len(measured) == 2
+    with pytest.raises(ValueError, match="selected methods"):
+        report.audit_graph_ledgers(result, selected, result["full_extend_graph_templates"])
+    analysis["captures"].append(deepcopy(analysis["captures"][0]))
+    with pytest.raises(ValueError, match="method/phase"):
+        report.audit_analysis(result, analysis, graph, methods=(method,))
+
+
 def test_prefill_compute_graph_coverage_includes_earlier_chunks_and_all_layers():
     result, calls, templates = graph_fixture()
     result["compute_graphs"] = True

@@ -5,6 +5,8 @@ cd -- "$script_dir/../../.."
 export PATH="$PWD/.venv/bin:$PATH"
 export PYTHONDONTWRITEBYTECODE=1
 export DG_JIT_WITH_LINEINFO=1
+runner_source="$script_dir/profile_layers.sh"
+runner_invocation=("$0" "$@")
 if [[ "${1:-}" == --help || "${1:-}" == -h ]]; then
   python -m experiments.deepseek_v32_mfu.src.profile_layers --help
   exit 0
@@ -15,13 +17,15 @@ if [[ ! "$run_id" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]]; then
   exit 2
 fi
 for argument in "$@"; do
-  case "${argument%%=*}" in
-    --run-id|--output|--nsys) echo "Script owns --run-id, --output, --nsys" >&2; exit 2 ;;
-  esac
+  option="${argument%%=*}"
+  if [[ "$option" == --* && ( --run-id == "$option"* || --output == "$option"* || --nsys == "$option"* ) ]]; then
+    echo "The script owns --run-id, --output and --nsys" >&2
+    exit 2
+  fi
 done
 base="experiments/deepseek_v32_mfu/output"
 for category in data log profile; do
-  if [[ -e "$base/$category/$run_id" ]]; then echo "Existing run: $run_id" >&2; exit 2; fi
+  if [[ -e "$base/$category/$run_id" || -L "$base/$category/$run_id" ]]; then echo "Existing run: $run_id" >&2; exit 2; fi
 done
 staging="$(mktemp -d "${TMPDIR:-/tmp}/deepseek-layers3-${run_id}.XXXXXX")"
 mkdir -p "$staging/log" "$staging/profile"
@@ -38,21 +42,16 @@ finish() {
 trap finish EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
+source "$script_dir/runner_common.sh"
 nsys --version >"$staging/log/nsys_version.txt" 2>"$staging/log/nsys_version.stderr.log"
-nsys profile --trace=cuda,nvtx --sample=none --cpuctxsw=none --cuda-graph-trace=node \
+command=(nsys profile --trace=cuda,nvtx --sample=none --cpuctxsw=none --cuda-graph-trace=node \
   --capture-range=cudaProfilerApi --capture-range-end=repeat \
   --output "$staging/profile/layers3" \
   python -m experiments.deepseek_v32_mfu.src.profile_layers \
-  --run-id "$run_id" --output "$staging/data" --nsys "$@" \
-  >"$staging/log/stdout.log" 2>"$staging/log/stderr.log"
+  --run-id "$run_id" --output "$staging/data" --nsys "$@")
+"${command[@]}" >"$staging/log/stdout.log" 2>"$staging/log/stderr.log"
 # Profiler exit status alone does not prove the target completed successfully.
-python - "$staging/data/result.json" <<'PY'
-import json, sys
-result = json.load(open(sys.argv[1]))
-assert result['accepted'] and result['num_layers'] == 3
-assert result['schema_version'] == 3 and result['mode'] == 'profile'
-assert len(result['correctness']) == 25 and result['validation_receipt']
-PY
+validate_and_record_runner profile
 mapfile -t captures < <(python - "$staging/data/result.json" <<'PYCODE'
 import json, sys
 for index, label in enumerate(json.load(open(sys.argv[1]))['nsys_capture_order'], 1):
@@ -74,14 +73,10 @@ done
 python -m experiments.deepseek_v32_mfu.src.operator_report "${analysis_args[@]}" \
   --calls "$staging/data/operator_calls.json" --output-dir "$staging/data/analysis" \
   >"$staging/log/analysis.stdout.log" 2>"$staging/log/analysis.stderr.log"
-python - "$staging/data/analysis/analysis.json" <<'PY'
-import json, sys
-report = json.load(open(sys.argv[1]))
-assert len(report['captures']) == 8
-assert report['calls_outside_selected_captures'] == 0
-for capture in report['captures']:
-    assert capture['audit']['kernel_count_and_time_conserved']
-    assert capture['audit']['metadata_call_counts_match']
+python - "$staging/data/result.json" "$staging/data/analysis/analysis.json" <<'PY'
+import sys
+from experiments.deepseek_v32_mfu.src.run_contract import validate_operator_analysis
+validate_operator_analysis(sys.argv[1], sys.argv[2])
 PY
 for category in data log profile; do
   mkdir -p "$base/$category"

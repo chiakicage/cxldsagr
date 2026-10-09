@@ -13,6 +13,21 @@ import torch.nn.functional as F
 
 from . import quantization
 
+# Complete-API and real-model Q1 checks cover these checkpoint linear shapes.
+# Other shapes keep the public row-major-scale preparation path.
+_Q1_TMA_SCALE_SHAPES = frozenset(
+    {
+        (7168, 1536),
+        (1536, 24576),
+        (7168, 576),
+        (1536, 8192),
+        (7168, 128),
+        (16384, 7168),
+        (7168, 18432),
+        (18432, 7168),
+    }
+)
+
 
 def _cdiv(value, divisor):
     return (value + divisor - 1) // divisor
@@ -206,7 +221,18 @@ def fp8_linear(x, weight, scales, *, out=None, quantized=None, return_quantized=
         if activation.shape[-1] != padded_k:
             activation = F.pad(activation, (0, padded_k - activation.shape[-1]))
         if quantized is None:
-            data, activation_scales = quantize_fp8_activation(activation)
+            if (
+                rows == 1
+                and activation.dtype == torch.bfloat16
+                and (x.shape[-1], columns) in _Q1_TMA_SCALE_SHAPES
+            ):
+                # DeepGEMM accepts this exact layout without a transpose.
+                # Quantization and its scale allocation stay inside this API.
+                data, activation_scales = quantization.quantize(
+                    activation, consumer_scale_layout=True
+                )
+            else:
+                data, activation_scales = quantize_fp8_activation(activation)
         else:
             data, activation_scales = quantized.consume(x)
         output = (

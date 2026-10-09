@@ -1,0 +1,86 @@
+--- a/operators/deepseek_v32/indexer/csrc/official_prefetch.cu
++++ b/operators/deepseek_v32/indexer/csrc/official_prefetch.cu
+@@ -41,10 +41,10 @@
+   }
+ }
+ 
+-__global__ void promote_kernel(const int* stage_ids, const uint16_t* stage,
+-                               const uint32_t* counter, uint16_t* records,
+-                               int* h2d, int64_t* d2h, const int* sorted_slots,
+-                               int64_t* allocations, int64_t* stats,
++__global__ void validate_promotion_kernel(const int* stage_ids,
++                               const uint32_t* counter, const int* h2d,
++                               const int64_t* d2h, const int* sorted_slots,
++                               const int64_t* allocations, int64_t* stats,
+                                int pool_rows, int host_capacity) {
+   __shared__ int count;
+   __shared__ int ids[kCap], slots[kCap];
+@@ -73,25 +73,34 @@
+     }
+   }
+   __syncthreads();
+-  // Two-byte copies preserve BF16 bits and support every contiguous alignment.
+-  for (int i = lane; i < count * kWidth; i += blockDim.x) {
+-    const int item = i / kWidth, element = i % kWidth;
+-    records[int64_t(slots[item]) * kWidth + element] = stage[i];
+-  }
+-  __syncthreads();
+-  if (lane < count) {
+-    const int64_t old = old_ids[lane];
+-    if (old != kMissing) h2d[old] = kMissing;
+-    d2h[slots[lane]] = ids[lane];
+-    h2d[ids[lane]] = slots[lane];
+-    allocations[slots[lane]] = ids[lane];
+-  }
+   if (lane == 0) {
+     int evicted = 0;
+     for (int i = 0; i < count; ++i) evicted += old_ids[i] != kMissing;
+     stats[0] = count;
+     stats[1] = evicted;
+     stats[2] = int64_t(*counter) - count;
++  }
++}
++
++__global__ void copy_publish_kernel(const int* stage_ids, const uint16_t* stage,
++                               const uint32_t* counter, uint16_t* records,
++                               int* h2d, int64_t* d2h, const int* sorted_slots,
++                               int64_t* allocations) {
++  const int item = blockIdx.x;
++  if (item >= min(*counter, uint32_t(kCap))) return;
++  const int slot = sorted_slots[item], host = stage_ids[item];
++  // Validation is complete before this kernel begins. Valid staged hosts and
++  // old owners are disjoint; the checked unique slots make all writes disjoint.
++  for (int element = threadIdx.x; element < kWidth; element += blockDim.x) {
++    records[int64_t(slot) * kWidth + element] = stage[item * kWidth + element];
++  }
++  __syncthreads();
++  if (threadIdx.x == 0) {
++    const int64_t old = d2h[slot];
++    if (old != kMissing) h2d[old] = kMissing;
++    d2h[slot] = host;
++    h2d[host] = slot;
++    allocations[slot] = host;
+   }
+ }
+ 
+@@ -122,12 +131,17 @@
+              TensorView records, TensorView h2d, TensorView d2h,
+              TensorView sorted_slots, TensorView allocations, TensorView stats) {
+   auto stream = stream_for(records);
+-  promote_kernel<<<1, 256, 0, stream>>>(
++  validate_promotion_kernel<<<1, kCap, 0, stream>>>(
++      static_cast<int*>(stage_ids.data_ptr()), static_cast<uint32_t*>(counter.data_ptr()),
++      static_cast<int*>(h2d.data_ptr()), static_cast<int64_t*>(d2h.data_ptr()),
++      static_cast<int*>(sorted_slots.data_ptr()), static_cast<int64_t*>(allocations.data_ptr()),
++      static_cast<int64_t*>(stats.data_ptr()), records.size(0), h2d.size(0));
++  checked(cudaGetLastError());
++  copy_publish_kernel<<<kCap, 128, 0, stream>>>(
+       static_cast<int*>(stage_ids.data_ptr()), static_cast<uint16_t*>(stage.data_ptr()),
+       static_cast<uint32_t*>(counter.data_ptr()), static_cast<uint16_t*>(records.data_ptr()),
+       static_cast<int*>(h2d.data_ptr()), static_cast<int64_t*>(d2h.data_ptr()),
+-      static_cast<int*>(sorted_slots.data_ptr()), static_cast<int64_t*>(allocations.data_ptr()),
+-      static_cast<int64_t*>(stats.data_ptr()), records.size(0), h2d.size(0));
++      static_cast<int*>(sorted_slots.data_ptr()), static_cast<int64_t*>(allocations.data_ptr()));
+   checked(cudaGetLastError());
+ }
+ 

@@ -81,6 +81,15 @@ def cache_state(model):
 
 
 def compare_cache_state(actual, expected, *, actual_prefetch=None, expected_prefetch=None):
+    from experiments.deepseek_v32_mfu.src.prefetch_transition_audit import (
+        COARSE_POLICY,
+        OFFICIAL_ELIGIBILITY,
+        OFFICIAL_POLICY,
+        OFFICIAL_SCHEMA,
+        SCHEMA,
+        preparation_capacity,
+    )
+
     schedule_fields = set()
     if actual_prefetch is not None or expected_prefetch is not None:
         for state, proof in ((actual, actual_prefetch), (expected, expected_prefetch)):
@@ -103,13 +112,31 @@ def compare_cache_state(actual, expected, *, actual_prefetch=None, expected_pref
                 or min(scope["H"], scope["A"]) < 1
                 or scope["H"] + scope["A"] > scope["slots"]
                 or scope["H"] + scope["A"] != state["length"]
-                or scope.get("max_prefetch") != min(8192, scope["slots"] - scope["A"])
             ):
                 raise AssertionError("prefetch transition proof has unsupported execution scope")
+            policy = scope.get("prefetch_policy", COARSE_POLICY)
+            try:
+                prepared_cap = preparation_capacity(scope)
+            except ValueError as error:
+                raise AssertionError(
+                    "prefetch transition proof has unsupported preparation scope"
+                ) from error
+            if policy == OFFICIAL_POLICY:
+                valid_policy = (
+                    scope["A"] == 1
+                    and scope.get("max_prefetch") == 64
+                    and scope.get("prepared_max_prefetch") == prepared_cap
+                    and prepared_cap >= 64
+                    and scope.get("hint_index") == 1
+                )
+            else:
+                valid_policy = policy == COARSE_POLICY and scope.get("max_prefetch") == prepared_cap
+            if not valid_policy:
+                raise AssertionError("prefetch transition proof has unsupported policy scope")
             audit = proof["proof"]
             layers = audit.get("layers", [])
             if (
-                audit.get("schema") != "cold-echo-prefetch-transition-v1"
+                audit.get("schema") != (OFFICIAL_SCHEMA if policy == OFFICIAL_POLICY else SCHEMA)
                 or any(audit.get("scope", {}).get(key) != value for key, value in scope.items())
                 or len(layers) != 3
                 or any(
@@ -138,6 +165,22 @@ def compare_cache_state(actual, expected, *, actual_prefetch=None, expected_pref
                     != proof["initial_hints"][index]
                 ):
                     raise AssertionError("prefetch layer audit is incomplete or mismatched")
+                if policy == OFFICIAL_POLICY and (
+                    layer.get("prefetch_policy") != OFFICIAL_POLICY
+                    or layer.get("effective_max_prefetch") != 64
+                    or layer.get("prepared_max_prefetch") != prepared_cap
+                    or layer.get("preparation") != scope.get("preparation")
+                    or layer.get("hint_index") != 1
+                    or layer.get("eligibility", {}).get("schema") != OFFICIAL_ELIGIBILITY
+                    or layer.get("official_staging", {}).get("temporary_tags_cleared") is not True
+                    or layer.get("official_staging", {}).get("copy_order_matches_publication")
+                    is not True
+                    or layer.get("official_staging", {})
+                    .get("record_validation", {})
+                    .get("checked_from_records")
+                    is not True
+                ):
+                    raise AssertionError("official prefetch stage proof is incomplete")
         if actual_prefetch["scope"] != expected_prefetch["scope"]:
             raise AssertionError("prefetch transition proofs cover different scopes")
         for field, description in (
@@ -151,7 +194,9 @@ def compare_cache_state(actual, expected, *, actual_prefetch=None, expected_pref
                 raise AssertionError(f"full graph changed {description}")
         # Each accepted stage proof independently recomputes these fields from
         # the actual capped prefetch/recall execution. Other cache metadata,
-        # numerical identities, final residency and clocks remain strict.
+        # numerical identities and clocks remain strict. Predictive false
+        # positives can change final residency only under the official proof,
+        # which independently derives every resident token and the free count.
         schedule_fields = {
             "prefetched_records",
             "prefetch_capacity_failures",
@@ -159,6 +204,9 @@ def compare_cache_state(actual, expected, *, actual_prefetch=None, expected_pref
             "resident_selection_records",
             "host_to_device_bytes",
         }
+        schedule_state_fields = {"logical_priority"}
+        if actual_prefetch["scope"].get("prefetch_policy") == OFFICIAL_POLICY:
+            schedule_state_fields.update(("resident", "free_count"))
         actual = {
             **actual,
             "layers": [
@@ -167,7 +215,7 @@ def compare_cache_state(actual, expected, *, actual_prefetch=None, expected_pref
                     if key == "metrics"
                     else value
                     for key, value in layer.items()
-                    if key != "logical_priority"
+                    if key not in schedule_state_fields
                 }
                 for layer in actual["layers"]
             ],
@@ -180,7 +228,7 @@ def compare_cache_state(actual, expected, *, actual_prefetch=None, expected_pref
                     if key == "metrics"
                     else value
                     for key, value in layer.items()
-                    if key != "logical_priority"
+                    if key not in schedule_state_fields
                 }
                 for layer in expected["layers"]
             ],
@@ -204,6 +252,11 @@ def compare_cache_state(actual, expected, *, actual_prefetch=None, expected_pref
                 "bounded_prefetch_transitions_validated": True,
                 "schedule_dependent_metrics": sorted(schedule_fields),
                 "exact_topk_equal": True,
+                **(
+                    {"schedule_dependent_state_fields": sorted(schedule_state_fields)}
+                    if "resident" in schedule_state_fields
+                    else {}
+                ),
             }
             if schedule_fields
             else {}

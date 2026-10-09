@@ -1,0 +1,32 @@
+{
+  "artifacts": {
+    "evidence.json": "72146d0df30f4ac029f445831fd453e94ec30de08d123a71671e8af9f0d37d0c",
+    "metrics.csv": "a7417a9e80ff0fb8a39c873657d3a02d1740032a9fdf8b967e06df6e31db2bd0",
+    "report.md": "ba1349c73c9b746bc226b56509795ad29df8aca09051cb2a90e7b16e4789d59f"
+  },
+  "command": {
+    "module": "experiments.deepseek_v32_echo_official.src.publish_q1_prefetch_diagnosis",
+    "output_dir": "experiments/deepseek_v32_echo_official/output/data/q1_prefetch_diagnosis_report_20261009_02",
+    "run_dir": "experiments/deepseek_v32_echo_official/output/data/q1_official_core_ncu_20261008_01"
+  },
+  "publisher": "experiments/deepseek_v32_echo_official/src/publish_q1_prefetch_diagnosis.py",
+  "publisher_archive": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/output/data/q1_prefetch_diagnosis_report_20261009_02/publish_q1_prefetch_diagnosis.py",
+  "publisher_sha256": "04165ee18f2f251f14fc3cd07ff9bae9ae93025d66b3af7fc58bacf1df0d0bdb",
+  "source_files": {
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/output/data/q1_official_core_ncu_20261008_01/comparison_verified.json": "938699985f9c96f95a54b38fc774e5088678d0479cf67201dfab6c4105adc623",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/output/data/q1_official_core_ncu_20261008_01/layer_2_warm_full/analysis/instances.json": "a57bb769463e9dd5f3c81fbd1b2e9fdef425e4fa55bf99345c5889ee9bcd0187",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/output/data/q1_official_core_ncu_20261008_01/layer_2_warm_full/analysis/metrics.json": "345e2214454e14fb3da5088d904c7e281ac21cafe2f38224d79eb9f86e97d10e",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/output/data/q1_official_core_ncu_20261008_01/layer_2_warm_full/analysis/pc_evidence.json": "b794154992d5440d2ea22708eccec57fbf33ccd88d233b8319ff343d6f9a045e",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/output/data/q1_official_core_ncu_20261008_01/layer_2_warm_full/analysis/summary.json": "57aae54d5a105adc6c609836e55d67137cd2ec13ad8fcd04a539a219f84a63bf",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/output/data/q1_official_core_ncu_20261008_01/layer_2_warm_full/passes/pass-ohgqxrv2/component/summary.json": "0f368643b2087a905f64f1639d663037652488904fa2c8d01011c1d8daa1d0ad",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/output/data/q1_official_core_ncu_20261008_01/layer_2_zero_full/analysis/instances.json": "f4ff0714eb3fc14b66e497403b1e861bba0a631940b8c07646d851030de2bbb7",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/output/data/q1_official_core_ncu_20261008_01/layer_2_zero_full/analysis/metrics.json": "79d31a9783320fde8d9152c724c16b0872918e82e90f165c727295b54cae4e43",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/output/data/q1_official_core_ncu_20261008_01/layer_2_zero_full/analysis/pc_evidence.json": "0eea2452ad90b7fb368d4d6f98d56d11f07b981bfca6c99c9b90b627805a7ace",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/output/data/q1_official_core_ncu_20261008_01/layer_2_zero_full/analysis/summary.json": "88712f17262f20b7a04f35a86d4fccb8b5e1cce7e17fd345a103f0e3e3b6463a",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/output/data/q1_official_core_ncu_20261008_01/layer_2_zero_full/passes/pass-ci1hg6vl/component/summary.json": "92b9d898f37a7c7eeaef986419e8ef07ae1460b96807453dbf318114bdcbf76d",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/output/data/q1_official_core_ncu_20261008_01/layer_2_zero_pilot/passes/pass-clj9_ngm/observation.json": "f6f650e512f6daca29753b96514e51352835e07277c2bfdabf3e8cd5ce6b1096",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/output/profile/q1_official_core_ncu_20261008_01/layer_2_warm_full.ncu-rep": "d661ffabd0b73fed1c2f3d1f91511d7e296682a1751c5eb0c23c2f692dee926d",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/output/profile/q1_official_core_ncu_20261008_01/layer_2_zero_full.ncu-rep": "3ef344bfa1e06efef1c0151e9a4553921666f3e99a512d51d7ab0d21a3b938cf"
+  },
+  "source_run_id": "q1_official_core_ncu_20261008_01"
+}

@@ -10,6 +10,7 @@ import statistics
 import time
 from contextlib import ExitStack, nullcontext
 from dataclasses import fields, is_dataclass
+from datetime import UTC, datetime
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
@@ -24,12 +25,18 @@ from experiments.deepseek_v32_mfu.src.operator_instrumentation import (
 )
 from experiments.deepseek_v32_mfu.src.profile_hardware import gather_hardware
 from experiments.deepseek_v32_mfu.src.run_contract import (
+    METHOD_ISOLATION,
     METHODS,
-    RECEIPT_KIND,
     bind_benchmark,
     checkpoint_identity,
     execution_identity,
+    hbm_reference_binding,
+    preparation_contract,
     receipt_binding,
+    receipt_kind,
+    require_hbm_reference,
+    validate_runtime_participation,
+    validated_receipt,
 )
 from models.deepseek_v32.execution.extend_graph import EXTEND_GRAPH_POLICY_REVISION
 from models.deepseek_v32.model import DeepSeekEchoModel
@@ -49,6 +56,14 @@ def select_cache_method(model, method):
         pool.dense_contiguous is not dense for pool in pools.values()
     ):
         raise RuntimeError("allocated cache layout differs from the declared method transport")
+    sequence = getattr(model, "_experiment_cache_method_selections", None)
+    if sequence is not None:
+        sequence.append(method)
+
+
+def selected_methods(args):
+    method = getattr(args, "method", None)
+    return METHODS if method is None else (method,)
 
 
 def write_json(path, value):
@@ -92,13 +107,20 @@ def sources():
         "operator_flops.py",
         "profile_hardware.py",
         "run_contract.py",
+        "gap_profile.py",
     ):
         path = Path(__file__).with_name(name)
         result[str(path.relative_to(ROOT))] = hashlib.sha256(path.read_bytes()).hexdigest()
     for name in ("graph_instrumentation.py", "graph_attribution.py"):
         path = ROOT / "experiments/deepseek_v32_motivation/src" / name
         result[str(path.relative_to(ROOT))] = hashlib.sha256(path.read_bytes()).hexdigest()
-    for name in ("scripts/profile_layers.sh", "scripts/run.sh"):
+    for name in (
+        "scripts/profile_layers.sh",
+        "scripts/run.sh",
+        "scripts/gap_profile.sh",
+        "scripts/runner_common.sh",
+        "scripts/method_isolation.sh",
+    ):
         path = Path(__file__).parents[1] / name
         result[str(path.relative_to(ROOT))] = hashlib.sha256(path.read_bytes()).hexdigest()
     return result
@@ -271,7 +293,7 @@ def profile_extend_graph(model, ids, args, result, method, *, record_operators=F
 
 def run_benchmark(model, ids, args, result):
     """Only default model outputs and wall timers; no output copies or comparisons."""
-    for mode in METHODS:
+    for mode in selected_methods(args):
         prefix_times = []
         prefix_cache_samples = []
         for _ in range(args.prefill_repeats):
@@ -304,7 +326,19 @@ def run_benchmark(model, ids, args, result):
 
 def run_check(model, ids, args, result):
     controls, prefixes = {}, {}
-    for mode in METHODS:
+    methods = selected_methods(args)
+    if getattr(args, "hbm_check_receipt", None) is not None:
+        reference = require_hbm_reference(args.hbm_check_receipt, result)
+        result["hbm_reference"] = hbm_reference_binding(reference, result)
+        controls["hbm"] = torch.load(
+            reference["artifact_paths"]["hbm_control.pt"], map_location="cpu", weights_only=True
+        )
+        prefixes["hbm"] = torch.load(
+            reference["artifact_paths"]["hbm_prefix_logits.pt"],
+            map_location="cpu",
+            weights_only=True,
+        )
+    for mode in methods:
         select_cache_method(model, mode)
         prefixes[mode] = model.forward(ids[: args.prefix]).cpu()
         snapshot = model.snapshot_prefix()
@@ -330,7 +364,9 @@ def run_check(model, ids, args, result):
         torch.save(control, args.output / f"{mode}_control.pt")
         torch.save(prefixes[mode], args.output / f"{mode}_prefix_logits.pt")
         del snapshot
-    for mode in METHODS[1:]:
+    for mode in methods:
+        if mode == "hbm":
+            continue
         for key in ("hidden", "logits"):
             result["correctness"][f"hbm_vs_{mode}_{key}"] = comparison(
                 controls[mode][key], controls["hbm"][key]
@@ -437,7 +473,7 @@ def run_profile(model, ids, args, result, receipt):
     result["nsys_capture_order"] = ["graph_setup"] if args.compute_graphs else []
     result["profile_detail"] = "matrix_api_node_ownership"
     result["correctness"].update(receipt["checks"]["comparisons"])
-    for mode in METHODS:
+    for mode in selected_methods(args):
         control = torch.load(
             receipt["artifact_paths"][mode + "_control.pt"], map_location="cpu", weights_only=True
         )
@@ -478,7 +514,7 @@ def run_profile(model, ids, args, result, receipt):
         }
         write_json(
             args.output / "operator_calls.json",
-            {"schema_version": 3, "run_id": args.run_id, "calls": calls},
+            {"schema_version": result["schema_version"], "run_id": args.run_id, "calls": calls},
         )
         if mode == "echo":
             capture_kernel_inputs(model, ids[args.prefix :], snapshot, args)
@@ -566,6 +602,16 @@ def parse_run_args(mode=None, argv=None):
         allow_abbrev=False,
     )
     parser.add_argument("--model", type=Path, default=Path("/preset-models"))
+    parser.add_argument(
+        "--method",
+        choices=METHODS,
+        help="isolate one method in this process; omitted keeps the four-method run",
+    )
+    parser.add_argument(
+        "--hbm-check-receipt",
+        type=Path,
+        help="check-only isolated HBM reference for an isolated offload check",
+    )
     parser.add_argument("--request", type=Path)
     parser.add_argument("--prefix", type=int, default=65536)
     parser.add_argument("--extend", type=int, default=128)
@@ -607,6 +653,10 @@ def parse_run_args(mode=None, argv=None):
     parser.add_argument("--validation-receipt", type=Path)
     args = parser.parse_args(argv)
     mode = mode or args.mode
+    if args.hbm_check_receipt is not None and not (mode == "check" and args.method in METHODS[1:]):
+        parser.error("--hbm-check-receipt is only for isolated offload checks")
+    if mode == "check" and args.method in METHODS[1:] and args.hbm_check_receipt is None:
+        parser.error("isolated offload check requires --hbm-check-receipt")
     if args.extend_chunk_size is None:
         args.extend_chunk_size = args.extend
     if args.extend_graph and args.extend_chunk_size != args.extend:
@@ -660,6 +710,15 @@ def parse_run_args(mode=None, argv=None):
 
 def run(mode=None, argv=None, *, profile_runner=None):
     mode, args = parse_run_args(mode, argv)
+    methods = selected_methods(args)
+    # Linux process start ticks distinguish a reused PID without entering a CUDA runtime.
+    process_provenance = {
+        "pid": os.getpid(),
+        "start_ticks": int(Path("/proc/self/stat").read_text().rsplit(")", 1)[1].split()[19]),
+        "driver_started_utc": datetime.now(UTC).isoformat(),
+        "completed_method_warmups": [],
+        "cache_method_selections": [],
+    }
     if mode == "profile" and args.extend_graph and not args.nsys:
         raise ValueError("full extend graph operator profiling requires --nsys node tracing")
     args.output.mkdir(parents=True, exist_ok=False)
@@ -710,6 +769,8 @@ def run(mode=None, argv=None, *, profile_runner=None):
         hbm_cache_budget_bytes=int(args.hbm_cache_budget_gib * 2**30),
         dram_cache_budget_bytes=int(args.dram_cache_budget_gib * 2**30),
     )
+    if args.method is not None:
+        model._experiment_cache_method_selections = process_provenance["cache_method_selections"]
     if any(block.is_moe for block in model.blocks):
         raise ValueError("This diagnostic requires the first three dense checkpoint blocks")
     from experiments.deepseek_v32_mfu.src.backend_provenance import (
@@ -721,7 +782,7 @@ def run(mode=None, argv=None, *, profile_runner=None):
     write_json(args.output / "backend_provenance_before.json", backend_identity)
     ids = request["input_ids"]
     result = {
-        "schema_version": 3,
+        "schema_version": 3 if args.method is None else 4,
         "mode": mode,
         "run_id": args.run_id,
         "accepted": False,
@@ -736,9 +797,9 @@ def run(mode=None, argv=None, *, profile_runner=None):
         "slots": args.slots,
         "cache_policy_revision": "four-method-checkpoint-persistent-v3",
         "dense_history_transport": {
-            method: DENSE_TRANSPORT if method == "dense_prefetch" else None for method in METHODS
+            method: DENSE_TRANSPORT if method == "dense_prefetch" else None for method in methods
         },
-        "methods": list(METHODS),
+        "methods": list(methods),
         "extend_residency": args.extend_residency,
         "compute_graphs": args.compute_graphs,
         "extend_graph": args.extend_graph,
@@ -752,7 +813,11 @@ def run(mode=None, argv=None, *, profile_runner=None):
         "extend_chunk_size": args.extend_chunk_size,
         "snapshot_schema": "echo-shared-prefix-v1",
         "snapshot_scope": "shared pools once plus session metadata; diagnostic CPU storage excluded from serving capacity",
-        "prefetch_cap": "ECHO: min(8192, sparse_pool_tokens - actual query batch)",
+        "prefetch_cap": (
+            "ECHO preparation: 64 free slots for eligible sole-session persistent official Q1 "
+            "with P-H>=64; otherwise min(8192, P-Q). Official Q1 effective prefetch cap: 64. "
+            "The independent transition proof records the actual preparation dispatch."
+        ),
         "prefetch_flags": {"fused_extend_equivalent": True, "early_evict": False},
         "warmups": args.warmups,
         "repeats": args.repeats,
@@ -762,7 +827,7 @@ def run(mode=None, argv=None, *, profile_runner=None):
             (["graph_setup"] if args.compute_graphs else [])
             + [
                 f"{method}/{phase}_annotated"
-                for method in METHODS
+                for method in methods
                 for phase in ("prefill", "extend")
             ]
         )
@@ -793,6 +858,17 @@ def run(mode=None, argv=None, *, profile_runner=None):
         "measurements": {},
         "correctness": {},
     }
+    if args.method is not None:
+        result.update(
+            {
+                "selected_method": args.method,
+                "method_isolation": METHOD_ISOLATION,
+                "preparation_contract": preparation_contract(
+                    args.method, args.warmups, args.compute_graphs
+                ),
+                "process_provenance": process_provenance,
+            }
+        )
     result["checkpoint_identity"] = checkpoint_identity(args.model)
     result["execution_environment"] = {
         "cpu_affinity": sorted(os.sched_getaffinity(0)),
@@ -823,7 +899,7 @@ def run(mode=None, argv=None, *, profile_runner=None):
         write_json(args.output / "graph_templates.json", graph_capture.finalize())
     # Exercise exactly the default execution path before binding loaded JIT identities.
     # This also completes compilation before any formal sample or profiler capture.
-    for method in METHODS:
+    for method in methods:
         for _ in range(args.warmups):
             select_cache_method(model, method)
             model.forward(ids[: args.prefix])
@@ -832,16 +908,23 @@ def run(mode=None, argv=None, *, profile_runner=None):
             prepare_extend_graph(model, ids[args.prefix :], args)
             model.forward(ids[args.prefix :])
             del snapshot
+            process_provenance["completed_method_warmups"].append(method)
     result["execution_runtime_artifacts"] = collect_flashinfer_runtime_artifacts(
-        require_local_native=True
+        require_local_native=args.method != "hbm"
     )
+    validate_runtime_participation(result)
     result["execution_identity"] = execution_identity(result)
     receipt = None
     if mode != "check":
         receipt = require_receipt(
-            args.validation_receipt, kind=RECEIPT_KIND, identity=result["execution_identity"]
+            args.validation_receipt,
+            kind=receipt_kind(result),
+            identity=result["execution_identity"],
         )
         result["validation_receipt"] = receipt_binding(receipt)
+        if args.method not in (None, "hbm"):
+            result["hbm_reference"] = receipt["checks"].get("hbm_reference")
+        receipt = validated_receipt(result)
     if mode == "profile" and args.benchmark_run is not None:
         result["benchmark"] = bind_benchmark(args.benchmark_run, result)
     if mode == "bench":
@@ -863,8 +946,9 @@ def run(mode=None, argv=None, *, profile_runner=None):
         write_json(args.output / "backend_provenance_differences.json", differences)
         raise RuntimeError(f"Official backend libraries changed during measurement: {differences}")
     result["flashinfer_runtime_artifacts"] = collect_flashinfer_runtime_artifacts(
-        require_local_native=True
+        require_local_native=args.method != "hbm"
     )
+    validate_runtime_participation(result, result["flashinfer_runtime_artifacts"])
     if (
         result["execution_runtime_artifacts"]["local_native_jit"]
         != result["flashinfer_runtime_artifacts"]["local_native_jit"]
@@ -875,11 +959,12 @@ def run(mode=None, argv=None, *, profile_runner=None):
     if mode == "check":
         write_receipt(
             args.output / "receipt.json",
-            kind=RECEIPT_KIND,
+            kind=receipt_kind(result),
             identity=result["execution_identity"],
             checks={
                 "passed": True,
                 "comparisons": result["correctness"],
+                **({"hbm_reference": result["hbm_reference"]} if "hbm_reference" in result else {}),
                 **({"extend_graph": result["extend_graph_checks"]} if args.extend_graph else {}),
             },
             artifacts={path.name: path for path in args.output.iterdir() if path.is_file()},

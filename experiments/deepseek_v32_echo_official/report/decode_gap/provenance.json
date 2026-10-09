@@ -1,0 +1,57 @@
+{
+  "schema": "cpu-gap-analysis-provenance-v1",
+  "argv": [
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/src/diagnose_decode_gap.py",
+    "--comparison",
+    "experiments/deepseek_v32_echo_official/output/data/combined_decode_fused_prepare_20261009_01",
+    "--official-report",
+    "experiments/deepseek_v32_echo_official/report/sglang_decode",
+    "--local-report",
+    "experiments/deepseek_v32_mfu/output/data/deepseek_h64k_a1_fused_prepare_report_20261009_01",
+    "--output-dir",
+    "experiments/deepseek_v32_echo_official/output/data/decode_gap_fused_prepare_20261009_01"
+  ],
+  "sources_sha256": {
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/output/data/combined_decode_fused_prepare_20261009_01/provenance.json": "95fd07847eae357eb6bf89d720be9afbdfddaa35468d9f192ba931911cf5a839",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/output/data/combined_decode_fused_prepare_20261009_01/source_snapshot/compact_timeline.py": "1efeb4a671e102f4f813f63e20a72ef3d188395e4a7f75828ba81fe229155a32",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/output/data/combined_decode_fused_prepare_20261009_01/source_snapshot/compare_decode_timeline.py": "ecfd8d8cc671737bb5213a0e0d12edcd8eeff1ed7f57a5cde0df28c700a5cdf9",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/output/data/combined_decode_fused_prepare_20261009_01/source_snapshot/compare_timeline.py": "0cd37c99d0f5df4bc25a08e7371b2152493a8a999731f5d9007b691ec6f00c41",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/output/data/combined_decode_fused_prepare_20261009_01/source_snapshot/engine_timeline.py": "fb2b5b70504cc0a1e6c5441f85893ca151cebbc02c3890445f946f0f8dd8cfb1",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/output/data/combined_decode_fused_prepare_20261009_01/source_snapshot/timeline.py": "6a8fa2598045accc26b6746913c283fad52ad4633f6fc01e0d961f397e691b25",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/report/sglang_decode/publication.json": "f77fd00f0344a902b526c4f6f3c1e9ee14d0f2eaa0e210933b4606a882e69b9c",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/report/sglang_decode/report.json": "3fa66ab9f5f812c2300ee22e22ca8d9805b9c0af0095037e7926a60a3a0d69b8",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/report/sglang_decode/windows.json": "d4fcf4f50c56e526f1abe2a107cbc61cc4d7971210ffff19108b547e35b40d20",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/report/sglang_decode/activities.json": "480eec9e1ef8b023277cd694ee8e6ce70163ec29fd102583b73bb1d9850c903e",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_h64k_a1_fused_prepare_report_20261009_01/summary.json": "e47bbed74bc6a7d43ca606ba8bb9d11eef7b9baa6f568feee0c130abb5d25927",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_h64k_a1_fused_prepare_report_20261009_01/publication_manifest.json": "dfb9a04e7f8a698f67b6cee3ef2c3129d944913dc70fbd17ef8baa528b418965",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_h64k_a1_fused_prepare_report_20261009_01/window_rows.json": "f764f5c4f13985cf647e3b2b72b69b5acb68138ca797abe47445b40fc86fff81",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_h64k_a1_fused_prepare_report_20261009_01/input_hashes.json": "cbca675d7588dc8862437bf820217bc39ccdc0a5ba563b47488bc30d8722b6d5",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/output/data/combined_decode_fused_prepare_20261009_01/panels.json": "ca18764329963fa1d93110864e985b164ba11f9a2c070d1f920e16c7346a9d47",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/output/data/h64k_decode_hbm_profile_20261008_05/run.json": "19f16964720e24530537f303367c9b03f6817e855d29c410f8bfd9a321e3b14e",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/output/profile/h64k_decode_hbm_profile_20261008_05/decode.sqlite": "ac9305a494f86b9fcfb9acd22c4545635a942c1ae2b652ab175d4fef07558516",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_h64k_a1_fused_prepare_20261009_01_hbm_profile/result.json": "fd57ece1d45824dad456a4279b0094ff9003da8e70b3c53e7c387284f95fbe2c",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_h64k_a1_fused_prepare_20261009_01_hbm_profile/capture_4.sqlite": "5d448615b1c9807b747e65fa052c1ea429b34c34526326750371f2c4d328c7be",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/output/data/h64k_decode_echo_profile_20261008_02/run.json": "736af3c0e7e10dcb1116e3cd0a89c378633dd0cfa85dcff480645cbacd2bceef",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/output/profile/h64k_decode_echo_profile_20261008_02/decode.sqlite": "fc7c5b1b76697e77b52c8a62264ace82c8bcd1216183024cd53046cac67c82ed",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_h64k_a1_fused_prepare_20261009_01_echo_profile/result.json": "ff4047440e9ba8e5d18ff1e63e135c45ebafe51d2c85b4bed2d682178c48bf99",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/output/data/deepseek_h64k_a1_fused_prepare_20261009_01_echo_profile/capture_4.sqlite": "4197bfa503ce87710a44d04da60df9b118099cc924c63f289e1c0fbbead86387",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/src/compare_timeline.py": "0cd37c99d0f5df4bc25a08e7371b2152493a8a999731f5d9007b691ec6f00c41",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/src/engine_timeline.py": "fb2b5b70504cc0a1e6c5441f85893ca151cebbc02c3890445f946f0f8dd8cfb1",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/src/compact_timeline.py": "1efeb4a671e102f4f813f63e20a72ef3d188395e4a7f75828ba81fe229155a32",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/src/timeline.py": "6a8fa2598045accc26b6746913c283fad52ad4633f6fc01e0d961f397e691b25",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/src/diagnose_decode_gap.py": "36e3b018c98120dd0d5a10cfad7d1754fb57dc793ae5f6fe71db5c0b9aea3bc1"
+  },
+  "artifacts_sha256": {
+    "gap_decomposition.csv": "8489746f3d0a5612f2090521a6e89761fc35c54cc9c79911dd92de18230d5191",
+    "kernel_details.csv": "a942dda82744690fdb558d5a9720b254e49c951660e1b2e290fc3bf05d8ceffe",
+    "report.json": "691b31ac68de3c4e648f2f0bc706026e474a7037d1567b77585204ccc8fc5f79"
+  },
+  "source_snapshot_sha256": {
+    "compare_timeline.py": "0cd37c99d0f5df4bc25a08e7371b2152493a8a999731f5d9007b691ec6f00c41",
+    "engine_timeline.py": "fb2b5b70504cc0a1e6c5441f85893ca151cebbc02c3890445f946f0f8dd8cfb1",
+    "compact_timeline.py": "1efeb4a671e102f4f813f63e20a72ef3d188395e4a7f75828ba81fe229155a32",
+    "timeline.py": "6a8fa2598045accc26b6746913c283fad52ad4633f6fc01e0d961f397e691b25",
+    "diagnose_decode_gap.py": "36e3b018c98120dd0d5a10cfad7d1754fb57dc793ae5f6fe71db5c0b9aea3bc1"
+  },
+  "execution": "CPU-only SQLite/JSON analysis; no model imports, GPU work or source measurements changed."
+}

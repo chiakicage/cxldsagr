@@ -206,6 +206,10 @@ class EchoCapacityPlanner:
             "execution_append_sources": self.execution.copy_source_bytes,
             "execution_pool_metadata_workspace": 64 * (p + 1) + 64 * nh,
         }
+        if self.execution.attention_extra_bytes:
+            hbm_components["execution_attention_extra_workspace"] = (
+                self.execution.attention_extra_bytes
+            )
         reservation = sum(hbm_components.values())
         allowance = allocation_allowance + self.allocator_headroom_bytes
         cache_total = reservation + allowance

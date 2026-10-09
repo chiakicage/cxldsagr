@@ -1328,3 +1328,94 @@ A128 四方法 MFU、局部 dense 重叠及依赖实验补测边界；S-033 记�
 - **边界：**零 miss 诊断不测真实 miss 的传输性能，不构成跨框架数值验收；官方
   `numerical_acceptance=false` 保留。缩小 NH 的扫描点是诊断控制，不是等容量
   serving 优化。未启动实现优化，原正式结果及其他研究任务不变。
+
+## S-037：DeepSeek Q1 的独立进程测量与比较边界
+
+本条记录 2026-10-08 的测量流程修正，选定报告已由 S-039 的生产融合补测替换。
+下方链接指向当前入口；旧性能产物已按规则清理，私有对照仍引用的 `request.json` 保留。
+
+- **研究位置与问题：**主条目 4.2，关联 2.5。用户要求继续将 local HBM 优化到
+  SGLang 水平，并检查 ECHO indexer/prefetch 的较长耗时。范围为真实 checkpoint
+  L0–L2、H=65,536、A=1，普通持久 append；不涉及 C10、完整 61 层或 NOSA。
+- **已发布来源：**[MFU 报告](../../../experiments/deepseek_v32_mfu/report/h64k_a1/results.md)、
+  [核验汇总](../../../experiments/deepseek_v32_mfu/report/h64k_a1/summary.json)与
+  [官方对照](../../../experiments/deepseek_v32_echo_official/README.md)。Cohort 为
+  `deepseek_h64k_a1_isolated_20261008_01`，每方法分别执行 check、bench、minimal
+  profile、operator profile，共 16 个独立进程。Check 的 13 项标准比较、44 项图检查
+  通过；保存输出、源码/native、原始进程与图节点已重读。每方法预热 1 次，prefill
+  3 次、step 5 次；正式同步 wall time 与侵入式 GPU 窗口分开。
+- **结果：**HBM、ECHO、serial sparse、dense prefetch 的完整同步 step 中位数为
+  1.834721、2.588716、2.395402、5.532310 ms。HBM 的 L0–L2 窗口与 idle 为
+  1.013090 ms、17.953 µs；官方参考为 1.014975 ms、14.274 µs。本地 ECHO 窗口为
+  1.426563 ms，官方为 1.555390 ms。跨实现数值验收仍为 `false`。
+- **判断变化：**独立控制显示，同进程执行 dense 完整预热足以在随后 HBM 测量中
+  复现较长节点间隙；新流程只准备所选方法，模型计算保持原样。原 GPU gap 不能全部
+  归为 kernel 效率不足，具体硬件机制尚未确定。不同批次 wall 中位数不估计配对收益。
+  官方与本地的输入 token、驻留、容量、框架和物理 GPU 不同，不报告等价工作量加速。
+- **当前缺口：**本地 cold ECHO 仍慢于 serial sparse。官方融合内核已接入，较长的
+  局部 indexer/prefetch 还受 cold 状态与阈值影响；不能把 trace 内部的计算和 IO
+  任意拆开。准备阶段融合候选正在单独验收与测量，尚未接入或宣称完整模型收益。
+  T-008 仅推进这项 Q1 工作，不改变 C10 排名、GR 代表性、物理容量或 NOSA 判断。
+
+## S-038：Q1 冷态预取长尾与准备融合的私有对照
+
+- **研究位置：**主条目 4.2，关联 2.5，继续 T-008 的真实前三层 H64K/A1 范围。
+  不将独立组件的驻留控制解释为 GR 场景或默认 serving 请求。
+- **官方 core 诊断：**[冷态预取报告](../../../experiments/deepseek_v32_echo_official/report/q1_prefetch_diagnosis/report.md)
+  来自 `q1_official_core_ncu_20261008_01`。同一真实 L2 Q/K/scales/weights、正零阈值下，
+  冷态／完全驻留的 NCU core 时长为 55.008 / 10.880 µs，最大 SM 活跃周期为
+  78,125 / 12,448，均值接近。有效聚合原子指令数为 1,048 / 0；冷态最终可见状态
+  暂存 64 条、73,728 B，尝试预约 33,464 条。源码已有 warp 聚合，两个获胜 warp
+  各串行处理 32 条记录。该对照同时移除预约和搬运，不能分离其因果占比。
+- **诊断边界：**full/source 各 45 次 kernel replay，另有一个冷态单 pass pilot；
+  NCU 使用 cache flush 与 base clock control。最终读回不代表每个内部 pass 的
+  实际集合。Per-PC 和 PM 实例标志为 false，未用于耗时份额或有效时间线。
+  六项 CTC 指标不可用，全部警告保留；没有修改官方 kernel。
+- **准备融合对照：**[组件与三层模型报告](../../../experiments/deepseek_v32_echo_official/report/q1_fused_prepare/report.md)
+  的组件来源为 `q1_fused_prepare_bench_20261008_02`，15 组各 100 对，冷态 L0–L2
+  配对节省合计 4.944 µs。模型来源为 `q1_fused_prepare_model_bench_20261008_02`，
+  预先规定 500 对 AB/BA，完整同步 wall 中位数从 2.646831 降到 2.6119945 ms，
+  配对中位数为 −34.6505 µs，413 对更快。两种顺序及五个区段中位数均改善；
+  部分均值和 p99 变差，全部样本保留。候选实际 H2D 配对中位数增加 2,304 B，
+  两侧 graph private reserved 均为 62,914,560 B，不证明容量增加。
+- **独立核验与解释：**检查、干净计时和 profile 的来源与实际 native/FI ELF 匹配。
+  保存分数的 36 组精确 top-k／资格及 12 份 compact 转移已独立重算；未保存的完整
+  KV payload 仍依赖运行时数值验收。`q1_fused_prepare_profile_analysis_20261009_01`
+  核验三份 capture/replay trace，准备节点 9→3，活动时长合计 23.744→18.592 µs，
+  其余 254 个节点的归属与配置一致。该局部变化不能解释全部 wall 差值；单进程中
+  两个固定模型的 500 对也不提供独立运行置信区间。
+- **当前判断：**私有证据支持准备融合接入；NCU 检查、生产验收与正式补测均已完成，
+  当前默认路径结果见 S-039。私有配对收益与生产延迟分别报告，不改变 C10/NOSA、
+  GR 场景、物理容量或跨实现数值验收的判断。
+
+## S-039：准备融合的生产接入与四方法独立补测
+
+- **研究位置：**主条目 4.2，关联 2.5；完成 T-008 本轮指定的 Q1 工作。
+- **来源：**[MFU 报告](../../../experiments/deepseek_v32_mfu/report/h64k_a1/results.md)、
+  [汇总](../../../experiments/deepseek_v32_mfu/report/h64k_a1/summary.json)及
+  [官方对照](../../../experiments/deepseek_v32_echo_official/README.md)。Cohort 为
+  `deepseek_h64k_a1_fused_prepare_20261009_01`，报告原件为
+  `experiments/deepseek_v32_mfu/output/data/deepseek_h64k_a1_fused_prepare_report_20261009_01/`。
+  四种方法的 check、bench、阶段 profile 和逐算子 profile 共 16 个进程，均只准备
+  本方法。H65536/A1、真实 L0–L2、GPU0/CPU0–7、FP8 权重、BF16 KV、P=NH=65600；
+  每方法预热 1 次，完整 prefill 3 次、同步 step 5 次。
+- **当前结果：**HBM/ECHO/serial sparse/dense prefetch 的完整 step 中位数为
+  1.803457 / 2.562300 / 2.401064 / 5.539999 ms，L0–L2 窗口为
+  1.014466 / 1.419011 / 1.263747 / 4.415209 ms。HBM 窗口与官方参考的
+  1.014975 ms 接近；完整请求边界、输入、驻留与框架仍不同，跨实现数值验收为 false。
+- **机制与验收：**融合只合并当前 K/scales、页表和暂存区的准备，不改官方 ECHO
+  内核或预测策略。151 项 GPU 检查通过；正式验收继续检查输出、精确选择与实际状态
+  转移。两类原始 trace 均确认准备 9→3、完整 graph 263→257，其余 254 个节点的
+  归属与完整执行配置组成一致；不宣称全部依赖边等价。阶段 profile 的准备耗时合计
+  18.656 µs，逐算子 profile 为 19.040 µs。各方法 graph private reserved 均为
+  62,914,560 B，allocated、reserved 与设备占用分别记录；不支持新增容量结论。
+- **流量与收益边界：**15 个 ECHO 单步层样本均预取 64 条，随后 recall 1983–2041 条，
+  每层 H2D 为 2358144–2424960 B。完整选择保留，预约竞争导致的实际集合与流量逐次
+  验收。收益依据仍是 S-038 的私有 500 对实验，不以跨批次中位数差归因；ECHO 在当前
+  cold 边界下仍慢于 serial sparse，没有证明尾延迟改善。
+- **范围：**核对 12 个 MFU 与 12 个 C10 配置、A128 单点和 post-top-k 路径后，确认
+  它们不执行本次 Q1 准备；规划源码及执行预留公式未变。通用 ECHO 的完整 SM90a
+  CUBIN 与原实现逐字节相同，原结果保留原身份。此结论不更新 C10、NOSA、GR 质量或
+  容量填满验收。源码与独立审查见
+  [接入计划](../kda/deepseek_q1_prefetch/fused_prepare_integration_plan.md)和
+  [生产审查](../kda/deepseek_q1_prefetch/fused_prepare_production_review.md)。

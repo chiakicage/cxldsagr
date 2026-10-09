@@ -1,0 +1,507 @@
+--- a/operators/deepseek_v32/indexer/selection.py
++++ b/operators/deepseek_v32/indexer/selection.py
+@@ -11,7 +11,7 @@
+     return importlib.import_module("flashinfer.topk")
+ 
+ 
+-def _official_topk_int32(scores, count):
++def _official_topk_int32(scores, count, *, sorted_output=True, deterministic=True):
+     """Call the same official sorted operation before its public int64 conversion."""
+     backend = _topk_backend()
+     row_states = backend._get_cache_buf(
+@@ -24,8 +24,8 @@
+     indices = backend.get_topk_module().radix_topk(
+         scores,
+         count,
+-        True,
+-        True,
++        sorted_output,
++        deterministic,
+         backend.TopKTieBreak.SMALL,
+         row_states,
+         values,
+@@ -73,8 +73,11 @@
+     a stable tie-index order, so the selected IDs/order may differ on ties;
+     this is an explicit policy, not approximate or truncated selection.
+ 
+-    Capacity is ``min(k, visible_tokens)``. Layout conversion, official sorting,
+-    index conversion and invalid-slot masking are part of this operator call.
++    Q1 with 2048 selected entries and at least 32768 visible columns keeps the
++    official SMALL selection and fuses ordering/masking with official CUB.
++    Other shapes use FlashInfer's original sorted operation. Capacity is
++    ``min(k, visible_tokens)``; layout conversion, ordering and invalid-slot
++    masking are part of this operator call.
+     """
+     if (
+         not isinstance(scores, torch.Tensor)
+@@ -94,6 +97,17 @@
+             (0, count), device=scores.device, dtype=torch.int32
+         )
+     with torch.cuda.device(scores.device):
+-        values, indices = _official_topk_int32(scores.contiguous(), count)
+-        _mask_nonfinite_indices_(values, indices)
++        scores = scores.contiguous()
++        if scores.shape[0] == 1 and count == 2048 and scores.shape[1] >= 32768:
++            from operators.deepseek_v32.indexer.q1_topk_cub import sort_mask_
++
++            # SMALL still forces deterministic Filtered selection. The flags
++            # disable only the two upstream post-selection ordering kernels.
++            values, indices = _official_topk_int32(
++                scores, count, sorted_output=False, deterministic=False
++            )
++            sort_mask_(values, indices)
++        else:
++            values, indices = _official_topk_int32(scores, count)
++            _mask_nonfinite_indices_(values, indices)
+     return values, indices
+--- /dev/null
++++ b/operators/deepseek_v32/indexer/q1_topk_cub.py
+@@ -0,0 +1,71 @@
++"""CUB ordering and invalid-index masking for Q1 FlashInfer SMALL selection."""
++
++import hashlib
++import os
++from functools import cache
++from pathlib import Path
++
++from operators.deepseek_v32.indexer import _native_cache
++
++SOURCE = Path(__file__).with_name("csrc") / "q1_topk_sort.cu"
++NAME = "cxldsagr_q1_topk_sort_mask"
++FLAGS = ["-O3", "-std=c++20", "-gencode=arch=compute_90a,code=sm_90a", "-lineinfo"]
++
++
++@cache
++def build_info():
++    """Bind the wrapper, loader and complete installed CCCL include closure."""
++    import flashinfer
++
++    package = Path(flashinfer.__file__).resolve().parent
++    includes = [
++        package / "data/cccl" / suffix for suffix in ("cub", "libcudacxx/include", "thrust")
++    ]
++    files = {Path(__file__), SOURCE, Path(_native_cache.__file__)}
++    for root in includes:
++        if not root.is_dir():
++            raise FileNotFoundError(root)
++        files.update(path for path in root.rglob("*") if path.is_file())
++    return {
++        "policy": "q1-cub-uint64-composite-sort-mask-256x8-v1",
++        "include_paths": [str(path) for path in includes],
++        "source_sha256": {
++            str(path.resolve()): hashlib.sha256(path.read_bytes()).hexdigest()
++            for path in sorted(files)
++        },
++    }
++
++
++@cache
++def _module():
++    info = build_info()
++    previous = os.environ.get("TVM_FFI_CUDA_ARCH_LIST")
++    os.environ["TVM_FFI_CUDA_ARCH_LIST"] = "9.0a"
++    try:
++        return _native_cache.load(
++            name=NAME,
++            sources=[str(SOURCE)],
++            extra_include_paths=info["include_paths"],
++            extra_cuda_cflags=FLAGS,
++            extra_ldflags=[],
++            source_identity=info,
++        )
++    finally:
++        if previous is None:
++            os.environ.pop("TVM_FFI_CUDA_ARCH_LIST", None)
++        else:
++            os.environ["TVM_FFI_CUDA_ARCH_LIST"] = previous
++
++
++def runtime_info():
++    """Inspect only this wrapper's already-loaded immutable native module."""
++    return _native_cache.native_info(NAME) if _module.cache_info().currsize else None
++
++
++def sort_mask_(values, indices):
++    """Order fresh contiguous native outputs in place on the caller's stream."""
++    import tvm_ffi
++
++    module = _module()
++    with tvm_ffi.use_torch_stream():
++        module.q1_topk_sort_mask(values, indices)
+--- /dev/null
++++ b/operators/deepseek_v32/indexer/csrc/q1_topk_sort.cu
+@@ -0,0 +1,69 @@
++// Exact postprocessing of the unchanged FlashInfer SMALL-selected set.
++#include <cub/block/block_radix_sort.cuh>
++#include <cuda_runtime.h>
++#include <tvm/ffi/container/tensor.h>
++#include <tvm/ffi/error.h>
++#include <tvm/ffi/extra/c_env_api.h>
++#include <tvm/ffi/function.h>
++#include <cstdint>
++
++namespace q1_topk {
++using tvm::ffi::TensorView;
++
++template<int Threads, int Items>
++__global__ __launch_bounds__(Threads)
++void cub_sort_mask_kernel(float* values, int* indices, int count) {
++    using Sort = cub::BlockRadixSort<uint64_t, Threads, Items>;
++    __shared__ typename Sort::TempStorage storage;
++    uint64_t keys[Items];
++    const int row = blockIdx.x;
++    const int base = row * count;
++#pragma unroll
++    for (int i = 0; i < Items; ++i) {
++        const int position = threadIdx.x * Items + i;
++        uint64_t key = UINT64_MAX;
++        if (position < count) {
++            const uint32_t bits = __float_as_uint(values[base + position]);
++            const uint32_t ordered = bits ^ ((bits & 0x80000000u) ? 0xffffffffu : 0x80000000u);
++            const uint32_t index = static_cast<uint32_t>(indices[base + position]);
++            key = (static_cast<uint64_t>(~ordered) << 32) | index;
++        }
++        keys[i] = key;
++    }
++    Sort(storage).Sort(keys);
++#pragma unroll
++    for (int i = 0; i < Items; ++i) {
++        const int position = threadIdx.x * Items + i;
++        if (position < count) {
++            const uint32_t ordered = ~static_cast<uint32_t>(keys[i] >> 32);
++            const uint32_t bits = ordered ^ ((ordered & 0x80000000u) ? 0x80000000u : 0xffffffffu);
++            values[base + position] = __uint_as_float(bits);
++            indices[base + position] = (bits & 0x7fffffffu) >= 0x7f800000u
++                ? -1 : static_cast<int>(static_cast<uint32_t>(keys[i]));
++        }
++    }
++}
++
++void sort_mask(TensorView values, TensorView indices) {
++    TVM_FFI_ICHECK(values.ndim() == 2 && indices.ndim() == 2);
++    TVM_FFI_ICHECK(values.size(0) == indices.size(0) && values.size(1) == indices.size(1));
++    TVM_FFI_ICHECK(values.dtype().code == kDLFloat && values.dtype().bits == 32);
++    TVM_FFI_ICHECK(indices.dtype().code == kDLInt && indices.dtype().bits == 32);
++    TVM_FFI_ICHECK(values.device().device_type == kDLCUDA);
++    TVM_FFI_ICHECK(indices.device().device_type == values.device().device_type);
++    TVM_FFI_ICHECK(indices.device().device_id == values.device().device_id);
++    TVM_FFI_ICHECK(values.stride(1) == 1 && indices.stride(1) == 1);
++    TVM_FFI_ICHECK(values.stride(0) == values.size(1) && indices.stride(0) == indices.size(1));
++    TVM_FFI_ICHECK(values.size(1) > 0 && values.size(1) <= 2048);
++    const int device = values.device().device_id;
++    auto error = cudaSetDevice(device);
++    TVM_FFI_ICHECK(error == cudaSuccess) << cudaGetErrorString(error);
++    auto stream = static_cast<cudaStream_t>(TVMFFIEnvGetStream(kDLCUDA, device));
++    cub_sort_mask_kernel<256, 8><<<values.size(0), 256, 0, stream>>>(
++        static_cast<float*>(values.data_ptr()), static_cast<int*>(indices.data_ptr()), values.size(1));
++    error = cudaGetLastError();
++    TVM_FFI_ICHECK(error == cudaSuccess) << cudaGetErrorString(error);
++}
++}  // namespace q1_topk
++
++TVM_FFI_DLL_EXPORT_TYPED_FUNC(q1_topk_sort_mask, q1_topk::sort_mask);
+--- /dev/null
++++ b/operators/deepseek_v32/indexer/tests/test_q1_topk.py
+@@ -0,0 +1,165 @@
++"""Q1 dispatch boundaries and bitwise ordering across native stream/capture use."""
++
++from contextlib import nullcontext
++
++import pytest
++import torch
++
++from operators.deepseek_v32.indexer import q1_topk_cub, selection
++
++
++@pytest.mark.parametrize(
++    "rows,columns,k,cub",
++    [
++        (1, 32767, 2048, False),
++        (1, 32768, 2048, True),
++        (1, 32769, 2048, True),
++        (1, 131072, 2048, True),
++        (2, 32768, 2048, False),
++        (1, 32768, 2047, False),
++        (1, 2047, 2048, False),
++    ],
++)
++def test_dispatch_preserves_geometry_abi_layout_and_output_ownership(
++    monkeypatch, rows, columns, k, cub
++):
++    # CPU tensors exercise the host dispatcher with mocked CUDA metadata only.
++    monkeypatch.setattr(torch.Tensor, "is_cuda", property(lambda _: True))
++    monkeypatch.setattr(torch.cuda, "get_device_capability", lambda _: (9, 0))
++    monkeypatch.setattr(torch.cuda, "device", lambda _: nullcontext())
++    scores = torch.empty(rows, columns * 2)[:, ::2]
++    count = min(k, columns)
++    values = torch.empty(rows, count)
++    indices = torch.empty(rows, count, dtype=torch.int32)
++    calls = []
++
++    def native(actual, selected, *, sorted_output=True, deterministic=True):
++        assert actual.is_contiguous() and actual.shape == scores.shape
++        assert selected == count
++        assert (sorted_output, deterministic) == (not cub, not cub)
++        calls.append("selection")
++        return values, indices
++
++    def postprocess(name):
++        def invoke(actual_values, actual_indices):
++            assert actual_values is values and actual_indices is indices
++            calls.append(name)
++
++        return invoke
++
++    monkeypatch.setattr(selection, "_official_topk_int32", native)
++    monkeypatch.setattr(selection, "_mask_nonfinite_indices_", postprocess("original-mask"))
++    monkeypatch.setattr(q1_topk_cub, "sort_mask_", postprocess("cub-sort-mask"))
++    actual_values, actual_indices = selection.exact_topk(scores, k)
++    assert actual_values is values and actual_indices is indices
++    assert calls == ["selection", "cub-sort-mask" if cub else "original-mask"]
++
++
++def test_cub_failure_propagates_without_repeating_selection_or_mask(monkeypatch):
++    monkeypatch.setattr(torch.Tensor, "is_cuda", property(lambda _: True))
++    monkeypatch.setattr(torch.cuda, "get_device_capability", lambda _: (9, 0))
++    monkeypatch.setattr(torch.cuda, "device", lambda _: nullcontext())
++    failure = RuntimeError("native launch failed")
++    calls = []
++
++    def native(*args, **kwargs):
++        calls.append("selection")
++        return torch.empty(1, 2048), torch.empty(1, 2048, dtype=torch.int32)
++
++    def fail(*args):
++        calls.append("sort")
++        raise failure
++
++    monkeypatch.setattr(selection, "_official_topk_int32", native)
++    monkeypatch.setattr(q1_topk_cub, "sort_mask_", fail)
++    monkeypatch.setattr(selection, "_mask_nonfinite_indices_", lambda *args: calls.append("mask"))
++    with pytest.raises(RuntimeError) as caught:
++        selection.exact_topk(torch.empty(1, 32768), 2048)
++    assert caught.value is failure and calls == ["selection", "sort"]
++
++
++def require_sm90():
++    if not torch.cuda.is_available():
++        pytest.skip("CUDA unavailable; scripts/run_tests.sh gpu requires CUDA")
++    if torch.cuda.get_device_capability() != (9, 0):
++        pytest.fail("DeepSeek Q1 selection requires Hopper SM90")
++
++
++def reference(scores):
++    backend = selection._topk_backend()
++    values, indices = backend.top_k(
++        scores.contiguous(),
++        2048,
++        sorted=True,
++        deterministic=True,
++        tie_break=backend.TopKTieBreak.SMALL,
++    )
++    return values, indices.int().masked_fill(~torch.isfinite(values), -1)
++
++
++def assert_bits(actual, expected):
++    for left, right in zip(actual, expected, strict=True):
++        torch.testing.assert_close(left.view(torch.int32), right.view(torch.int32), rtol=0, atol=0)
++
++
++@pytest.mark.parametrize("columns", [32767, 32768, 32769, 65536, 131072])
++@pytest.mark.parametrize("pattern", ["ties", "signed_zero", "causal", "extreme"])
++def test_cuda_q1_threshold_layout_and_value_bits(columns, pattern):
++    require_sm90()
++    storage = torch.empty(1, columns * 2 + 2, device="cuda")
++    scores = storage[:, 1:-1:2]
++    if pattern == "ties":
++        scores.copy_(torch.arange(columns, device="cuda").remainder(19))
++    elif pattern == "signed_zero":
++        scores.zero_()
++        scores.view(torch.int32)[:, ::2] = -2147483648
++    elif pattern == "causal":
++        scores.copy_(torch.randn_like(scores))
++        scores[:, 7:] = -torch.inf
++    else:
++        values = torch.tensor(
++            [
++                torch.finfo(torch.float32).min,
++                -1e30,
++                -1e-38,
++                -0.0,
++                0.0,
++                1e-38,
++                1e30,
++                torch.finfo(torch.float32).max,
++                -torch.inf,
++            ],
++            device="cuda",
++        )
++        scores.copy_(values[torch.arange(columns, device="cuda").remainder(len(values))])
++    before = scores.clone()
++    assert_bits(selection.exact_topk(scores, 2048), reference(scores))
++    torch.testing.assert_close(scores.view(torch.int32), before.view(torch.int32), rtol=0, atol=0)
++
++
++def test_cuda_q1_changed_graph_inputs_on_nondefault_stream():
++    require_sm90()
++    scores = torch.randn(1, 32769, device="cuda")
++    stream = torch.cuda.Stream()
++    stream.wait_stream(torch.cuda.current_stream())
++    with torch.cuda.stream(stream):
++        for _ in range(3):
++            selection.exact_topk(scores, 2048)
++        graph = torch.cuda.CUDAGraph()
++        with torch.cuda.graph(graph, stream=stream):
++            output = selection.exact_topk(scores, 2048)
++        for pattern in ("random", "ties", "invalid", "short", "signed_zero"):
++            if pattern == "random":
++                scores.normal_()
++            elif pattern == "invalid":
++                scores.fill_(-torch.inf)
++            else:
++                scores.zero_()
++                if pattern == "short":
++                    scores[:, 7:] = -torch.inf
++                elif pattern == "signed_zero":
++                    scores.view(torch.int32)[:, ::2] = -2147483648
++            graph.replay()
++            assert_bits(output, reference(scores))
++    stream.synchronize()
++    torch.cuda.current_stream().wait_stream(stream)
+--- a/experiments/deepseek_v32_mfu/src/backend_provenance.py
++++ b/experiments/deepseek_v32_mfu/src/backend_provenance.py
+@@ -60,6 +60,8 @@
+         ROOT / "uv.lock",
+         ROOT / "scripts/prepare_3rdparty.py",
+         ROOT / "evaluation/local_native.py",
++        ROOT / "operators/deepseek_v32/indexer/q1_topk_cub.py",
++        ROOT / "operators/deepseek_v32/indexer/csrc/q1_topk_sort.cu",
+     }
+     files.update((ROOT / "operators/deepseek_v32/norm").glob("*.py"))
+     files.update((ROOT / "operators/deepseek_v32/linear").glob("*.py"))
+@@ -224,6 +226,23 @@
+     return identity
+ 
+ 
++def _q1_topk_identity():
++    """Verify declared CUB source bytes and any observed native build."""
++    from operators.deepseek_v32.indexer.q1_topk_cub import build_info, runtime_info
++
++    identity = build_info()
++    sources = identity.get("source_sha256")
++    if not sources:
++        raise RuntimeError("Q1 top-k has no declared source identity")
++    for path, expected in sources.items():
++        if digest(path) != expected:
++            raise RuntimeError(f"Q1 top-k source changed during execution: {path}")
++    runtime = runtime_info()
++    if runtime is not None and runtime["build_identity"]["source_identity"] != identity:
++        raise RuntimeError("Loaded Q1 top-k differs from current build identity")
++    return identity
++
++
+ def _mapped_libraries():
+     """Read loaded file mappings without searching any cache directory."""
+     maps = Path("/proc/self/maps")
+@@ -332,6 +351,8 @@
+     linear_quantization = None if quantizer is None else quantizer.runtime_info()
+     decode = sys.modules.get("operators.deepseek_v32.attention.device_only.decode")
+     attention_decode = None if decode is None else decode.runtime_info()
++    topk = sys.modules.get("operators.deepseek_v32.indexer.q1_topk_cub")
++    q1_topk_native = None if topk is None else topk.runtime_info()
+     indexer_triton = {}
+     for component in ("page64", "decode_hint"):
+         module = sys.modules.get(f"operators.deepseek_v32.indexer.{component}")
+@@ -361,6 +382,7 @@
+         "cute_jit": cute,
+         "linear_quantization_triton": linear_quantization,
+         "attention_decode_triton": attention_decode,
++        "q1_topk_cub_native": q1_topk_native,
+         "indexer_adaptation_triton": indexer_triton,
+         "boundary": "Registered modules plus process mappings identify loaded native libraries; "
+         "live vendor and local norm CuTe cache entries identify compiled specializations. "
+@@ -414,6 +436,7 @@
+         "typed_norm": _typed_norm_identity(),
+         "official_echo_decode": official_decode.build_info(),
+         "official_echo_prefetch_adapter": official_prefetch.build_info(),
++        "q1_exact_topk": _q1_topk_identity(),
+         "flash_mla_upstream_cutlass_pin": "147f5673d0c1c3dcf66f78d677fd647e4a020219",
+         "flash_mla_shared_cutlass_pin": revisions["cutlass"],
+         "boundary": "Loaded official libraries and tracked build sources; hashes are identity, "
+--- a/experiments/deepseek_v32_mfu/tests/test_backend_provenance.py
++++ b/experiments/deepseek_v32_mfu/tests/test_backend_provenance.py
+@@ -21,6 +21,7 @@
+         "flashinfer.norm.kernels.fused_add_rmsnorm",
+         "operators.deepseek_v32.norm._compile",
+         "operators.deepseek_v32.linear.quantization",
++        "operators.deepseek_v32.indexer.q1_topk_cub",
+     ):
+         monkeypatch.delitem(sys.modules, name, raising=False)
+     monkeypatch.setattr(provenance, "_mapped_libraries", set)
+@@ -81,6 +82,8 @@
+         "operators/deepseek_v32/linear/quantization.py",
+         "operators/deepseek_v32/linear/_quantization_kernel.py",
+         "operators/deepseek_v32/linear/_quantization_identity.py",
++        "operators/deepseek_v32/indexer/q1_topk_cub.py",
++        "operators/deepseek_v32/indexer/csrc/q1_topk_sort.cu",
+     ):
+         path = provenance.ROOT / relative
+         assert path in sources and path.is_file()
+@@ -125,6 +128,7 @@
+     assert result["native_jit"] == []
+     assert result["cute_jit"] == []
+     assert result["linear_quantization_triton"] is None
++    assert result["q1_topk_cub_native"] is None
+ 
+ 
+ def test_runtime_observes_already_imported_linear_quantizer(empty_runtime, monkeypatch):
+@@ -306,7 +310,12 @@
+             }[name]
+         },
+     )
+-    for name in ("_installed_flashinfer", "_recall_dispatch_identity", "_typed_norm_identity"):
++    for name in (
++        "_installed_flashinfer",
++        "_recall_dispatch_identity",
++        "_typed_norm_identity",
++        "_q1_topk_identity",
++    ):
+         monkeypatch.setattr(provenance, name, dict)
+     monkeypatch.setattr(
+         provenance,
+@@ -377,3 +386,35 @@
+     module.build_info = lambda: {"identity": {"source_and_dependency_sha256": {}}}
+     with pytest.raises(RuntimeError, match="no declared source/dependency identity"):
+         provenance._recall_dispatch_identity()
++
++
++def test_q1_topk_runtime_does_not_create_a_native_module(empty_runtime, monkeypatch):
++    observed = {"artifact_sha256": "already-loaded", "build_identity": {}}
++    module = ModuleType("operators.deepseek_v32.indexer.q1_topk_cub")
++    module.runtime_info = lambda: observed
++    module._module = lambda: pytest.fail("Runtime inspection must not invoke a module factory")
++    monkeypatch.setitem(sys.modules, module.__name__, module)
++    assert provenance.collect_flashinfer_runtime_artifacts()["q1_topk_cub_native"] is observed
++
++
++def test_q1_topk_identity_rejects_source_and_native_build_changes(tmp_path, monkeypatch):
++    source = tmp_path / "sort.cu"
++    source.write_bytes(b"accepted CUB adapter")
++    identity = {"source_sha256": {str(source): sha256(source.read_bytes())}}
++    module = ModuleType("operators.deepseek_v32.indexer.q1_topk_cub")
++    module.build_info = lambda: identity
++    module.runtime_info = lambda: None
++    monkeypatch.setitem(sys.modules, module.__name__, module)
++    assert provenance._q1_topk_identity() is identity
++    module.runtime_info = lambda: {"build_identity": {"source_identity": identity}}
++    assert provenance._q1_topk_identity() is identity
++    module.runtime_info = lambda: {"build_identity": {"source_identity": {"stale": True}}}
++    with pytest.raises(RuntimeError, match="differs from current build identity"):
++        provenance._q1_topk_identity()
++    module.runtime_info = lambda: None
++    source.write_bytes(b"unaccepted source change")
++    with pytest.raises(RuntimeError, match="source changed during execution"):
++        provenance._q1_topk_identity()
++    module.build_info = lambda: {"source_sha256": {}}
++    with pytest.raises(RuntimeError, match="no declared source identity"):
++        provenance._q1_topk_identity()

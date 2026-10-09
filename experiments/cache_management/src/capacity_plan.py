@@ -152,6 +152,8 @@ def main(argv=None):
         "models/deepseek_v32/execution/cache_resources.py",
         "models/deepseek_v32/execution/planning.py",
         "models/deepseek_v32/cache/session.py",
+        "operators/deepseek_v32/indexer/echo.py",
+        "operators/deepseek_v32/attention/_config.py",
         "cache/capacity.py",
         "cache/sparse_token_pool.py",
         "cache/host_allocation.py",

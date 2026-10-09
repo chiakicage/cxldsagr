@@ -65,6 +65,8 @@ def test_supplied_memory_plan_records_transient_candidate_semantics_without_cuda
     assert point["candidate_host_tokens"] == point["candidate_device_to_host_bytes"] == 0
     assert "models/deepseek_v32/execution/adapter.py" in saved["sources"]
     assert "models/deepseek_v32/execution/planning.py" in saved["sources"]
+    assert "operators/deepseek_v32/indexer/echo.py" in saved["sources"]
+    assert "operators/deepseek_v32/attention/_config.py" in saved["sources"]
     assert (output / "checkpoint_config.json").read_bytes() == (
         tmp_path / "config.json"
     ).read_bytes()

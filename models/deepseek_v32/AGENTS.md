@@ -113,7 +113,87 @@ DMA ticket 借用已有 storage，不分配 GPU ID/count scratch，`dense_ticket
 compute/IO 交集，不能仅由创建 stream 或异步 API 推断重叠或性能收益。普通 sparse
 pool 保留原页分配与 FIFO 策略，不套用 dense 的连续布局。
 
+## Q1 indexer 与 attention
+
+SM90 推理的 FP32 `scores[1,65537]` 在内层 stride 为 1、输入按 16 B 对齐时，
+hint 均值可融合有限值掩码、计数与发布。必须保留已验收的 Torch FP32 归约树、
+subnormal 和非有限值处理，仅写入 `offset[0]`；decode EMA 仍单独更新。
+其他形状、布局或梯度模式保留原分派。源码或 native 位置变化后重新绑定二进制并
+验收全部 offset 位、变化输入的 graph replay，以及后续 Q>1 对 hint 的实际消费。
+移除临时张量不等于减少 graph reserved 或新增 session 容量，规划仍覆盖通用路径。
+
+精确 top-k 在 `Q=1`、`k=2048` 且 score storage 至少有 32,768 列时，保留
+FlashInfer SMALL 的精确选择核心，用官方 CUB 对复合 key 排序并合并 nonfinite ID
+mask。排序仍为分数降序、相同有序浮点 key 的 ID 升序，signed zero 沿用官方 radix
+顺序；值须逐位保留，无效 ID 为 -1。其他形状保留原 sorted 分派。不能用放宽并列
+规则换取性能；native 身份须包含实际 CUB headers、wrapper 和 loader。
+
+Resident indexer 仅在 `Q=1`、`prefetch is None` 且有效 causal context
+`query_start + 1 >= 32768` 时使用官方 paged MQA，不能仅按 K storage 长度触发。
+按 64-token 页打包原 FP8 K 与 FP32 scales，保留 causal mask、精确 top-k 及并列规则；
+其他 resident query shape 保留原分派。N=65,537 的 packed storage 为
+8,659,200 B，另计页表与最多 132 个 SM90 SM 对应的 1,064 B 调度 metadata。
+执行预算须覆盖最大 query 及可达的 Q1 尾块，按互斥活跃阶段的较大峰值预留，
+不能绕过准入或按层重复计入临时打包空间。
+
+Q1 offload 在 `N=query_start+1>=32768`、已初始化 history 恰为 `query_start`，
+且预取 lease 至少有 64 个合法槽位时，调用固定版本 ECHO 的官方 paged fused decode。
+官方按 `score > offset[1]` 预测，最多暂存 64 条 record，再通过本地适配发布到 FIFO
+pool；预测记录可以不属于精确 top-k，必须累计全部实际 H2D，随后完整召回剩余选择。
+其他 shape 和容量条件保留 prefill 分派。`offset[0]` 仍是 prefill mean，`offset[1]`
+是单请求 decode EMA，初始为 0，Q>1 不更新；Q1 精确选择后按官方公式
+`0.5 * old + 0.5 * kth_score` 更新。两者随现有 session/候选/graph 状态统一保存和恢复。
+
+暂存映射编码不得暴露给普通精确召回。官方 kernel 启动前，lease 必须持有暂存
+storage 与清理回调；finalize、rollback 和 discard 在普通发布前按原 stream 清除
+尚未被 promotion 替换的暂存 tag，host ID 0 同样有效。清理失败保留 lease 和 storage，
+异步完成不明时遵循 owner 保留与 poisoned 契约。N=65,537 时额外暂存空间为
+336,132 B，包含逐 token host 表、64 条 BF16 record 和 64 个 host ID；在 top-k/
+attention 前释放临时引用，graph 保留的全部 storage 仍另计 private reserved。
+
+官方 Q1 的准备融合只合并当前 K/scales 的 page64 打包、identity block table、
+逻辑 host-token 表与暂存重置；每次调用和 graph replay 都读取当前内容，不缓存
+packed history。保留原 packed-input 控制入口、4 B 对齐支持、全部 offset 位、
+官方评分／调度、promotion 和 owner 清理。可用时按 16 B 向量读取，否则按 4 B
+读取；不新增持久 storage，graph 私有池仍单独验收。生产分派沿用官方 Q1 条件，
+不能将单 session 的 bounded 空槽准备条件当作全部官方 Q1 的支持条件。
+实际参与证据须绑定正常返回的融合入口及已加载的不可变 native 身份；
+`build_info` 声明能力不等于执行过该入口，旧 receipt 不可用于新源码。
+
+官方 Q1 的 cold 验收须另立预测策略身份，核验严格阈值、实际 stage IDs/record、
+暂存 tag、合法 slot 次序、promotion journal、映射、priority、clock、计数及完整
+精确召回；不能套用 prefill 的“认证子集属于 top-k”证明。正式计时每个样本前恢复
+相同 prefix、hint 和驻留状态，不能把连续重放后的 warm 状态计作 cold。
+
+官方 Q1 的预取准备可在单 session、独占操作、普通持久 append 且 `P-H>=64`
+时只选择 64 个空槽。`L<=H` 证明空槽足够，不证明历史驻留；GPU 仍须核验全池
+priority、选中槽的 free bitmap 和反向映射，并重置全部 journal、计数与统计。
+独立的 bounded token 绑定 buffers、storage、stream 和 64 槽上限，只能由显式
+声明消费上限的官方 Q1 路径使用；通用 prefill 拒绝该 token。其他形状、候选或
+容量条件保留原完整准备。验收须记录实际准备上限，不能将 64 槽证据标成 8,192 槽。
+
+`sparse_mla_decode(q, kv, indices, scale, value_dim=512)` 是显式 Q1 入口，支持
+SM90、BF16、H64/H128、D576/V512。16 个分片调用官方 sparse prefill，并用自然对数
+LSE 合并 BF16 partial 输出；保留重复 ID、int64 越界屏蔽、strides、对齐和空分片语义。
+模型仅对原始 Q1 且 selection 宽度为 2,048 的 batch 调用该入口；容量拆分产生的
+Q1 继续使用 `sparse_mla`。Decode 的新增舍入按原容差验收，不放宽 prefill 的切片
+逐位契约，也不以单算子检查替代完整模型补测。
+
+Decode 的 query 准备、重复 Q、partial 输出、LSE、合并输出与 ID 临时空间均计入
+预算；在模型 KV 已连续且对齐的条件下，H128/S2048 的活跃空间上界为 4,816,896 B。
+仅将超过 indexer 预留的部分计为 attention 增量。Graph capture 保留的 storage
+按私有池全部 segment 容量单独核验，不能用活跃张量字节数代替 reserved。
+`build_info()` 须覆盖全部本地源码；实际 combine 的 compiled hash、metadata 和
+PTX/CUBIN 身份通过 `runtime_info()` 在测量外导出，执行时只记录编译对象。
+
 ## 计算图与模型生命周期
+
+SM90 FP8 的 Q1 projection capture 可将 KV-A/RMS 与 index-K/LayerNorm 放在
+模型持有的辅助 stream，Q 分支留在当前 stream，并在成对 RoPE 前汇合。
+归一化输入和跨 stream 消费的结果须登记 storage 生命周期；执行与汇合都失败时
+保留两者异常，关闭模型时先 drain。Eager 与 Q>1 保留原顺序。验收须覆盖全部
+projection 输出、变化输入的 replay 及完整模型；辅助 stream 不代表实际计算重叠。
+实际保留的 graph private segments 单独计入容量，不能只按活跃张量估算。
 
 纯计算图策略为 `deepseek-compute-islands-v4-bound-inputs`，用于 prefill 和现有 C10
 路径，只捕获 projection 和

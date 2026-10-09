@@ -1,0 +1,36 @@
+--- a/operators/deepseek_v32/indexer/csrc/official_prefetch.cu
++++ b/operators/deepseek_v32/indexer/csrc/official_prefetch.cu
+@@ -66,16 +66,17 @@
+     old_ids[lane] = old;
+   }
+   __syncthreads();
+-  if (lane < count) {
+-    for (int i = 0; i < lane; ++i) {
+-      assert(ids[i] != ids[lane]);
+-      assert(slots[i] != slots[lane]);
++  // Distribute the triangular uniqueness checks across the block. Every
++  // active pair is checked before any record or persistent map is modified.
++  for (int pair = lane; pair < kCap * kCap; pair += blockDim.x) {
++    const int left = pair / kCap, right = pair % kCap;
++    if (left < count && right < left) {
++      assert(ids[left] != ids[right]);
++      assert(slots[left] != slots[right]);
+     }
+   }
+-  __syncthreads();
++  const int evicted = __syncthreads_count(lane < count && old_ids[lane] != kMissing);
+   if (lane == 0) {
+-    int evicted = 0;
+-    for (int i = 0; i < count; ++i) evicted += old_ids[i] != kMissing;
+     stats[0] = count;
+     stats[1] = evicted;
+     stats[2] = int64_t(*counter) - count;
+@@ -131,7 +132,7 @@
+              TensorView records, TensorView h2d, TensorView d2h,
+              TensorView sorted_slots, TensorView allocations, TensorView stats) {
+   auto stream = stream_for(records);
+-  validate_promotion_kernel<<<1, kCap, 0, stream>>>(
++  validate_promotion_kernel<<<1, 256, 0, stream>>>(
+       static_cast<int*>(stage_ids.data_ptr()), static_cast<uint32_t*>(counter.data_ptr()),
+       static_cast<int*>(h2d.data_ptr()), static_cast<int64_t*>(d2h.data_ptr()),
+       static_cast<int*>(sorted_slots.data_ptr()), static_cast<int64_t*>(allocations.data_ptr()),

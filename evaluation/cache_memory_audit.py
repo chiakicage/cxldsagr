@@ -68,10 +68,20 @@ class WorkspaceAllowance:
     hint: int
     metadata: int
     copy_source: int
+    paged_q1_extra: int = 0
+    attention_q1_extra: int = 0
 
     @property
     def total(self):
-        return self.logits + self.selection + self.hint + self.metadata + self.copy_source
+        return (
+            self.logits
+            + self.selection
+            + self.hint
+            + self.metadata
+            + self.copy_source
+            + self.paged_q1_extra
+            + self.attention_q1_extra
+        )
 
     @classmethod
     def echo(cls, *, queries, context, topk, width, host_tokens, pool_tokens, inflight=2):
@@ -79,12 +89,41 @@ class WorkspaceAllowance:
         if any(type(value) is not int or value < 1 for value in values):
             raise ValueError("workspace dimensions must be positive integers")
         columns = (context + 127) // 128 * 128
+        logits = 16 * queries * columns
+        selection = 64 * queries * min(topk, context)
+        hint = 32 * columns
+        paged_q1_extra = 0
+        # Independent SM90 audit contract: resident Q1 uses paged logits from
+        # N=32768. A larger maximum query size may still execute a Q1 tail.
+        # Keep this calculation independent of the production reservation.
+        if context >= 32768:
+            pages = (context + 63) // 64
+            paged_columns = (context + 255) // 256 * 256
+            paged_q1 = (
+                48 * paged_columns
+                + 64 * min(topk, context)
+                + pages * 64 * (128 + 4)
+                + pages * 4
+                + (132 + 1) * 2 * 4  # Two int32 schedule values for up to 132 SM90 SMs.
+                + 4 * context
+                + 64 * (width * 2 + 4)  # Official token table and 64-record stage.
+            )
+            paged_q1_extra = max(0, paged_q1 - (logits + selection + hint))
+        attention_q1_extra = 0
+        if min(topk, context) >= 2048:
+            # Independent H128, 16-split BF16 decode contract. Existing model
+            # KV is aligned/contiguous; include prepared/repeated Q, partials,
+            # both FP32 statistics, merged output and selected-ID temporaries.
+            decode = 128 * (16 * (width * 2 + 512 * 2 + 8) + width * 2 + 512 * 2) + 32 * 2048
+            attention_q1_extra = max(0, decode - (logits + selection + hint + paged_q1_extra))
         return cls(
-            16 * queries * columns,
-            64 * queries * min(topk, context),
-            32 * columns,
+            logits,
+            selection,
+            hint,
             64 * (pool_tokens + 1) + 64 * host_tokens,
             inflight * queries * width * 2,
+            paged_q1_extra,
+            attention_q1_extra,
         )
 
 

@@ -60,6 +60,9 @@ def _weight_identity(model):
         visit(getattr(model, name), name)
     for index, block in enumerate(model.blocks):
         visit(block.attention.attention, f"layer.{index}.attention")
+        stream = getattr(block.attention.attention, "_q1_projection_stream", None)
+        if stream is not None:
+            result.append((f"layer.{index}.projection_stream", stream.cuda_stream))
         visit(block.post_norm_weight, f"layer.{index}.post_norm")
         visit(block.mlp, f"layer.{index}.mlp")
     return tuple(result)
@@ -375,6 +378,15 @@ class DeepSeekExtendGraph:
             "history_tokens": self.history,
             "query_tokens": self.queries,
             "cache_method": self.method,
+            "q1_projection_schedule": (
+                "query-and-kv-index-key-branches-v1"
+                if self.queries == 1
+                and all(
+                    getattr(block.attention.attention, "_q1_projection_stream", None) is not None
+                    for block in self.model.blocks
+                )
+                else None
+            ),
             "dense_history_wait": (
                 "after_indexer_topk_before_main_kv_append"
                 if self.dense_history_after_selection

@@ -20,6 +20,7 @@ def activation_quantization(
     STRIDE_COLUMN: tl.constexpr,
     CONTIGUOUS_FULL_GROUPS: tl.constexpr,
     GROUPS_PER_CTA: tl.constexpr,
+    SCALE_STRIDE_COLUMN: tl.constexpr,
 ):
     groups_per_row: tl.constexpr = triton.cdiv(COLUMNS, 128)
     if ROWS * COLUMNS > 0x7FFFFFFF:
@@ -59,4 +60,8 @@ def activation_quantization(
     normalized = values * inverse[:, None]
     encoded = normalized.to(tl.float8e4nv)
     tl.store(Data + output_offsets, encoded, valid)
-    tl.store(Scales + group, scales, valid_group)
+    if SCALE_STRIDE_COLUMN:
+        scale_offsets = group // groups_per_row + (group % groups_per_row) * SCALE_STRIDE_COLUMN
+    else:
+        scale_offsets = group
+    tl.store(Scales + scale_offsets, scales, valid_group)

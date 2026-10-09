@@ -1,6 +1,6 @@
 """CPU proof of the bounded cold-ECHO prefetch, append and recall transitions.
 
-Raw scores establish coarse-bin eligibility during independent acceptance.
+Raw scores establish policy-specific eligibility during independent acceptance.
 Compact evidence retains the eligibility bitmap and source tensor identities;
 its reread verifies transitions, not the omitted score-to-bitmap computation.
 Final KV bytes retain the separate runtime cache-state check's boundary.
@@ -16,6 +16,11 @@ from evaluation.validation import identity_digest
 
 MISSING = torch.iinfo(torch.int32).max
 SCHEMA = "cold-echo-prefetch-transition-v1"
+COARSE_POLICY = "native-half-ordered-high-byte-strict-bin-v1"
+OFFICIAL_POLICY = "official-q1-predictive-staging-promotion-v1"
+OFFICIAL_ELIGIBILITY = "official-fp32-strict-predictive-threshold-v1"
+OFFICIAL_SCHEMA = "cold-echo-official-q1-prefetch-transition-v1"
+BOUNDED_FREE_PREPARATION = "bounded-free-q1-v1"
 STAGES = ("initial", "after_prefetch", "after_append", "after_recall")
 
 
@@ -107,6 +112,31 @@ def eligible_mask(scores, hint, history, topk):
     return _eligibility(scores, hint, history, topk)[0]
 
 
+def _policy(layer):
+    policy = layer.get("prefetch_policy", COARSE_POLICY)
+    require(policy in (COARSE_POLICY, OFFICIAL_POLICY), "Unknown prefetch policy")
+    return policy
+
+
+def _raw_eligibility(layer):
+    if _policy(layer) == COARSE_POLICY:
+        return _eligibility(layer["scores"], layer["initial_hint"], layer["H"], layer["topk"])
+    history = layer["H"]
+    scores = tensor(layer["scores"], (1, history + 1), torch.float32, "official scores")
+    hint = tensor(layer["initial_hint"], (1,), torch.float32, "official initial hint")
+    require(bool(torch.isfinite(scores).all()), "Nonfinite causal indexer score")
+    require(bool(torch.isfinite(hint).all()), "Nonfinite initial hint")
+    eligible = scores[0, :history] > hint[0]
+    return eligible, {
+        "schema": OFFICIAL_ELIGIBILITY,
+        "score_identity": tensor_identity(scores),
+        "hint_identity": tensor_identity(hint),
+        "eligible_identity": tensor_identity(eligible),
+        "candidate_occurrences": int(eligible.sum()),
+        "checked_from_scores": True,
+    }
+
+
 def _selection(layer, scores=None):
     history, queries, topk = layer["H"], layer["A"], layer["topk"]
     ids = tensor(
@@ -136,6 +166,66 @@ def _selection(layer, scores=None):
     return selected
 
 
+def preparation_capacity(metadata):
+    """Check an observed preparation contract without inferring it from cap64.
+
+    Existing full-FIFO evidence has no descriptor. Bounded-free evidence must
+    retain the actual Q1 dispatch and ownership facts observed at preparation.
+    """
+    history, queries, slots = (metadata.get(name) for name in ("H", "A", "slots"))
+    require(
+        all(type(value) is int and value > 0 for value in (history, queries, slots))
+        and history + queries <= slots,
+        "Invalid preparation dimensions",
+    )
+    full_capacity = min(8192, slots - queries)
+    if "preparation" not in metadata:
+        return full_capacity
+    preparation = metadata["preparation"]
+    expected = {
+        "kind": BOUNDED_FREE_PREPARATION,
+        "query_start": history,
+        "query_count": 1,
+        "visible_columns": history + 1,
+        "initialized_history": history,
+        "prepared_limit": 64,
+        "single_session": True,
+        "exclusive_operation": True,
+        "pending_owner_matches": True,
+        "persistent_append": True,
+    }
+    require(
+        isinstance(preparation, dict)
+        and set(preparation) == {*expected, "requested_max_prefetch"}
+        and all(
+            type(preparation[name]) is type(value) and preparation[name] == value
+            for name, value in expected.items()
+        ),
+        "Unsupported bounded-free preparation descriptor",
+    )
+    requested = preparation["requested_max_prefetch"]
+    require(
+        queries == 1
+        and history + 1 >= 32768
+        and slots - history >= 64
+        and type(requested) is int
+        and 64 <= requested <= full_capacity
+        and type(metadata.get("record_bytes")) is int
+        and metadata["record_bytes"] == 1152
+        and type(metadata.get("topk")) is int
+        and metadata["topk"] == 2048
+        and metadata.get("prefetch_policy") == OFFICIAL_POLICY
+        and type(metadata.get("max_prefetch")) is int
+        and metadata["max_prefetch"] == 64
+        and type(metadata.get("prepared_max_prefetch")) is int
+        and metadata["prepared_max_prefetch"] == 64
+        and type(metadata.get("hint_index")) is int
+        and metadata["hint_index"] == 1,
+        "Unsupported bounded-free preparation scope",
+    )
+    return 64
+
+
 def _metadata(layer):
     history, queries, slots = layer["H"], layer["A"], layer["slots"]
     require(
@@ -146,22 +236,54 @@ def _metadata(layer):
         "Invalid execution dimensions",
     )
     require(history + queries <= slots, "Cold bounded proof requires H+A<=P")
-    require(
-        layer["max_prefetch"] == min(8192, slots - queries),
-        "Prefetch cap differs from actual supported policy",
-    )
+    prepared_cap = preparation_capacity(layer)
+    if _policy(layer) == OFFICIAL_POLICY:
+        require(
+            queries == 1
+            and layer["record_bytes"] == 1152
+            and layer["max_prefetch"] == 64
+            and layer.get("prepared_max_prefetch") == prepared_cap
+            and prepared_cap >= 64
+            and layer.get("hint_index") == 1,
+            "Official Q1 policy requires effective cap64, prepared headroom and hint slot1",
+        )
+    else:
+        require(
+            layer["max_prefetch"] == prepared_cap,
+            "Prefetch cap differs from actual supported policy",
+        )
     global_ids = tensor(layer["global_ids"], (history + queries,), torch.int64, "global IDs")
     equal(
         global_ids.sort().values,
         torch.arange(history + queries),
-        "single-session complete host arena",
+        "single-session complete valid host prefix",
     )
+    _host_geometry(layer)
     hint = tensor(layer["initial_hint"], (1,), torch.float32, "initial hint")
     require(bool(torch.isfinite(hint).all()), "Nonfinite initial hint")
     return history, queries, slots, global_ids
 
 
-def _stage(stage, history, queries, slots, global_ids, label):
+def _host_geometry(layer):
+    end = layer["H"] + layer["A"]
+    fields = ("host_arena_tokens", "session_host_tokens")
+    if not any(name in layer for name in fields):
+        # Existing evidence covered an arena with exactly H+A entries.
+        return end, end
+    require(all(name in layer for name in fields), "Incomplete host capacity metadata")
+    arena, session = (layer[name] for name in fields)
+    require(
+        type(arena) is int
+        and type(session) is int
+        and arena % 64 == 0
+        and session == (end + 63) // 64 * 64
+        and arena >= session,
+        "Invalid page-aligned host capacities",
+    )
+    return arena, session
+
+
+def _stage(stage, history, queries, slots, global_ids, label, *, host_padding_tokens):
     logical = tensor(
         stage["logical_to_slot"], (history + queries,), torch.int32, label + " logical map"
     ).long()
@@ -170,6 +292,13 @@ def _stage(stage, history, queries, slots, global_ids, label):
     priority = tensor(stage["priority"], (slots + 1,), torch.int64, label + " priority")
     clock = tensor(stage["clock"], (1,), torch.int64, label + " clock")
     counters = tensor(stage["counter_totals"], (8,), torch.int64, label + " counters")
+    padding = tensor(
+        stage.get("padding_to_slot", torch.empty(0, dtype=torch.int32)),
+        (host_padding_tokens,),
+        torch.int32,
+        label + " host padding map",
+    )
+    equal(padding, torch.full_like(padding, MISSING), label + " unmapped host padding")
     present = logical != MISSING
     mapped = logical[present]
     require(bool(((mapped > 0) & (mapped <= slots)).all()), f"{label}: invalid physical slot")
@@ -218,8 +347,9 @@ def _priority(actual, present, logical_priority, label):
 
 
 def _metrics(layer, selected, prefetched, recalls, rejected):
-    history, queries, slots = layer["H"], layer["A"], layer["slots"]
+    queries, slots = layer["A"], layer["slots"]
     size, moved, missing = int(selected.sum()), int(prefetched.sum()), int(recalls.sum())
+    host_arena, session_host = _host_geometry(layer)
     expected = {
         "written_records": queries,
         "transient_written_records": 0,
@@ -236,8 +366,8 @@ def _metrics(layer, selected, prefetched, recalls, rejected):
         "device_to_host_bytes": queries * layer["record_bytes"],
         "record_bytes": layer["record_bytes"],
         "device_slots": slots,
-        "host_token_capacity": history + queries,
-        "session_host_tokens": history + queries,
+        "host_token_capacity": host_arena,
+        "session_host_tokens": session_host,
         "padding_slots": 1,
         "candidate_slots": 0,
     }
@@ -278,17 +408,75 @@ def _final_state(layer, final, logical_priority):
         )
 
 
+def _official_staging(layer, prefetch, copied):
+    require("official_staging" in layer, "Official staging observation missing")
+    stage = layer["official_staging"]
+    hosts = tensor(stage["host_ids"], (64,), torch.int32, "official stage host IDs")
+    slots = tensor(stage["prepared_slots"], (64,), torch.int32, "official prepared slot order")
+    journal = tensor(
+        stage["allocation_log"], (layer["slots"] + 1,), torch.int64, "official allocation log"
+    )
+    equal(slots, torch.arange(1, 65, dtype=torch.int32), "official cold prepared FIFO ranks")
+    equal(hosts[copied:], torch.full_like(hosts[copied:], -1), "unused official stage IDs")
+    require(
+        bool(((hosts[:copied] >= 0) & (hosts[:copied] < layer["H"] + 1)).all())
+        and hosts[:copied].unique().numel() == copied,
+        "Invalid or duplicate official stage host IDs",
+    )
+    expected_hosts = prefetch["reverse"][slots[:copied].long()]
+    equal(hosts[:copied].long(), expected_hosts, "official stage-to-pool publication")
+    expected_log = torch.full_like(journal, MISSING)
+    expected_log[slots[:copied].long()] = hosts[:copied].long()
+    equal(journal, expected_log, "official allocation journal")
+    # Final _stage validation proves every forward/reverse map is legal and no
+    # temporary tag escaped. These explicit stage IDs also bind the copy order.
+    expected_shape = (copied, layer["record_bytes"] // 2)
+    if "records" in stage or "expected_records" in stage:
+        records = tensor(stage["records"], expected_shape, torch.bfloat16, "official stage KV")
+        expected = tensor(
+            stage["expected_records"], expected_shape, torch.bfloat16, "official host KV"
+        )
+        equal(records.view(torch.int16), expected.view(torch.int16), "official staged KV bytes")
+        checked = {
+            "checked_from_records": True,
+            "records_identity": tensor_identity(records),
+            "host_records_identity": tensor_identity(expected),
+        }
+    else:
+        checked = stage.get("record_validation", {})
+        require(checked.get("checked_from_records") is True, "Official staged KV check missing")
+        record_identity = checked.get("records_identity", {})
+        require(
+            record_identity == checked.get("host_records_identity")
+            and record_identity.get("shape") == list(expected_shape)
+            and record_identity.get("dtype") == "torch.bfloat16"
+            and len(record_identity.get("sha256", "")) == 64,
+            "Invalid saved official staged KV identity",
+        )
+    return {
+        "host_ids_identity": tensor_identity(hosts),
+        "prepared_slots_identity": tensor_identity(slots),
+        "allocation_log_identity": tensor_identity(journal),
+        "record_validation": checked,
+        "temporary_tags_cleared": True,
+        "copy_order_matches_publication": True,
+    }
+
+
 def validate_layer(layer):
     history, queries, slots, global_ids = _metadata(layer)
+    host_arena, session_host = _host_geometry(layer)
+    host_padding_tokens = host_arena - history - queries
     scores = layer.get("scores")
     if scores is not None:
-        eligible, eligibility = _eligibility(scores, layer["initial_hint"], history, layer["topk"])
+        eligible, eligibility = _raw_eligibility(layer)
         _selection(layer, scores)
     else:
         eligible = tensor(layer["eligible_mask"], (history,), torch.bool, "saved eligibility")
         eligibility = layer["eligibility"]
         require(
-            eligibility["schema"] == "native-half-ordered-high-byte-strict-bin-v1"
+            eligibility["schema"]
+            == (OFFICIAL_ELIGIBILITY if _policy(layer) == OFFICIAL_POLICY else COARSE_POLICY)
             and eligibility["checked_from_scores"] is True,
             "Saved eligibility lacks runtime derivation",
         )
@@ -306,13 +494,22 @@ def validate_layer(layer):
             "Saved score identity ABI differs",
         )
     selected = _selection(layer)
-    require(
-        not bool((eligible & ~selected[:history]).any()),
-        "Coarse eligibility includes a token outside exact selection",
-    )
+    if _policy(layer) == COARSE_POLICY:
+        require(
+            not bool((eligible & ~selected[:history]).any()),
+            "Coarse eligibility includes a token outside exact selection",
+        )
     require(set(layer["stages"]) == set(STAGES), "Incomplete stage observation")
     stages = {
-        name: _stage(layer["stages"][name], history, queries, slots, global_ids, name)
+        name: _stage(
+            layer["stages"][name],
+            history,
+            queries,
+            slots,
+            global_ids,
+            name,
+            host_padding_tokens=host_padding_tokens,
+        )
         for name in STAGES
     }
     initial, prefetch, append, final = (stages[name] for name in STAGES)
@@ -399,6 +596,8 @@ def validate_layer(layer):
     logical_priority = torch.zeros(history + queries, dtype=torch.int64)
     logical_priority[expected_final] = priorities[expected_final]
     _final_state(layer, final, logical_priority)
+    official = _policy(layer) == OFFICIAL_POLICY
+    stage_proof = _official_staging(layer, prefetch, copied) if official else None
     return {
         "layer": layer["layer"],
         "passed": True,
@@ -418,6 +617,35 @@ def validate_layer(layer):
         "stage_maps_free_priorities_clocks_verified": True,
         "physical_owners_preserved_until_final": True,
         "no_eviction": True,
+        **(
+            {
+                "prefetch_policy": OFFICIAL_POLICY,
+                "effective_max_prefetch": cap,
+                "prepared_max_prefetch": layer["prepared_max_prefetch"],
+                **({"preparation": dict(layer["preparation"])} if "preparation" in layer else {}),
+                "hint_index": 1,
+                "prefetch_false_positive_records": int((prefetched & ~selected).sum()),
+                "official_staging": stage_proof,
+            }
+            if official
+            else {}
+        ),
+        **(
+            {
+                "host_padding": {
+                    "host_arena_tokens": host_arena,
+                    "session_host_tokens": session_host,
+                    "padding_tokens": host_padding_tokens,
+                    "all_stages_unmapped": True,
+                    "stage_mapping_identities": {
+                        name: tensor_identity(layer["stages"][name]["padding_to_slot"])
+                        for name in STAGES
+                    },
+                }
+            }
+            if host_padding_tokens
+            else {}
+        ),
         "kv_boundary": "Final cache_state checks actual resident KV against host at runtime. All observed physical owners persist through the final check; per-stage KV bytes are not independently retained.",
     }
 
@@ -443,13 +671,18 @@ def validate_execution(evidence):
             layer["record_bytes"],
             layer["topk"],
             layer["max_prefetch"],
+            _policy(layer),
+            layer.get("prepared_max_prefetch"),
+            layer.get("hint_index"),
+            identity_digest(layer["preparation"]) if "preparation" in layer else None,
+            *_host_geometry(layer),
         )
         for layer in layers
     }
     require(len(geometry) == 1, "Layer proof geometries differ")
     first = layers[0]
     return {
-        "schema": SCHEMA,
+        "schema": OFFICIAL_SCHEMA if _policy(first) == OFFICIAL_POLICY else SCHEMA,
         "passed": True,
         "scope": {
             "method": "echo",
@@ -460,9 +693,27 @@ def validate_execution(evidence):
                 name: first[name]
                 for name in ("H", "A", "slots", "record_bytes", "topk", "max_prefetch")
             },
+            **(
+                {
+                    "prefetch_policy": OFFICIAL_POLICY,
+                    "prepared_max_prefetch": first["prepared_max_prefetch"],
+                    **(
+                        {"preparation": dict(first["preparation"])}
+                        if "preparation" in first
+                        else {}
+                    ),
+                    "hint_index": 1,
+                }
+                if _policy(first) == OFFICIAL_POLICY
+                else {}
+            ),
         },
         "layers": [validate_layer(layer) for layer in layers],
-        "eligibility_boundary": "Native coarse-bin eligibility and exact top-k validity are checked against full scores during runtime acceptance. Compact reread checks saved eligibility identities and stage transitions; it cannot re-evaluate omitted scores. Matching executions separately require identical scores, initial hints and exact index tensors.",
+        "eligibility_boundary": (
+            "Official strict FP32 predictive-threshold eligibility and exact top-k validity are checked against full scores during runtime acceptance. Predictive false positives remain resident and count as real H2D. Staged KV is compared against host records at runtime; compact reread checks saved identities and transitions, not omitted score or KV bytes. Matching executions separately require identical scores, initial hints and exact index tensors."
+            if _policy(first) == OFFICIAL_POLICY
+            else "Native coarse-bin eligibility and exact top-k validity are checked against full scores during runtime acceptance. Compact reread checks saved eligibility identities and stage transitions; it cannot re-evaluate omitted scores. Matching executions separately require identical scores, initial hints and exact index tensors."
+        ),
     }
 
 
@@ -472,15 +723,25 @@ def compact_evidence(evidence):
         if "scores" not in layer:
             layers.append(dict(layer))
             continue
-        eligible, metadata = _eligibility(
-            layer["scores"], layer["initial_hint"], layer["H"], layer["topk"]
-        )
+        eligible, metadata = _raw_eligibility(layer)
         _selection(layer, layer["scores"])
+        extra = {}
+        if _policy(layer) == OFFICIAL_POLICY:
+            stage_proof = validate_layer(layer)["official_staging"]
+            extra["official_staging"] = {
+                **{
+                    key: value
+                    for key, value in layer["official_staging"].items()
+                    if key not in ("records", "expected_records")
+                },
+                "record_validation": stage_proof["record_validation"],
+            }
         layers.append(
             {
                 **{key: value for key, value in layer.items() if key != "scores"},
                 "eligible_mask": eligible,
                 "eligibility": metadata,
+                **extra,
             }
         )
     return {**evidence, "layers": layers}

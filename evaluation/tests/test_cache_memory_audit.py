@@ -486,18 +486,50 @@ def test_native_nonzero_and_unique_pinned_lifetimes_reconcile_all_handouts(tmp_p
     assert len(outputs) == 4
 
 
-def test_workspace_components_match_current_independent_admission_contract():
+@pytest.mark.parametrize("queries", [1, 2, 8, 16, 1024])
+@pytest.mark.parametrize("context", [2047, 2048, 4096, 32767, 32768, 32769, 65537, 66560])
+def test_workspace_components_match_current_independent_admission_contract(queries, context):
     from cache.sparse_token_pool import SharedSparseTokenPool
     from models.deepseek_v32.execution.cache_resources import execution_reservation
 
     allowance = WorkspaceAllowance.echo(
-        queries=1024, context=66560, topk=2048, width=576, host_tokens=131072, pool_tokens=4096
+        queries=queries, context=context, topk=2048, width=576, host_tokens=131072, pool_tokens=4096
     )
-    execution = execution_reservation(1024, 66560, topk=2048, width=576)
+    execution = execution_reservation(queries, context, topk=2048, width=576)
     assert (
         allowance.total
         == execution.hbm + SharedSparseTokenPool.estimate_execution_workspace_bytes(131072, 4096)
     )
+
+
+def test_independent_paged_q1_allowance_only_adds_the_uncovered_peak():
+    args = {
+        "context": 65537,
+        "topk": 2048,
+        "width": 576,
+        "host_tokens": 131072,
+        "pool_tokens": 4096,
+    }
+    single = WorkspaceAllowance.echo(queries=1, **args)
+    tail = WorkspaceAllowance.echo(queries=2, **args)
+    wide = WorkspaceAllowance.echo(queries=1024, **args)
+    assert single.paged_q1_extra == 9_006_640
+    assert tail.paged_q1_extra == 7_824_944
+    assert wide.paged_q1_extra == 0
+    # The old full-chunk terms remain visible; only the uncovered Q1 peak is new.
+    assert tail.logits + tail.selection + tail.hint == 4_464_640
+    assert tail.logits + tail.selection + tail.hint + tail.paged_q1_extra == 12_289_584
+
+
+def test_independent_decode_allowance_covers_short_context_and_q1_tails():
+    args = {"context": 4096, "topk": 2048, "width": 576, "host_tokens": 8192, "pool_tokens": 4096}
+    single = WorkspaceAllowance.echo(queries=1, **args)
+    tail = WorkspaceAllowance.echo(queries=2, **args)
+    wide = WorkspaceAllowance.echo(queries=1024, **args)
+    assert single.attention_q1_extra == 4_489_216
+    assert tail.attention_q1_extra == 4_292_608
+    assert wide.attention_q1_extra == 0
+    assert single.paged_q1_extra == tail.paged_q1_extra == 0
 
 
 def test_fixed_storage_inventory_counts_aliases_once_and_includes_cuda_padding():
