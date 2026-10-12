@@ -1,0 +1,17 @@
+{
+  "run_id": "observation_20261012_01",
+  "shape": "b1024_q1_h65536",
+  "criterion": {
+    "formula": "sum((actual-reference)^2) / sum(actual^2 + reference^2), independently per sampled query",
+    "legacy_elementwise_diagnostic": {
+      "atol": 0.002,
+      "rtol": 0.001
+    },
+    "normalized_diff_limit": 5e-06,
+    "source": "3rdparty/DeepGEMM/tests/test_attention.py:mqa_logits_tolerances simulated FP8 criterion"
+  },
+  "max_indexer_abs_error": 0.002220630645751953,
+  "max_indexer_normalized_diff": 1.3766965986168466e-08,
+  "legacy_indexer_elementwise_violations": 1,
+  "boundary": "Same accepted formal check; legacy elementwise threshold is diagnostic, unchanged official normalized criterion determines acceptance."
+}

@@ -1,0 +1,60 @@
+{
+  "run_id": "observation_20261012_01",
+  "completed": true,
+  "coverage": {
+    "common": {
+      "workloads": 7,
+      "operators": 506,
+      "kinds": {
+        "non_gemm": 317,
+        "api_aggregate": 98,
+        "gemm": 91
+      },
+      "check_peak_allocated": 7332740096,
+      "check_peak_reserved": 7994343424,
+      "clean_peak_allocated": 7066920960,
+      "clean_peak_reserved": 7660896256,
+      "profile_peak_allocated": 7066920960,
+      "profile_peak_reserved": 7660896256
+    },
+    "moe": {
+      "workloads": 7,
+      "operators": 938,
+      "kinds": {
+        "api_aggregate": 161,
+        "non_gemm": 728,
+        "gemm": 49
+      },
+      "check_peak_allocated": 17031150080,
+      "check_peak_reserved": 19165872128,
+      "clean_peak_allocated": 16900055040,
+      "clean_peak_reserved": 17710448640,
+      "profile_peak_allocated": 16900055040,
+      "profile_peak_reserved": 17710448640
+    },
+    "attention": {
+      "workloads": 52,
+      "operators": 1172,
+      "kinds": {
+        "api_aggregate": 284,
+        "non_gemm": 784,
+        "gemm": 104
+      },
+      "check_peak_allocated": 122845177856,
+      "check_peak_reserved": 131560636416,
+      "clean_peak_allocated": 113876695552,
+      "clean_peak_reserved": 131694854144,
+      "profile_peak_allocated": 113876695552,
+      "profile_peak_reserved": 131694854144
+    }
+  },
+  "total_operator_records": 2616,
+  "total_timing_samples": 81096,
+  "total_static_graph_replays": 7848,
+  "matching_source_inventory": true,
+  "matching_numerical_receipts": true,
+  "matching_exported_native_artifacts": true,
+  "precision_mfu_recomputed": true,
+  "actual_hbm_profiles_complete": true,
+  "boundary": "Independent device-resident concrete operators and API aggregates. Matrix reference sampling and Extend query sampling retain declared coverage. Physical DRAM counters use intrusive warm-cache NCU graphs, independent of clean timing. No full-model, serving or offload validation."
+}

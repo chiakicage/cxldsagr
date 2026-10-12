@@ -1,0 +1,213 @@
+{
+  "checked_at_utc": "2026-10-11T14:26:54.734311+00:00",
+  "command": [
+    "nvidia-smi",
+    "--id=2",
+    "--query-gpu=index,name,uuid,pci.device_id,pci.bus_id,compute_cap,memory.total,clocks.max.sm,clocks.current.sm,power.limit,utilization.gpu,driver_version",
+    "--format=csv"
+  ],
+  "cuda_visible_devices": null,
+  "gpu": {
+    "clocks.current.sm": "1980 MHz",
+    "clocks.max.sm": "1980 MHz",
+    "compute_cap": "9.0",
+    "driver_version": "570.124.06",
+    "index": "2",
+    "memory.total": "143771 MiB",
+    "name": "NVIDIA M403",
+    "pci.bus_id": "00000000:3A:00.0",
+    "pci.device_id": "0x233510DE",
+    "power.limit": "700.00 W",
+    "utilization.gpu": "0 %",
+    "uuid": "GPU-72f87cfe-1a24-f69c-8b5d-71f1d8414a34"
+  },
+  "h200_sxm_reference": {
+    "conversion": "BF16 and FP8 published sparsity peaks divided by two; FP32 unchanged",
+    "dense_peaks_tflops": {
+      "BF16": 989.5,
+      "FP32": 67.0,
+      "FP8": 1979.0
+    },
+    "http_status": 200,
+    "product_column": "H200 SXM\u00b9",
+    "resolved_url": "https://www.nvidia.com/en-us/data-center/h200/",
+    "response_bytes": 281221,
+    "response_sha256": "ffdcbdf44fdd45bef1feeb196c5336cc85d247da02e7c5228bc03ef2c7cc32b8",
+    "retrieved_at_utc": "2026-10-11T14:26:55.348724+00:00",
+    "selected_rows": {
+      "BFLOAT16 Tensor Core": {
+        "label": "BFLOAT16 Tensor Core\u00b2",
+        "published_tflops": 1979.0
+      },
+      "FP32": {
+        "label": "FP32",
+        "published_tflops": 67.0
+      },
+      "FP8 Tensor Core": {
+        "label": "FP8 Tensor Core\u00b2",
+        "published_tflops": 3958.0
+      }
+    },
+    "sparsity_footnote": "2 With sparsity.",
+    "specification_table": [
+      [
+        "",
+        "H200 SXM\u00b9",
+        "H200 NVL\u00b9"
+      ],
+      [
+        "FP64",
+        "34 TFLOPS",
+        "30 TFLOPS"
+      ],
+      [
+        "FP64 Tensor Core",
+        "67 TFLOPS",
+        "60 TFLOPS"
+      ],
+      [
+        "FP32",
+        "67 TFLOPS",
+        "60 TFLOPS"
+      ],
+      [
+        "TF32 Tensor Core\u00b2",
+        "989 TFLOPS",
+        "835 TFLOPS"
+      ],
+      [
+        "BFLOAT16 Tensor Core\u00b2",
+        "1,979 TFLOPS",
+        "1,671 TFLOPS"
+      ],
+      [
+        "FP16 Tensor Core\u00b2",
+        "1,979 TFLOPS",
+        "1,671 TFLOPS"
+      ],
+      [
+        "FP8 Tensor Core\u00b2",
+        "3,958 TFLOPS",
+        "3,341 TFLOPS"
+      ],
+      [
+        "INT8 Tensor Core\u00b2",
+        "3,958 TFLOPS",
+        "3,341 TFLOPS"
+      ],
+      [
+        "GPU Memory",
+        "141GB",
+        "141GB"
+      ],
+      [
+        "GPU Memory Bandwidth",
+        "4.8TB/s",
+        "4.8TB/s"
+      ],
+      [
+        "Decoders",
+        "7 NVDEC 7 JPEG",
+        "7 NVDEC 7 JPEG"
+      ],
+      [
+        "Confidential Computing",
+        "Supported",
+        "Supported"
+      ],
+      [
+        "Max Thermal Design Power (TDP)",
+        "Up to 700W (configurable)",
+        "Up to 600W (configurable)"
+      ],
+      [
+        "Multi-Instance GPUs",
+        "Up to 7 MIGs @18GB each",
+        "Up to 7 MIGs @16.5GB each"
+      ],
+      [
+        "Form Factor",
+        "SXM",
+        "PCIe Dual-slot air-cooled"
+      ],
+      [
+        "Interconnect",
+        "NVIDIA NVLink\u2122: 900GB/s PCIe Gen5: 128GB/s",
+        "2- or 4-way NVIDIA NVLink bridge: 900GB/s per GPU PCIe Gen5: 128GB/s"
+      ],
+      [
+        "Server Options",
+        "NVIDIA HGX\u2122 H200 partner and NVIDIA-Certified Systems\u2122 with 4 or 8 GPUs",
+        "NVIDIA MGX\u2122 H200 NVL partner and NVIDIA-Certified Systems with up to 8 GPUs"
+      ],
+      [
+        "NVIDIA AI Enterprise",
+        "Add-on",
+        "Included"
+      ],
+      [
+        "1 Preliminary specifications. May be subject to change. 2 With sparsity."
+      ]
+    ],
+    "url": "https://www.nvidia.com/en-us/data-center/h200/",
+    "verified": true
+  },
+  "h200_sxm_reference_matches_pci": true,
+  "hardware_source_sha256": "8f85448482c3c37d6f6dd70bb1d9bfd3152122ed601ad84338ed43de234ef2a0",
+  "identity_checks": {
+    "nvml_reports_m403": true,
+    "official_dense_peaks": true,
+    "pci_device_2335": true,
+    "pci_vendor_10de": true,
+    "sm90": true,
+    "torch_nvml_uuid_match": true,
+    "torch_reports_h200": true
+  },
+  "is_sm90": true,
+  "pci_identity": {
+    "database_path": "/usr/share/misc/pci.ids",
+    "database_sha256": "eaa7099ae3cfc8a58cf5f8dcd1aafd323e2ad9263908051aa2d1fbd722a0800b",
+    "database_version": "#\tVersion: 2024.03.31",
+    "device_id": "2335",
+    "matched_line": "\t2335  GH100 [H200 SXM 141GB]",
+    "vendor_id": "10de"
+  },
+  "physical_device_selector": "2",
+  "query_headers": [
+    "index",
+    "name",
+    "uuid",
+    "pci.device_id",
+    "pci.bus_id",
+    "compute_cap",
+    "memory.total [MiB]",
+    "clocks.max.sm [MHz]",
+    "clocks.current.sm [MHz]",
+    "power.limit [W]",
+    "utilization.gpu [%]",
+    "driver_version"
+  ],
+  "schema_version": 1,
+  "selector_semantics": "physical nvidia-smi index or UUID; CUDA_VISIBLE_DEVICES does not remap it",
+  "stderr": "",
+  "stdout": "index, name, uuid, pci.device_id, pci.bus_id, compute_cap, memory.total [MiB], clocks.max.sm [MHz], clocks.current.sm [MHz], power.limit [W], utilization.gpu [%], driver_version\n2, NVIDIA M403, GPU-72f87cfe-1a24-f69c-8b5d-71f1d8414a34, 0x233510DE, 00000000:3A:00.0, 9.0, 143771 MiB, 1980 MHz, 1980 MHz, 700.00 W, 0 %, 570.124.06\n",
+  "torch_device": {
+    "capability": [
+      9,
+      0
+    ],
+    "cuda_visible_devices": "2",
+    "name": "NVIDIA H200",
+    "sms": 132,
+    "torch": "2.12.1+cu130",
+    "total_memory": 150121545728,
+    "uuid": "72f87cfe-1a24-f69c-8b5d-71f1d8414a34",
+    "visible_device": 0
+  },
+  "uuid_check_correction": {
+    "boundary": "CPU reread of the single original query; no repeated hardware or HTTP request",
+    "normalization": "Remove optional NVIDIA-SMI GPU- prefix, then compare lowercase UUID strings",
+    "normalized_comparison": true,
+    "original_literal_comparison": false
+  }
+}
