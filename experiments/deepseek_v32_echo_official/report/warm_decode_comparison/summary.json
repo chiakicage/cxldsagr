@@ -1,0 +1,102 @@
+{
+  "schema": "official-local-warm-echo-comparison-v1",
+  "run_id": "warm_decode_comparison_20261012_01",
+  "passed": true,
+  "numerical_acceptance_between_implementations": false,
+  "measurement": "Existing independent intrusive NSYS L0-L2 windows; no new GPU execution.",
+  "windows": [
+    {
+      "source": "Official SGLang",
+      "method": "echo",
+      "condition": "normal decode; natural residency",
+      "profile_run_id": "h64k_decode_echo_profile_20261008_02",
+      "start_ns": 10246111328,
+      "end_ns": 10247666718,
+      "window_ns": 1555390,
+      "idle_ns": 127648,
+      "compute_union_ns": 1010751,
+      "io_only_ns": 3200,
+      "control_only_ns": 413791,
+      "original_control_lane_union_ns": 413791,
+      "source_control_category_union_ns": 410655,
+      "window_ms": 1.55539,
+      "idle_ms": 0.127648,
+      "compute_union_ms": 1.010751,
+      "io_only_ms": 0.0032,
+      "control_only_ms": 0.413791,
+      "original_control_lane_union_ms": 0.413791,
+      "source_control_category_union_ms": 0.410655
+    },
+    {
+      "source": "Local warm",
+      "method": "echo",
+      "condition": "same supplied token; warm history KV",
+      "profile_run_id": "deepseek_h64k_a1_official_input_warm_20261011_01_echo_profile",
+      "start_ns": 79994785,
+      "end_ns": 81220836,
+      "window_ns": 1226051,
+      "idle_ns": 37988,
+      "compute_union_ns": 932190,
+      "io_only_ns": 9216,
+      "control_only_ns": 246657,
+      "original_control_lane_union_ns": 260737,
+      "source_control_category_union_ns": 136449,
+      "window_ms": 1.226051,
+      "idle_ms": 0.037988,
+      "compute_union_ms": 0.93219,
+      "io_only_ms": 0.009216,
+      "control_only_ms": 0.246657,
+      "original_control_lane_union_ms": 0.260737,
+      "source_control_category_union_ms": 0.136449
+    }
+  ],
+  "official_minus_local_ms": {
+    "window": 0.329339,
+    "compute_union": 0.078561,
+    "control_only": 0.167134,
+    "io_only": -0.006016,
+    "idle": 0.08966
+  },
+  "control_and_idle_share_of_window_difference_percent": 77.97254500681669,
+  "input_identity": {
+    "history_token_sha256": "85687e44fbb0abd809735729ebd4af4e9fbfb1edb2121ca6fd2532b94b5a3332",
+    "history_tokens": 65536,
+    "decode_input_token": 57841,
+    "official_output_ids": [
+      57841,
+      39556
+    ],
+    "local_full_token_sha256": "812f952215641a8f984f304bd7d5009ca0ff6e9155aedcc8afb97bef6725c998",
+    "exact_history_arrays_equal": true,
+    "exact_decode_token_equal": true,
+    "local_sampling_included": false,
+    "separate_recall_observation": {
+      "run_id": "h64k_decode_echo_recall_observe_20261011_02",
+      "observation_sha256": "dcddbc631f0a25797e259b628171873ed24e6f07d828205214a2bbb0af38ba26",
+      "residual_recall": [
+        {
+          "d2d_records": 0,
+          "h2d_records": 0,
+          "layer": 0
+        },
+        {
+          "d2d_records": 0,
+          "h2d_records": 0,
+          "layer": 1
+        },
+        {
+          "d2d_records": 0,
+          "h2d_records": 0,
+          "layer": 2
+        }
+      ],
+      "boundary": "Separate observer run; never assigned to the old profile's traffic."
+    }
+  },
+  "official_profile_actual_mapped_host_bytes": null,
+  "official_profile_recall_activity_us": 3.136,
+  "local_warm_per_layer_bytes": {
+    "host_to_device": 0,
+    "device_to_host": 1152
+  }
+}

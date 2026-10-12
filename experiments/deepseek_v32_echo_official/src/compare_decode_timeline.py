@@ -51,7 +51,9 @@ def official_panels(directory):
     return panels, [publication_path, *paths]
 
 
-def draw(panels, output):
+def draw(panels, output, *, xlim_ms=(0, 5), figure_title=None, compact_style=False):
+    if compact_style:
+        return draw_compact_comparison(panels, output, xlim_ms, figure_title)
     import matplotlib
 
     matplotlib.use("Agg")
@@ -66,13 +68,14 @@ def draw(panels, output):
             "svg.hashsalt": "h64k-q1-comparison",
         }
     )
-    figure, axes = plt.subplots(6, 1, figsize=(12, 14), sharex=True)
+    figure, axes = plt.subplots(len(panels), 1, figsize=(12, 14), sharex=True, squeeze=False)
+    axes = axes[:, 0]
     lanes = ["Compute", "H2D", "D2H", "GPU control", "GPU idle"]
     colors = {**engine.COLORS, "GPU control": "#777777"}
     for axis, panel in zip(axes, panels, strict=True):
         window = panel["window"]
         start, end = window["start_ns"], window["end_ns"]
-        if window["window_ms"] > 5:
+        if xlim_ms[0] != 0 or window["window_ms"] > xlim_ms[1]:
             raise ValueError("The shared axis must contain the entire window")
         for row in panel["rows"]:
             lane, category, hatched = decode_display.activity_style(row)
@@ -103,8 +106,9 @@ def draw(panels, output):
         axis.axvline(window["window_ms"], color="#777777", linewidth=0.6, linestyle="--")
         axis.set_yticks(range(len(lanes)), lanes)
         axis.set_ylim(4.6, -0.95)
-        axis.set_xlim(0, 5)
-        axis.set_xticks(range(6))
+        axis.set_xlim(*xlim_ms)
+        if xlim_ms == (0, 5):
+            axis.set_xticks(range(6))
         axis.tick_params(axis="x", labelbottom=True)
         axis.set_axisbelow(True)
         axis.grid(axis="x", alpha=0.18)
@@ -137,7 +141,9 @@ def draw(panels, output):
         )
     )
     figure.suptitle(
-        "H64K · Q1 · L0–L2 | Official decode and our single-token step", y=0.992, fontsize=13
+        figure_title or "H64K · Q1 · L0–L2 | Official decode and our single-token step",
+        y=0.992,
+        fontsize=13,
     )
     figure.legend(
         handles=handles,
@@ -148,6 +154,126 @@ def draw(panels, output):
         fontsize=10,
     )
     figure.tight_layout(rect=(0, 0, 1, 0.918), h_pad=1.2)
+    for suffix in ("svg", "png"):
+        figure.savefig(
+            output / f"timeline_decode.{suffix}",
+            dpi=180,
+            metadata={"Date": None} if suffix == "svg" else None,
+        )
+    plt.close(figure)
+
+
+def draw_compact_comparison(panels, output, xlim_ms, figure_title):
+    """Use the local phase palette and typography with all GPU control visible."""
+    import matplotlib.pyplot as plt
+    from matplotlib.patches import Patch
+
+    if (
+        not panels
+        or xlim_ms[0] != 0
+        or any(panel["window"]["window_ms"] > xlim_ms[1] for panel in panels)
+    ):
+        raise ValueError("The shared axis must contain every complete window")
+    plt.rcParams.update(
+        {"font.family": "DejaVu Sans", "svg.fonttype": "none", "svg.hashsalt": "warm-decode"}
+    )
+    figure, axes = plt.subplots(
+        len(panels), 1, figsize=(13, 3.6 + 1.6 * len(panels)), squeeze=False
+    )
+    lanes = ["Compute", "H2D", "D2H", "GPU control", "GPU idle"]
+    colors = {**engine.COLORS, "GPU control": "#777777"}
+    for axis, panel in zip(axes[:, 0], panels, strict=True):
+        window = panel["window"]
+        start, end = window["start_ns"], window["end_ns"]
+        for row in panel["rows"]:
+            lane, category, hatched = decode_display.activity_style(row)
+            if lane not in lanes[:-1]:
+                raise ValueError(f"Unrecognized GPU lane: {lane}")
+            if lane == "GPU control" and category not in comparison.compact.ANNOTATION_COLORS:
+                category = "GPU control"
+            left, right = max(start, row["start_ns"]), min(end, row["end_ns"])
+            axis.broken_barh(
+                [((left - start) / 1e6, (right - left) / 1e6)],
+                (lanes.index(lane) - 0.25, 0.50),
+                facecolors=colors[category],
+                edgecolors="white" if hatched else "none",
+                hatch="////" if hatched else None,
+                linewidth=0,
+            )
+        axis.broken_barh(
+            [
+                ((left - start) / 1e6, (right - left) / 1e6)
+                for left, right in panel["idle_intervals_ns"]
+            ],
+            (3.75, 0.50),
+            facecolors=colors["GPU idle"],
+        )
+        for layer in panel["layers"]:
+            left, right = (layer["start_ns"] - start) / 1e6, (layer["end_ns"] - start) / 1e6
+            axis.text((left + right) / 2, -0.52, f"L{layer['layer']}", ha="center", fontsize=9)
+            axis.axvline(right, color="#66717D", linestyle=":", alpha=0.5, linewidth=0.6)
+        axis.axvline(window["window_ms"], color="#66717D", linestyle="--", linewidth=0.8)
+        axis.set_yticks(range(len(lanes)), lanes)
+        axis.set_ylim(4.58, -0.98)
+        axis.set_xlim(*xlim_ms)
+        axis.tick_params(axis="both", labelsize=9)
+        axis.set_axisbelow(True)
+        axis.grid(axis="x", alpha=0.12)
+        for edge in ("left", "top", "right"):
+            axis.spines[edge].set_visible(False)
+        axis.set_title(
+            f"{panel['source']} ECHO  |  {window['window_ms']:.3f} ms"
+            f"  |  GPU idle {window['gpu_idle_ms']:.3f} ms",
+            loc="left",
+            fontsize=10.5,
+            pad=9,
+        )
+    axes[-1, 0].set_xlabel("Time from L0 first compute kernel start (ms)", fontsize=10)
+    figure.text(
+        0.09,
+        0.96,
+        figure_title or "ECHO | H=65,536, Q=1, L0-L2 | Official and local warm",
+        fontsize=15,
+    )
+    names = [
+        "Projection / RoPE",
+        "Indexer / top-k",
+        "Attention",
+        "Output / MLP",
+        "H2D",
+        "D2H",
+        "GPU control",
+        "GPU idle",
+        "ECHO prepare",
+        "ECHO finalize",
+        "ECHO hint",
+    ]
+    handles = [
+        Patch(
+            facecolor=colors[name],
+            label={"H2D": "H2D / official recall kernel", "D2H": "D2H: GPU to DRAM"}.get(
+                name, name
+            ),
+        )
+        for name in names
+    ]
+    handles.append(
+        Patch(
+            facecolor=colors["Indexer / top-k"],
+            edgecolor="white",
+            hatch="////",
+            label="Fused / potential mapped-host IO",
+        )
+    )
+    figure.legend(
+        handles=handles,
+        loc="lower center",
+        bbox_to_anchor=(0.53, 0.025),
+        ncol=4,
+        frameon=False,
+        fontsize=9,
+    )
+    figure.subplots_adjust(left=0.09, right=0.985, top=0.88, bottom=0.26, hspace=0.55)
     for suffix in ("svg", "png"):
         figure.savefig(
             output / f"timeline_decode.{suffix}",
