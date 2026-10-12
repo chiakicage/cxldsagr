@@ -1,21 +1,16 @@
 # Current production and open diagnosis
 
-The current published cohort is `deepseek_h64k_a1_isolated_20261008_01`.
-All 16 independent method/role processes and the complete CPU publication
-audit passed. The selected report is `experiments/deepseek_v32_mfu/report/h64k_a1/`.
-The model/kernel implementation remains the accepted exact-hint implementation;
-each process now prepares only its selected method.
+The current cold cohort is `deepseek_h64k_a1_exact_selected_cold_20261011_02`
+with policy `official-q1-exact-selected-staging-v2`. Correctness, independent
+clean timing, stage and operator profiles, and publication audits passed.
+The selected [MFU report](../../../../experiments/deepseek_v32_mfu/report/h64k_a1/results.md)
+and [official comparison](../../../../experiments/deepseek_v32_echo_official/report/combined_decode/provenance.json)
+retain each method's own process, source and measurement boundary.
 
-HBM L0–L2 span/busy/idle is 1013.090/995.137/17.953 us. The official reference
-span is 1014.975 us with 14.274 us idle, under different input/residency/framework
-and physical GPU conditions. This is a preparation/measurement boundary finding,
-not an equivalent-workload speedup or a proved hardware mechanism.
-
-Clean step medians are HBM 1.834721072, ECHO 2.588715986, serial sparse
-2.395401942 and dense prefetch 5.532309995 ms. ECHO L0–L2 span/idle is
-1426.563/47.492 us. ECHO still needs measured optimization; the overall goal
-remains active. Historical controls below retain their original implementation
-and measurement boundaries, and do not replace the current formal cohort.
+The independent HBM controls below remain evidence for the unresolved
+preparation and graph-gap diagnosis. They retain their original inputs,
+implementation and profiling boundary. They do not measure the new ECHO policy
+or replace its current complete-model results; the optimization goal remains open.
 
 ## Prior component evidence
 
@@ -49,15 +44,6 @@ small directionally consistent benefit. Both graphs reserve56,623,104 bytes.
 Production integration passed88 focused GPU linear/quantizer tests, including
 18 new Q1 bitwise/changed-graph/default-dispatch/prepared-lifetime tests.
 
-The prior production matrix `deepseek_h64k_a1_official_20261008_03` passed independent
-correctness, cold clean timing, stage/node profiling and source/native/input
-audits. Its HBM/echo/serial/dense step medians are 1.866080/2.725594/2.507448/
-5.519253 ms. Operator profile `deepseek_h64k_a1_official_mfu_profile_20261008_04`
-and report `deepseek_h64k_a1_official_mfu_report_20261008_04` bind the same check
-and benchmark. Eight saved profile outputs are bitwise equal to check outputs.
-Full CPU regression passed 4,761 tests and 58 subtests; 1,524 GPU/optional cases
-were skipped by the CPU entry point, not counted as GPU acceptance.
-
 The final Q1 graph also includes the separately checked projection branch
 schedule and physical score-padding view. Projection private model A/B
 `q1_projection_model_bench_20261008_01` improved the paired median by 81.1595 us
@@ -87,16 +73,15 @@ former result hashes are in `cleanup_cub_20261008_01.json`. `q1_qkv.py` remains
 only because accepted selection experiments import and fingerprint helpers.
 Two old profile pairs remain temporarily as inputs to the active gap diagnosis.
 
-The newer accepted CUB/validation cohort is
-`deepseek_h64k_a1_cub_20261008_01`; its complete stage and operator reports
-were independently audited and published. HBM/echo/serial/dense synchronized
-step medians are 1.868587/2.725153/2.482657/5.523886 ms. The local HBM profile
-window is 1.067459 ms, busy 1.000931 ms and idle 0.066528 ms. Controls for
-profiler state during construction and for the capture inspector do not
-reproduce the long idle. The zero-versus-two internal external-event control
+The retained HBM gap diagnosis used
+`deepseek_h64k_a1_cub_20261008_01`. Its local HBM profile window is 1.067459 ms,
+busy 1.000931 ms and idle 0.066528 ms. This original HBM evidence is independent
+of the subsequent ECHO promotion-policy change. Controls for profiler state
+during construction and for the capture inspector do not reproduce the long
+idle. The zero-versus-two internal external-event control
 also does not reproduce it: the zero-event arm has 19.584/19.968 us idle,
 and both arms have 96 ns median gaps. Its complete 197-node GPU signature
-matches current formal production, with 192 native layer-owned nodes.
+matches the then-current formal HBM graph, with 192 native layer-owned nodes.
 The evidence is `q1_event_boundary_audit_20261008_02` and
 `event_boundary_result.md`; clean paired timing shows no event-insertion gain.
 

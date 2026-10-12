@@ -5,21 +5,22 @@
 CUB candidate two was integrated after component and private full-model gates.
 Production dispatch is Q=1, count=2,048 and N>=32,768; other shapes retain the
 original path. Actual integration passed 65 focused tests, including Hopper
-boundary/bitwise/changed-graph checks and native provenance. Formal matrix
-`deepseek_h64k_a1_cub_20261008_01` and its independent operator profile
-`deepseek_h64k_a1_cub_mfu_profile_20261008_01` passed and were published.
-All 36 check and eight profile output tensors were independently reread;
-comparisons were bitwise equal. The separate operator profile's eight outputs
-also match the same check bitwise.
+boundary/bitwise/changed-graph checks and native provenance. Current complete
+model results use `deepseek_h64k_a1_exact_selected_cold_20261011_02` and policy
+`official-q1-exact-selected-staging-v2`; see the accepted
+[MFU report](../../../../experiments/deepseek_v32_mfu/report/h64k_a1/results.md).
+The independent exact-top-k evidence below retains its original operator
+boundary and source/native identities.
 
 Private full-model run `q1_selection_model_bench_20261008_01` retained 100
 AB/BA pairs. Layer event medians were 1.046336/1.038720 ms and graph medians
 1.484304/1.476480 ms, each with 86/100 candidate wins. The synchronized wall
 medians were 1.830168/1.820790 ms, but order-specific wall effects differ in
-sign. Formal five-sample step medians remain approximately unchanged at HBM
-1.868587 ms and ECHO 2.725153 ms. Do not claim the overall optimization goal
-has been met. Component report `q1_official_path_report_20261008_06` binds
-the retained raw samples, independent receipts, native bytes and inputs.
+sign. This private HBM control retains its original measured implementation;
+it does not measure current ECHO performance. Component report
+`q1_official_path_subset_report_20261011_01` binds the unchanged exact-top-k
+samples, independent receipts, native bytes and inputs. Its numeric CSV files
+are byte-identical to the original accepted component report.
 
 The installed FlashInfer selection is unchanged: `sorted_output=False`,
 `deterministic=False`, `SMALL` still select the same deterministic Filtered

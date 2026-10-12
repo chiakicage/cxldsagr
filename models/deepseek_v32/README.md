@@ -1,10 +1,10 @@
 # DeepSeek V3.2
 
-Q1 hint 均值融合已通过生产入口验收和正式三层补测。它仅作用于 SM90 推理的
-FP32 `[1,65537]`、内层 stride 为 1 且按 16 B 对齐的输入，保留原 FP32 归约次序。
-官方 ECHO、精确选择和 decode EMA 均未改变。私有 100 组配对计时为
-2.6486815→2.6053275 ms，87 组更快。该收益来自独立配对实验；当前正式结果与
-测量边界见 MFU 实验，不用不同批次的中位数估计加速。
+Q1 offload 当前使用 `official-q1-exact-selected-staging-v2`：官方融合内核先暂存
+最多 64 条预测记录，精确 top-k 后只将其中选中的历史记录驻留到本地 pool，
+清除其余暂存 tag。全部实际暂存 H2D 都计费，包括最终未被选中的记录；剩余精确
+选择仍完整 recall。当前 promotion 位于 append 前，与官方 recall 内统一发布的
+时间顺序仍有差异，不能称为完整官方 cache 策略对齐。
 
 真实前三层支持四种 cache 实现和显式准备的完整 extend CUDA Graph；独立验收、
 正式计时与 profile 的当前状态见[四方案 MFU 实验](../../experiments/deepseek_v32_mfu/README.md)。
@@ -13,27 +13,20 @@ FP32 `[1,65537]`、内层 stride 为 1 且按 16 B 对齐的输入，保留原 F
 profile；保留的 profile 只对应旧 H65536/A128 单点。
 固定历史的临时候选语义与前三层 MFU 的持久追加分开验收。
 
-H64K+A1 的真实前三层四方案已在 `deepseek_h64k_a1_fused_prepare_20261009_01` 完成
-独立正确性验收、正式计时及 graph node profile。该版本包含官方 ECHO paged decode、
-合并 KV 打包、Q1 scale 布局、projection 分支调度、多 CTA 暂存发布，以及供精确 top-k
-使用的对齐 score 视图、CUB 后处理、官方 Q1 专用的 64 空槽准备、精确 hint 均值融合及 page64／页表／暂存区准备融合。check 和 profile
-保存的 44 个输出 tensor 经独立 CPU 复读，所有比较逐位一致；六次 cold ECHO
-预取状态证明及每个正式样本的流量也通过核验。
-每种方法的 check、bench、阶段 profile 和逐算子 profile 均在独立进程中完成，
-只预热所选方法。逐算子 profile 另存的 8 个 hidden/logits 与相应验收逐位一致。
-HBM 的三层 GPU 窗口为 1.014466 ms，与官方参考接近；输入和环境差异仍保留。
-准备融合每次重建当前 K/scales、页表和暂存状态，不新增持久 storage；
-三层准备从 9 个节点减到 3 个，完整 ECHO graph 从 263 个节点减到 257 个。
-151 项 GPU 检查和四方法独立进程补测通过。私有 500 对计时的中位数下降约
-1.32%，部分均值与 p99 变差，不外推尾延迟或完整 serving 收益。
-结果与各项测量边界见上述 MFU 入口及
-[官方对照与 Q1 算子实验](../../experiments/deepseek_v32_echo_official/README.md)。
+H64K+A1 的真实前三层四方案已按当前策略完成独立验收、正式计时及两类 profile，
+cold run ID 为 `deepseek_h64k_a1_exact_selected_cold_20261011_02`。另有独立 warm
+对照使用官方正式 decode 的相同 history 和 token 57841，每次 step 前恢复 prefill
+驻留；正式计时和 profile 的三层 prefetch、residual recall 与 H2D 计数均为 0，
+每层仍有一条 append 的 D2H。实际 warm 路径仍执行融合 Q1 内核。物理驻留与 CPU
+驻留证明分开核验，不从容量或零搬运量推断分派。
+当前结果、输入、计时和验收边界见[四方案 MFU 实验](../../experiments/deepseek_v32_mfu/README.md)。
+官方跨实现数值验收仍未通过；同输入和驻留条件不等于数值或完整调度等价。
 
-64 空槽准备的独立双模型对照为 `q1_free_prepare_model_bench_20261008_01`。
-H=65,536、A=1、P=NH=65,600 的真实三层 cold 路径采用 100 组平衡 AB/BA 配对，
-完整 `model.forward(return_hidden=True)` 加同步的 wall 中位数从 2.7214065 ms
-降至 2.641556 ms，减少 2.934%，91 组更快。每次计时前恢复相同 prefix、映射和 hint，
-恢复操作在计时外；该结果不代表完整 61 层，也不建立与官方 SGLang 的数值等价。
+Q1 hint 均值融合、64 空槽准备、page64／页表／暂存区准备融合、scale 布局、
+projection 分支调度和 CUB top-k 后处理继续保留。准备逐次读取当前 K/scales、
+页表与暂存状态，hint 保留原 FP32 归约次序，decode EMA 单独更新。
+独立算子结果见[官方对照与 Q1 算子实验](../../experiments/deepseek_v32_echo_official/README.md)，
+按各自输入、源码身份和测量边界解读，不沿用旧 promotion 策略的全模型配对收益。
 
 独立 SM90 checkpoint 推理实现，支持 ECHO prefill/extend。完整结构包含 61 层、
 embedding、3 个 dense MLP、58 个 MoE、final norm 和 LM head。硬件算子按功能位于
@@ -170,14 +163,16 @@ query 配置及其 Q1 尾块，打包空间不作为逐层持久 cache 重复计
 
 Q1 offload 在有效 causal context 至少为 32,768、history 完整且预取空间至少有
 64 个合法槽位时，调用固定版本的 ECHO 官方 paged fused decode。最多 64 条预测
-记录先进入暂存区；适配器完成所有映射、slot 与 journal 核验后，再由最多 64 个 CTA
-逐 record 搬入并发布到本地 pool。未进入精确 top-k 的预测记录也计入实际 H2D，
+记录先进入暂存区；精确 top-k 完成后，适配器保护已驻留的精确选择，核验映射、
+slot 与 journal，再由最多 64 个 CTA 将选中的历史预测发布到本地 pool。其余预测
+清除暂存 tag。策略为 `official-q1-exact-selected-staging-v2`。未进入精确 top-k 的预测记录也计入实际 H2D，
 随后完整召回剩余选择。阈值使用独立的 `offset[1]`，初始为 0，每次 Q1 后按官方
 0.5 EMA 更新。官方 score storage 的物理行宽按 256 个 FP32 元素对齐，默认返回
 逻辑长度 N 的视图；模型的精确 top-k 直接使用包含已初始化 `-inf` 尾部的对齐视图，
 无需复制分数或增加 kernel。选择数量仍按逻辑 N 限定，hint 归约也只读取逻辑列，
 保留原分数、阈值和精确选择语义。暂存和逐 token host 表在 N=65,537 时共占
-336,132 B，已纳入执行预留；多 CTA 发布不另增 scratch。运行结果与验收边界见上述 MFU 入口。
+336,132 B，已纳入执行预留；多 CTA 发布不另增 scratch。当前 promotion 在 append
+前完成，官方在 recall 内发布的时序尚未完全复现。运行结果与验收边界见上述 MFU 入口。
 
 上述官方 Q1 路径在单 session、独占 pool 操作、普通持久 append、已初始化
 `H=query_start` 且 `P-H>=64` 时，只按槽位升序选择前 64 个空槽。已驻留数
@@ -199,6 +194,11 @@ Decode 活跃空间仅补入超过原 indexer 预留的部分；完整图的私�
 allocated、reserved 和设备已用量分别核验。
 
 ## 相关实验
+
+无 offload 的独立算子观测见
+[DeepSeek observation](../../experiments/deepseek_v32_observation/README.md)。该实验分别测量
+Q1 batch Decode 和 B1 Extend 的 52 个 B/Q/H 配置，并按 S 测量真实权重的公共算子
+与第 3 层 MoE；完整 API 时间和有效 MFU 不代表完整模型或 serving 延迟。
 
 真实前三层的 dense prefetch 使用连续布局和 `cudaMemcpyAsync`。纯计算图与完整
 extend 图的独立数值验收、正式计时和 profile 分别记录在

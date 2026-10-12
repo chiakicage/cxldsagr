@@ -4,29 +4,32 @@
 独立 Hopper / SM90 实现，为 checkpoint ECHO prefill/extend 提供算子。模型投影语义、
 精确选块、缓存调度和事务位于 [模型目录](../../models/deepseek_v32/README.md)。
 
-H64K+A1 的真实前三层四方案已在 `deepseek_h64k_a1_fused_prepare_20261009_01` 完成
-独立正确性验收、正式计时及 graph node profile。当前版本包含官方 ECHO paged Q1
-decode、合并 KV 打包、Q1 scale 布局、多 CTA 暂存发布、精确 top-k 的对齐 score
-视图与 CUB 后处理、官方 Q1 专用的 64 空槽准备、精确 hint 均值融合及 page64／页表／暂存区准备融合。
-check/profile 保存的 44 个输出 tensor 的独立复读比较全部逐位一致，六次 cold
-ECHO 状态证明及每个正式样本的流量均通过核验。每方法的 check、bench、阶段
-profile 和逐算子 profile 均使用独立进程并只预热本方法；逐算子 profile 的 8 个
-保存输出与相应验收逐位一致。此项测量流程修正没有改变算子计算。结果见
-[四方案 MFU](../../experiments/deepseek_v32_mfu/README.md)和
-[官方对照与 Q1 算子实验](../../experiments/deepseek_v32_echo_official/README.md)。
-准备融合每次重建当前 K/scales、页表和暂存状态，不新增持久 storage；
-三层准备从 9 个节点减到 3 个，完整 ECHO graph 从 263 个节点减到 257 个。
-151 项 GPU 检查和四方法独立进程补测通过。私有 500 对计时的中位数下降约
-1.32%，部分均值与 p99 变差，不外推尾延迟或完整 serving 收益。
-已有报告仍按各自 run ID、源码和测量边界解读。
+Q1 offload 当前使用 `official-q1-exact-selected-staging-v2`：官方融合内核最多
+暂存 64 条预测，适配器在精确 top-k 后只驻留选中的历史记录，清除其余暂存 tag。
+所有实际暂存 H2D 都计费，未选中的预测也包含在内；剩余精确选择继续完整 recall。
+当前 promotion 仍在 append 前完成，与官方 recall 内发布的时序有差异。
+
+H64K+A1 的真实前三层四方案已完成当前策略的独立验收、正式计时及两类 profile，
+cold run ID 为 `deepseek_h64k_a1_exact_selected_cold_20261011_02`。相同官方 history
+和 decode token 57841 的独立 warm 对照保留 prefill 驻留，正式计时与 profile 中
+三层 prefetch、residual recall、H2D 均为 0，append 的 D2H 单独记录；实际仍执行
+融合 Q1 内核。具体结果与 source/native/receipt 边界见
+[四方案 MFU](../../experiments/deepseek_v32_mfu/README.md)。这些条件不证明完整官方
+cache 调度或跨实现数值等价。
+
+合并 KV 打包、scale 布局、精确 top-k 的对齐 score 视图与 CUB 后处理、64 空槽
+准备、hint 均值融合及 page64／页表／暂存区准备融合继续保留。准备每次重建当前
+K/scales、页表和暂存状态，不新增持久 storage。独立算子结果见
+[官方对照与 Q1 算子实验](../../experiments/deepseek_v32_echo_official/README.md)，
+不沿用旧 promotion 策略的全模型配对收益。
 
 Q1 hint 均值融合的 70 项算子检查、生产入口验收及正式三层补测均已完成。
 在 SM90 推理、FP32 `[1,65537]`、内层 stride 为 1 且输入按 16 B 对齐时，
 [均值入口](indexer/q1_hint_exact.py)用一个 kernel 保留已验收的 Torch FP32 归约树，
 合并有限值掩码、计数与发布；只更新 `offset[0]`，decode EMA 仍单独更新。
 其他输入保留原分派。生产验收覆盖全部 offset 位、变化输入的 graph replay、非默认
-stream 和 Q1 后直接执行 A2 的实际消费。通用执行预留不变；本轮四方法的完整图
-private reserved 仍均为 62,914,560 B，临时张量减少未带来该观测值下降。
+stream 和 Q1 后直接执行 A2 的实际消费。通用执行预留与实际 graph private reserved
+分别核验，临时张量减少不直接证明 reserved 下降。
 
 | 功能 | 入口 | 当前实现 |
 | --- | --- | --- |
@@ -62,27 +65,40 @@ Resident indexer 在 Q1 且有效 causal context `query_start + 1 >= 32768` 时�
 FP32 scales，N=65,537 时 packed storage 为 8,659,200 B（约 8.66 MB），另有页表和
 调度 metadata。这些临时空间已纳入执行预算，最大 query 配置也覆盖可达的 Q1 尾块。
 
+无 offload 算子观测使用独立序列适配器：`indexer/resident_batch.py` 为每个序列保留
+独立的 K/scales，Q1 显式调用官方 paged API，B1/Q>1 调用官方 nonpaged API。
+`attention/device_only/batch.py` 将各序列的 BF16 主 KV 展平为互不相交的范围，并
+转换本地 selection ID 后调用 sparse prefill；B1/Q1/k2048 继续使用 split16 decode。
+B1024/Q1/H65536 的 page64 准备通过有界分批调用原 kernel，避免 int32 地址计算溢出。
+全部 52 个 B/Q/H 配置已完成独立算子验收、静态 Graph replay 检查和正式计时，结果见
+[驻留算子观测](../../experiments/deepseek_v32_observation/report/results.md)。该范围不执行
+Cache Manager 事务或 offload，不证明完整模型容量或 serving 收益。
+
 有效 causal context 至少为 32,768，且满足完整 history 和 64-slot 预取空间条件的 Q1 offload 优先调用
 [官方源码桥接](indexer/official_decode.py)，再由[pool 适配](indexer/official_prefetch.py)
-发布暂存记录。官方最多预取 64 条阈值预测记录，余下精确选择继续召回；Q>1 保留
+发布精确选中的暂存记录。官方最多预取 64 条阈值预测记录；适配器在精确 top-k
+之后只驻留其中选中的历史记录，清除其余暂存 tag，再完整召回剩余选择。策略为
+`official-q1-exact-selected-staging-v2`；Q>1 保留
 原 prefill 路径。官方 score storage 的物理行宽按 256 个 FP32 元素对齐，默认返回
 逻辑长度 N；模型通过私有选项将已有的 `-inf` 尾部一并暴露给精确 top-k，避免复制
 分数或增加 kernel。选择数量和 hint 归约仍按逻辑 N 处理，保留原始分数、预测阈值和精确选择。
 
-暂存发布先用一个 256-thread CTA 并行核验 ID、slot、旧 owner、journal 和重复记录，再由最多 64 个 CTA
-逐 record 搬运并发布映射。两阶段均在原 stream 中执行，保留任意连续 BF16 对齐，
+暂存发布先用一个 256-thread CTA 核验精确选择与预测的交集，保护已驻留的精确选择，
+检查 ID、slot、旧 owner、journal 和重复记录，再由最多 64 个 CTA 搬运选中的
+record 并发布映射。两阶段均在原 stream 中执行，保留任意连续 BF16 对齐，
 无需新增 scratch；清理及原有异常传播不变。所有实际预测预取都计入 H2D，
 包括未进入精确 top-k 的记录。暂存后的 device-to-device 搬运单列为 GPU control，
-不重复计为 host IO。独立正确性、完整两阶段计时及 NCU 依据见上述 Q1 算子实验；
-该版本也已通过上述真实前三层的完整路径验收。
+不重复计为 host IO。Promotion 在 append 前执行，尚未完整复现官方 recall 内
+发布的时序。新策略的完整路径结果见上述 MFU 实验；原打包、精确 top-k
+与 attention 的独立算子结果继续保留各自的测量边界。
 
 官方 Q1 的准备在单 session、独占 pool 操作、普通持久 append、已初始化
 `H=query_start` 且 `P-H>=64` 时，按槽位升序选出前 64 个空槽。三个 kernel
 完成全池 priority 核验、空槽选择及完整 journal、计数和统计重置；选中槽仍须通过
 free bitmap 与反向映射检查。`L<=H` 只证明空槽足够，不证明 history 驻留。
 独立 bounded token 绑定 storage、stream 和 64 槽上限，通用 prefill 拒绝消费；
-其他形状与容量条件保留原完整准备。三层完整调用的 100 组成对计时见
-[模型说明](../../models/deepseek_v32/README.md)，逐次状态证明见上述 MFU 实验。
+其他形状与容量条件保留原完整准备。当前策略的逐次状态证明与完整路径计时见
+上述 MFU 实验。
 
 显式 `sparse_mla_decode` 将 selection 分成 16 份，重复 Q 后调用一次官方 sparse
 prefill，再由 [decode.py](attention/device_only/decode.py) 用自然对数 LSE 以 FP32 合并 BF16

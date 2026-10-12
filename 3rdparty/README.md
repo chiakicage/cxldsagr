@@ -9,10 +9,13 @@
 
 此外，准备脚本管理固定提交的 `ECHO/` 源码 checkout，供本地 Q1 fused decode
 桥接直接包含官方 headers。它由 `.gitignore` 排除，提交由脚本显式校验，不作为
-第五个 Git 子模块或 Python 包安装。官方桥接、cache 适配、Q1 的 64 空槽准备与
-hint 均值融合及 page64／页表／暂存区准备融合已通过独立验收，并完成真实前三层四方案的正式补测，当前批次为
-`deepseek_h64k_a1_fused_prepare_20261009_01`，各方法分别在独立进程中准备和测量。
-官方 ECHO 内核、依赖版本和独立 SGLang 测量保持原样；结果见
+第五个 Git 子模块或 Python 包安装。官方桥接、cache 适配、Q1 的 64 空槽准备、
+hint 均值融合及 page64／页表／暂存区准备融合已通过独立验收。当前 Q1 策略为
+`official-q1-exact-selected-staging-v2`，只将精确 top-k 选中的历史预测驻留，全部
+实际暂存 H2D 仍计费。真实前三层四方案正式补测为
+`deepseek_h64k_a1_exact_selected_cold_20261011_02`，各方法分别在独立进程中准备
+和测量；另有同官方输入、保留 prefill 驻留的 warm 对照。官方 ECHO 内核、依赖
+版本和独立 SGLang 测量保持原样；结果见
 [四方案 MFU](../experiments/deepseek_v32_mfu/README.md)。
 
 从仓库根目录初始化并连接构建所需的头文件路径：

@@ -37,11 +37,11 @@ tail-shape claim. These profiler durations are not clean API latency.
 
 Permanent verification after promotion: 20 GPU/CPU tests covering page64
 delegation, byte preservation, real paged dispatch/masking/graph behavior and
-decode EMA passed. Full-model matrix `deepseek_h64k_a1_official_20261008_03`
-accepted independent check, clean timing, stage profiles and complete node/IO
-audits with official ECHO, scale layout, projection scheduling, promotion and
-score-layout changes integrated. The source-bound operator profile/report are
-`deepseek_h64k_a1_official_mfu_profile_20261008_04` and
-`deepseek_h64k_a1_official_mfu_report_20261008_04`. Packing measurements above
-retain their own API boundary; they cannot be summed with other component
-benefits to infer the measured whole-model improvement.
+decode EMA passed. Current full-model results use the accepted cold cohort
+`deepseek_h64k_a1_exact_selected_cold_20261011_02` with policy
+`official-q1-exact-selected-staging-v2`; see the
+[MFU report](../../../../experiments/deepseek_v32_mfu/report/h64k_a1/results.md).
+Independent packing/resident-MQA samples remain in
+`q1_official_path_subset_report_20261011_01` with their original numeric bytes,
+source/native identities and API boundary. They cannot be summed with other
+component benefits to infer whole-model improvement.
