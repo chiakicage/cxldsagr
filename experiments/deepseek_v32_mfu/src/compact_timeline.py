@@ -326,30 +326,35 @@ def draw(
     window_kind="full",
     io_layout="shared",
     annotations="gap",
+    figure_title=None,
 ):
-    shape = prefill[0]["shape"]
+    shape = (prefill or extend)[0]["shape"]
     if any(panel["shape"] != shape for panel in [*prefill, *extend]):
         raise ValueError("timeline panels have mismatched token dimensions")
     chunks = shape["prefill_chunks"]
     last_tokens = shape["last_chunk_tokens"]
     prefix_tokens, extend_tokens = shape["prefix_tokens"], shape["extend_tokens"]
     plt.rcParams.update({"font.family": "DejaVu Sans", "svg.fonttype": "none"})
-    separate = layout == "separate"
+    extend_only = layout == "extend-only"
+    separate = layout in {"separate", "extend-only"}
     split_io = io_layout == "directions"
     selected_annotations = annotations == "idle-echo"
     startup_comparison = window_kind == "extend-startup"
     colors = {"Embedding": "#F0E442", **COLORS} if startup_comparison else COLORS
-    fig, axes = plt.subplots(
-        4, 1 if separate else 2, figsize=(13, 10) if separate else (18, 10), squeeze=False
+    phases = (
+        [("extend", extend)]
+        if startup_comparison or extend_only
+        else [("prefill", prefill), ("extend", extend)]
     )
+    panel_count = max(len(panels) for _, panels in phases)
+    single_panel = separate and panel_count == 1
+    figure_size = (13, 4.6) if single_panel else (13, 10) if separate else (18, 10)
+    fig, axes = plt.subplots(panel_count, 1 if separate else 2, figsize=figure_size, squeeze=False)
     figures = []
     metrics = {}
-    phases = (
-        [("extend", extend)] if startup_comparison else [("prefill", prefill), ("extend", extend)]
-    )
     for column, (phase, panels) in enumerate(phases):
         if separate and column:
-            fig, axes = plt.subplots(4, 1, figsize=(13, 10), squeeze=False)
+            fig, axes = plt.subplots(panel_count, 1, figsize=figure_size, squeeze=False)
         axis_column = 0 if separate else column
         limit = max(p["window"]["window_ms"] for p in panels) * 1.015
         for index, panel in enumerate(panels):
@@ -495,7 +500,9 @@ def draw(
                 metrics[f"{phase}/{panel['method']}"]["embedding"] = panel["embedding"]
                 metrics[f"{phase}/{panel['method']}"]["l0_offset_ms"] = panel["l0_offset_ms"]
         xlabel = (
-            "Time from L0 start: first compute or earlier history H2D for dense (ms)"
+            "Time from L0 first compute kernel start (ms)"
+            if extend_only
+            else "Time from L0 start: first compute or earlier history H2D for dense (ms)"
             if window_kind == "three-layers" and phase == "extend"
             else "Time from L0 first compute kernel start (ms)"
             if window_kind == "three-layers"
@@ -561,6 +568,10 @@ def draw(
         notes.append(
             "Yellow marker locates the embedding kernel; all activity widths remain to scale."
         )
+    if extend_only:
+        notes[2] = (
+            "Window: L0 first compute to L2 last compute. This independent warm panel has its own time scale."
+        )
     prefill_title = (
         f"Prefill | H={prefix_tokens:,}, last chunk {chunks}/{chunks}, {last_tokens:,} tokens, L0-L2"
         if window_kind == "three-layers"
@@ -575,6 +586,8 @@ def draw(
             )
             if startup_comparison:
                 title = f"Extend | H={prefix_tokens:,}, A={extend_tokens:,}, startup + embedding + L0-L2"
+            if figure_title is not None:
+                title = figure_title
             fig.text(0.09, 0.960, title, fontsize=15)
         else:
             fig.text(0.075, 0.960, prefill_title, fontsize=15)
@@ -587,7 +600,7 @@ def draw(
         fig.legend(
             handles=handles,
             loc="lower center",
-            bbox_to_anchor=(0.53, 0.097 if separate else 0.087),
+            bbox_to_anchor=(0.53, 0.18 if single_panel else 0.097 if separate else 0.087),
             ncol=4 if separate else 7,
             frameon=False,
             fontsize=9,
@@ -595,7 +608,9 @@ def draw(
         for index, note in enumerate(notes):
             fig.text(
                 0.09 if separate else 0.075,
-                0.083 - index * (0.016 if startup_comparison else 0.018),
+                (0.135 - index * 0.033)
+                if single_panel
+                else 0.083 - index * (0.016 if startup_comparison else 0.018),
                 note,
                 fontsize=8 if separate else 8.5,
                 va="top",
@@ -603,8 +618,12 @@ def draw(
         fig.subplots_adjust(
             left=0.09 if separate else 0.075,
             right=0.985,
-            top=0.905,
-            bottom=(0.235 if selected_annotations else 0.20) if separate else 0.16,
+            top=0.81 if single_panel else 0.905,
+            bottom=0.46
+            if single_panel
+            else (0.235 if selected_annotations else 0.20)
+            if separate
+            else 0.16,
             hspace=0.50,
             wspace=0.16,
         )
