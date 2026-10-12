@@ -6,10 +6,10 @@ The workload uses checkpoint layers L0–L2, H=65,536, A=1, history chunk=1,024,
 
 | Method | Prefill wall ms | Step wall ms | Step MFU % | L0–L2 GPU ms | GPU idle µs |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| `hbm` | 633.801203 | 1.803457 | 0.395465 | 1.014466 | 16.737 |
-| `echo` | 639.018574 | 2.562300 | 0.278345 | 1.419011 | 40.388 |
-| `serial_sparse` | 648.025304 | 2.401064 | 0.297037 | 1.263747 | 41.890 |
-| `dense_prefetch` | 648.195370 | 5.539999 | 0.128737 | 4.415209 | 53.409 |
+| `hbm` | 638.473814 | 1.848991 | 0.385726 | 1.011458 | 17.792 |
+| `echo` | 636.300787 | 2.676780 | 0.266441 | 1.503972 | 43.332 |
+| `serial_sparse` | 640.060621 | 2.430380 | 0.293454 | 1.263427 | 35.586 |
+| `dense_prefetch` | 648.470980 | 5.527328 | 0.129032 | 4.422828 | 62.497 |
 
 ![Three-layer single-token timeline](extend.svg)
 
@@ -21,4 +21,4 @@ MFU is 100 × the sum of useful matrix FLOPs divided by each precision's nominal
 
 Fresh method processes remove another method's same-process preparation from the measurement boundary. This is not a change to model computation or evidence of a particular hardware mechanism. Different-batch wall times are not paired speedup estimates. The official SGLang comparison retains different inputs, natural residency and framework behavior.
 
-Cohort: `deepseek_h64k_a1_fused_prepare_20261009_01`. [Summary and child identities](summary.json), [all wall samples](timing_samples.csv), [raw-window summaries](windows.csv), [complete-stage MFU](final_mfu.csv), [operator MFU](operator_mfu.csv), [input hashes](input_hashes.json), [publication manifest](publication_manifest.json).
+Cohort: `deepseek_h64k_a1_exact_selected_cold_20261011_02`. [Summary and child identities](summary.json), [all wall samples](timing_samples.csv), [raw-window summaries](windows.csv), [complete-stage MFU](final_mfu.csv), [operator MFU](operator_mfu.csv), [input hashes](input_hashes.json), [publication manifest](publication_manifest.json).
