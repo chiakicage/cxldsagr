@@ -13,4 +13,3 @@
 | T-011 Main Cache overlap | 设计 Indexer、Attention 与 Main Cache 读取重叠，将剩余 Recall 纳入流水；与管理策略分开消融 | 2.8（关联 3.6、4.5） |
 | T-002 场景与模型数据 | 明确 GR、agentic serving 的具体任务及模型/数据适配，分别定义 Prefill/Extend、Q1 Decode 和 Batch=128 Decode | 1.1（关联 1.2–1.4） |
 | T-003 Decode 可比范围 | 以拆分后的驻留算子观测和独立 HBM 指标为依据，明确两档 Decode 的 batch、历史、驻留、输出和模型适配，建立共同完整单步 baseline 范围 | 2.1（关联 1.4、4.3） |
-| T-007 NOSA indexer workspace | 保留尚未实施的 H64K workspace 复用方案及完整 candidate 验收，作为 Decode 主线之后的独立 Prefill/Extend 任务 | 4.1（关联 2.1、2.4、4.2） |

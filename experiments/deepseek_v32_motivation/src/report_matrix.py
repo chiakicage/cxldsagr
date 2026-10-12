@@ -9,9 +9,9 @@ import shutil
 import tempfile
 from pathlib import Path
 
+from evaluation.cpu_environment import validate_cpu_environment_record
 from experiments.deepseek_v32_motivation.src import report
 from experiments.deepseek_v32_motivation.src.measure import BENCH_SCHEMA, CHECK_SCHEMA
-from experiments.nosa_motivation.src.cpu_environment import validate_cpu_environment_record
 
 HISTORIES = (4096, 16384, 65536)
 CANDIDATES = (128, 256, 512, 1024)

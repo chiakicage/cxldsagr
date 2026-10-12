@@ -63,9 +63,9 @@ def test_capture_completion_preserves_body_and_stop_errors(body_failure, stop_fa
 def test_graph_setup_failure_releases_runner_before_backend_close(
     tmp_path, monkeypatch, failure_stage, cleanup_failure, reporting_failure, backend_failure
 ):
+    from evaluation import motivation_validation as validation
     from evaluation import provenance
     from experiments.deepseek_v32_motivation.src import graph_instrumentation, profile
-    from experiments.nosa_motivation.src import validation
     from models.deepseek_v32.execution import adapter
     from serving import persistent
 

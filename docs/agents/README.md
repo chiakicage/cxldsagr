@@ -5,7 +5,6 @@
 
 | 入口 | 内容 |
 |---|---|
-| [系统工程](system/README.md) | T-007 的必要计划与依据；已完成重构的过程材料已删除 |
 | [独立验收](acceptance/unified_runtime_20261005/evidence.json) | 冻结源码、原始验收收据与证据索引；范围以各记录为准 |
 | [KDA 组件](kda/README.md) | 按算子组件保存任务、候选调查和验收检查点 |
 | [Supervisor 来源](research-supervisor/sources.md)、[理解修正](research-supervisor/updates.md) | 研究判断的内部依据与研究者修正 |

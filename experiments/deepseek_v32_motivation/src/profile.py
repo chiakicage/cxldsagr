@@ -637,7 +637,7 @@ def main(argv=None):
     args = parser().parse_args(argv)
     if not re.fullmatch(r"[A-Za-z0-9_-]+", args.run_id):
         raise ValueError("run ID must contain letters, digits, underscores or hyphens")
-    from experiments.nosa_motivation.src.validation import reference_directory
+    from evaluation.motivation_validation import reference_directory
 
     reference = reference_directory(
         args.reference_run, bench_schema=measure.BENCH_SCHEMA, kind=measure.RECEIPT_KIND

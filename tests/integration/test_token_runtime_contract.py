@@ -1,6 +1,6 @@
-"""Both native drivers obey one admission, output and transaction contract.
+"""The DeepSeek driver obeys the admission, output and transaction contract.
 
-NOSA uses its tiny CPU reference model. DeepSeek uses the existing deterministic
+DeepSeek uses the existing deterministic
 block fixture with its real dense cache, resource provider and model loop. These
 checks cover adapter behavior; checkpoint numerics remain independent GPU gates.
 """
@@ -15,26 +15,14 @@ from executor.contracts import OutputSpec, RequestShape
 from executor.runtime import TokenRuntime
 
 
-@pytest.fixture(params=("nosa", "deepseek"))
-def native_runtime(request, monkeypatch):
-    if request.param == "nosa":
-        from models.nosa.execution.adapter import NosaServingBackend
-        from models.nosa.tests.test_model import tiny_config
-        from models.nosa.tests.test_sparse_model import initialized_sparse_model
+@pytest.fixture
+def native_runtime(monkeypatch):
+    from models.deepseek_v32.tests.test_serving_backend import _dense_model
 
-        model = initialized_sparse_model(
-            tiny_config(max_position_embeddings=64, num_hidden_layers=2)
-        )
-        backend = NosaServingBackend(model, "hbm", chunk_size=4)
-        fail_target = model.model.layers[1]
-        raw_mutation = lambda session: session.truncate(8)
-    else:
-        from models.deepseek_v32.tests.test_serving_backend import _dense_model
-
-        backend = _dense_model(monkeypatch)
-        backend.close()
-        fail_target = backend.blocks[1]
-        raw_mutation = lambda session: session.runners[0].cache.truncate(8)
+    backend = _dense_model(monkeypatch)
+    backend.close()
+    fail_target = backend.blocks[1]
+    raw_mutation = lambda session: session.runners[0].cache.truncate(8)
     policy = CapacityPolicy.byte_budget(CacheFootprint(1 << 26, 1 << 26))
     runtime = TokenRuntime(backend.runtime_driver(policy))
     resource_plan = runtime.plan_resources(

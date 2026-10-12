@@ -10,6 +10,7 @@ import math
 import statistics
 from pathlib import Path
 
+from evaluation.motivation_validation import audit_receipt
 from experiments.deepseek_v32_motivation.src.measure import (
     BENCH_SCHEMA,
     CHECK_SCHEMA,
@@ -21,7 +22,6 @@ from experiments.deepseek_v32_motivation.src.measure import (
     validate_warmup_trace,
     write_json,
 )
-from experiments.nosa_motivation.src.validation import audit_receipt
 
 
 def digest(path):

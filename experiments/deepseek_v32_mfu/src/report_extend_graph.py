@@ -188,7 +188,7 @@ def main():
             "",
             "The full-forward diagnostic includes host startup and commit, and assigns startup to L0. The README uses the selected main window and its corresponding layer intervals, including L0 compute and history H2D for dense extend. Gap is the complement of compute and actual IO; fused ECHO is entirely productive and stays in the denominator.",
             "",
-            "The graph is valid only for its restored fixed prefix, cache/storage/clock state, query shape and output mode. Outputs are borrowed. The result does not establish arbitrary growing-history replay, C10/NOSA full graphs, full 61-layer performance, or serving capacity limits.",
+            "The graph is valid only for its restored fixed prefix, cache/storage/clock state, query shape and output mode. Outputs are borrowed. The result does not establish arbitrary growing-history replay, C10 full graphs, full 61-layer performance, or serving capacity limits.",
             "",
             "GPU execution, exported native traces and interval accounting are covered by the independent audit files. Any postprocessing repair is recorded in summary.postprocess; a null value means none was recorded. GPU ownership observations and their limits are recorded separately in the audit evidence. Discrete observations do not prove machine or CPU exclusivity.",
             "",

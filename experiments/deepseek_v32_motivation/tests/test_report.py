@@ -217,8 +217,8 @@ def replace_rows(path, rows):
 
 
 def test_independent_check_omits_request_timings(saved_run):
+    from evaluation.motivation_validation import without_performance
     from experiments.deepseek_v32_motivation.src.measure import CHECK_SCHEMA
-    from experiments.nosa_motivation.src.validation import without_performance
 
     metadata = json.loads((saved_run / "metadata.json").read_text())
     metadata.update(schema=CHECK_SCHEMA, mode="check")
@@ -238,9 +238,9 @@ def test_independent_check_omits_request_timings(saved_run):
 def test_clean_bench_uses_external_check_without_loading_outputs(
     saved_run, tmp_path_factory, monkeypatch
 ):
+    from evaluation.motivation_validation import base_identity
     from evaluation.validation import write_receipt
     from experiments.deepseek_v32_motivation.src.measure import BENCH_SCHEMA, RECEIPT_KIND
-    from experiments.nosa_motivation.src.validation import base_identity
 
     check_dir = tmp_path_factory.mktemp("deepseek_check")
     shutil.copytree(saved_run, check_dir, dirs_exist_ok=True)

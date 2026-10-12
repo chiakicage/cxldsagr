@@ -6,12 +6,9 @@
 
 ## 实验目录与产物
 
-- 同一模型实验组只维护一个算子 MFU 实验和报告入口。NOSA 统一使用
-  `experiments/nosa_mfu/`；后续新增 NOSA 算子的 MFU 测量、源码、脚本、测试和报告
-  加入该目录，不再按算子或优化版本新建平行 MFU 实验。README 汇总各算子的已有
-  结果，并注明输入、后端、精度、FLOPs 定义、计时边界和来源 run ID。完整模块与
-  完整模型的已有结果可在同一报告中保留，但须与单算子 MFU 分开解释；motivation、
-  sparse pattern 和 offload overlap 仍按各自实验问题维护。
+- 同一模型实验组只维护一个算子 MFU 入口，DeepSeek 使用 `experiments/deepseek_v32_mfu/`。
+  模块与完整模型结果可在同一报告中保留，须分别说明输入、精度、FLOPs 与计时边界。
+
 - `experiments/` 按目的区分四类：论文 motivation、baseline 实现性能合理性、服务设计
   的 sparse pattern 分析、自有设计性能 microbenchmark。每个 README 声明所属类别、
   回答的问题和实际执行路径；不以是否直接进入论文作为唯一保留标准，也不以算子 MFU

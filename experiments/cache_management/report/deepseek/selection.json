@@ -1,0 +1,18 @@
+{
+  "schema": "report-scope-selection-v1",
+  "selection_id": "deepseek_only_20261012",
+  "source_run_id": "cache_unified_dma_20261006_01",
+  "source_output": "experiments/cache_management/output/data/cache_unified_dma_20261006_01",
+  "source_report_sha256": {
+    "experiments/cache_management/report/unified/summary.json": "2991595ee6b7c28c28c112997541263407c93711d9080549b85250afcd414bcf",
+    "experiments/cache_management/report/unified/memory.csv": "fabf7de37e2d74de10fea3ca683edd8e9b624ba0c632e7b456f8ad61083b5ed4",
+    "experiments/cache_management/report/unified/results.md": "2a430c1d56a123778e08d9688b8913d59d38c3fff619caa639ae015941b5931a",
+    "experiments/cache_management/report/unified/publication.json": "f826147cfc153f6350e059ce5e8d0ab3620e45ac41b0bc4223e61c6dd05a1aa8"
+  },
+  "selected_files_sha256": {
+    "memory.csv": "30d0a02448bc95ca0fc860569cec188afffb0dddf587c35d845ed8578bd2756b",
+    "results.md": "14ec979b4986119a813ee117dca054580b2c176c66d04671c6d618012dccabd3",
+    "summary.json": "dc7c993847875a3afe398577b3b63b412a5cf42d03273ae533b89bea4d3a0ffe"
+  },
+  "boundary": "DeepSeek subset selected from the original report; no new measurement or runtime validation."
+}

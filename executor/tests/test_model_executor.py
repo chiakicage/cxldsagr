@@ -106,35 +106,3 @@ def test_invalid_execution_inputs_fail_before_model_call(ids, chunk_size, kwargs
     with pytest.raises(ValueError, match=message):
         run_chunks(model, ids, model.new_cache(10), chunk_size, **kwargs)
     assert not model.calls
-
-
-@pytest.mark.parametrize("fail", [False, True])
-def test_generation_releases_real_cache_after_completion_or_model_error(monkeypatch, fail):
-    from models.nosa.infer import generate
-    from models.nosa.tests.test_model import initialized_model
-
-    model = initialized_model()
-    allocate = model.cache_manager.allocate
-    sessions = []
-
-    def record_allocate(capacity):
-        session = allocate(capacity)
-        sessions.append(session)
-        return session
-
-    monkeypatch.setattr(model.cache_manager, "allocate", record_allocate)
-    if fail:
-
-        def fail_attention(*args):
-            raise RuntimeError("attention failed")
-
-        model.attention = fail_attention
-        with pytest.raises(RuntimeError, match="attention failed"):
-            generate(model, torch.tensor([1, 2, 3]), max_new_tokens=2, prefill_chunk_size=2)
-    else:
-        generated, _ = generate(
-            model, torch.tensor([1, 2, 3]), max_new_tokens=2, prefill_chunk_size=2
-        )
-        assert generated
-    assert len(sessions) == 1
-    assert sessions[0].released and sessions[0].stats()["resident_bytes"] == 0

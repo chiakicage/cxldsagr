@@ -6,6 +6,13 @@
 
 这里只记影响研究解释或任务选择的变化。文档维护和具体工具输出不逐条记录。
 
+## 2026-10-12：移除 NOSA，保留 DeepSeek 研究主线
+
+用户明确选择删除 NOSA 的模型、算子、实验及共享接入。此前保留的 NOSA H64K
+workspace 任务 T-007 随之取消；涉及 NOSA 的当前模型、baseline 和设计判断退出
+状态表。DeepSeek 的既有结果和验证边界保留，Q1/Batch=128、Cache Manager 与
+Overlap 的方向不变。本次未新增 GPU 测量，也不把删除范围解释为历史结果无效。
+
 ## 2026-10-12：分列具体算子与实际 HBM，修正驻留效率的解释边界
 
 - **新增证据：**`observation_20261012_01` 的全部 66 个负载完成独立数值验收、clean
@@ -346,7 +353,7 @@
 - **影响与下一步：**主条目 4.1，关联 2.1/4.2。T-007 移除已完成的诊断，准备
   indexer 选择输出与 normalizer 的 workspace 复用，以完整 candidate 对照
   检验收益并保持 cache 生命周期；该原型尚未运行 GPU。依据见
-  [元数据复用结果](../system/nosa/nosa_copy_descriptor_result.md)和 [S-028](sources.md#s-028h64k-恢复优化与元数据复用诊断)。
+  元数据复用结果（已移除，原路径 `docs/agents/system/nosa/nosa_copy_descriptor_result.md`）和 [S-028](sources.md#s-028h64k-恢复优化与元数据复用诊断)。
 
 ## 2026-10-05：NOSA motivation 报告整理完成
 
@@ -355,7 +362,7 @@
 - **任务收尾：**T-007 移除报告整理工作，NOSA 性能优化继续暂停，未运行的元数据
   复用候选不列为待办。ECHO 归因及其他开放问题保留，4K/16K 继续暂停。
   报告完成不表示 candidate 效率、长尾或重叠目标已经解决。
-- **入口：**[NOSA motivation 报告](../../../experiments/nosa_motivation/README.md)。
+- **入口：**NOSA motivation 报告（已移除，原路径 `experiments/nosa_motivation/README.md`）。
 
 ## 2026-10-05：按研究者要求停止优化，转为整理 NOSA 报告
 
@@ -379,7 +386,7 @@
 - **影响与下一步：**主条目 4.1，关联 2.1/4.2。T-007 移除已完成的匹配对照，
   下一步只准备单次输入校验内的元数据复用，保留全部检查与检查位置，不跨
   attention 复用。该候选未测量，原实现和正式结果不变，4K/16K 继续暂停。
-  依据见[匹配拷贝对照](../system/nosa/nosa_guarded_copy_control.md)。
+  依据见匹配拷贝对照（已移除，原路径 `docs/agents/system/nosa/nosa_guarded_copy_control.md`）。
 
 ## 2026-10-05：图内拷贝原型未取得一致的普通 candidate 收益
 
@@ -410,7 +417,7 @@
 - **边界与下一步：**诊断使用独立重建的 history 和额外的检查副本，条件不同于
   正式完整用户轨迹。T-007 移除已完成的预提交诊断，转向具体提交与拷贝优化的
   完整 candidate 对照，同时保留长尾问题；后续只测 64K。依据见
-  [诊断记录](../system/nosa/nosa_hbm_prequeue_diagnostic.md)。
+  诊断记录（已移除，原路径 `docs/agents/system/nosa/nosa_hbm_prequeue_diagnostic.md`）。
 
 ## 2026-10-04：扫描实现完成补测，效率与重叠问题仍未解决
 
@@ -594,7 +601,7 @@ Q128 serving 的重叠失败与完整请求待补测状态不变。依据见 [S-
   token policy，也不将共享 staging 记作跨请求热块缓存。
 - **影响：**2.1、2.4、2.5、3.2、4.1、4.2；T-003 增加复用边界评估。状态中的 ECHO
   从“尚未实施”同步为“实施中”，不升级验收状态。没有执行路径修改或新 GPU 结果。
-  依据见 [S-017](sources.md) 和[复用边界](cache_reuse_boundaries.md)。
+  依据见 [S-017](sources.md) 和复用边界（已移除，原路径 `docs/agents/research-supervisor/cache_reuse_boundaries.md`）。
 
 ## 2026-10-03：先复现官方 ECHO cache，再选择 chunk
 

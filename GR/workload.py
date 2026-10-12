@@ -53,7 +53,7 @@ class WorkloadConfig:
 
     def __post_init__(self) -> None:
         if self.model not in MODEL_FORMATS:
-            raise ValueError("model must be deepseek_v32 or nosa")
+            raise ValueError("model must be deepseek_v32")
         for name in ("num_users", "requests", "history_tokens", "candidate_tokens"):
             _positive_integer(name, getattr(self, name))
         _positive_integer("seed", self.seed, 0)
@@ -81,7 +81,7 @@ class WorkloadConfig:
         default_limit = MODEL_FORMATS[self.model].MAX_INPUT_TOKENS
         if self.context_limit is not None:
             _positive_integer("context_limit", self.context_limit)
-            supported_limit = 262144 if self.model == "nosa" else default_limit
+            supported_limit = default_limit
             if self.context_limit > supported_limit:
                 raise ValueError(f"context_limit exceeds the {supported_limit}-token backend limit")
         effective_limit = default_limit if self.context_limit is None else self.context_limit

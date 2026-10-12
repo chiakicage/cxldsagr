@@ -29,7 +29,7 @@ def tokenizer():
     return tokenizer
 
 
-@pytest.mark.parametrize("model", ["deepseek_v32", "nosa"])
+@pytest.mark.parametrize("model", ["deepseek_v32"])
 def test_reproducible_weighted_requests_and_exact_prefix_identity(tokenizer, model):
     config = WorkloadConfig(
         model=model, num_users=3, requests=16, history_tokens=1024, candidate_tokens=1024
@@ -66,7 +66,7 @@ def test_reproducible_weighted_requests_and_exact_prefix_identity(tokenizer, mod
 
 def test_seed_changes_trace_and_write_roundtrip(tokenizer, tmp_path):
     common = {
-        "model": "nosa",
+        "model": "deepseek_v32",
         "num_users": 3,
         "requests": 8,
         "history_tokens": 1024,
@@ -87,7 +87,11 @@ def test_seed_changes_trace_and_write_roundtrip(tokenizer, tmp_path):
 def test_iid_trace_reports_actual_users_without_forced_coverage(tokenizer):
     workload = build_workload(
         WorkloadConfig(
-            model="nosa", num_users=8, requests=1, history_tokens=1024, candidate_tokens=1024
+            model="deepseek_v32",
+            num_users=8,
+            requests=1,
+            history_tokens=1024,
+            candidate_tokens=1024,
         ),
         tokenizer=tokenizer,
     )
@@ -103,7 +107,11 @@ def test_iid_trace_reports_actual_users_without_forced_coverage(tokenizer):
 def test_uncapped_single_user_can_revisit_more_than_eight_times(tokenizer):
     workload = build_workload(
         WorkloadConfig(
-            model="nosa", num_users=1, requests=13, history_tokens=1024, candidate_tokens=1024
+            model="deepseek_v32",
+            num_users=1,
+            requests=13,
+            history_tokens=1024,
+            candidate_tokens=1024,
         ),
         tokenizer=tokenizer,
     )
@@ -118,7 +126,7 @@ def test_uncapped_single_user_can_revisit_more_than_eight_times(tokenizer):
         {"num_users": 0},
         {"requests": 0},
         {"seed": -1},
-        {"history_tokens": 32768},
+        {"history_tokens": MODEL_FORMATS["deepseek_v32"].MAX_INPUT_TOKENS},
         {"heat_dataset": ""},
         {"heat_dataset": None},
         {"heat_field": ""},
@@ -131,23 +139,23 @@ def test_uncapped_single_user_can_revisit_more_than_eight_times(tokenizer):
         {"context_limit": -1},
         {"context_limit": True},
         {"context_limit": 2.5},
-        {"context_limit": 262145},
+        {"context_limit": MODEL_FORMATS["deepseek_v32"].MAX_INPUT_TOKENS + 1},
     ],
 )
 def test_invalid_configuration(override):
-    arguments = {"model": "nosa", "num_users": 2, "requests": 4}
+    arguments = {"model": "deepseek_v32", "num_users": 2, "requests": 4}
     arguments.update(override)
     with pytest.raises(ValueError):
         WorkloadConfig(**arguments)
 
 
 def test_too_short_fixed_prefix_rejected(tokenizer):
-    config = WorkloadConfig(model="nosa", num_users=1, requests=1, history_tokens=2)
+    config = WorkloadConfig(model="deepseek_v32", num_users=1, requests=1, history_tokens=2)
     with pytest.raises(ValueError, match="fixed instruction"):
         build_workload(config, tokenizer=tokenizer)
 
 
-@pytest.mark.parametrize("model", ["deepseek_v32", "nosa"])
+@pytest.mark.parametrize("model", ["deepseek_v32"])
 @pytest.mark.parametrize("cap", [0, 8])
 def test_exhausted_workload_reports_actual_length_and_visit_identities(tokenizer, model, cap):
     workload = build_workload(
@@ -193,7 +201,7 @@ def test_workload_cli_propagates_revisit_cap(tokenizer, tmp_path, capsys):
     main(
         [
             "--model",
-            "nosa",
+            "deepseek_v32",
             "--num-users",
             "1",
             "--requests",
@@ -229,7 +237,7 @@ def test_workload_cli_propagates_revisit_cap(tokenizer, tmp_path, capsys):
     assert len((output / "requests.jsonl").read_text().splitlines()) == 2
 
 
-@pytest.mark.parametrize("model", ["deepseek_v32", "nosa"])
+@pytest.mark.parametrize("model", ["deepseek_v32"])
 def test_industrial_accesses_match_published_trace_prefix(tokenizer, model):
     # These are the first eight rows of the archived industrial 10M / pv_share
     # 1024-user, seed-42 trace. Model formatting cannot change access identities.
@@ -267,7 +275,7 @@ def test_industrial_accesses_match_published_trace_prefix(tokenizer, model):
 
 def test_explicit_curve_field_is_validated_by_gr(tokenizer):
     config = WorkloadConfig(
-        model="nosa",
+        model="deepseek_v32",
         num_users=1,
         requests=1,
         history_tokens=1024,
@@ -278,7 +286,7 @@ def test_explicit_curve_field_is_validated_by_gr(tokenizer):
         build_workload(config, tokenizer=tokenizer)
 
 
-@pytest.mark.parametrize("model", ["deepseek_v32", "nosa"])
+@pytest.mark.parametrize("model", ["deepseek_v32"])
 def test_sequential_two_passes_have_no_heat_dependency(tokenizer, monkeypatch, model):
     def forbidden_curve(*args, **kwargs):
         raise AssertionError("sequential input must not read a heat curve")
@@ -341,7 +349,7 @@ def test_sequential_two_passes_have_no_heat_dependency(tokenizer, monkeypatch, m
 @pytest.mark.parametrize("cap", [0, 1, 8])
 def test_sequential_rejects_revisit_cap(cap):
     with pytest.raises(ValueError, match="sequential sampling does not support max_revisits"):
-        WorkloadConfig("nosa", 16, 32, sampling="sequential", max_revisits=cap)
+        WorkloadConfig("deepseek_v32", 16, 32, sampling="sequential", max_revisits=cap)
 
 
 def test_workload_cli_sequential_records_no_heat(tokenizer, tmp_path, capsys):
@@ -351,7 +359,7 @@ def test_workload_cli_sequential_records_no_heat(tokenizer, tmp_path, capsys):
     main(
         [
             "--model",
-            "nosa",
+            "deepseek_v32",
             "--num-users",
             "2",
             "--requests",
@@ -376,31 +384,6 @@ def test_workload_cli_sequential_records_no_heat(tokenizer, tmp_path, capsys):
     assert [row["user_id"] for row in rows] == [0, 1, 0, 1]
 
 
-def test_nosa_long_context_requires_explicit_supported_override():
-    arguments = {
-        "model": "nosa",
-        "num_users": 1,
-        "requests": 1,
-        "history_tokens": 65536,
-        "candidate_tokens": 128,
-    }
-    with pytest.raises(ValueError, match="exceeds model context"):
-        WorkloadConfig(**arguments)
-    assert WorkloadConfig(**arguments, context_limit=65664).context_limit == 65664
-    assert WorkloadConfig(**arguments, context_limit=262144).context_limit == 262144
-    with pytest.raises(ValueError, match="exceeds model context"):
-        WorkloadConfig(**arguments, context_limit=65536)
-    with pytest.raises(ValueError, match="backend limit"):
-        WorkloadConfig(**arguments, context_limit=262145)
-    with pytest.raises(ValueError, match="backend limit"):
-        WorkloadConfig(
-            model="deepseek_v32",
-            num_users=1,
-            requests=1,
-            context_limit=MODEL_FORMATS["deepseek_v32"].MAX_INPUT_TOKENS + 1,
-        )
-
-
 def test_gr_constructor_context_override_preserves_default_boundary(tokenizer):
     text_config = TextConfig(
         user_lengths=(65536,),
@@ -410,10 +393,9 @@ def test_gr_constructor_context_override_preserves_default_boundary(tokenizer):
         max_input_tokens=65664,
     )
     population = HeatPopulation({0: 1.0}, {})
-    with pytest.raises(ValueError, match="32768-token context"):
-        InputGenerator(population, tokenizer, text_config=text_config)
-    with pytest.raises(ValueError, match="32768-token context"):
-        create_input_generator(tokenizer=tokenizer, num_users=1, text_config=text_config)
+    assert InputGenerator(population, tokenizer, text_config=text_config).context_limit == (
+        MODEL_FORMATS["deepseek_v32"].MAX_INPUT_TOKENS
+    )
     direct = InputGenerator(population, tokenizer, text_config=text_config, context_limit=65664)
     factory = create_input_generator(
         tokenizer=tokenizer, num_users=1, text_config=text_config, context_limit=65664

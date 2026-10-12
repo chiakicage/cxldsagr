@@ -5,12 +5,6 @@
 
 ```text
 operators/
-  nosa/
-    indexer/                  scoring、selection、compression、validation
-    attention/
-      reference/              PyTorch FP32 参考
-      device_only/            CUDA/CuTe FA3、native fallback、Triton
-      offload/                sparse host fetch + persistent FA3
   deepseek_v32/
     indexer/                  ECHO FP8 logits + fused prefetch
     attention/
@@ -27,24 +21,21 @@ Python reference 可独立导入，不触发 Triton 或 native extension 加载�
 
 | 入口 | 当前能力 |
 | --- | --- |
-| [NOSA](nosa/README.md) | resident indexer / attention，及 BF16 / D128 / GQA16 offload 融合算子 |
 | [DeepSeek V3.2](deepseek_v32/README.md) | ECHO indexer、MLA、FP8 linear / grouped MoE |
 | [共享 KV 搬运](common/kv_transfer.py) | record 宽度和 dtype 由调用者传入，支持非 16-byte 对齐的 contiguous view |
 | [FlashInfer 适配](flashinfer.py) | 封装现有后端，不解析模型配置 |
 
-NOSA offload 的单主 kernel 融合 fetch 和 attention；HBM staging 仍覆盖一层完整逻辑地址，
-尚无有限 slots / eviction。ECHO 将预取融合在 indexer 中；其 attention/offload 入口
+ECHO 将预取融合在 indexer 中；其 attention/offload 入口
 复用 device-only MLA，有限 HBM slots 和精确补取由 [token cache](../cache/sparse_token_cache.py)
-及模型调度管理。两种路径的能力分别记录，不混用。
+及模型调度管理。
 
 本次目录迁移保持 CUDA 计算源码和 Triton 计算语义，更新导入、JIT 依赖、源码采集及测试入口。
 已有性能报告仍对应各自 run ID 与源码快照；迁移和回归测试不产生新的性能结果。
-NOSA 完整模型 offload 性能尚未测量。DeepSeek 已完成真实前三层四方法
+DeepSeek 已完成真实前三层四方法
 H=65,536、A=128、P=65,664 的独立数值验收、正式计时与 profile；十 block C10
 GR 结果由 [本地四方案实验](../experiments/deepseek_v32_motivation/README.md)单独报告。
 完整 61 层仅保留实现能力，本轮未作完整模型验收。
-见 [NOSA overlap](../experiments/nosa_offload_overlap/README.md) 和
-[DeepSeek 四方法 MFU](../experiments/deepseek_v32_mfu/README.md)。
+见 [DeepSeek 四方法 MFU](../experiments/deepseek_v32_mfu/README.md)。
 
 SM120 扩展、旧 synthetic 模型及依赖它们的测量入口已移除。有效历史报告与 CPU 重建工具
 保存在不进 Git 的 `local/experiments/legacy/deepseek_v32/`；历史执行环境使用本地 README

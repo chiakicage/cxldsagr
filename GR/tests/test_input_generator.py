@@ -23,7 +23,6 @@ from GR.input_generator import (
     main,
 )
 from GR.scheduling import ScheduleConfig
-from models.nosa.infer import DEFAULT_MODEL_PATH, encode_prompt, load_tokenizer
 
 
 class HeatTests(unittest.TestCase):
@@ -55,7 +54,7 @@ class HeatTests(unittest.TestCase):
                 TextConfig(**kwargs)
 
 
-@unittest.skipUnless(DEFAULT_TOKENIZER.is_file(), "local NOSA tokenizer unavailable")
+@unittest.skipUnless(DEFAULT_TOKENIZER.is_file(), "local DeepSeek tokenizer unavailable")
 class RuleTextTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -69,24 +68,6 @@ class RuleTextTests(unittest.TestCase):
             titles=titles,
             schedule_config=ScheduleConfig(sampling="sequential"),
         )
-
-    def test_nosa_prompt_matches_checkpoint_template_and_context_limit(self):
-        tokenizer, config = load_tokenizer(DEFAULT_MODEL_PATH)
-        gen = create_input_generator(tokenizer=tokenizer, num_users=2)
-        row = gen.for_user(0)
-        content = row["prompt"].removeprefix("<|im_start|>user\n").removesuffix(gen.ending)
-        self.assertEqual(
-            row["input_ids"], encode_prompt(tokenizer, config, content, disable_thinking=True)
-        )
-        self.assertEqual(row["model"], "nosa")
-        self.assertLessEqual(row["total_input_tokens"], 32768)
-        with self.assertRaisesRegex(ValueError, "32768-token context"):
-            create_input_generator(
-                tokenizer=tokenizer,
-                text_config=TextConfig(
-                    user_lengths=(32768,), user_probabilities=(1,), max_input_tokens=65536
-                ),
-            )
 
     def test_api_and_file_output_match(self):
         with tempfile.TemporaryDirectory() as directory:

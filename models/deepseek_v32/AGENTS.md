@@ -56,8 +56,7 @@ history indexer 状态。GR `echo/serial_sparse` 为每层主 KV storage 增加�
 项或淘汰元数据。`cache/sparse_token_cache.py` 管理 session/layer view、精确 recall
 与事务；普通 `begin_step/commit` 保留持久 append，显式 transient step 只允许
 discard/rollback，候选始终从 GPU 尾部读取。record 宽度和 dtype 由模型提供。
-host page 释放遵守 session LRU，token eviction 只失效 HBM 映射；不能将这套 DeepSeek
-token pool 的有限 HBM pool 能力或候选临时存储策略归于 NOSA。
+host page 释放遵守 session LRU，token eviction 只失效 HBM 映射；这套有限 HBM pool 与候选临时存储策略由 DeepSeek adapter 声明。
 
 受支持的 native 精确召回在 H<=P 时以 GPU miss count 驱动有界 gather，随后在同一
 stream 发布映射，不逐层读取 host scalar。当前 sparse gather 上限为 128 CTAs。
@@ -218,7 +217,7 @@ replay 必须核验 capture 时的精度策略、权重身份、query shape 和 
 的 dense 层前缀、单个 session 和一次完整 query batch；offload 要求 H+A<=P。
 图绑定固定 H/A、输出模式、cache generation/storage、clock、驻留及追加证明。
 每次 replay 前须恢复匹配的 prefix；cold/warm 状态或其他绑定变化时直接报错，
-不能自动切换到图外执行。不得据此声称支持任意增长的历史、C10 或 NOSA 完整图。
+不能自动切换到图外执行。不得据此声称支持任意增长的历史、C10 完整图。
 
 ECHO 的融合 prefetch 通过原子操作竞争 `prefetch_cap` 额度。额度饱和时，符合
 阈值、位置和映射条件的候选可能随 GPU 调度不同而被实际预取；这会改变部分逻辑

@@ -103,8 +103,10 @@ class CurveHeatTests(unittest.TestCase):
 
     def test_factory_and_cli_defaults_need_no_raw_data(self):
         # Only exercise resource loading and metadata here. Exact request encoding
-        # is covered separately with the real NOSA tokenizer when available.
-        specials = ["[UNK]", "<|im_start|>", "<|im_end|>"]
+        # is covered separately with the real DeepSeek tokenizer when available.
+        from models.deepseek_v32.request_format import SPECIAL_TOKENS
+
+        specials = ["[UNK]", *SPECIAL_TOKENS]
         tokenizer = Tokenizer(WordLevel(dict(zip(specials, range(len(specials)))), "[UNK]"))
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

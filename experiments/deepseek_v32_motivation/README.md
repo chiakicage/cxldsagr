@@ -217,4 +217,8 @@ python -m experiments.deepseek_v32_motivation.src.plot_compute_share \
 
 本轮 12 点矩阵没有新采集 profile。已验收的 `deepseek_motivation_rerun_profile_20261006_01` 只匹配旧 H64K/A128 单点 `deepseek_motivation_rerun_bench_20261006_01`；其局部 DMA/计算重叠证据保留在[无图证据说明](report/diagnosis.md)，不能视为新矩阵的匹配 profile，也不以局部交集推出本轮完整请求的因果收益。原单层和请求时间线展示已撤下。
 
-`deepseek_dma_c10_bench_20261006_01` 仍是[独立 cache 管理报告](../cache_management/README.md)的内存观测来源，保留其原始证据，不将旧计时混入矩阵。NOSA、容量填满和 simulation 未重跑；旧 simulation 继续撤回。
+`deepseek_dma_c10_bench_20261006_01` 仍是[独立 cache 管理报告](../cache_management/README.md)的内存观测来源，保留其原始证据，不将旧计时混入矩阵。容量填满和 simulation 未重跑；旧 simulation 继续撤回。
+
+验收和来源工具现位于 `evaluation/motivation_validation.py`、`evaluation/cpu_environment.py`
+与 `evaluation/native_provenance.py`。2026-10-12 的目录清理未改动模型计算，也未重测 GPU 性能；
+已有数字仍绑定原 run 和源码快照。新运行须用迁移后的源码重新生成独立 check 收据。

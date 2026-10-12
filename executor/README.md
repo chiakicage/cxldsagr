@@ -3,7 +3,7 @@
 [contracts.py](contracts.py) 定义请求形状、执行上限、输出规格和模型 driver 接口。
 [runtime.py](runtime.py) 的 `TokenRuntime` 校验资源身份、session 状态、输入和输出，
 调用模型显式提供的 `prefill`、`candidate`、`append` 与释放操作。
-DeepSeek 与 NOSA 在模型目录装配 driver；用户身份、热度、预算准入和 LRU 由
+DeepSeek 在模型目录装配 driver；用户身份、热度、预算准入和 LRU 由
 serving/cache 负责，执行器不读取 GR 请求。
 模型内部的 indexer / main attention 协议见
 [attention_contracts.py](../models/attention_contracts.py)，具体普通层和 attention 适配由模型持有。
@@ -14,11 +14,11 @@ driver 时声明，报告 metadata 只反映该配置；runner 不再通过探�
 retained-HBM tokens 分别计费。容量类型见 [cache](../cache/capacity.py)。
 
 `candidate` 成功后保留已提交 history；固定容量路径使用 GPU 临时状态并 discard，
-普通 NOSA budget 与 DeepSeek budget 的 `hbm/dense_prefetch` 保留原
+DeepSeek budget 的 `hbm/dense_prefetch` 保留原
 `extend + truncate` 行为，DeepSeek budget 的 `echo/serial_sparse` 使用 GPU transient
 candidate。`append` 持久提交新增 token。
 `OutputSpec` 明确 last/all hidden、logits、LM head 工作量和输出所有权；DeepSeek serving
-继续执行末 token LM head，NOSA serving 继续只计算 hidden。候选阶段的 `executed` /
+继续执行末 token LM head。候选阶段的 `executed` /
 `cleaned` 观测点分别位于执行结束与清理结束，不改变正式计时边界。
 
 共享资源扩展通过纯 `plan_resources` 预留，`allocate_shared` 分配一次。
@@ -38,7 +38,7 @@ runner 在分配前 `bind_owner`，关闭全部 session 后 `unbind_owner`，共
 
 `run_chunks(model, ids, cache, chunk_size, output="hidden", logits_to_keep=0)` 默认跳过
 LM head，返回最后一个 chunk 的全部 normalized hidden；不拼接整条序列的输出。
-`output="logits"` 用于现有文本生成前向，采样和 EOS 处理保留在 NOSA `infer.py`。
+`output="logits"` 返回模型 logits；执行器不负责采样和 EOS 处理。
 
 模型负责参数树、逐层前向和一次 forward 的缓存提交；执行器不读取 GR 字典。
 请求的 prefix/candidate 分界由 [serving](../serving/README.md) 提取，

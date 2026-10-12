@@ -14,11 +14,9 @@ from pathlib import Path
 
 SCHEMES = {
     "deepseek_v32": ("hbm", "echo", "serial_sparse", "dense_prefetch"),
-    "nosa": ("hbm", "serial_sparse", "dense_prefetch", "overlap"),
 }
 DEFAULT_PATHS = {
     "deepseek_v32": Path("/preset-models"),
-    "nosa": Path("/mnt/ssd-wlcb/chenkaiqi/NOSA-8B"),
 }
 
 
@@ -35,9 +33,9 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--model", choices=tuple(SCHEMES), default="deepseek_v32")
     parser.add_argument(
         "--scheme",
-        choices=("hbm", "echo", "serial_sparse", "dense_prefetch", "overlap"),
+        choices=SCHEMES["deepseek_v32"],
         default="hbm",
-        help="DeepSeek: hbm/echo/serial_sparse/dense_prefetch; NOSA: hbm/serial_sparse/dense_prefetch/overlap",
+        help="DeepSeek: hbm/echo/serial_sparse/dense_prefetch",
     )
     parser.add_argument(
         "--model-path",
@@ -64,7 +62,7 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--context-limit",
         type=int,
-        help="Explicit generation context limit; NOSA supports a configured limit up to 262144",
+        help="Explicit generation context limit within the DeepSeek request format",
     )
     parser.add_argument(
         "--resource-mode",
@@ -158,7 +156,7 @@ def _build_generator(args):
     if args.history_tokens <= instruction_tokens:
         raise ValueError("history-tokens must leave user history after the fixed instruction")
     context_limit = args.context_limit or model_format.MAX_INPUT_TOKENS
-    supported_limit = 262144 if args.model == "nosa" else model_format.MAX_INPUT_TOKENS
+    supported_limit = model_format.MAX_INPUT_TOKENS
     if context_limit > supported_limit:
         raise ValueError("context-limit exceeds the supported backend context")
     if args.history_tokens + args.candidate_tokens > context_limit:
@@ -198,28 +196,18 @@ def _build_backend(args):
     if torch.cuda.get_device_capability(device) != (9, 0):
         raise ValueError("persistent GR serving requires an SM90/Hopper GPU")
     torch.cuda.set_device(device)
-    if args.model == "deepseek_v32":
-        from models.deepseek_v32.execution.adapter import DeepSeekServingBackend
+    from models.deepseek_v32.execution.adapter import DeepSeekServingBackend
 
-        return DeepSeekServingBackend(
-            args.model_path,
-            num_layers=10,
-            scheme=args.scheme,
-            device=device,
-            chunk_size=args.chunk_size,
-            sparse_pool_tokens=args.sparse_pool_tokens,
-            host_arena_tokens=args.host_arena_tokens,
-            workspace_query_tokens=args.workspace_query_tokens,
-            extend_chunk_size=args.extend_chunk_size,
-        )
-    from models.nosa.execution.adapter import NosaServingBackend
-
-    return NosaServingBackend.from_pretrained(
+    return DeepSeekServingBackend(
         args.model_path,
+        num_layers=10,
         scheme=args.scheme,
         device=device,
         chunk_size=args.chunk_size,
-        max_seq_len=args.history_tokens + args.candidate_tokens,
+        sparse_pool_tokens=args.sparse_pool_tokens,
+        host_arena_tokens=args.host_arena_tokens,
+        workspace_query_tokens=args.workspace_query_tokens,
+        extend_chunk_size=args.extend_chunk_size,
     )
 
 

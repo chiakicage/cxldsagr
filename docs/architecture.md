@@ -1,6 +1,6 @@
 # 系统架构
 
-系统面向 sparse attention offloading，使用 NOSA 和 DeepSeek V3.2 验证 HBM 与
+系统面向 sparse attention offloading，使用 DeepSeek V3.2 验证 HBM 与
 CPU DRAM 之间的缓存管理和稀疏搬运。公共代码统一请求执行、容量计划和资源生命周期，
 各模型保留自己的计算循环、稀疏选择、KV 布局与搬运调度。
 
@@ -17,7 +17,7 @@ CPU DRAM 之间的缓存管理和稀疏搬运。公共代码统一请求执行�
 flowchart TD
     G["GR：请求内容与用户访问序列"] --> S["serving：请求适配与历史复用"]
     S --> E["executor：TokenRuntime / ModelDriver"]
-    E --> M["models：NOSA / DeepSeek"]
+    E --> M["models：DeepSeek"]
     M --> O["operators：indexer / attention / linear"]
     S <-->|准入与 LRU| C["cache：session、容量、事务与生命周期"]
     E <-->|资源与 session 契约| C
@@ -29,16 +29,13 @@ flowchart TD
 | 模块 | 职责 | 主要入口 |
 | --- | --- | --- |
 | `GR/` | 构造请求内容、history/candidate token 与用户访问顺序 | [GR 说明](../GR/README.md) |
-| `serving/` | 解析用户身份和固定前缀，组织准入、历史复用、请求执行与关闭 | [persistent.py](../serving/persistent.py)、[runner.py](../serving/runner.py) |
+| `serving/` | 解析用户身份和固定前缀，组织准入、历史复用、请求执行与关闭 | [persistent.py](../serving/persistent.py) |
 | `executor/` | 提供 token 执行契约，校验输入、输出和 session 状态；提供普通分块执行入口 | [runtime.py](../executor/runtime.py)、[model_executor.py](../executor/model_executor.py) |
-| `models/` | 模型结构、权重加载、位置编码、稀疏语义、KV 布局与执行循环 | [NOSA](../models/nosa/README.md)、[DeepSeek](../models/deepseek_v32/README.md) |
+| `models/` | 模型结构、权重加载、位置编码、稀疏语义、KV 布局与执行循环 | [DeepSeek](../models/deepseek_v32/README.md) |
 | `cache/` | 容量声明、用户池与 LRU、缓存事务、共享缓冲和资源生命周期 | [缓存说明](../cache/README.md) |
 | `operators/` | 数学参考、GPU 计算、host record 搬运与融合 offload 算子 | [算子索引](../operators/README.md) |
 
-普通层按模型组织：NOSA 的 decoder、RMSNorm、SwiGLU 和 attention 适配位于
-`models/nosa/`，DeepSeek 的对应实现位于 `models/deepseek_v32/`。
-轻量公共 attention 契约位于
-[models/attention_contracts.py](../models/attention_contracts.py)，顶层没有 `layers/`。
+普通层与 attention 适配位于 `models/deepseek_v32/`。
 
 `evaluation/` 提供共享验收、来源记录和内存审计工具；`experiments/` 保存实验入口与报告；
 `tests/` 和各模块测试目录承担正确性回归。共享第三方依赖位于 `3rdparty/`，
@@ -50,7 +47,7 @@ flowchart TD
 
 [PersistentGRRunner](../serving/persistent.py) 通过
 `backend.runtime_driver(policy)` 取得 `ModelDriver`，再创建 `TokenRuntime`。
-两个模型目前都使用 [BackendAdapter](../executor/adapters.py) 连接已有 backend。
+DeepSeek 使用 [BackendAdapter](../executor/adapters.py) 连接已有 backend。
 构造 driver 时显式声明共享资源、candidate 策略、输出工作量、容量规划与分配方式。
 
 [ModelDriver](../executor/contracts.py) 提供以下操作：
@@ -67,25 +64,13 @@ flowchart TD
 
 `TokenRuntime` 校验资源计划身份、session 是否有效、token 输入、请求上限、输出形状
 以及执行后的有效长度。`OutputSpec` 声明返回哪些 hidden/logits、是否执行 LM head
-及输出所有权。当前 `BackendAdapter` 提供 owned 输出，两个模型的 serving prefill
-默认都不返回 hidden。NOSA candidate 默认返回全部 normalized hidden；DeepSeek 还执行
+及输出所有权。当前 `BackendAdapter` 提供 owned 输出，DeepSeek serving prefill
+默认不返回 hidden。DeepSeek candidate 返回全部 normalized hidden，并执行
 末 token LM head，但默认只返回 hidden，显式请求 `logits="last"` 时才返回 logits。
 
 实际的层循环、cache 事务和设备操作留在模型 backend 中。公共 adapter 转发这些调用，
 runtime 保留请求边界上的同步和校验；模型在自己的执行 lease 中处理内部异步完成。
-DeepSeek 的 block/replay 循环与 NOSA 的模型 forward 因此可以保持各自结构。
-
-### 普通逐请求推理
-
-[ModelExecutor](../executor/model_executor.py) 接收 token tensor，借助 `CacheManager`
-分配 session，并用 `run_chunks` 执行 prefill 或 extend。它不读取 GR 请求，也不管理用户 LRU。
-一次 forward 的所有层成功后由模型提交本次 cache step；某个后续 chunk 失败时，
-已完成 chunk 的提交仍保留。
-
-[GRRunner](../serving/runner.py) 使用这一入口，每个请求创建并释放 cache；
-`serving.run_multi_user` 使用持久 runner 跨请求保留 history。
-NOSA 固定 P/NH 实验通过独立的 `NosaFixedServingBackend` 接入持久 runner，
-与公共多用户 CLI 的普通 NOSA budget 路径分开。
+DeepSeek 保留原有 block/replay 循环。
 
 ## 3. 一次持久请求怎样执行
 
@@ -189,16 +174,13 @@ allocator 检查和 storage 释放由相应模型或 provider 执行。
 [staging.py](../cache/staging.py) 管理命名 record 双缓冲：写入前等待旧 consumer，
 消费前等待 copy ready；其 session、generation 和 layer 身份随 lease 校验。
 
-`cache/allocator/` 中的分配边界和新 snapshot 检查目前由 NOSA 显式调用。
-这些工具位于公共目录，不表示 DeepSeek 也执行相同的 allocator 扫描。
-
 ## 5. 模型、选择与 offload
 
 ### 公共 attention 契约
 
 [attention_contracts.py](../models/attention_contracts.py) 定义：
 
-- `BlockSelection`：逻辑 block IDs、block size 和可选 `valid_mask`，NOSA 用 mask 排除不足预算时的填充项。
+- `BlockSelection`：逻辑 block IDs、block size 和可选 `valid_mask`，mask 排除无效填充项。
 - `TokenSelection`：逻辑 `token_ids`，padding 解释及物理地址映射由消费模型负责。
 - `AttentionContext`：层号、query 起点、query 长度及辅助状态。
 - `Indexer` / `MainAttention`：选择与 attention 的调用接口。
@@ -206,25 +188,6 @@ allocator 检查和 storage 释放由相应模型或 provider 执行。
 这些类型传递逻辑访问语义，不展开或搬运 KV。`MainAttention` 接收 Q、selection、
 cache access 和 context；cache access 可以提供 resident view，也可以提供 host 来源
 与 device append，因此 attention 可以在调用内部安排 fetch 与计算重叠。
-
-### NOSA
-
-[layers.py](../models/nosa/layers.py) 组织投影、RoPE、CIS、indexer 和 main attention。
-本次 K/V/CIS 先写入 cache 的待提交区，indexer 生成逻辑块选择，attention 读取同一
-cache access，之后完成输出投影及 MLP。dense 模式不执行 indexer，使用 resident K/V。
-
-完整 sparse policy 结合 query-aware 选择、query-agnostic CIS 与 attention bias。
-resident attention 使用 SM90 native 或显式 Triton 对照；offload 算子可在同一主 kernel
-中融合稀疏 host fetch 和 attention，搬运完成的块供后续计算复用。
-
-普通 NOSA budget 的 sparse 路径使用覆盖一层完整逻辑地址的 staging，dense prefetch
-使用双 staging，用户历史按 session LRU 管理。固定 P/NH 路径另有逐层 P 槽，
-通过逻辑页偏移和 session tag 直接映射，host backing 随 session 分配；
-当前要求 H≤P，history 和 prefill chunk 按 64 token 对齐。
-固定路径可显式使用纯计算 CUDA Graph，indexer、attention 和 IO 留在图外。
-
-模型入口为 [NosaServingBackend](../models/nosa/execution/adapter.py) 和
-[NosaFixedServingBackend](../models/nosa/execution/fixed.py)。
 
 ### DeepSeek V3.2
 
@@ -246,19 +209,18 @@ block/replay、final norm、末 token LM head 及 cache 提交或 discard。
 不装配到本地 backend。ECHO 与 HBM-only 的真实前三层 performance-only 计时均已完成；
 两种配置容量不同，不作为等容量对照，数值验收未通过。
 
-两模型的数据布局与缓存能力如下：
+DeepSeek 的数据布局与缓存能力如下：
 
-| 项目 | NOSA | DeepSeek V3.2 |
-| --- | --- | --- |
-| 选择粒度 | 逻辑 block，带有效项 mask | 精确逻辑 token IDs |
-| 主 KV 与派生状态 | 独立 K/V、CIS 和压缩 indexer 记录 | MLA record、独立 indexer K/scales |
-| 融合搬运位置 | offload attention 内 | ECHO indexer 内，消费前保留精确 recall |
-| 固定 host 容量实现 | NH 配额下按 session 分配 backing | 预分配共享 host arena，按 session 分配页 |
-| HBM 缓存能力 | fixed 路径直接映射，要求完整 history 可放入 P | 有限 token pool、映射与淘汰 |
-| 当前 serving 计算工作量 | 全部 candidate normalized hidden | 全部 candidate normalized hidden，加末 token LM head |
+| 项目 | DeepSeek V3.2 |
+| --- | --- |
+| 选择粒度 | 精确逻辑 token IDs |
+| 主 KV 与派生状态 | MLA record、独立 indexer K/scales |
+| 融合搬运位置 | ECHO indexer 内，消费前保留精确 recall |
+| 固定 host 容量实现 | 预分配共享 host arena，按 session 分配页 |
+| HBM 缓存能力 | 有限 token pool、映射与淘汰 |
+| 当前 serving 计算工作量 | 全部 candidate normalized hidden，加末 token LM head |
 
-`dense_prefetch` 表示预取全部历史或其中的 miss；两模型的 serving 对照仍使用各自的
-稀疏 attention 选择。NOSA 的 Full Attention 模式是另一个模型配置。
+`dense_prefetch` 表示预取全部历史或其中的 miss；serving 对照仍使用稀疏 attention 选择。
 
 ## 6. 缓存事务与候选语义
 
@@ -275,8 +237,6 @@ block/replay、final norm、末 token LM head 及 cache 提交或 discard。
 
 | 模型与配置 | candidate 策略 |
 | --- | --- |
-| NOSA 普通 budget，全部方案 | `append_truncate`：extend 后截短至 history |
-| NOSA fixed P/NH，全部方案 | `gpu_transient`：整批计算后 discard 临时状态 |
 | DeepSeek 本地 budget，`echo` / `serial_sparse` | `gpu_transient` |
 | DeepSeek 本地 budget，`hbm` / `dense_prefetch` | `append_truncate` |
 | DeepSeek 本地 fixed P/NH，全部方案 | `gpu_transient` |
@@ -286,9 +246,6 @@ transient candidate 不向 host history 追加主 KV，也不推进已提交 his
 
 - DeepSeek 使用共享 token pool 的 offload 主 KV 候选尾部属于 backend；fixed
   HBM-only 的主 KV 候选尾部属于 session。合并后的 indexer workspace 由 backend 共享。
-- NOSA fixed offload 的主 K/V 候选尾部属于 backend，HBM-only 的候选 K/V 属于 session；
-  两种路径的 CIS/indexer 候选尾部都属于 session。
-
 driver 保留候选结束调用及同步，确保临时状态结束后 history 长度正确。
 公共 adapter 的结束调用仍为 `truncate(history_length)`；transient 路径通过该调用
 检查既有状态，不表示候选曾经持久提交。
@@ -309,10 +266,9 @@ driver 保留候选结束调用及同步，确保临时状态结束后 history �
 ## 8. 当前运行与验证范围
 
 本地 serving 尚无网络接口、并发批调度或到达队列吞吐测量，存储路径使用 HBM 与 pinned
-CPU DRAM；CXL/RDMA 尚未接入。NOSA fixed 的直接映射不提供任意容量下的 token LRU，
-完整 offload 调用也未接入 CUDA Graph capture。
+CPU DRAM；CXL/RDMA 尚未接入。完整 offload 调用也未接入 CUDA Graph capture。
 
-NOSA 当前 serving 实验使用完整 32 层 checkpoint。DeepSeek 模型代码保留完整 61 层与
+DeepSeek 模型代码保留完整 61 层与
 grouped MoE 能力，非 GR benchmark 使用真实 checkpoint 前三层依次传播；GR 对照使用
 前三层的独立副本组成十个 dense block，并复制对应 source block 输入，作为工作负载替身。
 这些执行范围和输出工作量在各实验中分别记录。
@@ -323,8 +279,7 @@ grouped MoE 能力，非 GR benchmark 使用真实 checkpoint 前三层依次传
 | [executor README](../executor/README.md) | token 执行接口与普通分块执行 |
 | [cache README](../cache/README.md) | 缓存实现、容量与生命周期 |
 | [两模型 cache 管理](../experiments/cache_management/README.md) | 静态 P/NH 规划、存储账本与完整请求内存观测 |
-| [NOSA motivation](../experiments/nosa_motivation/README.md)、[DeepSeek motivation](../experiments/deepseek_v32_motivation/README.md) | 固定 history/candidate 的完整请求对照 |
-| [NOSA offload overlap](../experiments/nosa_offload_overlap/README.md) | 单层稀疏搬运与 attention 重叠 |
+| [DeepSeek motivation](../experiments/deepseek_v32_motivation/README.md) | 固定 history/candidate 的完整请求对照 |
 | [DeepSeek 前三层](../experiments/deepseek_v32_mfu/README.md) | 本地真实三层四方法的验收和测量 |
 | [独立 SGLang 复现](../experiments/deepseek_v32_echo_official/README.md) | 官方 SGLang 真实前三层的 performance-only 计时，数值验收未通过 |
 

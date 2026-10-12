@@ -3,8 +3,7 @@ set -euo pipefail
 if [[ "${1:-}" == "--help" ]]; then
   echo "Usage: bash scripts/run_tests.sh [cpu|gpu|all]"
   echo "Default: cpu. gpu/all require Hopper CUDA, nvcc, shared CUTLASS, TVM FFI, Triton and FlashInfer."
-  echo "CLI checks use tiny weights."
-  echo "Optional checkpoint checks: NOSA_MODEL_PATH and NOSA_OFFLOAD_CHECKPOINT (NOSA-8B)."
+  echo "CPU fixtures and CLI checks do not validate full checkpoints."
   exit 0
 fi
 if [[ $# -gt 1 ]]; then
@@ -22,13 +21,10 @@ if [[ ! "$mode" =~ ^(cpu|gpu|all)$ ]]; then
 fi
 if [[ "$mode" == cpu || "$mode" == all ]]; then
   CUDA_VISIBLE_DEVICES='' .venv/bin/python -m pytest \
-    models/nosa/tests operators/nosa operators/deepseek_v32 operators/common \
-    cache/tests cache/allocator/tests executor/tests serving/tests GR/tests \
+    operators/deepseek_v32 operators/common \
+    cache/tests executor/tests serving/tests GR/tests \
     models/deepseek_v32/tests \
-    tests/integration evaluation/tests experiments/nosa_mfu/tests \
-    experiments/nosa_indexer_pattern_65536_1024/tests \
-    experiments/nosa_offload_overlap/tests \
-    experiments/nosa_motivation/tests \
+    tests/integration evaluation/tests \
     experiments/deepseek_v32_motivation/tests \
     experiments/deepseek_v32_mfu/tests \
     experiments/cache_manager_performance/tests \
@@ -46,16 +42,13 @@ if torch.cuda.get_device_capability() != (9, 0):
 import flashinfer
 import triton
 import tvm_ffi
-from operators.nosa._native import build_info
 from operators.deepseek_v32.indexer.echo import build_info as echo_build_info
 
-build_info()
 echo_build_info()
 PY
   # Collect complete functional directories: GPU tests do not all contain
   # 'cuda' or 'flashinfer' in their names. Each numerical test is collected once.
-  .venv/bin/python -m pytest models/nosa/tests operators/nosa \
-    operators/deepseek_v32 operators/common models/deepseek_v32/tests tests/integration \
-    cache/tests cache/allocator/tests \
+  .venv/bin/python -m pytest operators/deepseek_v32 operators/common \
+    models/deepseek_v32/tests tests/integration cache/tests \
     --import-mode=importlib -q -rs -p no:cacheprovider
 fi

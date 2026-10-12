@@ -3,27 +3,22 @@
 实验按要回答的问题分为四类。各实验明确数值验收状态，独立验收不作为性能结果。
 官方 SGLang 复现按用户要求仅测量性能，保留数值未通过的说明。
 各报告分别记录独立验收、正式计时和 profile 的 run ID、源码身份及测量边界。
-NOSA motivation 保留同机重构对照和未达到的性能目标；DeepSeek C10 已完成三档历史、
+DeepSeek C10 已完成三档历史、
 四档候选的 12 点四方案独立验收和正式计时，本轮没有新采集 profile。
 数值检查不替代正式计时和 profile。
 
 | 类别 | 实验 | 目的与现有证据 |
 |---|---|---|
-| Motivation | [NOSA 固定容量](nosa_motivation/README.md) | 完整 32 层、固定 P/NH 四方案；历史保留与稀疏搬运有收益，A128 async 未快于 sync |
 | Motivation | [DeepSeek 固定容量](deepseek_v32_motivation/README.md) | C10 checkpoint 工作负载替身，固定 P/NH 的 12 点四方案矩阵，含末 token LM head；单轮轨迹不证明稳定排序或跨模型排名 |
-| Motivation 容量依据 | [NOSA / DeepSeek cache 管理](cache_management/README.md) | 共同准入和计费契约；分别说明 NOSA 懒分配与 DeepSeek 全局 arena，静态规划和请求观测分开 |
-| Baseline 性能合理性 | [NOSA MFU](nosa_mfu/README.md) | 统一汇总算子、完整模块的效率，以及完整 dense/native/Triton 模型的已有测量；各自保留输入与计时边界 |
+| Motivation 容量依据 | [DeepSeek cache 管理](cache_management/README.md) | 准入和计费契约、全局 arena；静态规划和请求观测分开 |
 | Baseline 性能合理性 | [官方 SGLang 复现](deepseek_v32_echo_official/README.md) | 原始前三层固定历史负载的 ECHO / HBM-only 独立运行；仅报告性能，容量差异单列 |
 | Baseline 性能合理性 | [DeepSeek MFU](deepseek_v32_mfu/README.md) | 真实 checkpoint 第 0–2 层，四方案 prefill/extend 的逐算子与阶段 MFU、单层计算/控制/IO 时间线；非完整 61 层 |
 | Baseline 性能合理性 | [DeepSeek observation](deepseek_v32_observation/README.md) | 无 offload 的 52 点 B/Q/H 单层矩阵，公共算子与 MoE 各测 7 档 S；分列具体 GEMM、non-GEMM 与 API 聚合的时间/MFU、独立实际 HBM 带宽及利用率，图已嵌入报告 |
-| Sparse pattern | [NOSA 选择模式](nosa_indexer_pattern_65536_1024/README.md) | sparse 传播及 dense 激活上的 QA/full-NOSA 选择、并集和分解；服务后续设计，暂不在论文主线 |
-| 自有设计 microbenchmark | [NOSA offload overlap](nosa_offload_overlap/README.md) | 相同冷态稀疏并集的 serial/fused 延迟、唯一读取和内部工作区间；A1024 不替代 A128 serving |
 
 ## 独立验收、计时和诊断
 
-NOSA MFU、offload、两模型 motivation 与 DeepSeek 三层实验提供独立的
+DeepSeek motivation 与三层实验提供独立的
 验收、计时和 profile 入口，具体参数及完成状态见各 README 和脚本 `--help`。
-Pattern 按自己的数值验收与选择采集阶段运行，不把采集过程作为性能计时。
 官方 SGLang 的复现代码和原始产物位于本地 `3rdparty/ECHO/reproduction/cxldsagr/`，
 实验目录只保存报告及选定数据；原本接入本地框架的官方 ECHO 适配及旧记录已删除。
 
@@ -40,11 +35,6 @@ A128、compute graph、固定 cache 路径高效；缺少的测量仍为未测�
 旧 `gr_serving` 的 capped-popularity 短轨迹已结束独立维护，四方案和三档历史作为
 同一范围退出。共享请求构造迁至 `GR/workload.py`，来源与内存审计迁至 `evaluation/`；
 通用 budget serving 实现及必要回归保留，当前接口见 [serving](../serving/README.md)。
-
-NOSA resident baseline 与算子 MFU 已合并为 `nosa_mfu`，作为本组唯一的 MFU 报告入口；
-受重构影响的真实输入算子、模块和完整模型已有独立补测；未受影响的 synthetic 与
-kernel 专项仍保留原 run ID 和字节身份。Pattern 在假定带宽/MFU 下的理想时间、overlap
-与阈值支线已结束；实际 QA/full-NOSA 观测保留。目录合并本身不产生性能结论。
 
 旧 DeepSeek / SM120 与 CPU DRAM 带宽实验已移出 Git，分别保存在
 `local/experiments/legacy/` 和 `local/experiments/cpu_dram_bandwidth/`。

@@ -12,7 +12,7 @@ At the earlier error-handling freeze, the global CPU log ended with
 passed** in 84.81 s (one warning). Original log: `/tmp/cxldsagr-refactor-crash-final-cpu.stdout`;
 SHA-256 `e4d55b7305018a030a3cc8ecf3ae4f61192f92fda6267631f308f949383163e9`. This was the error-handling freeze before the later pure
 layout-cache optimization. Skipped hardware cases are not counted as validation.
-The existing [layout-cache CPU receipt](nosa_layout_cache_cpu_01/evidence.json)
+The existing layout-cache CPU receipt（已移除，原路径 `docs/agents/acceptance/unified_runtime_20261005/nosa_layout_cache_cpu_01/evidence.json`）
 records 264 passing tests, including the serving owner/resource-drain suites,
 with the changed production adapter hash; receipt-file SHA-256 `3758b3c98c1743c24576e93d0e4095ef3ac9b5e406ba63e5f70cdc997c68b4d9`.
 

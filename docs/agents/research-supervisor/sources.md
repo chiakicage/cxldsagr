@@ -1,5 +1,8 @@
 # 研究状态的材料依据
 
+> 2026-10-12：NOSA 已按用户要求移除，T-007 取消。下文有关它的旧条目仅记录
+> 研究过程，原路径不再是当前入口；当前模型范围见 S-042。
+
 > **2026-10-11 用户修正：**GR 外新增正常 agentic serving 候选，Prefill/Extend 与 Decode
 > 分开，优先 Q1 和 Batch=128 Decode；按 Cache Manager 与 Overlap 分析 ECHO。
 > 当前问题、设计方向和既有证据的边界见 S-040。本轮未运行新实验。
@@ -94,7 +97,7 @@ A128 四方法 MFU、局部 dense 重叠及依赖实验补测边界；S-033 记�
 
 ## S-004：NOSA GR 长上下文工程实验
 
-- **来源：**[NOSA resident baseline](../../../experiments/nosa_mfu/README.md) 的 dense 部分，
+- **来源：**NOSA resident baseline（已移除，原路径 `experiments/nosa_mfu/README.md`） 的 dense 部分，
   精确输入与执行边界、结果及模块耗时。
 - **对应：**1.2、1.4、2.2、4.3。
 - **支持：**已有 32 层 dense forward，prefix 65,536、suffix 1,024 的输入和模块分析基础。
@@ -103,7 +106,7 @@ A128 四方法 MFU、局部 dense 重叠及依赖实验补测边界；S-033 记�
 
 ## S-005：NOSA sparse fetch/attention overlap
 
-- **来源：**[nosa_offload_overlap/README.md](../../../experiments/nosa_offload_overlap/README.md)，
+- **来源：**nosa_offload_overlap/README.md（已移除，原路径 `experiments/nosa_offload_overlap/README.md`），
   实验目的、完整调用性能、完整模型数值检查和范围限制；[项目 README](../../../README.md)。
 - **对应：**3.2、4.1、4.2、4.3。
 - **支持：**在 64K+1K 固定单层输入回放中，L0/L15/L31 相对整批 sparse union 一次 fetch 后
@@ -342,7 +345,7 @@ A128 四方法 MFU、局部 dense 重叠及依赖实验补测边界；S-033 记�
 
 - **来源：**研究者说明另一 agent 正在修改 ECHO，询问 NOSA sparse async loading 与
   dense prefetch 能否复用。本轮只读核对工作区中的 shared serving 契约、PrefixPool、
-  ECHO 共享池及 NOSA offload/serving；详细来源与建议见[复用边界](cache_reuse_boundaries.md)。
+  ECHO 共享池及 NOSA offload/serving；详细来源与建议见复用边界（已移除，原路径 `docs/agents/research-supervisor/cache_reuse_boundaries.md`）。
 - **已核实：**ECHO 目标是 backend/device 持有逐层有限 pool；NOSA 当前仍由每 session
   持有一层 sparse 或两层 dense staging，前者只有逻辑地址 staging、没有有限 slots。
   新 shared plan/准入接口已出现在工作区，但 ECHO 仍在开发，本轮未独立验收。
@@ -478,7 +481,7 @@ A128 四方法 MFU、局部 dense 重叠及依赖实验补测边界；S-033 记�
 > 下列记录保留原 `_02` 的测量边界与当时判断。当前 `_03` 及匹配 profile/API 已完成，
 > 现行结果和来源见 S-026；旧数字不用于描述当前实现。
 
-- **来源：**[NOSA motivation](../../../experiments/nosa_motivation/README.md)、
+- **来源：**NOSA motivation（已移除，原路径 `experiments/nosa_motivation/README.md`）、
   工程检查点（Git `934485b:docs/agents/system/nosa_motivation_plan.md`）、
   独立 API 分析（Git `934485b:docs/agents/system/nosa_motivation_hbm_audit.md`）。
   正式表、summary 和 acceptance 位于
@@ -515,10 +518,10 @@ A128 四方法 MFU、局部 dense 重叠及依赖实验补测边界；S-033 记�
 
 ## S-023：Q128 候选拒绝与当前诊断范围
 
-- **来源：**[Q128 检查点](../kda/nosa_q128_overlap/checkpoint.md)、
-  [64-CTA 独立 warp 诊断计划](../kda/nosa_q128_overlap/independent_warps_ncu_plan.md)及
-  [已完成诊断](../kda/nosa_q128_overlap/independent_warps_ncu_findings.md)及
-  [同二进制对齐对照](../kda/nosa_q128_overlap/aligned_host_diagnostic_findings.md)。
+- **来源：**Q128 检查点（已移除，原路径 `docs/agents/kda/nosa_q128_overlap/checkpoint.md`）、
+  64-CTA 独立 warp 诊断计划（已移除，原路径 `docs/agents/kda/nosa_q128_overlap/independent_warps_ncu_plan.md`）及
+  已完成诊断（已移除，原路径 `docs/agents/kda/nosa_q128_overlap/independent_warps_ncu_findings.md`）及
+  同二进制对齐对照（已移除，原路径 `docs/agents/kda/nosa_q128_overlap/aligned_host_diagnostic_findings.md`）。
 - **否定结果：**Group4 的完整 hidden 数值门槛未通过；V-first、shared-union halves、
   双 stripe ILP、earliest-pair、frontier fanout、independent-warps 和四组 K/V 读取
   ILP 均未通过重叠
@@ -540,7 +543,7 @@ A128 四方法 MFU、局部 dense 重叠及依赖实验补测边界；S-033 记�
   诊断 padded owners 的 allocator 容量为 128 MiB，保留原 buffers 后共 192 MiB，
   不能直接作为满足容量预算的生产改动。随后首个对齐内部样本双比率为 84.08%，
   未达 90% 后立即停止，完整 API 延迟未测；这些结果也未证明带宽饱和或 spill 主导。
-- **四组读取候选：**[隔离准备与验收](../kda/nosa_q128_overlap/four_pair_ilp_plan.md)
+- **四组读取候选：**隔离准备与验收（已移除，原路径 `docs/agents/kda/nosa_q128_overlap/four_pair_ilp_plan.md`）
   保留原 host 分配，将每 warp 四组 K/V 读取提前到依赖 store 之前，并提高 halves2
   的 producer 寄存器额度。20 次短页调用和代表性数值、唯一读取、生命周期检查通过，
   但首个内部样本双比率仅 70.28%，随即停止；没有后续 API 延迟或完整模型验收。
@@ -551,9 +554,9 @@ A128 四方法 MFU、局部 dense 重叠及依赖实验补测边界；S-033 记�
 
 ## S-024：Resident A1024 补测与 pattern 时间链
 
-- **来源：**[NOSA MFU 报告](../../../experiments/nosa_mfu/README.md)中的全模型 native/Triton、
+- **来源：**NOSA MFU 报告（已移除，原路径 `experiments/nosa_mfu/README.md`）中的全模型 native/Triton、
   算子、完整模块与 dense 结果，以及
-  [pattern](../../../experiments/nosa_indexer_pattern_65536_1024/README.md)及各自 publication/audit。
+  pattern（已移除，原路径 `experiments/nosa_indexer_pattern_65536_1024/README.md`）及各自 publication/audit。
 - **全模型：**`sparse_flags_native_20261004_01` / `sparse_flags_triton_20261004_01`，
   H65536/A1024、完整 32 层、独立无 profiler 墙钟；native full/extend 为
   2394.454843/36.752254 ms，Triton 为 3678.514021/62.075100 ms，加速 1.536×/1.689×。
@@ -581,7 +584,7 @@ A128 四方法 MFU、局部 dense 重叠及依赖实验补测边界；S-033 记�
 - **原来源：**当时的 offload 报告及发布收据，原路径为
   `experiments/nosa_offload_overlap/report/publication.json`。该路径只定位历史文件，
   不将同路径下的替换报告用作本条证据；新结果另见 S-031 与
-  [当前 offload 入口](../../../experiments/nosa_offload_overlap/README.md)。
+  当前 offload 入口（已移除，原路径 `experiments/nosa_offload_overlap/README.md`）。
 - **新结果：**`nosa_cached_fetch_20261004_01` 的 L0/L15/L31 完整 API 中位延迟较
   同轮串行对照下降 29.34%/24.53%/22.71%；独立 40 次复测确认收益。全部 9 个内部
   样本的 page-envelope 与 stripe-copy 比率均达 0.9，最低 0.9062054934。
@@ -604,7 +607,7 @@ A128 四方法 MFU、局部 dense 重叠及依赖实验补测边界；S-033 记�
   `experiments/nosa_motivation/report/nosa_motivation_poolscan_sm90_20261004_01/measurement_review.json`、
   `experiments/nosa_motivation/report/nosa_motivation_poolscan_sm90_20261004_01/profile_review.json`、
   `experiments/nosa_motivation/report/nosa_motivation_poolscan_sm90_20261004_01/api_comparison.json`。
-  新结果单独见 S-031 与[NOSA motivation 当前入口](../../../experiments/nosa_motivation/README.md)。
+  新结果单独见 S-031 与NOSA motivation 当前入口（已移除，原路径 `experiments/nosa_motivation/README.md`）。
   本条吸收已接受的运行和独立核验，不重复执行 GPU 测量。
 - **身份与范围：**正式 `nosa_motivation_poolscan_sm90_20261004_01`、profile
   `nosa_motivation_poolscan_profile_sm90_20261004_01`、API
@@ -645,7 +648,7 @@ A128 四方法 MFU、局部 dense 重叠及依赖实验补测边界；S-033 记�
   这不要求每个样本都只有很小开销。80 份 BF16 hidden 经独立重开后与正式输出精确一致。
   该结果支持所测输入对提前提交敏感，不隔离可移除 CPU 成本，不测普通 serving 加速，
   也不证明计算或 IO 主导。数据、计时定义、driver 与审核摘要见
-  [预提交诊断记录](../system/nosa/nosa_hbm_prequeue_diagnostic.md)。
+  预提交诊断记录（已移除，原路径 `docs/agents/system/nosa/nosa_hbm_prequeue_diagnostic.md`）。
 - **预提交诊断的尾部与边界：**Event 区间在 `DeferredValidation.check` 入口结束，
   不含 finite 归约/host 决策、事务完成、lease 归还及退出时的 allocator 检查。
   请求 0 的 repeat-5 prequeue 与请求 16 的 repeat-5 event-only 在该入口之后，
@@ -692,7 +695,7 @@ A128 四方法 MFU、局部 dense 重叠及依赖实验补测边界；S-033 记�
   扫描时长或长期避免扫描的证明。所有 42 个计时样本与 18 次预热均保留。
   独立结果位于外部 `nosa_guarded_copy_control_review_20261005_01/consolidated.json`，
   SHA-256 为 `ab27da91d1348d4b87705368e779f32eb9e161f39dbdec3b09f237b0d6be1403`。
-  具体身份、数字与边界见[匹配拷贝对照](../system/nosa/nosa_guarded_copy_control.md)。
+  具体身份、数字与边界见匹配拷贝对照（已移除，原路径 `docs/agents/system/nosa/nosa_guarded_copy_control.md`）。
   后续准备的单次校验内元数据复用候选保留全部字段与校验位置，不跨 attention
   缓存元数据；2026-10-05 整理报告时曾停止后续优化，当时没有启动该候选的 GPU
   测量。最新继续要求与完成后的结果见 S-028。
@@ -778,7 +781,7 @@ A128 四方法 MFU、局部 dense 重叠及依赖实验补测边界；S-033 记�
   indexer API、有限范围的 Nsight、H64K prequeue、图内拷贝原型与匹配对照也不再列为待办。
   拷贝诊断主关联 4.1，关联 2.1/4.2；暂不接入，不改变当前正式报告的实现或结论。
   2026-10-05 报告整理阶段曾停止 NOSA 优化，单次校验内元数据复用候选移出待办。
-  [motivation 报告](../../../experiments/nosa_motivation/README.md)已完成中文正文与
+  motivation 报告（已移除，原路径 `experiments/nosa_motivation/README.md`）已完成中文正文与
   汇总图整理，沿用已验收数据，保留正式四方案、独立 API 与外部诊断各自的 run ID、
   长尾和结论边界，报告整理本身没有新增 GPU 测量。用户随后明确要求继续推进目标，
   恢复 H64K 优化，见 S-028；已完成的报告整理不再列为待办。检查的 CPU 成本、
@@ -834,8 +837,8 @@ A128 四方法 MFU、局部 dense 重叠及依赖实验补测边界；S-033 记�
   恢复 H64K 的 HBM-only、dense prefetch、sync sparse、async sparse 效率与
   cache 正确性工作；4K/16K 继续暂停。目标仍包含 HBM MFU 接近矩阵 API 参考，
   以及减少其他方案计算和 IO 之外的开销，不能以单项诊断完成代替整体目标。
-- **来源：**[元数据复用结果](../system/nosa/nosa_copy_descriptor_result.md)与
-  [indexer 执行 workspace 计划](../system/nosa/nosa_indexer_dispatch_plan.md)。本次读取
+- **来源：**元数据复用结果（已移除，原路径 `docs/agents/system/nosa/nosa_copy_descriptor_result.md`）与
+  indexer 执行 workspace 计划（已移除，原路径 `docs/agents/system/nosa/nosa_indexer_dispatch_plan.md`）。本次读取
   完成记录及独立汇总收据，未重复运行 GPU。Run IDs 为
   `nosa_descriptor_{baseline,captured_control,descriptor_reuse}_r{0,16}_20261005_02`；
   独立收据位于外部
@@ -878,7 +881,7 @@ A128 四方法 MFU、局部 dense 重叠及依赖实验补测边界；S-033 记�
 
 - **来源：**研究者要求每组实验保留一个算子 MFU 入口，并明确合并
   `nosa_baseline_performance` 与 `nosa_kernel_mfu`，后续新增算子进入同一报告。
-  当前入口见 [NOSA MFU](../../../experiments/nosa_mfu/README.md)，维护约定见
+  当前入口见 NOSA MFU（已移除，原路径 `experiments/nosa_mfu/README.md`），维护约定见
   [实验规则](../../../experiments/AGENTS.md)。
 - **范围：**统一保留算子、完整模块和完整 resident 模型的有效结果，原 run ID、
   report 数据、源码快照及运行产物不改写。合并清单位于
@@ -895,12 +898,12 @@ A128 四方法 MFU、局部 dense 重叠及依赖实验补测边界；S-033 记�
 
 - **来源与核验：**本条汇总执行者提供的冻结测量与独立复核；Supervisor 重开报告
   核对发布文件与引用数值，没有重新运行模型。当前入口为
-  [NOSA motivation](../../../experiments/nosa_motivation/README.md)、
+  NOSA motivation（已移除，原路径 `experiments/nosa_motivation/README.md`）、
   [DeepSeek motivation](../../../experiments/deepseek_v32_motivation/README.md)、
   [两模型 cache 管理](../../../experiments/cache_management/README.md)、
-  [NOSA MFU](../../../experiments/nosa_mfu/README.md)、
-  [NOSA pattern](../../../experiments/nosa_indexer_pattern_65536_1024/README.md)、
-  [A1024 offload](../../../experiments/nosa_offload_overlap/README.md)与
+  NOSA MFU（已移除，原路径 `experiments/nosa_mfu/README.md`）、
+  NOSA pattern（已移除，原路径 `experiments/nosa_indexer_pattern_65536_1024/README.md`）、
+  A1024 offload（已移除，原路径 `experiments/nosa_offload_overlap/README.md`）与
   [DeepSeek 三层计算](../../../experiments/deepseek_v32_mfu/README.md)。
   各组报告分别绑定原运行、验收与后续发布来源，具体见下表。
 - **统一框架与验收：**两个模型共用容量计划、owner/lease 与 token 执行契约，保留
@@ -911,8 +914,8 @@ A128 四方法 MFU、局部 dense 重叠及依赖实验补测边界；S-033 记�
   206,538.430 ms，增加 406.132 ms（0.19664%）。两组极差分别为 409.043 与
   223.016 ms。全部 128 个匹配请求的 cleanup 中位数增加，HBM 首访 candidate
   extend 增加 0.110724 ms。相邻 pair04 的总差值为 +388.599 ms（0.18777%），
-  单独保留，不纳入预定三轮统计。见[三版本对照](../../../experiments/nosa_motivation/report/three_version/results.md)
-  与[pair04 独立复核](../acceptance/unified_runtime_20261005/nosa_pair04_independent_review.json)。
+  单独保留，不纳入预定三轮统计。见三版本对照（已移除，原路径 `experiments/nosa_motivation/report/three_version/results.md`）
+  与pair04 独立复核（已移除，原路径 `docs/agents/acceptance/unified_runtime_20261005/nosa_pair04_independent_review.json`）。
   同机重复不隔离因果，CPU mock 也未覆盖真实 storage scan、lease 或 CUDA，不能
   将全部差值归为某一项检查成本。
 - **DeepSeek 重构对照：**完整 trace 中位总耗时变化为 −162.908 ms（−0.09076%），
@@ -939,11 +942,11 @@ A128 四方法 MFU、局部 dense 重叠及依赖实验补测边界；S-033 记�
 - **保留与可复现边界：**两模型 `report/three_version/` 的选用数据支持重算比较表格，
   不足以在原始依赖退休后重做完整历史源码/数值审计。离散 GPU 进程样本只说明采样
   时未见其他计算进程，不能证明连续独占，也不记录 CPU 活动、时钟或利用率。
-- **T-007 继续独立：**[workspace 计划](../system/nosa/nosa_indexer_dispatch_plan.md)
+- **T-007 继续独立：**workspace 计划（已移除，原路径 `docs/agents/system/nosa/nosa_indexer_dispatch_plan.md`）
   尚未实施，统一框架重构没有实现或验证它。实施前须按验收后的源码重查分配和分派
   假设，再检验完整 candidate 净收益与四方案正确性。S-028 的历史元数据复用数字
   不改写；冻结 reviewer 所需的六份原始参考按
-  [保留与重开说明](../acceptance/unified_runtime_20261005/t007_reference.md)回查。
+  保留与重开说明（已移除，原路径 `docs/agents/acceptance/unified_runtime_20261005/t007_reference.md`）回查。
 - **对应与研究判断：**1.4、2.1–2.5、3.1–3.2、4.1–4.3。完成的重构和报告工作
   不再列入 roadmap；T-006、T-003、T-007、T-002 保留。H64K-only、不跑满 NH、
   固定 loop、五类共同模型对照仍未建立、真实场景与质量未验证等修正均不变。
@@ -954,11 +957,11 @@ A128 四方法 MFU、局部 dense 重叠及依赖实验补测边界；S-033 记�
 
 | 报告 | 当前运行与选用范围 | 发布依据 |
 | --- | --- | --- |
-| NOSA motivation | `refactor_final_nosa_publication_20261005_02`；clean bench01、profile02 与独立 attention reference01 分开，三版本对照保留原始选择 | [最终 manifest](../../../experiments/nosa_motivation/report/publication_manifest.json)、[API 对照](../../../experiments/nosa_motivation/report/final/api_comparison.json) |
-| 容量 | `cache_unified_20261005_02`；五份 DeepSeek 静态计划、四种 NOSA 分配声明，两模型各自 clean bench01 的八行完整请求观测 | [publication](../../../experiments/cache_management/report/unified/publication.json)；静态最大值不等于实测物理容量 |
-| NOSA MFU | 真实算子、native/Triton 模块及 sparse 模型的 bench/profile 为 `refactor_mfu_*_20261005_01`；dense 为 fresh check02 后的 `refactor_mfu_dense_{bench,profile}_20261005_02` | [publication](../../../experiments/nosa_mfu/report/publication.json)列出全部 12 个当前 run；synthetic 与冻结输入保持原身份 |
-| NOSA pattern | `refactor_nosa_pattern_capture_20261005_01`；独立 observer check 分开保存；`refactor_qa64_environment_compare_20261005_01` 比较当前与保留 QA64 数组 | [publication](../../../experiments/nosa_indexer_pattern_65536_1024/report/publication.json)、[QA64 比较](../../../experiments/nosa_indexer_pattern_65536_1024/report/qa64/environment_comparison.json) |
-| NOSA overlap | `refactor_nosa_overlap_{bench,confirm40,profile}_20261005_01`；主测、40 次确认和独立 profile 分开 | [publication](../../../experiments/nosa_offload_overlap/report/publication.json)、[当前 profile 审计](../../../experiments/nosa_offload_overlap/report/current_profile_integrity.json) |
+| NOSA motivation | `refactor_final_nosa_publication_20261005_02`；clean bench01、profile02 与独立 attention reference01 分开，三版本对照保留原始选择 | 最终 manifest（已移除，原路径 `experiments/nosa_motivation/report/publication_manifest.json`）、API 对照（已移除，原路径 `experiments/nosa_motivation/report/final/api_comparison.json`） |
+| 容量 | `cache_unified_20261005_02`；五份 DeepSeek 静态计划、四种 NOSA 分配声明，两模型各自 clean bench01 的八行完整请求观测 | publication（已移除，原路径 `experiments/cache_management/report/unified/publication.json`）；静态最大值不等于实测物理容量 |
+| NOSA MFU | 真实算子、native/Triton 模块及 sparse 模型的 bench/profile 为 `refactor_mfu_*_20261005_01`；dense 为 fresh check02 后的 `refactor_mfu_dense_{bench,profile}_20261005_02` | publication（已移除，原路径 `experiments/nosa_mfu/report/publication.json`）列出全部 12 个当前 run；synthetic 与冻结输入保持原身份 |
+| NOSA pattern | `refactor_nosa_pattern_capture_20261005_01`；独立 observer check 分开保存；`refactor_qa64_environment_compare_20261005_01` 比较当前与保留 QA64 数组 | publication（已移除，原路径 `experiments/nosa_indexer_pattern_65536_1024/report/publication.json`）、QA64 比较（已移除，原路径 `experiments/nosa_indexer_pattern_65536_1024/report/qa64/environment_comparison.json`） |
+| NOSA overlap | `refactor_nosa_overlap_{bench,confirm40,profile}_20261005_01`；主测、40 次确认和独立 profile 分开 | publication（已移除，原路径 `experiments/nosa_offload_overlap/report/publication.json`）、当前 profile 审计（已移除，原路径 `experiments/nosa_offload_overlap/report/current_profile_integrity.json`） |
 | DeepSeek C10 motivation（该次来源） | `refactor_final_deepseek_publication_20261005_01`，选用 `refactor_final_deepseek_{bench,profile}_20261005_01`；三轮对照只保留本条历史范围 | 后续修改的补测另记 S-032；[当前实验入口](../../../experiments/deepseek_v32_motivation/README.md)不反向证明此处旧 run |
 | DeepSeek 真实三层（已替换） | 历史运行 `refactor_three_layers_publication_20261005_01`，独立 check02，`refactor_three_layers_{bench,profile}_20261005_01` | 旧 `layers3` 已替换；[当前四方法 publication](../../../experiments/deepseek_v32_mfu/report/full_extend_graph/mfu/publication_manifest.json)与[当前汇总](../../../experiments/deepseek_v32_mfu/report/full_extend_graph/mfu/summary.json)只对应 S-032，不能作为本行旧运行的证据 |
 
@@ -1017,9 +1020,9 @@ A128 四方法 MFU、局部 dense 重叠及依赖实验补测边界；S-033 记�
 - **验收结论：**numerical、profile、measurement integrity 通过；async 的完整
   trace/首访/复访 speedup 均失败，96 个适用内部样本的双重 90% overlap 门槛全部
   未过。MFU 接近度、compute/IO dominance 仍需解释。当前数值、分母与诊断分别见
-  [API 对照](../../../experiments/nosa_motivation/report/final/api_comparison.json)、
-  [验收结果](../../../experiments/nosa_motivation/report/final/acceptance.json)及
-  [profile 摘要](../../../experiments/nosa_motivation/report/final/profile_summary.json)。
+  API 对照（已移除，原路径 `experiments/nosa_motivation/report/final/api_comparison.json`）、
+  验收结果（已移除，原路径 `experiments/nosa_motivation/report/final/acceptance.json`）及
+  profile 摘要（已移除，原路径 `experiments/nosa_motivation/report/final/profile_summary.json`）。
 
 - **DeepSeek C10 诊断：**`refactor_final_deepseek_profile_20261005_01` 的
   `analysis/completion_receipt.json` 接受全部 13 个成功的 CPU 分析阶段；正式墙钟取
@@ -1531,3 +1534,11 @@ A128 四方法 MFU、局部 dense 重叠及依赖实验补测边界；S-033 记�
   小 batch → Overlap 低效”的因果链，也不建立真实 agentic 轨迹、多步追加、任务质量或五类
   共同模型 baseline。T-003 可据此明确完整单步对照；T-009/T-010/T-011 仍待开展，
   既有暂停安排不变。
+
+## S-042：移除 NOSA 的范围选择
+
+来源为 2026-10-12 用户明确选择“移除 NOSA：删除相关代码和实验，并清理共享模块中的接入”。
+移除 NOSA 模型、算子、四组专属实验及旧逐请求 serving；DeepSeek 使用的收据、
+CPU 环境与 native 身份工具保留在 `evaluation/`。共享容量报告仅保留 DeepSeek
+数据，原始测量身份和冻结证据不改写。本轮是范围清理，不是新的 GPU 性能结果。
+影响条目为 1.2、2.1、2.3、3.1–3.2、4.1–4.3；T-007 取消，其他研究者选择保留。

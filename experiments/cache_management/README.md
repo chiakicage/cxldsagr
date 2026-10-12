@@ -1,16 +1,16 @@
-# NOSA 与 DeepSeek cache 管理
+# DeepSeek cache 管理
 
 DeepSeek Q1 官方 staging 现在保留到 exact top-k 后，只发布精确选择中的预测记录。
 现有执行预留已同时计入 staging 与 top-k 活跃空间；静态复算后，五项完整容量计划及
-下一不可行配置均未改变。原有 dense DMA 请求内存观测和 NOSA 结果保留各自来源；
+下一不可行配置均未改变。原有 dense DMA 请求内存观测保留原始来源；
 本次没有重新测量请求内存或运行容量填满轨迹。
 
-本实验为 motivation 提供容量依据，说明两模型如何准入用户、保留 history、执行
+本实验为 motivation 提供容量依据，说明 DeepSeek 如何准入用户、保留 history、执行
 candidate，以及怎样核对 HBM / CPU DRAM 占用。公共框架统一容量计划和生命周期；
-模型分别声明 KV 布局、派生状态与搬运方式。静态规划、完整请求中的内存观测和物理
+模型声明 KV 布局、派生状态与搬运方式。静态规划、完整请求中的内存观测和物理
 容量边界分别报告。
 
-## 公共接口与模型差异
+## 公共接口与模型布局
 
 `ResourcePlan` 声明共享分配，`SessionPlan` 同时用于用户准入和实际 session 创建。
 分配项包含名称、owner、dtype、shape、设备、生命周期和计费；别名不重复收费，
@@ -20,49 +20,20 @@ candidate，以及怎样核对 HBM / CPU DRAM 占用。公共框架统一容量�
 执行失败直接传播；必要清理也失败时保留全部异常。无法确认异步完成时保留资源，
 拒绝复用，不自动恢复、重试或切换后端。
 
-| 项目 | NOSA | DeepSeek V3.2 |
-| --- | --- | --- |
-| 本文工作负载 | 完整 32 层 checkpoint，全部 candidate hidden，无 LM head | 前三层独立复制为 C10 source-input replay，全部 candidate hidden 与末 token LM head |
-| 逻辑主 KV | BF16 K/V，2 KV heads、D128；1,024 B/token/层 | BF16 512 latent + 64 RoPE；1,152 B/token/层 |
-| 稀疏选择 | query/KV-head 的 64-token block IDs 与 validity，保留 CIS 语义 | token top-k 与 causal padding，保留 indexer/prefetch 融合 |
-| 固定 P | offload 逐层历史槽直接映射；当前要求 H≤P | offload 逐层有限历史 pool；精确工作集超过 P 时拆分 query 消费 |
-| 固定 NH | host history 页配额，随 session 懒分配 pinned backing | 一次分配全局 pinned arena，另计各 session 的 indexer 与页表 |
-| 固定模式 candidate | 主 K/V 留在 GPU 临时尾部；CIS/派生尾部按 session 计费 | 主 KV 留在 GPU 临时尾部；当前层借用一份共享合并 indexer workspace |
-| HBM-only 准入 | 独立的 P history-token 配额，按整个用户 session LRU | 独立的 P history-token 配额，按整个用户 session LRU |
+| 项目 | DeepSeek V3.2 |
+| --- | --- |
+| 本文工作负载 | 前三层独立复制为 C10 source-input replay，全部 candidate hidden 与末 token LM head |
+| 逻辑主 KV | BF16 512 latent + 64 RoPE；1,152 B/token/层 |
+| 稀疏选择 | token top-k 与 causal padding，保留 indexer/prefetch 融合 |
+| 固定 P | offload 逐层有限历史 pool；精确工作集超过 P 时拆分 query 消费 |
+| 固定 NH | 一次分配全局 pinned arena，另计各 session 的 indexer 与页表 |
+| 固定模式 candidate | 主 KV 留在 GPU 临时尾部；当前层借用一份共享合并 indexer workspace |
+| HBM-only 准入 | 独立的 P history-token 配额，按整个用户 session LRU |
 
 通用 budget 模式按 HBM / DRAM 字节硬预算做 session LRU；固定 P/NH 模式按 token
-或页配额准入。相同 P/NH 不表示相同物理分配，也不构成等字节预算的两模型比较。
+或页配额准入。固定 P/NH 不等于 HBM/DRAM 字节预算。
 PyTorch allocated、reserved 和设备已用量分别保留。观测差额、规划时额外扣减的
 额度与实现预分配的 storage 各有来源，不能混为同一项开销。
-
-## NOSA 固定配额的容量含义
-
-离线计划 `cache_nosa_fixed_20261005_02` 使用 H=65,536、A=128、C=1024、P=65,536、
-NH=16,777,216，并分析 16 个用户。执行上下文显式设为 H+A=65,664，原 checkpoint
-声明的 32,768 上下文单独保留；本分析不提供长上下文质量验证。
-
-每用户的 32 层主 K/V 为 2 GiB，16 个历史的逻辑主 K/V 为 32 GiB。固定路径的
-host payload 按 H 分配，session 准入预留按 H+A 的 pinned 档位保守计费，每用户为
-4 GiB；这不表示 host allocator 实际占用 4 GiB。以下为生产分配声明给出的上界，
-尚未加入 graph storage：
-
-| 方案 | history 用户配额 | 共享 HBM 预留 GiB | 每 session HBM 预留 GiB | 每 session host payload GiB | 每 session host 预留 GiB |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| HBM-only | 1 | 0.000980377 | 2.120296478 | 0 | 0 |
-| Dense prefetch | 256 | 2.007329464 | 0.167774677 | 2 | 4 |
-| Sync sparse | 256 | 2.007358074 | 0.167774677 | 2 | 4 |
-| Async sparse | 256 | 2.007358074 | 0.167774677 | 2 | 4 |
-
-两个 sparse offload 方案保留 16 个用户时，HBM 预留上界约为 4.69175 GiB；填满
-256 用户配额时约为 44.95768 GiB，均不含 graph。完整配额的逻辑主 K/V 为 512 GiB，
-host 预留为 1,024 GiB，因此 NH/H=256 不能证明 512 GiB DRAM 能容纳全部用户。
-16 个历史只占 NH 配额的 6.25%。P=H 时 HBM-only 只能保留一个历史，也是策略配额
-的结果，不是 H200 的物理容量上限。
-
-[离线入口](src/nosa_plan.py) 复用生产代码的具名分配与 allocator 公式，不加载模型
-或初始化 CUDA；假设为 SM90、BF16 和原生 allocator。graph static allocation 与
-private reservation 从源码、配置均匹配的 motivation 记录读取，已计入共享预留
-的项目不再相加。
 
 ## DeepSeek 的容量账本
 
@@ -146,8 +117,7 @@ checkpoint 配置哈希，逐项比较五个完整计划，包括所选配置、
 共享影响检查确认，已发布 C10 motivation 和 MFU shape matrix 使用
 H=[4K,16K,64K]、A=[128,256,512,1024]，history chunk=1024、candidate 整批执行；
 cache manager performance 使用 H64K/A128。它们都没有 Q1 indexer 尾块，attention
-容量拆分只拆消费，不重跑 indexer 或 top-k。NOSA 模型与算子的 98 个 Python 文件
-没有导入 DeepSeek 实现或使用官方 promotion callback；这些已有结果保留原测量来源。
+容量拆分只拆消费，不重跑 indexer 或 top-k。已有结果保留原测量来源。
 
 上述静态边界针对 ECHO／serial sparse。完整请求中的 dense DMA ticket 借用已有
 连续 host/HBM storage，不再分配私有 GPU ID/count，预留为 0。这比前一实现减少
@@ -186,18 +156,17 @@ P 与 NH 共同消耗 HBM，不能同时取各自独立最大值。P>NH 只增�
 
 ## 完整请求内存观测
 
-统一报告 `cache_unified_dma_20261006_01` 汇入两个模型各一条正式 trace：
-`refactor_final_nosa_bench_20261005_01` 与
-`deepseek_dma_c10_bench_20261006_01`。每条 trace 含四方案各 32 个请求，
-使用 H=65,536、A=128、C=1024、P=65,536、NH=16,777,216、16 用户两轮访问。
-两条 trace 各自在 GPU3、CPU24–31、NUMA0 上计时，使用对应的独立数值验收收据。
+当前仅展示原报告 `cache_unified_dma_20261006_01` 中的 DeepSeek 数据，测量来源为
+`deepseek_dma_c10_bench_20261006_01`。四方案各 32 个请求，使用 H=65,536、A=128、
+C=1024、P=65,536、NH=16,777,216、16 用户两轮，GPU3、CPU24–31、NUMA0。
+2026-10-12 只移除另一模型的报告内容，DeepSeek 的数值、运行身份和测量边界保持原样；
+[选取清单](report/deepseek/selection.json)记录原文件和所选内容的哈希，本次没有重新测量。
+
 DeepSeek 的测量与 observer 均以 0 退出；147 次离散采样的最大间隔为 30.353405 秒，
 未发现所选 GPU 上的未归属进程或其他 GPU 进程。这些记录不证明全机独占、连续
 隔离或 CPU 独占。完整原始观测、归属及归档核验见
 [observer 审计](report/unified/deepseek_observer_audit.json)和
-[运行归属记录](report/unified/deepseek_observer_reconciliation.json)；NOSA 仍沿用原
-trace 的观测证据。性能比较见各模型 motivation 报告；本节只汇总这两条正式 trace
-的内存。表中来源、逐请求最大值和 NOSA 数据保留情况均已独立复核。
+[运行归属记录](report/unified/deepseek_observer_reconciliation.json)。性能比较见 DeepSeek motivation 报告；本节只汇总内存。
 
 下表单位为 GiB。allocated／reserved 为正式请求轨迹中的 PyTorch 峰值；设备已用量
 取每个请求结束后的边界采样最大值，不是连续采样的进程峰值。各项均包含模型与执行
@@ -205,10 +174,6 @@ trace 的观测证据。性能比较见各模型 motivation 报告；本节只�
 
 | 模型 | 方案 | 最多保留用户 | Allocated 峰值 | Reserved 峰值 | 设备已用量采样最大值 |
 | --- | --- | ---: | ---: | ---: | ---: |
-| nosa | hbm | 1 | 18.839923 | 24.078125 | 24.831116 |
-| nosa | dense_prefetch | 16 | 19.989842 | 25.330078 | 26.147522 |
-| nosa | serial_sparse | 16 | 19.989294 | 25.318359 | 26.137756 |
-| nosa | overlap | 16 | 19.989294 | 25.318359 | 26.137756 |
 | deepseek | hbm | 1 | 14.517354 | 23.634766 | 24.376038 |
 | deepseek | echo | 16 | 16.357248 | 24.296875 | 25.665100 |
 | deepseek | serial_sparse | 16 | 16.358774 | 24.296875 | 25.665100 |
@@ -220,39 +185,29 @@ storage、graph static allocated 与观测到的 graph private reserved；预留
 
 | 模型 | 方案 | HBM 记账 GiB | HBM 预留 GiB | DRAM 记账 GiB | DRAM 预留 GiB |
 | --- | --- | ---: | ---: | ---: | ---: |
-| nosa | hbm | 8.602579 | 8.644013 | 0.000000 | 0.000000 |
-| nosa | dense_prefetch | 9.727347 | 11.214461 | 32.000000 | 64.000000 |
-| nosa | serial_sparse | 9.727373 | 11.214489 | 32.000000 | 64.000000 |
-| nosa | overlap | 9.727373 | 11.214489 | 32.000000 | 64.000000 |
 | deepseek | hbm | 6.624072 | 14.585029 | 0.000000 | 0.000000 |
 | deepseek | echo | 8.462284 | 17.426820 | 320.001038 | 320.001038 |
 | deepseek | serial_sparse | 8.462284 | 17.426820 | 320.001038 | 320.001038 |
 | deepseek | dense_prefetch | 8.462284 | 17.426820 | 320.001038 | 320.001038 |
 
-NOSA 的 16 份历史实际主 KV payload 为 32 GiB，准入保守预留为 64 GiB。DeepSeek
-在此 NH 下的全局 arena 逻辑容量为 180 GiB，每层 18 GiB pinned 分配进入 32 GiB
-档位，十层 backing 为 320 GiB；本次 16 个历史只写入 11.25 GiB 主 KV。相同 NH
-因此对应不同物理分配，不能用这两列直接排列模型的内存效率。
+DeepSeek 在此 NH 下的全局 arena 逻辑容量为 180 GiB，每层 18 GiB pinned 分配进入 32 GiB
+档位，十层 backing 为 320 GiB；本次 16 个历史只写入 11.25 GiB 主 KV。NH 的逻辑 token 容量与 pinned allocator 的实际分配分别报告。
 
-模型加载后的 allocated／reserved／设备已用量采样分别为 NOSA
-15.246635／15.248047／15.762756 GiB、DeepSeek
+模型加载后的 allocated／reserved／设备已用量采样分别为
 9.188932／9.378906／9.983459 GiB。这是加载边界观测，不是逐 tensor 权重清单；
 DeepSeek 静态 planner 仍使用前节声明的历史 9.34375 GiB 输入。普通 activation
 没有独立测峰，记录为 null，不从进程峰值减去 cache 预留反推。
 
 HBM-only 的复访历史命中均为 0/16，offload 均为 16/16。本次轨迹没有填满 NH，
-也没有验收静态最大 P/NH 或 455 用户容量。明细见[统一结果](report/unified/results.md)、
-[内存表](report/unified/memory.csv)与[来源和计划](report/unified/summary.json)。
-报告使用的源码、生成命令及选定文件 hash 记录在[发布来源](report/unified/publication.json)。
+也没有验收静态最大 P/NH 或 455 用户容量。明细见[统一结果](report/deepseek/results.md)、
+[内存表](report/deepseek/memory.csv)与[来源和计划](report/deepseek/summary.json)。
+原报告的生成来源留在该 run 的 `output/data/`；本次内容选取见上述选取清单。
 
 ## 复现入口
 
-从仓库根目录执行。NOSA 离线规划使用 production allocation declarations；DeepSeek
-两条命令分别固定 P 与 NH：
+从仓库根目录执行。DeepSeek 两条命令分别固定 P 与 NH：
 
 ```bash
-.venv/bin/python -m experiments.cache_management.src.nosa_plan \
-  --run-id NEW_NOSA_PLAN_ID --model-path /mnt/ssd-wlcb/chenkaiqi/NOSA-8B
 .venv/bin/python -m experiments.cache_management.src.capacity_plan \
   --run-id NEW_NH_PLAN_ID --fixed-p 32768 \
   --total-hbm-gib 139.81158447265625 --model-hbm-gib 9.34375 \
@@ -265,8 +220,8 @@ HBM-only 的复访历史命中均为 0/16，offload 均为 16/16。本次轨迹�
 ```
 
 DeepSeek 省略 `--total-hbm-gib` 和 `--model-hbm-gib` 时会加载模型重新测量，本文五项
-计划均使用给定输入。`src.report` 接收 NOSA plan、全部 DeepSeek plans、两个独立
-验收后的正式 motivation bench 与可选 receipt 路径，核对来源后生成统一报告。
+计划均使用给定输入。`src.report` 接收 DeepSeek plans、独立
+验收后的正式 motivation bench 与可选 receipt 路径，核对来源后生成报告。
 源计划、源码快照及完整结果保存在各自 `output/data/<run_id>/`，选定的报告数据保存在
 `report/`。上述命令用于生成新规划和报告。重做某次运行的完整来源或数值审计仍需
 该次原始依赖；清理旧运行后，不能仅凭选定表格和摘要重做这类审计。

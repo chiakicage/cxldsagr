@@ -17,8 +17,6 @@ from pathlib import Path
 
 import torch
 
-from evaluation import pool_scan_provenance as pool_scan
-
 ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -44,9 +42,7 @@ def source_snapshot(output, *, include_official=False):
         "evaluation",
     ):
         for path in sorted((ROOT / directory).rglob("*")):
-            if not path.is_file() or (
-                path.suffix not in extensions and path != ROOT / pool_scan.POOL_SCAN_ABI
-            ):
+            if not path.is_file() or path.suffix not in extensions:
                 continue
             if any(part in ("__pycache__", "output", "generated", "build") for part in path.parts):
                 continue

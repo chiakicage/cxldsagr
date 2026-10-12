@@ -15,26 +15,25 @@ from pathlib import Path
 from tokenizers import Tokenizer
 
 from models.deepseek_v32 import request_format as deepseek_format
-from models.nosa import request_format as nosa_format
 
 from .dataset import DEFAULT_DATA_ROOT, load_titles
 from .heat import DEFAULT_HEAT_CURVES, HeatPopulation
 from .scheduling import ScheduleConfig, _integer, _schedule, index_letter
 
-MODEL_FORMATS = {"nosa": nosa_format, "deepseek_v32": deepseek_format}
-DEFAULT_USER_LENGTHS = nosa_format.USER_LENGTHS
+MODEL_FORMATS = {"deepseek_v32": deepseek_format}
+DEFAULT_USER_LENGTHS = deepseek_format.USER_LENGTHS
 DEEPSEEK_USER_LENGTHS = deepseek_format.USER_LENGTHS
-DEFAULT_ITEM_LENGTHS = nosa_format.ITEM_LENGTHS
+DEFAULT_ITEM_LENGTHS = deepseek_format.ITEM_LENGTHS
 DEEPSEEK_ITEM_LENGTHS = deepseek_format.ITEM_LENGTHS
-DEFAULT_MAX_INPUT_TOKENS = nosa_format.MAX_INPUT_TOKENS
+DEFAULT_MAX_INPUT_TOKENS = deepseek_format.MAX_INPUT_TOKENS
 
-DEFAULT_TOKENIZER = nosa_format.TOKENIZER_PATH
+DEFAULT_TOKENIZER = deepseek_format.TOKENIZER_PATH
 DEEPSEEK_TOKENIZER = deepseek_format.TOKENIZER_PATH
 
 INSTRUCTION = (
     "Recommend one item from the candidate pool based on the user history. Output its index letter."
 )
-PREFIX = nosa_format.prefix(INSTRUCTION)
+PREFIX = deepseek_format.prefix(INSTRUCTION)
 DEEPSEEK_PREFIX = deepseek_format.prefix(INSTRUCTION)
 ATTRIBUTES = (
     "easy to clean",
@@ -109,7 +108,7 @@ class InputGenerator:
         population: HeatPopulation,
         tokenizer: Tokenizer,
         *,
-        model: str = "nosa",
+        model: str = "deepseek_v32",
         text_config: TextConfig | None = None,
         schedule_config: ScheduleConfig | None = None,
         titles: dict[int, str] | None = None,
@@ -382,7 +381,7 @@ class InputGenerator:
 
 def create_input_generator(
     *,
-    model: str = "nosa",
+    model: str = "deepseek_v32",
     heat_source: str = "curve",
     heat_path: str | Path | None = None,
     curve_dataset: str = "beauty",
@@ -481,7 +480,7 @@ def create_input_generator(
 
 def main(argv: list[str] | None = None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--model", choices=tuple(MODEL_FORMATS), default="nosa")
+    parser.add_argument("--model", choices=tuple(MODEL_FORMATS), default="deepseek_v32")
     parser.add_argument(
         "--heat-source",
         choices=("curve", "beauty", "games", "books", "clothing", "industrial"),

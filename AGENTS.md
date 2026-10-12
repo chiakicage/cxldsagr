@@ -1,18 +1,16 @@
 # 项目约定
 
-本项目研究通用 sparse attention offloading，选取 DeepSeek V3.2 和 NOSA 验证方案。
-后续开发优先 NOSA，主要平台为 SM90 / Hopper；SM120 可执行代码已移除，保留有效历史报告。
+本项目研究通用 sparse attention offloading，当前使用 DeepSeek V3.2 验证方案。
+主要平台为 SM90 / Hopper；SM120 可执行代码已移除，保留有效历史报告。
 
 ## 按任务读取规则
 
 以下子规则按任务涉及的模块读取，不能只依赖待修改文件所在目录的作用域。
 
-- 涉及 NOSA 的模型、算子、cache、serving 或实验时，必须读取
-  [NOSA 模型规则](models/nosa/AGENTS.md)和[NOSA 算子规则](operators/nosa/AGENTS.md)。
 - 涉及 DeepSeek V3.2 的模型、算子、cache、serving 或实验时，必须读取
   [DeepSeek 模型与执行规则](models/deepseek_v32/AGENTS.md)。
-- 修改 `cache/`、`executor/`、`models/attention_contracts.py`、`serving/` 或其他共享实现时，必须读取两个
-  模型的规则，检查受影响的模型路径和全部依赖实验。
+- 修改 `cache/`、`executor/`、`models/attention_contracts.py`、`serving/` 或其他共享实现时，必须读取 DeepSeek
+  模型规则，检查受影响的模型路径和全部依赖实验。
 - 涉及实验、`evaluation/`、性能优化或正确性修正时，必须读取[实验规则](experiments/AGENTS.md)
   和受影响实验的 README；模型或算子目录内的改动也遵守此要求。
 - 修改第三方版本、依赖布局、native 构建、依赖准备脚本或环境依赖时，必须读取
@@ -33,7 +31,6 @@
 
 当前探索的一种 GR serving 方案是固定 history、变化 candidate 的 prefill 负载，
 其代表性及模型、数据适配仍待确定。`GR/` 的固定前缀语义不等于跨请求 KV 复用；
-`serving/runner.py` 保留逐请求创建并释放 cache 的旧入口；
 `serving/persistent.py` 使用 `cache/prefix_pool.py` 保留跨请求用户历史。
 通用预算模式在相同 HBM / CPU DRAM 硬预算下按用户 session 做 LRU；固定 P/NH 模式
 按对应的 host 页或 HBM history token 配额准入，两种模式的容量和命中结果不能混用。
@@ -69,7 +66,7 @@ HBM，不能只因 allocated 未超额就声称满足实际预算。观测到的
 
 ## 目录与职责
 
-- 自有算子按模型放在 `operators/nosa/`、`operators/deepseek_v32/`，模型内部按
+- 自有算子按模型放在 `operators/deepseek_v32/`，模型内部按
   `indexer/`、`attention/`、`linear/` 等实际功能组织。attention 分为 `reference/`、
   `device_only/`、`offload/`；reference 可独立导入，不加载 Triton 或 native 扩展。
   架构和后端是实现属性，不再作为算子的顶层目录；不为分类复制 kernel。
@@ -80,9 +77,9 @@ HBM，不能只因 allocated 未超额就声称满足实际预算。观测到的
 - `operators/` 的共享适配只封装现有后端调用。`models/attention_contracts.py` 保存
   `BlockSelection`、`TokenSelection`、`AttentionContext`、`Indexer` 和 `MainAttention`
   的轻量公共契约，不导入具体模型实现。普通层及 dense attention 适配放在对应模型目录；
-  NOSA 的 RMSNorm / SwiGLU 接收显式维度、eps 和 bias，不反向导入模型配置。
+  普通层接收显式维度、eps 和 bias，不反向导入模型配置。
 - 模型结构、权重加载、位置编码、稀疏选择语义、KV 布局适配放在
-  `models/deepseek_v32/`、`models/nosa/`。`models/` 只保留模型推理相关代码及其测试；
+  `models/deepseek_v32/`。`models/` 只保留模型推理相关代码及其测试；
   接入另一架构时复用对应模型目录，不按架构复制模型树。
   standalone SM90 ECHO 放在 `models/deepseek_v32/`，不依赖 SGLang 或 SM120 扩展。
 - `executor/` 负责通用模型分块执行和输出选择，不读取 GR 请求；`serving/` 负责 GR
@@ -113,7 +110,7 @@ HBM，不能只因 allocated 未超额就声称满足实际预算。观测到的
 - 本地权重与 tokenizer 放在 `weights/`（已被 `.gitignore` 排除），例如
   `weights/DeepSeek-V3.2/`；与代码目录 `models/` 分离。
 - 不将 DeepSeek V3.2 的 656 B packed MLA record、indexer 或 tokenizer 作为通用
-  offloading / NOSA 的固定假设；新增模型时显式适配其稀疏访问语义和 KV 布局。
+  offloading 的固定假设；新增模型时显式适配其稀疏访问语义和 KV 布局。
 - 修改目录时同步更新 Python 导入、`-m` 子进程入口、构建路径、配置和文档链接。
   保留 `weights/` 和 GR 共享资源；符合实验目的的有效运行产物迁入对应实验的 `output/`，
   报告需要呈现的图表和数据保存在该实验的 `report/`。

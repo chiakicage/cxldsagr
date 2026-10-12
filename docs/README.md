@@ -20,7 +20,7 @@
 
 - Supervisor：[材料依据](agents/research-supervisor/sources.md)、[重要理解修正](agents/research-supervisor/updates.md)。
 - KDA：[组件文档](agents/kda/README.md)，分别维护 indexer、sparse attention 和 offload attention 的任务与检查点。
-- 系统编码与实验执行者：[在办工程任务](agents/system/README.md)；已完成重构的接口见各模块 README，结果见对应实验报告。
+- 系统编码与实验执行者：在办任务材料使用 `docs/agents/system/`；当前接口见各模块 README，结果见对应实验报告。
 - 独立正确性验收：[冻结源码与证据索引](agents/acceptance/unified_runtime_20261005/evidence.json)，原始收据保留各自的源码和验证边界。
 
 完整入口见 [agent 文档导航](agents/README.md)。工程方案只保留当前任务所需材料，

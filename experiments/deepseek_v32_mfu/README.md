@@ -385,7 +385,7 @@ prefetch 保留在对应 API 的计时中；非矩阵操作的 FLOPs/MFU 为 N/A
 图绑定固定 prefix、query shape、输出模式、cache generation/storage、clock 和驻留
 证明；每次 replay 前须恢复匹配的 prefix。Offload 要求单 session 且 H+A<=P，
 绑定变化时直接报错。输出借用 graph storage；跨 replay 保留时由调用者复制。
-当前不支持任意增长历史，也未启用 C10 或 NOSA 的完整图。见[模型说明](../../models/deepseek_v32/README.md)。
+当前不支持任意增长历史，也未启用 C10 的完整图。见[模型说明](../../models/deepseek_v32/README.md)。
 
 默认输出图的 static input 实际 allocated 为 1,024 B；private pool reserved
 为 HBM 142 MiB、三个 offload 方法各 144 MiB。每图 2 GiB 是选择的规划上限。

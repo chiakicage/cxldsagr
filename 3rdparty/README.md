@@ -3,7 +3,7 @@
 | 子模块 | 版本来源 | 用途 |
 | --- | --- | --- |
 | `DeepGEMM/` | `main`，`057ca5964aae0879ff2e0eb71ee05a3cb0ba3df7` | DeepSeek 官方 FP8 GEMM / resident indexer 及独立基准 |
-| `cutlass/` | 与 DeepGEMM 的 gitlink 一致 | NOSA / DeepSeek SM90 及 DeepGEMM 共用的 CUTLASS / CuTe headers |
+| `cutlass/` | 与 DeepGEMM 的 gitlink 一致 | DeepSeek SM90 及 DeepGEMM 共用的 CUTLASS / CuTe headers |
 | `DeepJIT/` | 与 DeepGEMM 的 gitlink 一致 | DeepGEMM 的 JIT runtime headers |
 | `FlashMLA/` | `ba89a3466e9470ad08ab39738d4e7bb66989e1e7` | 官方 Hopper / DeepSeek V3.2 sparse MLA prefill |
 
@@ -77,5 +77,5 @@ git -C 3rdparty/ECHO -c submodule.recurse=false checkout --detach \
 SGLang 使用 ECHO 目录下的独立环境和依赖，不替换项目基础环境中的
 mainline `deep_gemm` 或 FlashMLA。实际版本、native 构建身份和运行命令见复现报告。
 
-项目自有的 SM90 NOSA 与 DeepSeek ECHO CUDA 内核复用顶层 `cutlass/include`，通过项目环境中的
+项目自有的 SM90 DeepSeek ECHO CUDA 内核复用顶层 `cutlass/include`，通过项目环境中的
 TVM FFI 按需编译；使用 `uv sync`，不要求安装 `legacy` 组或 EzKernelKit。

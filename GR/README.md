@@ -1,10 +1,9 @@
 # GR serving 请求生成器
 
-生成的请求可直接交给 [本地 serving runner](../serving/README.md)：
-`python -m serving.run_gr --count 1`。该框架串行执行 NOSA prefix/extend，生成器本身
-继续只负责输入，不加载模型或持有 KV cache。
-
-生成用于 KV cache 实验的可读请求：**用户历史固定、候选每次更新、token 长度精确控制**。用户热度、文本素材、到达时间分别配置。默认从仓库内的 Beauty 热度曲线生成合成用户，商品名也由规则生成，无需原始数据集。默认使用本地 NOSA-8B tokenizer 和关闭 thinking 的聊天模板，保留显式 DeepSeek V3.2 适配。完整文本编码后，可直接通过 Python 接口获取，也可用命令行输出 JSONL，不加载模型或运行 serving。
+为 KV cache 实验生成固定用户历史、变化候选和精确 token 长度的请求。用户热度、
+文本素材和到达时间分别配置；默认使用仓库中的 Beauty 热度曲线和 synthetic 文本。
+当前使用 DeepSeek V3.2 请求格式，tokenizer 可通过 `--tokenizer` 显式指定。
+生成器只构造请求；执行入口见 [serving](../serving/README.md)。
 
 ## Python 接口
 
@@ -13,7 +12,7 @@ from GR.input_generator import create_input_generator, TextConfig
 from GR.scheduling import ScheduleConfig
 
 generator = create_input_generator(
-    model="nosa",  # 默认模型；DeepSeek 使用 "deepseek_v32"
+    model="deepseek_v32",  # 默认模型
     heat_source="curve",  # 默认入口
     curve_dataset="beauty",
     num_users=1000,
@@ -45,7 +44,7 @@ revisit = generator.for_user(uid, visit_index=1)
 
 初始化函数读取所选热度资源、可选标题和 tokenizer，返回可复用的 `InputGenerator`，不写文件。路径参数 `data_root`、`heat_path`、`text_catalog_path`、`tokenizer` 接受字符串或 `Path`；`tokenizer` 也接受已加载的 `tokenizers.Tokenizer` 对象（会关闭其 padding 和 truncation）。默认 `heat_source="curve"`、`text_material="synthetic"`；使用真实商品标题需显式设置 `text_material="catalog"`。
 
-`iter_generate(count)` 返回惰性迭代器，不会一次保存全部请求。每次调用都会重新开始一条可复现的流；需要连续消费时保留同一个迭代器。`for_user(uid, item_variant=i)` 可指定独立于 user 的候选内容流；同一 seed、item 长度、visit 与 `item_variant` 下，不同 user 得到相同候选区块。省略时保留原来的 per-user 候选流。`for_user` 的 `visit_index` 由调用方维护，同一用户和访问序号会得到相同内容。已有内存热度和标题时，可直接构造 `InputGenerator(population, tokenizer, titles=..., text_config=..., schedule_config=...)`，其中 `population` 为 `HeatPopulation`。直接构造时也默认 `model="nosa"`。
+`iter_generate(count)` 返回惰性迭代器，不会一次保存全部请求。每次调用都会重新开始一条可复现的流；需要连续消费时保留同一个迭代器。`for_user(uid, item_variant=i)` 可指定独立于 user 的候选内容流；同一 seed、item 长度、visit 与 `item_variant` 下，不同 user 得到相同候选区块。省略时保留原来的 per-user 候选流。`for_user` 的 `visit_index` 由调用方维护，同一用户和访问序号会得到相同内容。已有内存热度和标题时，可直接构造 `InputGenerator(population, tokenizer, titles=..., text_config=..., schedule_config=...)`，其中 `population` 为 `HeatPopulation`。直接构造时也默认 `model="deepseek_v32"`。
 
 ## 直接运行
 
@@ -104,40 +103,31 @@ revisit = generator.for_user(uid, visit_index=1)
 
 ## 1. 请求内容和长度
 
-默认 NOSA 布局为（固定指令也在 user message 内）：
+默认 DeepSeek 布局如下；特殊 token 与 tokenizer 必须匹配：
 
 ```text
-<|im_start|>user
-固定指令
-User history:
+<｜begin▁of▁sentence｜>固定指令<｜User｜>User history:
 User profile U42.
 Record 1: Viewed P123, Blue travel bag. Preference: easy to clean.
 ...
 Candidate pool for visit 0:
 (A) P456: Silver water bottle.
 ...
-Details for (A): designed for travel.
-...
-<|im_end|>
-<|im_start|>assistant
-<think>
-
-</think>
+<｜Assistant｜></think>
 ```
 
-- `user-lengths`：历史区块长度，包含 `User profile` 和所有历史记录；NOSA 默认 4K/16K（等概率），DeepSeek 默认 4K/16K/64K/256K/1024K，1K = 1024 tokens。
-- `item-lengths`：**整个请求除历史区块之外的总预算**，包括固定指令、历史标题、候选、分隔符和 chat 特殊 token；NOSA 默认 128/256/512/1K/2K/4K（等概率），DeepSeek 还包含 64。
-- 因此 `total_input_tokens = user_tokens + item_tokens`，没有漏算模板开销。
-- 不指定概率时，各长度档位等概率。例如 NOSA 可指定 `--user-probabilities 0.3 0.7`、`--item-probabilities 0.1 0.1 0.1 0.2 0.2 0.3`；数量须匹配，概率之和须为 1。
-- 两个长度均在用户初始化时抽取一次，独立于热度；复访只更新候选内容，保持长度不变。同一个 seed 和用户 ID 可以重新生成同一份历史。
-- `--candidate-count` 默认 20，是候选商品数量上限；短预算下自动减少完整候选条目，为收尾预留 NOSA 8 tokens / DeepSeek 2 tokens，最少保留 1 个。若单个 catalog 标题仍超预算，按完整单词缩短，必要时使用简短商品标签。长预算由更多完整描述句填充，不靠增加候选数凑长度。
-- 历史用不同编号和商品的完整记录填充；最后的小额 token 余量用简短完整句子补齐。不会用随机 token ID 或截断半个 Unicode 字符填充预算。
-- 每条完整文本都重新编码，并检查完整编码等于前缀、历史、候选各块编码的拼接。NOSA 的 SentencePiece 会给独立文本块加 dummy prefix，因此历史和候选按实际换行上下文编码；完整 prompt 仍按原始 tokenizer 编码，不修改 tokenizer。边界发生合并时明确报错。NOSA 的解码文本可能多出特殊 token 附近的空格，因此校验原 prompt 的编码，不要求 decode 文本逐字相等。
-- `--max-input-tokens` 对 NOSA 默认 32768，对 DeepSeek 默认 1052672（1024K history + 4K item）。NOSA 输入不能超过当前支持的 32768-token context；实际推理还需为输出预留空间。所有档位组合必须在输入预算内；mandatory 候选文本过长时明确报错，不临时裁剪历史。NOSA 的模板开销较大，默认去掉了无法容纳完整候选的 64-token item 档。
+- `user-lengths` 为历史区块长度，默认 4K/16K/64K/256K/1024K，1K = 1024 tokens。
+- `item-lengths` 为完整请求中除历史外的预算，含指令、候选和特殊 token；默认 64/128/256/512/1K/2K/4K。
+- 各档位默认等概率；显式概率数量须匹配，且总和为 1。
+- `candidate-count` 默认 20。短预算可减少完整条目，至少保留一个，并为收尾预留 2 tokens；无法容纳必要文本时直接报错。
+- 每条完整文本重新编码，核对完整编码与各区块拼接是否一致；边界发生合并时直接报错。
+- 默认 `max-input-tokens=1052672`（1024K history + 4K item）。这是请求生成上限，实际推理仍须满足 backend 的上下文和容量约束。
+- 同一用户的历史 token 固定；复访改变 candidate。`stable_prefix_tokens` 表示固定历史边界，不代表已命中 KV cache。
+- `total_input_tokens = user_tokens + item_tokens`，模板开销已包含在内。两种长度在用户初始化时各抽取一次，独立于热度；复访保持长度不变。
+- 历史用完整商品记录填充，小额 token 余量用完整短句补齐。长候选标题按完整单词缩短，不使用随机 token ID 或半个 Unicode 字符填充预算。
 
-生成的 `prompt` 已含完整聊天模板，`input_ids` 可直接交给模型，避免再次套用模板或添加 BOS。
-
-为便于观察跨用户复用，历史开头带稳定用户编号；不同用户仍可能共享指令及一小段模板前缀，不能把 `user_id` 当成 KV 命中的充分条件。
+生成的 `prompt` 已含模板，`input_ids` 可直接交给模型，避免重复套模板或添加 BOS。
+不同用户可能共享指令和部分模板前缀，`user_id` 本身不足以证明 KV 命中。
 
 ## 2. 用户热度
 
@@ -190,9 +180,7 @@ Python API 可用 `ScheduleConfig(max_revisits=8)` 限制每个用户最多复�
 这里生成的是模拟时间戳，不会按墙钟时间睡眠或发送请求。`iter_generate` 每次调用重置随机状态、时钟和复访计数。
 
 `InputGenerator` 和 `create_input_generator` 可显式传入 `context_limit`，覆盖请求格式的
-默认生成边界（NOSA 默认为 32768 tokens）。例如较长的 NOSA 系统实验可同时设置足够的
-`TextConfig.max_input_tokens` 和 `context_limit=65664`，生成 65536 + 128 tokens。
-该参数只放宽文本生成边界，不验证推理后端支持情况或长上下文模型质量；调用方须分别验证。
+默认生成边界。显式 `--context-limit` 只声明请求构造边界，不证明长上下文质量。
 
 ## 输出和复现
 
@@ -200,7 +188,7 @@ Python API 可用 `ScheduleConfig(max_revisits=8)` 限制每个用户最多复�
 
 | 字段 | 含义 |
 |---|---|
-| `model` | 请求格式：`nosa` 或 `deepseek_v32` |
+| `model` | 请求格式：`deepseek_v32` |
 | `user_id`, `user_heat_weight` | 曲线模式为合成 ID 和曲线流量增量；原始模式为源用户 ID 和所选字段的权重 |
 | `task_id`, `timestamp`, `visit_index` | 请求序号、模拟秒数、从 0 开始的用户访问序号 |
 | `previous_request_id`, `revisit_interval_s` | 上一次访问及间隔，首访为 null |
@@ -219,17 +207,16 @@ Python API 可用 `ScheduleConfig(max_revisits=8)` 限制每个用户最多复�
 ```text
 热度曲线：GR/analysis/heat_curves.csv（相对于仓库，运行时按模块路径定位）
 原始数据根目录（仅原始热度或 catalog 模式使用）：/mnt/nfs/share/archive/260808_old_nfs/share/wsh/Bi-KV/Bi-KV/data
-NOSA tokenizer：/mnt/ssd-wlcb/chenkaiqi/NOSA-8B/tokenizer.json
 DeepSeek tokenizer：/mnt/nfs/share/models/DeepSeek-V3.2/tokenizer.json
 ```
 
-可用 `--data-root`、`--tokenizer`、`--text-catalog-path` 覆盖。`--tokenizer` 接受 JSON 文件或目录，须与 `--model` 匹配。DeepSeek 可用 `--model deepseek_v32 --tokenizer weights/DeepSeek-V3.2`。`TextConfig()` 本身采用 NOSA 默认值；显式配置 DeepSeek 长上下文时应同时设置 `max_input_tokens`。未传 `text_config` 时，工厂和构造函数自动采用所选模型的预算。Python API 为 `GR.input_generator.InputGenerator`、`TextConfig`、`GR.scheduling.ScheduleConfig` 和 `GR.heat.HeatPopulation`。
+可用 `--data-root`、`--tokenizer`、`--text-catalog-path` 覆盖。`--tokenizer` 接受 JSON 文件或目录，须与 `--model` 匹配。DeepSeek 可用 `--model deepseek_v32 --tokenizer weights/DeepSeek-V3.2`。`TextConfig()` 使用 DeepSeek 默认值。未传 `text_config` 时，工厂和构造函数自动采用所选模型的预算。Python API 为 `GR.input_generator.InputGenerator`、`TextConfig`、`GR.scheduling.ScheduleConfig` 和 `GR.heat.HeatPopulation`。
 
 ```bash
 .venv/bin/python -m pytest GR/tests -q
 ```
 
-测试包含默认长度组合、精确编码、复访稳定前缀和候选变化、共同前缀计算、热度载入，以及曲线插值、复现、输入校验、summary 集中度对照和 API/CLI 默认资源加载。已在本地 NOSA tokenizer 上验证默认 12 种长度组合、模板与 checkpoint 一致、精确编码和复访；DeepSeek 适配保留原模板与 35 种长度组合测试，本机缺少该 tokenizer，当前跳过。
+测试覆盖精确编码、固定历史与变化候选、热度和调度、API/CLI，以及上下文限制。涉及本地 tokenizer 的检查只在对应文件存在时运行。
 
 ## 三层内容交叉实验
 

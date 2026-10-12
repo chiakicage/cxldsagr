@@ -15,7 +15,7 @@ import time
 from functools import partial
 from pathlib import Path
 
-from experiments.nosa_motivation.src.validation import (
+from evaluation.motivation_validation import (
     add_mode_arguments,
     begin_validation,
     execution_environment,
@@ -244,9 +244,9 @@ def snapshot_sources(output):
         "evaluation/provenance.py",
         "evaluation/validation.py",
         "GR/workload.py",
-        "experiments/nosa_motivation/src/validation.py",
-        "experiments/nosa_motivation/src/provenance.py",
-        "experiments/nosa_motivation/src/cpu_environment.py",
+        "evaluation/motivation_validation.py",
+        "evaluation/native_provenance.py",
+        "evaluation/cpu_environment.py",
         "experiments/cache_management/src/capacity_probe.py",
         "experiments/deepseek_v32_mfu/src/backend_provenance.py",
     }
@@ -449,7 +449,7 @@ def run_case(backend, workload, config, output, metadata, observe, runner_type):
             raise AssertionError("backend did not apply the requested NH capacity")
         observe(f"{scheme}/after_cache_allocation")
         if "validation_identity" in metadata:
-            from experiments.nosa_motivation.src.provenance import loaded_native_artifacts
+            from evaluation.native_provenance import loaded_native_artifacts
 
             native_before = loaded_native_artifacts()
             record_runtime(
@@ -541,7 +541,7 @@ def run_case(backend, workload, config, output, metadata, observe, runner_type):
         }
     backend.close()
     if native_before is not None:
-        from experiments.nosa_motivation.src.provenance import verify_native_artifacts
+        from evaluation.native_provenance import verify_native_artifacts
 
         case["native_artifacts_before"] = native_before
         case["native_artifacts_after"] = verify_native_artifacts(native_before)
@@ -644,7 +644,7 @@ def main(argv=None):
             "total_memory": props.total_memory,
             "sm_count": props.multi_processor_count,
         }
-        from experiments.nosa_motivation.src.cpu_environment import cpu_environment
+        from evaluation.cpu_environment import cpu_environment
 
         metadata["hardware"]["cpu_environment"] = cpu_environment(torch)
         metadata["checkpoint"] = checkpoint_inventory(args.model_path)
@@ -717,7 +717,7 @@ def main(argv=None):
             raise RuntimeError("checkpoint identity changed during the run")
         if execution_environment() != metadata["execution_environment"]:
             raise RuntimeError("execution environment changed during the run")
-        from experiments.nosa_motivation.src.cpu_environment import finish_cpu_environment
+        from evaluation.cpu_environment import finish_cpu_environment
 
         finish_cpu_environment(metadata, torch)
         from experiments.deepseek_v32_mfu.src.backend_provenance import (

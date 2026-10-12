@@ -102,7 +102,7 @@ return_hidden=False, capture_scope=None)` 显式启用，策略为
 条件变化会直接报错。默认 logits、`return_hidden=True` 和 `all_logits=True`
 分别准备图。返回的 tensor 借用 graph storage，需跨后续 replay 保留时由调用者复制。
 `forward(..., use_extend_graph=False)` 可显式执行原路径作对照。完整图当前只用于
-固定 prefix 的真实层执行，不支持任意增长的 history，也未接入 C10 或 NOSA。
+固定 prefix 的真实层执行，不支持任意增长的 history，也未接入 C10。
 
 真实三层的 dense 完整图让本层 projection、indexer 和 top-k 与历史 H2D 同时推进；
 在 append 和主 attention 前等待数据及映射就绪，再发起下一层预取。
@@ -314,8 +314,8 @@ candidate 大小执行，不使用独立 `workspace_query_tokens` 准入。通�
 GR candidate 固定整批执行，不随 prefill chunk 再拆分投影、MLP 或 indexer。资源计划
 分别保留 H、A 和 H+A 的上限；候选临时执行不提交持久 history。
 
-输出包含全部 candidate normalized hidden，同时执行最后 token 的 LM head；当前 NOSA
-serving backend 只输出 hidden，其执行边界不同。跨方案数值对照使用同一模型的相同边界。
+输出包含全部 candidate normalized hidden，同时执行最后 token 的 LM head。
+跨方案数值对照使用同一模型的相同边界。
 
 单元测试及可选的真实 checkpoint 正确性检查：
 

@@ -1,7 +1,7 @@
-"""Join verified NOSA/DeepSeek allocation plans and complete-request observations.
+"""Join verified DeepSeek allocation plans and complete-request observations.
 
 Static plans never acquire a physical-fit verdict from unrelated motivation
-traces. The two models retain their own source, workload and accounting scopes.
+traces. Plans and observations retain their own source, workload and accounting scopes.
 """
 
 from __future__ import annotations
@@ -27,76 +27,6 @@ def require(condition, message):
         raise ValueError(message)
 
 
-def read_nosa_plan(directory):
-    from cache.capacity import AllocationSpec
-    from experiments.cache_management.src.nosa_plan import _summarize
-
-    directory = Path(directory)
-    value = read_json(directory / "plan.json")
-    require(
-        value.get("schema") == "nosa-offline-allocation-plan-v1"
-        and value.get("status") == "static_plan_not_execution",
-        "Expected an offline NOSA allocation plan",
-    )
-    require(bool(value["sources"]), "NOSA source inventory is empty")
-    for name, expected in value["sources"].items():
-        relative = Path(name)
-        require(not relative.is_absolute() and ".." not in relative.parts, "Invalid source path")
-        require(digest(directory / "source" / relative) == expected, f"Source differs: {name}")
-    require(
-        digest(directory / "checkpoint_config.json") == value["config_source"]["sha256"],
-        "NOSA checkpoint configuration differs",
-    )
-    require(
-        not any(
-            value["assumptions"][name]
-            for name in (
-                "live_hardware_validated",
-                "live_allocator_validated",
-                "model_weights_loaded",
-                "cuda_initialized_by_planner",
-            )
-        ),
-        "Offline NOSA planning must not claim execution validation",
-    )
-    require(
-        set(value["cases"]) == {"hbm", "dense_prefetch", "serial_sparse", "overlap"},
-        "NOSA plan must contain all four supported schemes",
-    )
-    for scheme, case in value["cases"].items():
-        for scope in ("shared", "one_session"):
-            allocations = tuple(
-                AllocationSpec(**{**item, "shape": tuple(item["shape"])})
-                for item in case[scope]["allocations"]
-            )
-            recomputed = _summarize(allocations)
-            for field in (
-                "storage_payload_bound",
-                "allocator_reservation_bound",
-                "categories",
-            ):
-                require(recomputed[field] == case[scope][field], f"NOSA {scope} {field} differs")
-        for population in case["populations"].values():
-            count = population["sessions"]
-            require(type(count) is int and count >= 0, "Invalid session population")
-            require(population["physical_fit_validated"] is False, "Static population claims fit")
-            require(
-                population["admissible_under_token_quota"]
-                == (count <= case["quota"]["full_history_sessions"]),
-                f"NOSA {scheme} quota verdict differs",
-            )
-            for field in ("storage_payload_bound", "allocator_reservation_bound"):
-                expected = {
-                    tier: case["shared"][field][tier] + count * case["one_session"][field][tier]
-                    for tier in ("hbm", "dram")
-                }
-                require(
-                    population[field + "_excluding_graphs"] == expected,
-                    f"NOSA {scheme} population accounting differs",
-                )
-    return value
-
-
 def memory_rows(model, metadata, rows):
     """Keep allocator peaks, boundary samples and cache reservations distinct."""
     result = []
@@ -105,8 +35,6 @@ def memory_rows(model, metadata, rows):
         samples = [row["memory_after"] for row in selected]
 
         def device_used(sample):
-            if model == "nosa":
-                return sample["device_used_bytes"]
             return sample["cuda_total_bytes"] - sample["cuda_free_bytes"]
 
         item = {
@@ -147,10 +75,9 @@ def memory_rows(model, metadata, rows):
 
 
 def read_motivation(model, directory, receipt_override=None):
-    if model == "nosa":
-        from experiments.nosa_motivation.src.report import audit_run
-    else:
-        from experiments.deepseek_v32_motivation.src.report import audit_run
+    if model != "deepseek":
+        raise ValueError("unsupported observation model")
+    from experiments.deepseek_v32_motivation.src.report import audit_run
 
     directory = Path(directory)
     options = {} if receipt_override is None else {"receipt_override": receipt_override}
@@ -195,38 +122,6 @@ def read_motivation(model, directory, receipt_override=None):
     }
 
 
-def validate_nosa_observation(plan, trace):
-    """Only describe graph accounting as matched when layout and source match."""
-    fields = {
-        "history_tokens": "history_tokens",
-        "candidate_tokens": "candidate_tokens",
-        "chunk_size": "chunk_size",
-        "sparse_pool_tokens": "sparse_pool_tokens",
-        "host_arena_tokens": "host_arena_tokens",
-        "requested_users": "num_users",
-    }
-    for static, measured in fields.items():
-        require(
-            plan["parameters"][static] == trace["config"][measured],
-            f"NOSA static/observed {static} differs",
-        )
-    require(plan["model_config"] == trace["model_config"], "NOSA model configuration differs")
-    require(
-        plan["config_source"]["sha256"] == trace["checkpoint"]["metadata_sha256"]["config.json"],
-        "NOSA checkpoint configuration source differs",
-    )
-    for name, expected in plan["sources"].items():
-        if name != "experiments/cache_management/src/nosa_plan.py":
-            require(
-                trace["source_manifest"].get(name) == expected,
-                f"NOSA planning/execution source differs: {name}",
-            )
-    require(
-        {case["scheme"] for case in trace["cases"]} == set(plan["cases"]),
-        "NOSA static/observed schemes differ",
-    )
-
-
 def write_csv(path, rows):
     with Path(path).open("x", newline="") as stream:
         writer = csv.DictWriter(stream, fieldnames=list(rows[0]))
@@ -256,30 +151,6 @@ def markdown(result):
         )
     lines += [
         "",
-        "## NOSA static allocation declarations",
-        "",
-        (
-            "Graph allocations are excluded here. Shared graph storage and private reservation "
-            "are already included in the matched request observations; do not add them again."
-        ),
-        "",
-        (
-            "| Scheme | Quota users | Shared HBM bound GiB | One-session HBM bound GiB | "
-            "One-session host payload GiB | One-session host reservation GiB |"
-        ),
-        "| --- | ---: | ---: | ---: | ---: | ---: |",
-    ]
-    for scheme, case in result["nosa_static"]["cases"].items():
-        shared, session = case["shared"], case["one_session"]
-        lines.append(
-            f"| {scheme} | {case['quota']['full_history_sessions']} | "
-            f"{shared['allocator_reservation_bound']['hbm'] / 2**30:.6f} | "
-            f"{session['allocator_reservation_bound']['hbm'] / 2**30:.6f} | "
-            f"{session['storage_payload_bound']['dram'] / 2**30:.6f} | "
-            f"{session['allocator_reservation_bound']['dram'] / 2**30:.6f} |"
-        )
-    lines += [
-        "",
         "## Complete-request memory observations",
         "",
         (
@@ -303,7 +174,7 @@ def markdown(result):
         ),
         "| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |",
     ]
-    for model in ("nosa", "deepseek"):
+    for model in ("deepseek",):
         trace = result["observed"][model]
         for row in trace["memory"]:
             values = [
@@ -321,16 +192,15 @@ def markdown(result):
                 + " | ".join(f"{value:.6f}" for value in values)
                 + " |"
             )
-    for model in ("nosa", "deepseek"):
+    for model in ("deepseek",):
         trace = result["observed"][model]
         lines += ["", f"{model} observation source: `{trace['run_id']}`."]
     lines += [
         "",
         (
-            "Both traces use fixed token quotas, not equal HBM/DRAM byte budgets. NOSA's NH "
-            "is a lazy per-session host quota; DeepSeek allocates a global arena. The workloads "
-            "also differ: full 32-layer NOSA hidden outputs versus a ten-block DeepSeek source-input "
-            "replay with a last-token LM head. The table does not rank cross-model efficiency."
+            "The trace uses fixed token quotas, not HBM/DRAM byte budgets. DeepSeek allocates "
+            "a global host arena. The ten-block source-input replay includes a last-token LM head; "
+            "it does not represent the full 61-layer model."
         ),
         "",
     ]
@@ -340,11 +210,8 @@ def markdown(result):
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--run-id", required=True)
-    parser.add_argument("--nosa-plan", type=Path, required=True)
     parser.add_argument("--deepseek-plans", type=Path, nargs="+", required=True)
-    parser.add_argument("--nosa-run", type=Path, required=True)
     parser.add_argument("--deepseek-run", type=Path, required=True)
-    parser.add_argument("--nosa-receipt", type=Path)
     parser.add_argument("--deepseek-receipt", type=Path)
     parser.add_argument("--output-dir", type=Path, required=True)
     args = parser.parse_args(argv)
@@ -355,17 +222,14 @@ def main(argv=None):
     plans, provenance = zip(*(read_plan(path, []) for path in args.deepseek_plans), strict=True)
     require(len({item["run_id"] for item in plans}) == len(plans), "Duplicate DeepSeek plan")
     result = {
-        "schema": "unified-cache-management-report-v1",
+        "schema": "deepseek-cache-management-report-v1",
         "run_id": args.run_id,
-        "nosa_static": read_nosa_plan(args.nosa_plan),
         "deepseek_static": {"plans": plans, "provenance": provenance, "complete_capacity_runs": 0},
         "observed": {
-            "nosa": read_motivation("nosa", args.nosa_run, args.nosa_receipt),
             "deepseek": read_motivation("deepseek", args.deepseek_run, args.deepseek_receipt),
         },
         "generator_sha256": digest(Path(__file__)),
     }
-    validate_nosa_observation(result["nosa_static"], result["observed"]["nosa"])
     args.output_dir.mkdir(parents=True)
     (args.output_dir / "summary.json").write_text(
         json.dumps(result, indent=2, allow_nan=False) + "\n"
@@ -379,7 +243,7 @@ def main(argv=None):
     from evaluation.provenance import snapshot_report_helpers
 
     snapshot_report_helpers(args.output_dir)
-    print(f"Verified unified cache report: {args.output_dir}")
+    print(f"Verified DeepSeek cache report: {args.output_dir}")
 
 
 if __name__ == "__main__":
