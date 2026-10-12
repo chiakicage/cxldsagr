@@ -514,16 +514,24 @@ def test_each_timing_sample_requires_matching_counter_and_byte_evidence():
         audit.timing_audit(result)
 
 
-def prefetch_fixture(tmp_path, *, official=False, different_winners=False, bounded=False):
+def prefetch_fixture(
+    tmp_path, *, official=False, different_winners=False, bounded=False, legacy=False
+):
     import torch
 
     from experiments.deepseek_v32_mfu.src import prefetch_transition_audit as transitions
     from experiments.deepseek_v32_mfu.tests.test_prefetch_transition_audit import layer_fixture
 
-    official = official or bounded
+    official = official or bounded or legacy
     layers = [
         copy.deepcopy(
-            layer_fixture(official=official, saturated=official, padded=official, bounded=bounded)
+            layer_fixture(
+                official=official,
+                saturated=official,
+                padded=official,
+                bounded=bounded,
+                legacy=legacy,
+            )
         )
         for _ in range(3)
     ]
@@ -554,7 +562,7 @@ def prefetch_fixture(tmp_path, *, official=False, different_winners=False, bound
     }
     if official:
         scope.update(
-            prefetch_policy=transitions.OFFICIAL_POLICY,
+            prefetch_policy=proof["scope"]["prefetch_policy"],
             prepared_max_prefetch=proof["scope"]["prepared_max_prefetch"],
             hint_index=1,
         )
@@ -591,6 +599,7 @@ def prefetch_fixture(tmp_path, *, official=False, different_winners=False, bound
                     padded=True,
                     different_winners=True,
                     bounded=bounded,
+                    legacy=legacy,
                 )
                 for _ in range(3)
             ]
@@ -665,11 +674,12 @@ def test_prefetch_omitted_score_identity_and_receipt_are_not_replaceable(tmp_pat
 
 
 @pytest.mark.parametrize("bounded", [False, True])
-def test_official_prefetch_matrix_accepts_bound_residency_variation_and_rejects_cap(
-    tmp_path, bounded
+@pytest.mark.parametrize("legacy", [False, True])
+def test_official_prefetch_matrix_accepts_bound_schedules_and_rejects_cap(
+    tmp_path, bounded, legacy
 ):
     result, receipt = prefetch_fixture(
-        tmp_path, official=True, different_winners=True, bounded=bounded
+        tmp_path, official=True, different_winners=True, bounded=bounded, legacy=legacy
     )
     verified = audit.prefetch_audit(tmp_path, result, receipt, audit.Evidence())
     assert verified["passed"] and verified["compact_evidence_files"] == 6
@@ -715,4 +725,18 @@ def test_matrix_reconstructs_bounded_compact_descriptor_and_transitions(tmp_path
     torch.save(compact, path)
     rebind_prefetch(tmp_path, result, receipt)
     with pytest.raises(ValueError, match="descriptor"):
+        audit.prefetch_audit(tmp_path, result, receipt, audit.Evidence())
+
+
+@pytest.mark.parametrize("stage", ["after_staging", "after_promotion"])
+def test_matrix_rereads_selective_raw_tags_and_deferred_metadata(stage, tmp_path):
+    import torch
+
+    result, receipt = prefetch_fixture(tmp_path, official=True)
+    path = tmp_path / "echo_replay_0_prefetch_evidence.pt"
+    compact = torch.load(path, weights_only=True)
+    compact["layers"][0]["stages"][stage]["clock"] += 1
+    torch.save(compact, path)
+    rebind_prefetch(tmp_path, result, receipt)
+    with pytest.raises(ValueError, match="deferred clock"):
         audit.prefetch_audit(tmp_path, result, receipt, audit.Evidence())

@@ -16,6 +16,8 @@ from experiments.deepseek_v32_mfu.src.prefetch_transition_audit import (
     BOUNDED_FREE_PREPARATION,
     COARSE_POLICY,
     OFFICIAL_POLICY,
+    OFFICIAL_STAGES,
+    STAGES,
     preparation_capacity,
 )
 
@@ -91,7 +93,7 @@ class ColdPrefetchObserver:
     def _allocate(self, block):
         cache, layer = block.cache, block.cache._pool.layers[block.cache.layer_id]
         stages = {}
-        for name in ("initial", "after_prefetch", "after_append", "after_recall"):
+        for name in OFFICIAL_STAGES:
             stages[name] = {
                 "host_to_device": torch.empty_like(cache.host_to_device),
                 "reverse": torch.empty_like(cache.device_to_host),
@@ -100,10 +102,11 @@ class ColdPrefetchObserver:
                 "clock": torch.empty_like(layer.clock_tensor),
                 "counter_totals": torch.empty_like(cache._counter_totals),
             }
-        stages["after_prefetch"].update(
-            prefetch_counter=torch.empty_like(cache._pool.counter),
-            prefetch_stats=torch.empty_like(cache._pool.prefetch_stats),
-        )
+        for name in ("after_staging", "after_promotion", "after_prefetch"):
+            stages[name].update(
+                prefetch_counter=torch.empty_like(cache._pool.counter),
+                prefetch_stats=torch.empty_like(cache._pool.prefetch_stats),
+            )
         return {
             "stages": stages,
             "initial_hint": torch.empty_like(block.attention.offset),
@@ -121,6 +124,16 @@ class ColdPrefetchObserver:
                     (64, cache.record_bytes // 2), device=cache.device, dtype=torch.bfloat16
                 ),
                 "prepared_slots": torch.empty(64, device=cache.device, dtype=torch.int32),
+                "promotion_slots": torch.empty(64, device=cache.device, dtype=torch.int32),
+                "page_table": torch.empty(
+                    self.history + self.append, device=cache.device, dtype=torch.int32
+                ),
+                "promotion_indices": torch.empty(
+                    (self.append, min(block.attention.cfg.index_topk, self.history + self.append)),
+                    device=cache.device,
+                    dtype=torch.int32,
+                ),
+                "raw_allocation_log": torch.empty_like(cache.device_to_host),
                 "allocation_log": torch.empty_like(cache.device_to_host),
             },
             "policy_metadata": {},
@@ -139,7 +152,7 @@ class ColdPrefetchObserver:
             "clock": layer.clock_tensor,
             "counter_totals": cache._counter_totals,
         }
-        if stage == "after_prefetch":
+        if stage in ("after_staging", "after_promotion", "after_prefetch"):
             sources.update(
                 prefetch_counter=cache._pool.counter, prefetch_stats=cache._pool.prefetch_stats
             )
@@ -155,6 +168,8 @@ class ColdPrefetchObserver:
         target["complete"] = False
         target["policy_metadata"] = {}
         target["preparation_metadata"] = {}
+        target["staging_observed"] = False
+        target["promotion_observed"] = False
         self.active = (index, target)
         self._snapshot(index, target, "initial")
         target["initial_hint"].copy_(offset)
@@ -256,15 +271,6 @@ class ColdPrefetchObserver:
             or "_official_prefetch" not in lease
         ):
             raise ValueError("official Q1 observation lacks cap or staging ownership")
-        state = lease["_official_prefetch"]
-        sources = {
-            "host_ids": state.host_ids.reshape(64),
-            "records": state.records.reshape(64, -1),
-            "prepared_slots": lease["free_slots"][:64],
-            "allocation_log": lease["allocation_log"],
-        }
-        for name, source in sources.items():
-            target["official_staging"][name].copy_(source)
         target["policy_metadata"] = {
             "prefetch_policy": OFFICIAL_POLICY,
             "max_prefetch": 64,
@@ -273,6 +279,58 @@ class ColdPrefetchObserver:
             **preparation,
         }
 
+    def _observe_logits(self, result):
+        if self.active is None:
+            raise ValueError("observed logits have no matching prefetch invocation")
+        index, target = self.active
+        if result.shape[0] != self.append or result.shape[1] < self.history + self.append:
+            raise ValueError("observed logits have unexpected token dimensions")
+        target["scores"].copy_(result[:, : self.history + self.append])
+        lease = target["prefetch_lease"]
+        self._prefetch_policy(index, target, lease)
+        if target["policy_metadata"].get("prefetch_policy") != OFFICIAL_POLICY:
+            return
+        if target["staging_observed"]:
+            raise ValueError("official staging was already observed")
+        callback = lease.get("_promote_selected_prefetch")
+        if not callable(callback):
+            raise TypeError("official Q1 observation requires selective promotion callback")
+        state = lease["_official_prefetch"]
+        sources = {
+            "host_ids": state.host_ids.reshape(64),
+            "records": state.records.reshape(64, -1),
+            "page_table": state.page_table.reshape(-1)[: self.history + self.append],
+            "prepared_slots": lease["free_slots"][:64],
+            "raw_allocation_log": lease["allocation_log"],
+        }
+        for name, source in sources.items():
+            target["official_staging"][name].copy_(source)
+        self._snapshot(index, target, "after_staging")
+        target["staging_observed"] = True
+        promotion_sources = (lease["free_slots"][:64], lease["allocation_log"])
+        lease["_promote_selected_prefetch"] = lambda indices: self._promote_selected(
+            callback, index, target, promotion_sources, indices
+        )
+
+    def _promote_selected(self, callback, index, target, sources, indices):
+        if (
+            self.active is None
+            or self.active[0] != index
+            or self.active[1] is not target
+            or not target["staging_observed"]
+            or target["promotion_observed"]
+            or indices.shape != target["indices"].shape
+            or indices.dtype != torch.int32
+        ):
+            raise ValueError("official selective promotion lacks its matching exact selection")
+        target["official_staging"]["promotion_indices"].copy_(indices)
+        result = callback(indices)
+        for name, source in zip(("promotion_slots", "allocation_log"), sources, strict=True):
+            target["official_staging"][name].copy_(source)
+        self._snapshot(index, target, "after_promotion")
+        target["promotion_observed"] = True
+        return result
+
     def _stage(self, original, index, stage, *args, **kwargs):
         if self.active is None or self.active[0] != index:
             raise ValueError("prefetch stage lacks its matching layer invocation")
@@ -280,6 +338,10 @@ class ColdPrefetchObserver:
         if stage == "after_prefetch":
             lease = args[0] if args and isinstance(args[0], dict) else target["prefetch_lease"]
             self._prefetch_policy(index, target, lease)
+            if target["policy_metadata"].get("prefetch_policy") == OFFICIAL_POLICY and not (
+                target["staging_observed"] and target["promotion_observed"]
+            ):
+                raise ValueError("official finalize lacks raw staging and selected promotion")
         if stage == "after_recall":
             indices = args[0]
             if indices.shape != target["indices"].shape or indices.dtype != torch.int32:
@@ -330,12 +392,7 @@ class ColdPrefetchObserver:
 
         def logits(*args, **kwargs):
             result = original_logits(*args, **kwargs)
-            if self.active is None:
-                raise ValueError("observed logits have no matching prefetch invocation")
-            target = self.active[1]["scores"]
-            if result.shape[0] != self.append or result.shape[1] < self.history + self.append:
-                raise ValueError("observed logits have unexpected token dimensions")
-            target.copy_(result[:, : self.history + self.append])
+            self._observe_logits(result)
             return result
 
         self.hooks.enter_context(patch.object(echo, "logits", logits))
@@ -381,7 +438,11 @@ class ColdPrefetchObserver:
                 raise ValueError("incomplete observer buffers cannot validate an execution")
             metadata = {**self.metadata[index], **target["policy_metadata"]}
             stages = {}
-            for name, stage in target["stages"].items():
+            stage_names = (
+                OFFICIAL_STAGES if metadata.get("prefetch_policy") == OFFICIAL_POLICY else STAGES
+            )
+            for name in stage_names:
+                stage = target["stages"][name]
                 copied = {key: value.detach().cpu().clone() for key, value in stage.items()}
                 mapping = copied.pop("host_to_device")
                 copied["logical_to_slot"] = mapping[metadata["global_ids"]].clone()

@@ -471,13 +471,13 @@ def prefetch_audit(directory, result, receipt, evidence):
     }
     policy = baseline_scope.get("prefetch_policy", transitions.COARSE_POLICY)
     require(
-        policy in (transitions.COARSE_POLICY, transitions.OFFICIAL_POLICY),
+        policy in (transitions.COARSE_POLICY, *transitions.OFFICIAL_POLICIES),
         "Unknown prefetch policy in matrix acceptance",
     )
-    if policy == transitions.OFFICIAL_POLICY:
+    if policy in transitions.OFFICIAL_POLICIES:
         require(append == 1 and slots - append >= 64, "Unsupported official Q1 headroom")
         expected_scope.update(
-            prefetch_policy=transitions.OFFICIAL_POLICY,
+            prefetch_policy=policy,
             max_prefetch=64,
             prepared_max_prefetch=prepared_cap,
             hint_index=1,
@@ -581,7 +581,7 @@ def prefetch_audit(directory, result, receipt, evidence):
         "host_to_device_bytes",
     }
     schedule_state_fields = {"logical_priority", "metrics"}
-    if policy == transitions.OFFICIAL_POLICY:
+    if policy == transitions.LEGACY_OFFICIAL_POLICY:
         schedule_state_fields.update(("resident", "free_count"))
     for baseline, other in (
         ("baseline", "default_graph"),

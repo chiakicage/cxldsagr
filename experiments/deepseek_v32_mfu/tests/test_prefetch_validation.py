@@ -155,6 +155,7 @@ def test_official_observer_snapshots_stage_before_finalize_and_selects_hint_one(
         state = SimpleNamespace(
             host_ids=torch.arange(64, dtype=torch.int32).view(1, 64),
             records=torch.arange(128, dtype=torch.float32).to(torch.bfloat16).view(1, 64, 2),
+            page_table=torch.arange(65, dtype=torch.int32),
         )
         lease.update(
             prefetch_policy=OFFICIAL_POLICY,
@@ -162,7 +163,10 @@ def test_official_observer_snapshots_stage_before_finalize_and_selects_hint_one(
             _official_prefetch=state,
             free_slots=torch.arange(1, 129, dtype=torch.int32),
             allocation_log=torch.arange(129, dtype=torch.int64),
+            _promote_selected_prefetch=lambda indices: lease["free_slots"].fill_(MISSING),
         )
+        observer._observe_logits(torch.zeros((1, 65)))
+        lease["_promote_selected_prefetch"](torch.tensor([[0, 1]], dtype=torch.int32))
 
         def finalize(prefetch):
             prefetch["_official_prefetch"].records.zero_()
@@ -178,6 +182,12 @@ def test_official_observer_snapshots_stage_before_finalize_and_selects_hint_one(
         assert target["initial_hint"][1].item() == 7
         assert torch.equal(target["official_staging"]["host_ids"], torch.arange(64).int())
         assert target["official_staging"]["records"].sum() > 0
+        assert torch.equal(target["official_staging"]["prepared_slots"], torch.arange(1, 65).int())
+        assert (target["official_staging"]["promotion_slots"] == MISSING).all()
+        assert torch.equal(
+            target["official_staging"]["promotion_indices"],
+            torch.tensor([[0, 1]], dtype=torch.int32),
+        )
         assert state.records.sum() == 0
 
 
@@ -222,7 +232,7 @@ def bounded_lease(cache):
     }
 
 
-def official_stage(lease):
+def official_stage(lease, history=65536):
     from experiments.deepseek_v32_mfu.src.prefetch_transition_audit import OFFICIAL_POLICY
 
     lease.update(
@@ -231,8 +241,15 @@ def official_stage(lease):
         _official_prefetch=SimpleNamespace(
             host_ids=torch.full((1, 64), -1, dtype=torch.int32),
             records=torch.zeros((1, 64, 576), dtype=torch.bfloat16),
+            page_table=torch.arange(history + 1, dtype=torch.int32),
         ),
+        _promote_selected_prefetch=lambda indices: None,
     )
+
+
+def observe_official_staging(observer, lease):
+    observer._observe_logits(torch.zeros((1, observer.history + 1)))
+    lease["_promote_selected_prefetch"](torch.arange(2048).int()[None])
 
 
 def test_observer_records_actual_bounded_dispatch_separately_from_full_capture(
@@ -250,6 +267,7 @@ def test_observer_records_actual_bounded_dispatch_separately_from_full_capture(
         assert not lease["_prepared"].used
         lease["_prepared"].consume(lease, 1, consumer_limit=64)
         official_stage(lease)
+        observe_official_staging(observer, lease)
         observer._stage(lambda *_: None, 0, "after_prefetch", lease)
         observer._stage(lambda *_: None, 0, "after_append")
         observer._stage(lambda x: x, 0, "after_recall", torch.arange(2048).int()[None])
@@ -265,6 +283,8 @@ def test_observer_records_actual_bounded_dispatch_separately_from_full_capture(
         }
         full["max_prefetch"] = 8192
         observer._prepare(lambda *a, **k: full, 0, 65536, 1, torch.zeros(16))
+        official_stage(full)
+        observe_official_staging(observer, full)
         observer._stage(lambda *_: None, 0, "after_prefetch", full)
         assert observer.captured[0]["policy_metadata"]["prepared_max_prefetch"] == 8192
         assert "preparation" not in observer.captured[0]["policy_metadata"]
@@ -370,3 +390,87 @@ def test_bounded_observer_requires_actual_official_token_consumption(change, tmp
             lease["prepared_limit"] = 64.0
         with pytest.raises(ValueError, match="official Q1 policy"):
             observer._stage(lambda *_: None, 0, "after_prefetch", lease)
+
+
+@pytest.mark.parametrize(
+    "change", ["callback", "repeat_logits", "missing_promotion", "repeat_promotion"]
+)
+def test_official_observer_requires_one_raw_staging_and_one_selected_promotion(
+    change, tmp_path, monkeypatch
+):
+    model = bounded_observer_model()
+    cache = model.blocks[0].cache
+    monkeypatch.setattr(torch.cuda, "is_current_stream_capturing", lambda: False)
+    with ColdPrefetchObserver(model, 65536, 1, tmp_path) as observer:
+        lease = bounded_lease(cache)
+        observer._prepare(lambda *a, **k: lease, 0, 65536, 1, torch.zeros(16))
+        lease["_prepared"].consume(lease, 1, consumer_limit=64)
+        official_stage(lease)
+        if change == "callback":
+            del lease["_promote_selected_prefetch"]
+            with pytest.raises(TypeError, match="callback"):
+                observer._observe_logits(torch.zeros((1, 65537)))
+        else:
+            observer._observe_logits(torch.zeros((1, 65537)))
+            if change == "repeat_logits":
+                with pytest.raises(ValueError, match="already observed"):
+                    observer._observe_logits(torch.zeros((1, 65537)))
+            elif change == "missing_promotion":
+                with pytest.raises(ValueError, match="selected promotion"):
+                    observer._stage(lambda *_: None, 0, "after_prefetch", lease)
+            else:
+                indices = torch.arange(2048).int()[None]
+                lease["_promote_selected_prefetch"](indices)
+                with pytest.raises(ValueError, match="matching exact selection"):
+                    lease["_promote_selected_prefetch"](indices)
+
+
+def test_official_observer_captures_counter_tags_and_journal_at_each_boundary(
+    tmp_path, monkeypatch
+):
+    model = bounded_observer_model()
+    cache, pool = model.blocks[0].cache, model.blocks[0].cache._pool
+    monkeypatch.setattr(torch.cuda, "is_current_stream_capturing", lambda: False)
+    with ColdPrefetchObserver(model, 65536, 1, tmp_path) as observer:
+        lease = bounded_lease(cache)
+        observer._prepare(lambda *a, **k: lease, 0, 65536, 1, torch.zeros(16))
+        lease["_prepared"].consume(lease, 1, consumer_limit=64)
+        official_stage(lease)
+        pool_rows = len(cache.device_to_host)
+        cache.host_to_device[0] = pool_rows
+        pool.counter[0] = 1
+        lease["_official_prefetch"].host_ids[0, 0] = 0
+        indices = torch.arange(2048).int()[None]
+
+        def promote(actual_indices):
+            assert actual_indices is indices
+            cache.host_to_device[0] = 1
+            cache.device_to_host[1] = 0
+            pool.free_slots[:64].fill_(MISSING)
+            pool.free_slots[0] = 1
+            pool.allocation_log[1] = 0
+            pool.prefetch_stats[0] = 1
+
+        lease["_promote_selected_prefetch"] = promote
+        observer._observe_logits(torch.zeros((1, 65537)))
+        lease["_promote_selected_prefetch"](indices)
+        target = observer.eager[0]
+        assert target["stages"]["after_staging"]["host_to_device"][0] == pool_rows
+        assert target["stages"]["after_staging"]["prefetch_stats"].tolist() == [0, 0, 0]
+        assert target["official_staging"]["raw_allocation_log"][1] == MISSING
+        assert target["official_staging"]["allocation_log"][1] == 0
+        assert target["stages"]["after_promotion"]["host_to_device"][0] == 1
+        assert target["stages"]["after_promotion"]["prefetch_stats"].tolist() == [1, 0, 0]
+        assert target["stages"]["after_promotion"]["free"][1]
+        assert target["official_staging"]["prepared_slots"][:2].tolist() == [1, 2]
+        assert target["official_staging"]["promotion_slots"][:2].tolist() == [1, MISSING]
+
+        def finalize(*_):
+            pool.layers[0].free[1] = False
+            pool.layers[0].clock_tensor[0] += 1
+            cache._counter_totals[0] = 1
+
+        observer._stage(finalize, 0, "after_prefetch", lease)
+        assert not target["stages"]["after_prefetch"]["free"][1]
+        assert target["stages"]["after_prefetch"]["counter_totals"][0] == 1
+        assert target["stages"]["after_promotion"]["counter_totals"][0] == 0

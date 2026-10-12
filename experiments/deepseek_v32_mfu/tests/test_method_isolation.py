@@ -269,8 +269,10 @@ def test_isolated_fused_q1_requires_observed_entry_and_actual_native_without_unu
 @pytest.mark.parametrize(
     "corruption", ["entry", "preparation", "source", "sha", "path", "name", "unmapped", "duplicate"]
 )
-def test_isolated_fused_q1_rejects_unbound_native_participation(corruption):
+@pytest.mark.parametrize("residency", ["cold", "warm"])
+def test_isolated_fused_q1_rejects_unbound_native_participation(corruption, residency):
     result = _large_q1_result()
+    result["extend_residency"] = residency
     runtime = result["execution_runtime_artifacts"]
     observed = runtime["q1_prefetch_preparation"]
     if corruption == "entry":
@@ -330,6 +332,92 @@ def test_warm_uncertified_residency_binds_only_observed_fused_entry(headroom):
         run_contract.validate_runtime_participation(result)
     result["execution_runtime_artifacts"]["indexer_adaptation_triton"]["page64"] = [{}]
     run_contract.validate_runtime_participation(result)
+
+
+def _resident_warm_q1_result():
+    result = _large_q1_result(page64=True)
+    result["extend_residency"] = "warm"
+    runtime = result["execution_runtime_artifacts"]
+    runtime["q1_prefetch_preparation"] = None
+    runtime["local_native_jit"] = [
+        row
+        for row in runtime["local_native_jit"]
+        if not row["name"].startswith(
+            ("cxldsagr_official_echo_decode_", "cxldsagr_official_prefetch_")
+        )
+    ]
+    return result
+
+
+def test_resident_warm_q1_requires_no_unused_predictive_adapters():
+    run_contract.validate_runtime_participation(_resident_warm_q1_result())
+
+
+@pytest.mark.parametrize("component", ["page64", "decode_hint", "q1_hint_native"])
+def test_resident_warm_q1_retains_actual_packer_and_hint_requirements(component):
+    result = _resident_warm_q1_result()
+    runtime = result["execution_runtime_artifacts"]
+    if component == "q1_hint_native":
+        runtime[component] = None
+        message = "mapped exact hint adapter"
+    else:
+        runtime["indexer_adaptation_triton"][component] = []
+        message = "page64 specialization" if component == "page64" else "decode hint specialization"
+    with pytest.raises(ValueError, match=message):
+        run_contract.validate_runtime_participation(result)
+
+
+def test_resident_warm_label_cannot_bypass_cold_predictive_evidence():
+    result = _resident_warm_q1_result()
+    result["extend_residency"] = "cold"
+    with pytest.raises(ValueError, match="observed fused preparation"):
+        run_contract.validate_runtime_participation(result)
+
+
+@pytest.mark.parametrize("residency", ["cold", "warm"])
+def test_observed_fused_q1_requires_actual_official_decode_adapter(residency):
+    result = _large_q1_result()
+    result["extend_residency"] = residency
+    runtime = result["execution_runtime_artifacts"]
+    runtime["local_native_jit"] = [
+        row
+        for row in runtime["local_native_jit"]
+        if not row["name"].startswith("cxldsagr_official_echo_decode_")
+    ]
+    with pytest.raises(ValueError, match="official mapped adapter"):
+        run_contract.validate_runtime_participation(result)
+
+
+@pytest.mark.parametrize("residency", ["cold", "warm"])
+@pytest.mark.parametrize("component", ["decode_hint", "q1_hint_native"])
+def test_q1_hint_requirements_do_not_depend_on_prefetch_headroom(residency, component):
+    result = _large_q1_result()
+    result.update(extend_residency=residency, slots=65537)
+    runtime = result["execution_runtime_artifacts"]
+    if component == "decode_hint":
+        runtime["indexer_adaptation_triton"][component] = []
+        message = "decode hint specialization"
+    else:
+        runtime[component] = None
+        message = "mapped exact hint adapter"
+    with pytest.raises(ValueError, match=message):
+        run_contract.validate_runtime_participation(result)
+
+
+def test_resident_warm_q1_non65537_mean_does_not_require_unused_exact_hint():
+    result = _resident_warm_q1_result()
+    result.update(prefix_tokens=32768, slots=32832)
+    result["execution_runtime_artifacts"]["q1_hint_native"] = None
+    run_contract.validate_runtime_participation(result)
+
+
+def test_resident_prefill_q1_requires_ema_and_exact_mean_without_q1_extend():
+    result = _resident_warm_q1_result()
+    result.update(prefix_tokens=65537, extend_tokens=128, extend_chunk_size=128, slots=65665)
+    run_contract.validate_runtime_participation(result)
+    result["execution_runtime_artifacts"]["q1_hint_native"] = None
+    with pytest.raises(ValueError, match="mapped exact hint adapter"):
+        run_contract.validate_runtime_participation(result)
 
 
 def test_legacy_declaration_cannot_claim_new_fused_entry():

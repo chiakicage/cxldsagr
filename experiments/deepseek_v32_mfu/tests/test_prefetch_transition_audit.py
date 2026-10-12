@@ -33,8 +33,10 @@ def layer_fixture(
     decode=False,
     official=False,
     bounded=False,
+    legacy=False,
+    partial_selection=False,
 ):
-    official, padded = official or bounded, padded or bounded
+    official, padded = official or bounded or legacy, padded or bounded
     history, queries, topk = (8448, 6, 2048) if saturated else (64, 2, 2048)
     if decode:
         history, queries, topk = 65536, 1, 2048
@@ -69,12 +71,20 @@ def layer_fixture(
     cap = 64 if official else prepared_cap
     winner_ids = eligible.nonzero().flatten()
     winner_ids = winner_ids[-cap:] if different_winners else winner_ids[:cap]
+    if partial_selection:
+        eligible_selected = (eligible & selected[:history]).nonzero().flatten()
+        eligible_unselected = (eligible & ~selected[:history]).nonzero().flatten()
+        winner_ids = torch.cat((eligible_selected[:32], eligible_unselected[:32]))
+    staged_winner_ids = winner_ids.clone()
+    if official and not legacy:
+        winner_ids = winner_ids[selected[winner_ids]]
     prefetched = torch.zeros(end, dtype=torch.bool)
     prefetched[winner_ids] = True
     candidates = torch.arange(end) >= history
     appended = prefetched | candidates
     recalls = selected & ~appended
-    copied, missing, size = len(winner_ids), int(recalls.sum()), int(selected.sum())
+    copied, published = len(staged_winner_ids), len(winner_ids)
+    missing, size = int(recalls.sum()), int(selected.sum())
     rejected = 3 if saturated else 0
     global_ids = torch.arange(end).flip(0)
     mapping = torch.full((end,), proof.MISSING, dtype=torch.int32)
@@ -105,7 +115,7 @@ def layer_fixture(
 
     priorities = torch.zeros(end, dtype=torch.int64)
     initial = stage(torch.zeros(end, dtype=torch.bool), priorities, start, [0] * 8)
-    mapping[winner_ids] = torch.arange(1, copied + 1, dtype=torch.int32)
+    mapping[winner_ids] = torch.arange(1, published + 1, dtype=torch.int32)
     priorities[prefetched] = start
     pre_counters = [copied, 0, rejected, 0, 0, 0, 0, 0]
     prefetch = stage(prefetched, priorities, start + 1, pre_counters)
@@ -113,7 +123,7 @@ def layer_fixture(
         prefetch_counter=torch.tensor([copied + rejected], dtype=torch.uint32),
         prefetch_stats=torch.tensor([copied, 0, rejected]),
     )
-    mapping[history:] = torch.arange(copied + 1, copied + queries + 1, dtype=torch.int32)
+    mapping[history:] = torch.arange(published + 1, published + queries + 1, dtype=torch.int32)
     priorities[candidates] = start + 1
     append = stage(appended, priorities, start + 2, pre_counters)
     free_slots = append["free"].nonzero().flatten()[:missing].flip(0)
@@ -186,22 +196,55 @@ def layer_fixture(
     }
     if official:
         host_ids = torch.full((64,), -1, dtype=torch.int32)
-        host_ids[:copied] = global_ids[winner_ids].int()
+        host_ids[:copied] = global_ids[staged_winner_ids].int()
+        selected_ranks = (
+            torch.ones(copied, dtype=torch.bool) if legacy else selected[staged_winner_ids]
+        )
+        promotion_slots = torch.full((64,), proof.MISSING, dtype=torch.int32)
+        promotion_slots[:copied][selected_ranks] = torch.arange(1, published + 1, dtype=torch.int32)
         journal = torch.full((capacity + 1,), proof.MISSING, dtype=torch.int64)
-        journal[1 : copied + 1] = host_ids[:copied].long()
+        journal[1 : published + 1] = host_ids[:copied][selected_ranks].long()
+        raw = deepcopy(initial)
+        raw["logical_to_slot"][staged_winner_ids] = (
+            capacity + 1 + torch.arange(copied, dtype=torch.int32)
+        )
+        raw.update(
+            prefetch_counter=torch.tensor([copied + rejected], dtype=torch.uint32),
+            prefetch_stats=torch.zeros(3, dtype=torch.int64),
+        )
+        promotion = deepcopy(raw)
+        promotion["logical_to_slot"][winner_ids] = torch.arange(1, published + 1, dtype=torch.int32)
+        promotion["reverse"] = prefetch["reverse"].clone()
+        promotion["prefetch_stats"] = torch.tensor([copied, 0, rejected])
+        if not legacy:
+            result["stages"].update(after_staging=raw, after_promotion=promotion)
         records = host_ids[:copied, None].to(torch.bfloat16).expand(copied, 576).clone()
         result.update(
-            prefetch_policy=proof.OFFICIAL_POLICY,
+            prefetch_policy=proof.LEGACY_OFFICIAL_POLICY if legacy else proof.OFFICIAL_POLICY,
             prepared_max_prefetch=prepared_cap,
             hint_index=1,
             official_staging={
                 "host_ids": host_ids,
                 "prepared_slots": torch.arange(1, 65, dtype=torch.int32),
+                "promotion_slots": promotion_slots,
+                "page_table": torch.cat(
+                    (global_ids[:history].int(), torch.zeros(1, dtype=torch.int32))
+                ),
+                "promotion_indices": indices.clone(),
+                "raw_allocation_log": torch.full_like(journal, proof.MISSING),
                 "allocation_log": journal,
                 "records": records,
                 "expected_records": records.clone(),
             },
         )
+        if legacy:
+            for field in (
+                "promotion_slots",
+                "page_table",
+                "promotion_indices",
+                "raw_allocation_log",
+            ):
+                del result["official_staging"][field]
         if bounded:
             result.update(prepared_max_prefetch=64, preparation=bounded_preparation(history))
     return result
@@ -382,7 +425,9 @@ def test_wrong_scope_rejected():
 
 
 @pytest.mark.parametrize("saturated", [False, True])
-def test_official_policy_preserves_false_positives_and_compact_staging_proof(saturated, tmp_path):
+def test_official_policy_charges_false_positives_and_promotes_exact_intersection(
+    saturated, tmp_path
+):
     raw = execution_fixture(official=True, saturated=saturated, different_winners=True, padded=True)
     result = proof.validate_execution(raw)
     assert result["schema"] == proof.OFFICIAL_SCHEMA
@@ -392,6 +437,9 @@ def test_official_policy_preserves_false_positives_and_compact_staging_proof(sat
         assert layer["eligibility"]["schema"] == proof.OFFICIAL_ELIGIBILITY
         assert layer["prefetched_records"] == (64 if saturated else 17)
         assert layer["prefetch_false_positive_records"] == (64 if saturated else 0)
+        assert layer["promoted_records"] == (0 if saturated else 17)
+        assert layer["official_staging"]["exact_selected_intersection_verified"]
+        assert layer["official_staging"]["raw_temporary_tags_verified"]
         assert layer["official_staging"]["temporary_tags_cleared"]
         assert layer["host_padding"]["padding_tokens"] == 63
         assert (
@@ -628,3 +676,124 @@ def test_bounded_preparation_keeps_existing_transition_checks(corruption):
         layer["stages"]["after_prefetch"]["priority"][1] = 500
     with pytest.raises(ValueError):
         proof.validate_layer(layer)
+
+
+def test_legacy_official_full_promotion_retains_v1_schema_and_compact_contract(tmp_path):
+    raw = execution_fixture(legacy=True, saturated=True, different_winners=True, padded=True)
+    result = proof.validate_execution(raw)
+    assert result["schema"] == proof.LEGACY_OFFICIAL_SCHEMA
+    assert result["scope"]["prefetch_policy"] == proof.LEGACY_OFFICIAL_POLICY
+    assert "Predictive false positives remain resident" in result["eligibility_boundary"]
+    for layer in result["layers"]:
+        assert layer["prefetch_false_positive_records"] == 64
+        assert "promoted_records" not in layer
+        assert set(layer["official_staging"]) == {
+            "host_ids_identity",
+            "prepared_slots_identity",
+            "allocation_log_identity",
+            "record_validation",
+            "temporary_tags_cleared",
+            "copy_order_matches_publication",
+        }
+    path = tmp_path / "legacy_v1.pt"
+    torch.save(proof.compact_evidence(raw), path)
+    assert proof.validate_execution(torch.load(path, weights_only=True)) == result
+
+
+def test_selective_promotion_compacts_stage_indices_and_charges_every_actual_copy():
+    layer = layer_fixture(official=True, saturated=True, partial_selection=True, padded=True)
+    result = proof.validate_layer(layer)
+    assert result["prefetched_records"] == 64
+    assert result["promoted_records"] == 32
+    assert result["prefetch_false_positive_records"] == 32
+    assert result["metrics"]["host_to_device_bytes"] == (64 + result["recalled_records"]) * 1152
+    promotion_slots = layer["official_staging"]["promotion_slots"]
+    assert promotion_slots[:32].tolist() == list(range(1, 33))
+    assert (promotion_slots[32:] == proof.MISSING).all()
+    assert (layer["stages"]["after_prefetch"]["logical_to_slot"] != proof.MISSING).sum() == 32
+
+
+def test_pending_candidate_host_placeholder_does_not_promote_a_false_positive():
+    layer = layer_fixture(official=True, saturated=True, different_winners=True)
+    layer["official_staging"]["page_table"][-1] = layer["official_staging"]["host_ids"][0]
+    result = proof.validate_layer(layer)
+    assert result["promoted_records"] == 0
+    assert result["prefetch_false_positive_records"] == 64
+
+
+@pytest.mark.parametrize("saved", [False, True])
+@pytest.mark.parametrize(
+    "corruption",
+    [
+        "raw_tag",
+        "raw_reverse",
+        "raw_free",
+        "raw_priority",
+        "raw_clock",
+        "raw_counter",
+        "raw_stats",
+        "raw_journal",
+        "raw_padding",
+        "page_table",
+        "promotion_indices",
+        "promotion_map",
+        "promotion_reverse",
+        "promotion_clock",
+        "promotion_stats",
+        "promotion_slot",
+        "promotion_journal_marker",
+        "final_tag",
+        "undercount_h2d",
+    ],
+)
+def test_selective_raw_and_promotion_transition_corruptions_are_rejected(corruption, saved):
+    evidence = execution_fixture(official=True, saturated=True, partial_selection=True, padded=True)
+    if saved:
+        evidence = proof.compact_evidence(evidence)
+    layer = evidence["layers"][0]
+    official = layer["official_staging"]
+    raw, promotion = (layer["stages"][name] for name in ("after_staging", "after_promotion"))
+    history = layer["H"]
+    inverse = torch.empty(history + 1, dtype=torch.int64)
+    inverse[layer["global_ids"]] = torch.arange(history + 1)
+    first = int(inverse[official["host_ids"][0].long()])
+    if corruption == "raw_tag":
+        raw["logical_to_slot"][first] += 1
+    elif corruption == "raw_reverse":
+        raw["reverse"][1] = official["host_ids"][0]
+    elif corruption == "raw_free":
+        raw["free"][1] = False
+    elif corruption == "raw_priority":
+        raw["priority"][1] = 0
+    elif corruption == "raw_clock":
+        raw["clock"][0] += 1
+    elif corruption == "raw_counter":
+        raw["counter_totals"][0] = 64
+    elif corruption == "raw_stats":
+        raw["prefetch_stats"][0] = 64
+    elif corruption == "raw_journal":
+        official["raw_allocation_log"][1] = 0
+    elif corruption == "raw_padding":
+        raw["padding_to_slot"][0] = layer["slots"] + 1
+    elif corruption == "page_table":
+        official["page_table"][first] = official["host_ids"][1]
+    elif corruption == "promotion_indices":
+        official["promotion_indices"][0, 0] = official["promotion_indices"][0, 1]
+    elif corruption == "promotion_map":
+        promotion["logical_to_slot"][first] = proof.MISSING
+    elif corruption == "promotion_reverse":
+        promotion["reverse"][1] = proof.MISSING
+    elif corruption == "promotion_clock":
+        promotion["clock"][0] += 1
+    elif corruption == "promotion_stats":
+        promotion["prefetch_stats"][0] = 32
+    elif corruption == "promotion_slot":
+        official["promotion_slots"][0] = 2
+    elif corruption == "promotion_journal_marker":
+        official["allocation_log"][-1] = -1
+    elif corruption == "final_tag":
+        layer["stages"]["after_prefetch"]["logical_to_slot"][first] = layer["slots"] + 1
+    elif corruption == "undercount_h2d":
+        layer["metrics"]["host_to_device_bytes"] -= 32 * 1152
+    with pytest.raises(ValueError):
+        proof.validate_execution(evidence)

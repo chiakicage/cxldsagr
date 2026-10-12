@@ -83,7 +83,10 @@ def cache_state(model):
 def compare_cache_state(actual, expected, *, actual_prefetch=None, expected_prefetch=None):
     from experiments.deepseek_v32_mfu.src.prefetch_transition_audit import (
         COARSE_POLICY,
+        LEGACY_OFFICIAL_POLICY,
+        LEGACY_OFFICIAL_SCHEMA,
         OFFICIAL_ELIGIBILITY,
+        OFFICIAL_POLICIES,
         OFFICIAL_POLICY,
         OFFICIAL_SCHEMA,
         SCHEMA,
@@ -121,7 +124,7 @@ def compare_cache_state(actual, expected, *, actual_prefetch=None, expected_pref
                 raise AssertionError(
                     "prefetch transition proof has unsupported preparation scope"
                 ) from error
-            if policy == OFFICIAL_POLICY:
+            if policy in OFFICIAL_POLICIES:
                 valid_policy = (
                     scope["A"] == 1
                     and scope.get("max_prefetch") == 64
@@ -135,8 +138,15 @@ def compare_cache_state(actual, expected, *, actual_prefetch=None, expected_pref
                 raise AssertionError("prefetch transition proof has unsupported policy scope")
             audit = proof["proof"]
             layers = audit.get("layers", [])
+            expected_schema = (
+                OFFICIAL_SCHEMA
+                if policy == OFFICIAL_POLICY
+                else LEGACY_OFFICIAL_SCHEMA
+                if policy == LEGACY_OFFICIAL_POLICY
+                else SCHEMA
+            )
             if (
-                audit.get("schema") != (OFFICIAL_SCHEMA if policy == OFFICIAL_POLICY else SCHEMA)
+                audit.get("schema") != expected_schema
                 or any(audit.get("scope", {}).get(key) != value for key, value in scope.items())
                 or len(layers) != 3
                 or any(
@@ -165,8 +175,8 @@ def compare_cache_state(actual, expected, *, actual_prefetch=None, expected_pref
                     != proof["initial_hints"][index]
                 ):
                     raise AssertionError("prefetch layer audit is incomplete or mismatched")
-                if policy == OFFICIAL_POLICY and (
-                    layer.get("prefetch_policy") != OFFICIAL_POLICY
+                if policy in OFFICIAL_POLICIES and (
+                    layer.get("prefetch_policy") != policy
                     or layer.get("effective_max_prefetch") != 64
                     or layer.get("prepared_max_prefetch") != prepared_cap
                     or layer.get("preparation") != scope.get("preparation")
@@ -181,6 +191,24 @@ def compare_cache_state(actual, expected, *, actual_prefetch=None, expected_pref
                     is not True
                 ):
                     raise AssertionError("official prefetch stage proof is incomplete")
+                if policy == OFFICIAL_POLICY:
+                    staging = layer["official_staging"]
+                    promoted = layer.get("promoted_records")
+                    copied = layer.get("prefetched_records")
+                    false_positives = layer.get("prefetch_false_positive_records")
+                    if (
+                        staging.get("exact_selected_intersection_verified") is not True
+                        or staging.get("raw_temporary_tags_verified") is not True
+                        or staging.get("promotion_indices_identity") != proof["indices"][index]
+                        or any(
+                            type(value) is not int for value in (promoted, copied, false_positives)
+                        )
+                        or not 0 <= promoted <= copied <= 64
+                        or promoted + false_positives != copied
+                        or staging.get("selected_promotion_records") != promoted
+                        or staging.get("staged_false_positive_records") != false_positives
+                    ):
+                        raise AssertionError("official selective promotion proof is incomplete")
         if actual_prefetch["scope"] != expected_prefetch["scope"]:
             raise AssertionError("prefetch transition proofs cover different scopes")
         for field, description in (
@@ -194,9 +222,9 @@ def compare_cache_state(actual, expected, *, actual_prefetch=None, expected_pref
                 raise AssertionError(f"full graph changed {description}")
         # Each accepted stage proof independently recomputes these fields from
         # the actual capped prefetch/recall execution. Other cache metadata,
-        # numerical identities and clocks remain strict. Predictive false
-        # positives can change final residency only under the official proof,
-        # which independently derives every resident token and the free count.
+        # numerical identities and clocks remain strict. Only legacy full
+        # promotion retains false predictions. Selective promotion has exactly
+        # the selected history plus appended candidate in the final cold cache.
         schedule_fields = {
             "prefetched_records",
             "prefetch_capacity_failures",
@@ -205,7 +233,7 @@ def compare_cache_state(actual, expected, *, actual_prefetch=None, expected_pref
             "host_to_device_bytes",
         }
         schedule_state_fields = {"logical_priority"}
-        if actual_prefetch["scope"].get("prefetch_policy") == OFFICIAL_POLICY:
+        if actual_prefetch["scope"].get("prefetch_policy") == LEGACY_OFFICIAL_POLICY:
             schedule_state_fields.update(("resident", "free_count"))
         actual = {
             **actual,

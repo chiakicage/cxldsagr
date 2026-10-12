@@ -198,7 +198,7 @@ def test_transition_proof_cannot_be_a_generic_priority_exemption(change):
         compare_cache_state(state, state, actual_prefetch=proof, expected_prefetch=proof_for(state))
 
 
-def official_proof_and_state(*, different_winners=False, bounded=False):
+def official_proof_and_state(*, different_winners=False, bounded=False, legacy=False):
     from experiments.deepseek_v32_mfu.src import prefetch_transition_audit as transitions
     from experiments.deepseek_v32_mfu.tests.test_prefetch_transition_audit import execution_fixture
 
@@ -208,6 +208,7 @@ def official_proof_and_state(*, different_winners=False, bounded=False):
         padded=True,
         different_winners=different_winners,
         bounded=bounded,
+        legacy=legacy,
     )
     audit = transitions.validate_execution(evidence)
     state = {
@@ -234,9 +235,11 @@ def official_proof_and_state(*, different_winners=False, bounded=False):
 
 
 @pytest.mark.parametrize("bounded", [False, True])
-def test_official_bound_false_positives_can_change_residency_and_free_count(bounded):
-    expected, expected_proof = official_proof_and_state(bounded=bounded)
-    actual, actual_proof = official_proof_and_state(different_winners=True, bounded=bounded)
+def test_legacy_official_bound_false_positives_can_change_residency_and_free_count(bounded):
+    expected, expected_proof = official_proof_and_state(bounded=bounded, legacy=True)
+    actual, actual_proof = official_proof_and_state(
+        different_winners=True, bounded=bounded, legacy=True
+    )
     assert actual["layers"][0]["resident"] != expected["layers"][0]["resident"]
     assert actual["layers"][0]["free_count"] != expected["layers"][0]["free_count"]
     compared = compare_cache_state(
@@ -303,8 +306,53 @@ def test_bounded_proofs_do_not_relax_exact_selection_scores_or_hints(field):
     layer = actual["proof"]["layers"][0]
     if field == "indices":
         layer["indices_identity"] = "changed"
+        layer["official_staging"]["promotion_indices_identity"] = "changed"
     else:
         key = "score_identity" if field == "scores" else "hint_identity"
         layer["eligibility"][key] = "changed"
     with pytest.raises(AssertionError, match="full graph changed"):
         compare_cache_state(state, state, actual_prefetch=actual, expected_prefetch=expected)
+
+
+@pytest.mark.parametrize("bounded", [False, True])
+def test_selective_official_promotions_preserve_exact_final_residency_and_free_count(bounded):
+    expected, expected_proof = official_proof_and_state(bounded=bounded)
+    actual, actual_proof = official_proof_and_state(different_winners=True, bounded=bounded)
+    assert actual["layers"][0]["resident"] == expected["layers"][0]["resident"]
+    assert actual["layers"][0]["free_count"] == expected["layers"][0]["free_count"]
+    result = compare_cache_state(
+        actual, expected, actual_prefetch=actual_proof, expected_prefetch=expected_proof
+    )
+    assert "schedule_dependent_state_fields" not in result
+    assert result["bounded_prefetch_transitions_validated"]
+
+
+@pytest.mark.parametrize(
+    "field",
+    [
+        "exact_selected_intersection_verified",
+        "raw_temporary_tags_verified",
+        "promotion_indices_identity",
+        "selected_promotion_records",
+        "staged_false_positive_records",
+    ],
+)
+def test_selective_official_comparison_requires_complete_bound_promotion_proof(field):
+    state, expected = official_proof_and_state()
+    actual = deepcopy(expected)
+    del actual["proof"]["layers"][0]["official_staging"][field]
+    with pytest.raises(AssertionError, match="selective promotion proof"):
+        compare_cache_state(state, state, actual_prefetch=actual, expected_prefetch=expected)
+
+
+@pytest.mark.parametrize("field", ["resident", "free_count"])
+def test_selective_official_comparison_keeps_final_residency_strict(field):
+    state, expected = official_proof_and_state()
+    changed, actual = deepcopy(state), deepcopy(expected)
+    changed["layers"][0][field] = "changed"
+    actual["final_cache_state_sha256"] = identity_digest(changed)
+    actual["proof"]["layers"][0]["final_cache_state_identity"] = identity_digest(
+        changed["layers"][0]
+    )
+    with pytest.raises(AssertionError, match=field):
+        compare_cache_state(changed, state, actual_prefetch=actual, expected_prefetch=expected)

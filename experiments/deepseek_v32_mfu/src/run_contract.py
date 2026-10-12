@@ -295,19 +295,24 @@ def validate_runtime_participation(result, runtime=None):
             "indexer_adaptation_triton", {}
         ).get("page64"):
             raise ValueError("Selected Q1 method is missing its page64 specialization")
-    if (
-        method == "echo"
+    legacy_official_q1 = (
+        preparation is None
+        and method == "echo"
         and result["extend_tokens"] == 1
         and result["prefix_tokens"] + 1 >= 32768
         and result["slots"] - result["prefix_tokens"] >= 64
-    ):
+    )
+    if observed_preparation is not None or legacy_official_q1:
         names = [row.get("name", "") for row in local]
         for prefix in ("cxldsagr_official_echo_decode_", "cxldsagr_official_prefetch_"):
             if sum(name.startswith(prefix) for name in names) != 1:
                 raise ValueError("Selected ECHO Q1 method is missing its official mapped adapter")
+    if method == "echo" and any(end >= 32768 for end in q1_ends):
+        # EMA still runs when certified residency removes predictive prefetch.
         if not runtime.get("indexer_adaptation_triton", {}).get("decode_hint"):
             raise ValueError("Selected ECHO Q1 method is missing its decode hint specialization")
-        if result["prefix_tokens"] + 1 == 65537:
+        if 65537 in q1_ends:
+            # The finite mean also runs on resident Q1, independently of EMA.
             hint = runtime.get("q1_hint_native")
             if not hint or not any(
                 row.get("library", {}).get("sha256") == hint.get("artifact_sha256")
