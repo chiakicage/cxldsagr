@@ -15,6 +15,7 @@ NOSA motivation 保留同机重构对照和未达到的性能目标；DeepSeek C
 | Baseline 性能合理性 | [NOSA MFU](nosa_mfu/README.md) | 统一汇总算子、完整模块的效率，以及完整 dense/native/Triton 模型的已有测量；各自保留输入与计时边界 |
 | Baseline 性能合理性 | [官方 SGLang 复现](deepseek_v32_echo_official/README.md) | 原始前三层固定历史负载的 ECHO / HBM-only 独立运行；仅报告性能，容量差异单列 |
 | Baseline 性能合理性 | [DeepSeek MFU](deepseek_v32_mfu/README.md) | 真实 checkpoint 第 0–2 层，四方案 prefill/extend 的逐算子与阶段 MFU、单层计算/控制/IO 时间线；非完整 61 层 |
+| Baseline 性能合理性 | [DeepSeek observation](deepseek_v32_observation/README.md) | 无 offload 的 52 点 B/Q/H 单层矩阵，公共算子与 MoE 各测 7 档 S；分列具体 GEMM、non-GEMM 与 API 聚合的时间/MFU、独立实际 HBM 带宽及利用率，图已嵌入报告 |
 | Sparse pattern | [NOSA 选择模式](nosa_indexer_pattern_65536_1024/README.md) | sparse 传播及 dense 激活上的 QA/full-NOSA 选择、并集和分解；服务后续设计，暂不在论文主线 |
 | 自有设计 microbenchmark | [NOSA offload overlap](nosa_offload_overlap/README.md) | 相同冷态稀疏并集的 serial/fused 延迟、唯一读取和内部工作区间；A1024 不替代 A128 serving |
 

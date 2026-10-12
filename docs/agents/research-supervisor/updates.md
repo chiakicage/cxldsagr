@@ -6,6 +6,63 @@
 
 这里只记影响研究解释或任务选择的变化。文档维护和具体工具输出不逐条记录。
 
+## 2026-10-12：分列具体算子与实际 HBM，修正驻留效率的解释边界
+
+- **新增证据：**`observation_20261012_01` 的全部 66 个负载完成独立数值验收、clean
+  计时与 NCU profile，直接观测 2,616 项，分列 244 GEMM、1,829 non-GEMM 和
+  543 API 聚合。纯 GEMM 使用准备好的 production operands；量化、casts、packing、
+  mapping 等另测，融合 Indexer/Attention 保留原内核边界。
+- **判断修正：**此前混合 API 的低 MFU 不能归为纯 GEMM 的表现。H64K/B128 的
+  Indexer MFU 为 24.98%，独立 HBM 利用率为 84.71%；MLA core 为 49.70%/52.84%，
+  完整 MLA API MFU 为 44.50%。S1024 grouped gate/up/down 的纯 GEMM useful MFU
+  为 8.97%/8.99%/9.54%，独立 HBM 利用率约 80%；useful FLOPs 只计 selected
+  routes，不用静态 packing 容量推算 vendor 执行 FLOPs，也不据此判定算力利用差。
+- **保留边界：**Clean MFU 与实际 HBM 使用不同的独立测量分母，部分小操作的 profile
+  时长明显增大；warm-cache 的低 DRAM 流量可能来自 L2。各叶操作与完整 API 不可
+  相加或相减为完整模型成本。本次不执行 Cache Manager、offload、Recall 或重叠，
+  不建立真实 agentic 轨迹、多步 Decode 或完整模型容量。
+- **影响：**S-041 更新为新 run 的来源与测量解释，替换此前混合 API 结果；下方
+  2026-10-11 的记录保留当时认识，其当前观测依据由本条更新。2.1、4.2、4.3 获得
+  更细的驻留算子证据，T-003 可据此明确完整单步对照；T-009/T-010/T-011 仍待开展。
+  GR/agentic 候选、Q1/Batch=128 优先级、Cache Manager 与 Overlap 的划分及既有暂停
+  安排不变。来源见 [S-041](sources.md#s-041deepseek-无-offload-算子观测)。
+
+## 2026-10-11：补入无 offload 算子基线，保留 Decode serving 缺口
+
+- **新增证据：**DeepSeek 的 `observation_20261011_02` 已发布全部 66 个工作负载，
+  包含 52 个 Decode/Extend attention 配置，以及各 7 档公共算子和 MoE 的 S 观测。
+  Q1 与 Batch=128 均有独立序列、device-resident 条件下的完整 API 时间与 MFU。
+- **判断修正：**此前“Batch=128 尚无正式结果”细化为“已有单层驻留算子观测，
+  完整 serving 对照尚未建立”。各 API 与聚合区间不能相加为模型或单步延迟；
+  单层大 batch 能执行也不证明完整 61 层的容量准入。
+- **保留缺口：**该观测不执行 Cache Manager 事务、offload 或 Recall，也未检验计算/IO 重叠。
+  `indexer_prepare` 与 scheduler metadata 是驻留输入准备，不直接计作管理成本。
+  低 MFU 是当前完整 API 的结果，尚不能用作纯 kernel 或 offload 收益的归因。
+- **影响：**更新 1.4、2.1、2.6、2.7、4.3 与当前卡点，T-003 据此定义完整 Decode
+  单步对照。T-009/T-010/T-011 不标完成，设计成熟度不提升；GR 与 agentic 候选、
+  Q1/Batch=128 优先级及既有暂停安排保留。S-040 仍记录此前用户范围修正，
+  新证据见 [S-041](sources.md#s-041deepseek-无-offload-算子观测)。
+
+## 2026-10-11：纳入 agentic serving，优先 Decode 并拆分 ECHO 问题
+
+- **原理解：**候选场景主要围绕固定 history、变化 candidate 的 GR Prefill/Extend；
+  ECHO 的管理开销与重叠局限未在状态表中分别展开。
+- **研究者修正：**正常 agentic serving 也可考虑；Prefill/Extend 与 Decode 分开，
+  当前优先 Q1 Decode 和 Batch=128 Decode。从 Cache Manager 与 Overlap 两线寻找
+  ECHO 的问题，管理流程引入的开销也归入 Cache Manager。
+- **当前问题与设计：**管理开销仍大；Indexer Cache 未 offload，研究者判断这限制
+  batch 并影响 Overlap 效率；剩余 Recall 尚未纳入重叠。设计方向分别是减少逐层
+  决策、重叠 Indexer 计算与 Indexer Cache 读取，以及让 Indexer、Attention 与 Main
+  Cache 读取重叠。问题判断来自研究者，因果占比与设计收益仍待量化。
+- **核对边界：**既有 A128 是单 session Extend，不能当作 Batch=128 Decode。
+  本地 Q1 是固定 token、前三层冷态单步，官方 Q1 是自然驻留的正常自回归；
+  官方约 1.53 ms 全池扫描诊断属于 Prefill/Extend，不能倒填为 Decode 瓶颈。
+- **影响：**更新 1.1–1.5、2.1、2.5，新增 2.6–2.8、3.4–3.6、4.4–4.5；
+  T-009/T-010/T-011 对应两条分析线，T-002/T-003 扩展到新增 Decode 范围。
+  T-007 保留为优先级较后的独立 Extend 任务；T-008 已完成，不重复列回。
+  既有实验保留原证据身份，未启动新实验或实现，未提高 agentic 场景代表性。
+  来源与核对见 [S-040](sources.md#s-040decode-优先级与-echo-问题划分)。
+
 ## 2026-10-09：准备融合已接入并完成独立补测
 
 - **新增证据：**生产路径完成 151 项 GPU 检查和四方法 16 个独立进程的正式补测。

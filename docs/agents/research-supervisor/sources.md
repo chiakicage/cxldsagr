@@ -1,5 +1,16 @@
 # 研究状态的材料依据
 
+> **2026-10-11 用户修正：**GR 外新增正常 agentic serving 候选，Prefill/Extend 与 Decode
+> 分开，优先 Q1 和 Batch=128 Decode；按 Cache Manager 与 Overlap 分析 ECHO。
+> 当前问题、设计方向和既有证据的边界见 S-040。本轮未运行新实验。
+
+> **2026-10-12 算子基线补测：**无 offload 观测 run `observation_20261012_01`
+> 完成全部 66 个工作负载，分列 GEMM、non-GEMM 与完整 API，并补齐独立实际 HBM
+> 指标，替换 `observation_20261011_02` 的混合 API 观测；来源与边界见 S-041。
+> Q1 与 Batch=128 已有驻留单层算子依据；Cache Manager、offload/Overlap 与完整
+> agentic serving 尚未由该观测验证。
+> S-040 中未运行实验的说明仍记录此前范围修正的那次更新。
+
 > **2026-10-07 DeepSeek H/A 矩阵已发布：**用户指定的 H=[4K,16K,64K] ×
 > A=[128,256,512,1024] 共 12 点已完成独立验收与正式计时，结果和边界见 S-034。
 > T-006 已完成，NOSA、容量填满与后续审阅、simulation 未随之恢复。S-033 的
@@ -37,10 +48,11 @@
 > 原始索引另存于[验收目录](../acceptance/unified_runtime_20261005/shared_cache_integration_evidence.json)，
 > 它有自己的冻结源码与覆盖范围，不能替代缺失产物。
 
-更新：2026-10-07。S-001–S-007 记录初始仓库材料；其旧算子结果未在本轮重新测量。
+更新：2026-10-11。S-041 补入无 offload 算子基线；S-040 记录 Decode 优先级与 ECHO 问题划分，S-035、S-037–S-039
+保留既有诊断与 Q1 结果。S-001–S-007 记录初始仓库材料；其旧算子结果未在本轮重新测量。
 S-008–S-010 记录本轮实际完成并审计的 GR serving 实验及用户约束；S-011–S-012 记录
 用户修正后的负载候选与数据可用性检查；S-013 记录热度抽样选择，S-014 记录本轮
-MFU/cache 与 baseline 判断修正。最新选择见 S-019：固定用户 loop 替代热度 IID；
+MFU/cache 与 baseline 判断修正。既有 GR 选择见 S-019：固定用户 loop 替代热度 IID；
 S-020 记录当时 cache 局部实现与公共系统验收的边界；S-018 是共享 cache 下的计算对照，
 S-021 补入本轮已验收的 ECHO 受控 loop、内存证据及 chunk 选择。
 S-022–S-025 增补 NOSA 固定容量原版实测、最新源码正确性、Q128 负结果及 A1024 补测。
@@ -1371,8 +1383,9 @@ A128 四方法 MFU、局部 dense 重叠及依赖实验补测边界；S-033 记�
   NCU 使用 cache flush 与 base clock control。最终读回不代表每个内部 pass 的
   实际集合。Per-PC 和 PM 实例标志为 false，未用于耗时份额或有效时间线。
   六项 CTC 指标不可用，全部警告保留；没有修改官方 kernel。
-- **准备融合对照：**[组件与三层模型报告](../../../experiments/deepseek_v32_echo_official/report/q1_fused_prepare/report.md)
-  的组件来源为 `q1_fused_prepare_bench_20261008_02`，15 组各 100 对，冷态 L0–L2
+- **准备融合对照：**原组件与三层模型报告已由
+  [新策略补测](../../../experiments/deepseek_v32_mfu/README.md)替换；下列数字保留为当时的
+  修正依据。组件来源为 `q1_fused_prepare_bench_20261008_02`，15 组各 100 对，冷态 L0–L2
   配对节省合计 4.944 µs。模型来源为 `q1_fused_prepare_model_bench_20261008_02`，
   预先规定 500 对 AB/BA，完整同步 wall 中位数从 2.646831 降到 2.6119945 ms，
   配对中位数为 −34.6505 µs，413 对更快。两种顺序及五个区段中位数均改善；
@@ -1416,6 +1429,105 @@ A128 四方法 MFU、局部 dense 重叠及依赖实验补测边界；S-033 记�
 - **范围：**核对 12 个 MFU 与 12 个 C10 配置、A128 单点和 post-top-k 路径后，确认
   它们不执行本次 Q1 准备；规划源码及执行预留公式未变。通用 ECHO 的完整 SM90a
   CUBIN 与原实现逐字节相同，原结果保留原身份。此结论不更新 C10、NOSA、GR 质量或
-  容量填满验收。源码与独立审查见
-  [接入计划](../kda/deepseek_q1_prefetch/fused_prepare_integration_plan.md)和
-  [生产审查](../kda/deepseek_q1_prefetch/fused_prepare_production_review.md)。
+  容量填满验收。上述 v1 结果已由 2026-10-11 的 exact-selected Q1 补测替换；
+  当前实现、验收及来源见 [MFU 入口](../../../experiments/deepseek_v32_mfu/README.md)
+  和 [正式报告](../../../experiments/deepseek_v32_mfu/report/h64k_a1/results.md)。
+
+## S-040：Decode 优先级与 ECHO 问题划分
+
+- **研究位置：**1.1–1.5、2.1、2.5–2.8、3.1、3.3–3.6、4.3–4.5。本轮任务只更新
+  状态和下一步，核对相关 README 及已有来源；未运行 GPU、修改实现或发布新性能结果。
+- **用户选择：**除 GR 外，正常 agentic serving 也纳入候选。Prefill/Extend 与 Decode
+  分开，当前优先 Q1 Decode 和 Batch=128 Decode。按 Cache Manager 与 Overlap 分析
+  ECHO，Cache Manager 导致的开销也归入管理成本。
+- **用户提出的问题与设计：**管理开销仍大，拟减少逐层决策；Indexer Cache 未
+  offload，研究者判断这限制 batch 并影响重叠效率，拟重叠 Indexer 计算与 Indexer
+  Cache 读取；剩余 Recall 未纳入重叠，拟同时用 Indexer 与 Attention 计算重叠
+  Main Cache 读取。这些是当前研究判断与设计方向，因果占比和完整收益待验证。
+- **负载边界来源：**[本地 MFU](../../../experiments/deepseek_v32_mfu/README.md)的
+  “H64K + A1：单 token step”与 A128 范围，以及
+  [官方正常 Decode](../../../experiments/deepseek_v32_echo_official/README.md#h64k-正常-decode)。
+  本地 Q1 是 H65536/A1、真实前三层、固定 token 的冷态持久 append；官方执行正常
+  自回归 query=1 并保留自然驻留。既有 A128 是一个 session 的 128-token Extend，
+  Batch=128 Decode 指 128 个序列各执行一个 token，当前没有该范围的正式结果。
+- **Cache Manager 依据：**[管理性能实验](../../../experiments/cache_manager_performance/README.md)
+  的指标是 A128 Extend 中 exact top-k 结束到首个 MLA kernel 开始，包含 IO、control
+  与 idle，但不覆盖前面的全部 prepare/finalize 等管理流程。S-039 的 Q1 三层准备
+  合计 18.656 µs，完整同步 step 为 ECHO 2.562300 ms、serial sparse 2.401064 ms。
+  三层准备混合了 indexer K/scales 输入打包、页表与暂存准备，并非纯管理成本；
+  只有缓存管理及其引入的部分按原因归入 Cache Manager。完整 step 差值也未完成归因。
+  本轮将决策、分配/淘汰、映射/发布、准备/维护及其引入的开销作为管理分析范围；
+  未归因的 gap 继续保留，已有区间不能改名为新定义下的完整管理成本。
+- **Indexer Cache 依据：**[DeepSeek 模型](../../../models/deepseek_v32/README.md#kv-与-rope-语义)
+  明确 FP8 indexer K 与 FP32 scales 常驻 GPU；当前路径没有 Indexer Cache offload。
+  Batch=128 的容量准入、常驻与 offload 对照，以及新增 IO 能否被隐藏仍待验证；
+  常驻这一事实不独立证明“batch 受限 → Overlap 低效”的完整因果链。
+- **Recall 依据：**S-039 与本地 MFU 记录 cold Q1 每层预取 64 条、随后 recall
+  1,983–2,041 条；当前 Attention 复用 device-only MLA，消费已召回的 HBM records。
+  官方正常 Q1 的三次 `_recall_update_with_prefetch_kernel` 合计 3.136 µs，混合映射、
+  可能的 D2D/H2D 与零搬运工作，实际字节未知。S-035 的约 1.53 ms 全 NH 扫描来自
+  Prefill/Extend 的另一条召回路径，不能作为 Decode 的已证实开销。
+- **任务影响与保留：**新增 T-009 管理成本与决策粒度、T-010 Indexer Cache offload/
+  overlap、T-011 Main Cache overlap；T-002 扩展场景与模型/数据，T-003 明确两档
+  Decode 的共同对照。T-007 保留为优先级较后的独立 Extend 任务，T-008 已完成。
+  本轮不撤回既有测量，也不自动恢复原 motivation、4K/16K、容量填满与 simulation。
+
+## S-041：DeepSeek 无 offload 算子观测
+
+- **研究位置：**主条目 2.1，关联 1.4、2.6、2.7、4.2、4.3。为 Decode baseline
+  执行效率提供局部依据，不验证 offload 设计或完整 serving 收益。
+- **来源：**[实验入口](../../../experiments/deepseek_v32_observation/README.md)、
+  [正式报告](../../../experiments/deepseek_v32_observation/report/results.md)、
+  [公共算子](../../../experiments/deepseek_v32_observation/report/common.csv)、
+  [MoE](../../../experiments/deepseek_v32_observation/report/moe.csv)、
+  [attention](../../../experiments/deepseek_v32_observation/report/attention.csv)、
+  [算子清单](../../../experiments/deepseek_v32_observation/report/operator_inventory.csv)及
+  [来源核查](../../../experiments/deepseek_v32_observation/report/provenance.json)。
+  当前 Run ID 为 `observation_20261012_01`，替换此前 `observation_20261011_02`；
+  原始数据、日志与 profile 分别为
+  `experiments/deepseek_v32_observation/output/data/observation_20261012_01/`、
+  `experiments/deepseek_v32_observation/output/log/observation_20261012_01/` 与
+  `experiments/deepseek_v32_observation/output/profile/observation_20261012_01/`，独立收据为
+  `/tmp/cxldsagr-checks/deepseek_v32_observation/observation_20261012_01/`。
+- **范围：**共 52 个 Decode/Extend attention 配置，含 Q1 与 Batch=128 Decode，
+  历史覆盖 H=4K/16K/32K/64K，完整 B/Q/H 范围见实验入口。公共算子与 MoE 各按
+  7 档 S=BQ 测量后映射，映射不新增实测。全部 66 个工作负载通过匹配的独立数值
+  验收、clean 计时与 NCU profile 核查；直接观测为公共算子 506 项、MoE 938 项、
+  attention 1,172 项，合计 2,616 项（244 GEMM、1,829 non-GEMM、543 API 聚合），
+  保留 81,096 个 clean 样本与 7,848 次静态 graph replay 比较。
+  公共算子读取真实 checkpoint 第 0 层及 embedding/final norm/LM head，MoE 读取
+  第 3 层的 256 个 routed experts 与一个 shared expert；activation/KV 使用声明的
+  合成输入，序列 KV 相互独立，不组成完整模型的传播轨迹。
+- **拆分与计量：**纯 FP8 GEMM 使用 production 调用捕获的量化输入、scales 和输出
+  strides，量化、scale layout、packing/mapping 等另测，不从完整 API 时间中相减。
+  FP32/BF16 投影同样分开 casts；Indexer 与 Attention 保留 vendor 融合边界，
+  不给内部矩阵部分虚构单独时间。Clean 时间是独立 Graph replay 内每次调用的外部
+  CUDA event span，不含 Python 提交或最终主机同步；MFU 按 useful matrix FLOPs
+  与 H200 SXM 对应精度的 dense 峰值计算，non-GEMM 标 N/A。组件与完整 API 聚合
+  不可相加，MFU 不表示 Tensor Core 活跃率。
+- **实际 HBM：**独立 NCU profile 按每个完整图采集实际 DRAM read/write bytes 与 GPU
+  duration，要求单 pass、`cache-control=none`，图内不加 clean timing 的外部事件。
+  带宽用同份 profile 的总 bytes/duration，利用率除以 NCU sustained HBM peak，
+  不使用逻辑 tensor bytes 或 clean API 时间，也不平均各 kernel 百分比。官方 H200
+  的 4.8 TB/s 规格与逐记录 NCU peak 分别解释。小操作可受明显 profile 扰动；
+  warm-cache 的零或低 DRAM bytes 可来自 L2 命中，不直接证明内存执行低效。
+- **局部发现：**H64K 的 Q1/B1 Indexer、MLA core 有效 MFU 为 7.03%/5.05%，
+  完整 MLA API 为 3.10%；B128 的 Indexer 为 24.98%，其独立 HBM 利用率为 84.71%，
+  MLA core 对应为 49.70%/52.84%，完整 MLA API MFU 为 44.50%。B128 的 page64
+  packing 另需 544.096 µs，不能忽略这项准备或把各独立区间相加为完整单步。
+  S1024 dense MLP 完整 API MFU 为 50.10%，完整 MoE 为 6.62%；grouped gate/up/down
+  纯 GEMM useful MFU 为 8.97%/8.99%/9.54%，独立 HBM 利用率为
+  80.82%/79.79%/79.59%。Grouped expert 的 useful FLOPs 只计实际 selected routes，
+  packing 容量、实际流量与 vendor 执行 FLOPs 分开；不能仅凭低 useful MFU 判断
+  官方 kernel 的算力利用差。GEMM 与 non-GEMM 结果仅支持各自的驻留执行边界。
+- **支持边界：**所有 Q1 Indexer 均显式选择官方 paged API，模型 resident 默认
+  仍要求有效 causal context 至少 32,768；低 H 结果不能称为默认模型路径。
+  独立验收与静态 graph 检查绑定源码、输入、后端及已导出的 artifacts；矩阵参考的
+  实际抽样覆盖见实验入口及来源核查中的 receipt 索引，当前未导出 DeepGEMM JIT CUBIN，
+  不宣称核对全部 vendor JIT 二进制。
+- **不支持：**驻留 `indexer_prepare`/metadata 没有 Cache Manager 事务，不证明
+  管理开销；单层 B1024 能执行不证明完整 61 层容量准入。本次没有 Indexer Cache
+  offload、Main Cache offload 或 Recall，也未检验计算/IO 重叠，不能验证“常驻 →
+  小 batch → Overlap 低效”的因果链，也不建立真实 agentic 轨迹、多步追加、任务质量或五类
+  共同模型 baseline。T-003 可据此明确完整单步对照；T-009/T-010/T-011 仍待开展，
+  既有暂停安排不变。

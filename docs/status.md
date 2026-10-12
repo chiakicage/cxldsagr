@@ -1,5 +1,22 @@
 # cxldsagr 研究状态
 
+> **2026-10-11 研究范围与优先级调整：**除 GR 外，将正常 agentic serving 纳入候选场景。
+> Prefill/Extend 与 Decode 分开考虑，当前优先 Q1 Decode 和 Batch=128 Decode。
+> 从 Cache Manager 与 Overlap 两个角度分析 ECHO；Cache Manager 引入的开销也归入管理成本。
+> 当前关注管理开销仍大、Indexer Cache 未 offload 对 batch 与重叠效率的限制，以及剩余
+> Recall 未纳入重叠。对应设计是减少逐层决策、重叠 Indexer 计算与 Indexer Cache 读取，
+> 并让 Indexer、Attention 与 Main Cache 读取重叠。这些是研究者本轮提出的问题与设计方向，
+> 因果占比和设计收益仍待验证；已有 A128 Extend 不作为 Batch=128 Decode 结果。依据见 S-040。
+
+> **2026-10-12 无 offload 算子拆分与 HBM 补测完成：**DeepSeek Decode 覆盖 Q=1、
+> B=1/32/64/128/256/512/1024，Extend 覆盖 B=1、Q=32/64/128/256/512/1024，
+> 两类均测 H=4K/16K/32K/64K；公共算子与 MoE 按 S=BQ 分组测量。
+> 新 run `observation_20261012_01` 完成 66 个负载、2,616 项独立观测，分列纯 GEMM、
+> non-GEMM 和完整 API 聚合；Indexer 与 Attention 内核保留融合边界。Clean 时间/MFU
+> 与独立 NCU 实际 HBM 指标分别报告，替换此前混合 API 观测。Q1 与 Batch=128
+> 已有局部算子依据，完整 Decode 对照仍待建立；该观测不执行 cache 事务或 offload，
+> 不验证 Cache Manager 成本或 Overlap 收益，也不能相加为模型或 serving 延迟。依据见 S-041。
+
 > **2026-10-09 Q1 准备融合已完成接入与补测：**新批次的 HBM 三层 GPU 窗口为
 > 1.014466 ms，官方参考为 1.014975 ms；输入、驻留与框架仍不同，不能据此声称
 > 等价实现加速。ECHO 的三层准备节点由 9 个减到 3 个，完整同步 step 中位数为
@@ -85,7 +102,8 @@
 > checkpoint 检查仅验证数值与存储语义。旧 candidate 写回 DRAM 的容量结果已替换，
 > 不作为新实现的显存测量或性能排名。NOSA 与独立前三层计算实验不在此次撤回范围内。
 
-更新：2026-10-09（Q1 准备融合已完成生产验收与独立补测）。保留研究者选择的固定用户顺序 loop。两模型的统一框架重构结果
+更新：2026-10-12（GR 与 agentic serving 均为候选，优先 Decode，按 Cache Manager 与 Overlap 分析 ECHO；驻留算子已分列 GEMM、non-GEMM 与独立 HBM 指标）。
+既有 GR 对照保留研究者选择的固定用户顺序 loop。两模型的统一框架重构结果
 与同机 P0 分别比较，原已发布数字保留历史来源。NOSA 三轮完整 trace 的中位总耗时
 比 P0 增加 406.132 ms（0.19664%）；准入、清理和部分 candidate／复访阶段仍有耗时
 增加，不能声称重构没有性能代价。A128 的 96 个适用内部样本均未达到两种 90% 门槛；
@@ -95,15 +113,20 @@ A1024 冷并集单层回放的 9 个样本均通过，最低 ratio 为 0.9108124
 T-007 的 indexer 执行 workspace 复用仍是未实施的独立方案，重构没有实现或验证它。
 此前元数据复用的局部改善与诊断边界继续保留，4K/16K 暂停。
 
-研究从 **sparse KV fetching 与 sparse attention 计算的重叠设计**出发，正在探索
-**sparse attention GR serving** 是否是合适的应用场景。当前范围是 **HBM 与 CPU DRAM**。
-最主要的未决问题是：如何建立有依据的 GR 任务、模型、数据和服务负载，并在其中说明
-KV 容量约束、offload 开销及相对 ECHO 的设计价值。已有单卡、跨请求保留用户历史的
-串行测量；**DeepSeek 替身与完整 NOSA 各有固定容量四方案控制点，五类方案的共同模型比较仍未建立**。
+当前候选场景包括 **sparse attention GR serving 与正常 agentic serving**，内存范围仍为
+**HBM 与 CPU DRAM**。Prefill/Extend 与 Decode 分开考虑，当前优先 **Q1 Decode 和
+Batch=128 Decode**。Q1 关注单序列单 token 步；Batch=128 关注 128 个序列各执行一个
+decode token，不能用单序列 A128 Extend 或 128 次串行请求代替。
+
+研究重点是分别识别 ECHO 的 **Cache Manager 开销与 Overlap 局限**，检验减少管理
+决策、offload Indexer Cache 及扩展计算/读取重叠能否改善 Decode。具体 agentic 任务、
+模型、数据和请求轨迹仍待明确。已有 GR 历史保留测量与真实前三层 Q1 局部结果各有
+边界；Q1 与 Batch=128 已有无 offload 单层算子观测，完整 Decode 对照尚未建立，
+**五类方案的共同模型比较仍未建立**。
 固定相同的共享 cache 实现后，官方计算后端与非矩阵算子适配进一步改善了前三层计算效率；
 算子 kernel 利用率与完整阶段的端到端利用率分开报告。计算优化与本次 cache/serving 结果分别解读。
 旧短轨迹没有建立有效的用户规模与缓存容量压力对照；16K 的少量复访重建差异只能描述
-原轨迹。固定 U 个用户、按同一顺序遍历 R 轮的选择不变，用户覆盖与复用距离据此解释。
+原轨迹。既有 GR 对照保留固定 U 个用户、按同一顺序遍历 R 轮的选择，用户覆盖与复用距离据此解释。
 两模型原控制点均为 U=16、R=2、H=65536、A=128、P=65536、NH=16777216；
 DeepSeek 后续在相同 U/R 与 P/NH 下补齐了 12 点 H/A 矩阵，NOSA 的范围不随之扩大。
 比较的是指定 token 配额，不是相同总 HBM/DRAM 字节预算。已撤回的 4 GiB / W / chunk
@@ -121,26 +144,39 @@ DeepSeek 后续在相同 U/R 与 P/NH 下补齐了 12 点 H/A 矩阵，NOSA 的�
 
 | 条目 / 要回答的问题 | 当前理解 | 状态与具体缺口 |
 |---|---|---|
-| **1.1 研究什么任务与场景？** | sparse attention GR serving 是候选场景；当前讨论固定 history 的构建与变化 candidate 的 extend，不含自回归 decode，跨请求保留有效历史 | **候选。** 执行生命周期已明确，仍需明确具体推荐任务、服务方式和适用范围 |
-| **1.2 使用什么模型？** | 现有执行对象为完整 NOSA-8B，以及 DeepSeek V3.2 前三层权重和对应输入独立复制构成的约 8B dense 工作负载替身；后续开发优先 NOSA | **执行对象已确定，任务模型仍待选择。** DeepSeek 替身未经训练，不等于完整 61 层验证；NOSA 只输出 hidden，DeepSeek 另执行末 token LM head，不能直接比较跨模型延迟或任务质量 |
-| **1.3 使用什么数据？** | 用户选择固定 U 个 user 的合成 loop 数据，不需要热度；沿用每用户固定 history、每次访问变化 candidate 的请求内容 | **已有受控矩阵。** DeepSeek 已测 16 用户、H=[4K,16K,64K] × A=[128,256,512,1024] 的 12 点矩阵。真实推荐标签及场景代表性仍未验证 |
-| **1.4 怎样形成 serving 负载？** | 同一用户顺序完整重复 R 轮：总请求 UR，首访 U，复访 U(R−1)；相邻两次访问之间有 U−1 个不同用户 | **已有两模型控制点及同机重复。** U=16/R=2、H=65536/A=128、P=65536/NH=16777216；两模型各有三轮 P0 与三轮重构后测量。重复次数不增加用户规模覆盖；Beauty 短轨迹不替代完整用户覆盖，同参数也不等于跨模型同计算 |
-| **1.5 主要优化目标是什么？** | 相同 HBM/DRAM 硬预算下比较完整 loop 的逐请求延迟，分开首轮、后续复访命中和复访重建；淘汰后重建仍计入复访 | **指标方向已明确。** 固定 P/NH 实验比较 token 额度，不等于相同总 HBM 字节预算；首访比例 1/R 影响全请求均值，仍需分轮报告。真实服务的吞吐/到达目标待确定 |
+| **1.1 研究什么任务与场景？** | GR serving 与正常 agentic serving 均为候选；Prefill/Extend 与 Decode 分开考虑，当前优先 Q1 Decode 和 Batch=128 Decode。既有 GR 方案仍是固定 history、变化 candidate 的 Extend | **范围与优先级已选择，场景仍待具体化。** 需明确 agentic 任务、服务需求、上下文增长及模型适配；GR 代表性也尚未成立 |
+| **1.2 使用什么模型？** | 既有 GR 对照使用完整 NOSA-8B 和约 8B 的 DeepSeek C10 checkpoint 工作负载替身；另有真实 DeepSeek 前三层 Q1 对照。后续开发优先 NOSA，Decode 的具体模型适配仍需明确 | **已有执行对象，新增范围未验收。** C10 未经训练，前三层不等于完整 61 层；NOSA 与 DeepSeek 输出范围不同，不能直接比较跨模型延迟或任务质量 |
+| **1.3 使用什么数据？** | 既有 GR 对照保留固定用户合成 loop、固定 history 与变化 candidate，不要求热度；agentic serving 的输入、生成轨迹和上下文分布另行确定 | **已有 GR 受控矩阵，Decode 数据待明确。** DeepSeek 的 16 用户、12 点 H/A 矩阵保留原范围；固定 token 的 Q1 局部对照不能证明真实 agentic 负载代表性 |
+| **1.4 怎样形成 serving 负载？** | 当前分别考察单序列单 token 的 Q1 Decode，以及 128 个序列各一个 token 的 Batch=128 Decode。Prefill/Extend 单列；既有 GR 仍按同一用户顺序重复 R 轮 | **Q1 与 Batch=128 已有局部算子依据，完整 serving 负载待建立。** 52 点驻留矩阵使用独立合成 KV，不包含多步事务或请求调度；仍需明确各序列历史、驻留、步间追加与批处理方式。既有串行 loop 和 A128 Extend 均不覆盖 Batch=128 Decode |
+| **1.5 主要优化目标是什么？** | 在相同 HBM/DRAM 硬预算下检验 Decode 的 Cache Manager 开销与计算/读取重叠；拟分别报告 Q1 单步延迟、Batch=128 单步延迟与吞吐，以及对应内存占用 | **目标方向已明确，量化要求待定。** 既有 GR 仍分首访、复访命中与重建；固定 P/NH 配额不等于相同总字节预算。Decode 的延迟/吞吐目标和真实到达过程尚未确定 |
+
+既有 GR loop 的请求与统计定义保留：总请求 UR，首访 U，复访 U(R−1)，相邻两次
+访问同一用户之间有 U−1 个不同用户；淘汰后重建仍计为复访。首访比例 1/R 会影响
+全请求均值。这些定义不直接用作 Decode 的 batch 或调度语义。
 
 ## 2. SOTA baseline 与 Motivation
 
 - [ ] 覆盖主要相关方案，讲清它们的取舍，并量化目标场景中的关键问题。
 
-当前候选论证是：**全 HBM 的容量约束 → CPU DRAM offload 的取数等待 → dense prefetch
-的冗余 → sparse fetch 的重叠困难**。这是待分析和验证的思路线索，各环节尚未整体成立。
+当前从 **Cache Manager 与 Overlap** 两个角度寻找 ECHO 的问题。Cache Manager 包括
+决策、分配/淘汰、映射与发布、缓存状态准备/维护，以及这些操作引入的调度、同步和额外
+搬运开销；即使它们出现在 Recall 或融合 kernel 中，也按管理原因归类。Overlap 关注
+必要的 Indexer Cache、Main Cache 读取与计算能否重叠，以及仍暴露多少取数等待。
+耗时归属与流水依赖分别分析，避免重复计入；尚未归因的 gap 保留为未知。
+
+此前的“全 HBM 容量约束 → DRAM 取数等待 → dense 冗余 → sparse 重叠困难”仍是
+待验证的线索。已有 Extend 结果可提供局部依据，Decode 的三个重点问题分别列在 2.6–2.8。
 
 | 条目 / 要回答的问题 | 当前理解 | 状态与具体缺口 |
 |---|---|---|
-| **2.1 主要 baseline 是否覆盖？** | motivation 目标集合为 HBM-only、ECHO、full prefetch、sync sparse loading、async sparse loading；full prefetch 搬运完整历史，attention 仍稀疏 | **两模型各有四类对照。** 统一资源与执行契约已接入，正式计时、独立数值依据和 profile 分别记录。ECHO 尚未接入同一 NOSA 对照，不能拼接跨模型排名；SOTA 覆盖仍待补 |
+| **2.1 主要 baseline 是否覆盖？** | 候选集合仍为 HBM-only、ECHO、full prefetch、sync sparse loading、async sparse loading；当前优先明确 Q1 与 Batch=128 Decode 中 ECHO 的可比路径 | **已有驻留算子基线，共同 Decode 对照未建立。** 两模型的 Extend 对照和 DeepSeek 前三层 Q1 保留原范围；新增 Q1、Batch=128 等形状的无 offload 算子观测不能补齐五类完整 serving baseline。ECHO 未接入同一 NOSA 对照，不拼接跨模型排名；SOTA 覆盖仍待补 |
 | **2.2 全 HBM 的问题是什么？** | 固定复用距离下，history 配额影响复访是否重建；实际物理容量还受模型布局、workspace、allocator 和其他分配约束 | **指定配额下的历史保留差异已测。** DeepSeek 固定 P=65,536 时，H4K 的 HBM 保留全部 16 用户、复访 16/16 命中；H16K/H64K 分别只能保留 4/1 个用户，顺序 loop 的复访均为 0/16。三个 offload 方案始终 16/16。H4K 没有避免历史重建的收益，不能沿用 H64K 的解释；这些配额结果不证明物理容量上限，也不恢复已撤回的 C1024/C2048 结论 |
 | **2.3 CPU DRAM offload 的问题是什么？** | NOSA 固定容量 loop 中，保留历史避免了重新构建，但引入了首访分配、写回及复访取数成本 | **重构后已测量。** 各轮先求 16 次复访均值，再取三轮中位数，HBM/dense/sync/async 分别为 2342.511/71.980/29.568/31.952 ms；三个 offload 的首访均慢于 HBM。容量保留收益与取数代价须分开，不能把完整差值归为串行等待 |
 | **2.4 Dense prefetch 的问题是什么？** | 整层历史预取仍使用 sparse attention；搬运量较多不必然意味着请求更慢。DeepSeek 三层完整图与 C10 单点均有连续内存 DMA 和计算的局部重叠证据 | **C10 取舍随 H/A 改变。** H16K 四档 A 的 dense 复访均值最低；H64K 的 A128/256 为 serial sparse 最低，A512/1024 为 dense 略低。ECHO/sparse 的 H2D 非零时，dense payload 为它们的 1.832–9.688 倍。不能仅据字节数或旧单点局部重叠解释排序；流量是软件 payload，矩阵未新增 profile |
-| **2.5 与 ECHO 如何比较？** | ECHO prefill fetch 适用于后续 chunk 或已有 offloaded prefix 的 extend；无 decode 不排除适用。已复现层内共享 token cache，GR session 保留与容量/异步安全适配单独说明 | **本轮矩阵未显示 ECHO 的复访优势。** ECHO 在 12 个 H/A 点的复访均值均高于 serial sparse，两者 candidate H2D 总量逐点相同。三层 cold A128 完整图也单独观察到 ECHO 较慢；一轮矩阵不证明稳定排序，融合 kernel 的计算与 IO 不从 trace 内部分离，独立 SGLang 计时不替代共同模型上的 NOSA/ECHO 比较 |
+| **2.5 与 ECHO 如何比较？** | 当前优先在 Decode 中分别分析 Cache Manager 和 Overlap。ECHO 的 Prefill/Extend、官方正常 Q1 Decode 与本地冷态 Q1 路径保留各自语义 | **局部差距已观察，归因仍有缺口。** 本地前三层 cold Q1 的 ECHO 完整 step 仍慢于 serial sparse；C10 的 12 点 Extend 矩阵也均较慢。两类结果不互相代替，官方与本地输入、容量及驻留不同，不能据此推断 Batch=128 或完整 serving 收益 |
+| **2.6 Cache Manager 的开销在哪里？** | 研究者判断 ECHO 的管理开销仍大；分析范围包含管理操作本身及其引入的准备、调度、同步和额外搬运成本 | **有局部诊断，Decode 总成本待量化。** 现有 manager 指标只覆盖 A128 Extend 的 top-k→MLA 区间，Q1 的准备还混合了输入打包与缓存准备。新增驻留 `indexer_prepare` 与 scheduler metadata 不包含 Cache Manager 事务，不能直接计作管理成本。仍需按原因拆分完整流程，不能将完整差值或混合准备整段归入管理成本 |
+| **2.7 Indexer Cache 如何限制 batch 与重叠？** | ECHO 当前 Indexer Cache 常驻 HBM，未考虑其 offload；研究者提出这限制 Batch Size，进而使 Overlap 效率不佳 | **常驻是实现事实，因果链待验证。** 新增矩阵提供不同 batch 的单层 resident Indexer/MLA 依据，但单层 B=1024 能执行不证明完整 61 层可准入同样 batch。仍需量化完整模型的 indexer 占用、可准入 batch，以及 offload 后新增 IO 和计算/读取重叠的净影响 |
+| **2.8 剩余 Recall 是否也能重叠？** | ECHO 已融合 Indexer 与部分 Main Cache 预取，但剩余 Recall 仍在精确 top-k 后、Attention 前完成；研究者希望将它也纳入重叠，减少暴露开销 | **流水局限已识别，收益待测。** 本地 cold Q1 每层预取 64 条，随后 recall 1,983–2,041 条；官方正常 Q1 的驻留与召回路径不同。需区分 Recall 内的管理成本、实际搬运和暴露等待 |
 
 ECHO cache baseline 的官方逐层共享 pool、实际领取才驱逐、
 `indexer/prefetch → top-k → 主 KV append → exact recall` 的顺序及时间戳 priority
@@ -153,18 +189,20 @@ ECHO cache baseline 的官方逐层共享 pool、实际领取才驱逐、
 均已完成 performance-only 计时；两种配置容量不同，不作为等容量对照，
 不据此宣称数值验收通过。
 
-2026-10-07 的[官方 recall 诊断](../experiments/deepseek_v32_echo_official/report/recall_diagnosis.md)
+2026-10-07 的[官方 Prefill/Extend recall 诊断](../experiments/deepseek_v32_echo_official/report/recall_diagnosis.md)
 确认了独立 SGLang 的一项实现开销：召回每层扫描全部 host pool 的标记，零 miss 时
 仍耗时约 1.53 ms。相同二进制的隔离实验与 NCU 将主要成本定位到扫描中的整数与
 逻辑运算。因此图中长 recall 条不能作为纯取数等待或 ECHO 重叠能力不足的证据。
 本地实现使用不同的召回路径，这一原因不能直接解释 C10 矩阵中的 ECHO 排名。
-本轮只完成诊断，未修改实现或恢复广泛优化；详细依据见 S-035。
+该轮只完成诊断，未修改实现；详细依据见 S-035。官方正常 Q1 Decode 使用另一条
+召回路径，不能把上述扫描耗时作为 Decode 的瓶颈证据。
 
 后续用户指定的 Q1 优化已有独立结果：本地 HBM 的 GPU 窗口接近官方参考，
 ECHO 在本地 cold 条件下仍慢于 serial sparse。准备流程会影响节点间隙，
 因此 GPU gap 不能未经控制就归为可移除的计算开销。官方 ECHO 与本地使用不同
 输入和自然／cold 驻留；其融合 indexer 时长差不能单独解释为实现效率差异。
-这些结果只对应真实三层单 token 路径，详见 S-037。
+这些结果只对应真实三层单 token 路径，当前生产结果见 S-039；本轮 Decode 范围和
+两类开销的划分见 [S-040](agents/research-supervisor/sources.md#s-040decode-优先级与-echo-问题划分)。
 
 非 GR 计算对照使用真实 checkpoint 第 0–2 层，hidden/residual 依次传播，包含
 embedding、三个 dense MLP、final norm 与末 token LM head。当前
@@ -223,9 +261,12 @@ A128/256 由 serial sparse 最低、A512/1024 由 dense 略低。不能把避免
 
 | 条目 / 要回答的问题 | 当前理解 | 状态与具体缺口 |
 |---|---|---|
-| **3.1 Sparse fetch 为什么难以重叠？** | NOSA 当前固定容量测量的 96 个适用内部样本均未达到两种 90% 重叠门槛；无 host-copy 的样本不计为通过 | **A128 重叠门槛未满足。** 先前候选的 NCU 诊断提示 host 数据依赖和 consumer K/V 就绪等待，同二进制对照确认对齐可消除高于逻辑 payload 的 12.5% sector 访问；这些局部结果不能分解当前请求延迟，也未证明计算或 IO 主导 |
+| **3.1 Sparse fetch 为什么难以重叠？** | NOSA 既有 A128 Extend 的 96 个适用内部样本均未达到两种 90% 重叠门槛；无 host-copy 的样本不计为通过。Decode 还需分析 batch、Indexer Cache 供数和剩余 Recall 对流水的限制 | **Extend 局部证据保留，Decode 待分析。** 先前 NCU 诊断提示 host 数据依赖和 consumer K/V 就绪等待，同二进制对照确认对齐可消除高于逻辑 payload 的 12.5% sector 访问；这些结果不能分解当前请求延迟或替代 Batch=128 Decode，也未证明计算或 IO 主导 |
 | **3.2 当前设计如何应对？** | NOSA 融合唯一历史读取与 sparse attention；固定 P/NH 专用路径使用有限逐层容量、逻辑位置直接映射和 session 身份标签，candidate 只在 GPU 临时执行 | **固定路径已实现，方法收益未成立。** 当前 async 在首访、复访和完整轨迹均慢于 sync。多个 Q128 候选未通过数值或重叠门槛，均未合入；通用 budget 共享 staging 仍不等于通用有限槽缓存或热点淘汰策略 |
-| **3.3 技术区别和研究贡献是什么？** | 希望在减少搬运的同时获得重叠收益 | **待总结。** 与 ECHO 和其他方案的实质区别尚未建立；系统名称、最终技术划分和贡献表述均未确定 |
+| **3.3 技术区别和研究贡献是什么？** | 当前拟分别减少 Cache Manager 开销，并让 Indexer、Attention 的计算与相应 Cache 读取重叠 | **设计方向已明确，贡献仍待验证。** 与 ECHO 和其他方案的实质区别、适用范围及净收益尚未建立，最终方法与贡献表述未确定 |
+| **3.4 怎样进一步减少管理开销？** | 探索无需逐层决策的管理方式，减少重复决策与由管理流程引入的开销 | **设计方向，尚未实现或验证。** 需说明不同层的选择与驻留如何支持统一决策，并保持完整稀疏选择、容量约束和事务语义；操作次数减少不等于端到端收益 |
+| **3.5 怎样重叠 Indexer 计算与 Indexer Cache？** | 将 Indexer Cache offload 纳入设计，让 Indexer 计算与 Indexer Cache 的读取/搬入重叠，探索扩大 batch 后的流水效率 | **设计方向，尚未实现或验证。** 需确定供数粒度、缓冲容量和计算依赖；offload 是否扩大可行 batch、能否隐藏新增读取成本仍待测 |
+| **3.6 怎样重叠 Main Cache 读取？** | 同时考虑用 Indexer 与 Attention 的计算重叠 Main Cache 读取，并将剩余 Recall 纳入流水 | **设计方向，尚未实现或验证。** 需明确精确选择就绪前后的可读范围、供数/消费依赖及缓冲复用；管理成本与重叠收益分别归因，再检验完整 Decode 的净收益 |
 
 NOSA 固定 P/NH 路径已将历史保留与 candidate 临时执行分开。P 限制逐层历史 HBM
 容量，NH 是按页对齐的 host history 准入额度，host backing 随 session 分配。
@@ -254,7 +295,26 @@ DeepSeek 则持有共享全局 host arena，并按 pinned allocator 档位预留
 |---|---|---|
 | **4.1 整体系统收益是什么？** | 两模型分别比较完整 loop、首访和复访；DeepSeek H16K/H64K 的 offload 复访优势首先来自保留历史，H4K 全命中时没有这项重建差值。真实三层 MFU 单独检查 baseline 执行效率 | **容量、执行效率与方法收益分开。** NOSA 的 async 复访均值比 sync 慢 8.06%，重构后完整 trace 中位数比 P0 增加 406.132 ms；原两模型重构对照的 cleanup 仍有增加。C10 矩阵的最低复访均值随 H/A 在 HBM、dense 和 serial sparse 间变化；一轮结果不证明稳定排名，也不建立共同模型对照或场景质量 |
 | **4.2 哪些设计带来收益？** | 独立矩阵/attention API、resident A1024、冷稀疏并集回放与 DeepSeek 局部 profile 分别提供局部证据；主机编排诊断不隔离可移除成本 | **收益依赖输入与范围。** NOSA A1024 融合 API 延迟下降 23.02%–29.47%，9 个样本双比率过 90%，但 A128 serving 的 96 个适用样本仍未过。真实三层与 C10 单点均有 dense DMA/计算重叠证据；新 C10 矩阵中 dense 在 6 点复访最低，但没有新增 profile 来解释这些点。不能沿用旧单点作跨配置机制归因。Q1 独立进程复测的 HBM 窗口接近官方参考，cold ECHO 完整 step 仍慢于 serial sparse。准备融合的私有 500 对中位数下降约 1.32%，尾部未一致改善；默认路径接入与独立补测已完成，三层准备由 9 个节点减到 3 个（S-038、S-039）；不据此推广 serving 收益或恢复广泛优化 |
-| **4.3 结论适用于哪些条件？** | DeepSeek 已测 SM90/Hopper、16 用户两轮、固定 P/NH 的 H=[4K,16K,64K] × A=[128,256,512,1024]；NOSA 原固定容量范围仍为 64K+128。两模型计算与输出范围不同 | **12 点矩阵已发布，外推范围仍有限。** 每个配置只测一条正式轨迹，每方案含两轮用户访问，不混入原重构对照的三轮统计。DeepSeek 是独立复制 block 的 C10 替身且执行末 token LM head，NOSA 使用完整 32 层 checkpoint；其他 U/R、物理字节预算、真实到达过程与 GR 质量未验证。NOSA pair04、请求 0/16 诊断、resident A1024 与 pattern 仍有各自范围 |
+| **4.3 结论适用于哪些条件？** | DeepSeek 已有 C10 的 12 点 H/A Extend 矩阵及真实前三层 Q1，另有包括 Batch=128 Decode 的 52 点无 offload 单层算子观测；NOSA 固定容量范围仍为 64K+128 Extend。Prefill/Extend 与 Decode 分别报告 | **驻留算子范围已扩展，完整 agentic serving 尚未覆盖。** 新矩阵使用合成 activation 与独立序列 KV，未运行上下文增长、多步追加或完整 61 层。既有 Q1 本地冷态与官方自然驻留，以及 C10、NOSA 的模型/输出、配额和统计边界保留，不外推场景代表性 |
+| **4.4 如何检验 Cache Manager 设计？** | 在 Q1 与 Batch=128 Decode 下量化完整管理流程及其引入的开销，用匹配对照检验减少逐层决策的收益 | **待开展。** 已有 post-top-k 指标不覆盖全部管理成本；需同时保留完整单步延迟、实际搬运和未归因 gap，避免把管理次数或局部区间减少直接作为净收益 |
+| **4.5 如何检验 Overlap 设计？** | 分别检验 Indexer Cache offload、Indexer 计算与 Indexer Cache 读取的重叠，以及 Indexer、Attention 计算与 Main Cache 读取的重叠；单独检查剩余 Recall | **待开展。** Q1 与 Batch=128 各自建立匹配串行对照，报告容量、实际流量、暴露等待和完整单步延迟/吞吐；管理策略与重叠策略分开消融，并测量组合后的净收益 |
+
+DeepSeek 的[无 offload 算子观测](../experiments/deepseek_v32_observation/report/results.md)
+已将纯 GEMM 与量化、norm、RoPE、cast、layout、routing 等 non-GEMM 分开测量，
+完整 API 聚合另列。H64K 的 B128 Decode 中，融合 Indexer 的有效 MFU 为 24.98%，
+独立 profile 的 HBM 利用率为 84.71%；融合 MLA core 对应为 49.70%/52.84%，
+包含 ID 转换等准备的完整 MLA API MFU 为 44.50%。Q1/B1 的 Indexer、MLA core
+MFU 分别为 7.03%/5.05%，不能与完整 Decode 单步效率混用。
+
+S1024 的 dense MLP 完整 API MFU 为 50.10%；grouped MoE 的 gate/up/down 纯 GEMM
+useful MFU 为 8.97%/8.99%/9.54%，独立 profile 的 HBM 利用率为
+80.82%/79.79%/79.59%，完整 MoE MFU 为 6.62%。Useful FLOPs 只计实际 selected
+routes，静态 packing 与实际 HBM 流量另计，不能仅凭低 useful MFU 判断官方
+kernel 的算力效率。Clean MFU 与 HBM 利用率使用不同的独立测量分母；小操作可能
+受到明显的 profile 扰动，warm-cache 的低 HBM 流量也可能来自 L2 命中。
+该观测不执行 Cache Manager 事务、offload 或 Recall，也未检验计算/IO 重叠；
+各 API 与聚合区间不能相加为完整模型延迟。来源与支持边界见
+[S-041](agents/research-supervisor/sources.md#s-041deepseek-无-offload-算子观测)。
 
 完整 resident A1024 对照中，native sparse 的 full/extend 墙钟中位数为
 2374.539/36.208 ms，有效 MFU 为 50.38%/52.56%；dense 为 3506.118/81.807 ms，
@@ -375,11 +435,15 @@ motivation 检验。合并报告不改变 4.2–4.3 的证据强度，也不产�
 
 | 卡在哪里 | 影响哪里 | 下一步建议 |
 |---|---|---|
-| **ECHO 相对 serial sparse 的加速尚未成立。** C10 的 12 点矩阵均观察到 ECHO 复访较慢；预测/预取、搬运方式与等待的因果归因仍有缺口 | 2.5、3.1、4.1、4.2 | **T-003：共同模型适配与可比范围。** 矩阵任务已完成，不把一轮排序视为稳定规律；用户指定的 Q1 优化由 T-008 单独推进，不扩大 C10 或 NOSA 的实验范围 |
-| **缺少可以直接采用的 sparse attention GR 场景。** 已有生成器和模型代码，但模型、数据与服务需求如何对应仍不清楚 | 1.1–1.5；影响 2.2 的容量动机和 4.1 的整体评测 | **T-002：场景构造方案比较**，先列出具体可行路线和各自能回答的问题 |
-| **五类 baseline 尚未在共同模型上形成完整可比集合。** 共享资源与执行契约已接入，但 ECHO 与 async 仍分属不同模型入口，模型和输出范围也不同 | 2.1、2.5、3.1、3.3 | **T-003：共同模型适配与可比范围**，明确剩余适配与可回答的问题 |
-| **固定 token 配额不等于相同物理预算。** DeepSeek 已补齐 12 点 H/A 矩阵，但两模型的计算和分配不同，其他 U/R、P/NH、字节预算范围仍未验证 | 1.4、2.2、4.1、4.3 | **当前不追加容量测量。** 保留历史命中与 candidate 成本的区别；容量填满和后续审阅仍暂缓，不跑满 NH，不扩展 NOSA 范围 |
-| **NOSA 当前固定容量 loop 未显示 async 收益。** H64K prequeue 显示提交敏感，但 candidate 效率差距、剩余长尾和供数/流水线等待仍需归因；外部原型尚未形成四方案完整 serving 收益 | 2.1、2.3、2.4、3.1、3.2、4.1、4.2 | **T-007：H64K 效率与归因**，用完整 candidate 对照检验 indexer workspace 复用，并保持四方案正确性和测量验收 |
+| **ECHO 的完整 Cache Manager 成本尚未量化。** 有准备与 post-top-k 局部证据，但 Q1 差距不能全归入管理；新增 Batch=128 驻留算子观测不包含管理事务 | 2.6、3.4、4.4 | **T-009：Decode 管理开销与决策粒度**，识别管理引入的成本，探索减少逐层决策 |
+| **Indexer Cache 常驻对 batch 与 Overlap 的因果影响尚未验证。** 缺少 Batch=128 Decode 的容量与供数对照 | 2.7、3.5、4.5 | **T-010：Indexer Cache offload 与重叠**，检验容量收益、新增 IO 与流水效率 |
+| **剩余 Recall 尚未纳入 Attention 重叠。** 冷态 Q1 仍需较多残余召回，官方自然驻留另有边界 | 2.8、3.6、4.5 | **T-011：Main Cache 读取与计算重叠**，联合考虑 Indexer、Attention 与剩余 Recall |
+| **Decode 的场景和共同对照仍需建立。** Q1 与 Batch=128 已有驻留单层观测；agentic 任务/数据、多步事务与完整 baseline 仍未建立 | 1.1–1.5、2.1、4.3 | **T-002、T-003：场景适配与 Decode 可比范围**，明确两档负载的语义与执行边界 |
+
+既有 NOSA H64K workspace 方案 T-007 保留为独立的 Prefill/Extend 任务，排在当前
+Decode 主线之后；既有元数据复用等局部改善尚未形成四方案完整 serving 收益。既有 motivation、
+4K/16K、容量填满与后续审阅、simulation 不因本轮状态更新自动恢复。新 Decode
+任务所需的容量分析另按其负载定义，固定 token 配额仍不等于相同物理预算。
 
 DeepSeek 当前有效结论以上方用户修正与[固定容量 motivation](../experiments/deepseek_v32_motivation/README.md)
 为准，不恢复已撤回的 4 GiB/W/chunk 排名。NOSA 的
