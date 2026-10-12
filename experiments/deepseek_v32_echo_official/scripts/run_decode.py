@@ -40,6 +40,7 @@ def sources():
         "src/decode_run.py",
         "src/decode_profile_hooks.py",
         "src/decode_graph_inspector.py",
+        "src/decode_recall_observer.py",
         "scripts/run_decode.py",
         "scripts/run_decode.sh",
     ]:
@@ -89,7 +90,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--run-id", required=True)
     parser.add_argument("--case", choices=("echo", "resident_reference"), required=True)
-    parser.add_argument("--mode", choices=("check", "bench", "profile"), required=True)
+    parser.add_argument("--mode", choices=("check", "bench", "profile", "observe"), required=True)
     parser.add_argument("--gpu", default="7")
     parser.add_argument("--check-run", type=Path)
     parser.add_argument("--performance-only", action="store_true", required=True)
@@ -108,8 +109,12 @@ def main():
     args = parser.parse_args()
     if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]*", args.run_id) or args.repeats < 1:
         parser.error("Use a new safe run ID and positive repeats")
-    if (args.mode == "check") != (args.check_run is None):
-        parser.error("bench/profile require --check-run; check forbids it")
+    if args.mode in ("bench", "profile") and args.check_run is None:
+        parser.error("bench/profile require --check-run")
+    if args.mode in ("check", "observe") and args.check_run is not None:
+        parser.error("check/observe forbid --check-run")
+    if args.mode == "observe" and args.case != "echo":
+        parser.error("observe requires --case echo")
     for name in ("python", "model", "workload", "build_receipt", "numerical_diagnostic", "nsys"):
         setattr(args, name, getattr(args, name).absolute())
     diagnostic = load_numerical_diagnostic(args.numerical_diagnostic)
@@ -282,15 +287,24 @@ def main():
                 "gpu_release_sha256": file_sha256(worker / "gpu_release_drain.json"),
                 "jit": capture_runtime_manifest(worker / "jit_artifacts.json"),
             }
+            if args.mode in ("profile", "observe"):
+                row["hooks"] = {
+                    path.name: file_sha256(path)
+                    for path in (worker / "engine/hooks").glob("*.json")
+                }
+            if args.mode == "observe":
+                artifact = completion["row"]["recall_observation"]
+                if file_sha256(Path(artifact["path"])) != artifact["sha256"]:
+                    raise ValueError("Recall observation changed after completion")
+                observed = json.loads(Path(artifact["path"]).read_text())
+                if observed["observed_replays"] != 1 or len(observed["layers"]) != 3:
+                    raise ValueError("Incomplete official normal decode recall observation")
+                row["recall_observation"] = observed
             if args.mode == "profile":
                 path = profiles / "decode.nsys-rep"
                 if not path.exists() or not path.stat().st_size:
                     raise ValueError("NSYS did not produce a report")
                 row["nsys"] = {"path": str(path), "sha256": file_sha256(path)}
-                row["hooks"] = {
-                    path.name: file_sha256(path)
-                    for path in (worker / "engine/hooks").glob("*.json")
-                }
             record["workers"].append(row)
             write_json(data / "run.json", record)
         if sources() != source_map:

@@ -105,8 +105,13 @@ def run(args):
     args.output.mkdir(parents=True, exist_ok=False)
     from sglang.srt.entrypoints import engine as engine_module
 
-    if args.mode == "profile":
-        from experiments.deepseek_v32_echo_official.src.decode_profile_hooks import scheduler
+    if args.mode in ("profile", "observe"):
+        if args.mode == "observe":
+            if args.case != "echo":
+                raise ValueError("Recall observation requires official ECHO")
+            from experiments.deepseek_v32_echo_official.src.decode_recall_observer import scheduler
+        else:
+            from experiments.deepseek_v32_echo_official.src.decode_profile_hooks import scheduler
 
         os.environ["ECHO_ENGINE_PROFILE_DIR"] = str(args.output / "hooks")
         os.environ["ECHO_ENGINE_PROFILE_CASE"] = "echo" if args.case == "echo" else "hbm"
@@ -143,9 +148,11 @@ def run(args):
                 response = engine.generate(input_ids=warm_prompt, sampling_params=SAMPLING)
             warmup.append({"first_token_offset": offset, **validate(response, warm_prompt)})
         write_json(args.output / "warmup.json", warmup)
-        if args.mode == "profile":
+        if args.mode in ("profile", "observe"):
             with deadline(60):
                 engine.collective_rpc("echo_engine_profile_begin")
+        if args.mode == "profile":
+            with deadline(60):
                 engine.start_profile(
                     activities=["CUDA_PROFILER"],
                     with_stack=False,
@@ -190,16 +197,24 @@ def run(args):
                 response, row["output_ids"], args.output / "output.npz"
             )
         else:
-            row["wall_ms"] = wall_ms
+            if args.mode != "observe":
+                row["wall_ms"] = wall_ms
             write_json(args.output / "response.json", response)
             row["response_sha256"] = file_sha256(args.output / "response.json")
-        if args.mode == "profile":
+        if args.mode in ("profile", "observe"):
             with deadline(60):
                 engine.collective_rpc("echo_decode_finish")
                 snapshot = json.loads((args.output / "hooks/residency.json").read_text())
                 if snapshot["decode_input_ids"] != row["output_ids"][:1]:
                     raise ValueError("Decode did not consume the first sampled output token")
-                engine.stop_profile()
+                if args.mode == "observe":
+                    observation = args.output / "hooks/recall_observation.json"
+                    row["recall_observation"] = {
+                        "path": str(observation),
+                        "sha256": file_sha256(observation),
+                    }
+                else:
+                    engine.stop_profile()
             profiling = False
         write_json(
             args.output / "complete.json",
@@ -238,7 +253,7 @@ def main():
     parser.add_argument("--model", type=Path, required=True)
     parser.add_argument("--workload", type=Path, required=True)
     parser.add_argument("--case", choices=("echo", "resident_reference"), required=True)
-    parser.add_argument("--mode", choices=("check", "bench", "profile"), required=True)
+    parser.add_argument("--mode", choices=("check", "bench", "profile", "observe"), required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--startup-timeout", type=float, default=1800)
     parser.add_argument("--request-timeout", type=float, default=600)
