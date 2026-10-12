@@ -1,6 +1,6 @@
 {
   "schema": "official-local-warm-echo-comparison-provenance-v1",
-  "run_id": "warm_decode_comparison_20261012_01",
+  "run_id": "warm_decode_fused_display_20261012_01",
   "inputs_and_sources_sha256": {
     "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/report/sglang_decode/publication.json": "4d70222d816788df35ee1f8885cdbeb6f4135ec44a304ec5cf5ad0813daff6ff",
     "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/report/sglang_decode/report.json": "3fa66ab9f5f812c2300ee22e22ca8d9805b9c0af0095037e7926a60a3a0d69b8",
@@ -37,13 +37,14 @@
     "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/output/data/h64k_decode_echo_profile_20261008_02/run.json": "736af3c0e7e10dcb1116e3cd0a89c378633dd0cfa85dcff480645cbacd2bceef",
     "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/output/data/h64k_decode_echo_profile_20261008_02/sample_00/engine/complete.json": "f4e61c436d59fd04b1c787fdb0f38251025be2debaec859386965f7328c7cfdc",
     "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-q1-selected-20261011-01/experiments/deepseek_v32_mfu/output/data/q1_isolation_20261011_01/official_decode_request/request.json": "cdd9f56622e7d906f8f0f2c74f18b0e7d6d232f2ec04d003069c63c236cf9140",
-    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/src/compare_warm_decode_timeline.py": "4c6b3bf8c32b7d4faf517004df0b662b1ddc0778e0d6b0b7dace33d7871e517d",
-    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/src/compare_decode_timeline.py": "38f34ea26715b0bb62f7464c13fc53503fc6da18272e1f0d3a3782db9130cf84",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/src/compare_warm_decode_timeline.py": "5aca1350105bbb36202c1e24ab31f3c7f009b3d526a12abecd773816d90b0fb7",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/src/compare_decode_timeline.py": "02dfe697c5ae27c26d2c0596633931fdc9efae52a3a659199a790d93c3a62363",
     "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/src/compare_timeline.py": "0cd37c99d0f5df4bc25a08e7371b2152493a8a999731f5d9007b691ec6f00c41",
     "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/src/engine_timeline.py": "fb2b5b70504cc0a1e6c5441f85893ca151cebbc02c3890445f946f0f8dd8cfb1",
     "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/src/compact_timeline.py": "146bfcb32b1c0bbbd4a18ebf9019bc2bd128d61c377060f26d5ee8ca5ce97043",
     "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_mfu/src/timeline.py": "6a8fa2598045accc26b6746913c283fad52ad4633f6fc01e0d961f397e691b25",
-    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/src/decode_display.py": "2ea125be388257cb5345503c851e87007d04cd317417a357140b08b256c9b4d2"
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/src/decode_display.py": "1ebef98ee7bda191f4524568e76daaf07464b9ea0912fb438d18716d6b88dc71",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/src/q1_timeline_categories.py": "be50f0f7f7034a5eaf988cd65ba6455b554ffed1471be456f907a07ad48a4615"
   },
   "profile_run_ids": [
     "h64k_decode_echo_profile_20261008_02",
@@ -1446,28 +1447,40 @@
     0,
     2
   ],
+  "category_policy": {
+    "schema": "q1-score-topk-functional-boundary-v1",
+    "indexer": "Paged score kernels, causal score cleaning, and the complete top-k output path, including initialization, masks, transforms and sorting.",
+    "projection": "Main and indexer Q/K projections, norm, RoPE, Hadamard, quantization and head weights.",
+    "control": "Scheduler metadata, index cache writes, page packing/tables, staging preparation/promotion, pool management and hint updates.",
+    "timing": "Clipped GPU interval unions across all streams; activity and kernel sums are reported separately. No activity, gap or timestamp is removed.",
+    "source": "Original authenticated panels remain unchanged; aligned panels retain source_lane/source_category and a per-row boundary reason."
+  },
   "source_snapshot_sha256": {
     "compact_timeline.py": "146bfcb32b1c0bbbd4a18ebf9019bc2bd128d61c377060f26d5ee8ca5ce97043",
-    "compare_decode_timeline.py": "38f34ea26715b0bb62f7464c13fc53503fc6da18272e1f0d3a3782db9130cf84",
+    "compare_decode_timeline.py": "02dfe697c5ae27c26d2c0596633931fdc9efae52a3a659199a790d93c3a62363",
     "compare_timeline.py": "0cd37c99d0f5df4bc25a08e7371b2152493a8a999731f5d9007b691ec6f00c41",
-    "compare_warm_decode_timeline.py": "4c6b3bf8c32b7d4faf517004df0b662b1ddc0778e0d6b0b7dace33d7871e517d",
-    "decode_display.py": "2ea125be388257cb5345503c851e87007d04cd317417a357140b08b256c9b4d2",
+    "compare_warm_decode_timeline.py": "5aca1350105bbb36202c1e24ab31f3c7f009b3d526a12abecd773816d90b0fb7",
+    "decode_display.py": "1ebef98ee7bda191f4524568e76daaf07464b9ea0912fb438d18716d6b88dc71",
     "engine_timeline.py": "fb2b5b70504cc0a1e6c5441f85893ca151cebbc02c3890445f946f0f8dd8cfb1",
+    "q1_timeline_categories.py": "be50f0f7f7034a5eaf988cd65ba6455b554ffed1471be456f907a07ad48a4615",
     "timeline.py": "6a8fa2598045accc26b6746913c283fad52ad4633f6fc01e0d961f397e691b25"
   },
   "output_evidence_sha256": {
+    "aligned_panels.json": "9179a5a9e3e77b3de64938673a6aa695723f7782bdb9374763150b7a953ef99f",
+    "category_metrics.csv": "8b48e5ac261c44a52004e336500f77735a7015c40b13a47e164a9ba63d643357",
     "panels.json": "5e74004d780e9449cfccd35b5c635952129c23c2b1862f841eba38a8be89b87d",
-    "report.md": "8e3b1b7bf038366ddd4311c03890d2b5440d73ff39223870f6d8e248334529ed",
-    "summary.json": "14b0367426342daca92e86ca0520770edcabac651a14efc95124f3364a3e364e",
-    "timeline_decode.png": "caf01486d6498d51c07bf5ce5b4f5d6862f1758c8f1b2ea954f4455fbd89a78a",
-    "timeline_decode.svg": "b46fd2e1608c3fa9448df2d9b8df3ebbd125666e5386c45cfd504347d5a0a352",
-    "windows.csv": "83524d4f5b39eacc72332d0546651609792194a7038a524f19c6145d491beb90",
+    "report.md": "8ffd99a5942f00cbf71bf7309717f6415a6472a20cec103860e7de6c7a5122aa",
+    "summary.json": "4350a2a0eea47a3896e216a3a5cad4285c91ae11f7f18618d301c896520fe7f6",
+    "timeline_decode.png": "0f05a344e5bb59d2deb2e2d656d65858c676dc80ce375a116c11ecf5a5991221",
+    "timeline_decode.svg": "1e11f1c2da1616359e4f3d8221335766eb5cb95ceccf2cab4c63e11841a89164",
+    "windows.csv": "99282a8cf84e567a3b3be0afdd76143259edef2df4a1cd24184df5e2f37be506",
     "source_snapshot/compact_timeline.py": "146bfcb32b1c0bbbd4a18ebf9019bc2bd128d61c377060f26d5ee8ca5ce97043",
-    "source_snapshot/compare_decode_timeline.py": "38f34ea26715b0bb62f7464c13fc53503fc6da18272e1f0d3a3782db9130cf84",
+    "source_snapshot/compare_decode_timeline.py": "02dfe697c5ae27c26d2c0596633931fdc9efae52a3a659199a790d93c3a62363",
     "source_snapshot/compare_timeline.py": "0cd37c99d0f5df4bc25a08e7371b2152493a8a999731f5d9007b691ec6f00c41",
-    "source_snapshot/compare_warm_decode_timeline.py": "4c6b3bf8c32b7d4faf517004df0b662b1ddc0778e0d6b0b7dace33d7871e517d",
-    "source_snapshot/decode_display.py": "2ea125be388257cb5345503c851e87007d04cd317417a357140b08b256c9b4d2",
+    "source_snapshot/compare_warm_decode_timeline.py": "5aca1350105bbb36202c1e24ab31f3c7f009b3d526a12abecd773816d90b0fb7",
+    "source_snapshot/decode_display.py": "1ebef98ee7bda191f4524568e76daaf07464b9ea0912fb438d18716d6b88dc71",
     "source_snapshot/engine_timeline.py": "fb2b5b70504cc0a1e6c5441f85893ca151cebbc02c3890445f946f0f8dd8cfb1",
+    "source_snapshot/q1_timeline_categories.py": "be50f0f7f7034a5eaf988cd65ba6455b554ffed1471be456f907a07ad48a4615",
     "source_snapshot/timeline.py": "6a8fa2598045accc26b6746913c283fad52ad4633f6fc01e0d961f397e691b25",
     "input_reports/input_audit_original/audit.py": "0c54a6be45d695e01c0e680956721b8dd1ce39070551cdf25d68d3126c883172",
     "input_reports/input_audit_original/identity_recall.json": "072d84f5c3e352eff5303f7909e780664dfa41db5a54840ab900c44fafb1cf21",
@@ -1510,7 +1523,8 @@
     "original_warm_and_input_audit_source_chain": true,
     "official_profile_input_identity": true,
     "original_windows_and_profile_ids": true,
-    "disjoint_interval_conservation": true
+    "disjoint_interval_conservation": true,
+    "source_to_aligned_activity_identity": true
   },
   "io_display_policy": {
     "source_category": "ECHO recall (IO unknown)",
@@ -1518,5 +1532,11 @@
     "category": "H2D",
     "hatch": null,
     "boundary": "Orange H2D spans show the complete official recall custom kernel by function. The kernel may update mappings and copy GPU staging (D2D) or mapped host records (H2D), and may transfer zero records. Actual mapped-host bytes and any pure-copy subspan are unknown. Original classifications, timestamps and busy/idle unions are preserved; true widths are not expanded."
+  },
+  "fused_display_policy": {
+    "schema": "q1-fused-capability-hatch-v1",
+    "kernel_name_contains": "sm90_fp8_paged_mqa_logits_fused_v2<",
+    "hatch": "////",
+    "boundary": "Hatching marks the complete fused score/prefetch kernel on both sides, including executions with verified zero transfers. It denotes mapped-host IO capability, not measured transfer bytes or a pure-copy interval. Original potential_io and actual_io evidence remain unchanged."
   }
 }

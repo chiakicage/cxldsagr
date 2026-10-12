@@ -15,8 +15,22 @@ RECALL_DISPLAY = {
     ),
 }
 
+FUSED_DISPLAY = {
+    "schema": "q1-fused-capability-hatch-v1",
+    "kernel_name_contains": "sm90_fp8_paged_mqa_logits_fused_v2<",
+    "hatch": "////",
+    "boundary": (
+        "Hatching marks the complete fused score/prefetch kernel on both sides, "
+        "including executions with verified zero transfers. It denotes mapped-host "
+        "IO capability, not measured transfer bytes or a pure-copy interval. "
+        "Original potential_io and actual_io evidence remain unchanged."
+    ),
+}
+
 
 def activity_style(row):
     if row["kind"] == "kernel" and row["category"] == RECALL_CATEGORY:
         return "H2D", "H2D", False
+    if row["kind"] == "kernel" and FUSED_DISPLAY["kernel_name_contains"] in row.get("name", ""):
+        return row["lane"], row["category"], True
     return row["lane"], row["category"], row["potential_io"]

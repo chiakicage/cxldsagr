@@ -10,6 +10,7 @@ from pathlib import Path
 
 from experiments.deepseek_v32_echo_official.src import compare_decode_timeline as decode
 from experiments.deepseek_v32_echo_official.src import compare_timeline as comparison
+from experiments.deepseek_v32_echo_official.src import q1_timeline_categories as categories
 
 engine = comparison.engine
 EXPERIMENT = comparison.EXPERIMENT
@@ -21,6 +22,8 @@ PUBLISHED_FILES = (
     "provenance.json",
     "publication_manifest.json",
     "report.md",
+    "aligned_panels.json",
+    "category_metrics.csv",
 )
 
 
@@ -375,10 +378,10 @@ def interval_metrics(panel):
         "io_only": compute_io_ns - compute_ns,
         "control_only": busy - compute_io_ns,
         "original_control_lane_union": engine.duration(
-            intervals(lambda row: row["lane"] == "GPU control")
+            intervals(lambda row: row.get("source_lane", row["lane"]) == "GPU control")
         ),
         "source_control_category_union": engine.duration(
-            intervals(lambda row: row["category"] == "GPU control")
+            intervals(lambda row: row.get("source_category", row["category"]) == "GPU control")
         ),
     }
     require(
@@ -411,7 +414,15 @@ def report_text(summary):
         f"展示运行 `{summary['run_id']}` 复用已发布的 L0–L2 profile，未新增 GPU 测量。"
         "两侧 history token 数组一致，H=65,536、Q=1，输入 token 均为 57841；本地显式输入该 token，不包含采样。"
         "本地保留 prefill 后的主 KV 驻留，官方保留正常 radix 与自然驻留。\n\n"
+        "两侧使用同一绘图函数、颜色、泳道高度和时间轴。蓝色 Indexer 统一包含评分、因果清理及完整 top-k 输出流程，"
+        "包括初始化、选择、转换、排序和 mask；投影、RoPE、量化与 head weights 归 Projection，"
+        "调度元数据、索引打包、缓存管理和 hint 更新归 control。"
+        "按所有 stream 的 GPU 区间并集统计，并裁到相同的三层窗口；融合 kernel 保留完整时长。"
+        "[逐层分类统计](category_metrics.csv)采用同一口径。\n\n"
         "![两侧 ECHO 时间线](timeline_decode.svg)\n\n"
+        "两侧融合评分/预取 kernel 都画斜线，即使实际搬运为 0 B。"
+        "斜线表示 kernel 包含 mapped-host 预取路径，不能当作实际 H2D 时间或字节数；"
+        "本地 warm 的预取计数仍为 0。\n\n"
         "| 来源 | 窗口 ms | Compute 并集 ms | Control-only ms | 明确 IO 独占 ms | Idle ms | 原 Control lane 并集 ms |\n"
         "| --- | ---: | ---: | ---: | ---: | ---: | ---: |\n"
         + table
@@ -429,7 +440,8 @@ def report_text(summary):
         "两侧使用不同的框架环境、GPU、pool 容量及缓存操作顺序。"
         "官方跨实现数值验收仍为 `false`；输入一致不证明模型数值或缓存策略等价。"
         "这些侵入式窗口不等于完整请求延迟，不用于计算配对加速比，也不能把窗口差直接归为缓存策略收益。"
-        "完整原始 panel、输入报告副本和源码快照保留在本次 `output/data/` 运行目录；"
+        "原始 `panels.json` 保留已认证活动，`aligned_panels.json` 只更新功能分类，保留原类别与逐项分类理由。"
+        "输入报告副本和源码快照保留在本次 `output/data/` 运行目录；"
         "[来源](provenance.json)、[窗口](windows.csv)和[发布清单](publication_manifest.json)绑定展示素材。\n"
     )
 
@@ -449,6 +461,7 @@ def build_report(official_directory, warm_directory, output, publish_dir=None):
     if output.exists() or (publish_dir is not None and publish_dir.exists()):
         raise FileExistsError("Use new output and publication directories")
     panels, inputs, identity = load_comparison(official_directory, warm_directory)
+    aligned = [categories.align_panel(panel) for panel in panels]
     sources = list(
         dict.fromkeys(
             [
@@ -459,6 +472,7 @@ def build_report(official_directory, warm_directory, output, publish_dir=None):
                 Path(comparison.compact.__file__),
                 Path(comparison.timeline.__file__),
                 Path(decode.decode_display.__file__),
+                Path(categories.__file__),
             ]
         )
     )
@@ -466,7 +480,7 @@ def build_report(official_directory, warm_directory, output, publish_dir=None):
     before = {str(path.resolve()): engine.sha256(path) for path in paths}
     output.mkdir(parents=True)
     decode.draw(
-        panels,
+        aligned,
         output,
         xlim_ms=(0, 2),
         figure_title="H64K · Q1 · L0–L2 | Official decode and local warm ECHO",
@@ -482,10 +496,15 @@ def build_report(official_directory, warm_directory, output, publish_dir=None):
             "end_ns": panel["window"]["end_ns"],
             **interval_metrics(panel),
         }
-        for panel in panels
+        for panel in aligned
     ]
     engine.write_csv(output / "windows.csv", windows)
     write_json(output / "panels.json", panels)
+    write_json(output / "aligned_panels.json", aligned)
+    engine.write_csv(
+        output / "category_metrics.csv",
+        [row for panel in aligned for row in categories.category_metrics(panel)],
+    )
     differences = {
         key: (windows[0][f"{key}_ns"] - windows[1][f"{key}_ns"]) / 1e6
         for key in ("window", "compute_union", "control_only", "io_only", "idle")
@@ -496,6 +515,7 @@ def build_report(official_directory, warm_directory, output, publish_dir=None):
         "passed": True,
         "numerical_acceptance_between_implementations": False,
         "measurement": "Existing independent intrusive NSYS L0-L2 windows; no new GPU execution.",
+        "category_policy": categories.POLICY,
         "windows": windows,
         "official_minus_local_ms": differences,
         "control_and_idle_share_of_window_difference_percent": (
@@ -552,6 +572,7 @@ def build_report(official_directory, warm_directory, output, publish_dir=None):
         "profile_run_ids": [panel["profile_run_id"] for panel in panels],
         "local_panel_provenance": panels[1]["provenance"],
         "shared_xlim_ms": [0, 2],
+        "category_policy": categories.POLICY,
         "source_snapshot_sha256": {path.name: engine.sha256(path) for path in snapshot.iterdir()},
         "output_evidence_sha256": {
             path.relative_to(output).as_posix(): engine.sha256(path)
@@ -564,8 +585,10 @@ def build_report(official_directory, warm_directory, output, publish_dir=None):
             "official_profile_input_identity": True,
             "original_windows_and_profile_ids": True,
             "disjoint_interval_conservation": True,
+            "source_to_aligned_activity_identity": True,
         },
         "io_display_policy": decode.decode_display.RECALL_DISPLAY,
+        "fused_display_policy": decode.decode_display.FUSED_DISPLAY,
     }
     write_json(output / "provenance.json", provenance)
     write_json(

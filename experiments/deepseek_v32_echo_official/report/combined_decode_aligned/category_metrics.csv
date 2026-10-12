@@ -1,0 +1,97 @@
+source,method,layer,category,activity_count,union_ns,activity_sum_ns,kernel_sum_ns,union_us
+Official SGLang,hbm,0,Projection / RoPE,25,77119,90623,90623,77.119
+Official SGLang,hbm,0,Indexer / top-k,5,39136,39136,39136,39.136
+Official SGLang,hbm,0,GPU control,3,3840,3840,3840,3.84
+Official SGLang,hbm,0,ECHO hint,0,0,0,0,0.0
+Official SGLang,hbm,1,Projection / RoPE,25,79232,93344,93344,79.232
+Official SGLang,hbm,1,Indexer / top-k,5,42688,42688,42688,42.688
+Official SGLang,hbm,1,GPU control,3,4032,4032,4032,4.032
+Official SGLang,hbm,1,ECHO hint,0,0,0,0,0.0
+Official SGLang,hbm,2,Projection / RoPE,25,77375,93182,93182,77.375
+Official SGLang,hbm,2,Indexer / top-k,5,41632,41632,41632,41.632
+Official SGLang,hbm,2,GPU control,3,3936,3936,3936,3.936
+Official SGLang,hbm,2,ECHO hint,0,0,0,0,0.0
+Official SGLang,hbm,all,Projection / RoPE,75,233726,277149,277149,233.726
+Official SGLang,hbm,all,Indexer / top-k,15,123456,123456,123456,123.456
+Official SGLang,hbm,all,GPU control,10,12128,12128,12128,12.128
+Official SGLang,hbm,all,ECHO hint,0,0,0,0,0.0
+Official SGLang,echo,0,Projection / RoPE,25,79296,92320,92320,79.296
+Official SGLang,echo,0,Indexer / top-k,7,44032,44032,44032,44.032
+Official SGLang,echo,0,GPU control,47,136223,136223,133471,136.223
+Official SGLang,echo,0,ECHO hint,4,4320,4320,3392,4.32
+Official SGLang,echo,1,Projection / RoPE,25,78336,91904,91904,78.336
+Official SGLang,echo,1,Indexer / top-k,7,46912,46912,46912,46.912
+Official SGLang,echo,1,GPU control,47,136448,136448,133856,136.448
+Official SGLang,echo,1,ECHO hint,4,4512,4512,3392,4.512
+Official SGLang,echo,2,Projection / RoPE,25,79263,92927,92927,79.263
+Official SGLang,echo,2,Indexer / top-k,7,44928,44928,44928,44.928
+Official SGLang,echo,2,GPU control,47,134752,134752,132032,134.752
+Official SGLang,echo,2,ECHO hint,4,4448,4448,3296,4.448
+Official SGLang,echo,all,Projection / RoPE,75,236895,277151,277151,236.895
+Official SGLang,echo,all,Indexer / top-k,21,135872,135872,135872,135.872
+Official SGLang,echo,all,GPU control,141,407423,407423,399359,407.423
+Official SGLang,echo,all,ECHO hint,12,13280,13280,10080,13.28
+Ours (local MFU),hbm,0,Projection / RoPE,31,83200,122240,122240,83.2
+Ours (local MFU),hbm,0,Indexer / top-k,4,50816,50816,50816,50.816
+Ours (local MFU),hbm,0,GPU control,17,24672,24672,20256,24.672
+Ours (local MFU),hbm,0,ECHO hint,0,0,0,0,0.0
+Ours (local MFU),hbm,1,Projection / RoPE,31,82336,106272,106272,82.336
+Ours (local MFU),hbm,1,Indexer / top-k,4,51072,51072,51072,51.072
+Ours (local MFU),hbm,1,GPU control,17,26336,26336,21696,26.336
+Ours (local MFU),hbm,1,ECHO hint,0,0,0,0,0.0
+Ours (local MFU),hbm,2,Projection / RoPE,31,79872,105920,105920,79.872
+Ours (local MFU),hbm,2,Indexer / top-k,4,50496,50496,50496,50.496
+Ours (local MFU),hbm,2,GPU control,17,24000,24000,19456,24.0
+Ours (local MFU),hbm,2,ECHO hint,0,0,0,0,0.0
+Ours (local MFU),hbm,all,Projection / RoPE,93,245408,334432,334432,245.408
+Ours (local MFU),hbm,all,Indexer / top-k,12,152384,152384,152384,152.384
+Ours (local MFU),hbm,all,GPU control,51,75008,75008,61408,75.008
+Ours (local MFU),hbm,all,ECHO hint,0,0,0,0,0.0
+Ours (local MFU),echo,0,Projection / RoPE,31,84704,111328,111328,84.704
+Ours (local MFU),echo,0,Indexer / top-k,4,57888,57888,57888,57.888
+Ours (local MFU),echo,0,GPU control,22,47456,47456,45856,47.456
+Ours (local MFU),echo,0,ECHO hint,2,4992,4992,4992,4.992
+Ours (local MFU),echo,1,Projection / RoPE,31,80960,114111,114111,80.96
+Ours (local MFU),echo,1,Indexer / top-k,4,82912,82912,82912,82.912
+Ours (local MFU),echo,1,GPU control,22,46816,46816,44928,46.816
+Ours (local MFU),echo,1,ECHO hint,2,4896,4896,4896,4.896
+Ours (local MFU),echo,2,Projection / RoPE,31,80287,116031,116031,80.287
+Ours (local MFU),echo,2,Indexer / top-k,4,96705,96705,96705,96.705
+Ours (local MFU),echo,2,GPU control,22,46144,46144,44320,46.144
+Ours (local MFU),echo,2,ECHO hint,2,4928,4928,4928,4.928
+Ours (local MFU),echo,all,Projection / RoPE,93,245951,341470,341470,245.951
+Ours (local MFU),echo,all,Indexer / top-k,12,237505,237505,237505,237.505
+Ours (local MFU),echo,all,GPU control,66,140416,140416,135104,140.416
+Ours (local MFU),echo,all,ECHO hint,6,14816,14816,14816,14.816
+Ours (local MFU),serial_sparse,0,Projection / RoPE,31,83776,119008,119008,83.776
+Ours (local MFU),serial_sparse,0,Indexer / top-k,4,50656,50656,50656,50.656
+Ours (local MFU),serial_sparse,0,GPU control,23,48384,48384,46656,48.384
+Ours (local MFU),serial_sparse,0,ECHO hint,0,0,0,0,0.0
+Ours (local MFU),serial_sparse,1,Projection / RoPE,31,83039,113695,113695,83.039
+Ours (local MFU),serial_sparse,1,Indexer / top-k,4,50944,50944,50944,50.944
+Ours (local MFU),serial_sparse,1,GPU control,23,50656,50656,48832,50.656
+Ours (local MFU),serial_sparse,1,ECHO hint,0,0,0,0,0.0
+Ours (local MFU),serial_sparse,2,Projection / RoPE,31,80864,114015,114015,80.864
+Ours (local MFU),serial_sparse,2,Indexer / top-k,4,50688,50688,50688,50.688
+Ours (local MFU),serial_sparse,2,GPU control,23,48032,48032,46176,48.032
+Ours (local MFU),serial_sparse,2,ECHO hint,0,0,0,0,0.0
+Ours (local MFU),serial_sparse,all,Projection / RoPE,93,247679,346718,346718,247.679
+Ours (local MFU),serial_sparse,all,Indexer / top-k,12,152288,152288,152288,152.288
+Ours (local MFU),serial_sparse,all,GPU control,69,147072,147072,141664,147.072
+Ours (local MFU),serial_sparse,all,ECHO hint,0,0,0,0,0.0
+Ours (local MFU),dense_prefetch,0,Projection / RoPE,31,85984,112672,112672,85.984
+Ours (local MFU),dense_prefetch,0,Indexer / top-k,4,50656,50656,50656,50.656
+Ours (local MFU),dense_prefetch,0,GPU control,17,31776,31776,30144,31.776
+Ours (local MFU),dense_prefetch,0,ECHO hint,0,0,0,0,0.0
+Ours (local MFU),dense_prefetch,1,Projection / RoPE,31,81792,110432,110432,81.792
+Ours (local MFU),dense_prefetch,1,Indexer / top-k,4,51009,51009,51009,51.009
+Ours (local MFU),dense_prefetch,1,GPU control,17,35200,35200,33280,35.2
+Ours (local MFU),dense_prefetch,1,ECHO hint,0,0,0,0,0.0
+Ours (local MFU),dense_prefetch,2,Projection / RoPE,31,84384,110784,110784,84.384
+Ours (local MFU),dense_prefetch,2,Indexer / top-k,4,50017,50017,50017,50.017
+Ours (local MFU),dense_prefetch,2,GPU control,17,36289,36289,34529,36.289
+Ours (local MFU),dense_prefetch,2,ECHO hint,0,0,0,0,0.0
+Ours (local MFU),dense_prefetch,all,Projection / RoPE,93,252160,333888,333888,252.16
+Ours (local MFU),dense_prefetch,all,Indexer / top-k,12,151682,151682,151682,151.682
+Ours (local MFU),dense_prefetch,all,GPU control,51,103265,103265,97953,103.265
+Ours (local MFU),dense_prefetch,all,ECHO hint,0,0,0,0,0.0

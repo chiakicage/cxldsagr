@@ -4,10 +4,8 @@
 原始 FP8 权重和 BF16 主 KV，包含 embedding、final norm 和末 token LM head。
 当前重点是 H64K 正常 decode、本地 ECHO 对照及缓存控制开销。
 
-目前的主要结果：官方 Q1 的额外耗时主要来自槽位分配、映射维护和 GPU idle；
-使用相同输入、保留 prefill 驻留的本地 warm 窗口为 1.226051 ms，官方为
-1.555390 ms。独立官方观测与本地 warm 的 residual recall 都为 0，见
-[同输入对照](#同输入保留-prefill-驻留的-echo-对照)。
+**H64K + A1 请直接阅读[独立报告](report/h64k_a1/README.md)。**
+官方与本地 ECHO 的 timeline、缓存控制、recall/H2D 和 indexer 分析已集中到该报告。
 
 **官方跨实现数值验收仍为 `false`。** 本地内核与 cache 事务的独立验收已通过，
 但两边的环境、容量和操作顺序仍有差异，以下结果不建立数值等价或策略加速比。
@@ -125,163 +123,22 @@ done
 
 ## H64K 正常 decode
 
-[执行入口](src/decode_run.py)以 H=65,536 调用一次 `Engine.generate`，设置
-`sampling_params={"max_new_tokens": 2, "temperature": 0, "ignore_eos": True}`。
-64 个 prefill chunk 完成后，scheduler 消费首个采样 token 57841，执行一次
-`DECODE`（query=1、sequence=65,537），再采样 token 39556。
-三层 decode 位于一次默认 CUDA Graph launch 中，保留 radix 和自然驻留。
+H=65,536、A=Q=1 的结果集中在独立的
+[H64K + A1 报告](report/h64k_a1/README.md)。报告包含同输入 warm ECHO timeline、
+官方 HBM-only 对照、GPU control 分解、recall/H2D 计数与 indexer 差异，
+cold 四方案作为补充。两边共用绘图风格与 Indexer 统计范围，原始活动和测量身份
+保持不变。
 
-每组使用三个新 Engine，各先运行两次正常请求预热。正式请求均为完整 prefix miss，
-包含 prefill、一次 decode、两次采样、调度和 IPC；初始化、预热及输出检查在计时外。
-硬件为 GPU7（H200 / SM90）、CPU72–79、NUMA1，OMP/MKL 线程数均为 8；
-TP=DP=1、page size=64。
-
-| 方案 | 完整请求样本数 | 完整请求中位数 ms |
-| --- | ---: | ---: |
-| HBM-only | 3 | 1157.594 |
-| ECHO | 3 | 1842.270 |
-
-![官方 SGLang H64K 正常 decode 的 L0–L2 GPU timeline](report/sglang_decode/timeline_decode.svg)
-
-| 方案 | Decode L0–L2 窗口 ms | GPU busy ms | GPU idle ms | 完整 decode graph 的 GPU 节点数 |
-| --- | ---: | ---: | ---: | ---: |
-| HBM-only | 1.014975 | 1.000701 | 0.014274 | 141 |
-| ECHO | 1.555390 | 1.427742 | 0.127648 | 297 |
-
-图中窗口从 L0 首个计算 kernel 到 L2 最后计算 kernel，来自独立 NSYS 采集，
-不等于完整请求或无 profiler 的单 token 延迟。GPU idle 是没有 kernel、memcpy
-或 memset 的区间。正式 forward 和完整 decode graph 的节点归属已核验；
-collector 的进程级警告仍保留，不宣称 setup、warmup 或整个 trace 完整。
-
-**橙色 H2D 小条表示 recall kernel，并非已确认的 H2D 搬运。**
-`_recall_update_with_prefetch_kernel` 三层合计 3.136 µs，可能更新映射、执行
-D2D/H2D，也可能不搬记录；旧 trace 的实际字节未知。紫色 D2H 写回 kernel
-合计 3.200 µs，字节数同样未观测。斜线表示融合 indexer 的潜在 mapped-host IO。
-
-HBM-only 使用 131,072 个 device 槽；ECHO 使用 65,664 个 device 槽和
-16,777,216 个 host 槽。请求结束后的快照显示两组 history 都驻留，但它不能证明
-decode 开始时的完整状态。数据见[报告](report/sglang_decode/report.json)、
-[计时样本](report/sglang_decode/timing_samples.csv)、
-[活动明细](report/sglang_decode/activities.json)和
-[发布清单](report/sglang_decode/publication.json)。
-
-### 与本地 H64K+A1 的 timeline 对比
-
-官方两组与本地四方案共用 0–5 ms 时间轴，保留各自 L0–L2 窗口。
-本地 offload 清空 history 主 KV 的 HBM 驻留、保留 resident indexer；官方保留
-自然驻留。输入 token、容量和软件环境也不同，分别使用 GPU7 和 GPU0。
-
-![官方正常 decode 与本地 H64K+A1 四方案的 GPU timeline 对比](report/combined_decode/timeline_decode.svg)
-
-本地采用 `official-q1-exact-selected-staging-v2`：最多暂存 64 条预测，精确 top-k
-后只驻留选中的历史预测，保护已有精确命中、清除其余 tag，全部实际 H2D 仍计费。
-发布预测仍先于当前-token append，尚未完全复刻官方的分配顺序。
-
-合图为 `combined_decode_exact_selected_cold_20261011_02`，本地 cohort 为
-`deepseek_h64k_a1_exact_selected_cold_20261011_02`。完整绑定见
-[窗口](report/combined_decode/windows.csv)、[来源](report/combined_decode/provenance.json)
-和[面板](report/combined_decode/panels.json)。
-[绘图入口](src/compare_decode_timeline.py)只整理已有 profile；橙色 recall 的含义同上。
+| 结果，L0–L2 GPU 窗口 | ms |
+| --- | ---: |
+| 官方 HBM-only | 1.014975 |
+| 官方 ECHO | 1.555390 |
+| 本地同输入 warm ECHO | 1.226051 |
 
 <details>
-<summary>重绘四方案合图与区间分解</summary>
-
-```bash
-PYTHONDONTWRITEBYTECODE=1 \
-MPLCONFIGDIR=experiments/deepseek_v32_echo_official/output/runtime/cache/matplotlib \
-CUDA_VISIBLE_DEVICES= .venv/bin/python -B \
-  -m experiments.deepseek_v32_echo_official.src.redraw_decode_timeline \
-  --source-report experiments/deepseek_v32_echo_official/report/sglang_decode \
-  --output-dir experiments/deepseek_v32_echo_official/output/data/h64k_decode_display_new
-
-PYTHONDONTWRITEBYTECODE=1 \
-MPLCONFIGDIR=experiments/deepseek_v32_echo_official/output/runtime/cache/matplotlib \
-CUDA_VISIBLE_DEVICES= .venv/bin/python -B \
-  -m experiments.deepseek_v32_echo_official.src.compare_decode_timeline \
-  --official-report experiments/deepseek_v32_echo_official/output/data/h64k_decode_display_new \
-  --mfu-report experiments/deepseek_v32_mfu/report/h64k_a1 \
-  --output-dir experiments/deepseek_v32_echo_official/output/data/combined_decode_new \
-  --publish-dir experiments/deepseek_v32_echo_official/report/combined_decode_new
-
-CUDA_VISIBLE_DEVICES= .venv/bin/python -B \
-  -m experiments.deepseek_v32_echo_official.src.diagnose_decode_gap \
-  --comparison experiments/deepseek_v32_echo_official/output/data/combined_decode_new \
-  --local-report experiments/deepseek_v32_mfu/report/h64k_a1 \
-  --output-dir experiments/deepseek_v32_echo_official/output/data/decode_gap_new
-```
-
-</details>
-
-### 同输入、保留 prefill 驻留的 ECHO 对照
-
-两边的 65,536 个 history tokens 已逐项核对，decode 输入都是 57841。
-官方消费采样 token，本地显式输入该 token；两边保留 prefill 主 KV 驻留，
-L0–L2 窗口共用 0–2 ms 时间轴。
-
-![同输入及 prefill 驻留条件下的官方与本地 ECHO timeline](report/warm_decode_comparison/timeline_decode.svg)
-
-合图沿用本地配色和标注。GPU control 显示全部控制活动，本地 prepare、finalize、
-hint 保留各自颜色，其余为灰色；红色只表示 GPU idle。
-
-| L0–L2 区间指标 | 官方 ECHO | 本地 warm ECHO |
-| --- | ---: | ---: |
-| 窗口 ms | 1.555390 | 1.226051 |
-| Compute 并集 µs | 1010.751 | 932.190 |
-| Compute 和明确 IO 之外的 control µs | 413.791 | 246.657 |
-| GPU idle µs | 127.648 | 37.988 |
-| 明确 IO 独占区间 µs | 3.200 | 9.216 |
-
-后四行是互不重叠的区间分解，合计为窗口。本地 control 原始泳道并集为
-260.737 µs，与 Compute 有重叠，不能直接相加。
-本地窗口少 329.339 µs，其中 control 独占区间少 167.134 µs、idle 少
-89.660 µs，两者约占差值的 78%。主要差异仍在缓存控制和节点间空闲。
-
-本地 warm 的 5 个正式样本及独立 profile 均为 prefetch 0、recall 0、全部实际
-H2D 0 B，仍执行官方融合 Q1 路径；每层 D2H append 为 1,152 B。另一次独立官方
-观测也为 residual recall 0 条、0 B，但不含融合预取流量，不能回填到图中的旧官方 trace。
-官方与本地分别使用 GPU7/GPU0，device/host 配额为 65,664/16,777,216 与
-P=NH=65,600。窗口差不能直接归因于缓存策略；本地完整 step 中位数
-2.397285 ms 与此窗口也属于不同计时边界。
-
-合图为 `warm_decode_comparison_20261012_01`，复用官方
-`h64k_decode_echo_profile_20261008_02` 与本地
-`deepseek_h64k_a1_official_input_warm_20261011_01_echo_profile`，未新增 GPU 测量。
-见[对照报告](report/warm_decode_comparison/report.md)、
-[窗口](report/warm_decode_comparison/windows.csv)、
-[分解](report/warm_decode_comparison/summary.json)、
-[来源](report/warm_decode_comparison/provenance.json)和
-[发布清单](report/warm_decode_comparison/publication_manifest.json)。
-
-<details>
-<summary>重绘同输入 warm 对照</summary>
-
-[绘图入口](src/compare_warm_decode_timeline.py)复用官方面板校验、本地活动转换与
-分类工具；完整证据位于 `output/data/warm_decode_comparison_20261012_01/`。
-
-```bash
-PYTHONDONTWRITEBYTECODE=1 \
-MPLCONFIGDIR=experiments/deepseek_v32_echo_official/output/runtime/cache/matplotlib \
-CUDA_VISIBLE_DEVICES= .venv/bin/python -B \
-  -m experiments.deepseek_v32_echo_official.src.compare_warm_decode_timeline \
-  --official-report experiments/deepseek_v32_echo_official/report/sglang_decode \
-  --warm-report experiments/deepseek_v32_mfu/report/h64k_a1_warm \
-  --output-dir experiments/deepseek_v32_echo_official/output/data/warm_decode_comparison_new
-```
-
-</details>
+<summary>Q1 独立算子优化结果</summary>
 
 ### Q1 瓶颈与优化结果
-
-官方 ECHO 比 HBM 的三层窗口多 540.415 µs，control 与 idle 的增量约解释
-95.3% 的差值。GPU control 包含 priority/FIFO 槽位选择、分配与释放、双向映射
-更新、当前 KV 写入和精确 miss 准备。官方/HBM 的 control 分类并集为
-410.655 / 8.992 µs，idle 为 127.648 / 14.274 µs；官方另有 3.136 µs 的
-recall kernel，按原 control lane 合计为 413.791 µs。
-
-最大单项是 `argmin_bounded_kernel<196608>`：单个 CTA、1,024 线程扫描约 65K
-个槽位，为当前 token 分配 append 槽。三层耗时为 65.311 / 64.960 / 64.032 µs，
-合计 194.303 µs，占 control 分类的 47.3%。细分见
-[kernel 表](report/decode_gap/kernel_details.csv)和[瓶颈报告](report/decode_gap/report.json)。
 
 ![官方 Q1 路径的打包开销](report/q1_official_path/packing_latency.svg)
 
@@ -302,26 +159,13 @@ Attention 使用 16 分片执行 sparse prefill，再合并 partial。完整 Gra
 `atol=4e-3, rtol=2e-2`。主 kernel 从 2 个 CTA 增至 32 个，见
 [attention 报告](report/q1_optimization/report.md)。
 
-本地 cold 的独立 step 计时与 NSYS 窗口如下：
-
-| 方法 | 官方正常 decode L0–L2 ms | 本地 cold L0–L2 ms | 本地完整 step ms |
-| --- | ---: | ---: | ---: |
-| HBM-only | 1.014975 | 1.011458 | 1.848991 |
-| ECHO | 1.555390 | 1.503972 | 2.676780 |
-| Serial sparse | — | 1.263427 | 2.430380 |
-| Dense prefetch | — | 4.422828 | 5.527328 |
-
-本地 cold ECHO 仍慢于 serial sparse。这轮 15 个层样本均暂存 64 条，residual
-recall 为 L0 1,983、L1 2,030–2,042、L2 1,986–2,010 条；每层 H2D 为
-2,358,144–2,426,112 B。独立验收确认精确选择、映射和流量正确。它与上方 warm
-的 recall 差主要来自驻留条件，不能用不同输入和批次的中位数估计策略收益。
-详见[本地报告](../deepseek_v32_mfu/README.md)及
-[输入与计数核验](../deepseek_v32_mfu/report/h64k_a1_warm/input_recall_audit/identity_recall.json)。
 
 同输入 L2 原始 fused core 的冷／热 map 诊断测得 NCU 时长为
 55.008 / 10.880 µs：cold 实际预取 64 条、73,728 B，fully resident 不搬运。
 原子与搬运同时消失，不能分离二者成本，也不能用 NCU 时长代替正式 API 计时。
 见[冷态预取诊断](report/q1_prefetch_diagnosis/report.md)。
+
+</details>
 
 ### Decode 来源与复现
 

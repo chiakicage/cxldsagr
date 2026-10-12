@@ -1,0 +1,50 @@
+{
+  "schema": "q1-indexer-detail-provenance-v1",
+  "run_id": "indexer_detail_20261012_01",
+  "inputs_and_sources_sha256": {
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/src/indexer_detail_timeline.py": "e2b12eddffdde2f3754697875de7a63b11ef435eb5a539d9d0d7a408a84ff0b8",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/src/compare_warm_decode_timeline.py": "5aca1350105bbb36202c1e24ab31f3c7f009b3d526a12abecd773816d90b0fb7",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/src/compare_timeline.py": "0cd37c99d0f5df4bc25a08e7371b2152493a8a999731f5d9007b691ec6f00c41",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/src/engine_timeline.py": "fb2b5b70504cc0a1e6c5441f85893ca151cebbc02c3890445f946f0f8dd8cfb1",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/src/decode_display.py": "1ebef98ee7bda191f4524568e76daaf07464b9ea0912fb438d18716d6b88dc71",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/report/warm_decode_aligned/timeline_decode.svg": "1e11f1c2da1616359e4f3d8221335766eb5cb95ceccf2cab4c63e11841a89164",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/report/warm_decode_aligned/timeline_decode.png": "0f05a344e5bb59d2deb2e2d656d65858c676dc80ce375a116c11ecf5a5991221",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/report/warm_decode_aligned/windows.csv": "99282a8cf84e567a3b3be0afdd76143259edef2df4a1cd24184df5e2f37be506",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/report/warm_decode_aligned/summary.json": "4350a2a0eea47a3896e216a3a5cad4285c91ae11f7f18618d301c896520fe7f6",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/report/warm_decode_aligned/provenance.json": "8efd84239e2d92975ecd26a8fdfb63dc08759bd4aa4d300f61347cd7b9ba8bdd",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/report/warm_decode_aligned/report.md": "8ffd99a5942f00cbf71bf7309717f6415a6472a20cec103860e7de6c7a5122aa",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/report/warm_decode_aligned/aligned_panels.json": "9179a5a9e3e77b3de64938673a6aa695723f7782bdb9374763150b7a953ef99f",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/report/warm_decode_aligned/category_metrics.csv": "8b48e5ac261c44a52004e336500f77735a7015c40b13a47e164a9ba63d643357",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/report/warm_decode_aligned/publication_manifest.json": "187c83f9076ac37cf75d4ae8b419887c9bbdaf17210bbd908af23339dedd29d6"
+  },
+  "source_snapshot_sha256": {
+    "compare_timeline.py": "0cd37c99d0f5df4bc25a08e7371b2152493a8a999731f5d9007b691ec6f00c41",
+    "compare_warm_decode_timeline.py": "5aca1350105bbb36202c1e24ab31f3c7f009b3d526a12abecd773816d90b0fb7",
+    "decode_display.py": "1ebef98ee7bda191f4524568e76daaf07464b9ea0912fb438d18716d6b88dc71",
+    "engine_timeline.py": "fb2b5b70504cc0a1e6c5441f85893ca151cebbc02c3890445f946f0f8dd8cfb1",
+    "indexer_detail_timeline.py": "e2b12eddffdde2f3754697875de7a63b11ef435eb5a539d9d0d7a408a84ff0b8"
+  },
+  "source_publication_run_id": "warm_decode_fused_display_20261012_01",
+  "grouping_policy": "Explicit native graph node IDs bound to the exact saved profile IDs; authenticated layer ownership retained. No name or repetition-based layer inference.",
+  "io_display_policy": {
+    "source_category": "ECHO recall (IO unknown)",
+    "lane": "H2D",
+    "category": "H2D",
+    "hatch": null,
+    "boundary": "Orange H2D spans show the complete official recall custom kernel by function. The kernel may update mappings and copy GPU staging (D2D) or mapped host records (H2D), and may transfer zero records. Actual mapped-host bytes and any pure-copy subspan are unknown. Original classifications, timestamps and busy/idle unions are preserved; true widths are not expanded."
+  },
+  "fused_display_policy": {
+    "schema": "q1-fused-capability-hatch-v1",
+    "kernel_name_contains": "sm90_fp8_paged_mqa_logits_fused_v2<",
+    "hatch": "////",
+    "boundary": "Hatching marks the complete fused score/prefetch kernel on both sides, including executions with verified zero transfers. It denotes mapped-host IO capability, not measured transfer bytes or a pure-copy interval. Original potential_io and actual_io evidence remain unchanged."
+  },
+  "timing_boundary": "Original integer GPU activity intervals; row duration is interval union. Idle is the original all-stream complement clipped to each zoom. Group overlap is retained.",
+  "audit": {
+    "exact_activity_coverage": true,
+    "saved_idle_conservation": true,
+    "unique_graph_node_and_layer_ownership": true,
+    "input_and_renderer_stable": true,
+    "new_gpu_execution": false
+  }
+}

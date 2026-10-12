@@ -46,12 +46,14 @@ def panel(method, phase, shape):
                 "lane": "Compute",
                 "stage": "attention_projection",
                 "purpose": "Projection / RoPE",
+                "category": "Projection / RoPE",
+                "layer": layer,
                 "raw_start_ns": start,
                 "raw_end_ns": end,
                 "start_ns": start,
                 "end_ns": end,
             }
-            for start, end in zip(starts, ends, strict=True)
+            for layer, (start, end) in enumerate(zip(starts, ends, strict=True))
         ],
     }
 
@@ -292,10 +294,11 @@ def test_decode_entry_reads_isolated_summary_shape_and_preserves_numerical_bound
             condition="normal decode; natural residency",
             profile_run_id=f"official_{method}",
         )
-        official.append(current)
+        official.append(compare.verify_panel(current))
     monkeypatch.setattr(decode, "official_panels", lambda _: (official, []))
 
-    def draw(panels, output):
+    def draw(panels, output, **kwargs):
+        assert kwargs["compact_style"] is True
         for suffix in ("svg", "png"):
             (output / f"timeline_decode.{suffix}").write_text("test figure")
 
@@ -331,11 +334,12 @@ def test_decode_entry_reads_isolated_summary_shape_and_preserves_numerical_bound
     }
     assert Path("panels.json") in artifacts
     assert any(path.parts[0] == "source_snapshot" for path in artifacts)
-    assert artifacts == {
+    assert {path: digest for path, digest in artifacts.items() if len(path.parts) == 1} == {
         path.relative_to(published): compare.engine.sha256(path)
         for path in published.rglob("*")
         if path.is_file()
     }
+    assert not (published / "source_snapshot").exists()
 
 
 def test_prefill_entry_records_per_method_ids_without_a_shared_profile_id(

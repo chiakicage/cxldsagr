@@ -1,0 +1,38 @@
+{
+  "schema": "q1-indexer-detail-v1",
+  "run_id": "indexer_detail_20261012_01",
+  "new_gpu_measurement": false,
+  "numerical_acceptance_between_implementations": false,
+  "shared_xlim_us": [
+    0,
+    260
+  ],
+  "anchor": "First current-token L0 index-cache write to attention end",
+  "panels": [
+    {
+      "source": "Official SGLang",
+      "profile_run_id": "h64k_decode_echo_profile_20261008_02",
+      "layer": 0,
+      "anchor": "First current-token index-cache write",
+      "start_ns": 10246192640,
+      "end_ns": 10246437567,
+      "anchor_offset_from_l0_compute_ns": 81312,
+      "gpu_busy_ns": 214943,
+      "gpu_idle_ns": 29984,
+      "activity_count": 67
+    },
+    {
+      "source": "Local warm",
+      "profile_run_id": "deepseek_h64k_a1_official_input_warm_20261011_01_echo_profile",
+      "layer": 0,
+      "anchor": "First current-token index-cache write",
+      "start_ns": 80079425,
+      "end_ns": 80244802,
+      "anchor_offset_from_l0_compute_ns": 84640,
+      "gpu_busy_ns": 148545,
+      "gpu_idle_ns": 16832,
+      "activity_count": 38
+    }
+  ],
+  "io_boundary": "Local warm fused prefetch and exact gather have verified 0 records / 0 B; official mapped-host bytes unknown. Observer counters are not assigned to this profile."
+}

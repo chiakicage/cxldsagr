@@ -1,0 +1,2013 @@
+{
+  "schema": "echo-h64k-a1-code-map-v1",
+  "run_id": "h64k_a1_code_map_report_20261012_01",
+  "new_gpu_measurement": false,
+  "numerical_acceptance_between_implementations": false,
+  "boundary": "Code navigation and authenticated saved-profile graph-node mapping; no execution or timing changes. One job may include multiple kernels or CUDA copies. Host function wall time is not assigned to GPU rows.",
+  "inputs": {
+    "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-q1-selected-20261011-01/experiments/deepseek_v32_mfu/output/data/deepseek_h64k_a1_official_input_warm_20261011_01_echo_profile/result.json": "8799083ec2735ad479ba3bf78ebee6aaa8ac463e957ef33b73611402e71a9f28",
+    "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-q1-selected-20261011-01/experiments/deepseek_v32_mfu/output/data/deepseek_h64k_a1_official_input_warm_20261011_01_echo_bench/result.json": "b197da297de4e288247497abb7433fd4abfc369e49739938cf7bcdb086c65142",
+    "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/3rdparty/ECHO/reproduction/cxldsagr/env/build_receipt.json": "757dc7b8424c468ea09239578364951b1dcb22418251d78545c5cfd2af4c7b45",
+    "report/h64k_a1/indexer_detail/activities.json": "949541e432184d2ed53aa855c53b22d38ad5fbeae94eaf23b2583b256ac40bef",
+    "report/h64k_a1/indexer_detail/publication_manifest.json": "ea07df65e2fea0a1f2ebe64a18987d6e2084753624e6b2438f54f723b91609fd"
+  },
+  "sources": {
+    "3rdparty/ECHO/DeepGEMM/csrc/jit_kernels/impls/smxx_fp8_paged_mqa_logits.hpp": {
+      "sha256": "acd33e64cb416f64fd7ddcf8750b4037e02ea379ae04f8a6f07b65902cb631c7",
+      "build_receipt_source_matches": true
+    },
+    "3rdparty/ECHO/DeepGEMM/deep_gemm/include/deep_gemm/impls/sm90_fp8_paged_mqa_logits.cuh": {
+      "sha256": "b6fe25e6c7cfff65b1e8ee92e14e18acde5a25ed910868b3606f9866d0ce0cac",
+      "build_receipt_source_matches": true
+    },
+    "3rdparty/ECHO/reproduction/cxldsagr/deps/repo-flash-attention/hopper/flash_fwd_combine_kernel.h": {
+      "sha256": "847a2972cf27dba62239cc2d731631accd335e606dc465914d819472e1983f6b",
+      "receipt_dependency_identity": "f9af0c2a1d82ab1812e6987e9338363cc2bf0f8d",
+      "receipt_archive_sha256": "608a93cd12c4df664fb58978ccef772cfc63abf9b7591a00acfa17199b588d77",
+      "archive_member_byte_identity_verified": true,
+      "verification": "Exact receipt archive was downloaded and hashed in memory; cited file bytes were compared to archive members by independent source audit."
+    },
+    "3rdparty/ECHO/reproduction/cxldsagr/deps/repo-flash-attention/hopper/flash_fwd_kernel_sm90.h": {
+      "sha256": "830e29edf20c96fa558ce6a0d51d3ae43f6a5bc6c94067c592d2bdbc1933d772",
+      "receipt_dependency_identity": "f9af0c2a1d82ab1812e6987e9338363cc2bf0f8d",
+      "receipt_archive_sha256": "608a93cd12c4df664fb58978ccef772cfc63abf9b7591a00acfa17199b588d77",
+      "archive_member_byte_identity_verified": true,
+      "verification": "Exact receipt archive was downloaded and hashed in memory; cited file bytes were compared to archive members by independent source audit."
+    },
+    "3rdparty/ECHO/reproduction/cxldsagr/deps/repo-flash-attention/hopper/flash_prepare_scheduler.cu": {
+      "sha256": "875c648ab638e1f27c67c70c0367d1e0134596228d6d31402a8ebd1261007e17",
+      "receipt_dependency_identity": "f9af0c2a1d82ab1812e6987e9338363cc2bf0f8d",
+      "receipt_archive_sha256": "608a93cd12c4df664fb58978ccef772cfc63abf9b7591a00acfa17199b588d77",
+      "archive_member_byte_identity_verified": true,
+      "verification": "Exact receipt archive was downloaded and hashed in memory; cited file bytes were compared to archive members by independent source audit."
+    },
+    "3rdparty/ECHO/sglang/python/sglang/srt/layers/attention/nsa/index_buf_accessor.py": {
+      "sha256": "8cf6118057d3747fe0f37394b3dab79dc8f6634dfa8a406f7e53236048eb1c6c",
+      "build_receipt_source_matches": true
+    },
+    "3rdparty/ECHO/sglang/python/sglang/srt/layers/attention/nsa/nsa_indexer.py": {
+      "sha256": "17d570bb588344aeb1b4c9cf488d461053c90dfb2e3200614a82f74c1ec1dc07",
+      "build_receipt_source_matches": true
+    },
+    "3rdparty/ECHO/sglang/python/sglang/srt/layers/attention/nsa_backend.py": {
+      "sha256": "aceca91e703c7a3dd2b9358c20eae705255dd66a45e02003ed7768533e260f6d",
+      "build_receipt_source_matches": true
+    },
+    "3rdparty/ECHO/sglang/python/sglang/srt/mem_cache/allocator.py": {
+      "sha256": "223c011de80109faaa2007f681b0083aa032e29d90ecf6decaa95e244549816b",
+      "build_receipt_source_matches": true
+    },
+    "3rdparty/ECHO/sglang/python/sglang/srt/mem_cache/memory_pool.py": {
+      "sha256": "b7980f175cff38a3635a8ea60c146fcf4c6faa16722c7c113ad458e14a8d7b36",
+      "build_receipt_source_matches": true
+    },
+    "3rdparty/ECHO/sglang/python/sglang/srt/mem_cache/memory_pool_host.py": {
+      "sha256": "559b9d1391070e5e24c3ec22c4ee03acfeceeacdf2b11c24bcc06f13ae1bf7a0",
+      "build_receipt_source_matches": true
+    },
+    "3rdparty/ECHO/sglang/python/sglang/srt/mem_cache/recall_ops.py": {
+      "sha256": "acccb812e162141a7c483a304aa82e14d4dd6b808c9e3d82d8bbd6dc693fbfee",
+      "build_receipt_source_matches": true
+    },
+    "3rdparty/ECHO/sglang/python/sglang/srt/models/deepseek_v2.py": {
+      "sha256": "9b067c0b0f6f90c59e1cc90be7e1b820d6c47435754653edbb11c86b4f2878b8",
+      "build_receipt_source_matches": true
+    },
+    "3rdparty/ECHO/sglang/sgl-kernel/csrc/elementwise/topk.cu": {
+      "sha256": "cebb32a9a479b36c1b9ef4d8e373fc116f3de9cb925f1833f4d3499ab1a61f9f",
+      "build_receipt_source_matches": true
+    },
+    "3rdparty/ECHO/sglang/sgl-kernel/python/sgl_kernel/flash_attn.py": {
+      "sha256": "5d556a6134fbe632decee6e910600da53bd78ad15b53d03c0ba5674c6700c6d6",
+      "build_receipt_source_matches": true
+    },
+    "3rdparty/ECHO/sglang/sgl-kernel/python/sgl_kernel/top_k.py": {
+      "sha256": "c288f86a5afc895dfadb0abaa4f8bef1c7571aed4b504e5d7eedbaa11de27812",
+      "build_receipt_source_matches": true
+    },
+    "cache/sparse_token_cache.py": {
+      "sha256": "3cd87b9bef30969dc9fc922ea6706b21e018a12309ee42ba0c727d74db765e39",
+      "frozen_source": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-q1-selected-20261011-01/cache/sparse_token_cache.py",
+      "profile_source_matches": true,
+      "profile_execution_identity_matches": true,
+      "benchmark_source_matches": true,
+      "current_navigation_target_matches": true
+    },
+    "cache/sparse_token_pool.py": {
+      "sha256": "56c9386c22d7f8b1833d9d9d420b69b0210dd472a1b24e0ff61e4753b9991ac2",
+      "frozen_source": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-q1-selected-20261011-01/cache/sparse_token_pool.py",
+      "profile_source_matches": true,
+      "profile_execution_identity_matches": true,
+      "benchmark_source_matches": true,
+      "current_navigation_target_matches": true
+    },
+    "models/deepseek_v32/attention.py": {
+      "sha256": "6c0becd4582cbcf38cb2af5200a6173ccba3846f3bb566fec521b752edc45dfb",
+      "frozen_source": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-q1-selected-20261011-01/models/deepseek_v32/attention.py",
+      "profile_source_matches": true,
+      "profile_execution_identity_matches": true,
+      "benchmark_source_matches": true,
+      "current_navigation_target_matches": true
+    },
+    "models/deepseek_v32/layers.py": {
+      "sha256": "c24e0d977639c01e30b41f99c4d2d76ffd8fd7e9c90e1d3ef08305ca8281e2e8",
+      "frozen_source": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-q1-selected-20261011-01/models/deepseek_v32/layers.py",
+      "profile_source_matches": true,
+      "profile_execution_identity_matches": true,
+      "benchmark_source_matches": true,
+      "current_navigation_target_matches": true
+    },
+    "models/deepseek_v32/model.py": {
+      "sha256": "412f675c6e9b709cb9379eafb6ca2acfee6a889e8f54d5e03e523b94f894f452",
+      "frozen_source": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-q1-selected-20261011-01/models/deepseek_v32/model.py",
+      "profile_source_matches": true,
+      "profile_execution_identity_matches": true,
+      "benchmark_source_matches": true,
+      "current_navigation_target_matches": true
+    },
+    "models/deepseek_v32/projections.py": {
+      "sha256": "d688d0ea3c410a6e6e0632875bcc6271f0a72db6d3b92c28aba56d5b1f2dbd27",
+      "frozen_source": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-q1-selected-20261011-01/models/deepseek_v32/projections.py",
+      "profile_source_matches": true,
+      "profile_execution_identity_matches": true,
+      "benchmark_source_matches": true,
+      "current_navigation_target_matches": true
+    },
+    "operators/common/csrc/kv_transfer.cu": {
+      "sha256": "71821370997ee6afb92b0aa0cc7da4c813d17e407b621e2b29aeb343747e525b",
+      "frozen_source": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-q1-selected-20261011-01/operators/common/csrc/kv_transfer.cu",
+      "profile_source_matches": true,
+      "profile_execution_identity_matches": true,
+      "benchmark_source_matches": true,
+      "current_navigation_target_matches": true
+    },
+    "operators/deepseek_v32/attention/device_only/decode.py": {
+      "sha256": "686b695f410bb4b4a30c25ca8337d1417b7f48ce1c41783f9de27f452f65d74b",
+      "frozen_source": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-q1-selected-20261011-01/operators/deepseek_v32/attention/device_only/decode.py",
+      "profile_source_matches": true,
+      "profile_execution_identity_matches": true,
+      "benchmark_source_matches": true,
+      "current_navigation_target_matches": true
+    },
+    "operators/deepseek_v32/attention/device_only/mla.py": {
+      "sha256": "1d353ab719a339275b8bcd3935cd72419684a680fe5eca9982a3dbbe08c385ec",
+      "frozen_source": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-q1-selected-20261011-01/operators/deepseek_v32/attention/device_only/mla.py",
+      "profile_source_matches": true,
+      "profile_execution_identity_matches": true,
+      "benchmark_source_matches": true,
+      "current_navigation_target_matches": true
+    },
+    "operators/deepseek_v32/indexer/cache_ops.py": {
+      "sha256": "090579cce35f3cbd491490896dec9d2a3ddbf7a6ff4c1deddff3ce0fc455c046",
+      "frozen_source": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-q1-selected-20261011-01/operators/deepseek_v32/indexer/cache_ops.py",
+      "profile_source_matches": true,
+      "profile_execution_identity_matches": true,
+      "benchmark_source_matches": true,
+      "current_navigation_target_matches": true
+    },
+    "operators/deepseek_v32/indexer/csrc/echo_indexer.cu": {
+      "sha256": "41130245ce2b8a74720c99201e53e9f96a8b3c33def1d028c9978d8788b49eba",
+      "frozen_source": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-q1-selected-20261011-01/operators/deepseek_v32/indexer/csrc/echo_indexer.cu",
+      "profile_source_matches": true,
+      "profile_execution_identity_matches": true,
+      "benchmark_source_matches": true,
+      "current_navigation_target_matches": true
+    },
+    "operators/deepseek_v32/indexer/csrc/echo_recall_dispatch.cpp": {
+      "sha256": "8d81e018bdd227dd068544368480635f410eb50428dc843574a9814e0818ac74",
+      "frozen_source": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-q1-selected-20261011-01/operators/deepseek_v32/indexer/csrc/echo_recall_dispatch.cpp",
+      "profile_source_matches": true,
+      "profile_execution_identity_matches": true,
+      "benchmark_source_matches": true,
+      "current_navigation_target_matches": true
+    },
+    "operators/deepseek_v32/indexer/csrc/echo_resident.cuh": {
+      "sha256": "931d978099525213ae267643822dada8697684eb4bce57b6faaa276dbe2ef340",
+      "frozen_source": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-q1-selected-20261011-01/operators/deepseek_v32/indexer/csrc/echo_resident.cuh",
+      "profile_source_matches": true,
+      "profile_execution_identity_matches": true,
+      "benchmark_source_matches": true,
+      "current_navigation_target_matches": true
+    },
+    "operators/deepseek_v32/indexer/csrc/echo_sparse_append_free.cuh": {
+      "sha256": "7167c5323b257c7111eaaa6095afd5e9c3929ee649d4f4d391c8627a5f16bade",
+      "frozen_source": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-q1-selected-20261011-01/operators/deepseek_v32/indexer/csrc/echo_sparse_append_free.cuh",
+      "profile_source_matches": true,
+      "profile_execution_identity_matches": true,
+      "benchmark_source_matches": true,
+      "current_navigation_target_matches": true
+    },
+    "operators/deepseek_v32/indexer/csrc/echo_sparse_free.cuh": {
+      "sha256": "b8f64a0f166af9673cfbdbac370a8aa9ab721a5709984c714aad944cfa5fc8ed",
+      "frozen_source": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-q1-selected-20261011-01/operators/deepseek_v32/indexer/csrc/echo_sparse_free.cuh",
+      "profile_source_matches": true,
+      "profile_execution_identity_matches": true,
+      "benchmark_source_matches": true,
+      "current_navigation_target_matches": true
+    },
+    "operators/deepseek_v32/indexer/csrc/echo_sparse_prepare_free.cuh": {
+      "sha256": "6b66429f98bbdece4247b8aa52ff161eb77966579d88ac10ec3003dd565f0344",
+      "frozen_source": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-q1-selected-20261011-01/operators/deepseek_v32/indexer/csrc/echo_sparse_prepare_free.cuh",
+      "profile_source_matches": true,
+      "profile_execution_identity_matches": true,
+      "benchmark_source_matches": true,
+      "current_navigation_target_matches": true
+    },
+    "operators/deepseek_v32/indexer/csrc/echo_sparse_recall.cuh": {
+      "sha256": "a7c33da4c60eb3354e93fc77cac39faf19810d4a5b52c03283242fa61e52ff44",
+      "frozen_source": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-q1-selected-20261011-01/operators/deepseek_v32/indexer/csrc/echo_sparse_recall.cuh",
+      "profile_source_matches": true,
+      "profile_execution_identity_matches": true,
+      "benchmark_source_matches": true,
+      "current_navigation_target_matches": true
+    },
+    "operators/deepseek_v32/indexer/csrc/official_decode.cu": {
+      "sha256": "6795fdd52f4f1bc149322c002d8c215cf22d224356e7d7577905864fc80984c5",
+      "frozen_source": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-q1-selected-20261011-01/operators/deepseek_v32/indexer/csrc/official_decode.cu",
+      "profile_source_matches": true,
+      "profile_execution_identity_matches": true,
+      "benchmark_source_matches": true,
+      "current_navigation_target_matches": true
+    },
+    "operators/deepseek_v32/indexer/csrc/official_decode_clean.cu": {
+      "sha256": "de3a5b0a38ea65ed6e95e1aaacec129b35ca5b1b47a5387b0ddea7f5b2762aa1",
+      "frozen_source": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-q1-selected-20261011-01/operators/deepseek_v32/indexer/csrc/official_decode_clean.cu",
+      "profile_source_matches": true,
+      "profile_execution_identity_matches": true,
+      "benchmark_source_matches": true,
+      "current_navigation_target_matches": true
+    },
+    "operators/deepseek_v32/indexer/csrc/official_prefetch.cu": {
+      "sha256": "911c448352cc22759894ef24aa41c6aa4f015a5e78df835c4b80eb23bc5e1f3c",
+      "frozen_source": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-q1-selected-20261011-01/operators/deepseek_v32/indexer/csrc/official_prefetch.cu",
+      "profile_source_matches": true,
+      "profile_execution_identity_matches": true,
+      "benchmark_source_matches": true,
+      "current_navigation_target_matches": true
+    },
+    "operators/deepseek_v32/indexer/csrc/q1_hint_exact.cu": {
+      "sha256": "8140c0cbd17026144008e672310172f48db8f138fbba4b461dd1cc2331570abc",
+      "frozen_source": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-q1-selected-20261011-01/operators/deepseek_v32/indexer/csrc/q1_hint_exact.cu",
+      "profile_source_matches": true,
+      "profile_execution_identity_matches": true,
+      "benchmark_source_matches": true,
+      "current_navigation_target_matches": true
+    },
+    "operators/deepseek_v32/indexer/csrc/q1_topk_sort.cu": {
+      "sha256": "e032304fdb34a01e77792796012f882dd906caf4f1868afc94bd9cbc530aab6c",
+      "frozen_source": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-q1-selected-20261011-01/operators/deepseek_v32/indexer/csrc/q1_topk_sort.cu",
+      "profile_source_matches": true,
+      "profile_execution_identity_matches": true,
+      "benchmark_source_matches": true,
+      "current_navigation_target_matches": true
+    },
+    "operators/deepseek_v32/indexer/decode_hint.py": {
+      "sha256": "03df99637bad567a2497aa39b2561618d27c52be88c7175572771d0644d95cd3",
+      "frozen_source": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-q1-selected-20261011-01/operators/deepseek_v32/indexer/decode_hint.py",
+      "profile_source_matches": true,
+      "profile_execution_identity_matches": true,
+      "benchmark_source_matches": true,
+      "current_navigation_target_matches": true
+    },
+    "operators/deepseek_v32/indexer/echo.py": {
+      "sha256": "d451c53d4dae4b13ef7f3b8486bf8e0a06bf5f416162504da7d0851f88ea4203",
+      "frozen_source": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-q1-selected-20261011-01/operators/deepseek_v32/indexer/echo.py",
+      "profile_source_matches": true,
+      "profile_execution_identity_matches": true,
+      "benchmark_source_matches": true,
+      "current_navigation_target_matches": true
+    },
+    "operators/deepseek_v32/indexer/official_decode.py": {
+      "sha256": "f61226ffc2166d767bf90f3791897cff74f3a889fe84e74f91341edc50b6b607",
+      "frozen_source": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-q1-selected-20261011-01/operators/deepseek_v32/indexer/official_decode.py",
+      "profile_source_matches": true,
+      "profile_execution_identity_matches": true,
+      "benchmark_source_matches": true,
+      "current_navigation_target_matches": true
+    },
+    "operators/deepseek_v32/indexer/official_prefetch.py": {
+      "sha256": "47aded2da0084f88fe526ed80333d9320a26947156c95502f68a63982037268e",
+      "frozen_source": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-q1-selected-20261011-01/operators/deepseek_v32/indexer/official_prefetch.py",
+      "profile_source_matches": true,
+      "profile_execution_identity_matches": true,
+      "benchmark_source_matches": true,
+      "current_navigation_target_matches": true
+    },
+    "operators/deepseek_v32/indexer/prefetch_hint.py": {
+      "sha256": "cb4b01c994f67bbbfa500e1c4326773a227820768ba78cf94196772917373b18",
+      "frozen_source": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-q1-selected-20261011-01/operators/deepseek_v32/indexer/prefetch_hint.py",
+      "profile_source_matches": true,
+      "profile_execution_identity_matches": true,
+      "benchmark_source_matches": true,
+      "current_navigation_target_matches": true
+    },
+    "operators/deepseek_v32/indexer/q1_topk_cub.py": {
+      "sha256": "c2d59cf3dedbe3ab47ea54241622cc21249448699816c099ad13818813b2f3a0",
+      "frozen_source": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-q1-selected-20261011-01/operators/deepseek_v32/indexer/q1_topk_cub.py",
+      "profile_source_matches": true,
+      "profile_execution_identity_matches": true,
+      "benchmark_source_matches": true,
+      "current_navigation_target_matches": true
+    },
+    "operators/deepseek_v32/indexer/selection.py": {
+      "sha256": "473e34e5961cea1511ce16995a93b56ed807d3e6b55b0f28c8b252916a0112d9",
+      "frozen_source": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-q1-selected-20261011-01/operators/deepseek_v32/indexer/selection.py",
+      "profile_source_matches": true,
+      "profile_execution_identity_matches": true,
+      "benchmark_source_matches": true,
+      "current_navigation_target_matches": true
+    }
+  },
+  "code_references": [
+    {
+      "label": "forward_absorb_prepare",
+      "path": "3rdparty/ECHO/sglang/python/sglang/srt/models/deepseek_v2.py",
+      "line": 1518,
+      "source_line": "def forward_absorb_prepare("
+    },
+    {
+      "label": "self.indexer 调用",
+      "path": "3rdparty/ECHO/sglang/python/sglang/srt/models/deepseek_v2.py",
+      "line": 1646,
+      "source_line": "topk_indices = self.indexer("
+    },
+    {
+      "label": "Indexer.forward_cuda",
+      "path": "3rdparty/ECHO/sglang/python/sglang/srt/layers/attention/nsa/nsa_indexer.py",
+      "line": 666,
+      "source_line": "def forward_cuda("
+    },
+    {
+      "label": "attention_projection",
+      "path": "models/deepseek_v32/attention.py",
+      "line": 321,
+      "source_line": "with scope(\"attention_projection\"):"
+    },
+    {
+      "label": "project_positions",
+      "path": "models/deepseek_v32/projections.py",
+      "line": 182,
+      "source_line": "def project_positions(self, hidden, positions, *, normalized=False) -> Projected:"
+    },
+    {
+      "label": "243–244 行",
+      "path": "models/deepseek_v32/projections.py",
+      "line": 243,
+      "source_line": "weights = F.linear(x.float(), self.index_head_weight) * cfg.index_n_heads**-0.5"
+    },
+    {
+      "label": "写 index cache",
+      "path": "3rdparty/ECHO/sglang/python/sglang/srt/layers/attention/nsa/nsa_indexer.py",
+      "line": 716,
+      "source_line": "forward_batch.token_to_kv_pool.set_index_k_and_scale_buffer("
+    },
+    {
+      "label": "_get_logits_head_gate",
+      "path": "3rdparty/ECHO/sglang/python/sglang/srt/layers/attention/nsa/nsa_indexer.py",
+      "line": 239,
+      "source_line": "def _get_logits_head_gate(self, x: torch.Tensor, q_scale: torch.Tensor):"
+    },
+    {
+      "label": "_set_k_and_s_triton_kernel",
+      "path": "3rdparty/ECHO/sglang/python/sglang/srt/layers/attention/nsa/index_buf_accessor.py",
+      "line": 315,
+      "source_line": "def _set_k_and_s_triton_kernel("
+    },
+    {
+      "label": "metadata 调用",
+      "path": "3rdparty/ECHO/sglang/python/sglang/srt/layers/attention/nsa/nsa_indexer.py",
+      "line": 351,
+      "source_line": "schedule_metadata = deep_gemm.get_paged_mqa_logits_metadata("
+    },
+    {
+      "label": "counter.fill_(0)",
+      "path": "3rdparty/ECHO/sglang/python/sglang/srt/layers/attention/nsa/nsa_indexer.py",
+      "line": 386,
+      "source_line": "query_recall_counter.fill_(0)"
+    },
+    {
+      "label": "smxx_paged_mqa_logits_metadata",
+      "path": "3rdparty/ECHO/DeepGEMM/deep_gemm/include/deep_gemm/impls/sm90_fp8_paged_mqa_logits.cuh",
+      "line": 21,
+      "source_line": "void smxx_paged_mqa_logits_metadata(const uint32_t batch_size, const uint32_t* context_lens, uint32_t* schedule_metadata) {"
+    },
+    {
+      "label": "fp8_paged_mqa_logits_fused_v2 调用",
+      "path": "3rdparty/ECHO/sglang/python/sglang/srt/layers/attention/nsa/nsa_indexer.py",
+      "line": 391,
+      "source_line": "logits = deep_gemm.fp8_paged_mqa_logits_fused_v2("
+    },
+    {
+      "label": "JIT launcher",
+      "path": "3rdparty/ECHO/DeepGEMM/csrc/jit_kernels/impls/smxx_fp8_paged_mqa_logits.hpp",
+      "line": 333,
+      "source_line": "static void smxx_fp8_paged_mqa_logits_fused_v2(const torch::Tensor& q,"
+    },
+    {
+      "label": "fused_v2 kernel",
+      "path": "3rdparty/ECHO/DeepGEMM/deep_gemm/include/deep_gemm/impls/sm90_fp8_paged_mqa_logits.cuh",
+      "line": 413,
+      "source_line": "void sm90_fp8_paged_mqa_logits_fused_v2(const uint32_t batch_size,"
+    },
+    {
+      "label": "topk_transform",
+      "path": "3rdparty/ECHO/sglang/python/sglang/srt/layers/attention/nsa_backend.py",
+      "line": 136,
+      "source_line": "def topk_transform("
+    },
+    {
+      "label": "kth-logit 输出初始化",
+      "path": "3rdparty/ECHO/sglang/sgl-kernel/python/sgl_kernel/top_k.py",
+      "line": 85,
+      "source_line": "torch.zeros((score.size(0),), dtype=torch.float32, device=score.device)"
+    },
+    {
+      "label": "topk_transform_decode_kernel",
+      "path": "3rdparty/ECHO/sglang/sgl-kernel/csrc/elementwise/topk.cu",
+      "line": 251,
+      "source_line": "void topk_transform_decode_kernel("
+    },
+    {
+      "label": "arange / mask 后处理",
+      "path": "3rdparty/ECHO/sglang/python/sglang/srt/layers/attention/nsa_backend.py",
+      "line": 174,
+      "source_line": "if self.attn_metadata.nsa_non_padded is not None:"
+    },
+    {
+      "label": "decode_topk_logits 更新",
+      "path": "3rdparty/ECHO/sglang/python/sglang/srt/layers/attention/nsa/nsa_indexer.py",
+      "line": 413,
+      "source_line": "self.decode_topk_logits[:q_len] = ("
+    },
+    {
+      "label": "set_mla_kv_buffer",
+      "path": "3rdparty/ECHO/sglang/python/sglang/srt/mem_cache/memory_pool_host.py",
+      "line": 1097,
+      "source_line": "def set_mla_kv_buffer("
+    },
+    {
+      "label": "容量计算",
+      "path": "3rdparty/ECHO/sglang/python/sglang/srt/mem_cache/memory_pool_host.py",
+      "line": 1126,
+      "source_line": "if metadata.nsa_non_padded is not None:"
+    },
+    {
+      "label": "free_device_pool_cuda_graph",
+      "path": "3rdparty/ECHO/sglang/python/sglang/srt/mem_cache/memory_pool_host.py",
+      "line": 1071,
+      "source_line": "def free_device_pool_cuda_graph("
+    },
+    {
+      "label": "get_free_loc",
+      "path": "3rdparty/ECHO/sglang/python/sglang/srt/mem_cache/recall_ops.py",
+      "line": 674,
+      "source_line": "def get_free_loc(priority: torch.Tensor, loc: torch.Tensor, free_size: torch.Tensor):"
+    },
+    {
+      "label": "fast_argmin_bounded",
+      "path": "3rdparty/ECHO/sglang/python/sglang/srt/mem_cache/recall_ops.py",
+      "line": 696,
+      "source_line": "_fast_argmin_bounded(priority, loc, free_size)"
+    },
+    {
+      "label": "argmin_bounded_kernel",
+      "path": "3rdparty/ECHO/sglang/sgl-kernel/csrc/elementwise/topk.cu",
+      "line": 876,
+      "source_line": "void argmin_bounded_kernel("
+    },
+    {
+      "label": "free 调用",
+      "path": "3rdparty/ECHO/sglang/python/sglang/srt/mem_cache/memory_pool_host.py",
+      "line": 1086,
+      "source_line": "free_update("
+    },
+    {
+      "label": "append 发布",
+      "path": "3rdparty/ECHO/sglang/python/sglang/srt/mem_cache/memory_pool_host.py",
+      "line": 1139,
+      "source_line": "self.device_pool_allocator[layer_id].alloc(need_size, device_pool_loc)"
+    },
+    {
+      "label": "host 写回",
+      "path": "3rdparty/ECHO/sglang/python/sglang/srt/mem_cache/memory_pool_host.py",
+      "line": 1181,
+      "source_line": "if torch.cuda.is_current_stream_capturing():"
+    },
+    {
+      "label": "_free_update_kernel",
+      "path": "3rdparty/ECHO/sglang/python/sglang/srt/mem_cache/recall_ops.py",
+      "line": 84,
+      "source_line": "def _free_update_kernel("
+    },
+    {
+      "label": "allocator free",
+      "path": "3rdparty/ECHO/sglang/python/sglang/srt/mem_cache/allocator.py",
+      "line": 784,
+      "source_line": "def _cuda_graph_allocator_free_kernel("
+    },
+    {
+      "label": "alloc",
+      "path": "3rdparty/ECHO/sglang/python/sglang/srt/mem_cache/allocator.py",
+      "line": 745,
+      "source_line": "def _cuda_graph_allocator_alloc_kernel("
+    },
+    {
+      "label": "_set_update_kernel",
+      "path": "3rdparty/ECHO/sglang/python/sglang/srt/mem_cache/recall_ops.py",
+      "line": 134,
+      "source_line": "def _set_update_kernel("
+    },
+    {
+      "label": "HBM KV 写入",
+      "path": "3rdparty/ECHO/sglang/python/sglang/srt/mem_cache/recall_ops.py",
+      "line": 216,
+      "source_line": "def _set_mla_kv_buffer_cuda_graph_kernel("
+    },
+    {
+      "label": "mapped-host 写入",
+      "path": "3rdparty/ECHO/sglang/python/sglang/srt/mem_cache/memory_pool.py",
+      "line": 1149,
+      "source_line": "def set_mla_kv_buffer_kernel("
+    },
+    {
+      "label": "映射查询与 need_device / sum",
+      "path": "3rdparty/ECHO/sglang/python/sglang/srt/layers/attention/nsa_backend.py",
+      "line": 780,
+      "source_line": "device_page_table_1 = forward_batch.token_to_kv_pool.host_token_to_device["
+    },
+    {
+      "label": "recall_miss_tokens_decode_cuda_graph_with_prefetch",
+      "path": "3rdparty/ECHO/sglang/python/sglang/srt/mem_cache/memory_pool_host.py",
+      "line": 1379,
+      "source_line": "def recall_miss_tokens_decode_cuda_graph_with_prefetch("
+    },
+    {
+      "label": "容量与保护调用",
+      "path": "3rdparty/ECHO/sglang/python/sglang/srt/mem_cache/memory_pool_host.py",
+      "line": 1394,
+      "source_line": "available_size = device_pool_allocator.available_size().to(torch.int32)"
+    },
+    {
+      "label": "_protect_kernel",
+      "path": "3rdparty/ECHO/sglang/python/sglang/srt/mem_cache/recall_ops.py",
+      "line": 45,
+      "source_line": "def _protect_kernel("
+    },
+    {
+      "label": "更新 priority",
+      "path": "3rdparty/ECHO/sglang/python/sglang/srt/mem_cache/memory_pool_host.py",
+      "line": 1408,
+      "source_line": "self.update_priority_when_use(layer_id, recall_device_indices)"
+    },
+    {
+      "label": "recall_update_with_prefetch",
+      "path": "3rdparty/ECHO/sglang/python/sglang/srt/mem_cache/recall_ops.py",
+      "line": 479,
+      "source_line": "def recall_update_with_prefetch("
+    },
+    {
+      "label": "清 staging 调用",
+      "path": "3rdparty/ECHO/sglang/python/sglang/srt/mem_cache/memory_pool_host.py",
+      "line": 1425,
+      "source_line": "clear_decode_prefetch_mappings("
+    },
+    {
+      "label": "边界检查调用",
+      "path": "3rdparty/ECHO/sglang/python/sglang/srt/layers/attention/nsa_backend.py",
+      "line": 852,
+      "source_line": "check_device_pool(device_page_table_1, kv_cache.shape[0])"
+    },
+    {
+      "label": "_recall_update_with_prefetch_kernel",
+      "path": "3rdparty/ECHO/sglang/python/sglang/srt/mem_cache/recall_ops.py",
+      "line": 385,
+      "source_line": "def _recall_update_with_prefetch_kernel("
+    },
+    {
+      "label": "_clear_decode_prefetch_mappings_kernel",
+      "path": "3rdparty/ECHO/sglang/python/sglang/srt/mem_cache/recall_ops.py",
+      "line": 525,
+      "source_line": "def _clear_decode_prefetch_mappings_kernel("
+    },
+    {
+      "label": "check_device_pool_kernel",
+      "path": "3rdparty/ECHO/sglang/python/sglang/srt/layers/attention/nsa_backend.py",
+      "line": 1127,
+      "source_line": "def check_device_pool_kernel("
+    },
+    {
+      "label": "_forward_fa3",
+      "path": "3rdparty/ECHO/sglang/python/sglang/srt/layers/attention/nsa_backend.py",
+      "line": 938,
+      "source_line": "def _forward_fa3("
+    },
+    {
+      "label": "flash_attn_with_kvcache",
+      "path": "3rdparty/ECHO/sglang/sgl-kernel/python/sgl_kernel/flash_attn.py",
+      "line": 39,
+      "source_line": "def flash_attn_with_kvcache("
+    },
+    {
+      "label": "prepare scheduler",
+      "path": "3rdparty/ECHO/reproduction/cxldsagr/deps/repo-flash-attention/hopper/flash_prepare_scheduler.cu",
+      "line": 15,
+      "source_line": "__global__ void prepare_varlen_num_blocks_kernel("
+    },
+    {
+      "label": "FlashAttnFwdSm90",
+      "path": "3rdparty/ECHO/reproduction/cxldsagr/deps/repo-flash-attention/hopper/flash_fwd_kernel_sm90.h",
+      "line": 29,
+      "source_line": "class FlashAttnFwdSm90 {"
+    },
+    {
+      "label": "FlashAttnFwdCombine",
+      "path": "3rdparty/ECHO/reproduction/cxldsagr/deps/repo-flash-attention/hopper/flash_fwd_combine_kernel.h",
+      "line": 26,
+      "source_line": "class FlashAttnFwdCombine {"
+    },
+    {
+      "label": "index_cache_write",
+      "path": "models/deepseek_v32/attention.py",
+      "line": 323,
+      "source_line": "with scope(\"index_cache_write\"):"
+    },
+    {
+      "label": "prepare_prefetch",
+      "path": "cache/sparse_token_cache.py",
+      "line": 741,
+      "source_line": "def prepare_prefetch(self, new_start, new_count, offset, *, limit=8192):"
+    },
+    {
+      "label": "有界 free 分派",
+      "path": "cache/sparse_token_cache.py",
+      "line": 774,
+      "source_line": "# Non-Q1 paths retain their original preparation and token."
+    },
+    {
+      "label": "prepare_prefetch_free",
+      "path": "operators/deepseek_v32/indexer/cache_ops.py",
+      "line": 462,
+      "source_line": "def prepare_prefetch_free("
+    },
+    {
+      "label": "prepare_masks",
+      "path": "operators/deepseek_v32/indexer/csrc/echo_sparse_append_free.cuh",
+      "line": 11,
+      "source_line": "__global__ void prepare_masks(const int64_t* priority, uint32_t* masks,"
+    },
+    {
+      "label": "select_slots",
+      "path": "operators/deepseek_v32/indexer/csrc/echo_sparse_append_free.cuh",
+      "line": 26,
+      "source_line": "__global__ void select_slots(const uint32_t* masks, const bool* free_bitmap,"
+    },
+    {
+      "label": "reset_publish",
+      "path": "operators/deepseek_v32/indexer/csrc/echo_sparse_prepare_free.cuh",
+      "line": 9,
+      "source_line": "__global__ void reset_publish(int* slots_out, int64_t* journal, uint32_t* counter,"
+    },
+    {
+      "label": "starts / ends 构造",
+      "path": "operators/deepseek_v32/indexer/echo.py",
+      "line": 358,
+      "source_line": "starts = torch.zeros(rows, dtype=torch.int32, device=device)"
+    },
+    {
+      "label": "logits_from_keys",
+      "path": "operators/deepseek_v32/indexer/official_prefetch.py",
+      "line": 326,
+      "source_line": "def logits_from_keys(q, k, weights, scales, context_lens, prefetch):"
+    },
+    {
+      "label": "_prepare_keys",
+      "path": "operators/deepseek_v32/indexer/official_prefetch.py",
+      "line": 196,
+      "source_line": "def _prepare_keys(k, scales, prefetch, context_lens):"
+    },
+    {
+      "label": "metadata",
+      "path": "operators/deepseek_v32/indexer/official_decode.py",
+      "line": 143,
+      "source_line": "def metadata(context_lens):"
+    },
+    {
+      "label": "prepare_keys_kernel",
+      "path": "operators/deepseek_v32/indexer/csrc/official_prefetch.cu",
+      "line": 220,
+      "source_line": "__global__ void prepare_keys_kernel(const uint32_t* keys, const uint32_t* scales,"
+    },
+    {
+      "label": "metadata bridge",
+      "path": "operators/deepseek_v32/indexer/csrc/official_decode.cu",
+      "line": 60,
+      "source_line": "void metadata(TensorView context_lens, TensorView output) {"
+    },
+    {
+      "label": "_logits_prepared",
+      "path": "operators/deepseek_v32/indexer/official_prefetch.py",
+      "line": 295,
+      "source_line": "def _logits_prepared("
+    },
+    {
+      "label": "official_decode.logits",
+      "path": "operators/deepseek_v32/indexer/official_decode.py",
+      "line": 155,
+      "source_line": "def logits("
+    },
+    {
+      "label": "fused_v2 实例化与发射",
+      "path": "operators/deepseek_v32/indexer/csrc/official_decode.cu",
+      "line": 106,
+      "source_line": "auto kernel = deep_gemm::sm90_fp8_paged_mqa_logits_fused_v2<"
+    },
+    {
+      "label": "clean 发射调用",
+      "path": "operators/deepseek_v32/indexer/csrc/official_decode.cu",
+      "line": 120,
+      "source_line": "clean(stream, max_context_len, output.size(1),"
+    },
+    {
+      "label": "clean bridge",
+      "path": "operators/deepseek_v32/indexer/csrc/official_decode_clean.cu",
+      "line": 8,
+      "source_line": "void clean(cudaStream_t stream, uint32_t max_context_len, uint64_t stride,"
+    },
+    {
+      "label": "exact_topk",
+      "path": "operators/deepseek_v32/indexer/selection.py",
+      "line": 62,
+      "source_line": "def exact_topk(scores, k):"
+    },
+    {
+      "label": "Q1 分派",
+      "path": "operators/deepseek_v32/indexer/selection.py",
+      "line": 106,
+      "source_line": "values, indices = _official_topk_int32("
+    },
+    {
+      "label": "_official_topk_int32",
+      "path": "operators/deepseek_v32/indexer/selection.py",
+      "line": 14,
+      "source_line": "def _official_topk_int32(scores, count, *, sorted_output=True, deterministic=True):"
+    },
+    {
+      "label": "sort_mask_ 调用",
+      "path": "operators/deepseek_v32/indexer/selection.py",
+      "line": 109,
+      "source_line": "sort_mask_(values, indices)"
+    },
+    {
+      "label": "native wrapper",
+      "path": "operators/deepseek_v32/indexer/q1_topk_cub.py",
+      "line": 65,
+      "source_line": "def sort_mask_(values, indices):"
+    },
+    {
+      "label": "cub_sort_mask_kernel",
+      "path": "operators/deepseek_v32/indexer/csrc/q1_topk_sort.cu",
+      "line": 15,
+      "source_line": "void cub_sort_mask_kernel(float* values, int* indices, int count) {"
+    },
+    {
+      "label": "精确选择发布入口",
+      "path": "models/deepseek_v32/attention.py",
+      "line": 376,
+      "source_line": "prefetch[\"_promote_selected_prefetch\"](indices)"
+    },
+    {
+      "label": "_promote",
+      "path": "operators/deepseek_v32/indexer/official_prefetch.py",
+      "line": 229,
+      "source_line": "def _promote(state, prefetch, indices):"
+    },
+    {
+      "label": "validate_promotion_kernel",
+      "path": "operators/deepseek_v32/indexer/csrc/official_prefetch.cu",
+      "line": 44,
+      "source_line": "__global__ void validate_promotion_kernel(const int* stage_ids,"
+    },
+    {
+      "label": "finalize_prefetch",
+      "path": "cache/sparse_token_cache.py",
+      "line": 852,
+      "source_line": "def finalize_prefetch(self, prefetch=None):"
+    },
+    {
+      "label": "pool finalize",
+      "path": "cache/sparse_token_pool.py",
+      "line": 681,
+      "source_line": "def finalize_prefetch(self, layer_id):"
+    },
+    {
+      "label": "copy_publish_kernel",
+      "path": "operators/deepseek_v32/indexer/csrc/official_prefetch.cu",
+      "line": 144,
+      "source_line": "__global__ void copy_publish_kernel(const int* stage_ids, const uint16_t* stage,"
+    },
+    {
+      "label": "clear_kernel",
+      "path": "operators/deepseek_v32/indexer/csrc/official_prefetch.cu",
+      "line": 167,
+      "source_line": "__global__ void clear_kernel(const int* stage_ids, int* h2d,"
+    },
+    {
+      "label": "finalize_kernel / advance_clock_kernel",
+      "path": "operators/deepseek_v32/indexer/csrc/echo_indexer.cu",
+      "line": 129,
+      "source_line": "__global__ void finalize_kernel(int64_t* priority, bool* free_bitmap,"
+    },
+    {
+      "label": "两种 hint 更新",
+      "path": "models/deepseek_v32/attention.py",
+      "line": 385,
+      "source_line": "update_prefetch_hint(scores[:, :end], self.offset)"
+    },
+    {
+      "label": "update_prefetch_hint",
+      "path": "operators/deepseek_v32/indexer/prefetch_hint.py",
+      "line": 38,
+      "source_line": "def update_prefetch_hint(scores, offset):"
+    },
+    {
+      "label": "update_decode_hint",
+      "path": "operators/deepseek_v32/indexer/decode_hint.py",
+      "line": 24,
+      "source_line": "def update_decode_hint(values, offset):"
+    },
+    {
+      "label": "mean_kernel",
+      "path": "operators/deepseek_v32/indexer/csrc/q1_hint_exact.cu",
+      "line": 19,
+      "source_line": "void mean_kernel(const float* scores, float* offset) {"
+    },
+    {
+      "label": "update_decode_ema",
+      "path": "operators/deepseek_v32/indexer/decode_hint.py",
+      "line": 16,
+      "source_line": "def update_decode_ema(Values, Offset, LAST: tl.constexpr):"
+    },
+    {
+      "label": "append",
+      "path": "cache/sparse_token_cache.py",
+      "line": 290,
+      "source_line": "def append(self, records):"
+    },
+    {
+      "label": "sparse_append_free 分派",
+      "path": "cache/sparse_token_cache.py",
+      "line": 367,
+      "source_line": "append_native = getattr(native, \"sparse_append_free\", append_native)"
+    },
+    {
+      "label": "write_host",
+      "path": "cache/sparse_token_pool.py",
+      "line": 468,
+      "source_line": "def write_host(self, session, layer, start, source):"
+    },
+    {
+      "label": "空槽分配发射",
+      "path": "operators/deepseek_v32/indexer/csrc/echo_sparse_append_free.cuh",
+      "line": 90,
+      "source_line": "void append(TensorView source, TensorView records, TensorView pages,"
+    },
+    {
+      "label": "planned_append_kernel",
+      "path": "operators/deepseek_v32/indexer/csrc/echo_resident.cuh",
+      "line": 180,
+      "source_line": "__global__ void planned_append_kernel("
+    },
+    {
+      "label": "_ensure_from_topk",
+      "path": "cache/sparse_token_cache.py",
+      "line": 571,
+      "source_line": "def _ensure_from_topk(self, indices):"
+    },
+    {
+      "label": "_ensure_sparse_from_topk",
+      "path": "cache/sparse_token_cache.py",
+      "line": 616,
+      "source_line": "def _ensure_sparse_from_topk(self, indices, native):"
+    },
+    {
+      "label": "sparse_selection_classify",
+      "path": "operators/deepseek_v32/indexer/cache_ops.py",
+      "line": 303,
+      "source_line": "def sparse_selection_classify("
+    },
+    {
+      "label": "sparse_union_clear",
+      "path": "operators/deepseek_v32/indexer/csrc/echo_sparse_recall.cuh",
+      "line": 8,
+      "source_line": "__global__ void sparse_union_clear(uint32_t* bitmap, int64_t words,"
+    },
+    {
+      "label": "sparse_union_kernel",
+      "path": "operators/deepseek_v32/indexer/csrc/echo_sparse_recall.cuh",
+      "line": 22,
+      "source_line": "__global__ void sparse_union_kernel(const int* indices, int64_t elements,"
+    },
+    {
+      "label": "sparse_classify_kernel",
+      "path": "operators/deepseek_v32/indexer/csrc/echo_sparse_recall.cuh",
+      "line": 47,
+      "source_line": "__global__ void sparse_classify_kernel("
+    },
+    {
+      "label": "complete 调用",
+      "path": "cache/sparse_token_cache.py",
+      "line": 672,
+      "source_line": "complete("
+    },
+    {
+      "label": "map 调用",
+      "path": "cache/sparse_token_cache.py",
+      "line": 728,
+      "source_line": "native.sparse_selection_map("
+    },
+    {
+      "label": "recall bridge",
+      "path": "operators/deepseek_v32/indexer/csrc/echo_recall_dispatch.cpp",
+      "line": 86,
+      "source_line": "Function make_bridge(Module echo, Module common, bool free_only) {"
+    },
+    {
+      "label": "count / compact 空槽",
+      "path": "operators/deepseek_v32/indexer/csrc/echo_sparse_free.cuh",
+      "line": 29,
+      "source_line": "__global__ void count_flags_and_free(const int* flags, const int64_t* priority,"
+    },
+    {
+      "label": "gather_records",
+      "path": "operators/common/csrc/kv_transfer.cu",
+      "line": 14,
+      "source_line": "__global__ void gather_records(const unsigned char* host, unsigned char* device,"
+    },
+    {
+      "label": "sparse_publish_kernel",
+      "path": "operators/deepseek_v32/indexer/csrc/echo_sparse_recall.cuh",
+      "line": 356,
+      "source_line": "__global__ void sparse_publish_kernel("
+    },
+    {
+      "label": "sparse_map_kernel",
+      "path": "operators/deepseek_v32/indexer/csrc/echo_sparse_recall.cuh",
+      "line": 415,
+      "source_line": "__global__ void sparse_map_kernel("
+    },
+    {
+      "label": "sparse_mla_decode",
+      "path": "operators/deepseek_v32/attention/device_only/mla.py",
+      "line": 118,
+      "source_line": "def sparse_mla_decode(q, kv, indices, scale, value_dim=512):"
+    },
+    {
+      "label": "split_kv",
+      "path": "operators/deepseek_v32/attention/device_only/decode.py",
+      "line": 90,
+      "source_line": "def split_kv(q, kv, indices, scale, backend):"
+    },
+    {
+      "label": "q.repeat(DECODE_SPLITS, 1, 1)",
+      "path": "operators/deepseek_v32/attention/device_only/decode.py",
+      "line": 93,
+      "source_line": "repeated_q = q.repeat(DECODE_SPLITS, 1, 1)"
+    },
+    {
+      "label": "flash_mla_sparse_fwd 与 combine 发射",
+      "path": "operators/deepseek_v32/attention/device_only/decode.py",
+      "line": 94,
+      "source_line": "partials, _, lse = backend.flash_mla_sparse_fwd("
+    },
+    {
+      "label": "combine kernel",
+      "path": "operators/deepseek_v32/attention/device_only/decode.py",
+      "line": 70,
+      "source_line": "def combine(Partials, Lse, Out, H: tl.constexpr, S: tl.constexpr, D: tl.constexpr):"
+    },
+    {
+      "label": "forward_absorb_core",
+      "path": "3rdparty/ECHO/sglang/python/sglang/srt/models/deepseek_v2.py",
+      "line": 1665,
+      "source_line": "def forward_absorb_core("
+    },
+    {
+      "label": "DecoderLayer.forward",
+      "path": "3rdparty/ECHO/sglang/python/sglang/srt/models/deepseek_v2.py",
+      "line": 2495,
+      "source_line": "def forward("
+    },
+    {
+      "label": "CheckpointAttention.output",
+      "path": "models/deepseek_v32/projections.py",
+      "line": 291,
+      "source_line": "def output(self, attention: torch.Tensor) -> torch.Tensor:"
+    },
+    {
+      "label": "block.forward 的 post norm / MLP",
+      "path": "models/deepseek_v32/layers.py",
+      "line": 307,
+      "source_line": "with scope(\"post_attention_residual_norm\"):"
+    },
+    {
+      "label": "model.forward",
+      "path": "models/deepseek_v32/model.py",
+      "line": 749,
+      "source_line": "block.cache.begin_step(ids.numel())"
+    },
+    {
+      "label": "完整 graph replay",
+      "path": "models/deepseek_v32/model.py",
+      "line": 763,
+      "source_line": "output = extend_graph.replay(ids, scope=scope)"
+    },
+    {
+      "label": "同步并统一 commit",
+      "path": "models/deepseek_v32/model.py",
+      "line": 766,
+      "source_line": "self.synchronize()"
+    },
+    {
+      "label": "wait_host",
+      "path": "cache/sparse_token_cache.py",
+      "line": 649,
+      "source_line": "pool.wait_host(self.session, self.layer_id)"
+    }
+  ],
+  "groups": [
+    {
+      "job_id": "O1",
+      "source": "Official SGLang",
+      "profile_run_id": "h64k_decode_echo_profile_20261008_02",
+      "graph_node_ids": [
+        8589934615,
+        8589934616,
+        8589934617,
+        8589934618,
+        8589934619
+      ],
+      "start_ns": 10246192640,
+      "end_ns": 10246201504,
+      "gpu_active_ns": 7136,
+      "code_references": [
+        {
+          "label": "写 index cache",
+          "path": "3rdparty/ECHO/sglang/python/sglang/srt/layers/attention/nsa/nsa_indexer.py",
+          "line": 716
+        },
+        {
+          "label": "_get_logits_head_gate",
+          "path": "3rdparty/ECHO/sglang/python/sglang/srt/layers/attention/nsa/nsa_indexer.py",
+          "line": 239
+        },
+        {
+          "label": "_set_k_and_s_triton_kernel",
+          "path": "3rdparty/ECHO/sglang/python/sglang/srt/layers/attention/nsa/index_buf_accessor.py",
+          "line": 315
+        }
+      ]
+    },
+    {
+      "job_id": "O2",
+      "source": "Official SGLang",
+      "profile_run_id": "h64k_decode_echo_profile_20261008_02",
+      "graph_node_ids": [
+        8589934620,
+        8589934621
+      ],
+      "start_ns": 10246201920,
+      "end_ns": 10246204800,
+      "gpu_active_ns": 2464,
+      "code_references": [
+        {
+          "label": "metadata 调用",
+          "path": "3rdparty/ECHO/sglang/python/sglang/srt/layers/attention/nsa/nsa_indexer.py",
+          "line": 351
+        },
+        {
+          "label": "counter.fill_(0)",
+          "path": "3rdparty/ECHO/sglang/python/sglang/srt/layers/attention/nsa/nsa_indexer.py",
+          "line": 386
+        },
+        {
+          "label": "smxx_paged_mqa_logits_metadata",
+          "path": "3rdparty/ECHO/DeepGEMM/deep_gemm/include/deep_gemm/impls/sm90_fp8_paged_mqa_logits.cuh",
+          "line": 21
+        }
+      ]
+    },
+    {
+      "job_id": "O3",
+      "source": "Official SGLang",
+      "profile_run_id": "h64k_decode_echo_profile_20261008_02",
+      "graph_node_ids": [
+        8589934622
+      ],
+      "start_ns": 10246205216,
+      "end_ns": 10246213664,
+      "gpu_active_ns": 8448,
+      "code_references": [
+        {
+          "label": "fp8_paged_mqa_logits_fused_v2 调用",
+          "path": "3rdparty/ECHO/sglang/python/sglang/srt/layers/attention/nsa/nsa_indexer.py",
+          "line": 391
+        },
+        {
+          "label": "JIT launcher",
+          "path": "3rdparty/ECHO/DeepGEMM/csrc/jit_kernels/impls/smxx_fp8_paged_mqa_logits.hpp",
+          "line": 333
+        },
+        {
+          "label": "fused_v2 kernel",
+          "path": "3rdparty/ECHO/DeepGEMM/deep_gemm/include/deep_gemm/impls/sm90_fp8_paged_mqa_logits.cuh",
+          "line": 413
+        }
+      ]
+    },
+    {
+      "job_id": "O4",
+      "source": "Official SGLang",
+      "profile_run_id": "h64k_decode_echo_profile_20261008_02",
+      "graph_node_ids": [
+        8589934623,
+        8589934624,
+        8589934625,
+        8589934626,
+        8589934627,
+        8589934628
+      ],
+      "start_ns": 10246214112,
+      "end_ns": 10246251936,
+      "gpu_active_ns": 35584,
+      "code_references": [
+        {
+          "label": "topk_transform",
+          "path": "3rdparty/ECHO/sglang/python/sglang/srt/layers/attention/nsa_backend.py",
+          "line": 136
+        },
+        {
+          "label": "kth-logit 输出初始化",
+          "path": "3rdparty/ECHO/sglang/sgl-kernel/python/sgl_kernel/top_k.py",
+          "line": 85
+        },
+        {
+          "label": "topk_transform_decode_kernel",
+          "path": "3rdparty/ECHO/sglang/sgl-kernel/csrc/elementwise/topk.cu",
+          "line": 251
+        },
+        {
+          "label": "arange / mask 后处理",
+          "path": "3rdparty/ECHO/sglang/python/sglang/srt/layers/attention/nsa_backend.py",
+          "line": 174
+        }
+      ]
+    },
+    {
+      "job_id": "O5",
+      "source": "Official SGLang",
+      "profile_run_id": "h64k_decode_echo_profile_20261008_02",
+      "graph_node_ids": [
+        8589934629,
+        8589934630,
+        8589934631,
+        8589934632
+      ],
+      "start_ns": 10246252352,
+      "end_ns": 10246257984,
+      "gpu_active_ns": 4320,
+      "code_references": [
+        {
+          "label": "decode_topk_logits 更新",
+          "path": "3rdparty/ECHO/sglang/python/sglang/srt/layers/attention/nsa/nsa_indexer.py",
+          "line": 413
+        }
+      ]
+    },
+    {
+      "job_id": "O6",
+      "source": "Official SGLang",
+      "profile_run_id": "h64k_decode_echo_profile_20261008_02",
+      "graph_node_ids": [
+        8589934633,
+        8589934634,
+        8589934635,
+        8589934636,
+        8589934637
+      ],
+      "start_ns": 10246258432,
+      "end_ns": 10246266912,
+      "gpu_active_ns": 6560,
+      "code_references": [
+        {
+          "label": "set_mla_kv_buffer",
+          "path": "3rdparty/ECHO/sglang/python/sglang/srt/mem_cache/memory_pool_host.py",
+          "line": 1097
+        },
+        {
+          "label": "容量计算",
+          "path": "3rdparty/ECHO/sglang/python/sglang/srt/mem_cache/memory_pool_host.py",
+          "line": 1126
+        },
+        {
+          "label": "free_device_pool_cuda_graph",
+          "path": "3rdparty/ECHO/sglang/python/sglang/srt/mem_cache/memory_pool_host.py",
+          "line": 1071
+        }
+      ]
+    },
+    {
+      "job_id": "O7",
+      "source": "Official SGLang",
+      "profile_run_id": "h64k_decode_echo_profile_20261008_02",
+      "graph_node_ids": [
+        8589934638
+      ],
+      "start_ns": 10246267328,
+      "end_ns": 10246332639,
+      "gpu_active_ns": 65311,
+      "code_references": [
+        {
+          "label": "get_free_loc",
+          "path": "3rdparty/ECHO/sglang/python/sglang/srt/mem_cache/recall_ops.py",
+          "line": 674
+        },
+        {
+          "label": "fast_argmin_bounded",
+          "path": "3rdparty/ECHO/sglang/python/sglang/srt/mem_cache/recall_ops.py",
+          "line": 696
+        },
+        {
+          "label": "argmin_bounded_kernel",
+          "path": "3rdparty/ECHO/sglang/sgl-kernel/csrc/elementwise/topk.cu",
+          "line": 876
+        }
+      ]
+    },
+    {
+      "job_id": "O8",
+      "source": "Official SGLang",
+      "profile_run_id": "h64k_decode_echo_profile_20261008_02",
+      "graph_node_ids": [
+        8589934639,
+        8589934640,
+        8589934641,
+        8589934642,
+        8589934643,
+        8589934644,
+        8589934645,
+        8589934646,
+        8589934647,
+        8589934648
+      ],
+      "start_ns": 10246333055,
+      "end_ns": 10246357983,
+      "gpu_active_ns": 20608,
+      "code_references": [
+        {
+          "label": "free 调用",
+          "path": "3rdparty/ECHO/sglang/python/sglang/srt/mem_cache/memory_pool_host.py",
+          "line": 1086
+        },
+        {
+          "label": "append 发布",
+          "path": "3rdparty/ECHO/sglang/python/sglang/srt/mem_cache/memory_pool_host.py",
+          "line": 1139
+        },
+        {
+          "label": "host 写回",
+          "path": "3rdparty/ECHO/sglang/python/sglang/srt/mem_cache/memory_pool_host.py",
+          "line": 1181
+        },
+        {
+          "label": "_free_update_kernel",
+          "path": "3rdparty/ECHO/sglang/python/sglang/srt/mem_cache/recall_ops.py",
+          "line": 84
+        },
+        {
+          "label": "allocator free",
+          "path": "3rdparty/ECHO/sglang/python/sglang/srt/mem_cache/allocator.py",
+          "line": 784
+        },
+        {
+          "label": "alloc",
+          "path": "3rdparty/ECHO/sglang/python/sglang/srt/mem_cache/allocator.py",
+          "line": 745
+        },
+        {
+          "label": "_set_update_kernel",
+          "path": "3rdparty/ECHO/sglang/python/sglang/srt/mem_cache/recall_ops.py",
+          "line": 134
+        },
+        {
+          "label": "HBM KV 写入",
+          "path": "3rdparty/ECHO/sglang/python/sglang/srt/mem_cache/recall_ops.py",
+          "line": 216
+        },
+        {
+          "label": "mapped-host 写入",
+          "path": "3rdparty/ECHO/sglang/python/sglang/srt/mem_cache/memory_pool.py",
+          "line": 1149
+        }
+      ]
+    },
+    {
+      "job_id": "O9",
+      "source": "Official SGLang",
+      "profile_run_id": "h64k_decode_echo_profile_20261008_02",
+      "graph_node_ids": [
+        8589934649,
+        8589934650,
+        8589934651,
+        8589934652,
+        8589934653,
+        8589934654,
+        8589934655,
+        8589934656
+      ],
+      "start_ns": 10246358399,
+      "end_ns": 10246377343,
+      "gpu_active_ns": 15808,
+      "code_references": [
+        {
+          "label": "映射查询与 need_device / sum",
+          "path": "3rdparty/ECHO/sglang/python/sglang/srt/layers/attention/nsa_backend.py",
+          "line": 780
+        }
+      ]
+    },
+    {
+      "job_id": "O10",
+      "source": "Official SGLang",
+      "profile_run_id": "h64k_decode_echo_profile_20261008_02",
+      "graph_node_ids": [
+        8589934657,
+        8589934658,
+        8589934659,
+        8589934660,
+        8589934661,
+        8589934662,
+        8589934663,
+        8589934664,
+        8589934665,
+        8589934666,
+        8589934667,
+        8589934668,
+        8589934669,
+        8589934670,
+        8589934671,
+        8589934672,
+        8589934673,
+        8589934674
+      ],
+      "start_ns": 10246377759,
+      "end_ns": 10246409343,
+      "gpu_active_ns": 23104,
+      "code_references": [
+        {
+          "label": "recall_miss_tokens_decode_cuda_graph_with_prefetch",
+          "path": "3rdparty/ECHO/sglang/python/sglang/srt/mem_cache/memory_pool_host.py",
+          "line": 1379
+        },
+        {
+          "label": "容量与保护调用",
+          "path": "3rdparty/ECHO/sglang/python/sglang/srt/mem_cache/memory_pool_host.py",
+          "line": 1394
+        },
+        {
+          "label": "_protect_kernel",
+          "path": "3rdparty/ECHO/sglang/python/sglang/srt/mem_cache/recall_ops.py",
+          "line": 45
+        },
+        {
+          "label": "更新 priority",
+          "path": "3rdparty/ECHO/sglang/python/sglang/srt/mem_cache/memory_pool_host.py",
+          "line": 1408
+        }
+      ]
+    },
+    {
+      "job_id": "O11",
+      "source": "Official SGLang",
+      "profile_run_id": "h64k_decode_echo_profile_20261008_02",
+      "graph_node_ids": [
+        8589934675,
+        8589934676,
+        8589934677,
+        8589934678
+      ],
+      "start_ns": 10246409759,
+      "end_ns": 10246414655,
+      "gpu_active_ns": 3584,
+      "code_references": [
+        {
+          "label": "recall_update_with_prefetch",
+          "path": "3rdparty/ECHO/sglang/python/sglang/srt/mem_cache/recall_ops.py",
+          "line": 479
+        },
+        {
+          "label": "清 staging 调用",
+          "path": "3rdparty/ECHO/sglang/python/sglang/srt/mem_cache/memory_pool_host.py",
+          "line": 1425
+        },
+        {
+          "label": "边界检查调用",
+          "path": "3rdparty/ECHO/sglang/python/sglang/srt/layers/attention/nsa_backend.py",
+          "line": 852
+        },
+        {
+          "label": "_recall_update_with_prefetch_kernel",
+          "path": "3rdparty/ECHO/sglang/python/sglang/srt/mem_cache/recall_ops.py",
+          "line": 385
+        },
+        {
+          "label": "_clear_decode_prefetch_mappings_kernel",
+          "path": "3rdparty/ECHO/sglang/python/sglang/srt/mem_cache/recall_ops.py",
+          "line": 525
+        },
+        {
+          "label": "check_device_pool_kernel",
+          "path": "3rdparty/ECHO/sglang/python/sglang/srt/layers/attention/nsa_backend.py",
+          "line": 1127
+        }
+      ]
+    },
+    {
+      "job_id": "O12",
+      "source": "Official SGLang",
+      "profile_run_id": "h64k_decode_echo_profile_20261008_02",
+      "graph_node_ids": [
+        8589934679,
+        8589934680,
+        8589934681
+      ],
+      "start_ns": 10246415071,
+      "end_ns": 10246437567,
+      "gpu_active_ns": 22016,
+      "code_references": [
+        {
+          "label": "_forward_fa3",
+          "path": "3rdparty/ECHO/sglang/python/sglang/srt/layers/attention/nsa_backend.py",
+          "line": 938
+        },
+        {
+          "label": "flash_attn_with_kvcache",
+          "path": "3rdparty/ECHO/sglang/sgl-kernel/python/sgl_kernel/flash_attn.py",
+          "line": 39
+        },
+        {
+          "label": "prepare scheduler",
+          "path": "3rdparty/ECHO/reproduction/cxldsagr/deps/repo-flash-attention/hopper/flash_prepare_scheduler.cu",
+          "line": 15
+        },
+        {
+          "label": "FlashAttnFwdSm90",
+          "path": "3rdparty/ECHO/reproduction/cxldsagr/deps/repo-flash-attention/hopper/flash_fwd_kernel_sm90.h",
+          "line": 29
+        },
+        {
+          "label": "FlashAttnFwdCombine",
+          "path": "3rdparty/ECHO/reproduction/cxldsagr/deps/repo-flash-attention/hopper/flash_fwd_combine_kernel.h",
+          "line": 26
+        }
+      ]
+    },
+    {
+      "job_id": "L1",
+      "source": "Local warm",
+      "profile_run_id": "deepseek_h64k_a1_official_input_warm_20261011_01_echo_profile",
+      "graph_node_ids": [
+        176093659175,
+        176093659176
+      ],
+      "start_ns": 80079425,
+      "end_ns": 80081281,
+      "gpu_active_ns": 1760,
+      "code_references": [
+        {
+          "label": "index_cache_write",
+          "path": "models/deepseek_v32/attention.py",
+          "line": 323
+        }
+      ]
+    },
+    {
+      "job_id": "L2",
+      "source": "Local warm",
+      "profile_run_id": "deepseek_h64k_a1_official_input_warm_20261011_01_echo_profile",
+      "graph_node_ids": [
+        176093659177,
+        176093659178,
+        176093659179
+      ],
+      "start_ns": 80081441,
+      "end_ns": 80091681,
+      "gpu_active_ns": 9984,
+      "code_references": [
+        {
+          "label": "prepare_prefetch",
+          "path": "cache/sparse_token_cache.py",
+          "line": 741
+        },
+        {
+          "label": "有界 free 分派",
+          "path": "cache/sparse_token_cache.py",
+          "line": 774
+        },
+        {
+          "label": "prepare_prefetch_free",
+          "path": "operators/deepseek_v32/indexer/cache_ops.py",
+          "line": 462
+        },
+        {
+          "label": "prepare_masks",
+          "path": "operators/deepseek_v32/indexer/csrc/echo_sparse_append_free.cuh",
+          "line": 11
+        },
+        {
+          "label": "select_slots",
+          "path": "operators/deepseek_v32/indexer/csrc/echo_sparse_append_free.cuh",
+          "line": 26
+        },
+        {
+          "label": "reset_publish",
+          "path": "operators/deepseek_v32/indexer/csrc/echo_sparse_prepare_free.cuh",
+          "line": 9
+        }
+      ]
+    },
+    {
+      "job_id": "L3",
+      "source": "Local warm",
+      "profile_run_id": "deepseek_h64k_a1_official_input_warm_20261011_01_echo_profile",
+      "graph_node_ids": [
+        176093659180,
+        176093659181,
+        176093659182,
+        176093659183
+      ],
+      "start_ns": 80091809,
+      "end_ns": 80101473,
+      "gpu_active_ns": 9280,
+      "code_references": [
+        {
+          "label": "starts / ends 构造",
+          "path": "operators/deepseek_v32/indexer/echo.py",
+          "line": 358
+        },
+        {
+          "label": "logits_from_keys",
+          "path": "operators/deepseek_v32/indexer/official_prefetch.py",
+          "line": 326
+        },
+        {
+          "label": "_prepare_keys",
+          "path": "operators/deepseek_v32/indexer/official_prefetch.py",
+          "line": 196
+        },
+        {
+          "label": "metadata",
+          "path": "operators/deepseek_v32/indexer/official_decode.py",
+          "line": 143
+        },
+        {
+          "label": "prepare_keys_kernel",
+          "path": "operators/deepseek_v32/indexer/csrc/official_prefetch.cu",
+          "line": 220
+        },
+        {
+          "label": "metadata bridge",
+          "path": "operators/deepseek_v32/indexer/csrc/official_decode.cu",
+          "line": 60
+        }
+      ]
+    },
+    {
+      "job_id": "L4",
+      "source": "Local warm",
+      "profile_run_id": "deepseek_h64k_a1_official_input_warm_20261011_01_echo_profile",
+      "graph_node_ids": [
+        176093659184
+      ],
+      "start_ns": 80101537,
+      "end_ns": 80108897,
+      "gpu_active_ns": 7360,
+      "code_references": [
+        {
+          "label": "_logits_prepared",
+          "path": "operators/deepseek_v32/indexer/official_prefetch.py",
+          "line": 295
+        },
+        {
+          "label": "official_decode.logits",
+          "path": "operators/deepseek_v32/indexer/official_decode.py",
+          "line": 155
+        },
+        {
+          "label": "fused_v2 实例化与发射",
+          "path": "operators/deepseek_v32/indexer/csrc/official_decode.cu",
+          "line": 106
+        }
+      ]
+    },
+    {
+      "job_id": "L5",
+      "source": "Local warm",
+      "profile_run_id": "deepseek_h64k_a1_official_input_warm_20261011_01_echo_profile",
+      "graph_node_ids": [
+        176093659185
+      ],
+      "start_ns": 80108961,
+      "end_ns": 80111233,
+      "gpu_active_ns": 2272,
+      "code_references": [
+        {
+          "label": "clean 发射调用",
+          "path": "operators/deepseek_v32/indexer/csrc/official_decode.cu",
+          "line": 120
+        },
+        {
+          "label": "clean bridge",
+          "path": "operators/deepseek_v32/indexer/csrc/official_decode_clean.cu",
+          "line": 8
+        }
+      ]
+    },
+    {
+      "job_id": "L6",
+      "source": "Local warm",
+      "profile_run_id": "deepseek_h64k_a1_official_input_warm_20261011_01_echo_profile",
+      "graph_node_ids": [
+        176093659186
+      ],
+      "start_ns": 80111297,
+      "end_ns": 80136257,
+      "gpu_active_ns": 24960,
+      "code_references": [
+        {
+          "label": "exact_topk",
+          "path": "operators/deepseek_v32/indexer/selection.py",
+          "line": 62
+        },
+        {
+          "label": "Q1 分派",
+          "path": "operators/deepseek_v32/indexer/selection.py",
+          "line": 106
+        },
+        {
+          "label": "_official_topk_int32",
+          "path": "operators/deepseek_v32/indexer/selection.py",
+          "line": 14
+        }
+      ]
+    },
+    {
+      "job_id": "L7",
+      "source": "Local warm",
+      "profile_run_id": "deepseek_h64k_a1_official_input_warm_20261011_01_echo_profile",
+      "graph_node_ids": [
+        176093659187
+      ],
+      "start_ns": 80136449,
+      "end_ns": 80154977,
+      "gpu_active_ns": 18528,
+      "code_references": [
+        {
+          "label": "sort_mask_ 调用",
+          "path": "operators/deepseek_v32/indexer/selection.py",
+          "line": 109
+        },
+        {
+          "label": "native wrapper",
+          "path": "operators/deepseek_v32/indexer/q1_topk_cub.py",
+          "line": 65
+        },
+        {
+          "label": "cub_sort_mask_kernel",
+          "path": "operators/deepseek_v32/indexer/csrc/q1_topk_sort.cu",
+          "line": 15
+        }
+      ]
+    },
+    {
+      "job_id": "L8",
+      "source": "Local warm",
+      "profile_run_id": "deepseek_h64k_a1_official_input_warm_20261011_01_echo_profile",
+      "graph_node_ids": [
+        176093659188
+      ],
+      "start_ns": 80155041,
+      "end_ns": 80177089,
+      "gpu_active_ns": 22048,
+      "code_references": [
+        {
+          "label": "精确选择发布入口",
+          "path": "models/deepseek_v32/attention.py",
+          "line": 376
+        },
+        {
+          "label": "_promote",
+          "path": "operators/deepseek_v32/indexer/official_prefetch.py",
+          "line": 229
+        },
+        {
+          "label": "validate_promotion_kernel",
+          "path": "operators/deepseek_v32/indexer/csrc/official_prefetch.cu",
+          "line": 44
+        }
+      ]
+    },
+    {
+      "job_id": "L9",
+      "source": "Local warm",
+      "profile_run_id": "deepseek_h64k_a1_official_input_warm_20261011_01_echo_profile",
+      "graph_node_ids": [
+        176093659189,
+        176093659190,
+        176093659191,
+        176093659192,
+        176093659193,
+        176093659194
+      ],
+      "start_ns": 80177153,
+      "end_ns": 80184513,
+      "gpu_active_ns": 7008,
+      "code_references": [
+        {
+          "label": "finalize_prefetch",
+          "path": "cache/sparse_token_cache.py",
+          "line": 852
+        },
+        {
+          "label": "pool finalize",
+          "path": "cache/sparse_token_pool.py",
+          "line": 681
+        },
+        {
+          "label": "copy_publish_kernel",
+          "path": "operators/deepseek_v32/indexer/csrc/official_prefetch.cu",
+          "line": 144
+        },
+        {
+          "label": "clear_kernel",
+          "path": "operators/deepseek_v32/indexer/csrc/official_prefetch.cu",
+          "line": 167
+        },
+        {
+          "label": "finalize_kernel / advance_clock_kernel",
+          "path": "operators/deepseek_v32/indexer/csrc/echo_indexer.cu",
+          "line": 129
+        }
+      ]
+    },
+    {
+      "job_id": "L10",
+      "source": "Local warm",
+      "profile_run_id": "deepseek_h64k_a1_official_input_warm_20261011_01_echo_profile",
+      "graph_node_ids": [
+        176093659195,
+        176093659196
+      ],
+      "start_ns": 80184577,
+      "end_ns": 80189569,
+      "gpu_active_ns": 4928,
+      "code_references": [
+        {
+          "label": "两种 hint 更新",
+          "path": "models/deepseek_v32/attention.py",
+          "line": 385
+        },
+        {
+          "label": "update_prefetch_hint",
+          "path": "operators/deepseek_v32/indexer/prefetch_hint.py",
+          "line": 38
+        },
+        {
+          "label": "update_decode_hint",
+          "path": "operators/deepseek_v32/indexer/decode_hint.py",
+          "line": 24
+        },
+        {
+          "label": "mean_kernel",
+          "path": "operators/deepseek_v32/indexer/csrc/q1_hint_exact.cu",
+          "line": 19
+        },
+        {
+          "label": "update_decode_ema",
+          "path": "operators/deepseek_v32/indexer/decode_hint.py",
+          "line": 16
+        }
+      ]
+    },
+    {
+      "job_id": "L11",
+      "source": "Local warm",
+      "profile_run_id": "deepseek_h64k_a1_official_input_warm_20261011_01_echo_profile",
+      "graph_node_ids": [
+        176093659197,
+        176093659198,
+        176093659199,
+        176093659200
+      ],
+      "start_ns": 80189665,
+      "end_ns": 80205057,
+      "gpu_active_ns": 13728,
+      "code_references": [
+        {
+          "label": "append",
+          "path": "cache/sparse_token_cache.py",
+          "line": 290
+        },
+        {
+          "label": "sparse_append_free 分派",
+          "path": "cache/sparse_token_cache.py",
+          "line": 367
+        },
+        {
+          "label": "write_host",
+          "path": "cache/sparse_token_pool.py",
+          "line": 468
+        },
+        {
+          "label": "空槽分配发射",
+          "path": "operators/deepseek_v32/indexer/csrc/echo_sparse_append_free.cuh",
+          "line": 90
+        },
+        {
+          "label": "planned_append_kernel",
+          "path": "operators/deepseek_v32/indexer/csrc/echo_resident.cuh",
+          "line": 180
+        }
+      ]
+    },
+    {
+      "job_id": "L12",
+      "source": "Local warm",
+      "profile_run_id": "deepseek_h64k_a1_official_input_warm_20261011_01_echo_profile",
+      "graph_node_ids": [
+        176093659201,
+        176093659202,
+        176093659203
+      ],
+      "start_ns": 80200545,
+      "end_ns": 80206977,
+      "gpu_active_ns": 6208,
+      "code_references": [
+        {
+          "label": "_ensure_from_topk",
+          "path": "cache/sparse_token_cache.py",
+          "line": 571
+        },
+        {
+          "label": "_ensure_sparse_from_topk",
+          "path": "cache/sparse_token_cache.py",
+          "line": 616
+        },
+        {
+          "label": "sparse_selection_classify",
+          "path": "operators/deepseek_v32/indexer/cache_ops.py",
+          "line": 303
+        },
+        {
+          "label": "sparse_union_clear",
+          "path": "operators/deepseek_v32/indexer/csrc/echo_sparse_recall.cuh",
+          "line": 8
+        },
+        {
+          "label": "sparse_union_kernel",
+          "path": "operators/deepseek_v32/indexer/csrc/echo_sparse_recall.cuh",
+          "line": 22
+        },
+        {
+          "label": "sparse_classify_kernel",
+          "path": "operators/deepseek_v32/indexer/csrc/echo_sparse_recall.cuh",
+          "line": 47
+        }
+      ]
+    },
+    {
+      "job_id": "L13",
+      "source": "Local warm",
+      "profile_run_id": "deepseek_h64k_a1_official_input_warm_20261011_01_echo_profile",
+      "graph_node_ids": [
+        176093659204,
+        176093659205,
+        176093659206,
+        176093659207,
+        176093659208,
+        176093659209
+      ],
+      "start_ns": 80220065,
+      "end_ns": 80229761,
+      "gpu_active_ns": 8928,
+      "code_references": [
+        {
+          "label": "complete 调用",
+          "path": "cache/sparse_token_cache.py",
+          "line": 672
+        },
+        {
+          "label": "map 调用",
+          "path": "cache/sparse_token_cache.py",
+          "line": 728
+        },
+        {
+          "label": "recall bridge",
+          "path": "operators/deepseek_v32/indexer/csrc/echo_recall_dispatch.cpp",
+          "line": 86
+        },
+        {
+          "label": "count / compact 空槽",
+          "path": "operators/deepseek_v32/indexer/csrc/echo_sparse_free.cuh",
+          "line": 29
+        },
+        {
+          "label": "gather_records",
+          "path": "operators/common/csrc/kv_transfer.cu",
+          "line": 14
+        },
+        {
+          "label": "sparse_publish_kernel",
+          "path": "operators/deepseek_v32/indexer/csrc/echo_sparse_recall.cuh",
+          "line": 356
+        },
+        {
+          "label": "sparse_map_kernel",
+          "path": "operators/deepseek_v32/indexer/csrc/echo_sparse_recall.cuh",
+          "line": 415
+        }
+      ]
+    },
+    {
+      "job_id": "L14",
+      "source": "Local warm",
+      "profile_run_id": "deepseek_h64k_a1_official_input_warm_20261011_01_echo_profile",
+      "graph_node_ids": [
+        176093659210
+      ],
+      "start_ns": 80229857,
+      "end_ns": 80233538,
+      "gpu_active_ns": 3681,
+      "code_references": [
+        {
+          "label": "sparse_mla_decode",
+          "path": "operators/deepseek_v32/attention/device_only/mla.py",
+          "line": 118
+        },
+        {
+          "label": "split_kv",
+          "path": "operators/deepseek_v32/attention/device_only/decode.py",
+          "line": 90
+        },
+        {
+          "label": "q.repeat(DECODE_SPLITS, 1, 1)",
+          "path": "operators/deepseek_v32/attention/device_only/decode.py",
+          "line": 93
+        }
+      ]
+    },
+    {
+      "job_id": "L15",
+      "source": "Local warm",
+      "profile_run_id": "deepseek_h64k_a1_official_input_warm_20261011_01_echo_profile",
+      "graph_node_ids": [
+        176093659211,
+        176093659212
+      ],
+      "start_ns": 80233666,
+      "end_ns": 80244802,
+      "gpu_active_ns": 10784,
+      "code_references": [
+        {
+          "label": "flash_mla_sparse_fwd 与 combine 发射",
+          "path": "operators/deepseek_v32/attention/device_only/decode.py",
+          "line": 94
+        },
+        {
+          "label": "combine kernel",
+          "path": "operators/deepseek_v32/attention/device_only/decode.py",
+          "line": 70
+        }
+      ]
+    }
+  ],
+  "local_head_weights_before_zoom": {
+    "path": "models/deepseek_v32/projections.py",
+    "lines": [
+      243,
+      244
+    ],
+    "graph_node_ids": [
+      176093659168,
+      176093659169,
+      176093659170,
+      176093659171,
+      176093659172,
+      176093659173
+    ],
+    "l0_relative_start_ns": 71616,
+    "l0_relative_end_ns": 83040,
+    "zoom_anchor_l0_relative_ns": 84640
+  },
+  "gpu_idle": "No GPU kernel implements an idle interval. Local wait_host is a source dependency boundary, not proof of the full gap cause.",
+  "native_library_boundary": "Torch/cuBLAS/FlashInfer activity bodies are represented by the active source call sites. FA3 files belong to the actual built repo-flash-attention dependency. Sources are tied to the saved build or measured local source hashes."
+}

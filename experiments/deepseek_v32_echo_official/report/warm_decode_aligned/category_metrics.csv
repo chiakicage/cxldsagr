@@ -1,0 +1,33 @@
+source,method,layer,category,activity_count,union_ns,activity_sum_ns,kernel_sum_ns,union_us
+Official SGLang,echo,0,Projection / RoPE,25,79296,92320,92320,79.296
+Official SGLang,echo,0,Indexer / top-k,7,44032,44032,44032,44.032
+Official SGLang,echo,0,GPU control,47,136223,136223,133471,136.223
+Official SGLang,echo,0,ECHO hint,4,4320,4320,3392,4.32
+Official SGLang,echo,1,Projection / RoPE,25,78336,91904,91904,78.336
+Official SGLang,echo,1,Indexer / top-k,7,46912,46912,46912,46.912
+Official SGLang,echo,1,GPU control,47,136448,136448,133856,136.448
+Official SGLang,echo,1,ECHO hint,4,4512,4512,3392,4.512
+Official SGLang,echo,2,Projection / RoPE,25,79263,92927,92927,79.263
+Official SGLang,echo,2,Indexer / top-k,7,44928,44928,44928,44.928
+Official SGLang,echo,2,GPU control,47,134752,134752,132032,134.752
+Official SGLang,echo,2,ECHO hint,4,4448,4448,3296,4.448
+Official SGLang,echo,all,Projection / RoPE,75,236895,277151,277151,236.895
+Official SGLang,echo,all,Indexer / top-k,21,135872,135872,135872,135.872
+Official SGLang,echo,all,GPU control,141,407423,407423,399359,407.423
+Official SGLang,echo,all,ECHO hint,12,13280,13280,10080,13.28
+Local warm,echo,0,Projection / RoPE,31,80000,107904,107904,80.0
+Local warm,echo,0,Indexer / top-k,4,53120,53120,53120,53.12
+Local warm,echo,0,GPU control,23,44769,44769,43009,44.769
+Local warm,echo,0,ECHO hint,2,4928,4928,4928,4.928
+Local warm,echo,1,Projection / RoPE,31,79200,110304,110304,79.2
+Local warm,echo,1,Indexer / top-k,4,54848,54848,54848,54.848
+Local warm,echo,1,GPU control,23,45504,45504,43712,45.504
+Local warm,echo,1,ECHO hint,2,4800,4800,4800,4.8
+Local warm,echo,2,Projection / RoPE,31,79550,110206,110206,79.55
+Local warm,echo,2,Indexer / top-k,4,55744,55744,55744,55.744
+Local warm,echo,2,GPU control,23,46176,46176,44544,46.176
+Local warm,echo,2,ECHO hint,2,4832,4832,4832,4.832
+Local warm,echo,all,Projection / RoPE,93,238750,328414,328414,238.75
+Local warm,echo,all,Indexer / top-k,12,163712,163712,163712,163.712
+Local warm,echo,all,GPU control,69,136449,136449,131265,136.449
+Local warm,echo,all,ECHO hint,6,14560,14560,14560,14.56

@@ -1,0 +1,296 @@
+{
+  "schema": "echo-h64k-a1-focused-report-v1",
+  "report_run_id": "h64k_a1_argmin_report_20261012_01",
+  "new_gpu_measurement": false,
+  "numerical_acceptance_between_implementations": false,
+  "scope": {
+    "history_tokens": 65536,
+    "query_tokens": 1,
+    "layers": [
+      0,
+      1,
+      2
+    ],
+    "same_input_warm_comparison_decode_token": 57841
+  },
+  "inputs": {
+    "experiments/deepseek_v32_echo_official/report/sglang_decode/activities.json": "480eec9e1ef8b023277cd694ee8e6ce70163ec29fd102583b73bb1d9850c903e",
+    "experiments/deepseek_v32_echo_official/report/sglang_decode/report.json": "3fa66ab9f5f812c2300ee22e22ca8d9805b9c0af0095037e7926a60a3a0d69b8",
+    "experiments/deepseek_v32_echo_official/report/decode_gap/kernel_details.csv": "5f2a714d2343789e2c8e7cbf75550a846ddf43670ceae63e515882fefc9d5896",
+    "experiments/deepseek_v32_echo_official/report/decode_gap/report.json": "ff735273599ee6fe5613459da202b640fe2fe446997cf2ed85cbcf0e956015fa",
+    "experiments/deepseek_v32_echo_official/report/decode_recall_observation/layers.csv": "d0907c727e30892efa0fbe77116441562dc4b8275e55ec0f8050a2d039c39047",
+    "experiments/deepseek_v32_echo_official/report/decode_recall_observation/provenance.json": "7d1fb6b7256c7fe9b918c519c350850fa07557ad489ae31793772d2a6d9f0f08",
+    "experiments/deepseek_v32_mfu/report/h64k_a1_warm/summary.json": "e04b221d9eef93a74230dc698c1ce0accd3a3e39f4923bf3f021f9124e1a2452",
+    "experiments/deepseek_v32_mfu/report/h64k_a1_warm/input_recall_audit/identity_recall.json": "072d84f5c3e352eff5303f7909e780664dfa41db5a54840ab900c44fafb1cf21",
+    "experiments/deepseek_v32_echo_official/output/data/warm_decode_fused_display_20261012_01/panels.json": "5e74004d780e9449cfccd35b5c635952129c23c2b1862f841eba38a8be89b87d",
+    "experiments/deepseek_v32_echo_official/output/data/warm_decode_fused_display_20261012_01/aligned_panels.json": "9179a5a9e3e77b3de64938673a6aa695723f7782bdb9374763150b7a953ef99f",
+    "experiments/deepseek_v32_echo_official/report/warm_decode_aligned/summary.json": "4350a2a0eea47a3896e216a3a5cad4285c91ae11f7f18618d301c896520fe7f6",
+    "experiments/deepseek_v32_echo_official/report/warm_decode_aligned/provenance.json": "8efd84239e2d92975ecd26a8fdfb63dc08759bd4aa4d300f61347cd7b9ba8bdd",
+    "experiments/deepseek_v32_echo_official/report/warm_decode_aligned/publication_manifest.json": "187c83f9076ac37cf75d4ae8b419887c9bbdaf17210bbd908af23339dedd29d6",
+    "experiments/deepseek_v32_echo_official/report/combined_decode_aligned/provenance.json": "66ca90d430e4aecf2c0027a221df450c75716a5300c25d225ce5700287cc0a1c",
+    "experiments/deepseek_v32_echo_official/report/combined_decode_aligned/category_metrics.csv": "81ba4ced92a148fed870ea192b5c496b852262ef4b3bdcbde07ac5ad4e111f9b",
+    "experiments/deepseek_v32_echo_official/report/h64k_a1/indexer_detail/provenance.json": "6258f1169e96645c91e47306ade5ce2c30e5895032c848b600f2ec0f33ff546e",
+    "experiments/deepseek_v32_echo_official/report/h64k_a1/indexer_detail/publication_manifest.json": "ea07df65e2fea0a1f2ebe64a18987d6e2084753624e6b2438f54f723b91609fd",
+    "experiments/deepseek_v32_echo_official/report/h64k_a1/indexer_detail/segments.csv": "e5ed68bef9d75a9d30146bdd4b627ef994ea7f11dd7d578b4a0ce831be257403",
+    "experiments/deepseek_v32_echo_official/report/h64k_a1/indexer_detail/summary.json": "43026b25b720f95b04c2747c616ef85fc8fd30d8bba15f03b8ea83ca77ab79e1",
+    "experiments/deepseek_v32_echo_official/report/h64k_a1/code_map.json": "f9028d2300014bfaac0bb065d7cd6131efd46975b5404bf2c30c990384494f55"
+  },
+  "indexer_breakdown": {
+    "source": "experiments/deepseek_v32_echo_official/output/data/warm_decode_fused_display_20261012_01/aligned_panels.json",
+    "selection": "Aligned rows whose category is Indexer / top-k, grouped by authenticated layer ownership.",
+    "timing": "Union of integer [start_ns,end_ns) GPU activity intervals divided by 1000. Kernel sum is separate and includes concurrent streams.",
+    "fused_core": "name contains sm90_fp8_paged_mqa_logits_fused_v2<",
+    "causal_clean": "name contains smxx_clean_logits<",
+    "topk": "Complete topk or exact_topk stage, including actual output initialization and masking.",
+    "topk_selection": "topk row name contains topk_transform_decode_kernel or FilteredTopKUnifiedKernel",
+    "topk_postprocess": "Remaining topk rows; local is CUB sorting/masking, official is surrounding mask operations.",
+    "category_boundary": "Paged score kernels, causal score cleaning, and the complete top-k output path, including initialization, masks, transforms and sorting.",
+    "output_sha256": "c42c0e6bae73421ee2a8afc077782e2b568a8240f035ec516ca20e671137e0c9"
+  },
+  "traffic_boundary": "Official residual recall observer is a separate run and excludes fused predictive traffic; its counters are never assigned to the old NSYS profile.",
+  "measurement_boundary": "Existing independent intrusive L0-L2 profiles; complete Engine request and local synchronized step are different wall-time boundaries.",
+  "category_policy": {
+    "schema": "q1-score-topk-functional-boundary-v1",
+    "indexer": "Paged score kernels, causal score cleaning, and the complete top-k output path, including initialization, masks, transforms and sorting.",
+    "projection": "Main and indexer Q/K projections, norm, RoPE, Hadamard, quantization and head weights.",
+    "control": "Scheduler metadata, index cache writes, page packing/tables, staging preparation/promotion, pool management and hint updates.",
+    "timing": "Clipped GPU interval unions across all streams; activity and kernel sums are reported separately. No activity, gap or timestamp is removed.",
+    "source": "Original authenticated panels remain unchanged; aligned panels retain source_lane/source_category and a per-row boundary reason."
+  },
+  "detailed_decode_flow": {
+    "boundary": "Source identity establishes the applicable implementation. Dynamic tensor states and transfer bytes require their separately recorded evidence; no numerical equivalence is inferred.",
+    "official": {
+      "profile_run_id": "h64k_decode_echo_profile_20261008_02",
+      "run": {
+        "path": "experiments/deepseek_v32_echo_official/output/data/h64k_decode_echo_profile_20261008_02/run.json",
+        "sha256": "736af3c0e7e10dcb1116e3cd0a89c378633dd0cfa85dcff480645cbacd2bceef"
+      },
+      "preflight": {
+        "path": "experiments/deepseek_v32_echo_official/output/data/h64k_decode_echo_profile_20261008_02/preflight.json",
+        "sha256": "3521f9598ec5aca026ae19eff33a1c6306678803c082648460f6f5feece7bf62"
+      },
+      "build_receipt": {
+        "path": "3rdparty/ECHO/reproduction/cxldsagr/env/build_receipt.json",
+        "sha256": "757dc7b8424c468ea09239578364951b1dcb22418251d78545c5cfd2af4c7b45"
+      },
+      "hook_manifest": {
+        "path": "experiments/deepseek_v32_echo_official/output/data/h64k_decode_echo_profile_20261008_02/sample_00/engine/hooks/hook_manifest.json",
+        "sha256": "a5a5a90702d7777c7b6406080f6e832aafdf1389cb0ca3e89a00d190cd6a9234"
+      },
+      "sources": {
+        "3rdparty/ECHO/sglang/python/sglang/srt/models/deepseek_v2.py": {
+          "sha256": "9b067c0b0f6f90c59e1cc90be7e1b820d6c47435754653edbb11c86b4f2878b8",
+          "build_receipt_source_matches": true,
+          "imported_package_matches": true,
+          "unchanged_profile_hook_targets": [
+            "DeepseekV2DecoderLayer.forward",
+            "DeepseekV2AttentionMLA.forward_prepare",
+            "DeepseekV2AttentionMLA.forward_core",
+            "DeepseekV2MLP.forward"
+          ]
+        },
+        "3rdparty/ECHO/sglang/python/sglang/srt/layers/attention/nsa/nsa_indexer.py": {
+          "sha256": "17d570bb588344aeb1b4c9cf488d461053c90dfb2e3200614a82f74c1ec1dc07",
+          "build_receipt_source_matches": true,
+          "imported_package_matches": true,
+          "unchanged_profile_hook_targets": [
+            "Indexer.forward_cuda",
+            "Indexer._get_topk_ragged",
+            "Indexer._get_topk_paged"
+          ]
+        },
+        "3rdparty/ECHO/sglang/python/sglang/srt/layers/attention/nsa_backend.py": {
+          "sha256": "aceca91e703c7a3dd2b9358c20eae705255dd66a45e02003ed7768533e260f6d",
+          "build_receipt_source_matches": true,
+          "imported_package_matches": true,
+          "unchanged_profile_hook_targets": [
+            "NSAIndexerMetadata.topk_transform",
+            "NativeSparseAttnBackend.init_forward_metadata",
+            "NativeSparseAttnBackend.forward_extend",
+            "NativeSparseAttnBackend._forward_flashmla_prefill",
+            "NativeSparseAttnBackend.forward_decode",
+            "NativeSparseAttnBackend._forward_fa3",
+            "NativeSparseAttnBackend._forward_flashmla_decode"
+          ]
+        },
+        "3rdparty/ECHO/sglang/python/sglang/srt/mem_cache/memory_pool_host.py": {
+          "sha256": "559b9d1391070e5e24c3ec22c4ee03acfeceeacdf2b11c24bcc06f13ae1bf7a0",
+          "build_receipt_source_matches": true,
+          "imported_package_matches": true,
+          "unchanged_profile_hook_targets": [
+            "NSATokenToKVPoolHost.set_mla_kv_buffer",
+            "NSATokenToKVPoolHost.set_index_k_and_scale_buffer",
+            "NSATokenToKVPoolHost.recall_miss_tokens_extend_cuda_graph",
+            "NSATokenToKVPoolHost.free_device_pool_cuda_graph",
+            "NSATokenToKVPoolHost.update_priority_when_use",
+            "NSATokenToKVPoolHost.recall_miss_tokens_decode_cuda_graph_with_prefetch",
+            "NSATokenToKVPoolHost.recall_miss_tokens_decode_cuda_graph"
+          ]
+        },
+        "3rdparty/ECHO/sglang/python/sglang/srt/mem_cache/recall_ops.py": {
+          "sha256": "acccb812e162141a7c483a304aa82e14d4dd6b808c9e3d82d8bbd6dc693fbfee",
+          "build_receipt_source_matches": true,
+          "imported_package_matches": true,
+          "unchanged_profile_hook_targets": [
+            "sglang.srt.mem_cache.memory_pool_host.recall_update_extend"
+          ]
+        },
+        "3rdparty/ECHO/sglang/sgl-kernel/csrc/elementwise/topk.cu": {
+          "sha256": "cebb32a9a479b36c1b9ef4d8e373fc116f3de9cb925f1833f4d3499ab1a61f9f",
+          "build_receipt_source_matches": true
+        },
+        "3rdparty/ECHO/sglang/sgl-kernel/python/sgl_kernel/top_k.py": {
+          "sha256": "c288f86a5afc895dfadb0abaa4f8bef1c7571aed4b504e5d7eedbaa11de27812",
+          "build_receipt_source_matches": true
+        },
+        "3rdparty/ECHO/DeepGEMM/csrc/jit_kernels/impls/smxx_fp8_paged_mqa_logits.hpp": {
+          "sha256": "acd33e64cb416f64fd7ddcf8750b4037e02ea379ae04f8a6f07b65902cb631c7",
+          "build_receipt_source_matches": true
+        }
+      },
+      "decode_recall_hook_boundary": "recall_ops.py recall_update_extend hook is not decode execution evidence. Decode call chain is supported by memory_pool_host.py decode wrapper and authenticated graph nodes.",
+      "hint_boundary": "Official decode and prefill hints are separate tensors. Formal profile follows two normal requests; the old formal decode EMA value was not saved."
+    },
+    "local": {
+      "profile_run_id": "deepseek_h64k_a1_official_input_warm_20261011_01_echo_profile",
+      "result": {
+        "path": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-q1-selected-20261011-01/experiments/deepseek_v32_mfu/output/data/deepseek_h64k_a1_official_input_warm_20261011_01_echo_profile/result.json",
+        "sha256": "8799083ec2735ad479ba3bf78ebee6aaa8ac463e957ef33b73611402e71a9f28"
+      },
+      "sources": {
+        "models/deepseek_v32/attention.py": {
+          "sha256": "6c0becd4582cbcf38cb2af5200a6173ccba3846f3bb566fec521b752edc45dfb",
+          "frozen_source": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-q1-selected-20261011-01/models/deepseek_v32/attention.py",
+          "profile_source_matches": true,
+          "profile_execution_identity_matches": true,
+          "benchmark_source_matches": true,
+          "current_navigation_target_matches": true
+        },
+        "models/deepseek_v32/model.py": {
+          "sha256": "412f675c6e9b709cb9379eafb6ca2acfee6a889e8f54d5e03e523b94f894f452",
+          "frozen_source": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-q1-selected-20261011-01/models/deepseek_v32/model.py",
+          "profile_source_matches": true,
+          "profile_execution_identity_matches": true,
+          "benchmark_source_matches": true,
+          "current_navigation_target_matches": true
+        },
+        "cache/sparse_token_cache.py": {
+          "sha256": "3cd87b9bef30969dc9fc922ea6706b21e018a12309ee42ba0c727d74db765e39",
+          "frozen_source": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-q1-selected-20261011-01/cache/sparse_token_cache.py",
+          "profile_source_matches": true,
+          "profile_execution_identity_matches": true,
+          "benchmark_source_matches": true,
+          "current_navigation_target_matches": true
+        },
+        "cache/sparse_token_pool.py": {
+          "sha256": "56c9386c22d7f8b1833d9d9d420b69b0210dd472a1b24e0ff61e4753b9991ac2",
+          "frozen_source": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-q1-selected-20261011-01/cache/sparse_token_pool.py",
+          "profile_source_matches": true,
+          "profile_execution_identity_matches": true,
+          "benchmark_source_matches": true,
+          "current_navigation_target_matches": true
+        },
+        "operators/deepseek_v32/indexer/official_prefetch.py": {
+          "sha256": "47aded2da0084f88fe526ed80333d9320a26947156c95502f68a63982037268e",
+          "frozen_source": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-q1-selected-20261011-01/operators/deepseek_v32/indexer/official_prefetch.py",
+          "profile_source_matches": true,
+          "profile_execution_identity_matches": true,
+          "benchmark_source_matches": true,
+          "current_navigation_target_matches": true
+        },
+        "operators/deepseek_v32/indexer/selection.py": {
+          "sha256": "473e34e5961cea1511ce16995a93b56ed807d3e6b55b0f28c8b252916a0112d9",
+          "frozen_source": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-q1-selected-20261011-01/operators/deepseek_v32/indexer/selection.py",
+          "profile_source_matches": true,
+          "profile_execution_identity_matches": true,
+          "benchmark_source_matches": true,
+          "current_navigation_target_matches": true
+        },
+        "operators/deepseek_v32/attention/device_only/decode.py": {
+          "sha256": "686b695f410bb4b4a30c25ca8337d1417b7f48ce1c41783f9de27f452f65d74b",
+          "frozen_source": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-q1-selected-20261011-01/operators/deepseek_v32/attention/device_only/decode.py",
+          "profile_source_matches": true,
+          "profile_execution_identity_matches": true,
+          "benchmark_source_matches": true,
+          "current_navigation_target_matches": true
+        },
+        "operators/deepseek_v32/indexer/csrc/q1_topk_sort.cu": {
+          "sha256": "e032304fdb34a01e77792796012f882dd906caf4f1868afc94bd9cbc530aab6c",
+          "frozen_source": "/mnt/ssd-wlcb/chenkaiqi/.cache/cxldsagr-q1-selected-20261011-01/operators/deepseek_v32/indexer/csrc/q1_topk_sort.cu",
+          "profile_source_matches": true,
+          "profile_execution_identity_matches": true,
+          "benchmark_source_matches": true,
+          "current_navigation_target_matches": true
+        }
+      }
+    }
+  },
+  "fused_display_policy": {
+    "schema": "q1-fused-capability-hatch-v1",
+    "kernel_name_contains": "sm90_fp8_paged_mqa_logits_fused_v2<",
+    "hatch": "////",
+    "boundary": "Hatching marks the complete fused score/prefetch kernel on both sides, including executions with verified zero transfers. It denotes mapped-host IO capability, not measured transfer bytes or a pure-copy interval. Original potential_io and actual_io evidence remain unchanged."
+  },
+  "display_validation": {
+    "original_panels_and_aligned_panels_byte_identical": true,
+    "window_and_category_metrics_byte_identical": true,
+    "warm_official_fused_hatches": 3,
+    "warm_local_fused_hatches": 3,
+    "warm_local_prefetch_bytes_per_layer": [
+      0,
+      0,
+      0
+    ],
+    "gpu_execution_performed": false
+  },
+  "indexer_detail": {
+    "run_id": "indexer_detail_20261012_01",
+    "source": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/report/warm_decode_aligned/aligned_panels.json",
+    "source_sha256": "9179a5a9e3e77b3de64938673a6aa695723f7782bdb9374763150b7a953ef99f",
+    "shared_xlim_us": [
+      0,
+      260
+    ],
+    "anchor": "First current-token L0 index-cache write to end of attention combine",
+    "layers": [
+      0
+    ],
+    "activity_counts": [
+      67,
+      38
+    ],
+    "exact_saved_activity_identity": true,
+    "row_timing": "Integer GPU interval union per job; group overlaps and original all-stream idle intervals retained.",
+    "indexer_l0_union_ns": [
+      44032,
+      53120
+    ],
+    "audit_path": "/mnt/ssd-wlcb/chenkaiqi/cxldsagr/experiments/deepseek_v32_echo_official/output/data/indexer_detail_20261012_01/audit.json",
+    "audit_sha256": "69392b9e60dc2da2a0e4249cd0ff0f84a85a466d50f9ba2a82bdc62ee5799fd7",
+    "priority_scan_entries": {
+      "usable_slots": 65664,
+      "sentinel": 1,
+      "total": 65665
+    },
+    "new_gpu_measurement": false
+  },
+  "code_map": {
+    "path": "code_map.json",
+    "sha256": "f9028d2300014bfaac0bb065d7cd6131efd46975b5404bf2c30c990384494f55",
+    "source_files": 45,
+    "code_references": 119,
+    "zoom_groups": 27,
+    "zoom_activity_count": 105,
+    "local_head_weights_before_zoom": true,
+    "new_gpu_measurement": false
+  },
+  "argmin_comparison": {
+    "official_l0_argmin_ns": 65311,
+    "local_l0_append_mask_ns": 1632,
+    "local_l0_append_select_ns": 5824,
+    "local_l0_append_copy_publish_ns": 3232,
+    "local_l0_append_d2h_ns": 3040,
+    "boundary": "Distinct scheduling work: official bounded priority eviction selection vs local capacity-proven free-slot selection. No same-algorithm speedup or per-instruction cost attribution.",
+    "new_gpu_measurement": false
+  }
+}

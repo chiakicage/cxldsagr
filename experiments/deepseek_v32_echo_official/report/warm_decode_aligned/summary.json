@@ -1,9 +1,17 @@
 {
   "schema": "official-local-warm-echo-comparison-v1",
-  "run_id": "warm_decode_comparison_20261012_01",
+  "run_id": "warm_decode_fused_display_20261012_01",
   "passed": true,
   "numerical_acceptance_between_implementations": false,
   "measurement": "Existing independent intrusive NSYS L0-L2 windows; no new GPU execution.",
+  "category_policy": {
+    "schema": "q1-score-topk-functional-boundary-v1",
+    "indexer": "Paged score kernels, causal score cleaning, and the complete top-k output path, including initialization, masks, transforms and sorting.",
+    "projection": "Main and indexer Q/K projections, norm, RoPE, Hadamard, quantization and head weights.",
+    "control": "Scheduler metadata, index cache writes, page packing/tables, staging preparation/promotion, pool management and hint updates.",
+    "timing": "Clipped GPU interval unions across all streams; activity and kernel sums are reported separately. No activity, gap or timestamp is removed.",
+    "source": "Original authenticated panels remain unchanged; aligned panels retain source_lane/source_category and a per-row boundary reason."
+  },
   "windows": [
     {
       "source": "Official SGLang",
@@ -14,16 +22,16 @@
       "end_ns": 10247666718,
       "window_ns": 1555390,
       "idle_ns": 127648,
-      "compute_union_ns": 1010751,
+      "compute_union_ns": 1000703,
       "io_only_ns": 3200,
-      "control_only_ns": 413791,
+      "control_only_ns": 423839,
       "original_control_lane_union_ns": 413791,
       "source_control_category_union_ns": 410655,
       "window_ms": 1.55539,
       "idle_ms": 0.127648,
-      "compute_union_ms": 1.010751,
+      "compute_union_ms": 1.000703,
       "io_only_ms": 0.0032,
-      "control_only_ms": 0.413791,
+      "control_only_ms": 0.423839,
       "original_control_lane_union_ms": 0.413791,
       "source_control_category_union_ms": 0.410655
     },
@@ -52,12 +60,12 @@
   ],
   "official_minus_local_ms": {
     "window": 0.329339,
-    "compute_union": 0.078561,
-    "control_only": 0.167134,
+    "compute_union": 0.068513,
+    "control_only": 0.177182,
     "io_only": -0.006016,
     "idle": 0.08966
   },
-  "control_and_idle_share_of_window_difference_percent": 77.97254500681669,
+  "control_and_idle_share_of_window_difference_percent": 81.02350465629641,
   "input_identity": {
     "history_token_sha256": "85687e44fbb0abd809735729ebd4af4e9fbfb1edb2121ca6fd2532b94b5a3332",
     "history_tokens": 65536,

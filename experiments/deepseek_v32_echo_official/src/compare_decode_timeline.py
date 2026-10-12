@@ -9,6 +9,7 @@ from pathlib import Path
 
 from experiments.deepseek_v32_echo_official.src import compare_timeline as comparison
 from experiments.deepseek_v32_echo_official.src import decode_display
+from experiments.deepseek_v32_echo_official.src import q1_timeline_categories as categories
 
 engine = comparison.engine
 EXPERIMENT = comparison.EXPERIMENT
@@ -165,6 +166,9 @@ def draw(panels, output, *, xlim_ms=(0, 5), figure_title=None, compact_style=Fal
 
 def draw_compact_comparison(panels, output, xlim_ms, figure_title):
     """Use the local phase palette and typography with all GPU control visible."""
+    import matplotlib
+
+    matplotlib.use("Agg")
     import matplotlib.pyplot as plt
     from matplotlib.patches import Patch
 
@@ -175,11 +179,18 @@ def draw_compact_comparison(panels, output, xlim_ms, figure_title):
     ):
         raise ValueError("The shared axis must contain every complete window")
     plt.rcParams.update(
-        {"font.family": "DejaVu Sans", "svg.fonttype": "none", "svg.hashsalt": "warm-decode"}
+        {
+            "font.family": "DejaVu Sans",
+            "font.size": 10,
+            "svg.fonttype": "none",
+            "svg.hashsalt": "q1-aligned-decode",
+        }
     )
-    figure, axes = plt.subplots(
-        len(panels), 1, figsize=(13, 3.6 + 1.6 * len(panels)), squeeze=False
+    panel_height, panel_gap, top_margin, bottom_margin = 1.25, 0.60, 0.90, 2.10
+    figure_height = (
+        top_margin + bottom_margin + len(panels) * panel_height + (len(panels) - 1) * panel_gap
     )
+    figure, axes = plt.subplots(len(panels), 1, figsize=(13, figure_height), squeeze=False)
     lanes = ["Compute", "H2D", "D2H", "GPU control", "GPU idle"]
     colors = {**engine.COLORS, "GPU control": "#777777"}
     for axis, panel in zip(axes[:, 0], panels, strict=True):
@@ -221,9 +232,15 @@ def draw_compact_comparison(panels, output, xlim_ms, figure_title):
         axis.grid(axis="x", alpha=0.12)
         for edge in ("left", "top", "right"):
             axis.spines[edge].set_visible(False)
+        indexer_us = next(
+            metric["union_us"]
+            for metric in categories.category_metrics(panel)
+            if metric["layer"] == "all" and metric["category"] == "Indexer / top-k"
+        )
         axis.set_title(
-            f"{panel['source']} ECHO  |  {window['window_ms']:.3f} ms"
-            f"  |  GPU idle {window['gpu_idle_ms']:.3f} ms",
+            f"{panel['source']} {comparison.METHODS[panel['method']]}  |  {window['window_ms']:.3f} ms"
+            f"  |  GPU idle {window['gpu_idle_ms']:.3f} ms"
+            f"  |  Indexer {indexer_us:.3f} µs",
             loc="left",
             fontsize=10.5,
             pad=9,
@@ -231,7 +248,7 @@ def draw_compact_comparison(panels, output, xlim_ms, figure_title):
     axes[-1, 0].set_xlabel("Time from L0 first compute kernel start (ms)", fontsize=10)
     figure.text(
         0.09,
-        0.96,
+        1 - 0.32 / figure_height,
         figure_title or "ECHO | H=65,536, Q=1, L0-L2 | Official and local warm",
         fontsize=15,
     )
@@ -251,9 +268,11 @@ def draw_compact_comparison(panels, output, xlim_ms, figure_title):
     handles = [
         Patch(
             facecolor=colors[name],
-            label={"H2D": "H2D / official recall kernel", "D2H": "D2H: GPU to DRAM"}.get(
-                name, name
-            ),
+            label={
+                "H2D": "H2D / official recall kernel",
+                "D2H": "D2H: GPU to DRAM",
+                "Indexer / top-k": "Indexer: scores + clean + full top-k",
+            }.get(name, name),
         )
         for name in names
     ]
@@ -268,12 +287,18 @@ def draw_compact_comparison(panels, output, xlim_ms, figure_title):
     figure.legend(
         handles=handles,
         loc="lower center",
-        bbox_to_anchor=(0.53, 0.025),
+        bbox_to_anchor=(0.53, 0.20 / figure_height),
         ncol=4,
         frameon=False,
         fontsize=9,
     )
-    figure.subplots_adjust(left=0.09, right=0.985, top=0.88, bottom=0.26, hspace=0.55)
+    figure.subplots_adjust(
+        left=0.09,
+        right=0.985,
+        top=1 - top_margin / figure_height,
+        bottom=bottom_margin / figure_height,
+        hspace=panel_gap / panel_height,
+    )
     for suffix in ("svg", "png"):
         figure.savefig(
             output / f"timeline_decode.{suffix}",
@@ -312,6 +337,7 @@ def main():
             else "fixed token; cold history KV",
         )
     panels = official + local
+    aligned = [categories.align_panel(panel) for panel in panels]
     sources = [
         Path(__file__),
         Path(comparison.__file__),
@@ -319,11 +345,17 @@ def main():
         Path(comparison.compact.__file__),
         Path(comparison.timeline.__file__),
         Path(decode_display.__file__),
+        Path(categories.__file__),
     ]
     paths = [*official_paths, *local_paths, *sources]
     before = {str(path.resolve()): engine.sha256(path) for path in paths}
     output.mkdir(parents=True)
-    draw(panels, output)
+    draw(
+        aligned,
+        output,
+        compact_style=True,
+        figure_title="H64K · Q1 · L0–L2 | Official decode and local cold steps",
+    )
     engine.write_csv(
         output / "windows.csv",
         [
@@ -341,6 +373,11 @@ def main():
         ],
     )
     (output / "panels.json").write_text(json.dumps(panels, indent=2) + "\n")
+    (output / "aligned_panels.json").write_text(json.dumps(aligned, indent=2) + "\n")
+    engine.write_csv(
+        output / "category_metrics.csv",
+        [row for panel in aligned for row in categories.category_metrics(panel)],
+    )
     snapshot = output / "source_snapshot"
     snapshot.mkdir()
     for path in sources:
@@ -353,9 +390,11 @@ def main():
         "measurement": "Presentation of existing verified NSYS windows; no new GPU execution or clean timing.",
         "inputs_and_sources_sha256": before,
         "shared_xlim_ms": [0, 5],
+        "category_policy": categories.POLICY,
         "window": "Published L0 first compute to L2 last compute windows; local dense also retains earlier L0 history H2D when present.",
         "io_display": decode_display.RECALL_DISPLAY["boundary"],
         "display_policy": decode_display.RECALL_DISPLAY,
+        "fused_display_policy": decode_display.FUSED_DISPLAY,
         "numerical_acceptance_between_implementations": False,
         "local_profile_run_ids": {panel["method"]: panel["profile_run_id"] for panel in local},
         "local_panel_provenance": {
@@ -374,6 +413,7 @@ def main():
             "published_hashes": True,
             "exact_window_and_idle_durations": True,
             "local_compute_categories_and_idle_intervals": True,
+            "source_to_aligned_activity_identity": True,
         },
         "artifacts_sha256": {
             path.name: engine.sha256(path) for path in output.iterdir() if path.is_file()
@@ -382,8 +422,11 @@ def main():
     }
     (output / "provenance.json").write_text(json.dumps(provenance, indent=2) + "\n")
     if args.publish_dir:
-        # The panel data and renderer snapshots are required by the raw-trace audit.
-        shutil.copytree(output, args.publish_dir)
+        # Renderer snapshots remain in the run directory; publish report artifacts only.
+        args.publish_dir.mkdir(parents=True)
+        for path in output.iterdir():
+            if path.is_file():
+                shutil.copyfile(path, args.publish_dir / path.name)
     print(output)
 
 

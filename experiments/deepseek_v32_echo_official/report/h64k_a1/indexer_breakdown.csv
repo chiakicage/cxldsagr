@@ -1,0 +1,9 @@
+source,layer,fused_core_us,causal_clean_us,topk_selection_us,topk_postprocess_us,topk_union_us,blue_union_us,blue_kernel_sum_us,blue_kernel_count
+Official SGLang,0,8.448,0.000,29.952,5.632,35.584,44.032,44.032,7
+Official SGLang,1,8.800,0.000,32.160,5.952,38.112,46.912,46.912,7
+Official SGLang,2,8.416,0.000,30.240,6.272,36.512,44.928,44.928,7
+Official SGLang,all,25.664,0.000,92.352,17.856,110.208,135.872,135.872,21
+Local warm,0,7.360,2.272,24.960,18.528,43.488,53.120,53.120,4
+Local warm,1,7.168,2.304,26.880,18.496,45.376,54.848,54.848,4
+Local warm,2,7.264,2.304,27.712,18.464,46.176,55.744,55.744,4
+Local warm,all,21.792,6.880,79.552,55.488,135.040,163.712,163.712,12
