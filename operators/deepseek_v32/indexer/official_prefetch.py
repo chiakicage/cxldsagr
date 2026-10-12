@@ -1,8 +1,8 @@
-"""Promote official Q1 prefetch staging into an exclusive local pool lease.
+"""Publish exact-selected official Q1 staging into an exclusive pool lease.
 
 The unchanged official kernel writes temporary forward-map tags. This adapter
-publishes exact record bytes into the prepared local FIFO slots before normal
-cache finalization. A registered cleanup hook owns staging until finalization
+publishes only predictions selected by exact top-k into prepared FIFO slots.
+A registered cleanup hook owns staging through selection and finalization
 and removes any tags left by an interrupted call.
 """
 
@@ -19,12 +19,13 @@ import torch
 from operators.deepseek_v32.indexer import official_decode
 
 PREFETCH_CAP = 64
-POLICY = "official-q1-predictive-staging-promotion-v1"
+POLICY = "official-q1-exact-selected-staging-v2"
 PREPARATION = "official-q1-current-page64-and-staging-v1"
 _MODULE_NAME = None
 _FUSED_ENTRY_OBSERVED = False
 CLEANUP_KEY = "_pending_prefetch_cleanup"
 STATE_KEY = "_official_prefetch"
+SELECT_KEY = "_promote_selected_prefetch"
 _SOURCE = Path(__file__).with_name("csrc") / "official_prefetch.cu"
 _FLAGS = ["-O3", "-std=c++20", "-gencode=arch=compute_90a,code=sm_90a", "-lineinfo"]
 
@@ -101,6 +102,7 @@ class _Staging:
     host_to_device: torch.Tensor
     counter: torch.Tensor
     pool_rows: int
+    promoted: bool = False
 
     def clear(self):
         """Clear only our remaining tags; published real mappings survive."""
@@ -165,6 +167,10 @@ def _register_staging(state, prefetch):
     # must call this hook before finalization and retain it if cleanup fails.
     prefetch[STATE_KEY] = state
     prefetch[CLEANUP_KEY] = state.clear
+    # Capture tensor arguments without retaining the callback's own dictionary;
+    # a reference cycle would keep stage storage alive until Python GC runs.
+    promotion_lease = dict(prefetch)
+    prefetch[SELECT_KEY] = lambda indices: _promote(state, promotion_lease, indices)
     prefetch["prefetch_policy"] = POLICY
     prefetch["official_prefetch_cap"] = PREFETCH_CAP
 
@@ -220,7 +226,14 @@ def _prepare_keys(k, scales, prefetch, context_lens):
     return packed, blocks, state
 
 
-def _promote(state, prefetch):
+def _promote(state, prefetch, indices):
+    from operators.deepseek_v32.indexer.echo import _check_tensor
+
+    if prefetch.get(STATE_KEY) is not state or state.promoted:
+        raise ValueError("official staging was already promoted or belongs to another lease")
+    if indices.ndim != 2 or indices.shape[0] != 1 or indices.shape[1] < 1:
+        raise ValueError("official staging promotion requires one exact selection row")
+    _check_tensor(indices, indices.shape, torch.int32, prefetch["device"].device, "indices")
     _call(
         state.module,
         "official_prefetch_promote",
@@ -228,13 +241,17 @@ def _promote(state, prefetch):
         state.host_ids,
         state.records,
         state.counter,
+        indices,
+        state.page_table,
         prefetch["device"],
         prefetch["host_to_device"],
         prefetch["device_to_host"],
         prefetch["free_slots"],
         prefetch["allocation_log"],
         prefetch["prefetch_stats"],
+        prefetch["history_length"],
     )
+    state.promoted = True
 
 
 def logits(
@@ -247,10 +264,11 @@ def logits(
     max_context_len,
     prefetch,
 ):
-    """Return official causal scores and publish every successful stage record.
+    """Return official causal scores, retaining temporary stage records.
 
     The lease must remain exclusive through finalize, exact recall and attention.
-    Its owner invokes ``_pending_prefetch_cleanup`` before normal finalization,
+    Its owner invokes ``_promote_selected_prefetch(indices)`` after exact top-k,
+    then ``_pending_prefetch_cleanup`` before normal finalization,
     including rollback after a failed call. This function never retries or
     synchronizes; CUDA completion and poisoning remain the owner's contract.
     The pending query is excluded from host prefetch; ``offset[1]`` holds a
@@ -302,7 +320,6 @@ def _logits_prepared(
         state.counter,
         prefetch["offset"][1:2],
     )
-    _promote(state, prefetch)
     return scores
 
 

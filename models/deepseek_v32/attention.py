@@ -351,11 +351,9 @@ class EchoAttentionRunner:
                     prefetch=prefetch,
                     **indexer_options,
                 )
-            if prefetch is not None:
+            if prefetch is not None and "_promote_selected_prefetch" not in prefetch:
                 with scope("offload_finalize"):
                     self.cache.finalize_prefetch(prefetch)
-                # Release the callback-owned official staging before top-k/MLA.
-                # Captured storage remains accounted in the graph private pool.
                 prefetch = None
             with scope("exact_topk"):
                 if scores.is_cuda:
@@ -370,6 +368,14 @@ class EchoAttentionRunner:
                     scores = scores[:, :end].masked_fill(~valid, -torch.inf)
                     values, indices = torch.topk(scores, min(self.cfg.index_topk, end), dim=-1)
                     indices = torch.where(torch.isfinite(values), indices, -1).int()
+            if prefetch is not None:
+                with scope("offload_finalize"):
+                    # Exact top-k decides which predictions become persistent.
+                    # Clear discarded tags before append or ordinary recall can
+                    # consume the forward map. Graph storage remains accounted.
+                    prefetch["_promote_selected_prefetch"](indices)
+                    self.cache.finalize_prefetch(prefetch)
+                prefetch = None
             if self.fused_prefetch and self.cache.offload and self._needs_prefetch_hint(end):
                 # Cache prediction is separate from the model's exact selection.
                 # A later visit can use this hint after another user's eviction.

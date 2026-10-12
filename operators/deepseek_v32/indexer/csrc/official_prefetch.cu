@@ -42,39 +42,97 @@ __global__ void prepare_kernel(const int* pages, int* token_ids, int* stage_ids,
 }
 
 __global__ void validate_promotion_kernel(const int* stage_ids,
-                               const uint32_t* counter, const int* h2d,
-                               const int64_t* d2h, const int* sorted_slots,
-                               const int64_t* allocations, int64_t* stats,
+                               const uint32_t* counter, const int* indices,
+                               const int* token_ids, const int* h2d,
+                               const int64_t* d2h, int* sorted_slots,
+                               int64_t* allocations, int64_t* stats,
+                               int selection_size, int history,
                                int pool_rows, int host_capacity) {
   __shared__ int count;
-  __shared__ int ids[kCap], slots[kCap];
+  __shared__ int ids[kCap], slots[kCap], selected[kCap];
   __shared__ int64_t old_ids[kCap];
   if (threadIdx.x == 0) count = min(*counter, uint32_t(kCap));
-  __syncthreads();
   const int lane = threadIdx.x;
-  if (lane < count) {
-    const int host = stage_ids[lane], slot = sorted_slots[lane];
-    assert(host >= 0 && host < host_capacity);
-    assert(slot > 0 && slot < pool_rows);
-    assert(h2d[host] == pool_rows + lane);
-    const int64_t old = d2h[slot];
-    assert(old == kMissing || (old >= 0 && old < host_capacity));
-    assert(old == kMissing || h2d[old] == slot);
-    assert(allocations[slot] == kMissing);
-    ids[lane] = host;
-    slots[lane] = slot;
-    old_ids[lane] = old;
+  if (lane < kCap) {
+    selected[lane] = 0;
+    slots[lane] = kMissing;
+    old_ids[lane] = kMissing;
   }
   __syncthreads();
-  // Distribute the triangular uniqueness checks across the block. Every
-  // active pair is checked before any record or persistent map is modified.
+  if (lane < count) {
+    const int host = stage_ids[lane];
+    assert(host >= 0 && host < host_capacity);
+    assert(h2d[host] == pool_rows + lane);
+    ids[lane] = host;
+  }
+  __syncthreads();
+  // Protect real exact hits without changing persistent FIFO timestamps.
+  // Temporary tags are interpreted only here; the pending query has no host ID.
+  for (int i = lane; i < selection_size; i += blockDim.x) {
+    const int logical = indices[i];
+    assert(logical == -1 || (logical >= 0 && logical <= history));
+    if (logical < 0 || logical == history) continue;
+    const int host = token_ids[logical];
+    assert(host >= 0 && host < host_capacity);
+    const int mapped = h2d[host];
+    if (mapped != kMissing && mapped < pool_rows) {
+      assert(mapped > 0 && d2h[mapped] == host);
+      atomicExch(reinterpret_cast<unsigned long long*>(allocations + mapped),
+                 static_cast<unsigned long long>(-1LL));
+    } else if (mapped != kMissing) {
+      const int stage = mapped - pool_rows;
+      assert(stage >= 0 && stage < count && ids[stage] == host);
+      atomicExch(selected + stage, 1);
+    }
+  }
+  __syncthreads();
+  if (lane == 0) {
+    int rank = 0;
+    for (int item = 0; item < count; ++item) {
+      if (!selected[item]) continue;
+      int slot = kMissing;
+      // Prepared order is free-first FIFO. Skip protected exact hits and the
+      // bounded preparation's unused tail, compacting only selected stages.
+      while (rank < pool_rows - 1) {
+        const int candidate = sorted_slots[rank++];
+        if (candidate == kMissing) break;
+        assert(candidate > 0 && candidate < pool_rows);
+        if (allocations[candidate] == -1) continue;
+        assert(allocations[candidate] == kMissing);
+        slot = candidate;
+        break;
+      }
+      assert(slot != kMissing);
+      const int64_t old = d2h[slot];
+      assert(old == kMissing || (old >= 0 && old < host_capacity));
+      assert(old == kMissing || h2d[old] == slot);
+      slots[item] = slot;
+      old_ids[item] = old;
+    }
+  }
+  __syncthreads();
+  // Every active pair is checked before any record or persistent map changes.
   for (int pair = lane; pair < kCap * kCap; pair += blockDim.x) {
     const int left = pair / kCap, right = pair % kCap;
     if (left < count && right < left) {
       assert(ids[left] != ids[right]);
-      assert(slots[left] != slots[right]);
+      assert(slots[left] == kMissing || slots[right] == kMissing ||
+             slots[left] != slots[right]);
     }
   }
+  __syncthreads();
+  // Restore the scratch-only protection marks. Finalization consumes only the
+  // successfully published journal, so no protected hit acquires a new age.
+  for (int i = lane; i < selection_size; i += blockDim.x) {
+    const int logical = indices[i];
+    if (logical < 0 || logical == history) continue;
+    const int mapped = h2d[token_ids[logical]];
+    if (mapped > 0 && mapped < pool_rows)
+      atomicCAS(reinterpret_cast<unsigned long long*>(allocations + mapped),
+                static_cast<unsigned long long>(-1LL),
+                static_cast<unsigned long long>(kMissing));
+  }
+  if (lane < kCap) sorted_slots[lane] = slots[lane];
   const int evicted = __syncthreads_count(lane < count && old_ids[lane] != kMissing);
   if (lane == 0) {
     stats[0] = count;
@@ -90,6 +148,7 @@ __global__ void copy_publish_kernel(const int* stage_ids, const uint16_t* stage,
   const int item = blockIdx.x;
   if (item >= min(*counter, uint32_t(kCap))) return;
   const int slot = sorted_slots[item], host = stage_ids[item];
+  if (slot == kMissing) return;
   // Validation is complete before this kernel begins. Valid staged hosts and
   // old owners are disjoint; the checked unique slots make all writes disjoint.
   for (int element = threadIdx.x; element < kWidth; element += blockDim.x) {
@@ -129,14 +188,18 @@ void prepare(TensorView pages, TensorView token_ids, TensorView stage_ids,
 }
 
 void promote(TensorView stage_ids, TensorView stage, TensorView counter,
+             TensorView indices, TensorView token_ids,
              TensorView records, TensorView h2d, TensorView d2h,
-             TensorView sorted_slots, TensorView allocations, TensorView stats) {
+             TensorView sorted_slots, TensorView allocations, TensorView stats,
+             int64_t history) {
   auto stream = stream_for(records);
   validate_promotion_kernel<<<1, 256, 0, stream>>>(
       static_cast<int*>(stage_ids.data_ptr()), static_cast<uint32_t*>(counter.data_ptr()),
+      static_cast<int*>(indices.data_ptr()), static_cast<int*>(token_ids.data_ptr()),
       static_cast<int*>(h2d.data_ptr()), static_cast<int64_t*>(d2h.data_ptr()),
       static_cast<int*>(sorted_slots.data_ptr()), static_cast<int64_t*>(allocations.data_ptr()),
-      static_cast<int64_t*>(stats.data_ptr()), records.size(0), h2d.size(0));
+      static_cast<int64_t*>(stats.data_ptr()), indices.size(1), history,
+      records.size(0), h2d.size(0));
   checked(cudaGetLastError());
   copy_publish_kernel<<<kCap, 128, 0, stream>>>(
       static_cast<int*>(stage_ids.data_ptr()), static_cast<uint16_t*>(stage.data_ptr()),

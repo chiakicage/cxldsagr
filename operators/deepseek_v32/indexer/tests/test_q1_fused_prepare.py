@@ -11,7 +11,13 @@ import torch
 from operators.deepseek_v32.indexer import _native_cache, echo, official_decode, official_prefetch
 from operators.deepseek_v32.indexer.page64 import pack_q1_keys
 from operators.deepseek_v32.indexer.selection import exact_topk
-from operators.deepseek_v32.indexer.tests.test_official_prefetch import _context, _lease
+from operators.deepseek_v32.indexer.tests.test_official_prefetch import (
+    MISSING,
+    _assert_selected_publication,
+    _context,
+    _lease,
+    _snapshot,
+)
 
 
 def test_loaded_control_does_not_claim_current_key_participation(monkeypatch):
@@ -100,6 +106,7 @@ def _release(lease):
     torch.cuda.synchronize()
     lease.pop(official_prefetch.CLEANUP_KEY)
     lease.pop(official_prefetch.STATE_KEY)
+    lease.pop(official_prefetch.SELECT_KEY)
     lease.pop("_prepared", None)
 
 
@@ -198,6 +205,7 @@ def test_cuda_public_fused_scores_selection_and_actual_promotion(transient, nond
     _release(lease)
     lease["offset"][1] = 0
     before_offsets = lease["offset"].clone()
+    before = _snapshot(lease)
     stream = torch.cuda.Stream() if nondefault_stream else None
     if stream is not None:
         stream.wait_stream(torch.cuda.current_stream())
@@ -209,7 +217,8 @@ def test_cuda_public_fused_scores_selection_and_actual_promotion(transient, nond
     assert actual.shape == (1, 33024)
     assert actual[:, columns:].isneginf().all()
     assert torch.equal(actual[:, :columns].view(torch.int32), expected.view(torch.int32))
-    for left, right in zip(exact_topk(actual, 2048), exact_topk(expected, 2048), strict=True):
+    selection = exact_topk(actual, 2048)
+    for left, right in zip(selection, exact_topk(expected, 2048), strict=True):
         if left.dtype == torch.float32:
             left, right = left.view(torch.int32), right.view(torch.int32)
         assert torch.equal(left, right)
@@ -221,17 +230,26 @@ def test_cuda_public_fused_scores_selection_and_actual_promotion(transient, nond
     logical_to_host = state.page_table[0, : columns - 1].long()
     logical = torch.where(torch.isin(logical_to_host, ids))[0]
     assert len(logical) == count and actual[0, logical].gt(0).all()
-    slots = lease["host_to_device"][ids].long()
-    assert (
-        slots.unique().numel() == count
-        and slots.gt(0).all()
-        and slots.lt(len(lease["device"])).all()
+    assert torch.equal(
+        lease["host_to_device"][ids],
+        torch.arange(count, device=device, dtype=torch.int32) + len(lease["device"]),
     )
-    assert torch.equal(lease["device_to_host"][slots], ids)
-    assert torch.equal(lease["allocation_log"][slots], ids)
-    assert torch.equal(lease["device"][slots].cpu(), lease["host"][ids.cpu()])
+    assert torch.equal(lease["device"].cpu(), before["device"])
+    assert torch.equal(lease["device_to_host"].cpu(), before["device_to_host"])
+    assert lease["allocation_log"].eq(MISSING).all()
+    assert lease["prefetch_stats"].eq(0).all()
     assert torch.equal(state.records[0, :count].cpu(), lease["host"][ids.cpu()])
-    assert lease["prefetch_stats"].tolist() == [count, 0, state.counter.item() - count]
+    chosen = selection[1][0].long()
+    selected_hosts = logical_to_host[chosen[(chosen >= 0) & (chosen < columns - 1)]]
+    attempts = state.counter.item()
+    with torch.cuda.stream(stream) if stream is not None else nullcontext():
+        if stream is not None:
+            stream.wait_stream(torch.cuda.current_stream())
+        lease[official_prefetch.SELECT_KEY](selection[1])
+        lease[official_prefetch.CLEANUP_KEY]()
+    if stream is not None:
+        torch.cuda.current_stream().wait_stream(stream)
+    _assert_selected_publication(lease, before, ids, selected_hosts, attempts=attempts)
     assert torch.equal(lease["offset"].view(torch.int32), before_offsets.view(torch.int32))
     assert official_prefetch.runtime_info()["entry_point"] == "logits_from_keys"
     _release(lease)

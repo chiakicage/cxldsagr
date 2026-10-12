@@ -138,8 +138,11 @@ Resident indexer 仅在 `Q=1`、`prefetch is None` 且有效 causal context
 
 Q1 offload 在 `N=query_start+1>=32768`、已初始化 history 恰为 `query_start`，
 且预取 lease 至少有 64 个合法槽位时，调用固定版本 ECHO 的官方 paged fused decode。
-官方按 `score > offset[1]` 预测，最多暂存 64 条 record，再通过本地适配发布到 FIFO
-pool；预测记录可以不属于精确 top-k，必须累计全部实际 H2D，随后完整召回剩余选择。
+官方按 `score > offset[1]` 预测，最多暂存 64 条 record。精确 top-k 完成后，本地
+适配只将选中的历史预测发布到 FIFO pool，保护已驻留的精确选择，再清除其余暂存
+tag。当前 token 没有历史 host ID，不能参与暂存匹配。全部实际暂存 H2D 都须计费，
+包括未选中的预测；随后完整召回剩余选择。策略身份为
+`official-q1-exact-selected-staging-v2`。
 其他 shape 和容量条件保留 prefill 分派。`offset[0]` 仍是 prefill mean，`offset[1]`
 是单请求 decode EMA，初始为 0，Q>1 不更新；Q1 精确选择后按官方公式
 `0.5 * old + 0.5 * kth_score` 更新。两者随现有 session/候选/graph 状态统一保存和恢复。
@@ -148,8 +151,9 @@ pool；预测记录可以不属于精确 top-k，必须累计全部实际 H2D，
 storage 与清理回调；finalize、rollback 和 discard 在普通发布前按原 stream 清除
 尚未被 promotion 替换的暂存 tag，host ID 0 同样有效。清理失败保留 lease 和 storage，
 异步完成不明时遵循 owner 保留与 poisoned 契约。N=65,537 时额外暂存空间为
-336,132 B，包含逐 token host 表、64 条 BF16 record 和 64 个 host ID；在 top-k/
-attention 前释放临时引用，graph 保留的全部 storage 仍另计 private reserved。
+336,132 B，包含逐 token host 表、64 条 BF16 record 和 64 个 host ID；精确 top-k
+完成后发布选中预测并清理暂存，在 attention 前释放临时引用，graph 保留的全部
+storage 仍另计 private reserved。
 
 官方 Q1 的准备融合只合并当前 K/scales 的 page64 打包、identity block table、
 逻辑 host-token 表与暂存重置；每次调用和 graph replay 都读取当前内容，不缓存
@@ -223,7 +227,7 @@ token 的 priority，并可能改变 prefetch 与 residual recall 的计数。�
 仅在 cold、单 session、H+A<=P 的真实前三层完整图验收中，可以用逐次执行的合法
 状态转移证明代替跨执行 priority 与搬运计数逐位相等的要求。证明须绑定实际源码、
 native 构建、阈值/hint、`prefetch_cap` 和阶段输入，逐层核验每个实际预取记录的
-资格，以及 prepare、融合 prefetch、finalize、精确 top-k、hint 更新、append 与 recall
+资格，以及 prepare、融合 staging、精确 top-k、选择性发布、finalize、hint 更新、append 与 recall
 之间的映射、priority、free bitmap、clock、KV 内容与计数变化。成功预取数量须
 受实际额度限制；竞争尝试计数可以超过额度，须按源码分别核验成功、淘汰和拒绝计数。
 还须确认记录唯一性、完整精确选择和实际搬运量；只比较最终计数、驻留集合或模型输出
