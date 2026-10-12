@@ -1,8 +1,9 @@
 # NOSA 与 DeepSeek cache 管理
 
-DeepSeek Q1 indexer、attention 与官方预取 staging 的执行预留已纳入静态规划。重算后，
-五项完整容量计划及下一不可行配置均与原结果一致。原有 dense DMA 请求内存观测和
-NOSA 结果保留各自来源；本次只补充静态审计，未重新测量请求内存或运行容量填满轨迹。
+DeepSeek Q1 官方 staging 现在保留到 exact top-k 后，只发布精确选择中的预测记录。
+现有执行预留已同时计入 staging 与 top-k 活跃空间；静态复算后，五项完整容量计划及
+下一不可行配置均未改变。原有 dense DMA 请求内存观测和 NOSA 结果保留各自来源；
+本次没有重新测量请求内存或运行容量填满轨迹。
 
 本实验为 motivation 提供容量依据，说明两模型如何准入用户、保留 history、执行
 candidate，以及怎样核对 HBM / CPU DRAM 占用。公共框架统一容量计划和生命周期；
@@ -127,15 +128,26 @@ session 的逻辑计数 slab 从 560 B 增至 640 B，每 session 增加 80 B；
 [DMA 源码影响审计](report/unified/deepseek_static_impact.json)和
 [原发布审计](report/unified/audit.json)，其中的源码身份仍对应当时版本。
 
-新审计 `cache_deepseek_q1_impact_20261008_02` 复算了包括官方预取 staging 在内的 Q1 预留。
-五项计划均使用 Q=1024，indexer 预留为 1,212,157,952 B，已覆盖 Q1 indexer 和 attention 的活跃峰值，
-attention 增量为 0；两份 append source 为 2,359,296 B，因此 E(1024) 不变。
+静态审计 `cache_deepseek_q1_selected_impact_20261011_01` 核对了
+`official-q1-exact-selected-staging-v2` 的存活期：staging 与 top-k 同时计入 Q1
+indexer 的 12,298,544 B 上界，selected promotion 复用既有 `free_slots`、
+`allocation_log`、计数和 exact indices，finalize 后才 append 和消费 MLA。
+五项计划均使用 Q=1024，indexer 预留为 1,212,157,952 B，已覆盖 Q1 indexer 和
+attention 的活跃峰值；attention 增量为 0，两份 append source 为 2,359,296 B，
+因此 E(1024) 不变。
+
 [Q1 静态影响记录](report/unified/deepseek_q1_static_impact.json)绑定当前源码、原计划及
 checkpoint 配置哈希，逐项比较五个完整计划，包括所选配置、有效 P 配置及下一不可行
-配置；共 1,222 个标量全部相等。[Q1 发布清单](report/unified/deepseek_q1_static_publication.json)记录
-报告与复现文件的哈希。脚本、当前源码和原计划副本位于
-`output/data/cache_deepseek_q1_impact_20261008_02/`。此次复算不更新后文的请求内存
-观测，也不验收 Graph 私有池或物理容量。
+配置；共 1,222 个标量全部相等。[Q1 发布清单](report/unified/deepseek_q1_static_publication.json)
+记录报告、独立文件核验与复现材料的哈希。脚本、当前源码和原计划副本位于
+`output/data/cache_deepseek_q1_selected_impact_20261011_01/`。这是静态复算，不更新后文的
+请求内存观测，也不验收 Graph 私有池、实际 allocated/reserved 或物理容量。
+
+共享影响检查确认，已发布 C10 motivation 和 MFU shape matrix 使用
+H=[4K,16K,64K]、A=[128,256,512,1024]，history chunk=1024、candidate 整批执行；
+cache manager performance 使用 H64K/A128。它们都没有 Q1 indexer 尾块，attention
+容量拆分只拆消费，不重跑 indexer 或 top-k。NOSA 模型与算子的 98 个 Python 文件
+没有导入 DeepSeek 实现或使用官方 promotion callback；这些已有结果保留原测量来源。
 
 上述静态边界针对 ECHO／serial sparse。完整请求中的 dense DMA ticket 借用已有
 连续 host/HBM storage，不再分配私有 GPU ID/count，预留为 0。这比前一实现减少
